@@ -1891,4 +1891,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Xin chào, $UserName!
+
+Chúng tôi liên hệ để thông báo rằng nạp tiền tự động không được hỗ trợ cho phương thức thanh toán hiện tại của bạn: tiền chỉ đến ${LetterLogoText} Wallet sau khi chuyển khoản ngân hàng được xử lý xong, vì vậy số dư không thể được bổ sung ngay lập tức.
+
+Do đó, nạp tiền tự động đã bị tắt. Để tránh bất kỳ sự gián đoạn nào đối với các dịch vụ trả phí, vui lòng nạp tiền thủ công vào số dư ví của bạn hoặc chuyển sang phương thức thanh toán hỗ trợ nạp tiền tự động.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Yêu cầu hành động: Nạp tiền tự động không khả dụng cho ${LetterLogoText} Wallet của bạn</value>
+  </data>
 </root>

@@ -14,20 +14,35 @@ Any **new** conversion — entity → DTO, request DTO → settings/domain, EF r
 Mapperly mapper. Not a new `*Helper` / `*DtoHelper` method, and not an object initializer
 assembled inline in a controller or service.
 
+One exception: when the server fills fields of the target itself (`LastModified`, a low-balance flag,
+`IsLicensor`), the controller builds that object explicitly, so the server-owned fields are visible
+where they are set (`.claude/rules/api-models.md` §2; `PaymentsController.SetTenantWalletSettings`).
+
+Before writing a mapper at all, check whether the source class exists only for the response — then
+it is renamed and moved into `ApiModels` instead of copied (`api-models.md` §3).
+
 ## How to declare one (follow the existing pattern)
 
 - Same file as the target DTO or entity, right after the type; name it `<Type>Mapper` or
   `<Type>DtoMapper`.
-- Attribute, exactly as the rest of the repo writes it:
-  `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]`.
-- **Pure copy, no services** — a static extension mapper, called as `x.MapToDto()`:
+- The required-mapping strategy depends on the direction, because it decides which mistake the
+  build catches:
+
+  | Direction | Attribute | What breaks the build |
+  |---|---|---|
+  | domain/settings/entity → **API DTO** | `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]` | a DTO property nothing fills |
+  | **request DTO** → domain/settings | `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]` | a request field nothing reads |
+  | EF row ↔ domain, existing mappers | `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]` | nothing — keep it only where the repo already uses it |
+
+  `Target` on a request mapping would force mapping the server-owned fields of the target, which
+  the request must not carry; `Source` checks the request side instead and leaves them alone.
+- **Pure copy, no services** — a static extension mapper, called as `x.Map()`:
 
   ```csharp
-  [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-  public static partial class TenantDtoMapper
+  [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+  public static partial class TenantWalletSettingsDtoMapper
   {
-      [MapProperty(nameof(Tenant.Id), nameof(TenantDto.TenantId))]
-      public static partial TenantDto MapToDto(this Tenant source);
+      public static partial TenantWalletSettingsDto Map(this TenantWalletSettings source);
   }
   ```
 

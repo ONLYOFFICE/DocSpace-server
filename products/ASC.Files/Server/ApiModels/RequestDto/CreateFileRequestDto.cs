@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters of a file that the portal creates from a template or a blank document.
 /// </summary>
-public class CreateFile<T>
+public class CreateFileRequest<T>
 {
     /// <summary>
     /// The title of the new file. The extension in it decides the format, and one of a known text, spreadsheet or
@@ -87,5 +87,5 @@ public class CreateFileRequestDto<T>
     /// </summary>
     /// <example>{"title": "New Document.docx", "templateId": "1", "enableExternalExt": false, "formId": 0}</example>
     [FromBody]
-    public required CreateFile<JsonElement> File { get; set; }
+    public required CreateFileRequest<JsonElement> File { get; set; }
 }

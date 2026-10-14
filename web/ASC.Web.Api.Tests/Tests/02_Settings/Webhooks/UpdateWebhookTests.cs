@@ -50,7 +50,7 @@ public class UpdateWebhookTests(
             WebhooksTestData.CreateWebhookDto(), TestContext.Current.CancellationToken);
 
         var updated = WebhooksTestData.CreateWebhookDto();
-        var updateRequest = new UpdateWebhooksConfigRequestsDto(created.Response.Id)
+        var updateRequest = new UpdateWebhooksConfigRequestDto(created.Response.Id)
         {
             Name = updated.Name,
             Uri = updated.Uri,

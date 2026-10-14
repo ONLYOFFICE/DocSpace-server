@@ -35,7 +35,7 @@ namespace ASC.Data.Storage.Log;
 internal static partial class EncryptionOperationLogger
 {
     [LoggerMessage(LogLevel.Debug, "Storage already {status}")]
-    public static partial void DebugStorageAlready(this ILogger logger, EncryprtionStatus status);
+    public static partial void DebugStorageAlready(this ILogger logger, EncryptionStatus status);
 
     [LoggerMessage(LogLevel.Debug, "Percentage: {tenantAlias} {module} {percentage}")]
     public static partial void DebugPercentage(this ILogger logger, string tenantAlias, string module, double percentage);

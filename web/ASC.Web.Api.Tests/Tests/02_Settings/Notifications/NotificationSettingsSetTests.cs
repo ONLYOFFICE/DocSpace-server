@@ -51,7 +51,7 @@ public class NotificationSettingsSetTests(
 
         // Act
         var settings = await _notificationsApi.SetNotificationSettingsWithHttpInfoAsync(
-            new NotificationSettingsRequestsDto(type, true), TestContext.Current.CancellationToken);
+            new NotificationSettingsRequestDto(type, true), TestContext.Current.CancellationToken);
 
         // Assert
         settings.StatusCode.Should().Be(HttpStatusCode.OK);

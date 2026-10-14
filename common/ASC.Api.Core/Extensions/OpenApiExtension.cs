@@ -74,6 +74,11 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
+            // Query models bound with [FromQuery] and no explicit Name surfaced their C# property names
+            // (`IsDark`, `ServiceName`, `Userid`). Binding is case-insensitive, so documenting the
+            // camelCase spelling every other parameter uses changes nothing on the wire.
+            c.DescribeAllParametersInCamelCase();
+
             var openApiInfo = new OpenApiInfo
             {
                 Title = "ONLYOFFICE DocSpace API",
@@ -138,6 +143,9 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<ApiDateTimeParameterFilter>();
+            c.OperationFilter<FlattenObjectQueryParameterFilter>();
+            c.OperationFilter<AcronymQueryParameterNameFilter>();
+            c.OperationFilter<RequestBodyNameOperationFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -280,8 +288,6 @@ public static class OpenApiExtension
                 Description = "OpenID Connect authentication"
             });
 
-            var xmlDocs = new List<XPathDocument>();
-
             string xmlPath = null;
             var assemblyLocation = entryAssembly.Location;
             if (!string.IsNullOrEmpty(assemblyLocation))
@@ -295,7 +301,6 @@ public static class OpenApiExtension
                         var doc = new XPathDocument(xmlPath);
 
                         c.IncludeXmlComments(() => doc);
-                        xmlDocs.Add(doc);
                     }
                 }
             }
@@ -311,12 +316,8 @@ public static class OpenApiExtension
                     var doc = new XPathDocument(xmlPathOther);
 
                     c.IncludeXmlComments(() => doc);
-                    xmlDocs.Add(doc);
                 }
             }
-
-            // Must stay after every IncludeXmlComments call - see the filter's own remarks.
-            c.SchemaFilter<XmlCommentsMemberDescriptionSchemaFilter>(xmlDocs);
         });
     }
 
@@ -364,6 +365,11 @@ public static class OpenApiExtension
                     options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
                     options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
                     options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
+                    // The concrete types behind a polymorphic schema. x-thirdparty-variant stays hidden: Scalar renders
+                    // it as a raw tree of the whole twin operation; the other x- keys are for the SDK generator only.
+                    options.WithShowExtensions("x-derived-types");
+                    // Several request bodies have more than the 12 properties Scalar shows before "show more".
+                    options.WithMaxVisibleRequestBodyProperties(0);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
@@ -480,86 +486,6 @@ public static class OpenApiExtension
 
 
     /// <summary>
-    /// Puts the summary of a documented property or field back after Swashbuckle's own XML filters have run.
-    /// </summary>
-    /// <remarks>
-    /// For every property `XmlCommentsSchemaFilter` writes the summary of the property's *type* into the
-    /// property schema first and the summary of the property itself second, and one such filter is registered
-    /// per XML file. So when the type is documented in a file included later than the file that documents the
-    /// property, the type's text silently replaces the property's own. Which file comes first depends on
-    /// assembly load order, so the same property can end up described one way in one service document and
-    /// another way in the next - and two documents that disagree about a shared schema cannot be joined into
-    /// the API reference. Registered after every IncludeXmlComments call, this filter restores the member text.
-    /// A property with no summary of its own is left alone: falling back to the type's text is intended.
-    /// </remarks>
-    private class XmlCommentsMemberDescriptionSchemaFilter : ISchemaFilter
-    {
-        private readonly Dictionary<string, string> _memberSummaries = new(StringComparer.Ordinal);
-        private readonly Dictionary<(string Type, string Parameter), string> _recordParameterSummaries = new();
-
-        public XmlCommentsMemberDescriptionSchemaFilter(IReadOnlyList<XPathDocument> xmlDocs)
-        {
-            foreach (var xmlDoc in xmlDocs)
-            {
-                foreach (var member in xmlDoc.CreateNavigator().Select("/doc/members/member").Cast<XPathNavigator>())
-                {
-                    var name = member.GetAttribute("name", string.Empty);
-
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        continue;
-                    }
-
-                    // "P:Ns.Type.Property" and "F:Ns.Type.Field" carry the member summary, "T:Ns.Type" the
-                    // `<param>` tags of a record's primary constructor. Everything else is of no interest here.
-                    if (name[0] is 'P' or 'F')
-                    {
-                        var summary = member.SelectSingleNode("summary");
-
-                        if (summary != null)
-                        {
-                            _memberSummaries[name] = XmlCommentsTextHelper.Humanize(summary.InnerXml);
-                        }
-                    }
-                    else if (name[0] == 'T')
-                    {
-                        foreach (var parameter in member.Select("param").Cast<XPathNavigator>())
-                        {
-                            var parameterName = parameter.GetAttribute("name", string.Empty);
-
-                            if (!string.IsNullOrEmpty(parameterName))
-                            {
-                                _recordParameterSummaries[(name, parameterName)] = XmlCommentsTextHelper.Humanize(parameter.Value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (context.MemberInfo is not { DeclaringType: not null } memberInfo)
-            {
-                return;
-            }
-
-            // Same precedence as Swashbuckle: a record's `<param>` first, the member's own summary on top of it.
-            var declaringType = XmlCommentsNodeNameHelper.GetMemberNameForType(memberInfo.DeclaringType);
-
-            if (_recordParameterSummaries.TryGetValue((declaringType, memberInfo.Name), out var parameterSummary))
-            {
-                schema.Description = parameterSummary;
-            }
-
-            if (_memberSummaries.TryGetValue(XmlCommentsNodeNameHelper.GetMemberNameForFieldOrProperty(memberInfo), out var memberSummary))
-            {
-                schema.Description = memberSummary;
-            }
-        }
-    }
-
-    /// <summary>
     /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it
     /// actually is. ApiDateTimeTypeConverter binds such a value from a single string, so pointing the parameter
     /// at the object component would both misdescribe the wire and make the string `example` invalid against
@@ -583,6 +509,150 @@ public static class OpenApiExtension
                     };
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Spells a whole request model bound from the query string out as one query parameter per property.
+    /// </summary>
+    /// <remarks>
+    /// A model with a custom binder (<c>BatchModelBinder</c> behind <c>GET files/fileops/move</c>) is described
+    /// as a single object parameter named after the C# argument, <c>inDto</c>. Serialized as a form query it
+    /// already sends the flat <c>folderIds=..&amp;destFolderId=..</c> the binder reads, so the wire does not
+    /// change; what does is the SDK method, which no longer takes an argument called <c>inDto</c> and names
+    /// every field an agent has to fill instead.
+    /// </remarks>
+    /// <summary>
+    /// Fixes the camel case of query parameter names that start with an acronym.
+    /// </summary>
+    /// <remarks>
+    /// <c>DescribeAllParametersInCamelCase</c> only lowers the first letter, so <c>AWSRegion</c> is published as
+    /// <c>aWSRegion</c>; this spells it the way System.Text.Json does, <c>awsRegion</c>. Query binding ignores case,
+    /// so the request that reaches the server is the same. The name cannot be fixed with <c>[FromQuery(Name)]</c> on
+    /// the model property instead: the same model is bound from the body elsewhere, and a binding-source attribute on
+    /// one of its properties turns off the body inference of <c>[ApiController]</c>.
+    /// </remarks>
+    private class AcronymQueryParameterNameFilter : IOperationFilter
+    {
+        private static readonly Regex _acronymStart = new("^[a-z][A-Z]{2}", RegexOptions.Compiled);
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter { In: ParameterLocation.Query, Name: { } name } concrete && _acronymStart.IsMatch(name))
+                {
+                    concrete.Name = JsonNamingPolicy.CamelCase.ConvertName(char.ToUpperInvariant(name[0]) + name[1..]);
+                }
+            }
+        }
+    }
+
+    private class FlattenObjectQueryParameterFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.Parameters is not { Count: > 0 } parameters)
+            {
+                return;
+            }
+
+            for (var i = parameters.Count - 1; i >= 0; i--)
+            {
+                if (parameters[i] is not OpenApiParameter { In: ParameterLocation.Query, Schema: OpenApiSchemaReference reference })
+                {
+                    continue;
+                }
+
+                var properties = new Dictionary<string, IOpenApiSchema>();
+                CollectProperties(reference.Reference.Id, context.SchemaRepository, properties);
+
+                if (properties.Count == 0)
+                {
+                    // An enum or any other schema without members of its own stays a single parameter.
+                    continue;
+                }
+
+                parameters.RemoveAt(i);
+
+                var index = i;
+                foreach (var (name, schema) in properties)
+                {
+                    parameters.Insert(index++, new OpenApiParameter
+                    {
+                        Name = name,
+                        In = ParameterLocation.Query,
+                        Description = schema.Description,
+                        Schema = schema
+                    });
+                }
+            }
+        }
+
+        private static void CollectProperties(string schemaId, SchemaRepository repository, Dictionary<string, IOpenApiSchema> properties)
+        {
+            if (!repository.Schemas.TryGetValue(schemaId, out var schema))
+            {
+                return;
+            }
+
+            foreach (var part in schema.AllOf ?? [])
+            {
+                if (part is OpenApiSchemaReference partReference)
+                {
+                    CollectProperties(partReference.Reference.Id, repository, properties);
+                }
+                else
+                {
+                    AddProperties(part, properties);
+                }
+            }
+
+            AddProperties(schema, properties);
+        }
+
+        private static void AddProperties(IOpenApiSchema schema, Dictionary<string, IOpenApiSchema> properties)
+        {
+            foreach (var (name, property) in schema.Properties ?? new Dictionary<string, IOpenApiSchema>())
+            {
+                properties.TryAdd(name, property);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Names a request body that has no model of its own after the request model that carries it.
+    /// </summary>
+    /// <remarks>
+    /// A request model whose <c>[FromBody]</c> property is a bare array of numbers or enum values
+    /// (<c>DeleteTemplateFilesRequestDto.FileIds</c>) puts an inline array schema on the operation. The SDK
+    /// generators find no model name in it and call the argument <c>request_body</c>, where every other body is
+    /// named after its model. The extension names only that argument: the body on the wire is still the bare
+    /// array. A body that references a model, directly or through its array items, already gets that model's
+    /// name and is left alone, and so is a body bound straight to an action parameter, which has no request
+    /// model to be named after.
+    /// </remarks>
+    private class RequestBodyNameOperationFilter : IOperationFilter
+    {
+        private const string BodyNameExtension = "x-codegen-request-body-name";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.RequestBody is not OpenApiRequestBody { Content: { Count: > 0 } content } requestBody ||
+                content.Values.Any(media => media.Schema is null or OpenApiSchemaReference || media.Schema.Items is OpenApiSchemaReference))
+            {
+                return;
+            }
+
+            var body = context.ApiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == BindingSource.Body);
+            var model = body?.ParameterDescriptor?.ParameterType;
+            if (model == null || model == body.Type)
+            {
+                return;
+            }
+
+            requestBody.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            requestBody.Extensions[BodyNameExtension] = new JsonNodeExtension(JsonValue.Create(CustomSchemaId(model)));
         }
     }
 

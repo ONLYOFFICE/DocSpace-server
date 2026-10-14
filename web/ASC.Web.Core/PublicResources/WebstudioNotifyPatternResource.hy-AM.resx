@@ -1886,4 +1886,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Բարև, $UserName!
+
+Կապ ենք հաստատում ձեզ հետ՝ տեղեկացնելու, որ ձեր ընթացիկ վճարման եղանակի համար ավտոմատ համալրումը չի աջակցվում. գումարը ${LetterLogoText} Wallet-ում հայտնվում է միայն բանկային փոխանցման կատարումից հետո, ուստի մնացորդը հնարավոր չէ անմիջապես համալրել։
+
+Հետևաբար ավտոմատ համալրումն անջատվել է։ Վճարովի ծառայությունների ընդհատումից խուսափելու համար խնդրում ենք ձեռքով համալրել ձեր դրամապանակի մնացորդը կամ անցնել ավտոմատ համալրումն աջակցող վճարման եղանակի։
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Պահանջվում է գործողություն. Ավտոմատ համալրումը հասանելի չէ ձեր ${LetterLogoText} Wallet-ի համար</value>
+  </data>
 </root>

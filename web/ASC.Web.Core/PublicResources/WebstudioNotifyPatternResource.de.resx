@@ -1888,4 +1888,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wir melden uns, um Sie darüber zu informieren, dass das automatische Aufladen für Ihre aktuelle Zahlungsmethode nicht unterstützt wird: Das Geld gelangt erst nach Abwicklung der Banküberweisung in die ${LetterLogoText} Wallet, sodass das Guthaben nicht sofort aufgefüllt werden kann.
+
+Das automatische Aufladen wurde daher deaktiviert. Um eine Unterbrechung kostenpflichtiger Dienste zu vermeiden, laden Sie Ihr Wallet-Guthaben bitte manuell auf oder wechseln Sie zu einer Zahlungsmethode, die das automatische Aufladen unterstützt.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Aktion erforderlich: Automatisches Aufladen ist für Ihre ${LetterLogoText} Wallet nicht verfügbar</value>
+  </data>
 </root>

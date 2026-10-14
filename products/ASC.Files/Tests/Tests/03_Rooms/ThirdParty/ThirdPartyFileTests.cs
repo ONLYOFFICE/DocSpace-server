@@ -120,7 +120,7 @@ public class ThirdPartyFileTests(
 
         // Act
         var renamed = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile(newTitle), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest(newTitle), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         renamed.Title.Should().Be(newTitle);
@@ -145,7 +145,7 @@ public class ThirdPartyFileTests(
 
         // Act
         var file = (await _filesApi.CreateTextFileAsync(
-            work.Id, new CreateTextOrHtmlFile(title, content), TestContext.Current.CancellationToken)).Response;
+            work.Id, new CreateTextOrHtmlFileRequest(title, content), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         file.Title.Should().Be(title);
@@ -193,7 +193,7 @@ public class ThirdPartyFileTests(
 
         // Act
         var results = (await _filesApi.DeleteFileAsync(
-            file.Id, new Delete(false, true), cancellationToken: TestContext.Current.CancellationToken)).Response;
+            file.Id, new DeleteFileRequest(false, true), cancellationToken: TestContext.Current.CancellationToken)).Response;
         var finished = await WaitLongOperation(results.FirstOrDefault()?.Id);
 
         // Assert

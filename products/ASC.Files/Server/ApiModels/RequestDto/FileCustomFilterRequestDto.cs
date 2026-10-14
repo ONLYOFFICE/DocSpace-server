@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The Custom Filter state a spreadsheet is to be put into.
 /// </summary>
-public class CustomFilterParameters
+public class CustomFilterRequest
 {
     /// <summary>
     /// The state to reach: `true` turns the mode on, so that the sorting and filtering each person applies stays
@@ -64,5 +64,5 @@ public class FileCustomFilterRequestDto<T>
     /// </summary>
     /// <example>{"enabled": true}</example>
     [FromBody]
-    public required CustomFilterParameters Parameters { get; set; }
+    public required CustomFilterRequest Parameters { get; set; }
 }

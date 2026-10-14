@@ -147,7 +147,7 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         //trigger.Should().NotBeNull();
         //trigger!.Available.Should().Be(false);
 
-        var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestsDto(
+        var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestDto(
             "test",
             "https://onlyoffice.com",
             "test123!@#%ABC",
@@ -171,7 +171,7 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
     {
         await _peopleClient.Authenticate(Owner);
 
-        var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestsDto(
+        var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestDto(
             "test",
             "http://localhost",
             "test123!@#%ABC",

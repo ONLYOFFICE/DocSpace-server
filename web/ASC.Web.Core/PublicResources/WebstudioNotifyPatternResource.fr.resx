@@ -1889,4 +1889,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Bonjour, $UserName !
+
+Nous vous contactons pour vous informer que le rechargement automatique n'est pas pris en charge par votre méthode de paiement actuelle : les fonds n'arrivent dans le ${LetterLogoText} Wallet qu'après le règlement du virement bancaire, de sorte que le solde ne peut pas être rechargé immédiatement.
+
+Le rechargement automatique a donc été désactivé. Pour éviter toute interruption des services payants, veuillez recharger manuellement le solde de votre portefeuille ou passer à une méthode de paiement prenant en charge le rechargement automatique.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Action requise : Le rechargement automatique n'est pas disponible pour votre ${LetterLogoText} Wallet</value>
+  </data>
 </root>

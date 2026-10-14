@@ -563,7 +563,7 @@ public abstract class FilesController<T>(
                 previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
             }
 
-            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
+            result.Previous = new EditHistoryUrlDto { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
 
             result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
         }
@@ -1117,7 +1117,7 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
     {
-        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles.Select(r => r.Map()));
     }
 
     /// <remarks>
@@ -1246,7 +1246,7 @@ public abstract class FilesController<T>(
         return new FileEncryptionInfoDto
         {
             UserKeys = userKeys,
-            FileKeys = fileKeys
+            FileKeys = fileKeys?.Select(r => r.Map()).ToList()
         };
     }
 
@@ -1312,7 +1312,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage")]
     [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the caller is a guest, who has no My documents")]
     [HttpPost("@my/file")]
-    public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFile<JsonElement> inDto)
+    public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {
         return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
     }
@@ -1327,7 +1327,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@common/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInCommon(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInCommon(CreateTextOrHtmlFileRequest inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -1356,7 +1356,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(403, "The caller may not create a file in this section")]
     [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInMyDocuments(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInMyDocuments(CreateTextOrHtmlFileRequest inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -1370,7 +1370,7 @@ public class FilesControllerCommon(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@common/text")]
-    public async Task<FileDto<int>> CreateTextFileInCommon(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateTextFileInCommon(CreateTextOrHtmlFileRequest inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -1398,7 +1398,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(403, "The caller may not create a file in this section")]
     [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/text")]
-    public async Task<FileDto<int>> CreateTextFileInMyDocuments(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateTextFileInMyDocuments(CreateTextOrHtmlFileRequest inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }

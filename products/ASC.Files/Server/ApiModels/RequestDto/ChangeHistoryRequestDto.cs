@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The change to make to a revision group of a file.
 /// </summary>
-public class ChangeHistory
+public class ChangeHistoryRequest
 {
     /// <summary>
     /// The version the change applies to; 0 means the current version of the file.
@@ -70,5 +70,5 @@ public class ChangeHistoryRequestDto<T>
     /// </summary>
     /// <example>{"version": 1, "continueVersion": false}</example>
     [FromBody]
-    public required ChangeHistory File { get; set; }
+    public required ChangeHistoryRequest File { get; set; }
 }

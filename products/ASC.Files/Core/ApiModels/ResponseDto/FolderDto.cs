@@ -46,15 +46,16 @@ public class FolderDto<T> : FileEntryDto<T>
 
     /// <summary>
     /// How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room
-    /// templates and default templates sections always report 0, because the number is not collected for them.
+    /// templates, default templates and AI agents sections always report 0, because the number is not collected for
+    /// them.
     /// </summary>
     /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are
-    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates
-    /// sections report 0.
+    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI
+    /// agents sections report 0.
     /// </summary>
     /// <example>7</example>
     public int FoldersCount { get; set; }
@@ -97,7 +98,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <example>
     /// {"original": "", "large": "", "medium": "", "small": "", "color": "F2C4C4", "cover": {"id": "bookmark"}}
     /// </example>
-    public Logo Logo { get; set; }
+    public LogoDto Logo { get; set; }
 
     /// <summary>
     /// Whether the caller pinned the room to the top of their own room list. Pinning is personal and is lost when the
@@ -574,7 +575,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates && folder.FolderType != FolderType.DefaultTemplates)
+        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents))
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

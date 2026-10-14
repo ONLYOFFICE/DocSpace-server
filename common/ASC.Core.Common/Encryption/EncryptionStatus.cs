@@ -36,7 +36,7 @@ namespace ASC.Core.Encryption;
 /// <summary>
 /// The storage encryption status.
 /// </summary>
-public enum EncryprtionStatus
+public enum EncryptionStatus
 {
     [Description("Decrypted")]
     Decrypted,

@@ -50,7 +50,7 @@ public abstract class VersionsTestBase(
         var owner = user ?? Owner;
         var file = await CreateFileInMy(title, owner);
 
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         return file;
     }
@@ -64,7 +64,7 @@ public abstract class VersionsTestBase(
         var room = await CreateCustomRoom(roomTitle);
         var file = await CreateFile(fileTitle, room.Id);
 
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         return (room, file);
     }

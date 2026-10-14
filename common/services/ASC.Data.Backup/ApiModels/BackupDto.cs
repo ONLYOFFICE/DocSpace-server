@@ -36,7 +36,7 @@ namespace ASC.Data.Backup.ApiModels;
 /// <summary>
 /// The request parameters for starting a backup.
 /// </summary>
-public class BackupDto
+public class StartBackupRequestDto
 {
     /// <summary>
     /// The storage the archive is written to. It defaults to `Documents`, and it decides which keys
@@ -67,7 +67,7 @@ public class BackupDto
 /// <summary>
 /// The request parameters for counting the backups of a portal.
 /// </summary>
-public class BackupsCountDto
+public class BackupsCountRequestDto
 {
     /// <summary>
     /// The start of the period, in UTC and inclusive. It defaults to the first day of the current calendar

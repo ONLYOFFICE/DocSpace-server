@@ -60,10 +60,27 @@ public class MetadataFilterCondition
     public int FieldId { get; set; }
     public MetadataFieldType FieldType { get; set; }
     public string StringValue { get; set; }
+
+    /// <summary>
+    /// <c>true</c> when <see cref="StringValue"/> is matched as a substring of the stored value instead of the whole of it.
+    /// </summary>
+    public bool StringContains { get; set; }
+
     public long? NumberFrom { get; set; }
     public long? NumberTo { get; set; }
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
+
+    /// <summary>
+    /// <c>true</c> when the lower bound (<see cref="NumberFrom"/> or <see cref="DateFrom"/>) is excluded from the match.
+    /// </summary>
+    public bool FromExclusive { get; set; }
+
+    /// <summary>
+    /// <c>true</c> when the upper bound (<see cref="NumberTo"/> or <see cref="DateTo"/>) is excluded from the match.
+    /// </summary>
+    public bool ToExclusive { get; set; }
+
     public List<Guid> OptionIds { get; set; }
 }
 
@@ -87,14 +104,19 @@ public class MetadataFilterConditionRequest
     public string Name { get; set; }
 
     /// <summary>
-    /// The operator, one of <see cref="MetadataFilterOperators"/>. Optional: the field type alone determines how the
-    /// condition is evaluated, so an omitted operator is accepted, while a present one has to match the field type.
+    /// The operator, one of <see cref="MetadataFilterOperators"/>: "eq" or "contains" for a string field, "eq", "range",
+    /// "gt", "gte", "lt" or "lte" for a number field, "range", "gt", "gte", "lt" or "lte" for a date field, "in" for a
+    /// choice field. Optional: an omitted operator is read as "eq" for a string, as "range" for a date, as "in" for a
+    /// choice, and for a number as "eq" when a value is given or as "range" when a bound is. A present one has to belong
+    /// to the field type and to the arguments: "eq" takes a value, "range" takes bounds.
     /// </summary>
     /// <example>eq</example>
     public string Op { get; set; }
 
     /// <summary>
-    /// The exact value: string fields, and number fields given a single value. A JSON number is accepted as well as a string.
+    /// The value of a single-valued condition: the whole or a part of a string field, the exact value of a number field,
+    /// or the bound of a "gt", "gte", "lt" or "lte" condition on a number or a date field. A JSON number is accepted as
+    /// well as a string. A date given without a time ("2026-06-30") names the whole day (UTC).
     /// </summary>
     /// <example>ACME</example>
     [JsonConverter(typeof(MetadataFilterValueConverter))]
@@ -155,8 +177,23 @@ public static class MetadataFilterOperators
     /// <summary>Exact match: string fields, and number fields given a single <c>value</c>.</summary>
     public const string Equal = "eq";
 
+    /// <summary>Substring match of the <c>value</c>, without regard to case: string fields.</summary>
+    public const string Contains = "contains";
+
     /// <summary>Inclusive range with an optional side: number and date fields.</summary>
     public const string Range = "range";
+
+    /// <summary>Strictly greater than the <c>value</c>: number and date fields.</summary>
+    public const string GreaterThan = "gt";
+
+    /// <summary>Greater than or equal to the <c>value</c>: number and date fields.</summary>
+    public const string GreaterThanOrEqual = "gte";
+
+    /// <summary>Strictly less than the <c>value</c>: number and date fields.</summary>
+    public const string LessThan = "lt";
+
+    /// <summary>Less than or equal to the <c>value</c>: number and date fields.</summary>
+    public const string LessThanOrEqual = "lte";
 
     /// <summary>Any of the requested options: choice fields.</summary>
     public const string In = "in";
@@ -310,9 +347,18 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                 }
 
                 condition.StringValue = request.Value.ToLowerInvariant();
+                condition.StringContains = request.Op == MetadataFilterOperators.Contains;
                 break;
 
             case MetadataFieldType.Date:
+                if (IsSingleBound(request.Op))
+                {
+                    SetSingleDateBound(condition, request, field);
+                    break;
+                }
+
+                DemandNoValue(request, field);
+
                 condition.DateFrom = ParseDate(request.From, field, endOfDay: false);
                 condition.DateTo = ParseDate(request.To, field, endOfDay: true);
 
@@ -324,11 +370,21 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                 break;
 
             case MetadataFieldType.Number:
-                // a single value is an exact match, a range is given by its bounds; the two forms do not mix, or "from" with
-                // a stray "value" used to become the range [from, value] and silently answered with nothing
-                var hasBounds = !string.IsNullOrEmpty(request.From) || !string.IsNullOrEmpty(request.To);
+                if (IsSingleBound(request.Op))
+                {
+                    SetSingleNumberBound(condition, request, field);
+                    break;
+                }
 
-                if (hasBounds && !string.IsNullOrEmpty(request.Value))
+                // a single value is an exact match, a range is given by its bounds; the two forms do not mix, or "from" with
+                // a stray "value" used to become the range [from, value] and silently answered with nothing. A named
+                // operator fixes the form: "eq" with bounds, or "range" with a value, is a contradiction, not a hint
+                var hasBounds = !string.IsNullOrEmpty(request.From) || !string.IsNullOrEmpty(request.To);
+                var hasValue = !string.IsNullOrEmpty(request.Value);
+
+                if ((hasBounds && hasValue) ||
+                    (request.Op == MetadataFilterOperators.Equal && hasBounds) ||
+                    (request.Op == MetadataFilterOperators.Range && hasValue))
                 {
                     throw new ArgumentException($@"The condition for the field '{field.Name}' takes either a value or a range, not both");
                 }
@@ -379,9 +435,9 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
 
         var supported = field.Type switch
         {
-            MetadataFieldType.String => request.Op is MetadataFilterOperators.Equal,
-            MetadataFieldType.Number => request.Op is MetadataFilterOperators.Equal or MetadataFilterOperators.Range,
-            MetadataFieldType.Date => request.Op is MetadataFilterOperators.Range,
+            MetadataFieldType.String => request.Op is MetadataFilterOperators.Equal or MetadataFilterOperators.Contains,
+            MetadataFieldType.Number => request.Op is MetadataFilterOperators.Equal or MetadataFilterOperators.Range || IsSingleBound(request.Op),
+            MetadataFieldType.Date => request.Op is MetadataFilterOperators.Range || IsSingleBound(request.Op),
             MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice => request.Op is MetadataFilterOperators.In,
             _ => false
         };
@@ -389,6 +445,97 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         if (!supported)
         {
             throw new ArgumentException($@"The operator '{request.Op}' is not supported for the field '{field.Name}'");
+        }
+    }
+
+    /// <summary>
+    /// Whether the operator names one bound of an open interval: "gt", "gte", "lt" or "lte", each with its bound in <c>value</c>.
+    /// </summary>
+    private static bool IsSingleBound(string op)
+    {
+        return op is MetadataFilterOperators.GreaterThan or MetadataFilterOperators.GreaterThanOrEqual
+            or MetadataFilterOperators.LessThan or MetadataFilterOperators.LessThanOrEqual;
+    }
+
+    /// <summary>
+    /// A range condition carries its bounds in "from" and "to"; a "value" next to them has no meaning, and ignoring it
+    /// would answer a question the caller did not ask.
+    /// </summary>
+    private static void DemandNoValue(MetadataFilterConditionRequest request, MetadataField field)
+    {
+        if (!string.IsNullOrEmpty(request.Value))
+        {
+            throw new ArgumentException($@"The condition for the field '{field.Name}' takes either a value or a range, not both");
+        }
+    }
+
+    /// <summary>
+    /// The single bound of a "gt", "gte", "lt" or "lte" condition comes in "value"; "from" and "to" belong to "range" and
+    /// are refused next to it, the way a "value" is refused next to a range.
+    /// </summary>
+    private static string SingleBoundValue(MetadataFilterConditionRequest request, MetadataField field)
+    {
+        if (!string.IsNullOrEmpty(request.From) || !string.IsNullOrEmpty(request.To))
+        {
+            throw new ArgumentException($@"The condition for the field '{field.Name}' takes the bound of '{request.Op}' in the value, not in a range");
+        }
+
+        if (string.IsNullOrEmpty(request.Value))
+        {
+            throw new ArgumentException($@"The condition for the field '{field.Name}' requires a value");
+        }
+
+        return request.Value;
+    }
+
+    private static void SetSingleNumberBound(MetadataFilterCondition condition, MetadataFilterConditionRequest request, MetadataField field)
+    {
+        var bound = ParseNumber(SingleBoundValue(request, field), field);
+
+        switch (request.Op)
+        {
+            case MetadataFilterOperators.GreaterThan:
+                condition.NumberFrom = bound;
+                condition.FromExclusive = true;
+                break;
+            case MetadataFilterOperators.GreaterThanOrEqual:
+                condition.NumberFrom = bound;
+                break;
+            case MetadataFilterOperators.LessThan:
+                condition.NumberTo = bound;
+                condition.ToExclusive = true;
+                break;
+            case MetadataFilterOperators.LessThanOrEqual:
+                condition.NumberTo = bound;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// A bound given as a date only names the whole day, so the strict operators step over it as a whole: "gt" starts
+    /// after its last second, "lt" ends before its first one; "gte" and "lte" take the day in. A bound carrying a time is
+    /// an instant and the operator applies to it as is.
+    /// </summary>
+    private static void SetSingleDateBound(MetadataFilterCondition condition, MetadataFilterConditionRequest request, MetadataField field)
+    {
+        var value = SingleBoundValue(request, field);
+
+        switch (request.Op)
+        {
+            case MetadataFilterOperators.GreaterThan:
+                condition.DateFrom = ParseDate(value, field, endOfDay: true);
+                condition.FromExclusive = true;
+                break;
+            case MetadataFilterOperators.GreaterThanOrEqual:
+                condition.DateFrom = ParseDate(value, field, endOfDay: false);
+                break;
+            case MetadataFilterOperators.LessThan:
+                condition.DateTo = ParseDate(value, field, endOfDay: false);
+                condition.ToExclusive = true;
+                break;
+            case MetadataFilterOperators.LessThanOrEqual:
+                condition.DateTo = ParseDate(value, field, endOfDay: true);
+                break;
         }
     }
 

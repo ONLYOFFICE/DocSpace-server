@@ -54,7 +54,7 @@ public class DocsCloudTenantConfigValidationTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var config = new DocsCloudConfig { TenantName = new string('a', MaxStringLength + 1) };
+        var config = new DocsCloudConfigRequestDto { TenantName = new string('a', MaxStringLength + 1) };
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -71,7 +71,7 @@ public class DocsCloudTenantConfigValidationTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var config = new DocsCloudConfig { Security = new DocsCloudSecurityConfig { Secret = new string('a', MaxStringLength + 1) } };
+        var config = new DocsCloudConfigRequestDto { Security = new DocsCloudSecurityConfigRequest { Secret = new string('a', MaxStringLength + 1) } };
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -88,7 +88,7 @@ public class DocsCloudTenantConfigValidationTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var config = new DocsCloudConfig { Security = new DocsCloudSecurityConfig { Header = new string('a', MaxStringLength + 1) } };
+        var config = new DocsCloudConfigRequestDto { Security = new DocsCloudSecurityConfigRequest { Header = new string('a', MaxStringLength + 1) } };
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -105,11 +105,11 @@ public class DocsCloudTenantConfigValidationTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var config = new DocsCloudConfig
+        var config = new DocsCloudConfigRequestDto
         {
-            IpFilter = new DocsCloudIpFilterConfig
+            IpFilter = new DocsCloudIpFilterConfigRequest
             {
-                Rules = [new DocsCloudIpFilterRule { Address = new string('a', MaxStringLength + 1), Allowed = true }]
+                Rules = [new DocsCloudIpFilterRuleRequest { Address = new string('a', MaxStringLength + 1), Allowed = true }]
             }
         };
 
@@ -128,7 +128,7 @@ public class DocsCloudTenantConfigValidationTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var config = new DocsCloudConfig { Server = new DocsCloudServerConfig { FileSizeLimit = 9999999999 } };
+        var config = new DocsCloudConfigRequestDto { Server = new DocsCloudServerConfigRequest { FileSizeLimit = 9999999999 } };
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

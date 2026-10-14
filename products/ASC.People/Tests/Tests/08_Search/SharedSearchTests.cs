@@ -462,7 +462,7 @@ public class SharedSearchTests(AspireAppFixture fixture) : SearchTestBase(fixtur
         AssertSingleEmployee(result.Response, searchable.Id, searchableName);
     }
 
-    private static void AssertSingleAccountEntry(IAccountEntryArrayWrapper result, Guid expectedId, string expectedName)
+    private static void AssertSingleAccountEntry(AccountEntryArrayWrapper result, Guid expectedId, string expectedName)
     {
         result.Response.Should().HaveCount(1);
 

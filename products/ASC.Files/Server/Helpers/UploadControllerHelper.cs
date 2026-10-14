@@ -62,7 +62,7 @@ public class UploadControllerHelper(
         tenantManager,
         authContext)
 {
-    public async Task<ChunkedUploadSessionResponse<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
+    public async Task<ChunkedUploadSessionDto<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
@@ -70,13 +70,13 @@ public class UploadControllerHelper(
     }
 
 
-    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
+    public async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    private async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
@@ -99,23 +99,4 @@ public class UploadControllerHelper(
             await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
         ];
     }
-}
-
-/// <summary>
-/// The reserved chunked upload wrapped in the envelope the two older session operations answer with.
-/// </summary>
-public class ChunkedUploadSessionResponseWrapper<T>
-{
-    /// <summary>
-    /// Always true in a body that reaches the caller, because a call that does not succeed answers with an error
-    /// status and no body at all. It cannot be used to tell a refusal from a success.
-    /// </summary>
-    /// <example>true</example>
-    public bool Success { get; set; }
-
-    /// <summary>
-    /// The reserved upload itself, in the same shape the newer session operations answer with directly.
-    /// </summary>
-    /// <example>{"id": "1b6a2ee1f2a04c6f9bd2cbf0e0f23a54", "bytes_total": 10485760}</example>
-    public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

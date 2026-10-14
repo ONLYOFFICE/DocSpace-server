@@ -185,7 +185,7 @@ public class ThirdPartyFolderTests(
 
         // Act
         var results = (await _foldersApi.DeleteFolderAsync(
-            child.Id, new DeleteFolder(false, true), TestContext.Current.CancellationToken)).Response;
+            child.Id, new DeleteFolderRequest(false, true), TestContext.Current.CancellationToken)).Response;
         var finished = await WaitLongOperation(results.FirstOrDefault()?.Id);
 
         // Assert

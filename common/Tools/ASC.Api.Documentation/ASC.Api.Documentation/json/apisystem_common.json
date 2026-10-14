@@ -435,7 +435,7 @@
         "operationId": "remove",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -446,7 +446,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -458,7 +458,7 @@
             }
           },
           {
-            "name": "AffiliateId",
+            "name": "affiliateId",
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
@@ -471,7 +471,7 @@
             }
           },
           {
-            "name": "PartnerId",
+            "name": "partnerId",
             "in": "query",
             "description": "The partner ID.",
             "schema": {
@@ -484,7 +484,7 @@
             }
           },
           {
-            "name": "Campaign",
+            "name": "campaign",
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
@@ -495,7 +495,7 @@
             }
           },
           {
-            "name": "FirstName",
+            "name": "firstName",
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
@@ -508,7 +508,7 @@
             }
           },
           {
-            "name": "Email",
+            "name": "email",
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
@@ -522,7 +522,7 @@
             }
           },
           {
-            "name": "Industry",
+            "name": "industry",
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
@@ -534,7 +534,7 @@
             }
           },
           {
-            "name": "Language",
+            "name": "language",
             "in": "query",
             "description": "The portal language.",
             "schema": {
@@ -547,7 +547,7 @@
             }
           },
           {
-            "name": "LastName",
+            "name": "lastName",
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
@@ -560,7 +560,7 @@
             }
           },
           {
-            "name": "Module",
+            "name": "module",
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
@@ -573,7 +573,7 @@
             }
           },
           {
-            "name": "Password",
+            "name": "password",
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
@@ -586,7 +586,7 @@
             }
           },
           {
-            "name": "PasswordHash",
+            "name": "passwordHash",
             "in": "query",
             "description": "The password hash.",
             "schema": {
@@ -597,7 +597,7 @@
             }
           },
           {
-            "name": "Phone",
+            "name": "phone",
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
@@ -610,7 +610,7 @@
             }
           },
           {
-            "name": "RecaptchaResponse",
+            "name": "recaptchaResponse",
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
@@ -621,7 +621,7 @@
             }
           },
           {
-            "name": "RecaptchaType",
+            "name": "recaptchaType",
             "in": "query",
             "description": "The type of CAPTCHA validation used.",
             "schema": {
@@ -630,7 +630,7 @@
             "example": 0
           },
           {
-            "name": "Region",
+            "name": "region",
             "in": "query",
             "description": "The portal region.",
             "schema": {
@@ -643,7 +643,7 @@
             }
           },
           {
-            "name": "AWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
@@ -654,7 +654,7 @@
             }
           },
           {
-            "name": "Status",
+            "name": "status",
             "in": "query",
             "description": "The tenant status.",
             "schema": {
@@ -663,7 +663,7 @@
             "example": 0
           },
           {
-            "name": "SkipWelcome",
+            "name": "skipWelcome",
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
@@ -674,7 +674,7 @@
             }
           },
           {
-            "name": "TimeZoneName",
+            "name": "timeZoneName",
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
@@ -687,7 +687,7 @@
             }
           },
           {
-            "name": "Spam",
+            "name": "spam",
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
@@ -698,7 +698,7 @@
             }
           },
           {
-            "name": "Calls",
+            "name": "calls",
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
@@ -709,7 +709,7 @@
             }
           },
           {
-            "name": "AppKey",
+            "name": "appKey",
             "in": "query",
             "description": "The application key.",
             "schema": {
@@ -720,7 +720,7 @@
             }
           },
           {
-            "name": "LimitedAccessSpace",
+            "name": "limitedAccessSpace",
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
@@ -731,7 +731,7 @@
             }
           },
           {
-            "name": "ThirdPartyProfile",
+            "name": "thirdPartyProfile",
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
@@ -742,7 +742,7 @@
             }
           },
           {
-            "name": "Provider",
+            "name": "provider",
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
@@ -753,7 +753,7 @@
             }
           },
           {
-            "name": "AccessToken",
+            "name": "accessToken",
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
@@ -764,7 +764,7 @@
             }
           },
           {
-            "name": "CodeOAuth",
+            "name": "codeOAuth",
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
@@ -1052,7 +1052,7 @@
         "operationId": "getPortals",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -1063,7 +1063,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -1075,7 +1075,7 @@
             }
           },
           {
-            "name": "AffiliateId",
+            "name": "affiliateId",
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
@@ -1088,7 +1088,7 @@
             }
           },
           {
-            "name": "PartnerId",
+            "name": "partnerId",
             "in": "query",
             "description": "The partner ID.",
             "schema": {
@@ -1101,7 +1101,7 @@
             }
           },
           {
-            "name": "Campaign",
+            "name": "campaign",
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
@@ -1112,7 +1112,7 @@
             }
           },
           {
-            "name": "FirstName",
+            "name": "firstName",
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
@@ -1125,7 +1125,7 @@
             }
           },
           {
-            "name": "Email",
+            "name": "email",
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
@@ -1139,7 +1139,7 @@
             }
           },
           {
-            "name": "Industry",
+            "name": "industry",
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
@@ -1151,7 +1151,7 @@
             }
           },
           {
-            "name": "Language",
+            "name": "language",
             "in": "query",
             "description": "The portal language.",
             "schema": {
@@ -1164,7 +1164,7 @@
             }
           },
           {
-            "name": "LastName",
+            "name": "lastName",
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
@@ -1177,7 +1177,7 @@
             }
           },
           {
-            "name": "Module",
+            "name": "module",
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
@@ -1190,7 +1190,7 @@
             }
           },
           {
-            "name": "Password",
+            "name": "password",
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
@@ -1203,7 +1203,7 @@
             }
           },
           {
-            "name": "PasswordHash",
+            "name": "passwordHash",
             "in": "query",
             "description": "The password hash.",
             "schema": {
@@ -1214,7 +1214,7 @@
             }
           },
           {
-            "name": "Phone",
+            "name": "phone",
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
@@ -1227,7 +1227,7 @@
             }
           },
           {
-            "name": "RecaptchaResponse",
+            "name": "recaptchaResponse",
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
@@ -1238,7 +1238,7 @@
             }
           },
           {
-            "name": "RecaptchaType",
+            "name": "recaptchaType",
             "in": "query",
             "description": "The type of CAPTCHA validation used.",
             "schema": {
@@ -1247,7 +1247,7 @@
             "example": 0
           },
           {
-            "name": "Region",
+            "name": "region",
             "in": "query",
             "description": "The portal region.",
             "schema": {
@@ -1260,7 +1260,7 @@
             }
           },
           {
-            "name": "AWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
@@ -1271,7 +1271,7 @@
             }
           },
           {
-            "name": "Status",
+            "name": "status",
             "in": "query",
             "description": "The tenant status.",
             "schema": {
@@ -1280,7 +1280,7 @@
             "example": 0
           },
           {
-            "name": "SkipWelcome",
+            "name": "skipWelcome",
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
@@ -1291,7 +1291,7 @@
             }
           },
           {
-            "name": "TimeZoneName",
+            "name": "timeZoneName",
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
@@ -1304,7 +1304,7 @@
             }
           },
           {
-            "name": "Spam",
+            "name": "spam",
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
@@ -1315,7 +1315,7 @@
             }
           },
           {
-            "name": "Calls",
+            "name": "calls",
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
@@ -1326,7 +1326,7 @@
             }
           },
           {
-            "name": "AppKey",
+            "name": "appKey",
             "in": "query",
             "description": "The application key.",
             "schema": {
@@ -1337,7 +1337,7 @@
             }
           },
           {
-            "name": "LimitedAccessSpace",
+            "name": "limitedAccessSpace",
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
@@ -1348,7 +1348,7 @@
             }
           },
           {
-            "name": "ThirdPartyProfile",
+            "name": "thirdPartyProfile",
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
@@ -1359,7 +1359,7 @@
             }
           },
           {
-            "name": "Provider",
+            "name": "provider",
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
@@ -1370,7 +1370,7 @@
             }
           },
           {
-            "name": "AccessToken",
+            "name": "accessToken",
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
@@ -1381,7 +1381,7 @@
             }
           },
           {
-            "name": "CodeOAuth",
+            "name": "codeOAuth",
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
@@ -1751,7 +1751,7 @@
         "operationId": "getSettings",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -1764,7 +1764,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -1776,7 +1776,7 @@
             }
           },
           {
-            "name": "Key",
+            "name": "key",
             "in": "query",
             "description": "The settings parameter key.",
             "schema": {
@@ -1789,7 +1789,7 @@
             }
           },
           {
-            "name": "Value",
+            "name": "value",
             "in": "query",
             "description": "The settings parameter value.",
             "schema": {

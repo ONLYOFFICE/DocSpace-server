@@ -47,7 +47,7 @@ public class FileCustomizationTests(
         var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Owner);
         
         // Act
-        var customFilterParams = new CustomFilterParameters(enabled: true);
+        var customFilterParams = new CustomFilterRequest(enabled: true);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -66,7 +66,7 @@ public class FileCustomizationTests(
         var file = await CreateFile("file_for_custom_filter.xlsx", createdRoom.Id);
         
         // Act
-        var customFilterParams = new CustomFilterParameters(enabled: true);
+        var customFilterParams = new CustomFilterRequest(enabled: true);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -86,11 +86,11 @@ public class FileCustomizationTests(
         var file = await CreateFile("file_for_custom_filter_disable.xlsx", createdRoom.Id);
         
         // First enable custom filter
-        var enableParams = new CustomFilterParameters(enabled: true);
+        var enableParams = new CustomFilterRequest(enabled: true);
         await _filesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
         
         // Then disable it
-        var disableParams = new CustomFilterParameters(enabled: false);
+        var disableParams = new CustomFilterRequest(enabled: false);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert

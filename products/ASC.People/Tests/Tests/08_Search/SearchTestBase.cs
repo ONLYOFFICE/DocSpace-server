@@ -61,14 +61,14 @@ public abstract class SearchTestBase(AspireAppFixture fixture) : BaseTest(fixtur
     protected async Task<(int RoomId, int FileId)> CreateRoomWithFileAsync(string roomTitle, string fileTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
-        var file = await _filesApi.CreateFileAsync(room.Id, new CreateFileJsonElement(fileTitle), TestContext.Current.CancellationToken);
+        var file = await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest(fileTitle), TestContext.Current.CancellationToken);
         return (room.Id, file.Response.Id);
     }
 
     protected async Task<(int RoomId, int FolderId)> CreateRoomWithFolderAsync(string roomTitle, string folderTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
-        var folder = await _foldersApi.CreateFolderAsync(room.Id, new CreateFolder(folderTitle), TestContext.Current.CancellationToken);
+        var folder = await _foldersApi.CreateFolderAsync(room.Id, new CreateFolderRequest(folderTitle), TestContext.Current.CancellationToken);
         return (room.Id, folder.Response.Id);
     }
 

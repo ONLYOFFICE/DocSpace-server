@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI agenta MCP serveris {0} atjaunināts</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metadatu kaskādes piešķiršana sākta: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metadatu lauks izveidots: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metadatu lauks dzēsts: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metadatu lauks atjaunināts: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metadatu veidne piešķirta: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metadatu veidne izveidota: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metadatu veidne dzēsta: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metadatu veidnes piešķiršana atcelta: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metadatu veidne atjaunināta: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metadatu vērtības atjauninātas: {0}</value>
+  </data>
 </root>

@@ -52,7 +52,7 @@ public class NotificationsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _notificationsApi.SetNotificationSettingsAsync(
-                new NotificationSettingsRequestsDto(NotificationType.Badges, true), TestContext.Current.CancellationToken));
+                new NotificationSettingsRequestDto(NotificationType.Badges, true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);

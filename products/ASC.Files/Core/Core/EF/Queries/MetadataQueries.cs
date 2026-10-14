@@ -66,6 +66,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<bool> MetadataTemplatesExistAsync(int tenantId)
+    {
+        return MetadataQueries.MetadataTemplatesExistAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFilesMetadataValue> MetadataValuesByEntryAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return MetadataQueries.MetadataValuesByEntryAsync(this, tenantId, entryId, entryType);
@@ -75,6 +81,12 @@ public partial class FilesDbContext
     public IAsyncEnumerable<DbFilesMetadataValue> MetadataValuesByEntriesAsync(int tenantId, IEnumerable<int> entryIds, FileEntryType entryType)
     {
         return MetadataQueries.MetadataValuesByEntriesAsync(this, tenantId, entryIds, entryType);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<MetadataTextMatch> MetadataTextMatchesAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText)
+    {
+        return MetadataQueries.MetadataTextMatchesAsync(this, tenantId, fileIds, folderIds, lowerText);
     }
 
     [PreCompileQuery]
@@ -131,6 +143,20 @@ public partial class FilesDbContext
         }
 
         return links.ExecuteUpdateAsync(s => s.SetProperty(r => r.SourceFolderId, (int?)null));
+    }
+
+    /// <summary>
+    /// Takes the cascade off the folder's own link of the template: the flag goes down and the conflict rule back to its
+    /// default, the link itself stays. Not precompiled on purpose: an <c>ExecuteUpdate</c> inside <c>EF.CompileAsyncQuery</c>
+    /// fails to translate (see <see cref="ConvertMetadataCascadeLinksToDirectAsync"/>).
+    /// </summary>
+    public Task<int> StopMetadataCascadeAsync(int tenantId, int folderId, int templateId)
+    {
+        return MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.TemplateId == templateId && r.EntryId == folderId && r.EntryType == FileEntryType.Folder)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(r => r.Cascade, false)
+                .SetProperty(r => r.CascadeConflict, MetadataConflictResolveType.Skip));
     }
 
     [PreCompileQuery]
@@ -507,6 +533,14 @@ public partial class FilesDbContext
 
 static file class MetadataQueries
 {
+    /// <summary>
+    /// Whether the tenant has any template at all, the hidden system one included; cached by <c>MetadataTemplatesCache</c>.
+    /// </summary>
+    public static readonly Func<FilesDbContext, int, Task<bool>> MetadataTemplatesExistAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.MetadataTemplates.Any(t => t.TenantId == tenantId));
+
     public static readonly Func<FilesDbContext, int, int, FileEntryType, IAsyncEnumerable<DbFilesMetadataLink>> MetadataLinksByEntryAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, FileEntryType entryType) =>
@@ -561,6 +595,33 @@ static file class MetadataQueries
             (FilesDbContext ctx, int tenantId, IEnumerable<int> entryIds, FileEntryType entryType) =>
                 ctx.MetadataValues
                     .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId)));
+
+    /// <summary>
+    /// The string values of one listing page that contain the lowered text, with the field and the template they belong
+    /// to: what the text search matched, for the page to say where. The system template is not shown outside, so its
+    /// fields (the custom fields) come back by name alone, without the template or the field id.
+    /// </summary>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, string, IAsyncEnumerable<MetadataTextMatch>> MetadataTextMatchesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText) =>
+                ctx.MetadataValues
+                    .Where(v => v.TenantId == tenantId && v.ValueString.ToLower().Contains(lowerText) &&
+                        ((v.EntryType == FileEntryType.File && fileIds.Contains(v.EntryId)) ||
+                         (v.EntryType == FileEntryType.Folder && folderIds.Contains(v.EntryId))))
+                    .Join(ctx.MetadataFields, v => v.FieldId, f => f.Id, (v, f) => new { Value = v, Field = f })
+                    .Where(x => x.Field.TenantId == tenantId)
+                    .Join(ctx.MetadataTemplates, x => x.Field.TemplateId, t => t.Id, (x, t) => new { x.Value, x.Field, Template = t })
+                    .Where(x => x.Template.TenantId == tenantId)
+                    .OrderBy(x => x.Value.EntryType).ThenBy(x => x.Value.EntryId).ThenBy(x => x.Field.Order).ThenBy(x => x.Field.Id)
+                    .Select(x => new MetadataTextMatch
+                    {
+                        EntryId = x.Value.EntryId,
+                        EntryType = x.Value.EntryType,
+                        TemplateId = x.Template.IsSystem ? null : x.Template.Id,
+                        FieldId = x.Template.IsSystem ? null : x.Field.Id,
+                        FieldName = x.Field.Name,
+                        Value = x.Value.ValueString
+                    }));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, Task<int>> DeleteMetadataLinksByEntriesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -44,7 +44,7 @@ public class PaymentRequestTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private static SalesRequestsDto ValidRequest => new("nctTest", "nct@email.com", "autoTest");
+    private static SalesRequestDto ValidRequest => new("nctTest", "nct@email.com", "autoTest");
 
     [Fact]
     public async Task SendPaymentRequest_Owner_Succeeds()
@@ -131,7 +131,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto(new string('a', 256), "nct@email.com", "autoTest");
+        var request = new SalesRequestDto(new string('a', 256), "nct@email.com", "autoTest");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -147,7 +147,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto("nctTest", new string('a', 55) + "@email.com", "autoTest");
+        var request = new SalesRequestDto("nctTest", new string('a', 55) + "@email.com", "autoTest");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -163,7 +163,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto("nctTest", "nct@email.com", new string('a', 256));
+        var request = new SalesRequestDto("nctTest", "nct@email.com", new string('a', 256));
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -179,7 +179,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto("", "nct@email.com", "autoTest");
+        var request = new SalesRequestDto("", "nct@email.com", "autoTest");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -195,7 +195,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto("nctTest", "", "autoTest");
+        var request = new SalesRequestDto("nctTest", "", "autoTest");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -211,7 +211,7 @@ public class PaymentRequestTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new SalesRequestsDto("nctTest", "nct@email.com", "");
+        var request = new SalesRequestDto("nctTest", "nct@email.com", "");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

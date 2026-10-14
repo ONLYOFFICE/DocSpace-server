@@ -1889,4 +1889,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Ciao, $UserName!
+
+Ti contattamo per informarti che il ricarico automatico non è supportato per il tuo attuale metodo di pagamento: i fondi arrivano nel ${LetterLogoText} Wallet solo dopo il completamento del bonifico bancario, pertanto il saldo non può essere ripristinato immediatamente.
+
+Il ricarico automatico è stato quindi disattivato. Per evitare interruzioni dei servizi a pagamento, ti preghiamo di ricaricare manualmente il saldo del tuo wallet o di passare a un metodo di pagamento che supporti il ricarico automatico.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Azione richiesta: Il ricarico automatico non è disponibile per il tuo ${LetterLogoText} Wallet</value>
+  </data>
 </root>

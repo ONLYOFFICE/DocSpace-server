@@ -51,7 +51,7 @@ public class IpRestrictionsSaveTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = new IpRestrictionsDto([new IpRestrictionBase("192.168.1.1", false)], false);
+        var dto = new IpRestrictionsDto([new IpRestrictionEntryDto("192.168.1.1", false)], false);
 
         // Act
         var result = await _ipRestrictionsApi.SaveIpRestrictionsAsync(dto, TestContext.Current.CancellationToken);
@@ -68,7 +68,7 @@ public class IpRestrictionsSaveTests(
         // Arrange
         var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
         await _webApiClient.Authenticate(admin);
-        var dto = new IpRestrictionsDto([new IpRestrictionBase("192.168.1.1", false)], false);
+        var dto = new IpRestrictionsDto([new IpRestrictionEntryDto("192.168.1.1", false)], false);
 
         // Act
         var result = await _ipRestrictionsApi.SaveIpRestrictionsAsync(dto, TestContext.Current.CancellationToken);

@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Serverul MCP {0} al agentului AI a fost actualizat</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Atribuirea în cascadă a metadatelor a fost inițiată: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Câmpul de metadate a fost creat: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Câmpul de metadate a fost șters: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Câmpul de metadate a fost actualizat: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Șablonul de metadate a fost atribuit: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Șablonul de metadate a fost creat: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Șablonul de metadate a fost șters: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Atribuirea șablonului de metadate a fost anulată: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Șablonul de metadate a fost actualizat: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Valorile metadatelor au fost actualizate: {0}</value>
+  </data>
 </root>

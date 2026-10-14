@@ -244,7 +244,7 @@ public class FolderShareTests(
         var externalShareData = (await _sharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        externalShareData.Status.Should().Be(Status.RequiredPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.RequiredPassword);
     }
 
     [Fact]
@@ -269,8 +269,8 @@ public class FolderShareTests(
         var externalShareData = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
-        externalShareData.Status.Should().Be(Status.Ok);
+        externalShareDataWrongPassword.Status.Should().Be(ExternalShareStatus.InvalidPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.Ok);
     }
 
     [Fact]

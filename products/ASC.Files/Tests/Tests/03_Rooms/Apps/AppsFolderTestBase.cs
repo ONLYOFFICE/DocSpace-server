@@ -132,7 +132,7 @@ public abstract class AppsFolderTestBase(
     {
         var results = (await _foldersApi.DeleteFolderAsync(
             folderId,
-            new DeleteFolder { DeleteAfter = true, Immediately = false },
+            new DeleteFolderRequest { DeleteAfter = true, Immediately = false },
             TestContext.Current.CancellationToken)).Response;
 
         await AssertOperationSucceeded(results.FirstOrDefault()?.Id);

@@ -1891,4 +1891,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obraćamo vam se da vas obavestimo da automatsko punjenje nije podržano za vaš trenutni način plaćanja: novac stiže u ${LetterLogoText} Wallet tek nakon poravnanja bankovnog transfera, pa stanje ne može biti odmah dopunjeno.
+
+Stoga je automatsko punjenje isključeno. Da biste izbegli prekid plaćenih usluga, molimo vas da ručno dopunite stanje novčanika ili pređete na način plaćanja koji podržava automatsko punjenje.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Potrebna je akcija: Automatsko dopunjavanje nije dostupno za vaš ${LetterLogoText} novčanik</value>
+  </data>
 </root>

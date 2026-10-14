@@ -74,10 +74,11 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array && schema.Type != JsonSchemaType.Object;
         string responseSchemaKey = null;
         OpenApiSchema responseSchema = null;
-        if (IsNullableAnyValue(schema))
+        if (IsAnyValue(schema))
         {
-            // A nullable type with no schema of its own - `JsonElement?`, `object?` - comes out of the generator as
-            // `type: null` alone, which claims the payload is always null. It is any JSON value, null included.
+            // A type with no schema of its own - `JsonElement?`, `object?` - is any JSON value, null included.
+            // Swashbuckle up to 10.2 emitted it as `type: null` alone, which claims the payload is always null;
+            // from 10.3 it is an empty schema, which the object branch below would document as `type: object`.
             responseSchemaKey = "JsonValueWrapper";
             responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema(),
                 ("The successful API response containing an arbitrary JSON value.",
@@ -157,7 +158,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             else
             {
                 responseSchemaKey = originalSchemaRef == null
-                    ? $"{schema.Items.Type.ToString().ToUpper()}ArrayWrapper"
+                    ? $"{schema.Items.Type}ArrayWrapper"
                     : WrapperKey(originalSchemaRef, "ArrayWrapper", schemas, generated);
                 arrayResponseProperty = new OpenApiSchema
                 {
@@ -283,16 +284,22 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         return stripped;
     }
 
-    private static bool IsNullableAnyValue(IOpenApiSchema schema)
+    private static bool IsAnyValue(IOpenApiSchema schema)
     {
         return schema is OpenApiSchema
         {
-            Type: JsonSchemaType.Null,
+            Type: null or JsonSchemaType.Null,
+            AdditionalProperties: null,
             Items: null,
             Properties: null or { Count: 0 },
             OneOf: null or { Count: 0 },
             AnyOf: null or { Count: 0 },
-            AllOf: null or { Count: 0 }
+            AllOf: null or { Count: 0 },
+            Enum: null or { Count: 0 },
+            Not: null,
+            Const: null,
+            Format: null,
+            Discriminator: null
         };
     }
 

@@ -137,7 +137,7 @@ public class OperationsReportBuilder(
                     OrderType = taskData.OrderType
                 };
 
-                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter, context.CancellationToken))
                 {
                     if (records is not { Count: > 0 })
                     {
@@ -172,22 +172,15 @@ public class OperationsReportBuilder(
         return null;
     }
 
-    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
+    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var offset = 0;
-        var limit = 1000;
+        filter.Limit = 1000;
 
-        while (true)
+        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter, cancellationToken))
         {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
-
             if (report?.Collection == null)
             {
-                yield return null;
-                break;
+                continue;
             }
 
             var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
@@ -212,13 +205,6 @@ public class OperationsReportBuilder(
             }
 
             yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
         }
     }
 

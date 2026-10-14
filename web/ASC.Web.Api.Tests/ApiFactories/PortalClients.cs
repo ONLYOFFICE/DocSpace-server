@@ -76,6 +76,7 @@ public sealed class PortalClients : PortalClientsBase
     public AuditTrailDataApi AuditTrailDataApi { get; }
     public CSPApi CspApi { get; }
     public FirebaseApi FirebaseApi { get; }
+    public EncryptionApi EncryptionApi { get; }
     public LoginHistoryApi LoginHistoryApi { get; }
     public OAuth2Api OAuth2Api { get; }
     public SecurityAccessToDevToolsApi SecurityAccessToDevToolsApi { get; }
@@ -140,6 +141,7 @@ public sealed class PortalClients : PortalClientsBase
         AuditTrailDataApi = new AuditTrailDataApi(WebApiHttpClient, webApiConfig);
         CspApi = new CSPApi(WebApiHttpClient, webApiConfig);
         FirebaseApi = new FirebaseApi(WebApiHttpClient, webApiConfig);
+        EncryptionApi = new EncryptionApi(WebApiHttpClient, webApiConfig);
         LoginHistoryApi = new LoginHistoryApi(WebApiHttpClient, webApiConfig);
         OAuth2Api = new OAuth2Api(WebApiHttpClient, webApiConfig);
         SecurityAccessToDevToolsApi = new SecurityAccessToDevToolsApi(WebApiHttpClient, webApiConfig);

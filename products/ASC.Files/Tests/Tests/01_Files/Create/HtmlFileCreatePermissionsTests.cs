@@ -49,7 +49,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Owner", "<p>Owner content</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Owner", "<p>Owner content</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -63,7 +63,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(admin);
 
         var result = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Admin", "<p>Admin content</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Admin", "<p>Admin content</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -77,7 +77,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(roomAdmin);
 
         var result = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Room Admin", "<p>Room admin content</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Room Admin", "<p>Room admin content</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -91,7 +91,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(user);
 
         var result = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs User", "<p>User content</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs User", "<p>User content</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -105,7 +105,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(guest);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Guest", "<p>Guest content</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Guest", "<p>Guest content</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -117,7 +117,7 @@ public class HtmlFileCreatePermissionsTests(
         await _filesClient.Authenticate(null);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Anon", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Anon", createNewIfExist: true),
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);

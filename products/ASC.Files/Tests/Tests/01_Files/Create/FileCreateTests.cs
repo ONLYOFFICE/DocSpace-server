@@ -104,7 +104,7 @@ public class FileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         //Arrange
-        var file = new CreateFileJsonElement("test.docx");
+        var file = new CreateFileRequest("test.docx");
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
 
@@ -127,7 +127,7 @@ public class FileCreateTests(
 
         // Arrange
         var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
-        var file = new CreateFileJsonElement(longFileName);
+        var file = new CreateFileRequest(longFileName);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -150,7 +150,7 @@ public class FileCreateTests(
         var content = "This is the content of my text file.";
 
         // Act
-        var createParams = new CreateTextOrHtmlFile(
+        var createParams = new CreateTextOrHtmlFileRequest(
             title: fileName,
             content: content,
             createNewIfExist: true
@@ -178,7 +178,7 @@ public class FileCreateTests(
         var content = "<html><body><h1>Test HTML</h1><p>This is a test HTML file.</p></body></html>";
 
         // Act
-        var createParams = new CreateTextOrHtmlFile(
+        var createParams = new CreateTextOrHtmlFileRequest(
             title: fileName,
             content: content,
             createNewIfExist: true

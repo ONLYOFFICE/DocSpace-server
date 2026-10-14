@@ -276,13 +276,13 @@ public abstract class SecurityController<T>(
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "The people who currently have access to the file, when the caller still has to invite someone; empty otherwise", typeof(List<AceShortWrapper>))]
+    [SwaggerResponse(200, "The people who currently have access to the file, when the caller still has to invite someone; empty otherwise", typeof(List<AceShortDto>))]
     [SwaggerResponse(400, "The address list is missing, or the message is longer than the field allows")]
     [SwaggerResponse(403, "The caller may not comment on the file")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{fileId}/sendeditornotify")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
+    public async Task<List<AceShortDto>> SendEditorNotify(MentionMessageRequestDto<T> inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
 
@@ -306,11 +306,11 @@ public abstract class SecurityController<T>(
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "The members of the group with the access each of them has on the folder", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
+    [SwaggerResponse(200, "The members of the group with the access each of them has on the folder", typeof(IAsyncEnumerable<GroupMemberSecurityDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
-    public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
+    public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
     {
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
@@ -329,7 +329,7 @@ public abstract class SecurityController<T>(
 
         await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, inDto.GroupId, text, offset, count))
         {
-            yield return new GroupMemberSecurityRequestDto
+            yield return new GroupMemberSecurityDto
             {
                 User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
                 GroupAccess = memberSecurity.GroupShare,
@@ -357,11 +357,11 @@ public abstract class SecurityController<T>(
     /// <summary>Get file access of group members</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "The members of the group with the access each of them has on the file", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
+    [SwaggerResponse(200, "The members of the group with the access each of them has on the file", typeof(IAsyncEnumerable<GroupMemberSecurityDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
-    public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
+    public async IAsyncEnumerable<GroupMemberSecurityDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
     {
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -379,7 +379,7 @@ public abstract class SecurityController<T>(
 
         await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(file, inDto.GroupId, text, offset, count))
         {
-            yield return new GroupMemberSecurityRequestDto
+            yield return new GroupMemberSecurityDto
             {
                 User = await employeeFullDtoHelper.GetFullAsync(memberSecurity.User),
                 GroupAccess = memberSecurity.GroupShare,

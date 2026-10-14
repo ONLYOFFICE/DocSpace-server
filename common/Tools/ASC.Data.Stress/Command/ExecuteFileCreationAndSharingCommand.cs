@@ -124,7 +124,7 @@ public class ExecuteFileCreationAndSharingCommand : AsyncCommand<ExecuteFileCrea
 
                 async Task CreateAndShareFile(Guid guid)
                 {
-                    var file = (await filesApi.CreateFileAsync(userFolder, new CreateFileJsonElement(system.FileName("docx")), cancellationToken: token)).Response;
+                    var file = (await filesApi.CreateFileAsync(userFolder, new CreateFileRequest(system.FileName("docx")), cancellationToken: token)).Response;
 
                     await filesApi.AddFileToRecentAsync(file.Id, cancellationToken: token);
 

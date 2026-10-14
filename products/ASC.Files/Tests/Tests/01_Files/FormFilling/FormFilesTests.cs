@@ -95,7 +95,7 @@ public class FormFilesTests(
         // Act & Assert
         try
         {
-            var checkParams = new CheckFillFormDraft();
+            var checkParams = new CheckFillFormDraftRequest();
             var result = (await _filesApi.CheckFillFormDraftAsync(file.Id, checkParams, TestContext.Current.CancellationToken)).Response;
 
             // If the file is properly recognized as a form draft, we'll get a session ID

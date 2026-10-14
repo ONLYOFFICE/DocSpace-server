@@ -54,7 +54,7 @@
         "operationId": "getBackupSchedule",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -183,7 +183,7 @@
             "application/json": {
               "schema": {
                 "description": "The request parameters for setting the backup schedule.",
-                "$ref": "#/components/schemas/BackupScheduleDto"
+                "$ref": "#/components/schemas/CreateBackupScheduleRequestDto"
               }
             }
           }
@@ -292,7 +292,7 @@
         "operationId": "deleteBackupSchedule",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -421,7 +421,7 @@
             "application/json": {
               "schema": {
                 "description": "The request parameters for starting a backup.",
-                "$ref": "#/components/schemas/BackupDto"
+                "$ref": "#/components/schemas/StartBackupRequestDto"
               }
             }
           }
@@ -630,7 +630,7 @@
         "operationId": "getBackupProgress",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -753,7 +753,7 @@
         "operationId": "getBackupHistory",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -1000,7 +1000,7 @@
         "operationId": "deleteBackupHistory",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -1129,7 +1129,7 @@
             "application/json": {
               "schema": {
                 "description": "The request parameters for restoring a portal from a backup.",
-                "$ref": "#/components/schemas/BackupRestoreDto"
+                "$ref": "#/components/schemas/StartBackupRestoreRequestDto"
               }
             }
           }
@@ -1238,7 +1238,7 @@
         "operationId": "getRestoreProgress",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Which restoring job to look for, read as three states rather than as a flag: leave it out for\r\nwhichever job concerns this portal, including a server-wide one, send false for the job of this\r\nportal alone, and send true for the server-wide job. On a portal that is not a standalone\r\ninstallation the value is forced to false.",
             "schema": {
@@ -1722,43 +1722,81 @@
   },
   "components": {
     "schemas": {
-      "BackupDto": {
+      "BackupCronRequest": {
         "type": "object",
         "properties": {
-          "storageType": {
-            "description": "The storage the archive is written to. It defaults to `Documents`, and it decides which keys\r\n`storageParams` has to carry.",
-            "$ref": "#/components/schemas/BackupStorageType"
+          "period": {
+            "description": "How often the backup runs: `EveryDay`, `EveryWeek` or `EveryMonth`. It defaults to `EveryDay`.",
+            "$ref": "#/components/schemas/BackupPeriod"
           },
-          "storageParams": {
+          "hour": {
             "examples": [
-              [
-                {
-                  "key": "folderId",
-                  "value": "1234"
-                }
-              ]
+              2
+            ],
+            "type": "integer",
+            "description": "The hour of the day the backup starts at, from 0 to 23. Minutes cannot be chosen - it always starts\r\non the hour.",
+            "format": "int32"
+          },
+          "day": {
+            "examples": [
+              1
             ],
             "type": [
               "null",
-              "array"
+              "integer"
             ],
-            "items": {
-              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
-              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
-            },
-            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` needs an integer\r\n`folderId`, `ThridpartyDocuments` a provider-specific non-integer `folderId`, `Local` a `filePath`,\r\n`ThirdPartyConsumer` a `module` plus the settings of that consumer, and `DataStore` none. The\r\n`subdir` key is added by the operation itself and must not be sent."
-          },
-          "dump": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Backs up the whole server rather than this one portal. It requires the space access permission and\r\nworks on a standalone installation only."
+            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the\r\nday of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is\r\nstored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent\r\nwithout it fails.",
+            "format": "int32"
           }
         },
-        "description": "The request parameters for starting a backup."
+        "description": "The request parameters for the time the scheduled backup runs."
       },
-      "BackupHistoryRecord": {
+      "BackupHistoryRecordArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackupHistoryRecordDto"
+            },
+            "description": "The list of BackupHistoryRecordDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of BackupHistoryRecordDto objects."
+      },
+      "BackupHistoryRecordDto": {
         "required": [
           "createdOn",
           "expiresOn",
@@ -1809,51 +1847,6 @@
         },
         "description": "One stored backup of a portal."
       },
-      "BackupHistoryRecordArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BackupHistoryRecord"
-            },
-            "description": "The list of BackupHistoryRecord objects returned by the operation."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the list of BackupHistoryRecord objects."
-      },
       "BackupPeriod": {
         "oneOf": [
           {
@@ -1889,7 +1882,7 @@
         "description": "How often a scheduled backup runs. `EveryWeek` and `EveryMonth` also need the day to be given, while\r\n`EveryDay` does not.",
         "x-enum-type": "integer"
       },
-      "BackupProgress": {
+      "BackupProgressDto": {
         "type": "object",
         "properties": {
           "isCompleted": {
@@ -2005,8 +1998,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The BackupProgress object returned by the operation.",
-            "$ref": "#/components/schemas/BackupProgress"
+            "description": "The BackupProgressDto object returned by the operation.",
+            "$ref": "#/components/schemas/BackupProgressDto"
           },
           "count": {
             "type": "integer",
@@ -2041,114 +2034,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the BackupProgress object."
-      },
-      "BackupRestoreDto": {
-        "required": [
-          "backupId"
-        ],
-        "type": "object",
-        "properties": {
-          "backupId": {
-            "examples": [
-              "11111111-1111-1111-1111-111111111111"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The ID of the backup to restore from, as listed by `GET api/2.0/backup/getbackuphistory`. Send\r\nanything that is not a GUID to restore from a file given by `storageParams` instead; an all-zero GUID\r\nselects neither, because it parses as a GUID and then matches no record."
-          },
-          "storageType": {
-            "description": "The storage the archive is read from. It defaults to `Documents` and is only used when `backupId` is\r\nnot a GUID, because a known backup carries the storage of its own record.",
-            "$ref": "#/components/schemas/BackupStorageType"
-          },
-          "storageParams": {
-            "examples": [
-              [
-                {
-                  "key": "filePath",
-                  "value": "1234"
-                }
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
-              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
-            },
-            "description": "The location of the archive, as an array of key and value pairs. The key read here is `filePath` -\r\nnot the `folderId` a backup is started with - and it holds a file ID for `Documents`, a\r\nprovider-specific file ID for `ThridpartyDocuments` and a path on the server for `Local`. It is only\r\nused when `backupId` is not a GUID."
-          },
-          "notify": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Chooses who is emailed when the restoring starts and when it finishes: every active user of the\r\nportal when true, and its owner alone when false. Mail goes only to accounts that have been\r\nactivated, so this decides the audience rather than whether anybody is notified at all."
-          },
-          "dump": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Restores the whole server rather than this one portal. It requires the space access permission."
-          }
-        },
-        "description": "The request parameters for restoring a portal from a backup."
-      },
-      "BackupScheduleDto": {
-        "type": "object",
-        "properties": {
-          "storageType": {
-            "description": "The storage the scheduled archives are written to. It defaults to `Documents`, and it decides which\r\nkeys `storageParams` has to carry.",
-            "$ref": "#/components/schemas/BackupStorageType"
-          },
-          "storageParams": {
-            "examples": [
-              [
-                {
-                  "key": "folderId",
-                  "value": "1234"
-                }
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
-              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
-            },
-            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` and\r\n`ThridpartyDocuments` need `folderId`, `Local` needs `filePath`, `ThirdPartyConsumer` needs `module`\r\nplus the settings of that consumer, and `DataStore` needs none."
-          },
-          "backupsStored": {
-            "examples": [
-              5
-            ],
-            "type": [
-              "null",
-              "integer"
-            ],
-            "description": "The number of scheduled copies to keep, from 1 to 30. It defaults to 1, and only the copies this\r\nschedule creates are counted and removed - archives started by hand are left alone.",
-            "format": "int32"
-          },
-          "cronParams": {
-            "description": "When the backup runs. It is required: a request without it fails rather than falling back to a\r\ndefault.",
-            "$ref": "#/components/schemas/Cron"
-          },
-          "dump": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Schedules a backup of the whole server rather than of this one portal. It requires the space access\r\npermission and works on a standalone installation only."
-          }
-        },
-        "description": "The request parameters for setting the backup schedule."
+        "description": "The successful API response containing the BackupProgressDto object."
       },
       "BackupServiceStateDto": {
         "type": "object",
@@ -2355,36 +2241,58 @@
         },
         "description": "The successful API response containing the boolean value."
       },
-      "Cron": {
+      "CreateBackupScheduleRequestDto": {
         "type": "object",
         "properties": {
-          "period": {
-            "description": "How often the backup runs: `EveryDay`, `EveryWeek` or `EveryMonth`. It defaults to `EveryDay`.",
-            "$ref": "#/components/schemas/BackupPeriod"
+          "storageType": {
+            "description": "The storage the scheduled archives are written to. It defaults to `Documents`, and it decides which\r\nkeys `storageParams` has to carry.",
+            "$ref": "#/components/schemas/BackupStorageType"
           },
-          "hour": {
+          "storageParams": {
             "examples": [
-              2
+              [
+                {
+                  "key": "folderId",
+                  "value": "1234"
+                }
+              ]
             ],
-            "type": "integer",
-            "description": "The hour of the day the backup starts at, from 0 to 23. Minutes cannot be chosen - it always starts\r\non the hour.",
-            "format": "int32"
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` and\r\n`ThridpartyDocuments` need `folderId`, `Local` needs `filePath`, `ThirdPartyConsumer` needs `module`\r\nplus the settings of that consumer, and `DataStore` needs none."
           },
-          "day": {
+          "backupsStored": {
             "examples": [
-              1
+              5
             ],
             "type": [
               "null",
               "integer"
             ],
-            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the\r\nday of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is\r\nstored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent\r\nwithout it fails.",
+            "description": "The number of scheduled copies to keep, from 1 to 30. It defaults to 1, and only the copies this\r\nschedule creates are counted and removed - archives started by hand are left alone.",
             "format": "int32"
+          },
+          "cronParams": {
+            "description": "When the backup runs. It is required: a request without it fails rather than falling back to a\r\ndefault.",
+            "$ref": "#/components/schemas/BackupCronRequest"
+          },
+          "dump": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Schedules a backup of the whole server rather than of this one portal. It requires the space access\r\npermission and works on a standalone installation only."
           }
         },
-        "description": "The request parameters for the time the scheduled backup runs."
+        "description": "The request parameters for setting the backup schedule."
       },
-      "CronParams": {
+      "CronParamsDto": {
         "type": "object",
         "properties": {
           "period": {
@@ -2580,7 +2488,7 @@
           },
           "cronParams": {
             "description": "When the backup runs, read back from the stored cron expression. `day` is 0 for a daily schedule,\r\nbecause a daily one has no day.",
-            "$ref": "#/components/schemas/CronParams"
+            "$ref": "#/components/schemas/CronParamsDto"
           },
           "backupsStored": {
             "examples": [
@@ -2652,6 +2560,98 @@
           }
         },
         "description": "The successful API response containing the ScheduleDto object."
+      },
+      "StartBackupRequestDto": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "description": "The storage the archive is written to. It defaults to `Documents`, and it decides which keys\r\n`storageParams` has to carry.",
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "examples": [
+              [
+                {
+                  "key": "folderId",
+                  "value": "1234"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` needs an integer\r\n`folderId`, `ThridpartyDocuments` a provider-specific non-integer `folderId`, `Local` a `filePath`,\r\n`ThirdPartyConsumer` a `module` plus the settings of that consumer, and `DataStore` none. The\r\n`subdir` key is added by the operation itself and must not be sent."
+          },
+          "dump": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Backs up the whole server rather than this one portal. It requires the space access permission and\r\nworks on a standalone installation only."
+          }
+        },
+        "description": "The request parameters for starting a backup."
+      },
+      "StartBackupRestoreRequestDto": {
+        "required": [
+          "backupId"
+        ],
+        "type": "object",
+        "properties": {
+          "backupId": {
+            "examples": [
+              "11111111-1111-1111-1111-111111111111"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The ID of the backup to restore from, as listed by `GET api/2.0/backup/getbackuphistory`. Send\r\nanything that is not a GUID to restore from a file given by `storageParams` instead; an all-zero GUID\r\nselects neither, because it parses as a GUID and then matches no record."
+          },
+          "storageType": {
+            "description": "The storage the archive is read from. It defaults to `Documents` and is only used when `backupId` is\r\nnot a GUID, because a known backup carries the storage of its own record.",
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "examples": [
+              [
+                {
+                  "key": "filePath",
+                  "value": "1234"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The location of the archive, as an array of key and value pairs. The key read here is `filePath` -\r\nnot the `folderId` a backup is started with - and it holds a file ID for `Documents`, a\r\nprovider-specific file ID for `ThridpartyDocuments` and a path on the server for `Local`. It is only\r\nused when `backupId` is not a GUID."
+          },
+          "notify": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Chooses who is emailed when the restoring starts and when it finishes: every active user of the\r\nportal when true, and its owner alone when false. Mail goes only to accounts that have been\r\nactivated, so this decides the audience rather than whether anybody is notified at all."
+          },
+          "dump": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Restores the whole server rather than this one portal. It requires the space access permission."
+          }
+        },
+        "description": "The request parameters for restoring a portal from a backup."
       }
     },
     "headers": {

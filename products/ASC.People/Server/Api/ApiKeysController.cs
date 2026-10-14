@@ -238,6 +238,7 @@ public class ApiKeysController(
     /// an already expired key returns, because such a key is left untouched instead of being reported as an error.
     /// Deactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it
     /// when the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.
+    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
     /// </remarks>
     /// <summary>
     /// Update an API key
@@ -247,13 +248,13 @@ public class ApiKeysController(
     [SwaggerResponse(200, "True if the key was changed, false if it was left untouched because it has already expired", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
-    [SwaggerResponse(500, "The portal has no key with this ID")]
+    [SwaggerResponse(404, "The portal has no key with this ID")]
     [HttpPut("{keyId:guid}")]
     public async Task<bool> UpdateApiKey(UpdateApiKeyRequestDto requestDto)
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
-        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
+        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId) ?? throw new ItemNotFoundException("API key not found");
 
         if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
         {

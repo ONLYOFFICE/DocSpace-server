@@ -159,6 +159,106 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    [Trait("Bug", "84406")]
+    public async Task ReplaceAll_RemovesToolPrefsOfDroppedServers()
+    {
+        await CreateMcpServerAsync("kept");
+        await CreateMcpServerAsync("dropped");
+
+        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        {
+            ["kept"] = ["t"],
+            ["dropped"] = ["t"],
+            [SystemToolsServerType] = ["search"]
+        });
+        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        {
+            ["kept"] = ["t"],
+            ["dropped"] = ["t"],
+            [SystemToolsServerType] = ["preview"]
+        });
+
+        using var response = await _ai.PutAsync(
+            McpServersPath,
+            new
+            {
+                servers = new Dictionary<string, string>
+                {
+                    ["kept"] = BuildMcpConfig()
+                }
+            },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var stored = await ReadToolPrefsAsync();
+        stored.Should().NotContainKey("dropped");
+        stored["kept"].Disabled.Should().BeEquivalentTo(["t"]);
+        stored["kept"].AllowAlways.Should().BeEquivalentTo(["t"]);
+        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
+        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+
+        await CreateMcpServerAsync("dropped");
+
+        (await ReadToolPrefsAsync()).Should().NotContainKey("dropped");
+    }
+
+    [Fact]
+    [Trait("Bug", "84406")]
+    public async Task ReplaceAll_WithEntityId_RemovesOnlyScopedToolPrefsOfDroppedServers()
+    {
+        var roomId = await CreateRoomAsync();
+        var entityId = roomId.ToString();
+
+        await CreateMcpServerAsync("dropped");
+        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        {
+            ["dropped"] = ["global-tool"]
+        });
+
+        await CreateMcpServerAsync("kept", entityId: entityId);
+        await CreateMcpServerAsync("dropped", entityId: entityId);
+        await UpsertDisabledToolPrefsAsync(
+            new Dictionary<string, HashSet<string>>
+            {
+                ["kept"] = ["t"],
+                ["dropped"] = ["t"]
+            },
+            entityId);
+        await UpsertAllowAlwaysToolPrefsAsync(
+            new Dictionary<string, HashSet<string>>
+            {
+                ["kept"] = ["t"],
+                ["dropped"] = ["t"]
+            },
+            entityId);
+
+        using var response = await _ai.PutAsync(
+            McpServersPath,
+            new
+            {
+                servers = new Dictionary<string, string>
+                {
+                    ["kept"] = BuildMcpConfig()
+                },
+                entityId
+            },
+            TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var scoped = await ReadToolPrefsAsync(entityId);
+        scoped.Should().NotContainKey("dropped");
+        scoped["kept"].Disabled.Should().BeEquivalentTo(["t"]);
+        scoped["kept"].AllowAlways.Should().BeEquivalentTo(["t"]);
+
+        var global = await ReadToolPrefsAsync();
+        global["dropped"].AllowAlways.Should().BeEquivalentTo(["global-tool"]);
+
+        await CreateMcpServerAsync("dropped", entityId: entityId);
+
+        (await ReadToolPrefsAsync(entityId)).Should().NotContainKey("dropped");
+    }
+
+    [Fact]
     public async Task ReplaceAll_NonExistentEntityId_Returns404()
     {
         using var response = await _ai.PutAsync(
