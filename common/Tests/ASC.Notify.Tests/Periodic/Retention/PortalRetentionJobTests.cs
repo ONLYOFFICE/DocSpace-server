@@ -239,6 +239,149 @@ public class PortalRetentionJobTests
     }
 
     [Fact]
+    public async Task Run_ThatCouldNotDecideAPortal_LeavesItsDaysToTheNext()
+    {
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope);
+
+        // Unreachable on the first night, answers on the second.
+        bool[] answers = [false, true];
+        var asked = 0;
+
+        var (tariffService, accounting) = WithAccounting(scope, (_, _) =>
+            answers[asked++] ? Task.FromResult(EmptyBalance()) : throw new HttpRequestException("Connection refused"));
+
+        await using var accountingServices = accounting;
+
+        var saved = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        try
+        {
+            await settingsManager.SaveForDefaultTenantAsync(new PortalRetentionPolicyStartSettings { StartedOn = _policyStart, LastRunOn = _today.AddDays(-2) });
+
+            // Yesterday the portal was due its first warning, but its balance could not be read.
+            var yesterday = _today.AddDays(-1);
+            var logger = new RecordingLogger<PortalRetentionJob>();
+            var client = new RecordingNotifyClient();
+            var job = CreateJob(scope, logger, tariffService: tariffService);
+
+            var (_, lastRunOn) = await job.BeginRunAsync(yesterday);
+
+            await job.ApplyAsync(Free(tenant, _today.AddDays(-31)) with { NowDate = yesterday }, _policyStart, client, _senderName, lastRunOn);
+            await job.EndRunAsync(yesterday);
+
+            client.Sent.Should().BeEmpty();
+            logger.Messages.Should().ContainSingle(m => m.Contains("did not get through every portal"));
+            (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn
+                .Should().Be(_today.AddDays(-2), "a run that left a portal waiting does not count as got through");
+
+            // Today's run covers yesterday again, and the warning goes out a day late.
+            logger = new RecordingLogger<PortalRetentionJob>();
+            client = new RecordingNotifyClient();
+            job = CreateJob(scope, logger, tariffService: tariffService);
+
+            (_, lastRunOn) = await job.BeginRunAsync(_today);
+
+            await job.ApplyAsync(Free(tenant, _today.AddDays(-31)), _policyStart, client, _senderName, lastRunOn);
+            await job.EndRunAsync(_today);
+
+            logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), string.Join(" | ", logger.Messages));
+            client.Sent.Should().ContainSingle();
+            (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn.Should().Be(_today);
+        }
+        finally
+        {
+            await settingsManager.SaveForDefaultTenantAsync(saved);
+        }
+    }
+
+    [Fact]
+    public async Task Run_ThatFailedOnAPortal_LeavesItsDaysToTheNext()
+    {
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var job = CreateJob(scope, logger);
+
+        var failing = Free(InMemoryTenant(scope), _today.AddDays(-30)) with
+        {
+            LastActivity = new Lazy<Task<PortalActivity>>(() => throw new InvalidOperationException("The audit trail could not be read"))
+        };
+
+        var saved = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        try
+        {
+            await settingsManager.SaveForDefaultTenantAsync(new PortalRetentionPolicyStartSettings { StartedOn = _policyStart, LastRunOn = _today.AddDays(-1) });
+
+            var (_, lastRunOn) = await job.BeginRunAsync(_today);
+
+            // The caller logs the failure and goes on to the next portal.
+            await Assert.ThrowsAsync<InvalidOperationException>(() => job.ApplyAsync(failing, _policyStart, new RecordingNotifyClient(), _senderName, lastRunOn));
+
+            await job.EndRunAsync(_today);
+
+            (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn
+                .Should().Be(_today.AddDays(-1), "the next run covers today again");
+        }
+        finally
+        {
+            await settingsManager.SaveForDefaultTenantAsync(saved);
+        }
+    }
+
+    [Fact]
+    public async Task Warning_SentByARunThatDidNotGetThrough_IsNotSentAgain()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+
+        var first = new RecordingNotifyClient();
+
+        await CreateJob(scope, new RecordingLogger<PortalRetentionJob>()).ApplyAsync(Free(tenant, _today.AddDays(-30)), _policyStart, first, _senderName);
+
+        first.Sent.Should().ContainSingle("the first warning is due today");
+
+        // The run did not get through, so the next one covers today again.
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var again = new RecordingNotifyClient();
+
+        await CreateJob(scope, logger).ApplyAsync(Free(tenant, _today.AddDays(-30)), _policyStart, again, _senderName);
+
+        logger.Messages.Should().BeEmpty();
+        again.Sent.Should().BeEmpty("the warning kept with the portal covers its day");
+    }
+
+    [Fact]
+    public async Task EarlyDeletionNotice_SentByARunThatDidNotGetThrough_IsNotSentAgain()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+
+        // Blocked sixty days ago after its tariff lapsed: thirty days before its deletion, the early reminder is due.
+        var tenant = InMemoryTenant(scope, TenantStatus.Blocked, _today.AddDays(-60), portal.TenantId);
+        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(tenant, _today), _today.AddDays(-150));
+
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var first = new RecordingNotifyClient();
+
+        await CreateJob(scope, logger).ApplyAsync(context, _policyStart, first, _senderName);
+
+        logger.Messages.Should().ContainSingle(m => m.Contains("FormerPaying: Notify EarlyDeletionNotice"), string.Join(" | ", logger.Messages));
+        first.Sent.Should().ContainSingle();
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id)).EarlyNoticeSentOn.Should().Be(_today);
+
+        var again = new RecordingNotifyClient();
+
+        await CreateJob(scope, new RecordingLogger<PortalRetentionJob>()).ApplyAsync(context, _policyStart, again, _senderName);
+
+        again.Sent.Should().BeEmpty("the reminder kept with the portal covers its day");
+    }
+
+    [Fact]
     public async Task FormerPayingPortal_CountsFromTheDueDate()
     {
         using var scope = await OpenScopeAsync();

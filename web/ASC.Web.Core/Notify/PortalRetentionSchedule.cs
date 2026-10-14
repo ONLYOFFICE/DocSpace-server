@@ -217,7 +217,7 @@ public class PortalRetentionConfiguration(IConfiguration configuration)
 /// <summary>
 /// Decides what happens to an unused portal today. It keeps no state of its own: the caller hands it
 /// what is stored - the day the count starts, for an active portal its last warning, for a blocked portal
-/// the day its status changed and the day its last reminder went out, and the last day the job got through.
+/// the day its status changed and the days its reminders went out, and the last day the job got through.
 /// </summary>
 /// <remarks>
 /// A portal is never blocked earlier than the day its last warning named, nor without a warning naming
@@ -229,7 +229,9 @@ public class PortalRetentionConfiguration(IConfiguration configuration)
 /// is always told, and the deletion is counted from the block, so the whole retention period lies
 /// between that letter and the deletion. A warning or a reminder is sent on the first run after its day:
 /// a run covers every day since the last one the job got through, and when several letters fall into
-/// those days only the latest goes out, since it says everything the earlier ones would have. The last
+/// those days only the latest goes out, since it says everything the earlier ones would have. A letter
+/// already sent is not sent again when a run covers its day once more - a run that failed halfway, or
+/// for one portal, leaves the days it covered to the next one. The last
 /// reminder before the deletion is never skipped: a portal is deleted only once it has gone out, a full
 /// notice period earlier, and one sent late moves the deletion back by as much. A warning due before the
 /// policy could see the portal at all - a lapsed tariff still in its grace period - goes out on the
@@ -274,7 +276,9 @@ public static class PortalRetentionSchedule
             return BlockOrWarn(schedule, start, today, lastWarning);
         }
 
-        var letter = WarningFor(schedule, start, noticesFrom.Date, today, CoveredFrom(lastRunOn, today));
+        // A warning of this count already sent covers its own day and the days before it.
+        var warnedOn = lastWarning is { } warning && warning.SentOn.Date > start ? warning.SentOn.Date : DateTime.MinValue;
+        var letter = WarningFor(schedule, start, noticesFrom.Date, today, Later(CoveredFrom(lastRunOn, today), warnedOn));
 
         return letter.HasValue
             ? new PortalRetentionDecision(PortalRetentionStep.Notify, letter, blockOn, deleteOn)
@@ -292,12 +296,16 @@ public static class PortalRetentionSchedule
     /// <param name="finalNoticeSentOn">
     /// The day the last reminder before the deletion went out, or null while it has not.
     /// </param>
-    public static PortalRetentionDecision DecideBlocked(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime today, DateTime? lastRunOn = null, DateTime? finalNoticeSentOn = null)
+    /// <param name="earlyNoticeSentOn">
+    /// The day the early reminder before the deletion went out, or null while it has not.
+    /// </param>
+    public static PortalRetentionDecision DecideBlocked(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime today, DateTime? lastRunOn = null, DateTime? finalNoticeSentOn = null, DateTime? earlyNoticeSentOn = null)
     {
         blockedOn = blockedOn.Date;
         today = today.Date;
 
-        var coveredFrom = CoveredFrom(lastRunOn, today);
+        // The early reminder goes out once, however many runs cover its day.
+        var coveredFrom = earlyNoticeSentOn.HasValue ? DateTime.MaxValue : CoveredFrom(lastRunOn, today);
         var deleteOn = blockedOn.AddDays(schedule.RetentionDays);
         var noticeDays = schedule.FinalDeletionNoticeDays;
 
@@ -343,6 +351,11 @@ public static class PortalRetentionSchedule
     private static DateTime CoveredFrom(DateTime? lastRunOn, DateTime today)
     {
         return lastRunOn?.Date ?? today.AddDays(-1);
+    }
+
+    private static DateTime Later(DateTime first, DateTime second)
+    {
+        return first > second ? first : second;
     }
 
     /// <summary>

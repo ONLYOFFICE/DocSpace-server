@@ -147,7 +147,8 @@ public class StudioPeriodicNotify(
             }
         }
 
-        // Only once every portal has been through it: a run that stops halfway is covered again by the next.
+        // Only once every portal has been through it: a run that stops halfway, or fails a portal, is covered
+        // again by the next.
         await portalRetentionJob.EndRunAsync(nowDate);
 
         _log.InformationEndSendSaasTariffLetters();

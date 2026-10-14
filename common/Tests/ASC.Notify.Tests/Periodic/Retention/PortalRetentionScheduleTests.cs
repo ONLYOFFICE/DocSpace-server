@@ -57,10 +57,10 @@ public class PortalRetentionScheduleTests
     }
 
     /// <summary>A day of the blocked part, with the day the last reminder went out if it has.</summary>
-    private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock, int? finalNoticeDay = null, int? lastRunDay = null)
+    private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock, int? finalNoticeDay = null, int? lastRunDay = null, int? earlyNoticeDay = null)
     {
         return PortalRetentionSchedule.DecideBlocked(_options.For(category), _start, _start.AddDays(dayAfterBlock),
-            lastRunOn: DayOrNull(lastRunDay), finalNoticeSentOn: DayOrNull(finalNoticeDay));
+            lastRunOn: DayOrNull(lastRunDay), finalNoticeSentOn: DayOrNull(finalNoticeDay), earlyNoticeSentOn: DayOrNull(earlyNoticeDay));
     }
 
     private static DateTime? DayOrNull(int? day)
@@ -271,6 +271,29 @@ public class PortalRetentionScheduleTests
     }
 
     [Fact]
+    public void Warning_SentByARunThatDidNotGetThrough_IsNotSentAgain()
+    {
+        var firstSent = new PortalRetentionWarning(_start.AddDays(30), _start.AddDays(60));
+
+        Active(PortalRetentionCategory.Free, 31, lastRunDay: 28, lastWarning: firstSent).Step.Should().Be(PortalRetentionStep.None,
+            "the run of day 30 sent it, it only did not get through every portal");
+
+        var secondSent = new PortalRetentionWarning(_start.AddDays(60), _start.AddDays(90));
+
+        Active(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 55, lastWarning: secondSent).Step.Should().Be(PortalRetentionStep.None);
+        Active(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 55, lastWarning: firstSent).Letter.Should().Be(PortalRetentionLetter.SecondNotice,
+            "a warning sent earlier does not cover the days after it");
+    }
+
+    [Fact]
+    public void Warning_OfAnEarlierCount_DoesNotCoverTheDaysOfThisOne()
+    {
+        var earlierCount = new PortalRetentionWarning(_start.AddDays(-5), _start.AddDays(25));
+
+        Active(PortalRetentionCategory.Free, 31, lastRunDay: 28, lastWarning: earlierCount).Letter.Should().Be(PortalRetentionLetter.FirstNotice);
+    }
+
+    [Fact]
     public void Warnings_SeveralMissed_OnlyTheLatestIsSent()
     {
         Active(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 25).Letter.Should().Be(PortalRetentionLetter.SecondNotice);
@@ -286,6 +309,13 @@ public class PortalRetentionScheduleTests
 
         Blocked(PortalRetentionCategory.Free, 37, finalNoticeDay: 31).Step.Should().Be(PortalRetentionStep.None);
         Blocked(PortalRetentionCategory.Free, 38, finalNoticeDay: 31).Step.Should().Be(PortalRetentionStep.Delete);
+    }
+
+    [Fact]
+    public void EarlyNotice_SentByARunThatDidNotGetThrough_IsNotSentAgain()
+    {
+        Blocked(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 58).Letter.Should().Be(PortalRetentionLetter.EarlyDeletionNotice, "it is due on day 60");
+        Blocked(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 58, earlyNoticeDay: 60).Step.Should().Be(PortalRetentionStep.None);
     }
 
     [Fact]

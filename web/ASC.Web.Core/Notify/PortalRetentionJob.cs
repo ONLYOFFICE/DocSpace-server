@@ -38,7 +38,7 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
 /// removes it when that is the answer. Stored per portal (<see cref="PortalRetentionSettings"/>) is
 /// only what the schedule cannot read anywhere else: while it is active, its last warning and its last
-/// sign-in; once it is blocked, the category it was blocked under and the day of its last reminder.
+/// sign-in; once it is blocked, the category it was blocked under and the days of its reminders.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -56,8 +56,9 @@ public class PortalRetentionJob(
     IServiceProvider serviceProvider)
 {
     /// <summary>
-    /// How many days back a run looks for letters it has not sent. After a longer stop the older warnings
-    /// are not worth a pile of letters at once; the last reminder before a deletion is never lost to it.
+    /// How many days back a run looks for letters it has not sent. After a longer stop - or a run after run
+    /// that could not get through every portal - the older warnings are not worth a pile of letters at once;
+    /// the last reminder before a deletion is never lost to it.
     /// </summary>
     private const int MaxCatchUpDays = 7;
 
@@ -74,12 +75,20 @@ public class PortalRetentionJob(
     private int _balanceFailures;
 
     /// <summary>
+    /// Whether a portal of this run had something due that it could not be given - its balance was unknown,
+    /// or applying the policy failed - so the run must not count as got through; see <see cref="EndRunAsync"/>.
+    /// </summary>
+    private bool _incomplete;
+
+    /// <summary>
     /// Opens the daily run: the day the policy started counting in this installation, stamped on the
     /// first run, and the last day a run got through, after which this one sends the letters.
     /// </summary>
     public async Task<(DateTime PolicyStart, DateTime? LastRunOn)> BeginRunAsync(DateTime today)
     {
         today = today.Date;
+        _balanceFailures = 0;
+        _incomplete = false;
 
         var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
 
@@ -111,11 +120,19 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// Closes the daily run once every portal has been through it. A run that stops halfway leaves the
-    /// mark where it was, so the next one sends again what it could not.
+    /// Closes the daily run once every portal has been through it. A run that stops halfway, or that left a
+    /// portal waiting for a letter it could not send, leaves the mark where it was, so the next one sends
+    /// what it could not; what was sent is kept with each portal and not sent again.
     /// </summary>
     public async Task EndRunAsync(DateTime today)
     {
+        if (_incomplete)
+        {
+            logger.WarningRunIncomplete(today.Date);
+
+            return;
+        }
+
         var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
 
         settings.LastRunOn = today.Date;
@@ -129,6 +146,21 @@ public class PortalRetentionJob(
     /// <paramref name="lastRunOn"/> (<see cref="BeginRunAsync"/>) are this run's; null means yesterday.
     /// </summary>
     public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn = null)
+    {
+        try
+        {
+            return await ApplyToPortalAsync(context, policyStart, client, senderName, lastRunOn);
+        }
+        catch
+        {
+            // The caller logs it and goes on to the next portal; the days of this run stay to be covered again.
+            _incomplete = true;
+
+            throw;
+        }
+    }
+
+    private async Task<bool> ApplyToPortalAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn)
     {
         var blocked = context.Tenant.Status == TenantStatus.Blocked;
         var formerPaying = !context.Quota.Free && context.Tariff.State == TariffState.NotPaid && context.DueDateIsNotMax;
@@ -158,7 +190,7 @@ public class PortalRetentionJob(
         var blockedOn = context.Tenant.StatusChangeDate;
 
         PortalRetentionDecision Decide(PortalRetentionCategory category) =>
-            PortalRetentionSchedule.DecideBlocked(Options.For(category), blockedOn, context.NowDate, lastRunOn, kept.FinalNoticeSentOn);
+            PortalRetentionSchedule.DecideBlocked(Options.For(category), blockedOn, context.NowDate, lastRunOn, kept.FinalNoticeSentOn, kept.EarlyNoticeSentOn);
 
         // A blocked portal keeps the category it was blocked under: the letter about the block named the
         // deletion date of that category, and a balance that changes afterwards must not bring it forward.
@@ -246,7 +278,10 @@ public class PortalRetentionJob(
 
         if (await HasPositiveBalanceAsync(tenant) is not { } hasBalance)
         {
-            // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow.
+            // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow, and
+            // have tomorrow's run cover today again.
+            _incomplete = true;
+
             return null;
         }
 
@@ -315,7 +350,8 @@ public class PortalRetentionJob(
 
     /// <summary>
     /// Carries out the decision of the day, and keeps with the portal what the next days depend on: the
-    /// day a warning named for the block, the day the last reminder before the deletion went out.
+    /// day a warning went out and the day it named for the block, the days the reminders before the
+    /// deletion went out.
     /// </summary>
     private async Task ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, PortalRetentionSettings kept)
     {
@@ -333,6 +369,9 @@ public class PortalRetentionJob(
                     // The block waits for the day this warning names.
                     PortalRetentionLetter.FirstNotice or PortalRetentionLetter.SecondNotice or PortalRetentionLetter.MonthlyNotice =>
                         kept with { LastWarning = new PortalRetentionWarning(context.NowDate, decision.BlockOn) },
+
+                    // Sent once, however many runs cover its day.
+                    PortalRetentionLetter.EarlyDeletionNotice => kept with { Category = category, EarlyNoticeSentOn = context.NowDate },
 
                     // The deletion waits a full notice period after this reminder.
                     PortalRetentionLetter.FinalDeletionNotice => kept with { Category = category, FinalNoticeSentOn = context.NowDate },
