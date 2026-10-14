@@ -67,16 +67,13 @@ export async function resolveCustomServers(
   options?: { strict?: boolean },
 ): Promise<Record<string, McpHttpServerConfig>> {
   // A failed read is tolerated so a round still runs with whatever servers
-  // could be resolved. A settings write must not: with `strict`, the AI
-  // service's 401/403 (Guest, AI disabled) is rethrown instead of leaving the
-  // registered names out of the valid set, which turned the refusal into a
-  // 400 "unknown serverType" (Bugs 84400, 84401).
+  // could be resolved. A settings write must not: with `strict`, any failure
+  // is rethrown instead of leaving the registered names out of the valid
+  // set, which turned a refusal (Guest, AI disabled: Bugs 84400, 84401) or a
+  // passing upstream outage into a 400 "unknown serverType". Only a 404 —
+  // nothing stored for the scope — still reads as an empty map.
   const tolerate = (what: string) => (err: unknown) => {
-    if (
-      options?.strict
-      && err instanceof AiServiceHttpError
-      && (err.status === 401 || err.status === 403)
-    ) {
+    if (options?.strict && !(err instanceof AiServiceHttpError && err.status === 404)) {
       throw err;
     }
     logger.warn(
