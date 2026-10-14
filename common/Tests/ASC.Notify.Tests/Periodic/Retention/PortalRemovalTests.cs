@@ -39,18 +39,10 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 /// </summary>
 public class PortalRemovalTests
 {
-    private static async ValueTask<LetterStackFixture> GetStackAsync()
-    {
-        return await TestContext.Current.GetFixture<LetterStackFixture>()
-            ?? throw new InvalidOperationException(
-                $"No stack in the test context. {nameof(LetterStackFixture)} is registered with "
-                + "[assembly: AssemblyFixture] and starts before any letter test runs.");
-    }
-
     [Fact]
     public async Task Removal_WhoseLettersFail_StillStartsThePurge()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
 
         using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
         using var scope = stack.Host.CreateScope();

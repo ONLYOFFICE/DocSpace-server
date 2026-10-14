@@ -48,6 +48,15 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// </remarks>
 public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 {
+    /// <summary>The stack of the running test, which the assembly starts before any letter test runs.</summary>
+    public static async ValueTask<LetterStackFixture> CurrentAsync()
+    {
+        return await TestContext.Current.GetFixture<LetterStackFixture>()
+            ?? throw new InvalidOperationException(
+                $"No stack in the test context. {nameof(LetterStackFixture)} is registered with "
+                + "[assembly: AssemblyFixture] and starts before any letter test runs.");
+    }
+
     private static readonly JsonSerializerOptions _apiSystemJsonOptions = new(JsonSerializerDefaults.Web);
 
     private MailPitInbox? _inbox;

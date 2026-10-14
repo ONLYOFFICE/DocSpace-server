@@ -128,6 +128,17 @@ internal static class PeriodicLetterContexts
         };
     }
 
+    /// <summary>A free portal last used on <paramref name="lastActivity"/>, looked at on <paramref name="today"/>.</summary>
+    public static PeriodicLetterContext Free(Tenant tenant, DateTime today, DateTime lastActivity)
+    {
+        return Fresh(tenant, today) with
+        {
+            Quota = Quota(free: true),
+            Tariff = new Tariff { Quotas = [], State = TariffState.Paid, DueDate = DateTime.MaxValue, DelayDueDate = DateTime.MaxValue },
+            LastActivity = Activity(lastActivity)
+        };
+    }
+
     /// <summary>A portal whose paid tariff lapsed on <paramref name="due"/> and was never renewed.</summary>
     public static PeriodicLetterContext Lapsed(PeriodicLetterContext context, DateTime due)
     {

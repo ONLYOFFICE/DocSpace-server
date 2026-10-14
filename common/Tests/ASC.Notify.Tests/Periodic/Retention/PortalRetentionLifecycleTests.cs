@@ -42,14 +42,6 @@ public class PortalRetentionLifecycleTests
 {
     private static readonly string _senderName = ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;
 
-    private static async ValueTask<LetterStackFixture> GetStackAsync()
-    {
-        return await TestContext.Current.GetFixture<LetterStackFixture>()
-            ?? throw new InvalidOperationException(
-                $"No stack in the test context. {nameof(LetterStackFixture)} is registered with "
-                + "[assembly: AssemblyFixture] and starts before any letter test runs.");
-    }
-
     /// <summary>A service scope working for <paramref name="tenantId"/>, the way the daily job's is.</summary>
     private static async Task<IServiceScope> OpenScopeAsync(LetterStackFixture stack, int tenantId)
     {
@@ -59,17 +51,6 @@ public class PortalRetentionLifecycleTests
         await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(tenantId);
 
         return scope;
-    }
-
-    /// <summary>A free portal last used on <paramref name="lastActivity"/>, looked at on <paramref name="today"/>.</summary>
-    private static PeriodicLetterContext Free(Tenant tenant, DateTime today, DateTime lastActivity)
-    {
-        return PeriodicLetterContexts.Fresh(tenant, today) with
-        {
-            Quota = PeriodicLetterContexts.Quota(free: true),
-            Tariff = new Tariff { Quotas = [], State = TariffState.Paid, DueDate = DateTime.MaxValue, DelayDueDate = DateTime.MaxValue },
-            LastActivity = PeriodicLetterContexts.Activity(lastActivity)
-        };
     }
 
     /// <summary>
@@ -83,9 +64,9 @@ public class PortalRetentionLifecycleTests
         var tenant = await services.GetRequiredService<TenantManager>().GetTenantAsync(tenantId);
         var job = services.GetRequiredService<PortalRetentionJob>();
 
-        await job.ApplyAsync(Free(tenant, today.AddDays(-30), today.AddDays(-60)), today.AddYears(-1), new RecordingNotifyClient(), _senderName);
+        await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today.AddDays(-30), today.AddDays(-60)), today.AddYears(-1), new RecordingNotifyClient(), _senderName);
 
-        var leaveAlone = await job.ApplyAsync(Free(tenant, today, today.AddDays(-60)), today.AddYears(-1), client, _senderName);
+        var leaveAlone = await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today, today.AddDays(-60)), today.AddYears(-1), client, _senderName);
 
         leaveAlone.Should().BeTrue("a portal that has just been blocked gets none of the ordinary letters");
 
@@ -165,7 +146,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task BlockLetter_KeptBackByAFailure_IsSentByTheNextRun()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
@@ -180,12 +161,12 @@ public class PortalRetentionLifecycleTests
 
         var tenant = await tenantManager.GetTenantAsync(portal.TenantId);
 
-        await job.ApplyAsync(Free(tenant, today.AddDays(-30), today.AddDays(-60)), policyStart, new RecordingNotifyClient(), _senderName);
+        await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today.AddDays(-30), today.AddDays(-60)), policyStart, new RecordingNotifyClient(), _senderName);
 
         // The portal is blocked, and the letter about it fails.
         var failing = new RecordingNotifyClient { Fails = action => action is SaasOwnerRetentionBlockedNotifyAction };
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => job.ApplyAsync(Free(tenant, today, today.AddDays(-60)), policyStart, failing, _senderName));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today, today.AddDays(-60)), policyStart, failing, _senderName));
 
         (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue();
         (await settingsManager.LoadAsync<PortalRetentionSettings>(portal.TenantId)).BlockNoticeSentOn.Should().BeNull();
@@ -195,7 +176,7 @@ public class PortalRetentionLifecycleTests
 
         var client = new RecordingNotifyClient();
 
-        (await job.ApplyAsync(Free(tenant, today.AddDays(1), today.AddDays(-60)), policyStart, client, _senderName)).Should().BeTrue();
+        (await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today.AddDays(1), today.AddDays(-60)), policyStart, client, _senderName)).Should().BeTrue();
 
         client.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionBlockedNotifyAction>("the owner hears of the block before any reminder of the deletion");
@@ -204,7 +185,7 @@ public class PortalRetentionLifecycleTests
         // And only once.
         var after = new RecordingNotifyClient();
 
-        await job.ApplyAsync(Free(tenant, today.AddDays(2), today.AddDays(-60)), policyStart, after, _senderName);
+        await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, today.AddDays(2), today.AddDays(-60)), policyStart, after, _senderName);
 
         after.Sent.Should().BeEmpty();
     }
@@ -212,7 +193,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task IdlePortal_IsBlocked_StopsAnswering_AndComesBackWithTheOwnersLink()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
@@ -262,7 +243,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task UnblockLink_IsRefusedOnAPortalThatIsNotBlocked()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
@@ -285,7 +266,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task UnblockLink_OfAnotherBlock_IsRefused()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
@@ -320,7 +301,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task UnblockWithoutTheLink_IsRefused()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
@@ -335,7 +316,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task BlockedPortal_NobodyUnblocks_IsRemovedAtTheEndOfItsRetention()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
 
         using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
         using var scope = await OpenScopeAsync(stack, portal.TenantId);
@@ -348,7 +329,7 @@ public class PortalRetentionLifecycleTests
         var reminderDay = DateTime.UtcNow.Date.AddDays(23);
 
         await ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, new RecordingLogger<PortalRetentionJob>())
-            .ApplyAsync(Free(tenant, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), reminderClient, _senderName);
+            .ApplyAsync(PeriodicLetterContexts.Free(tenant, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), reminderClient, _senderName);
 
         reminderClient.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionFinalReminderNotifyAction>();
@@ -363,7 +344,7 @@ public class PortalRetentionLifecycleTests
         var logger = new RecordingLogger<PortalRetentionJob>();
         var job = ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, logger);
 
-        var leaveAlone = await job.ApplyAsync(Free(tenant, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
+        var leaveAlone = await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
 
         leaveAlone.Should().BeTrue();
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Delete"), string.Join(" | ", logger.Messages));
@@ -397,7 +378,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task BlockedPortal_UnblockedAfterTheRunReadIt_IsNotRemoved()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
 
         using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
         using var scope = await OpenScopeAsync(stack, portal.TenantId);
@@ -410,7 +391,7 @@ public class PortalRetentionLifecycleTests
         var reminderDay = DateTime.UtcNow.Date.AddDays(23);
 
         await ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, new RecordingLogger<PortalRetentionJob>())
-            .ApplyAsync(Free(blocked, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), new RecordingNotifyClient(), _senderName);
+            .ApplyAsync(PeriodicLetterContexts.Free(blocked, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), new RecordingNotifyClient(), _senderName);
 
         // Brought back while the run still holds the portal as it found it: blocked, and with the reminder on
         // record, as the run had read it before the unblocking.
@@ -425,7 +406,7 @@ public class PortalRetentionLifecycleTests
         var logger = new RecordingLogger<PortalRetentionJob>();
         var job = ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, logger);
 
-        await job.ApplyAsync(Free(blocked, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
+        await job.ApplyAsync(PeriodicLetterContexts.Free(blocked, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
 
         logger.Messages.Should().Contain(m => m.Contains("Free: Delete"), "the portal it was handed is due for deletion");
         logger.Messages.Should().Contain(m => m.Contains("is not removed"), string.Join(" | ", logger.Messages));
@@ -438,7 +419,7 @@ public class PortalRetentionLifecycleTests
     [Fact]
     public async Task BlockedPortal_KeepsTheRetentionOfItsBlock_WhenItsWalletEmpties()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
 
         using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
         using var scope = await OpenScopeAsync(stack, portal.TenantId);
@@ -460,7 +441,7 @@ public class PortalRetentionLifecycleTests
         var logger = new RecordingLogger<PortalRetentionJob>();
         var job = ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, logger);
 
-        var leaveAlone = await job.ApplyAsync(Free(tenant, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
+        var leaveAlone = await job.ApplyAsync(PeriodicLetterContexts.Free(tenant, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
 
         leaveAlone.Should().BeTrue("a blocked portal gets none of the ordinary letters");
         logger.Messages.Should().BeEmpty("thirty days into a ninety-day retention is not a day of its schedule");

@@ -40,18 +40,10 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 /// </summary>
 public class PortalRetentionTenantQueryTests
 {
-    private static async ValueTask<LetterStackFixture> GetStackAsync()
-    {
-        return await TestContext.Current.GetFixture<LetterStackFixture>()
-            ?? throw new InvalidOperationException(
-                $"No stack in the test context. {nameof(LetterStackFixture)} is registered with "
-                + "[assembly: AssemblyFixture] and starts before any letter test runs.");
-    }
-
     [Fact]
     public async Task TenantsByStatus_ReturnsThePortalsInTheGivenStates()
     {
-        var stack = await GetStackAsync();
+        var stack = await LetterStackFixture.CurrentAsync();
 
         using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
 
