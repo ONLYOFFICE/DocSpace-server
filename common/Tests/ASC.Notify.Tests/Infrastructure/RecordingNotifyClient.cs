@@ -42,8 +42,16 @@ internal sealed class RecordingNotifyClient : INotifyClient
 {
     public List<(INotifyAction Action, IRecipient Recipient)> Sent { get; } = [];
 
+    /// <summary>The letters whose sending fails, for a case about what a failure leaves behind.</summary>
+    public Func<INotifyAction, bool>? Fails { get; init; }
+
     public Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames)
     {
+        if (Fails?.Invoke(action) == true)
+        {
+            throw new InvalidOperationException($"Sending {action.ID} failed, as the case asked.");
+        }
+
         Sent.Add((action, recipient));
 
         return Task.CompletedTask;

@@ -163,6 +163,53 @@ public class PortalRetentionLifecycleTests
     }
 
     [Fact]
+    public async Task BlockLetter_KeptBackByAFailure_IsSentByTheNextRun()
+    {
+        var stack = await GetStackAsync();
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        using var portal = await stack.CreatePortalAsync(cancellationToken);
+        using var scope = await OpenScopeAsync(stack, portal.TenantId);
+
+        var services = scope.ServiceProvider;
+        var tenantManager = services.GetRequiredService<TenantManager>();
+        var settingsManager = services.GetRequiredService<SettingsManager>();
+        var job = services.GetRequiredService<PortalRetentionJob>();
+        var today = DateTime.UtcNow.Date;
+        var policyStart = today.AddYears(-1);
+
+        var tenant = await tenantManager.GetTenantAsync(portal.TenantId);
+
+        await job.ApplyAsync(Free(tenant, today.AddDays(-30), today.AddDays(-60)), policyStart, new RecordingNotifyClient(), _senderName);
+
+        // The portal is blocked, and the letter about it fails.
+        var failing = new RecordingNotifyClient { Fails = action => action is SaasOwnerRetentionBlockedNotifyAction };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => job.ApplyAsync(Free(tenant, today, today.AddDays(-60)), policyStart, failing, _senderName));
+
+        (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue();
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(portal.TenantId)).BlockNoticeSentOn.Should().BeNull();
+
+        // The next run sends it, and keeps the day it did.
+        tenant = await tenantManager.GetTenantAsync(portal.TenantId);
+
+        var client = new RecordingNotifyClient();
+
+        (await job.ApplyAsync(Free(tenant, today.AddDays(1), today.AddDays(-60)), policyStart, client, _senderName)).Should().BeTrue();
+
+        client.Sent.Should().ContainSingle()
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionBlockedNotifyAction>("the owner hears of the block before any reminder of the deletion");
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(portal.TenantId)).BlockNoticeSentOn.Should().Be(today.AddDays(1));
+
+        // And only once.
+        var after = new RecordingNotifyClient();
+
+        await job.ApplyAsync(Free(tenant, today.AddDays(2), today.AddDays(-60)), policyStart, after, _senderName);
+
+        after.Sent.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task IdlePortal_IsBlocked_StopsAnswering_AndComesBackWithTheOwnersLink()
     {
         var stack = await GetStackAsync();
@@ -405,7 +452,7 @@ public class PortalRetentionLifecycleTests
 
         // As if it had been blocked with money on its wallet: its letter promised ninety days. The stack has
         // no accounting service, so from here on its wallet reads as empty.
-        await settingsManager.SaveAsync(new PortalRetentionSettings { Category = PortalRetentionCategory.FreeWithBalance }, portal.TenantId);
+        await settingsManager.SaveAsync(new PortalRetentionSettings { Category = PortalRetentionCategory.FreeWithBalance, BlockNoticeSentOn = DateTime.UtcNow.Date }, portal.TenantId);
 
         var client = new RecordingNotifyClient();
         var later = DateTime.UtcNow.Date.AddDays(30);

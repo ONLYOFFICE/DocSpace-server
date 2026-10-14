@@ -52,6 +52,9 @@ internal static partial class PortalRetentionJobLogger
     [LoggerMessage(LogLevel.Warning, "Retention run for {today:yyyy-MM-dd} did not get through every portal: {count} left to the next run, which covers its days again (tenants {tenantIds})")]
     public static partial void WarningRunIncomplete(this ILogger<PortalRetentionJob> logger, DateTime today, int count, string tenantIds);
 
+    [LoggerMessage(LogLevel.Information, "Retention: tenant {tenantId} {tenantDomain} is blocked, but the letters about the block did not go out; sending them now")]
+    public static partial void InformationBlockLettersLate(this ILogger<PortalRetentionJob> logger, int tenantId, string tenantDomain);
+
     [LoggerMessage(LogLevel.Information, "Retention skipped for tenant {tenantId} {tenantDomain}: the domain is kept on purpose")]
     public static partial void InformationForbiddenDomain(this ILogger<PortalRetentionJob> logger, int tenantId, string tenantDomain);
 

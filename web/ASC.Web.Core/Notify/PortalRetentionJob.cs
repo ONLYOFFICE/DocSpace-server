@@ -38,7 +38,8 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
 /// removes it when that is the answer. Stored per portal (<see cref="PortalRetentionSettings"/>) is
 /// only what the schedule cannot read anywhere else: while it is active, its last warning, its last
-/// sign-in and the day its activity was last read; once it is blocked, the category it was blocked under and the days of its reminders.
+/// sign-in and the day its activity was last read; once it is blocked, the category it was blocked under
+/// and the days of its letters.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -198,13 +199,26 @@ public class PortalRetentionJob(
         return await ApplyActiveAsync(context, formerPaying, kept, policyStart, client, senderName, lastRunOn);
     }
 
-    /// <summary>A blocked portal: reminded of its deletion, or deleted.</summary>
+    /// <summary>A blocked portal: told of its block if that failed, reminded of its deletion, or deleted.</summary>
     private async Task ApplyBlockedAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, INotifyClient client, string senderName, DateTime? lastRunOn)
     {
         var blockedOn = context.Tenant.StatusChangeDate;
 
         PortalRetentionDecision Decide(PortalRetentionCategory category) =>
             PortalRetentionSchedule.DecideBlocked(Options.For(category), blockedOn, context.NowDate, lastRunOn, kept.FinalNoticeSentOn, kept.EarlyNoticeSentOn);
+
+        // The letters about the block go out right after it; when a failure in between kept them back, the next
+        // run sends them, so the owner hears of the block and of the way back before any reminder of the
+        // deletion. They always precede the reminders, so a portal reminded already is not owed them: it was
+        // blocked some other way, and the reminder recorded its category. A portal already due for deletion
+        // gets the letter about that instead.
+        if (kept.Category is { } blockedUnder && kept.BlockNoticeSentOn is null && kept.EarlyNoticeSentOn is null && kept.FinalNoticeSentOn is null
+            && Decide(blockedUnder) is { Step: not PortalRetentionStep.Delete } owed)
+        {
+            logger.InformationBlockLettersLate(context.Tenant.Id, context.Tenant.GetTenantDomain(coreSettings));
+
+            kept = await SendBlockLettersAsync(context, blockedUnder, owed with { Step = PortalRetentionStep.Block, Letter = PortalRetentionLetter.Blocked }, client, senderName, kept);
+        }
 
         // A blocked portal keeps the category it was blocked under: the letter about the block named the
         // deletion date of that category, and a balance that changes afterwards must not bring it forward.
@@ -496,8 +510,11 @@ public class PortalRetentionJob(
             return;
         }
 
-        // Before the status, so a blocked portal always finds the category its letter was written for.
-        await settingsManager.SaveAsync(new PortalRetentionSettings { Category = category }, tenant.Id);
+        // Before the status, so a blocked portal always finds the category its letter was written for - and,
+        // with no day of the letters on record yet, a failure before they go out leaves them to the next run.
+        var kept = new PortalRetentionSettings { Category = category };
+
+        await settingsManager.SaveAsync(kept, tenant.Id);
 
         tenant.SetStatus(TenantStatus.Blocked);
         await tenantManager.SaveTenantAsync(tenant);
@@ -509,16 +526,30 @@ public class PortalRetentionJob(
         // Written by the system: there is no request behind the daily job to take a user and an address from.
         messageService.Send(MessageInitiator.System, MessageAction.PortalBlocked);
 
+        await SendBlockLettersAsync(context, category, decision, client, senderName, kept);
+    }
+
+    /// <summary>
+    /// Tells of the block - the owner, and, for a portal that has paid or still has money on its wallet,
+    /// support, where a manager can step in - and keeps the day it did.
+    /// </summary>
+    private async Task<PortalRetentionSettings> SendBlockLettersAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, PortalRetentionSettings kept)
+    {
+        var tenant = context.Tenant;
+
         await SendAsync(typeof(SaasOwnerRetentionBlockedNotifyAction), context, category, decision, client, senderName);
 
-        // Support steps in only for a portal that has paid or still has money on its wallet.
-        if (category == PortalRetentionCategory.Free)
+        if (category != PortalRetentionCategory.Free)
         {
-            return;
+            var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+            await studioNotifyService.SendMsgPortalBlockedToSupportAsync(tenant.GetTenantDomain(coreSettings), owner, category, decision.DeleteOn);
         }
 
-        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        await studioNotifyService.SendMsgPortalBlockedToSupportAsync(tenant.GetTenantDomain(coreSettings), owner, category, decision.DeleteOn);
+        kept = kept with { BlockNoticeSentOn = context.NowDate };
+
+        await settingsManager.SaveAsync(kept, tenant.Id);
+
+        return kept;
     }
 
     /// <summary>

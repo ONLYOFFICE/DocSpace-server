@@ -39,8 +39,9 @@ namespace ASC.Web.Studio.Core.Notify;
 /// portal falls under afterwards - the latest activity the policy has seen, which outlives the login
 /// history the portal's audit settings purge, and the day it last read it. Once it is blocked: the category
 /// it was blocked under - the letter about the block names the deletion date of that category, so the portal keeps it until it is
-/// deleted or unblocked, whatever its wallet shows in the meantime - and the days the reminders before the
-/// deletion went out, so that a run covering their days again does not send them twice.
+/// deleted or unblocked, whatever its wallet shows in the meantime - the day the letters about the block
+/// went out, so that letters lost to a failure after the block are sent by the next run, and the days the
+/// reminders before the deletion went out, so that a run covering their days again does not send them twice.
 /// </summary>
 /// <remarks>
 /// A block replaces the whole record, and <c>PUT api/2.0/portal/unblock</c> clears it: what was kept about
@@ -61,6 +62,12 @@ public record PortalRetentionSettings : ISettings<PortalRetentionSettings>
 
     /// <summary>The day the early reminder before the deletion went out, or null while it has not.</summary>
     public DateTime? EarlyNoticeSentOn { get; init; }
+
+    /// <summary>
+    /// The day the letters about the block went out - to the owner, and to support where it steps in - or null
+    /// while they have not: the portal is blocked first, and a failure in between leaves them to the next run.
+    /// </summary>
+    public DateTime? BlockNoticeSentOn { get; init; }
 
     /// <summary>
     /// The latest sign of life of the active portal the policy has seen - an audit event or a sign-in. The
