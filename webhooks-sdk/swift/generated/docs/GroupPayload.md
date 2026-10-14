@@ -5,7 +5,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **UUID** |  | [optional] 
 **name** | **String** |  | [optional] 
-**parent** | **UUID** |  | [optional] 
+**parent** | **UUID** | ID of the parent group; absent for a top-level group. | [optional] 
 **category** | **UUID** |  | [optional] 
 **isLDAP** | **Bool** |  | [optional] 
 **isSystem** | **Bool** |  | [optional] 

@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**Parent** | Pointer to **string** |  | [optional] 
+**Parent** | Pointer to **string** | ID of the parent group; absent for a top-level group. | [optional] 
 **Category** | Pointer to **string** |  | [optional] 
 **IsLDAP** | Pointer to **bool** |  | [optional] 
 **IsSystem** | Pointer to **bool** |  | [optional] 

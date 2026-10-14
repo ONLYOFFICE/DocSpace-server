@@ -9,8 +9,7 @@ Name | Type | Description | Notes
 **id** | **UUID** |  | [optional] 
 **display_name** | **str** |  | [optional] 
 **user_name** | **str** |  | [optional] 
-**email** | **str** |  | [optional] 
-**avatar** | **str** |  | [optional] 
+**avatar** | **str** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
 **profile_url** | **str** |  | [optional] 
 
 ## Example

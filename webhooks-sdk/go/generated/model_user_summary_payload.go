@@ -22,7 +22,7 @@ type UserSummaryPayload struct {
 	Id *string `json:"id,omitempty"`
 	DisplayName *string `json:"displayName,omitempty"`
 	UserName *string `json:"userName,omitempty"`
-	Email *string `json:"email,omitempty"`
+	// Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
 	Avatar *string `json:"avatar,omitempty"`
 	ProfileUrl *string `json:"profileUrl,omitempty"`
 }
@@ -140,38 +140,6 @@ func (o *UserSummaryPayload) SetUserName(v string) {
 	o.UserName = &v
 }
 
-// GetEmail returns the Email field value if set, zero value otherwise.
-func (o *UserSummaryPayload) GetEmail() string {
-	if o == nil || IsNil(o.Email) {
-		var ret string
-		return ret
-	}
-	return *o.Email
-}
-
-// GetEmailOk returns a tuple with the Email field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserSummaryPayload) GetEmailOk() (*string, bool) {
-	if o == nil || IsNil(o.Email) {
-		return nil, false
-	}
-	return o.Email, true
-}
-
-// HasEmail returns a boolean if a field has been set.
-func (o *UserSummaryPayload) HasEmail() bool {
-	if o != nil && !IsNil(o.Email) {
-		return true
-	}
-
-	return false
-}
-
-// SetEmail gets a reference to the given string and assigns it to the Email field.
-func (o *UserSummaryPayload) SetEmail(v string) {
-	o.Email = &v
-}
-
 // GetAvatar returns the Avatar field value if set, zero value otherwise.
 func (o *UserSummaryPayload) GetAvatar() string {
 	if o == nil || IsNil(o.Avatar) {
@@ -254,9 +222,6 @@ func (o UserSummaryPayload) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.UserName) {
 		toSerialize["userName"] = o.UserName
-	}
-	if !IsNil(o.Email) {
-		toSerialize["email"] = o.Email
 	}
 	if !IsNil(o.Avatar) {
 		toSerialize["avatar"] = o.Avatar

@@ -450,7 +450,7 @@ public class UserPayload {
   }
 
   /**
-   * Comma-separated group names, HTML-encoded.
+   * Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
    * @return department
    */
   @javax.annotation.Nullable
@@ -865,7 +865,7 @@ public class UserPayload {
   }
 
   /**
-   * Get avatar
+   * Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
    * @return avatar
    */
   @javax.annotation.Nullable
@@ -884,7 +884,7 @@ public class UserPayload {
   }
 
   /**
-   * Get avatarOriginal
+   * Absolute URL of the original avatar, with the same hash parameter.
    * @return avatarOriginal
    */
   @javax.annotation.Nullable
@@ -903,7 +903,7 @@ public class UserPayload {
   }
 
   /**
-   * Get avatarMax
+   * Absolute URL of the 200x200 avatar, with the same hash parameter.
    * @return avatarMax
    */
   @javax.annotation.Nullable
@@ -922,7 +922,7 @@ public class UserPayload {
   }
 
   /**
-   * Get avatarMedium
+   * Absolute URL of the 48x48 avatar, with the same hash parameter.
    * @return avatarMedium
    */
   @javax.annotation.Nullable
@@ -941,7 +941,7 @@ public class UserPayload {
   }
 
   /**
-   * Get avatarSmall
+   * Absolute URL of the 32x32 avatar, with the same hash parameter.
    * @return avatarSmall
    */
   @javax.annotation.Nullable

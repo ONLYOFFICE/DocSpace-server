@@ -258,7 +258,7 @@ components:
           format: date-time
         department:
           type: string
-          description: Comma-separated group names, HTML-encoded.
+          description: Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
         groups:
           type: array
           items:
@@ -309,14 +309,19 @@ components:
           type: boolean
         avatar:
           type: string
+          description: Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
         avatarOriginal:
           type: string
+          description: Absolute URL of the original avatar, with the same hash parameter.
         avatarMax:
           type: string
+          description: Absolute URL of the 200x200 avatar, with the same hash parameter.
         avatarMedium:
           type: string
+          description: Absolute URL of the 48x48 avatar, with the same hash parameter.
         avatarSmall:
           type: string
+          description: Absolute URL of the 32x32 avatar, with the same hash parameter.
         profileUrl:
           type: string
 
@@ -331,11 +336,9 @@ components:
           type: string
         userName:
           type: string
-        email:
-          type: string
-          format: email
         avatar:
           type: string
+          description: Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
         profileUrl:
           type: string
 
@@ -365,6 +368,7 @@ components:
         parent:
           type: string
           format: uuid
+          description: ID of the parent group; absent for a top-level group.
         category:
           type: string
           format: uuid

@@ -140,7 +140,7 @@ public class GroupPayload {
   }
 
   /**
-   * Get parent
+   * ID of the parent group; absent for a top-level group.
    * @return parent
    */
   @javax.annotation.Nullable

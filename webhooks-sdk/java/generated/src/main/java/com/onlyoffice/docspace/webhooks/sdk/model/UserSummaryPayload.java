@@ -67,11 +67,6 @@ public class UserSummaryPayload {
   @javax.annotation.Nullable
   private String userName;
 
-  public static final String SERIALIZED_NAME_EMAIL = "email";
-  @SerializedName(SERIALIZED_NAME_EMAIL)
-  @javax.annotation.Nullable
-  private String email;
-
   public static final String SERIALIZED_NAME_AVATAR = "avatar";
   @SerializedName(SERIALIZED_NAME_AVATAR)
   @javax.annotation.Nullable
@@ -142,32 +137,13 @@ public class UserSummaryPayload {
   }
 
 
-  public UserSummaryPayload email(@javax.annotation.Nullable String email) {
-    this.email = email;
-    return this;
-  }
-
-  /**
-   * Get email
-   * @return email
-   */
-  @javax.annotation.Nullable
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(@javax.annotation.Nullable String email) {
-    this.email = email;
-  }
-
-
   public UserSummaryPayload avatar(@javax.annotation.Nullable String avatar) {
     this.avatar = avatar;
     return this;
   }
 
   /**
-   * Get avatar
+   * Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
    * @return avatar
    */
   @javax.annotation.Nullable
@@ -256,7 +232,6 @@ public class UserSummaryPayload {
     return Objects.equals(this.id, userSummaryPayload.id) &&
         Objects.equals(this.displayName, userSummaryPayload.displayName) &&
         Objects.equals(this.userName, userSummaryPayload.userName) &&
-        Objects.equals(this.email, userSummaryPayload.email) &&
         Objects.equals(this.avatar, userSummaryPayload.avatar) &&
         Objects.equals(this.profileUrl, userSummaryPayload.profileUrl)&&
         Objects.equals(this.additionalProperties, userSummaryPayload.additionalProperties);
@@ -264,7 +239,7 @@ public class UserSummaryPayload {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, displayName, userName, email, avatar, profileUrl, additionalProperties);
+    return Objects.hash(id, displayName, userName, avatar, profileUrl, additionalProperties);
   }
 
   @Override
@@ -274,7 +249,6 @@ public class UserSummaryPayload {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
-    sb.append("    email: ").append(toIndentedString(email)).append("\n");
     sb.append("    avatar: ").append(toIndentedString(avatar)).append("\n");
     sb.append("    profileUrl: ").append(toIndentedString(profileUrl)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
@@ -296,7 +270,7 @@ public class UserSummaryPayload {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "displayName", "userName", "email", "avatar", "profileUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "displayName", "userName", "avatar", "profileUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -323,9 +297,6 @@ public class UserSummaryPayload {
       }
       if ((jsonObj.get("userName") != null && !jsonObj.get("userName").isJsonNull()) && !jsonObj.get("userName").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `userName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("userName").toString()));
-      }
-      if ((jsonObj.get("email") != null && !jsonObj.get("email").isJsonNull()) && !jsonObj.get("email").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `email` to be a primitive type in the JSON string but got `%s`", jsonObj.get("email").toString()));
       }
       if ((jsonObj.get("avatar") != null && !jsonObj.get("avatar").isJsonNull()) && !jsonObj.get("avatar").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatar` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatar").toString()));

@@ -38,7 +38,7 @@ module DocspaceWebhooksSdk
 
     attr_accessor :terminated
 
-    # Comma-separated group names, HTML-encoded.
+    # Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
     attr_accessor :department
 
     attr_accessor :groups
@@ -82,14 +82,19 @@ module DocspaceWebhooksSdk
 
     attr_accessor :has_avatar
 
+    # Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
     attr_accessor :avatar
 
+    # Absolute URL of the original avatar, with the same hash parameter.
     attr_accessor :avatar_original
 
+    # Absolute URL of the 200x200 avatar, with the same hash parameter.
     attr_accessor :avatar_max
 
+    # Absolute URL of the 48x48 avatar, with the same hash parameter.
     attr_accessor :avatar_medium
 
+    # Absolute URL of the 32x32 avatar, with the same hash parameter.
     attr_accessor :avatar_small
 
     attr_accessor :profile_url

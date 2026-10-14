@@ -6,7 +6,7 @@
 | ---- | ---- | ----------- | ----- |
 | **id** | **String** |  | [optional] |
 | **name** | **String** |  | [optional] |
-| **parent** | **String** |  | [optional] |
+| **parent** | **String** | ID of the parent group; absent for a top-level group. | [optional] |
 | **category** | **String** |  | [optional] |
 | **is_ldap** | **Boolean** |  | [optional] |
 | **is_system** | **Boolean** |  | [optional] |

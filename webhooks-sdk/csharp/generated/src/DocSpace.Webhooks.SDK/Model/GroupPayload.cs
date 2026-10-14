@@ -37,7 +37,7 @@ namespace DocSpace.Webhooks.SDK.Model
         /// </summary>
         /// <param name="id">id.</param>
         /// <param name="name">name.</param>
-        /// <param name="parent">parent.</param>
+        /// <param name="parent">ID of the parent group; absent for a top-level group..</param>
         /// <param name="category">category.</param>
         /// <param name="isLDAP">isLDAP.</param>
         /// <param name="isSystem">isSystem.</param>
@@ -68,8 +68,9 @@ namespace DocSpace.Webhooks.SDK.Model
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or Sets Parent
+        /// ID of the parent group; absent for a top-level group.
         /// </summary>
+        /// <value>ID of the parent group; absent for a top-level group.</value>
         [DataMember(Name = "parent", EmitDefaultValue = false)]
         public Guid Parent { get; set; }
 

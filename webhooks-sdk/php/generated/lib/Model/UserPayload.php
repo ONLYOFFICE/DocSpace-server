@@ -825,7 +825,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets department
      *
-     * @param string|null $department Comma-separated group names, HTML-encoded.
+     * @param string|null $department Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
      *
      * @return self
      */
@@ -1392,7 +1392,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar
      *
-     * @param string|null $avatar avatar
+     * @param string|null $avatar Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
      *
      * @return self
      */
@@ -1419,7 +1419,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_original
      *
-     * @param string|null $avatar_original avatar_original
+     * @param string|null $avatar_original Absolute URL of the original avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1446,7 +1446,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_max
      *
-     * @param string|null $avatar_max avatar_max
+     * @param string|null $avatar_max Absolute URL of the 200x200 avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1473,7 +1473,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_medium
      *
-     * @param string|null $avatar_medium avatar_medium
+     * @param string|null $avatar_medium Absolute URL of the 48x48 avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1500,7 +1500,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_small
      *
-     * @param string|null $avatar_small avatar_small
+     * @param string|null $avatar_small Absolute URL of the 32x32 avatar, with the same hash parameter.
      *
      * @return self
      */

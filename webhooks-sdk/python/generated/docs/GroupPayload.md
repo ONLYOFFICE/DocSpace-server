@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **UUID** |  | [optional] 
 **name** | **str** |  | [optional] 
-**parent** | **UUID** |  | [optional] 
+**parent** | **UUID** | ID of the parent group; absent for a top-level group. | [optional] 
 **category** | **UUID** |  | [optional] 
 **is_ldap** | **bool** |  | [optional] 
 **is_system** | **bool** |  | [optional] 

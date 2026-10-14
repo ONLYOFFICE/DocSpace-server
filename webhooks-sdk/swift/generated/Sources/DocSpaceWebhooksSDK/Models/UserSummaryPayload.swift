@@ -13,15 +13,14 @@ public struct UserSummaryPayload: Sendable, Codable, Hashable {
     public var id: UUID?
     public var displayName: String?
     public var userName: String?
-    public var email: String?
+    /** Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
     public var avatar: String?
     public var profileUrl: String?
 
-    public init(id: UUID? = nil, displayName: String? = nil, userName: String? = nil, email: String? = nil, avatar: String? = nil, profileUrl: String? = nil) {
+    public init(id: UUID? = nil, displayName: String? = nil, userName: String? = nil, avatar: String? = nil, profileUrl: String? = nil) {
         self.id = id
         self.displayName = displayName
         self.userName = userName
-        self.email = email
         self.avatar = avatar
         self.profileUrl = profileUrl
     }
@@ -30,7 +29,6 @@ public struct UserSummaryPayload: Sendable, Codable, Hashable {
         case id
         case displayName
         case userName
-        case email
         case avatar
         case profileUrl
     }
@@ -42,7 +40,6 @@ public struct UserSummaryPayload: Sendable, Codable, Hashable {
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(displayName, forKey: .displayName)
         try container.encodeIfPresent(userName, forKey: .userName)
-        try container.encodeIfPresent(email, forKey: .email)
         try container.encodeIfPresent(avatar, forKey: .avatar)
         try container.encodeIfPresent(profileUrl, forKey: .profileUrl)
     }
