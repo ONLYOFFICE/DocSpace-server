@@ -405,25 +405,31 @@ function upstreamAbortSignal(res: Response): AbortSignal {
 }
 
 // Hard cap on the buffered body, enforced both up front (declared
-// Content-Length) and while reading. It sits under the next hop's own
-// limit: the AI service that fronts the ONLYOFFICE gateway runs on Kestrel's
-// default 30,000,000-byte request cap and answers a bigger body with an
-// unmapped 500 carrying its stack trace, so the 413 has to fire here first
-// (Bug 84415). Legitimate vision/OCR data URLs stay well below.
-const MAX_BODY_BYTES = 28 * 1024 * 1024;
+// Content-Length) and while reading — legitimate vision/OCR data URLs stay
+// well below. A third-party provider is called directly and keeps the
+// generous ceiling. The ONLYOFFICE provider is reached through the AI
+// service, which runs on Kestrel's default 30,000,000-byte request cap and
+// answers a bigger body with an unmapped 500 carrying its stack trace, so
+// for it the 413 has to fire here first (Bug 84415).
+const MAX_BODY_BYTES = 100 * 1024 * 1024;
+const MAX_ONLYOFFICE_BODY_BYTES = 28 * 1024 * 1024;
+
+function maxBodyBytes(providerType: string | undefined): number {
+  return providerType === "onlyoffice" ? MAX_ONLYOFFICE_BODY_BYTES : MAX_BODY_BYTES;
+}
 
 class BodyTooLargeError extends Error {}
 
 // Read the raw request body into a single buffer, rejecting anything over
-// MAX_BODY_BYTES as it arrives (the declared-length check upstream only
-// catches honest clients).
-async function readRequestBody(req: Readable): Promise<Buffer> {
+// `limit` as it arrives (the declared-length check upstream only catches
+// honest clients).
+async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
     const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
     total += buf.length;
-    if (total > MAX_BODY_BYTES) {
+    if (total > limit) {
       throw new BodyTooLargeError();
     }
     chunks.push(buf);
@@ -539,8 +545,9 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     const search = remaining.length > 0 ? `?${remaining}` : "";
     const target = `${base}/${subPath}${search}`;
 
+    const bodyLimit = maxBodyBytes(profile.providerType);
     const declaredLength = Number(req.headers["content-length"]);
-    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    if (Number.isFinite(declaredLength) && declaredLength > bodyLimit) {
       openAiError(res, 413, "Request body too large", "invalid_request_error");
       return;
     }
@@ -555,7 +562,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     // serialized-JSON requests byte for byte.
     let body: Buffer;
     try {
-      body = await readRequestBody(req);
+      body = await readRequestBody(req, bodyLimit);
     } catch (err) {
       if (err instanceof BodyTooLargeError) {
         openAiError(res, 413, "Request body too large", "invalid_request_error");
