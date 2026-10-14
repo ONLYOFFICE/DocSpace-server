@@ -71,7 +71,8 @@ public class PortalActivityQueryTests
 
         var lastEventOn = await scope.Services.GetRequiredService<AuditEventsRepository>().GetLastEventDateAsync(portal.TenantId);
 
-        lastEventOn?.Date.Should().Be(_future.AddDays(20), "the newest event is the latest date, whatever order the events were written in");
+        // The nullable date as a whole: a query that found nothing fails here instead of skipping the check.
+        (lastEventOn?.Date).Should().Be(_future.AddDays(20), "the newest event is the latest date, whatever order the events were written in");
     }
 
     [Fact]
@@ -99,7 +100,7 @@ public class PortalActivityQueryTests
 
         var lastLoginOn = await scope.Services.GetRequiredService<LoginEventsRepository>().GetLastSuccessEventDateAsync(portal.TenantId);
 
-        lastLoginOn?.Date.Should().Be(_future.AddDays(20), "a failed sign-in is no activity, and the newest is the latest date");
+        (lastLoginOn?.Date).Should().Be(_future.AddDays(20), "a failed sign-in is no activity, and the newest is the latest date");
     }
 
     [Fact]
