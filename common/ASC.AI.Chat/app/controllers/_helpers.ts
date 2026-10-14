@@ -251,9 +251,11 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
     try {
       await handler(req, res, next);
     } catch (err) {
-      logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+      const { status, message } = clientError(err);
+      if (status >= 500) {
+        logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+      }
       if (!res.headersSent) {
-        const { status, message } = clientError(err);
         res.status(status).json({ error: message });
       } else {
         res.end();
