@@ -39,6 +39,26 @@ import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new AssignmentsEngine({ storage });
 
+// The engine's lenient lookup still throws a plain Error when the slot
+// names a profile that can no longer be loaded - deleted without the
+// assignment cascade, or one the caller cannot see. For the caller that is
+// the same as an empty slot, not a server failure, so both resolve
+// operations answer it as one (404 and an empty result respectively)
+// instead of a 500.
+async function resolveOrNull(
+  actionType: ActionType,
+  entityId: string | undefined,
+): Promise<Awaited<ReturnType<AssignmentsEngine["tryResolveForAction"]>>> {
+  try {
+    return await engine.tryResolveForAction(actionType, entityId);
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Assigned profile not found")) {
+      return null;
+    }
+    throw err;
+  }
+}
+
 interface AssignBody {
   actionType?: string;
   profileId?: string;
@@ -71,9 +91,10 @@ export const assignmentsController = {
     await assertEntityAccessible(entityId);
     // The engine's throwing variant reports "nothing configured" with a
     // plain Error, which read as a 500 (Bugs 84278, 84450); the lenient
-    // variant answers null for the same states, and that is a 404 here —
-    // the status threads/create gives the same condition.
-    const result = await engine.tryResolveForAction(actionType, entityId);
+    // variant answers null for the same states (and `resolveOrNull` for an
+    // assigned profile that is gone), and that is a 404 here — the status
+    // threads/create gives the same condition.
+    const result = await resolveOrNull(actionType, entityId);
     if (result === null) {
       res.status(404).json({ error: `no AI profile is available for ActionType.${actionType}` });
       return;
@@ -89,7 +110,7 @@ export const assignmentsController = {
     }
     const entityId = asString(req.query["entityId"]);
     await assertEntityAccessible(entityId);
-    const result = await engine.tryResolveForAction(actionType, entityId);
+    const result = await resolveOrNull(actionType, entityId);
     res.json(result);
   }),
 
