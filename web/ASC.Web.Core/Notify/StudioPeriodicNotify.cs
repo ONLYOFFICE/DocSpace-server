@@ -151,11 +151,11 @@ public class StudioPeriodicNotify(
             {
                 _log.ErrorSendSaasLettersAsync(listed.Id, err);
 
-                // Failed before the policy got to the portal: what it owed the portal today is still owed. A failure
-                // in the ordinary letters after it leaves the policy's days alone.
+                // Failed before the policy was through with the portal: what it owed the portal today is still
+                // owed. A failure in the ordinary letters after it leaves the policy's days alone.
                 if (!retentionApplied)
                 {
-                    portalRetentionJob.MarkIncomplete();
+                    portalRetentionJob.MarkIncomplete(listed.Id);
                 }
             }
         }

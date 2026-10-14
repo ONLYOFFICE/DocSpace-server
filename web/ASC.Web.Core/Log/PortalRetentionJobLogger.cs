@@ -49,8 +49,8 @@ internal static partial class PortalRetentionJobLogger
     [LoggerMessage(LogLevel.Warning, "Retention: {failures} balance requests in a row failed; the accounting service is not asked again in this run, and the portals that need it wait for the next one")]
     public static partial void WarningAccountingUnavailable(this ILogger<PortalRetentionJob> logger, int failures);
 
-    [LoggerMessage(LogLevel.Warning, "Retention run for {today:yyyy-MM-dd} did not get through every portal; the next run covers its days again")]
-    public static partial void WarningRunIncomplete(this ILogger<PortalRetentionJob> logger, DateTime today);
+    [LoggerMessage(LogLevel.Warning, "Retention run for {today:yyyy-MM-dd} did not get through every portal: {count} left to the next run, which covers its days again (tenants {tenantIds})")]
+    public static partial void WarningRunIncomplete(this ILogger<PortalRetentionJob> logger, DateTime today, int count, string tenantIds);
 
     [LoggerMessage(LogLevel.Information, "Retention skipped for tenant {tenantId} {tenantDomain}: the domain is kept on purpose")]
     public static partial void InformationForbiddenDomain(this ILogger<PortalRetentionJob> logger, int tenantId, string tenantDomain);

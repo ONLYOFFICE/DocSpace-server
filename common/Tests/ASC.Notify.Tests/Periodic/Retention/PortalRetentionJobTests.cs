@@ -349,14 +349,15 @@ public class PortalRetentionJobTests
 
             // What the daily loop does when a portal fails before the policy is applied to it - its tariff or its
             // status could not be read.
-            job.MarkIncomplete();
+            job.MarkIncomplete(int.MaxValue - 1);
 
             await job.EndRunAsync(_today);
 
             (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn
                 .Should().Be(_today.AddDays(-1), "the next run covers today again");
 
-            logger.Messages.Should().Contain(m => m.Contains("did not get through every portal"));
+            logger.Messages.Should().Contain(m => m.Contains("did not get through every portal") && m.Contains($"tenants {int.MaxValue - 1}"),
+                "the log names the portal the run is waiting on");
 
             // The mark is the run's own: the next run starts clean and, getting through, moves it on.
             await job.BeginRunAsync(_today);

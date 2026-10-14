@@ -62,6 +62,9 @@ public class PortalRetentionJob(
     /// </summary>
     private const int MaxCatchUpDays = 7;
 
+    /// <summary>How many of the portals a run could not get through the log names when the run ends.</summary>
+    private const int IncompleteTenantsLogged = 20;
+
     public PortalRetentionOptions Options => configuration.Options;
 
     /// <summary>
@@ -75,10 +78,11 @@ public class PortalRetentionJob(
     private int _balanceFailures;
 
     /// <summary>
-    /// Whether a portal of this run had something due that it could not be given - its balance was unknown,
-    /// or applying the policy failed - so the run must not count as got through; see <see cref="EndRunAsync"/>.
+    /// The portals of this run that may have had something due they could not be given - their balance was
+    /// unknown, applying the policy to them failed, or they failed before the policy got to them - so the run
+    /// must not count as got through; see <see cref="EndRunAsync"/>.
     /// </summary>
-    private bool _incomplete;
+    private readonly HashSet<int> _incompleteTenants = [];
 
     /// <summary>
     /// Opens the daily run: the day the policy started counting in this installation, stamped on the
@@ -88,7 +92,7 @@ public class PortalRetentionJob(
     {
         today = today.Date;
         _balanceFailures = 0;
-        _incomplete = false;
+        _incompleteTenants.Clear();
 
         var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
 
@@ -126,9 +130,9 @@ public class PortalRetentionJob(
     /// </summary>
     public async Task EndRunAsync(DateTime today)
     {
-        if (_incomplete)
+        if (_incompleteTenants.Count > 0)
         {
-            logger.WarningRunIncomplete(today.Date);
+            logger.WarningRunIncomplete(today.Date, _incompleteTenants.Count, string.Join(", ", _incompleteTenants.Take(IncompleteTenantsLogged)));
 
             return;
         }
@@ -140,12 +144,13 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// Keeps the run from counting as got through, so the next one covers its days again: a portal failed
-    /// before the policy could be applied to it, and what was due to it today is still owed.
+    /// Keeps the run from counting as got through, so the next one covers its days again: the portal
+    /// <paramref name="tenantId"/> failed before the policy was through with it, and what was due to it today
+    /// is still owed.
     /// </summary>
-    public void MarkIncomplete()
+    public void MarkIncomplete(int tenantId)
     {
-        _incomplete = true;
+        _incompleteTenants.Add(tenantId);
     }
 
     /// <summary>
@@ -163,7 +168,7 @@ public class PortalRetentionJob(
         catch
         {
             // The caller logs it and goes on to the next portal; the days of this run stay to be covered again.
-            MarkIncomplete();
+            MarkIncomplete(context.Tenant.Id);
 
             throw;
         }
@@ -289,7 +294,7 @@ public class PortalRetentionJob(
         {
             // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow, and
             // have tomorrow's run cover today again.
-            _incomplete = true;
+            MarkIncomplete(tenant.Id);
 
             return null;
         }
