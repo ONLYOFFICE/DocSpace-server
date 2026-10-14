@@ -313,7 +313,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
-    "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
+    "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, the slot names a profile that no longer exists, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
   aiAssignmentsTryResolveForAction:
     "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room the caller can open - an unknown one answers 404 here as well. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
   aiAssignmentsAssign:
@@ -722,13 +722,15 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiProfilesCreate: {
     "400":
       "The provider URL is missing, malformed, or points at a private network address, or the key " +
-      "holds characters that cannot travel in an HTTP header.",
+      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
+      "result shape, `success: false` and an `error` naming the `key` field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesUpdate: {
     "400":
       "The provider URL is missing, malformed, or points at a private network address, or the key " +
-      "holds characters that cannot travel in an HTTP header.",
+      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
+      "result shape, `success: false` and an `error` naming the `key` field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesDelete: { "400": "The profile ID is missing." },
@@ -778,8 +780,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "409": "A folder of that name already exists.",
   },
   aiPromptsImportBundle: {
-    "400": "The bundle is malformed, references a folder it does not carry, holds an empty entry, or `mode` is unknown.",
-    "409": "Every refused entry is a name that already exists in the library.",
+    "400": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
+    "409": "Every refused entry is a name that already exists in the library (`merge` only).",
   },
   aiPromptsDelete: { "400": "The prompt ID is missing." },
   aiPromptsDeleteFolder: {
@@ -1642,12 +1644,52 @@ const FIELD_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [FIELD_ERROR_SCHEMA, ERROR_RESPONSE_REF],
 };
 
+// A refused engine mutation answers 4xx with the engine's own result -
+// `{ success: false, error }`, the field named and `code` saying why - so a
+// client reads a refusal the same way it reads a success. These routes also
+// raise plain `AiErrorResponse` refusals of their own before the engine runs
+// (a private-network URL, an inaccessible room), so their 4xx admit either.
+const PROMPT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiPromptMutationResult" };
+const FOLDER_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiFolderMutationResult" };
+const IMPORT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiImportResult" };
+const PROFILE_OR_PLAIN_ERROR_SCHEMA: Json = {
+  anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_RESPONSE_REF],
+};
+const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
+  anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
+};
+
 // operationId -> status code -> schema, with `*` standing for every code of that
 // operation. Anything not listed answers with `AiErrorResponse`.
 const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
   aiOpenaiChatCompletions: { "*": OPENAI_ERROR_SCHEMA },
   aiOpenaiImagesGenerations: { "*": OPENAI_ERROR_SCHEMA },
   aiProfilesListProviderModels: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
+  aiProfilesCreate: { "400": PROFILE_OR_PLAIN_ERROR_SCHEMA },
+  aiProfilesUpdate: { "400": PROFILE_OR_PLAIN_ERROR_SCHEMA },
+  aiPromptsCreate: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsUpdate: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsMove: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsCreateFolder: { "400": FOLDER_REFUSAL_SCHEMA, "409": FOLDER_REFUSAL_SCHEMA },
+  aiPromptsRenameFolder: {
+    "400": FOLDER_REFUSAL_SCHEMA,
+    "404": FOLDER_REFUSAL_SCHEMA,
+    "409": FOLDER_REFUSAL_SCHEMA,
+  },
+  aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
+  aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {

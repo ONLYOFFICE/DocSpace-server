@@ -725,7 +725,7 @@
         ],
         "operationId": "aiAssignmentsResolveForAction",
         "summary": "Resolve for action",
-        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
+        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, the slot names a profile that no longer exists, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
         "responses": {
           "200": {
             "description": "The profile that will serve the action.",
@@ -2963,11 +2963,18 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiProfileMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -3046,11 +3053,18 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiProfileMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -3760,7 +3774,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3790,7 +3804,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3800,7 +3814,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3863,7 +3877,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3893,7 +3907,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3903,7 +3917,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3965,7 +3979,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3995,7 +4009,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -4005,7 +4019,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -4223,7 +4237,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4253,7 +4267,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4320,7 +4334,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4350,7 +4364,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4360,7 +4374,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4622,11 +4636,11 @@
             }
           },
           "400": {
-            "description": "The bundle is malformed, references a folder it does not carry, holds an empty entry, or `mode` is unknown.",
+            "description": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiImportResult"
                 }
               }
             }
@@ -4652,11 +4666,11 @@
             }
           },
           "409": {
-            "description": "Every refused entry is a name that already exists in the library.",
+            "description": "Every refused entry is a name that already exists in the library (`merge` only).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "$ref": "#/components/schemas/AiImportResult"
                 }
               }
             }
@@ -7610,7 +7624,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiWebSearchMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -11403,6 +11424,10 @@
           "message": {
             "type": "string",
             "description": "The human-readable reason the field was rejected."
+          },
+          "code": {
+            "$ref": "#/components/schemas/AiErrorCode",
+            "description": "Optional: producers that know the reason set it (the prompts engine does)."
           }
         },
         "required": [
@@ -11411,6 +11436,16 @@
         ],
         "additionalProperties": false,
         "description": "A field-scoped validation error: which form field was rejected, and why."
+      },
+      "AiErrorCode": {
+        "type": "string",
+        "enum": [
+          "required",
+          "conflict",
+          "not_found",
+          "invalid"
+        ],
+        "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
       },
       "AiBulkAssignmentResult": {
         "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
