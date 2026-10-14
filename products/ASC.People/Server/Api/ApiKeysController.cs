@@ -203,8 +203,8 @@ public class ApiKeysController(
     /// Returns the API key that authenticated this very request, letting the holder of a key find out what it is
     /// allowed to do without knowing its ID.
     /// The key is identified by the `Authorization` header of the call itself, so the request has to be sent as
-    /// `Bearer sk-...`; a session authenticated in any other way has no key to report and this operation is not
-    /// usable for it.
+    /// `Bearer sk-...`; a session authenticated in any other way, by a cookie or by a user token, has no key to
+    /// report and is rejected with 400.
     /// The call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the
     /// secret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.
     /// To look at a key other than the one in use, call `GET api/2.0/keys` instead.
@@ -215,14 +215,20 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "The API key that authenticated this request", typeof(ApiKeyResponseDto))]
-    [SwaggerResponse(400, "The request has no Authorization header, as with a session authenticated by a cookie")]
-    [SwaggerResponse(500, "The Authorization header carries a token that is not an API key of this portal")]
+    [SwaggerResponse(400, "The request is not authenticated by an API key, as with a session authenticated by a cookie or by a user token")]
     [HttpGet("@self")]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
-        var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
+        var header = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
 
-        var apiKey = await apiKeyManager.GetApiKeyAsync(token);
+        if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("The request is not authenticated by an API key");
+        }
+
+        var apiKey = await apiKeyManager.GetApiKeyAsync(header["Bearer ".Length..])
+            ?? throw new ArgumentException("The request is not authenticated by an API key");
+
         return await mapper.MapManual(apiKey);
     }
 
