@@ -41,6 +41,7 @@ import { assertAiAccess } from "./aiAccess.js";
 import { asString, isObject } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
+import type { Response } from "express";
 
 const engine = new ProfilesEngine({ storage });
 
@@ -185,6 +186,14 @@ function headerSafeKeyError(value: unknown): string | undefined {
   return undefined;
 }
 
+// The engine's own refusal shape (`{ success: false, error }`, the field
+// named), so the widget's profile form shows the message on the key input:
+// the chat client hands a non-2xx body back as a value only in this shape
+// and reports any other one as a bare "HTTP 400".
+function sendKeyRefusal(res: Response, message: string): void {
+  res.status(400).json({ success: false, error: { field: "key", message, code: "invalid" } });
+}
+
 // 404 for a profile the caller cannot see, before the engine is involved:
 // the library's lookup throws a plain Error for a missing profile, which
 // collapsed into 502 "Failed to list provider models" on list-models and
@@ -203,7 +212,7 @@ export const profilesController = {
     await assertSafeBaseUrl(req.body?.baseUrl);
     const keyError = headerSafeKeyError(req.body?.key);
     if (keyError) {
-      res.status(400).json({ error: keyError, field: "key" });
+      sendKeyRefusal(res, keyError);
       return;
     }
     const result = await engine.create(req.body);
@@ -218,7 +227,7 @@ export const profilesController = {
     await assertSafeBaseUrl(req.body?.baseUrl);
     const keyError = headerSafeKeyError(req.body?.key);
     if (keyError) {
-      res.status(400).json({ error: keyError, field: "key" });
+      sendKeyRefusal(res, keyError);
       return;
     }
     const result = await engine.update(req.body);
