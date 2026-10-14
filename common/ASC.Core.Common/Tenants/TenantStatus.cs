@@ -63,7 +63,9 @@ public enum TenantStatus
     /// <summary>
     /// Blocked by the retention policy after a long period without use: its users can no longer sign in,
     /// the API answers only what the blocked page and the unblocking need, and its content is kept until
-    /// the deletion date announced to the owner. A portal that has paid before or still has money on its
+    /// the deletion date announced to the owner. Any other call is refused: with 401 when it needs a
+    /// signed-in user and comes without one, since sign-in is checked before the status, and with 404
+    /// otherwise - so tell a blocked portal by this status, not by the code of a refusal. A portal that has paid before or still has money on its
     /// wallet becomes active again with the unblocking link from the letters about the block
     /// (`PUT api/2.0/portal/unblock`); any other is made active again by support. A blocked portal that
     /// nobody brings back is deleted at the end of its retention period.
