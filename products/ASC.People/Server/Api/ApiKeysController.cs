@@ -233,7 +233,8 @@ public class ApiKeysController(
     /// The caller may update a key they created themselves, and a DocSpace administrator may update any key of the
     /// portal.
     /// Take the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is
-    /// rejected with 400, and the fields that are left out keep their current values.
+    /// rejected with 400, as is a name that is empty or made of whitespace only, and the fields that are left out
+    /// keep their current values.
     /// The answer is a plain boolean: true when the key was changed, and false when it was not - which is also what
     /// an already expired key returns, because such a key is left untouched instead of being reported as an error.
     /// Deactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it
@@ -246,7 +247,7 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was changed, false if it was left untouched because it has already expired", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(400, "The request body cannot be read, the name is empty, made of whitespace only or longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
     [SwaggerResponse(404, "The portal has no key with this ID")]
     [HttpPut("{keyId:guid}")]
