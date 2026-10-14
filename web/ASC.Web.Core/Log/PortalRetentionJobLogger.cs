@@ -51,4 +51,7 @@ internal static partial class PortalRetentionJobLogger
 
     [LoggerMessage(LogLevel.Information, "Retention skipped for tenant {tenantId} {tenantDomain}: the domain is kept on purpose")]
     public static partial void InformationForbiddenDomain(this ILogger<PortalRetentionJob> logger, int tenantId, string tenantDomain);
+
+    [LoggerMessage(LogLevel.Information, "Retention: tenant {tenantId} is not removed, it is no longer in the block it was due to be removed for (now {status})")]
+    public static partial void InformationRemovalSkipped(this ILogger<PortalRetentionJob> logger, int tenantId, TenantStatus? status);
 }

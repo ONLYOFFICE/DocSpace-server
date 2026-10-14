@@ -473,7 +473,18 @@ public class PortalRetentionJob(
     /// </summary>
     private async Task RemoveAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
     {
-        var tenant = context.Tenant;
+        // Read again right before it, since nothing undoes a removal: only the block the decision was made for may
+        // go, and a portal unblocked in the meantime stays. The block is told by its day, as the unblocking link
+        // tells it: the database keeps the moment less precisely than it is set.
+        var tenant = await tenantManager.GetTenantAsync(context.Tenant.Id);
+
+        if (tenant?.Status != TenantStatus.Blocked || tenant.StatusChangeDate.Date != context.Tenant.StatusChangeDate.Date)
+        {
+            logger.InformationRemovalSkipped(context.Tenant.Id, tenant?.Status);
+            return;
+        }
+
+        context = context with { Tenant = tenant };
 
         // Before the removal: it renames the alias, and the letter to support names the portal.
         var tenantDomain = tenant.GetTenantDomain(coreSettings);

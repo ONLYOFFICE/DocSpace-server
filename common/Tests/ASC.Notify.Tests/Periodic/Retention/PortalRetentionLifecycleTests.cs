@@ -327,6 +327,67 @@ public class PortalRetentionLifecycleTests
             .Which.Action.Should().BeOfType<SaasOwnerRetentionDeletedNotifyAction>("the owner hears of the deletion");
     }
 
+    /// <summary>
+    /// The portal as a run holds it: a copy of its own, since the tenant cache hands every reader the same
+    /// instance, and a change saved later would otherwise show through it.
+    /// </summary>
+    private static Tenant Snapshot(Tenant tenant)
+    {
+        return new Tenant(tenant.Id, tenant.Alias)
+        {
+            OwnerId = tenant.OwnerId,
+            Name = tenant.Name,
+            Language = tenant.Language,
+            TimeZone = tenant.TimeZone,
+            HostedRegion = tenant.HostedRegion,
+            MappedDomain = tenant.MappedDomain,
+            CreationDateTime = tenant.CreationDateTime,
+            Status = tenant.Status,
+            StatusChangeDate = tenant.StatusChangeDate
+        };
+    }
+
+    [Fact]
+    public async Task BlockedPortal_UnblockedAfterTheRunReadIt_IsNotRemoved()
+    {
+        var stack = await GetStackAsync();
+
+        using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
+        using var scope = await OpenScopeAsync(stack, portal.TenantId);
+
+        var services = scope.ServiceProvider;
+        var tenantManager = services.GetRequiredService<TenantManager>();
+        var blocked = Snapshot(await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient()));
+
+        // Reminded a week before its deletion, so nothing but its status stands between it and the deletion.
+        var reminderDay = DateTime.UtcNow.Date.AddDays(23);
+
+        await ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, new RecordingLogger<PortalRetentionJob>())
+            .ApplyAsync(Free(blocked, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), new RecordingNotifyClient(), _senderName);
+
+        // Brought back while the run still holds the portal as it found it: blocked, and with the reminder on
+        // record, as the run had read it before the unblocking.
+        var unblocked = await tenantManager.GetTenantAsync(portal.TenantId);
+
+        unblocked.SetStatus(TenantStatus.Active);
+        await tenantManager.SaveTenantAsync(unblocked);
+
+        var client = new RecordingNotifyClient();
+        var later = DateTime.UtcNow.Date.AddDays(30);
+
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var job = ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, logger);
+
+        await job.ApplyAsync(Free(blocked, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
+
+        logger.Messages.Should().Contain(m => m.Contains("Free: Delete"), "the portal it was handed is due for deletion");
+        logger.Messages.Should().Contain(m => m.Contains("is not removed"), string.Join(" | ", logger.Messages));
+
+        (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Active)).Should().BeTrue("a portal unblocked in the meantime stays");
+
+        client.Sent.Should().BeEmpty("the owner of a portal that stays is not told it is gone");
+    }
+
     [Fact]
     public async Task BlockedPortal_KeepsTheRetentionOfItsBlock_WhenItsWalletEmpties()
     {

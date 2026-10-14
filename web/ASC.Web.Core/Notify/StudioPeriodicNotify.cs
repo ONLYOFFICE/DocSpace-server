@@ -113,11 +113,18 @@ public class StudioPeriodicNotify(
         // payment letter lists. Global and cached, so they are read once for all tenants.
         var walletQuotas = (await tenantManager.GetTenantQuotasAsync(all: true, wallet: true)).ToDictionary(q => q.TenantId);
 
-        foreach (var tenant in tenants)
+        foreach (var listed in tenants)
         {
             try
             {
-                await tenantManager.SetCurrentTenantAsync(tenant.Id);
+                // The portal as it is now, not as the list found it: the run takes hours, and a portal unblocked,
+                // removed or suspended in the meantime must not be warned, reminded or deleted for its old status.
+                var tenant = await tenantManager.SetCurrentTenantAsync(listed.Id);
+
+                if (tenant?.Status is not (TenantStatus.Active or TenantStatus.Blocked))
+                {
+                    continue;
+                }
 
                 var context = await BuildContextAsync(tenant, nowDate);
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
@@ -136,7 +143,7 @@ public class StudioPeriodicNotify(
             }
             catch (Exception err)
             {
-                _log.ErrorSendSaasLettersAsync(tenant.Id, err);
+                _log.ErrorSendSaasLettersAsync(listed.Id, err);
             }
         }
 
