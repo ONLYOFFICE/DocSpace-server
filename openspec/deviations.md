@@ -53,3 +53,52 @@ something the server does not do. Each item names the specification it would bel
 | shared-links | Form filling room and Public room links are perpetual | Only the room's own primary link; entries and additional links keep an expiration date |
 | shared-links | "Rejects" an audience or lifetime value that is not offered | Answers 200 and silently normalises or skips (see the spec) |
 | shared-links | VDR: deny-download cannot be turned off on a link while the room setting is on | The flag is stored; the room setting still blocks the download |
+
+## Suspected defects found while writing the later specs
+
+Static findings (code and tests, not a live run) collected from the `verification.md` of each spec; the
+numbers are the ones used there. Ordered by how much they matter.
+
+### Access and integrity
+
+| # | Spec | What the server does | Evidence |
+|---|------|----------------------|----------|
+| H3 | history-and-audit | `PUT security/activeconnections/logout/{loginEventId}` checks ownership only when the login event has a `UserId`; an event stored without one can be closed by any signed-in user. | `ConnectionsController.LogOutActiveConnection` |
+| S2 | webhooks-and-api-keys | `PUT keys/{id}` on an expired key answers `200 false` before the ownership check: a non-owner learns that a foreign key exists and is expired instead of 403. | `ApiKeysController.UpdateApiKey` |
+| S5 | webhooks-and-api-keys | `PUT settings/webhook` validates the target (incl. an outbound HEAD request) before checking ownership: any member can make the server probe a public URL by naming someone else's webhook id (403 afterwards). | `WebhooksController.UpdateWebhook` |
+| S1 | webhooks-and-api-keys | Updating an API key with `permissions: ["*", "files:read"]` is stored as-is and the auth handler then grants unrestricted `*:write`; creation normalises the same input to "unrestricted". | `ApiKeyManager.UpdateApiKeyAsync`, `ApiKeyBearerAuthHandler` |
+| F1 | file-operations | `POST files/thumbnails` is `[AllowAnonymous]`; an anonymous caller without a link is accepted although the API document says 401. | bug 81268, test red |
+| F9 | file-operations | `markAsRead` has no per-item access check: a non-member marks a room file as read with 200. | `MarkAsReadPermissionsTests` asserts it |
+| F8 | file-operations | `markAsRead` on the My documents root clears the "new" marks of an unrelated room (one shared tag per user). | bug 83509 |
+| Q2 | quotas | Moving a file between two accounts' My documents silently raises the receiver's custom user quota by the file size. | `FileDao.cs` move path |
+| S6 | webhooks-and-api-keys | The "limited Developer Tools access for Users" setting also blocks Room admins; notes and endpoint text say Users only. Intent unclear; the bug-81236 test asserts the block. | `WebhooksController`, `ApiKeysController` |
+
+### Crashes (500) and wrong status codes
+
+| # | Spec | What the server does | Evidence |
+|---|------|----------------------|----------|
+| H1 | history-and-audit | `GET security/audit/events/filter` with any non-default `moduleType` dereferences a null module mapper → 500. No test covers `moduleType`. | `AuditEventsRepository.GetByFilterWithActionsAsync` |
+| Q1 | quotas | A default room or AI-agent quota above the total storage throws a plain `Exception` → 500; the user-quota siblings answer 400 for the same condition. | `SettingsController` |
+| F3 | file-operations | `copyBatchItems` with a folder id that does not exist → 500 (a missing file id → 404). | `FolderCopyTests` asserts the 500 |
+| F5 | file-operations | Aborting an upload session that never existed → 500 instead of 404. | bug 82278 |
+| F2 | file-operations | `POST files/thumbnails` without `fileIds` → 400 with a stack trace instead of 200 and an empty list. | test red, unfiled |
+| Q3 | quotas | `setTenantQuotaSettings` reports a non-admin caller or a hosted portal with `NotSupportedException` → 415 instead of 403. | `SettingsController` |
+| F4 | file-operations | `moveBatchItems` with a file id that does not exist → 403 instead of 404. | bug 82243 |
+| F12, F10, H2 | file-operations, history-and-audit | 403 instead of 404 for a missing folder in `createFile` and a missing file in `getFileVersionInfo`; 403 instead of 401 for an anonymous caller of `file/{id}/history`; the sibling endpoints answer 404 / correctly. | tests assert the current codes |
+| F6 | file-operations | `GET fileops/convert` and `fileops/import` → 400 instead of an empty list; `GET fileops/move` is shadowed by the check endpoint. | bug 82225 |
+| F7 | file-operations | A room member with Editing rights gets 403 from `checkConversionStatus`. | bug 81825 |
+
+### Inconsistencies, messages and documentation
+
+| # | Spec | What the server does | Evidence |
+|---|------|----------------------|----------|
+| F11 | file-operations | `createNewIfExist` is inverted between text/HTML creation (`true` = return the existing file) and every upload call (`true` = keep both). | tests assert both |
+| Q5 | quotas | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting free space as a per-file limit. | `FileDao`, `SetupInfo` |
+| Q4 | quotas | `FolderQuotaChangeAsync` has an unreachable second over-limit check with a "folder not found" message; both cases are 403. | `FileStorageService` |
+| Q6 | quotas | The `maxTotalSize = 0` branch of `getPortalQuota` for a User is dead code behind the permission demand, yet documented in the yaml. | `PortalController` |
+| S3 | webhooks-and-api-keys | `ApiKeyManager.DeleteApiKeyAsync` returns `result >= 0`, i.e. always true. | `ApiKeyManager` |
+| S4 | webhooks-and-api-keys | `PUT settings/webhook/enable` demands `name` and `uri` in a body it ignores. | `EnableWebhook` DTO reuse |
+| H4 | history-and-audit | A missing body on `POST security/audit/settings/lifetime` is reported as "LoginHistoryLifeTime" 400. | `SecurityController.SetAuditSettings` |
+| H5 | history-and-audit | Audit and login filters are silently dropped on a plan without the audit option: 20 most recent events, 200. Design smell, documented. | `SecurityController` |
+| S7 | webhooks-and-api-keys | OpenAPI: `WebhookTrigger` description stops at `form.stopped`; `WebhooksLogDto` example names the header `x-docspace-signature` instead of `x-docspace-signature-256`. | yaml, `WebhooksLogDto.cs` |
+| F13 | file-operations | `checkMoveOrCopyBatchItems`, `checkMoveOrCopyDestFolder` and `deleteFileVersions` cannot be called through the generated SDK clients (query binding / array response). | tests use raw HTTP |
