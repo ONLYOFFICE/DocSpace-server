@@ -246,18 +246,16 @@ internal class BoxDaoBase(
         }
     }
 
-    public Task<BoxFile> GetFileAsync(string fileId)
+    public async Task<BoxFile> GetFileAsync(string fileId)
     {
         var boxFileId = MakeThirdId(fileId);
         try
         {
-            var file = _providerInfo.GetFileAsync(boxFileId);
-
-            return file;
+            return await _providerInfo.GetFileAsync(boxFileId);
         }
         catch (Exception ex)
         {
-            return Task.FromResult<BoxFile>(new ErrorFile(ex, boxFileId));
+            return new ErrorFile(ex, boxFileId);
         }
     }
 
