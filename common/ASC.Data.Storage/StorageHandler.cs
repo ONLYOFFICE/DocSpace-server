@@ -247,7 +247,8 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
     private static bool IsTraversal(string pathInfo)
     {
-        return pathInfo.Split('/', '\\').Any(segment => segment.Trim() is ".." or ".");
+        // A rooted segment (a drive letter like "C:") would reset the base path in Path.Combine.
+        return pathInfo.Split('/', '\\').Any(segment => segment.Trim() is ".." or "." || Path.IsPathRooted(segment));
     }
 
     private string GetRouteValue(string name, HttpContext context)

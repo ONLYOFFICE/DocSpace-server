@@ -46,24 +46,25 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Links;
 [Trait("Bug", "84541")]
 public class RoomLinkStorageAccessTests(
     AspireAppFixture fixture)
-    : RoomsPermissionsTestBase(fixture)
+    : Logos.RoomLogoTestBase(fixture)
 {
     private const string AnonymousSessionCookie = "anonymous_session_key";
-
-    // A 1x1 PNG, enough for a room logo.
-    private const string LogoBase64 =
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 
     /// <summary>
     /// A path that climbs out of the <c>userPhotos</c> root with <c>..\</c> segments must not be served - neither
     /// to a public link visitor nor to the portal owner. The backslashes are sent percent-encoded, as Kestrel
     /// decodes them into the route value just like the raw <c>\</c> of <c>curl --path-as-is</c>, while
     /// <see cref="Uri"/> would otherwise fold them into <c>/</c> and collapse the dot segments client-side.
+    /// The absolute variant names the file by its full path instead (<c>C:\Windows\win.ini</c>): a drive-letter
+    /// segment resets the base path in <see cref="Path.Combine(string[])"/>, and the request must be refused
+    /// the same way, not end in a 400 from the storage's own containment check.
     /// </summary>
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task GetStorageFile_PathOutsideModuleRoot_NotServed(bool anonymous)
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task GetStorageFile_PathOutsideModuleRoot_NotServed(bool anonymous, bool absolute)
     {
         // Arrange
         if (anonymous)
@@ -75,7 +76,7 @@ public class RoomLinkStorageAccessTests(
             await _studioClient.Authenticate(Owner);
         }
 
-        var url = "storage/userPhotos/root/" + string.Concat(Enumerable.Repeat("..%5C", 20)) + OutsideFile();
+        var url = "storage/userPhotos/root/" + (absolute ? OutsideFileAbsolute() : string.Concat(Enumerable.Repeat("..%5C", 20)) + OutsideFile());
 
         // Act
         using var response = await _studioClient.GetAsync(url, TestContext.Current.CancellationToken);
@@ -116,9 +117,8 @@ public class RoomLinkStorageAccessTests(
         await _filesClient.Authenticate(Owner);
         var room = await CreatePublicRoom("Autotest Storage Access Logo");
 
-        await using var stream = new MemoryStream(Convert.FromBase64String(LogoBase64));
-        var tmpFile = (await _roomsApi.UploadRoomLogoAsync(new FileParameter("logo.png", "image/png", stream), TestContext.Current.CancellationToken)).Response.Data!.ToString()!;
-        var logo = (await _roomsApi.CreateRoomLogoAsync(room.Id, new LogoRequest(tmpFile, 0, 0, 1, 1), TestContext.Current.CancellationToken)).Response.Logo.Original;
+        var tmpFile = await UploadLogo(CreateTestImageBytes());
+        var logo = (await CreateLogo(room.Id, tmpFile)).Logo.Original;
         var url = PathOf(logo);
         url.Should().Contain("/storage/room_logos/root/");
 
@@ -153,6 +153,14 @@ public class RoomLinkStorageAccessTests(
         return OperatingSystem.IsWindows()
             ? Path.GetRelativePath(Path.GetPathRoot(Environment.SystemDirectory)!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "win.ini")).Replace("\\", "%5C")
             : "etc%5Cpasswd";
+    }
+
+    /// <summary>The same file by its absolute path, with the separators percent-encoded.</summary>
+    private static string OutsideFileAbsolute()
+    {
+        return OperatingSystem.IsWindows()
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "win.ini").Replace("\\", "%5C")
+            : "%5Cetc%5Cpasswd";
     }
 
     private async Task UsePublicRoomSessionAsync()
