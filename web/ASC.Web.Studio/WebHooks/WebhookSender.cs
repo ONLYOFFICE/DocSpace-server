@@ -65,7 +65,7 @@ public class WebhookSender(
     private const int MaxRequestPayloadLength = ushort.MaxValue;
     private const int MaxResponsePayloadBytes = 8 * 1024;
 
-    public async Task Send(int tenantId, int webhookLogId, CancellationToken cancellationToken)
+    public async Task Send(int tenantId, int webhookLogId, Guid leaseId, CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
@@ -79,7 +79,7 @@ public class WebhookSender(
             var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
             if (tenant == null)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                 return;
             }
 
@@ -92,13 +92,13 @@ public class WebhookSender(
             var entry = await dbWorker.ReadJournal(tenantId, webhookLogId);
             if (entry == null)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                 return;
             }
 
             if (entry.Attempts > 0 && !entry.Config.Enabled)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                 return;
             }
 
@@ -108,7 +108,7 @@ public class WebhookSender(
             });
             if (!validationResult.IsValid)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                 await DisableWebhook(validationResult, entry, dbWorker, messageService);
                 return;
             }
@@ -196,7 +196,7 @@ public class WebhookSender(
 
                 if (e.StatusCode == HttpStatusCode.Gone)
                 {
-                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                     await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
                     messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
                     return;
@@ -245,7 +245,11 @@ public class WebhookSender(
                 requestPayload = entry.RequestPayload;
             }
 
-            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn);
+            if (!await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, leaseId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn))
+            {
+                logger.DebugLeaseLost(entry.Id);
+            }
+
             journalUpdated = true;
 
             await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
@@ -265,12 +269,12 @@ public class WebhookSender(
 
             if (!journalUpdated)
             {
-                await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId);
+                await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
             }
         }
     }
 
-    private async Task RegisterFailedAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId)
+    private async Task RegisterFailedAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
     {
         try
         {
@@ -292,7 +296,7 @@ public class WebhookSender(
                 logger.WarningDeliveryGivenUp(webhookLogId, nextAttempts);
             }
 
-            await dbWorker.ScheduleJournalAttemptAsync(tenantId, webhookLogId, nextAttempts, nextAttemptOn);
+            await dbWorker.ScheduleJournalAttemptAsync(tenantId, webhookLogId, leaseId, nextAttempts, nextAttemptOn);
         }
         catch (Exception e)
         {

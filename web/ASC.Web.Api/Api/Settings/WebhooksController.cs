@@ -337,8 +337,10 @@ public class WebhooksController(
     ///
     /// A `DocSpaceAdmin` may retry any delivery in the portal, anyone else only deliveries of the subscriptions
     /// they created, and a `Guest` is refused. An `id` of 0 is rejected as an invalid request and an unknown one
-    /// gives 404. The operation is rate limited, so a burst of calls is answered with 429; to retry several records
-    /// use `PUT api/2.0/settings/webhook/retry`.
+    /// gives 404. A delivery that is being sent at this very moment cannot be retried and gives 409: wait until
+    /// `GET api/2.0/settings/webhooks/log` shows the outcome of that attempt, then retry if it is still needed. The
+    /// operation is rate limited, so a burst of calls is answered with 429; to retry several records use
+    /// `PUT api/2.0/settings/webhook/retry`.
     /// </remarks>
     /// <summary>
     /// Retry a webhook delivery
@@ -349,6 +351,7 @@ public class WebhooksController(
     [SwaggerResponse(400, "The delivery record identifier is 0")]
     [SwaggerResponse(403, "The delivery belongs to another member's subscription, or the caller may not use webhooks")]
     [SwaggerResponse(404, "No delivery record with this ID exists in the portal")]
+    [SwaggerResponse(409, "The delivery is being sent at this moment and cannot be requeued until that attempt finishes")]
     [HttpPut("webhook/{id:int}/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
@@ -375,30 +378,33 @@ public class WebhooksController(
 
         var result = await webhookPublisher.RetryPublishAsync(item);
 
-        if (result == null)
+        switch (result.Status)
         {
-            // the record was removed between the read above and the requeue
-            throw new ItemNotFoundException();
+            case WebhookRetryStatus.NotFound:
+                // the record was removed between the read above and the requeue
+                throw new ItemNotFoundException();
+            case WebhookRetryStatus.InProgress:
+                throw new CustomHttpException(HttpStatusCode.Conflict, "The delivery is being sent right now; retry it once the attempt has finished");
         }
 
-        return mapper.Map(result);
+        return mapper.Map(result.Log);
     }
 
     /// <remarks>
     /// Sends a batch of past webhook deliveries again. `ids` holds the identifiers of delivery records from
     /// `GET api/2.0/settings/webhooks/log`; each of them is put back in the queue for the subscription it belongs
     /// to and sent once more, byte for byte, and the response lists those records with `status` and `delivery`
-    /// cleared. Records that do not exist, and records of another member's subscription when the caller is not a
-    /// `DocSpaceAdmin`, are skipped in silence instead of failing the call, so a response shorter than `ids` is the
-    /// only sign that something was left out: compare the counts rather than assuming everything was queued. An
-    /// empty `ids` list is accepted and queues nothing. Read the outcomes from
-    /// `GET api/2.0/settings/webhooks/log`, matching the returned identifiers with `eventId`.
+    /// cleared. Records that do not exist, records being sent at this very moment, and records of another member's
+    /// subscription when the caller is not a `DocSpaceAdmin`, are skipped in silence instead of failing the call,
+    /// so a response shorter than `ids` is the only sign that something was left out: compare the counts rather
+    /// than assuming everything was queued. An empty `ids` list is accepted and queues nothing. Read the outcomes
+    /// from `GET api/2.0/settings/webhooks/log`, matching the returned identifiers with `eventId`.
     ///
     /// Each record keeps its identifier, so a retried delivery reaches the receiver as `event.id` of the original
     /// event rather than as a new one, and the outcome of its previous attempt is cleared rather than kept beside
     /// the new one. A `Guest` is refused. The operation is rate limited, so a burst of calls is answered with 429.
-    /// For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing or forbidden record instead
-    /// of skipping it.
+    /// For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing, forbidden or in-flight
+    /// record instead of skipping it.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries
@@ -431,12 +437,12 @@ public class WebhooksController(
 
             var result = await webhookPublisher.RetryPublishAsync(item);
 
-            if (result == null)
+            if (result.Status != WebhookRetryStatus.Requeued)
             {
                 continue;
             }
 
-            yield return mapper.Map(result);
+            yield return mapper.Map(result.Log);
         }
     }
 

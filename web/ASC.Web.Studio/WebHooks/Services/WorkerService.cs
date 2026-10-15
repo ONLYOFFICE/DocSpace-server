@@ -63,7 +63,7 @@ public class WorkerService(
 
             try
             {
-                List<(int TenantId, int Id)> entries;
+                List<(int TenantId, int Id, Guid LeaseId)> entries;
 
                 await using (var scope = scopeFactory.CreateAsyncScope())
                 {
@@ -75,7 +75,7 @@ public class WorkerService(
 
                 if (claimed > 0)
                 {
-                    await Parallel.ForEachAsync(entries, parallelOptions, async (entry, token) => await webhookSender.Send(entry.TenantId, entry.Id, token));
+                    await Parallel.ForEachAsync(entries, parallelOptions, async (entry, token) => await webhookSender.Send(entry.TenantId, entry.Id, entry.LeaseId, token));
 
                     logger.DebugProcedureFinish();
                 }
