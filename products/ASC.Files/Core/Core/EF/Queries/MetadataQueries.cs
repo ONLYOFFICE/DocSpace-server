@@ -84,9 +84,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<MetadataTextMatch> MetadataTextMatchesAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText)
+    public IAsyncEnumerable<MetadataTextMatch> MetadataTextMatchesAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText, bool includeHiddenTemplates)
     {
-        return MetadataQueries.MetadataTextMatchesAsync(this, tenantId, fileIds, folderIds, lowerText);
+        return MetadataQueries.MetadataTextMatchesAsync(this, tenantId, fileIds, folderIds, lowerText, includeHiddenTemplates);
     }
 
     [PreCompileQuery]
@@ -599,11 +599,12 @@ static file class MetadataQueries
     /// <summary>
     /// The string values of one listing page that contain the lowered text, with the field and the template they belong
     /// to: what the text search matched, for the page to say where. The system template is not shown outside, so its
-    /// fields (the custom fields) come back by name alone, without the template or the field id.
+    /// fields (the custom fields) come back by name alone, without the template or the field id. The values of the hidden
+    /// templates are reported on request only, the way the text search finds by them on request only.
     /// </summary>
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, string, IAsyncEnumerable<MetadataTextMatch>> MetadataTextMatchesAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, string, bool, IAsyncEnumerable<MetadataTextMatch>> MetadataTextMatchesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText) =>
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds, string lowerText, bool includeHiddenTemplates) =>
                 ctx.MetadataValues
                     .Where(v => v.TenantId == tenantId && v.ValueString.ToLower().Contains(lowerText) &&
                         ((v.EntryType == FileEntryType.File && fileIds.Contains(v.EntryId)) ||
@@ -611,7 +612,7 @@ static file class MetadataQueries
                     .Join(ctx.MetadataFields, v => v.FieldId, f => f.Id, (v, f) => new { Value = v, Field = f })
                     .Where(x => x.Field.TenantId == tenantId)
                     .Join(ctx.MetadataTemplates, x => x.Field.TemplateId, t => t.Id, (x, t) => new { x.Value, x.Field, Template = t })
-                    .Where(x => x.Template.TenantId == tenantId)
+                    .Where(x => x.Template.TenantId == tenantId && (includeHiddenTemplates || x.Template.Visible || x.Template.IsSystem))
                     .OrderBy(x => x.Value.EntryType).ThenBy(x => x.Value.EntryId).ThenBy(x => x.Field.Order).ThenBy(x => x.Field.Id)
                     .Select(x => new MetadataTextMatch
                     {

@@ -47,6 +47,14 @@ public class MetadataFilter
     public List<MetadataFilterCondition> Conditions { get; set; } = [];
 
     /// <summary>
+    /// Whether the free text search and the matches it reports look at the values of the hidden templates as well. The
+    /// hidden templates hold the metadata a service keeps for itself, which the web client never shows, so by default
+    /// the text search does not find an entry by them either; the conditions and the template of the filter are not
+    /// concerned, a hidden template or field named there is searched either way.
+    /// </summary>
+    public bool IncludeHiddenTemplates { get; set; }
+
+    /// <summary>
     /// <c>true</c> when the filter narrows nothing, so the callers treat it the same as a missing one.
     /// </summary>
     public bool IsEmpty => TemplateId == null && Conditions.Count == 0;
@@ -215,16 +223,16 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
     /// listing is narrowed to the entries the template is assigned to. It used to be read for validation only, so such a
     /// request came back unfiltered with a 200.
     /// </summary>
-    public Task<MetadataFilter> ParseAsync(int? templateId, string json)
+    public Task<MetadataFilter> ParseAsync(int? templateId, string json, bool includeHiddenTemplates = false)
     {
-        return ParseAsync(templateId, ParseConditions(json));
+        return ParseAsync(templateId, ParseConditions(json), includeHiddenTemplates);
     }
 
     /// <summary>
     /// Builds the filter from typed conditions, the form the search endpoints take in their body. The query string
     /// variant is parsed into the same conditions first, so both roads validate and evaluate identically.
     /// </summary>
-    public async Task<MetadataFilter> ParseAsync(int? templateId, IEnumerable<MetadataFilterConditionRequest> conditions)
+    public async Task<MetadataFilter> ParseAsync(int? templateId, IEnumerable<MetadataFilterConditionRequest> conditions, bool includeHiddenTemplates = false)
     {
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
@@ -244,7 +252,9 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
 
         if (requests.Count == 0)
         {
-            return templateId.HasValue ? new MetadataFilter { TemplateId = templateId } : null;
+            return templateId.HasValue || includeHiddenTemplates
+                ? new MetadataFilter { TemplateId = templateId, IncludeHiddenTemplates = includeHiddenTemplates }
+                : null;
         }
 
         if (requests.Count > MaxConditions)
@@ -257,7 +267,7 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         var fields = await metadataDao.GetFieldsAsync(requests.Select(r => r.FieldId).Distinct())
             .ToDictionaryAsync(f => f.Id);
 
-        var filter = new MetadataFilter { TemplateId = templateId };
+        var filter = new MetadataFilter { TemplateId = templateId, IncludeHiddenTemplates = includeHiddenTemplates };
 
         foreach (var request in requests)
         {

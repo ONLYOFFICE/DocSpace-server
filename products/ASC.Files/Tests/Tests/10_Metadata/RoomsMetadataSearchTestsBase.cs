@@ -208,9 +208,9 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
         /// <summary>
         /// Searches by the free text only, without a structured metadata filter.
         /// </summary>
-        public Task<RoomsContentResponse> SearchByTextAsync(string text, int[] expected, TimeSpan? timeout = null)
+        public Task<RoomsContentResponse> SearchByTextAsync(string text, int[] expected, TimeSpan? timeout = null, bool? includeHiddenMetadata = null)
         {
-            return PollAsync(conditions: null, expected, filterValue: text, searchArea: null, roomType: null, timeout);
+            return PollAsync(conditions: null, expected, filterValue: text, searchArea: null, roomType: null, timeout, includeHiddenMetadata);
         }
 
         /// <summary>
@@ -221,16 +221,16 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
             return PollAsync(until, conditions: null, filterValue: null, searchArea, roomType: null, timeout);
         }
 
-        private Task<RoomsContentResponse> PollAsync(object[]? conditions, int[] expected, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout)
+        private Task<RoomsContentResponse> PollAsync(object[]? conditions, int[] expected, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
         {
-            return PollAsync(r => r.RoomIds().Order().SequenceEqual(expected.Order()), conditions, filterValue, searchArea, roomType, timeout);
+            return PollAsync(r => r.RoomIds().Order().SequenceEqual(expected.Order()), conditions, filterValue, searchArea, roomType, timeout, includeHiddenMetadata);
         }
 
         /// <summary>
         /// Requests the rooms listing, retrying until the condition holds.
         /// The metadata values are indexed right after they are written, the retry only absorbs the indexing lag.
         /// </summary>
-        private async Task<RoomsContentResponse> PollAsync(Func<RoomsContentResponse, bool> until, object[]? conditions, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout)
+        private async Task<RoomsContentResponse> PollAsync(Func<RoomsContentResponse, bool> until, object[]? conditions, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
         {
             using var deadline = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
 
@@ -242,7 +242,8 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
                     filterValue,
                     searchArea,
                     roomType,
-                    TestContext.Current.CancellationToken);
+                    TestContext.Current.CancellationToken,
+                    includeHiddenMetadata);
 
                 if (until(rooms) || deadline.IsCancellationRequested)
                 {
