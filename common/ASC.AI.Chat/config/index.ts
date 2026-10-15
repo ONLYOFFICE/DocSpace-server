@@ -164,6 +164,12 @@ export interface DocumentAgentConfig {
      * reaches; an agent elsewhere needs the public portal address here.
      */
     portalUrl: string | undefined;
+    /**
+     * Where the agent reaches this service, for the file-link MCP server handed to it (see
+     * `documentAgentFiles.ts`). `http://localhost:<port>` by default, which an agent on the same
+     * host reaches; an agent elsewhere needs this service's address on their shared network.
+     */
+    filesUrl: string;
 }
 
 const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
@@ -172,7 +178,8 @@ const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
 // each field overridable from the environment in the same `__` form as the
 // MCP endpoints (`AI__DOCUMENT_AGENT__URL`, `AI__DOCUMENT_AGENT__TOKEN`,
 // `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS`, `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`,
-// `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`).
+// `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`,
+// `AI__DOCUMENT_AGENT__FILES_URL`).
 // Undefined without a URL and a token: the tool is then simply not offered.
 export function getDocumentAgent(): DocumentAgentConfig | undefined {
     const ai: RootConfig["ai"] = nconf.get("ai");
@@ -194,6 +201,7 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
     const shareSystemServers =
         share !== undefined && share !== "" ? share === "true" || share === "1" : setting?.shareSystemServers === true;
     const portalUrl = (process.env["AI__DOCUMENT_AGENT__PORTAL_URL"] || setting?.portalUrl || "").trim();
+    const filesUrl = (process.env["AI__DOCUMENT_AGENT__FILES_URL"] || setting?.filesUrl || "").trim();
     return {
         url: url.replace(/\/+$/, ""),
         token,
@@ -201,6 +209,7 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
         maxToolCalls,
         shareSystemServers,
         portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
+        filesUrl: (filesUrl === "" ? `http://localhost:${getAppConfig().port}` : filesUrl).replace(/\/+$/, ""),
     };
 }
 

@@ -80,6 +80,12 @@ import {
   systemServerHeaders,
 } from "./systemTools.js";
 import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
+import {
+  DOCUMENT_AGENT_FILES_PATH,
+  DOCUMENT_AGENT_FILES_SERVER,
+  DOCUMENT_AGENT_TOKEN_HEADER,
+  GET_FILE_LINK_TOOL,
+} from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { agentAssignedProfileId } from "../controllers/agentProfile.js";
 import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
@@ -409,8 +415,11 @@ function withInputIds(task: string, fileIds: string[], folderIds: string[]): str
     return task;
   }
   const lines = [
-    "Workspace inputs: read their content with the DocSpace tools. Do not change them; " +
-      "save every result as a new file.",
+    "Workspace inputs, by id. To open or edit a file as it is, fetch it with " +
+      `${DOCUMENT_AGENT_FILES_SERVER}_${GET_FILE_LINK_TOOL}: it lands in your sandbox as a file. ` +
+      "docspace_download_file_as_text gives a file's text only; docspace_get_folder_content lists " +
+      "a folder. Never change the originals: produce every result as a new file under " +
+      "/workspace/out.",
   ];
   if (fileIds.length > 0) {
     lines.push(`- file ids: ${fileIds.join(", ")}`);
@@ -465,6 +474,16 @@ async function collectServers(
         "configured in ai.mcp, the agent cannot read workspace files",
     );
   }
+
+  // This service's own server (see documentAgentFiles.ts): the agent presents
+  // the shared token and the user's session, the same session the portal
+  // server gets, so a link is minted only for a file the user may read.
+  const session = sessionCookie();
+  const authorization = getForwardedHeaders()["authorization"];
+  add(DOCUMENT_AGENT_FILES_SERVER, `${config.filesUrl}${DOCUMENT_AGENT_FILES_PATH}`, {
+    [DOCUMENT_AGENT_TOKEN_HEADER]: config.token,
+    ...(session ? { cookie: session } : authorization ? { authorization } : {}),
+  });
 
   const custom = await resolveCustomServers(entityId);
   for (const [name, server] of Object.entries(custom)) {

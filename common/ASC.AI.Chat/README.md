@@ -20,14 +20,15 @@ tool is not offered at all.
 The agent is configured in the shared `appsettings.json` under `ai.documentAgent`, or from the
 environment, which wins:
 
-| `appsettings.json`                    | Environment                                | Default                  |
-| ------------------------------------- | ------------------------------------------ | ------------------------ |
-| `ai.documentAgent.url`                | `AI__DOCUMENT_AGENT__URL`                  | —                        |
-| `ai.documentAgent.token`              | `AI__DOCUMENT_AGENT__TOKEN`                | —                        |
-| `ai.documentAgent.taskTimeoutSeconds` | `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS` | `1800`                   |
-| `ai.documentAgent.maxToolCalls`       | `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`       | agent's                  |
-| `ai.documentAgent.shareSystemServers` | `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS` | `false`                  |
-| `ai.documentAgent.portalUrl`          | `AI__DOCUMENT_AGENT__PORTAL_URL`           | the AI service's address |
+| `appsettings.json`                    | Environment                                | Default                   |
+| ------------------------------------- | ------------------------------------------ | ------------------------- |
+| `ai.documentAgent.url`                | `AI__DOCUMENT_AGENT__URL`                  | —                         |
+| `ai.documentAgent.token`              | `AI__DOCUMENT_AGENT__TOKEN`                | —                         |
+| `ai.documentAgent.taskTimeoutSeconds` | `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS` | `1800`                    |
+| `ai.documentAgent.maxToolCalls`       | `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`       | agent's                   |
+| `ai.documentAgent.shareSystemServers` | `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS` | `false`                   |
+| `ai.documentAgent.portalUrl`          | `AI__DOCUMENT_AGENT__PORTAL_URL`           | the AI service's address  |
+| `ai.documentAgent.filesUrl`           | `AI__DOCUMENT_AGENT__FILES_URL`            | `http://localhost:<port>` |
 
 In the Docker install the two required values come from `DOCUMENT_AGENT_URL` and
 `DOCUMENT_AGENT_TOKEN` in `install/docker/.env`.
@@ -44,7 +45,13 @@ and folders the model names, are appended to the task's text, and the agent read
 through that server. Of its tools the agent takes the reading ones only (those docspace-mcp
 annotates read-only: `get_*`, `download_file_as_text`), as it does for every server it is not
 told `readOnly: false` about: it runs its tools without asking anyone, so nothing of the user's
-workspace may be changed from a task. With
+workspace may be changed from a task. Next to it goes a small MCP server of this service itself
+(`app/tools/documentAgentFiles.ts`, at `/document-agent/files/mcp` under `filesUrl`) with one
+tool, `workspace_get_file_link`: a workspace file id in, the Files API's pre-signed download
+link out, re-hosted on `portalUrl`; the agent fetches the link itself, so the file lands in its
+sandbox as it is and Document Builder can open or edit it (`docspace_download_file_as_text`
+gives only the text). The agent presents the document agent's token (`X-Docagent-Token`) and
+the user's session, and a link is minted only for a file that session may read. With
 `shareSystemServers` the other host-configured servers of `ai.mcp` go
 along as well. Their endpoints must be reachable from the agent's host, as the agent refuses a
 task whose server it cannot connect to. The originals are

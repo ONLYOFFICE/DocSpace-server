@@ -130,6 +130,8 @@ export interface DocumentAgentSetting {
   shareSystemServers?: boolean;
   /** The portal API as the agent reaches it, for the portal's own model provider; the AI service's address by default. */
   portalUrl?: string;
+  /** This service as the agent reaches it, for the file-link server it hands the agent; `http://localhost:<port>` by default. */
+  filesUrl?: string;
 }
 
 export interface RootConfig {

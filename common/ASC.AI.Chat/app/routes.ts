@@ -63,6 +63,7 @@ import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
 import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
+import { registerDocumentAgentFiles } from "./tools/documentAgentFiles.js";
 
 export { API_PREFIX };
 
@@ -236,14 +237,8 @@ export default function registerRoutes(app: Application): void {
   // Web-search passthrough for the editor AI plugin: the plugin holds a
   // placeholder config, the portal's active provider and key are resolved
   // here (see webSearchPassthroughController).
-  router.post(
-    "/websearch/v1/search",
-    webSearchPassthroughController.search,
-  );
-  router.post(
-    "/websearch/v1/contents",
-    webSearchPassthroughController.contents,
-  );
+  router.post("/websearch/v1/search", webSearchPassthroughController.search);
+  router.post("/websearch/v1/contents", webSearchPassthroughController.contents);
 
   let total = 0;
   for (const binding of ENGINE_DOCS) {
@@ -253,6 +248,10 @@ export default function registerRoutes(app: Application): void {
   logger.info(
     `Registered ${total} engine routes across ${ENGINE_DOCS.length} engines under ${API_PREFIX}`,
   );
+
+  // The document agent's file-link server, outside the API prefix and its
+  // catalog: a machine endpoint with its own token, not a route of the chat.
+  registerDocumentAgentFiles(app);
 
   app.use(API_PREFIX, router);
 
