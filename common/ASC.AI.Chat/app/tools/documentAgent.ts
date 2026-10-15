@@ -73,8 +73,13 @@ import {
   getSourceMeta,
 } from "../requestContext.js";
 import { resolveCustomServers } from "./customTools.js";
-import { agentServerWhitelist, getSystemServerConfig, systemServerHeaders } from "./systemTools.js";
-import { getMcpServers } from "../../config/index.js";
+import {
+  agentServerWhitelist,
+  getSystemServerConfig,
+  sessionCookie,
+  systemServerHeaders,
+} from "./systemTools.js";
+import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { agentAssignedProfileId } from "../controllers/agentProfile.js";
 import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
@@ -325,11 +330,12 @@ const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
 // The profile as the agent's settings want it. A third-party provider goes
 // as stored, key included. For the portal's own provider the key is a
-// placeholder and the session is what authenticates: the caller's cookie
-// goes along (the portal API reads the session from it, the key stays a
-// harmless bearer), or, for a caller that sent a header instead, that
-// header in place of the key. The round's source goes along too, so the
-// agent's requests are billed to the same entry as the chat's own.
+// placeholder and the session is what authenticates: the caller's auth
+// cookie goes along, that one cookie only (the portal API reads the session
+// from it, the key stays a harmless bearer), or, for a caller that sent a
+// header instead, that header in place of the key. The round's source goes
+// along too, so the agent's requests are billed to the same entry as the
+// chat's own.
 function modelSettings(
   profile: Profile,
   config: DocumentAgentConfig,
@@ -355,9 +361,8 @@ function modelSettings(
     if (source) {
       model.source = source;
     }
-    const forwarded = getForwardedHeaders();
-    const cookie = forwarded["cookie"];
-    const authorization = forwarded["authorization"];
+    const cookie = sessionCookie();
+    const authorization = getForwardedHeaders()["authorization"];
     if (cookie) {
       model.headers = { ...model.headers, cookie };
     } else if (authorization) {
@@ -416,12 +421,13 @@ function withInputIds(task: string, fileIds: string[], folderIds: string[]): str
   return `${task}\n\n${lines.join("\n")}`;
 }
 
-// The MCP servers the agent gets: the custom servers of the round's scope,
-// as the chat itself sees them, and, when the host shares them, the
-// host-configured system servers (the portal's own among them) under the
-// same whitelist the chat applies to an agent room, with the caller's
-// session as their headers. The agent connects to every server it is given
-// before it starts, so a server it cannot reach fails the task.
+// The MCP servers the agent gets: the portal's own server always, as that is
+// how the agent reads the workspace ids it is handed; the other
+// host-configured system servers when the host shares them, under the same
+// whitelist the chat applies to an agent room; and the custom servers of the
+// round's scope, as the chat itself sees them. The system servers carry the
+// caller's session as their headers. The agent connects to every server it
+// is given before it starts, so a server it cannot reach fails the task.
 async function collectServers(
   config: DocumentAgentConfig,
   entityId: string | undefined,
@@ -440,16 +446,24 @@ async function collectServers(
     };
   };
 
-  if (config.shareSystemServers) {
-    const whitelist = await agentServerWhitelist(entityId);
-    const headers = systemServerHeaders();
-    for (const server of getMcpServers()) {
-      if (whitelist && !whitelist.has(server.name)) {
-        continue;
-      }
-      const url = getSystemServerConfig(server.name)?.url ?? server.endpoint;
-      add(server.name, url, headers);
+  const whitelist = config.shareSystemServers ? await agentServerWhitelist(entityId) : undefined;
+  const headers = systemServerHeaders();
+  for (const server of getMcpServers()) {
+    const portal = server.name === PORTAL_MCP_SERVER_NAME;
+    if (!portal && !config.shareSystemServers) {
+      continue;
     }
+    if (whitelist && !whitelist.has(server.name)) {
+      continue;
+    }
+    const url = getSystemServerConfig(server.name)?.url ?? server.endpoint;
+    add(server.name, url, headers);
+  }
+  if (!(PORTAL_MCP_SERVER_NAME in out)) {
+    logger.warn(
+      `${DOCUMENT_AGENT_TOOL_NAME}: the portal's MCP server "${PORTAL_MCP_SERVER_NAME}" is not ` +
+        "configured in ai.mcp, the agent cannot read workspace files",
+    );
   }
 
   const custom = await resolveCustomServers(entityId);

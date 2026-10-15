@@ -38,13 +38,16 @@ scope. A profile of the portal's own provider is reached through `/api/2.0/ai/ga
 the agent's model requests are billed like the chat's own; the default is the AI service's own
 address, which an agent on the same network reaches, while an agent elsewhere needs the public
 portal address there.
-With `shareSystemServers` the host-configured servers of `ai.mcp` (the portal's own
-`docspace` server among them) are handed over too, with the user's session, so the agent can
-read and write the workspace itself; their endpoints must then be reachable from the agent's
-host, as the agent refuses a task whose server it cannot connect to. No file content is sent:
-the ids of the files attached to the message, and of the files and folders the model names, are
-appended to the task's text, and the agent reads them itself through the portal's MCP server,
-which therefore has to be among the servers it gets (`shareSystemServers`). The originals are
+The portal's own `docspace` server of `ai.mcp` is always handed over too, with the user's
+session: no file content is sent, the ids of the files attached to the message, and of the files
+and folders the model names, are appended to the task's text, and the agent reads them itself
+through that server. Of its tools the agent takes the reading ones only (those docspace-mcp
+annotates read-only: `get_*`, `download_file_as_text`), as it does for every server it is not
+told `readOnly: false` about: it runs its tools without asking anyone, so nothing of the user's
+workspace may be changed from a task. With
+`shareSystemServers` the other host-configured servers of `ai.mcp` go
+along as well. Their endpoints must be reachable from the agent's host, as the agent refuses a
+task whose server it cannot connect to. The originals are
 never changed: the files the agent produces are saved as new files into the agent room's Result
 Storage, else the current folder, else My documents. While an agent is configured the
 `onlyoffice_generate_*` tools, which only create empty files, are not offered.

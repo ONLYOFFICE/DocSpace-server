@@ -168,6 +168,15 @@ export function systemServerHeaders(): Record<string, string> {
   };
 }
 
+// The caller's session as the one cookie the portal API reads, for a client
+// outside this process that must act as the user against the portal itself
+// (the document agent's model requests through the gateway proxy). Only the
+// auth cookie goes: the rest of the browser's cookies are not the agent's.
+export function sessionCookie(): string | undefined {
+  const token = readCookie(getForwardedHeaders()["cookie"], AUTH_COOKIE);
+  return token === undefined ? undefined : `${AUTH_COOKIE}=${token}`;
+}
+
 // Forward the caller's DocSpace auth/context headers to the MCP server so
 // it acts on behalf of the current user, plus an `Authorization` header
 // derived from the auth cookie and a `Referer` pointing at the portal root.

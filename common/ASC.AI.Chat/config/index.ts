@@ -151,10 +151,10 @@ export interface DocumentAgentConfig {
     /** Tool calls the agent may make for one task; undefined leaves the agent's default. */
     maxToolCalls: number | undefined;
     /**
-     * Whether the host-configured MCP servers (`ai.mcp`, the portal's own among them) are handed
-     * to the agent with the caller's session, so a task can read and write the workspace. Their
-     * endpoints must then be reachable from the agent: it refuses a task whose server it cannot
-     * connect to.
+     * Whether the host-configured MCP servers of `ai.mcp` other than the portal's own are handed
+     * to the agent with the caller's session. The portal's own server always goes: it is how the
+     * agent reads the workspace. Their endpoints must be reachable from the agent: it refuses a
+     * task whose server it cannot connect to.
      */
     shareSystemServers: boolean;
     /**
