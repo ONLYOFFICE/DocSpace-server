@@ -91,10 +91,6 @@ public class ThirdPartyRecentDeleteTests(
 
         await DeleteThroughAnotherConnection(file.Id);
 
-        // Without the wait the room's connection still serves the deleted file from its cache, the
-        // entry is removed the ordinary way and the missing-file path is never taken.
-        await WaitForProviderCacheToExpire();
-
         // Act
         await _filesApi.DeleteRecentAsync(
             new BaseBatchRequestDto(fileIds: [new BaseBatchRequestDtoAllOfFileIds(file.Id)]),

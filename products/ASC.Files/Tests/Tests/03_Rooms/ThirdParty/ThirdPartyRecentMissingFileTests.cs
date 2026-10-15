@@ -41,8 +41,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.ThirdParty;
 /// <remarks>
 /// The file is removed through a room on a second connection to the same account, so the Recent mark made
 /// through the room's connection stays: deleting through the room would take the mark with it.
-/// Each connection caches the storage's answers for a minute, so the test waits that out before
-/// opening the document.
+/// The helper then reads the file through the room, which drops the answer the room's connection
+/// had cached, so the editor sees the file missing straight away.
 /// </remarks>
 [Trait("Category", "Rooms")]
 [Trait("Requires", "Nextcloud")]
@@ -73,10 +73,6 @@ public class ThirdPartyRecentMissingFileTests(
 
         var document = await CreateFileInMy("Autotest Recent Missing Document.docx", Owner);
         var spreadsheet = await CreateFileInMy("Autotest Recent Missing Spreadsheet.xlsx", Owner);
-
-        // Without this wait the room's connection still answers from its cache with the deleted
-        // file and the editor opens fine, so the test would pass while the defect is there.
-        await WaitForProviderCacheToExpire();
 
         // Act
         var failures = new List<string>();

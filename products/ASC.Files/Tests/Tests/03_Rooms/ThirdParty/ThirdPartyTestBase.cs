@@ -243,7 +243,8 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// <summary>
     /// Deletes a file of a WebDAV room from the storage through a fresh connection to the same
     /// account, which leaves the tags made through the room's own connection in place: deleting
-    /// through the room itself would take its Recent and Favorites marks with it.
+    /// through the room itself would take its Recent and Favorites marks with it. On return the
+    /// room's own connection reports the file missing as well.
     /// </summary>
     protected async Task DeleteThroughAnotherConnection(string fileId)
     {
@@ -262,16 +263,14 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
 
         finished.Should().NotBeNull();
         finished!.Should().OnlyContain(r => r.Finished && string.IsNullOrEmpty(r.Error));
-    }
 
-    /// <summary>
-    /// Waits out the minute for which a connection keeps the storage's answers. A connection that read
-    /// a file before it was deleted elsewhere goes on serving it until then, so a test that needs the
-    /// storage to report the file missing has to wait first.
-    /// </summary>
-    protected static Task WaitForProviderCacheToExpire()
-    {
-        return Task.Delay(TimeSpan.FromSeconds(65), TestContext.Current.CancellationToken);
+        // Each connection keeps the storage's answers for a minute, so the room's connection would go
+        // on serving the deleted file from its cache. Reading the file through the room drops that
+        // cached answer and asks the storage again, which no longer has it.
+        var missing = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
+
+        missing.ErrorCode.Should().Be(404);
     }
 
     /// <summary>
