@@ -51,8 +51,6 @@ public class ThirdPartyRecentMissingFileTests(
     AspireAppFixture fixture)
     : ThirdPartyTestBase(fixture)
 {
-    private static readonly TimeSpan _providerCacheExpiration = TimeSpan.FromSeconds(65);
-
     /// <remarks>
     /// Bug 84528: the editor configuration answered 500 (NullReferenceException) for a document of
     /// any editable type while Recent held a WebDAV file deleted in the storage, because the
@@ -78,7 +76,7 @@ public class ThirdPartyRecentMissingFileTests(
 
         // Without this wait the room's connection still answers from its cache with the deleted
         // file and the editor opens fine, so the test would pass while the defect is there.
-        await Task.Delay(_providerCacheExpiration, TestContext.Current.CancellationToken);
+        await WaitForProviderCacheToExpire();
 
         // Act
         var failures = new List<string>();
@@ -97,28 +95,5 @@ public class ThirdPartyRecentMissingFileTests(
 
         // Assert
         failures.Should().BeEmpty();
-    }
-
-    /// <summary>
-    /// Deletes a file of a WebDAV room from the storage through a fresh connection to the same
-    /// account, which leaves the tags made through the room's own connection in place.
-    /// </summary>
-    private async Task DeleteThroughAnotherConnection(string fileId)
-    {
-        // A WebDAV id is "sbox-<connection>-<base64url path>"; the path is the same for every
-        // connection to the account.
-        var encodedPath = fileId.Split('-', 3)[2].Replace('-', '+').Replace('_', '/');
-        var path = Encoding.UTF8.GetString(Convert.FromBase64String(encodedPath.PadRight(encodedPath.Length + (4 - encodedPath.Length % 4) % 4, '=')));
-
-        // A bare connection may not delete anything, so the second connection is turned into a room
-        // rooted at the account, which addresses the file by the same path.
-        var (_, _, removerRoomId) = await CreateNextcloudRoom(UniqueTitle("TP Recent Remover"));
-
-        var results = (await _filesApi.DeleteFileAsync(
-            WebDavFolderId(removerRoomId, path), new DeleteFileRequest(false, true), cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var finished = await WaitLongOperation(results.FirstOrDefault()?.Id);
-
-        finished.Should().NotBeNull();
-        finished!.Should().OnlyContain(r => r.Finished && string.IsNullOrEmpty(r.Error));
     }
 }

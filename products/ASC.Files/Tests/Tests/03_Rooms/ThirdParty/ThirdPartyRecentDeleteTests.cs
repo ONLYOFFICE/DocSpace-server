@@ -70,4 +70,38 @@ public class ThirdPartyRecentDeleteTests(
         var recent = await PollRecentTitlesUntil(t => !t.Contains(file.Title));
         recent.Should().NotContain(file.Title);
     }
+
+    /// <remarks>
+    /// Bug 84528: once third-party ids were passed on, a file deleted in the storage must not fail the
+    /// whole call. The storage no longer finds the file, so its entry is not removed, but the call
+    /// still succeeds and the section keeps listing without it.
+    /// </remarks>
+    [Trait("Bug", "84528")]
+    [Fact]
+    public async Task DeleteRecent_ThirdPartyFileMissingFromStorage_Succeeds()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        var (_, work) = await CreateWorkFolder("TP Recent Delete Missing");
+        var file = await CreateThirdPartyFile(work.Id, $"{UniqueTitle("TP Recent Delete Missing")}.docx");
+
+        await _filesApi.AddFileToRecentAsync(file.Id, TestContext.Current.CancellationToken);
+        (await PollRecentTitlesUntil(t => t.Contains(file.Title))).Should().Contain(file.Title);
+
+        await DeleteThroughAnotherConnection(file.Id);
+
+        // Without the wait the room's connection still serves the deleted file from its cache, the
+        // entry is removed the ordinary way and the missing-file path is never taken.
+        await WaitForProviderCacheToExpire();
+
+        // Act
+        await _filesApi.DeleteRecentAsync(
+            new BaseBatchRequestDto(fileIds: [new BaseBatchRequestDtoAllOfFileIds(file.Id)]),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        var recent = await PollRecentTitlesUntil(t => !t.Contains(file.Title));
+        recent.Should().NotContain(file.Title);
+    }
 }
