@@ -142,6 +142,7 @@ public class WebhookSender(
             var attempts = entry.Attempts + 1;
             var status = 0;
             var succeeded = false;
+            var mayAutoDisable = false;
             DateTime? delivery = null;
             string responsePayload;
             string responseHeaders = null;
@@ -178,7 +179,7 @@ public class WebhookSender(
                 responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
                 responsePayload = await ReadResponsePayloadAsync(response.Content, timeoutCts.Token);
 
-                entry.Config.LastSuccessOn = delivery = DateTime.UtcNow;
+                delivery = DateTime.UtcNow;
                 succeeded = true;
 
                 logger.DebugResponse(response);
@@ -203,16 +204,14 @@ public class WebhookSender(
                 }
 
                 responsePayload = e.Message;
-
-                RegisterDeliveryFailure(entry.Config, e.Message);
+                mayAutoDisable = true;
 
                 logger.WarningWithException(e);
             }
             catch (OperationCanceledException)
             {
                 responsePayload = $"The target did not answer within {_requestTimeout.TotalSeconds:0} seconds";
-
-                RegisterDeliveryFailure(entry.Config, responsePayload);
+                mayAutoDisable = true;
 
                 logger.WarningRequestTimeout(entry.Id, _requestTimeout);
             }
@@ -220,16 +219,29 @@ public class WebhookSender(
             {
                 responsePayload = e.Message;
 
-                entry.Config.LastFailureContent = e.Message;
-                entry.Config.LastFailureOn = DateTime.UtcNow;
-
                 status = (int)HttpStatusCode.InternalServerError;
                 logger.ErrorWithException(e);
             }
 
-            var configDisabled = !entry.Config.Enabled;
+            var autoDisabled = false;
 
-            var nextAttemptOn = succeeded || configDisabled ? null : GetNextAttemptOn(attempts);
+            if (succeeded)
+            {
+                await dbWorker.RecordWebhookConfigSuccessAsync(tenantId, entry.ConfigId, delivery.Value);
+            }
+            else
+            {
+                var failureOn = DateTime.UtcNow;
+
+                await dbWorker.RecordWebhookConfigFailureAsync(tenantId, entry.ConfigId, failureOn, responsePayload);
+
+                if (mayAutoDisable)
+                {
+                    autoDisabled = await dbWorker.DisableStaleWebhookConfigAsync(tenantId, entry.ConfigId, failureOn - TimeSpan.FromDays(settings.TrustedDaysCount ?? 3));
+                }
+            }
+
+            var nextAttemptOn = succeeded || autoDisabled || !entry.Config.Enabled ? null : GetNextAttemptOn(attempts);
 
             if (nextAttemptOn.HasValue)
             {
@@ -252,9 +264,7 @@ public class WebhookSender(
 
             journalUpdated = true;
 
-            await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
-
-            if (configDisabled)
+            if (autoDisabled)
             {
                 messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
             }
@@ -363,19 +373,6 @@ public class WebhookSender(
         return DateTime.UtcNow + intervals[attempts - 1] * jitter;
     }
 
-    private void RegisterDeliveryFailure(DbWebhooksConfig config, string message)
-    {
-        config.LastFailureContent = message;
-        config.LastFailureOn = DateTime.UtcNow;
-
-        var lastSuccessOn = config.LastSuccessOn ?? config.CreatedOn;
-
-        if (lastSuccessOn.HasValue && config.LastFailureOn - lastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3))
-        {
-            config.Enabled = false;
-        }
-    }
-
     private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
         MessageService messageService)
     {
@@ -386,10 +383,8 @@ public class WebhookSender(
                 MessageTarget.Create(entry.ConfigId), null,
                 $"{entry.Config.Name} (blacklist)");
         }
-        else
+        else if (await dbWorker.DisableWebhookConfigAsync(entry.TenantId, entry.ConfigId, entry.Config.Uri))
         {
-            entry.Config.Enabled = false;
-            await dbWorker.UpdateWebhookConfig(entry.Config, true);
             messageService.SendHeadersMessage(MessageAction.WebhookUpdated,
                 MessageTarget.Create(entry.ConfigId), null,
                 $"{entry.Config.Name} ({validationResult.ErrorMessage})");

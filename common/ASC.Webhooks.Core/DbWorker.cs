@@ -170,6 +170,48 @@ public class DbWorker(
         return updateObj;
     }
 
+    public async Task RecordWebhookConfigSuccessAsync(int tenantId, int id, DateTime successOn)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.RecordWebhooksConfigSuccessAsync(tenantId, id, successOn);
+    }
+
+    public async Task RecordWebhookConfigFailureAsync(int tenantId, int id, DateTime failureOn, string failureContent)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.RecordWebhooksConfigFailureAsync(tenantId, id, failureOn, failureContent);
+    }
+
+    public async Task<bool> DisableStaleWebhookConfigAsync(int tenantId, int id, DateTime successBefore)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var disabled = await webhooksDbContext.DisableStaleWebhooksConfigAsync(tenantId, id, successBefore, DateTime.UtcNow) > 0;
+
+        if (disabled)
+        {
+            await webhookCache.ClearAsync(GetCacheKey(tenantId));
+        }
+
+        return disabled;
+    }
+
+    public async Task<bool> DisableWebhookConfigAsync(int tenantId, int id, string uri)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var disabled = await webhooksDbContext.DisableWebhooksConfigAsync(tenantId, id, uri, DateTime.UtcNow) > 0;
+
+        if (disabled)
+        {
+            await webhookCache.ClearAsync(GetCacheKey(tenantId));
+        }
+
+        return disabled;
+    }
+
     public async Task<DbWebhooksConfig> RemoveWebhookConfigAsync(int id)
     {
         var tenantId = tenantManager.GetCurrentTenantId();

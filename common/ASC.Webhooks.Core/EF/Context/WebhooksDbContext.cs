@@ -180,6 +180,49 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
                 .SetProperty(p => p.NextAttemptOn, nextAttemptOn)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // The delivery bookkeeping below touches only the fields the sender owns, so an edit the user saves while an
+    // attempt is in flight is never reverted, and parallel attempts for one subscription do not move the dates back.
+    public Task<int> RecordWebhooksConfigSuccessAsync(int tenantId, int id, DateTime successOn)
+    {
+        return WebhooksConfigs
+            .Where(r => r.TenantId == tenantId && r.Id == id && (r.LastSuccessOn == null || r.LastSuccessOn < successOn))
+            .ExecuteUpdateAsync(q => q.SetProperty(p => p.LastSuccessOn, successOn));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public Task<int> RecordWebhooksConfigFailureAsync(int tenantId, int id, DateTime failureOn, string failureContent)
+    {
+        return WebhooksConfigs
+            .Where(r => r.TenantId == tenantId && r.Id == id && (r.LastFailureOn == null || r.LastFailureOn < failureOn))
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.LastFailureOn, failureOn)
+                .SetProperty(p => p.LastFailureContent, failureContent));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Disables an enabled subscription that has had no success since successBefore (counting from its creation when it
+    // never had one). The check runs on the current row, so a success recorded by a parallel attempt keeps it enabled.
+    public Task<int> DisableStaleWebhooksConfigAsync(int tenantId, int id, DateTime successBefore, DateTime modifiedOn)
+    {
+        return WebhooksConfigs
+            .Where(r => r.TenantId == tenantId && r.Id == id && r.Enabled && (r.LastSuccessOn ?? r.CreatedOn) < successBefore)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Enabled, false)
+                .SetProperty(p => p.ModifiedOn, modifiedOn));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Matches the target address too: a subscription whose address was changed since it was checked stays enabled.
+    public Task<int> DisableWebhooksConfigAsync(int tenantId, int id, string uri, DateTime modifiedOn)
+    {
+        return WebhooksConfigs
+            .Where(r => r.TenantId == tenantId && r.Id == id && r.Enabled && r.Uri == uri)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Enabled, false)
+                .SetProperty(p => p.ModifiedOn, modifiedOn));
+    }
 }
 
 static file class Queries
