@@ -1844,7 +1844,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedAiModelsDto))]
-    [SwaggerResponse(400, "The request body cannot be read, or `models` is missing or `null`")]
+    [SwaggerResponse(400, "The request body cannot be read, or `models` is missing, `null` or holds a `null` entry")]
     [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, the installation has no billing service or no AI gateway configured, or the AI tools wallet service is off for the portal")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
