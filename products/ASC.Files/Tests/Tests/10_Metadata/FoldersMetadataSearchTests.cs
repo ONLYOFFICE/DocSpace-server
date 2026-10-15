@@ -261,6 +261,66 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         var content = await data.SearchByTextAsync(marker, expectedFolders: [data.MatchingFolderId], expectedFiles: []);
 
         content.FolderIds().Should().Equal(data.MatchingFolderId);
+
+        // the page says where the text was met: a custom field is reported by its name alone, its template is hidden
+        var match = content.Folders.Single().MetadataMatches.Should().ContainSingle().Which;
+        match.FieldName.Should().Be("Reference");
+        match.Value.Should().Be(marker);
+        match.TemplateId.Should().BeNull();
+        match.FieldId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Folders_TextSearch_FindsTheSubFolderByItsTemplateFieldValue()
+    {
+        var data = await ArrangeAsync();
+
+        // the string values of every template feed the global text, not only the custom fields: the sub-folder is
+        // found by the value of a template field, and the page names the template and the field it was met in
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+
+        await data.Api.SetFolderValuesAsync(data.MatchingFolderId, [data.Value(ClientField, marker + " Corp")], TestContext.Current.CancellationToken);
+
+        var content = await data.SearchByTextAsync(marker, expectedFolders: [data.MatchingFolderId], expectedFiles: []);
+
+        content.FolderIds().Should().Equal(data.MatchingFolderId);
+
+        var match = content.Folders.Single().MetadataMatches.Should().ContainSingle().Which;
+        match.TemplateId.Should().Be(data.TemplateId);
+        match.FieldId.Should().Be(data.FieldId(ClientField));
+        match.FieldName.Should().Be(ClientField);
+        match.Value.Should().Be(marker + " Corp", "the whole stored value is reported, not the matching part");
+    }
+
+    [Fact]
+    public async Task Folders_TextSearch_ReportsEveryMatchingFieldOfTheEntry()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+
+        await data.Api.SetFileValuesAsync(data.MatchingFileId, [data.Value(ClientField, marker)], TestContext.Current.CancellationToken);
+        await data.Api.SetFileCustomFieldAsync(data.MatchingFileId, "Reference", marker, TestContext.Current.CancellationToken);
+
+        var content = await data.SearchByTextAsync(marker, expectedFolders: [], expectedFiles: [data.MatchingFileId]);
+
+        content.FileIds().Should().Equal(data.MatchingFileId);
+
+        var matches = content.Files.Single().MetadataMatches;
+        matches.Should().HaveCount(2);
+        matches.Should().ContainSingle(m => m.FieldName == ClientField && m.TemplateId == data.TemplateId);
+        matches.Should().ContainSingle(m => m.FieldName == "Reference" && m.TemplateId == null);
+    }
+
+    [Fact]
+    public async Task Folders_ListedWithoutText_CarryNoMetadataMatches()
+    {
+        var data = await ArrangeAsync();
+
+        var content = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: [data.MatchingFileId]);
+
+        content.Folders.Should().OnlyContain(f => f.MetadataMatches == null, "the matches describe the text search, which this listing did not run");
+        content.Files.Should().OnlyContain(f => f.MetadataMatches == null);
     }
 
     #endregion
@@ -432,6 +492,11 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         public int MatchingFileId { get; init; }
         public int OtherFileId { get; init; }
         public int NestedFileId { get; init; }
+
+        public int FieldId(string fieldName)
+        {
+            return template.Field(fieldName).Id;
+        }
 
         public MetadataValuePayload Value(string fieldName, string value)
         {

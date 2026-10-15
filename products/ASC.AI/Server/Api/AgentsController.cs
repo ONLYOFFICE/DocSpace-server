@@ -103,7 +103,7 @@ public class AgentsController(
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: StorageFilter.None);
 
-        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
+        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue);
 
         return dto.NotFoundIfNull();
     }
@@ -150,12 +150,17 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(404, "The AI agent is not found")]
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
-        var folder = (await fileStorageService.GetFolderAsync(inDto.Id)).NotFoundIfNull("Folder not found");
+        var agent = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (agent is not { FolderType: FolderType.AiRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
-        return await folderDtoHelper.GetAsync(folder);
+        return await folderDtoHelper.GetAsync(agent);
     }
 
     /// <remarks>
@@ -165,14 +170,20 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, or `chatSettings` is sent for a room that is not an AI agent")]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, or a tag name is empty")]
     [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller may not edit the agent, the agent does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
-    [SwaggerResponse(404, "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists")]
+    [SwaggerResponse(403, "The caller may not edit the agent, the agent lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "The AI agent is not found, or the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists")]
     [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
+        var agent = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (agent is not { FolderType: FolderType.AiRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
         var room = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateRoom);
 
         return await folderDtoHelper.GetAsync(room);

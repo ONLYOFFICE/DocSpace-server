@@ -216,6 +216,28 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
   );
 }
 
+// Reads whose answer an HTTP response echoes to the browser. The secrets of
+// a profile (`key`, `headers`) are what in-process provider calls need -
+// the chat engine and the passthroughs run under the caller's credentials
+// too - so only the AI service, which knows the caller's employee type, can
+// decide to drop them, and only Node knows which reads leave the process.
+// Every other read goes without the flag and keeps the secrets.
+const CLIENT_READ = { query: { forClient: true } };
+
+function parseProfileList(raw: unknown): Profile[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const result: Profile[] = [];
+  for (const item of raw) {
+    const profile = dtoToProfile(item);
+    if (profile) {
+      result.push(profile);
+    }
+  }
+  return result;
+}
+
 export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
@@ -275,14 +297,16 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // the profile exactly as the C# storage serves it (public gateway baseUrl
   // on SaaS — the same object `readAll` returns). This is the only variant
   // an HTTP response may echo: the override's internal service address and
-  // forwarded auth headers must never reach a client (Bug 82821).
+  // forwarded auth headers must never reach a client (Bug 82821). Read with
+  // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
+  // `headers` on top for every caller.
   async readByIdRaw(id: string): Promise<Profile | undefined> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);
     }
     try {
-      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`, CLIENT_READ);
       return dtoToProfile(raw);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -293,24 +317,23 @@ export class HttpProfilesStorage implements ProfilesStorage {
     }
   }
 
+  // The profile list as an HTTP response may echo it: read with
+  // `forClient=true`, which tells the AI service the answer leaves this
+  // process, so it strips `key` and `headers` unless the caller administers
+  // the portal (an administrator needs them to edit a profile). Never served
+  // from the round snapshot, which carries the secrets for in-process use.
+  // An AI service that predates the flag ignores it and answers in full.
+  async readAllForClient(): Promise<Profile[]> {
+    return parseProfileList(await aiService.get(PATH, CLIENT_READ));
+  }
+
   async readAll(): Promise<Profile[]> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles;
     }
     reportChatContextMiss("profiles.readAll");
-    const raw = await aiService.get(PATH);
-    if (!Array.isArray(raw)) {
-      return [];
-    }
-    const result: Profile[] = [];
-    for (const item of raw) {
-      const profile = dtoToProfile(item);
-      if (profile) {
-        result.push(profile);
-      }
-    }
-    return result;
+    return parseProfileList(await aiService.get(PATH));
   }
 
   async update(profile: Profile): Promise<void> {

@@ -96,7 +96,7 @@ static file class ToolPrefsQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == null)
+                    .Where(x => x.TenantId == tenantId && (x.CreatedBy == createdBy || x.CreatedBy == Guid.Empty) && x.EntryId == null)
                     .OrderBy(x => x.ServerType)
                     .AsQueryable());
 
@@ -104,7 +104,7 @@ static file class ToolPrefsQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, int entryId) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.EntryId == entryId)
+                    .Where(x => x.TenantId == tenantId && (x.CreatedBy == createdBy || x.CreatedBy == Guid.Empty) && x.EntryId == entryId)
                     .OrderBy(x => x.ServerType)
                     .AsQueryable());
 
@@ -112,7 +112,7 @@ static file class ToolPrefsQueriesContainer
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, int? firstEntryId, int? secondEntryId) =>
                 ctx.ToolPrefs
-                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && (x.EntryId == null || x.EntryId == firstEntryId || x.EntryId == secondEntryId))
+                    .Where(x => x.TenantId == tenantId && (x.CreatedBy == createdBy || x.CreatedBy == Guid.Empty) && (x.EntryId == null || x.EntryId == firstEntryId || x.EntryId == secondEntryId))
                     .OrderBy(x => x.ServerType)
                     .AsQueryable());
 

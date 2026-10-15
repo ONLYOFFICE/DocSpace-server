@@ -607,7 +607,8 @@ public class FolderMetadataSearch
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
-    /// The text to search for in the titles and in the custom fields.
+    /// The text to search for in the titles and in the string metadata values of the entries, the custom fields and the
+    /// template fields alike; an entry found by its metadata says where in "metadataMatches".
     /// </summary>
     /// <example>ACME</example>
     public string FilterValue { get; set; }
@@ -671,7 +672,8 @@ public class RoomsMetadataSearchRequestDto
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
-    /// The text to search for in the room titles and in the custom fields.
+    /// The text to search for in the room titles and in the string metadata values of the rooms, the custom fields and
+    /// the template fields alike; a room found by its metadata says where in "metadataMatches".
     /// </summary>
     /// <example>ACME</example>
     public string FilterValue { get; set; }

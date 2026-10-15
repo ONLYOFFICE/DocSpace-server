@@ -37,4 +37,7 @@ public class ReadToolPrefsRequestDto
 {
     [FromQuery(Name = "entityId")]
     public string? EntityId { get; init; }
+
+    [FromQuery(Name = "scope")]
+    public ToolPrefsScope Scope { get; init; }
 }
