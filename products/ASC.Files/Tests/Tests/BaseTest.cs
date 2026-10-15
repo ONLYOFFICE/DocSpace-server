@@ -55,6 +55,7 @@ public class BaseTest(
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
+    protected HttpClient _studioClient = null!;
 
     protected FoldersApi _foldersApi = null!;
     protected FilesApi _filesApi = null!;
@@ -114,6 +115,7 @@ public class BaseTest(
         _filesClient = _clients.FilesHttpClient;
         _peopleClient = _clients.PeopleHttpClient;
         _webApiClient = _clients.WebApiHttpClient;
+        _studioClient = _clients.StudioHttpClient;
 
         _foldersApi = _clients.FoldersApi;
         _filesApi = _clients.FilesApi;

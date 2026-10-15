@@ -40,6 +40,10 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
+    // The anonymous session of a public room only has to show the pictures that page renders:
+    // member avatars and room logos. Every other module stays closed to it.
+    private static readonly FrozenSet<string> _publicRoomModules = new[] { "userPhotos", "room_logos" }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
     public async Task InvokeAsync(
         HttpContext context,
         TenantManager tenantManager,
@@ -55,13 +59,20 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             throw new ItemNotFoundException("tenant");
         }
 
+        var pathInfo = GetRouteValue("pathInfo", context);
+        if (IsTraversal(pathInfo))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            return;
+        }
+
         var storage = await storageFactory.GetStorageAsync(currentTenant.Id, module);
-        var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
+        var path = CrossPlatform.PathCombine(storagePath, pathInfo.Replace('/', Path.DirectorySeparatorChar));
         string header = context.Request.Query[Constants.QueryHeader];
         string auth = context.Request.Query[Constants.QueryAuth];
         var storageExpire = storage.GetExpire(domain);
         var fromPublicRoom = false;
-        if (!authContext.IsAuthenticated)
+        if (!authContext.IsAuthenticated && string.IsNullOrEmpty(domain) && _publicRoomModules.Contains(module))
         {
             var anonymousSessionKey = context.Request.Cookies["anonymous_session_key"];
             fromPublicRoom = Signature.Read<Guid>(anonymousSessionKey, await coreSettings.GetDocDbKeyAsync()) != Guid.Empty;
@@ -232,6 +243,11 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         context.Response.Headers.ContentRange = $" bytes {offset}-{endOffset}/{fullLength}";
 
         return length;
+    }
+
+    private static bool IsTraversal(string pathInfo)
+    {
+        return pathInfo.Split('/', '\\').Any(segment => segment.Trim() is ".." or ".");
     }
 
     private string GetRouteValue(string name, HttpContext context)
