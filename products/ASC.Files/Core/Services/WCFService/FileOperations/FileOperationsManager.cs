@@ -44,12 +44,14 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private readonly DistributedTaskQueue<T> _tasks;
     private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
 
-    public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
+    public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider, IDistributedLockProvider distributedLockProvider)
     {
         _serviceProvider = serviceProvider;
+        _distributedLockProvider = distributedLockProvider;
         _tasks = queueFactory.CreateQueue<T>();
         notifyConfiguration.Configure();
     }
@@ -123,7 +125,46 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
         return await _tasks.PublishTask(task);
     }
 
-    public async Task CheckRunning(Guid userId, FileOperationType fileOperationType, string error)
+    /// <summary>
+    /// Refuses a new operation while one of the same type started by <paramref name="userId"/> is queued or running.
+    /// The check alone is not enough: two requests can both pass it before either publishes its task, on one node or
+    /// on two. So it is made under a distributed lock per owner and type, and the caller holds the returned lock until
+    /// its task is published.
+    /// </summary>
+    public async Task<IAsyncDisposable> LockAndCheckRunning(Guid userId, FileOperationType fileOperationType, string error)
+    {
+        // an anonymous caller without a session has no identity of its own, and one lock would make all of them wait
+        if (userId == Guid.Empty)
+        {
+            await CheckRunning(userId, fileOperationType, error);
+            return null;
+        }
+
+        IDistributedLockHandle handle;
+        try
+        {
+            handle = await _distributedLockProvider.TryAcquireFairLockAsync($"file_operation_start_{fileOperationType}_{userId}");
+        }
+        catch (DistributedLockException)
+        {
+            // another start of this owner still holds the lock, so its operation is about to run
+            throw new InvalidOperationException(error);
+        }
+
+        try
+        {
+            await CheckRunning(userId, fileOperationType, error);
+        }
+        catch
+        {
+            await handle.DisposeAsync();
+            throw;
+        }
+
+        return handle;
+    }
+
+    private async Task CheckRunning(Guid userId, FileOperationType fileOperationType, string error)
     {
         var operations = (await _tasks.GetAllTasks())
             .Where(t => t.Owner == userId)
@@ -372,7 +413,7 @@ public class FileBuilderOperationsManager(
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
-        await _fileOperationsManagerHolder.CheckRunning(userId, FileOperationType.Build, "A document builder script of yours is already queued or running; wait until it finishes");
+        await using var startLock = await _fileOperationsManagerHolder.LockAndCheckRunning(userId, FileOperationType.Build, "A document builder script of yours is already queued or running; wait until it finishes");
 
         var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputs);
 
@@ -419,7 +460,7 @@ public class FileDownloadOperationsManager(
             throw new AuthenticationException();
         }
 
-        await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download, FilesCommonResource.ErrorMessage_ManyDownloads);
+        await using var startLock = await _fileOperationsManagerHolder.LockAndCheckRunning(await GetUserIdAsync(), FileOperationType.Download, FilesCommonResource.ErrorMessage_ManyDownloads);
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return null;
