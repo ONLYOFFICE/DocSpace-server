@@ -180,9 +180,13 @@ public class PortalRetentionJob(
         var blocked = context.Tenant.Status == TenantStatus.Blocked;
         var formerPaying = !context.Quota.Free && context.Tariff.State == TariffState.NotPaid && context.DueDateIsNotMax;
 
-        if (!context.Quota.Free && !formerPaying)
+        // An add-on paid from the wallet keeps the free quota of the tariff it is bought on, so the portal reads as
+        // free; it is paying all the same until the add-on's due date.
+        var addOnsPaidUntil = AddOnsPaidUntil(context.Tariff);
+
+        if ((!context.Quota.Free && !formerPaying) || addOnsPaidUntil?.Date >= context.NowDate.Date)
         {
-            // Paid, in its grace period or on a trial: not the policy's business.
+            // Paid, in its grace period, on a trial or paying for an add-on: not the policy's business.
             return blocked;
         }
 
@@ -196,7 +200,16 @@ public class PortalRetentionJob(
             return true;
         }
 
-        return await ApplyActiveAsync(context, formerPaying, kept, policyStart, client, senderName, lastRunOn);
+        return await ApplyActiveAsync(context, formerPaying, kept, policyStart, client, senderName, lastRunOn, addOnsPaidUntil);
+    }
+
+    /// <summary>
+    /// The day the add-ons paid from the portal's wallet are paid until, the latest of them, or null when it has
+    /// none. An add-on that was not renewed keeps its row with the day it ran out.
+    /// </summary>
+    private static DateTime? AddOnsPaidUntil(Tariff tariff)
+    {
+        return tariff.Quotas.Where(q => q.Wallet && q.DueDate.HasValue).Max(q => q.DueDate);
     }
 
     /// <summary>A blocked portal: told of its block if that failed, reminded of its deletion, or deleted.</summary>
@@ -234,7 +247,8 @@ public class PortalRetentionJob(
     }
 
     /// <summary>An active portal: warned, or blocked. Returns true when it has just been blocked.</summary>
-    private async Task<bool> ApplyActiveAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn)
+    private async Task<bool> ApplyActiveAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn,
+        DateTime? addOnsPaidUntil)
     {
         var tenant = context.Tenant;
 
@@ -248,9 +262,10 @@ public class PortalRetentionJob(
         var portalPolicyStart = Options.FirstWaveDays > 0 ? policyStart.AddDays(tenant.Id % Options.FirstWaveDays) : policyStart;
 
         // The count starts no earlier than the last change of status, which is what an unblocked portal starts
-        // again from.
+        // again from, nor than the day the last add-on paid from the wallet ran out: until then the portal paid.
         Func<PortalRetentionCategory, PortalRetentionDecision> CountedFrom(DateTime day) => category =>
-            PortalRetentionSchedule.DecideActive(Options.For(category), Later(day, tenant.StatusChangeDate), portalPolicyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
+            PortalRetentionSchedule.DecideActive(Options.For(category), Later(Later(day, addOnsPaidUntil), tenant.StatusChangeDate), portalPolicyStart, context.NowDate,
+                noticesFrom, lastRunOn, lastWarning);
 
         DateTime anchor;
 

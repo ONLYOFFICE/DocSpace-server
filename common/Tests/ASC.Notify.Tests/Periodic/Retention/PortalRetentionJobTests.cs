@@ -404,6 +404,60 @@ public class PortalRetentionJobTests
         again.Sent.Should().BeEmpty("the reminder kept with the portal covers its day");
     }
 
+    /// <summary>
+    /// A free portal with an add-on bought from its wallet, paid until <paramref name="paidUntil"/>: the tariff keeps
+    /// the free startup quota next to the add-on, so the portal reads as free.
+    /// </summary>
+    private static PeriodicLetterContext FreeWithAddOn(Tenant tenant, DateTime lastActivity, DateTime paidUntil)
+    {
+        return PeriodicLetterContexts.Free(tenant, _today, lastActivity) with
+        {
+            Tariff = new Tariff
+            {
+                Quotas = [new Quota(-3, 1), new Quota(-11, 1) { Wallet = true, Additional = true, DueDate = paidUntil }],
+                State = TariffState.Paid,
+                DueDate = DateTime.MaxValue,
+                DelayDueDate = DateTime.MaxValue
+            }
+        };
+    }
+
+    [Fact]
+    public async Task FreePortal_WithAPaidAddOn_IsLeftAlone()
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        // Idle for a month, which would bring the first warning, but its add-on is paid until tomorrow.
+        var context = FreeWithAddOn(InMemoryTenant(scope), _today.AddDays(-30), _today.AddDays(1));
+
+        var leaveAlone = await CreateJob(scope, logger).ApplyAsync(context, _policyStart, client, _senderName);
+
+        leaveAlone.Should().BeFalse("a paying portal still gets the ordinary letters");
+        logger.Messages.Should().BeEmpty("a portal paying for an add-on is not the policy's business");
+        client.Sent.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task FreePortal_WhoseAddOnRanOut_CountsFromTheDayItRanOut()
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        // Last used fifty days ago, so its first warning was due twenty days ago - but until thirty days ago it paid
+        // for an add-on, and the count starts when that ran out.
+        var context = FreeWithAddOn(InMemoryTenant(scope), _today.AddDays(-50), _today.AddDays(-30));
+
+        await CreateJob(scope, logger).ApplyAsync(context, _policyStart, client, _senderName);
+
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice") && m.Contains($"block on {_today.AddDays(30):yyyy-MM-dd}"),
+            string.Join(" | ", logger.Messages));
+        client.Sent.Should().ContainSingle()
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionInactivityWarningNotifyAction>();
+    }
+
     [Fact]
     public async Task FormerPayingPortal_CountsFromTheDueDate()
     {
