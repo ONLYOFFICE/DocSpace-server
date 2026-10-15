@@ -147,6 +147,7 @@ public static class MetadataSearchQuery
         string searchText,
         string lowerText,
         bool hasTemplates,
+        bool includeHiddenTemplates,
         Expression<Func<TRow, int>> idSelector)
         where TDoc : MetadataSearchItemBase
     {
@@ -160,7 +161,7 @@ public static class MetadataSearchQuery
         // the metadata index is not there yet (it is created by the first full indexing pass) or it is overflowing:
         // the global metadata part of the search comes from the database alone; with the index it is narrowed to
         // the candidates the index returned first, so the confirmation probes a handful of rows instead of scanning
-        var globalTextSqlIds = TemplateTextEntryIds(filesDbContext, tenantId, entryType, lowerText);
+        var globalTextSqlIds = TemplateTextEntryIds(filesDbContext, tenantId, entryType, lowerText, includeHiddenTemplates);
 
         if (success)
         {
@@ -318,14 +319,24 @@ public static class MetadataSearchQuery
 
     /// <summary>
     /// The SQL counterpart of <see cref="BuildGlobalTextSelector{TDoc}"/>: the identifiers of the entries holding a
-    /// string value, of whatever template, that contains the text. The text is expected to be already lowered.
+    /// string value that contains the text. The text is expected to be already lowered. The values of the hidden
+    /// templates count only on request (<see cref="MetadataFilter.IncludeHiddenTemplates"/>); the index document holds
+    /// them regardless, it only proposes candidates and this query is what confirms them.
     /// </summary>
-    public static IQueryable<int> TemplateTextEntryIds(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, string lowerText)
+    public static IQueryable<int> TemplateTextEntryIds(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, string lowerText, bool includeHiddenTemplates)
     {
-        return filesDbContext.MetadataValues
-            .Where(v => v.TenantId == tenantId && v.EntryType == entryType && v.ValueString.ToLower().Contains(lowerText))
-            .Select(v => v.EntryId)
-            .Distinct();
+        var values = filesDbContext.MetadataValues
+            .Where(v => v.TenantId == tenantId && v.EntryType == entryType && v.ValueString.ToLower().Contains(lowerText));
+
+        if (!includeHiddenTemplates)
+        {
+            // the system template of the custom fields is never hidden, but it is kept in with its flag for the day it is
+            values = values.Where(v => filesDbContext.MetadataFields
+                .Join(filesDbContext.MetadataTemplates, f => f.TemplateId, t => t.Id, (f, t) => new { f.Id, t.Visible, t.IsSystem })
+                .Any(x => x.Id == v.FieldId && (x.Visible || x.IsSystem)));
+        }
+
+        return values.Select(v => v.EntryId).Distinct();
     }
 
     /// <summary>
