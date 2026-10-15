@@ -33,8 +33,10 @@
 
 // One task on the document agent over A2A, through the protocol's own client
 // (`@a2a-js/sdk/client`): the agent card is read once, the message carries
-// the task text, the input files as bytes and the run settings in
-// `metadata.docagent`, and the stream is drained until the task ends. The
+// the task text and the input files as bytes, the request's own
+// `metadata.docagent` the run settings (next to the message, never inside it:
+// the agent stores no request metadata, so the keys stay out of the task's
+// history), and the stream is drained until the task ends. The
 // agent's status lines (its one-line intent before every tool call, sent as
 // working-state status updates) go to the log and to the caller as steps; a
 // task that stops for input or auth (A2A's interrupted states) is cancelled,
@@ -194,7 +196,7 @@ function userMessage(input: DocumentTaskInput): Message {
     taskId: "",
     role: Role.ROLE_USER,
     parts: [textPart(input.task), ...input.files.map(filePart)],
-    metadata: { docagent: input.settings },
+    metadata: undefined,
     extensions: [],
     referenceTaskIds: [],
   };
@@ -424,7 +426,12 @@ export async function runDocumentTask(
 
   try {
     const stream = client.sendMessageStream(
-      { tenant: "", message: userMessage(input), configuration: undefined, metadata: undefined },
+      {
+        tenant: "",
+        message: userMessage(input),
+        configuration: undefined,
+        metadata: { docagent: input.settings },
+      },
       { signal: input.signal },
     );
     for await (const event of stream) {
