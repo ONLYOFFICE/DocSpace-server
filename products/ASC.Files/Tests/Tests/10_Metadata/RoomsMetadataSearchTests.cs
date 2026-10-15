@@ -109,6 +109,26 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     }
 
     [Fact]
+    public async Task Rooms_TextSearch_SkipsTheHiddenTemplateValues_UnlessAsked()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+        var hidden = await data.Api.CreateTemplateAsync("Hidden " + Guid.NewGuid().ToString()[..8],
+            [new MetadataFieldPayload { Name = "Reference", Type = 0 }], TestContext.Current.CancellationToken, visible: false);
+
+        await data.Api.AssignFolderTemplatesAsync(data.BareRoomId, [hidden.Id], cascade: false, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderValuesAsync(data.BareRoomId, [new MetadataValuePayload { FieldId = hidden.Field("Reference").Id, StringValue = marker }], TestContext.Current.CancellationToken);
+
+        // the presence is seen first, with the hidden templates asked for, so the absence below is not the indexing lag
+        var included = await data.SearchByTextAsync(marker, expected: [data.BareRoomId], includeHiddenMetadata: true);
+        included.RoomIds().Should().Equal(data.BareRoomId);
+
+        var excluded = await data.SearchByTextAsync(marker, expected: []);
+        excluded.RoomIds().Should().BeEmpty("the web client never shows a hidden template, so it must not find by its values either");
+    }
+
+    [Fact]
     public async Task Rooms_MetadataFilterAndRoomTypeFilter_AreCombined()
     {
         var data = await ArrangeAsync();
