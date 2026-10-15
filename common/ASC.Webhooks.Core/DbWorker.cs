@@ -254,9 +254,10 @@ public class DbWorker(
         return entity.Entity;
     }
 
-    public async Task<DbWebhooksLog> UpdateWebhookJournal(
+    public async Task<bool> UpdateWebhookJournal(
         int id,
         int tenantId,
+        Guid leaseId,
         int status,
         DateTime? delivery,
         string requestPayload,
@@ -268,27 +269,12 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var webhook = (await webhooksDbContext.WebhooksLogAsync(tenantId, id))?.Log;
+        var updated = await webhooksDbContext.CompleteWebhooksLogAttemptAsync(tenantId, id, leaseId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders, attempts, nextAttemptOn);
 
-        if (webhook != null)
-        {
-            webhook.Status = status;
-            webhook.RequestHeaders = requestHeaders;
-            webhook.RequestPayload = requestPayload;
-            webhook.ResponsePayload = responsePayload;
-            webhook.ResponseHeaders = responseHeaders;
-            webhook.Delivery = delivery;
-            webhook.Attempts = attempts;
-            webhook.NextAttemptOn = nextAttemptOn;
-
-            webhooksDbContext.WebhooksLogs.Update(webhook);
-            await webhooksDbContext.SaveChangesAsync();
-        }
-
-        return webhook;
+        return updated > 0;
     }
 
-    public async Task<List<(int TenantId, int Id)>> ClaimDueJournalEntriesAsync(int count, TimeSpan lease)
+    public async Task<List<(int TenantId, int Id, Guid LeaseId)>> ClaimDueJournalEntriesAsync(int count, TimeSpan lease)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -299,35 +285,36 @@ public class DbWorker(
             await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
 
             var now = DateTime.UtcNow;
+            var leaseId = Guid.NewGuid();
 
             // Rows held by another instance are skipped, so concurrent instances take disjoint batches.
             var due = await webhooksDbContext.LockDueWebhooksLogsAsync(now, count);
 
             if (due.Count > 0)
             {
-                await webhooksDbContext.ClaimWebhooksLogsAsync(due.Select(r => r.Id).ToList(), now + lease);
+                await webhooksDbContext.ClaimWebhooksLogsAsync(due.Select(r => r.Id).ToList(), now + lease, leaseId);
             }
 
             await tx.CommitAsync();
 
-            return due.Select(r => (r.TenantId, r.Id)).ToList();
+            return due.Select(r => (r.TenantId, r.Id, leaseId)).ToList();
         });
     }
 
-    public async Task<DbWebhooksLog> ResetJournalAttemptsAsync(int tenantId, int id)
+    public async Task<bool> ResetJournalAttemptsAsync(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.ResetWebhooksLogAttemptsAsync(tenantId, id, DateTime.UtcNow);
+        var reset = await webhooksDbContext.ResetWebhooksLogAttemptsAsync(tenantId, id, DateTime.UtcNow);
 
-        return await ReadJournal(tenantId, id);
+        return reset > 0;
     }
 
-    public async Task CancelJournalAttemptsAsync(int tenantId, int id)
+    public async Task CancelJournalAttemptsAsync(int tenantId, int id, Guid leaseId)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.CancelWebhooksLogAttemptsAsync(tenantId, id);
+        await webhooksDbContext.CancelWebhooksLogAttemptsAsync(tenantId, id, leaseId);
     }
 
     public async Task<int?> GetJournalAttemptsAsync(int tenantId, int id)
@@ -337,11 +324,11 @@ public class DbWorker(
         return await webhooksDbContext.WebhooksLogAttemptsAsync(tenantId, id);
     }
 
-    public async Task ScheduleJournalAttemptAsync(int tenantId, int id, int attempts, DateTime? nextAttemptOn)
+    public async Task ScheduleJournalAttemptAsync(int tenantId, int id, Guid leaseId, int attempts, DateTime? nextAttemptOn)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.ScheduleWebhooksLogAttemptAsync(tenantId, id, attempts, nextAttemptOn);
+        await webhooksDbContext.ScheduleWebhooksLogAttemptAsync(tenantId, id, leaseId, attempts, nextAttemptOn);
     }
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(

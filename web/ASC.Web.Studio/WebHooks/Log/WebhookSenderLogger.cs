@@ -41,6 +41,9 @@ internal static partial class WebhookSenderLogger
     [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: attempt {attempts} failed, next attempt at {nextAttemptOn}")]
     public static partial void DebugRetryScheduled(this ILogger<WebhookSender> logger, int logId, int attempts, DateTime nextAttemptOn);
 
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: the outcome was not recorded, the entry was requeued or claimed again during the attempt")]
+    public static partial void DebugLeaseLost(this ILogger<WebhookSender> logger, int logId);
+
     [LoggerMessage(LogLevel.Warning, "Webhook log {logId}: the target did not answer within {timeout}")]
     public static partial void WarningRequestTimeout(this ILogger<WebhookSender> logger, int logId, TimeSpan timeout);
 

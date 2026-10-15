@@ -41,5 +41,14 @@ public interface IWebhookPublisher
 
     Task PublishAsync<TSource, TPayload, TId>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source, Func<Task<TPayload>> payloadFactory, TId dataId);
 
-    Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog);
+    Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog);
 }
+
+public enum WebhookRetryStatus
+{
+    Requeued,
+    NotFound,
+    InProgress
+}
+
+public record WebhookRetryResult(WebhookRetryStatus Status, DbWebhooksLog Log = null);

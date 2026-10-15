@@ -50,6 +50,9 @@ public class DbWebhooksLog
     public DateTime? Delivery { get; set; }
     public int Attempts { get; set; }
     public DateTime? NextAttemptOn { get; set; }
+    // Set by the worker instance that claimed the row for delivery, cleared when that attempt is recorded.
+    // While it is set and NextAttemptOn is in the future, an instance is delivering the row right now.
+    public Guid? LeaseId { get; set; }
     public DbWebhooksConfig Config { get; set; }
     public DbTenant Tenant { get; set; }
 }
@@ -154,6 +157,12 @@ public static class WebhooksPayloadExtension
                 entity.Property(e => e.NextAttemptOn)
                     .HasColumnType("datetime")
                     .HasColumnName("next_attempt_on");
+
+                entity.Property(e => e.LeaseId)
+                    .HasColumnName("lease_id")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
             });
         }
 
@@ -220,6 +229,9 @@ public static class WebhooksPayloadExtension
 
                 entity.Property(e => e.NextAttemptOn)
                     .HasColumnName("next_attempt_on");
+
+                entity.Property(e => e.LeaseId)
+                    .HasColumnName("lease_id");
 
                 // Add indexes (PostgreSQL-specific naming)
                 entity.HasIndex(e => e.TenantId)
