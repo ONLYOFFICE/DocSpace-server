@@ -916,7 +916,6 @@ public static class DocumentService
         /// Whether the result is a fillable PDF form: true keeps the form fields of the source as fields to fill in,
         /// false saves a plain PDF.
         /// </summary>
-        /// <example>true</example>
         public bool Form { get; set; }
     }
 
@@ -928,20 +927,17 @@ public static class DocumentService
         /// <summary>
         /// Whether an empty form field shows its placeholder text in the result; false leaves it blank.
         /// </summary>
-        /// <example>true</example>
         public bool? DrawPlaceHolders { get; set; }
 
         /// <summary>
         /// Whether form fields keep their highlight colour in the result; false draws them without it.
         /// </summary>
-        /// <example>false</example>
         public bool? DrawFormHighlight { get; set; }
 
         /// <summary>
         /// Whether the print mode is turned on. It only applies to a docx converted into pdf: with the print mode off
         /// the highlight flag does nothing and the placeholder flag saves the forms in the pdf.
         /// </summary>
-        /// <example>true</example>
         public bool? IsPrint { get; set; }
     }
 
@@ -954,7 +950,6 @@ public static class DocumentService
         /// The rendering mode: blockChar reads the text by single characters, blockLine by separate lines, plainLine as
         /// plain text with a paragraph per line, plainParagraph as plain text with lines combined into paragraphs.
         /// </summary>
-        /// <example>plainLine</example>
         public string TextAssociation { get; set; }
     }
 
@@ -982,25 +977,21 @@ public static class DocumentService
         /// 1 - keep the aspect for the image;
         /// 2 - convert the metric size of the page into pixels at 96 dpi.
         /// </summary>
-        /// <example>1</example>
         public int? Aspect { get; set; }
 
         /// <summary>
         /// Specifies if the thumbnails should be generated for the first page only or for all the document pages.
         /// </summary>
-        /// <example>true</example>
         public bool? First { get; set; }
 
         /// <summary>
         /// The thumbnail height in pixels; not used with aspect 2.
         /// </summary>
-        /// <example>100</example>
         public int? Height { get; set; }
 
         /// <summary>
         /// The thumbnail width in pixels; not used with aspect 2.
         /// </summary>
-        /// <example>100</example>
         public int? Width { get; set; }
     }
 
@@ -1013,43 +1004,36 @@ public static class DocumentService
         /// <summary>
         /// Specifies whether to ignore the print area chosen for the spreadsheet file or not.
         /// </summary>
-        /// <example>false</example>
         public bool? IgnorePrintArea { get; set; }
 
         /// <summary>
         /// The page orientation of the output PDF file: portrait or landscape.
         /// </summary>
-        /// <example>landscape</example>
         public string Orientation { get; set; }
 
         /// <summary>
         /// The number of pages the converted area is fitted into in height; 0 does not fit it.
         /// </summary>
-        /// <example>0</example>
         public int? FitToHeight { get; set; }
 
         /// <summary>
         /// The scale of the output PDF file, in percent.
         /// </summary>
-        /// <example>100</example>
         public int? Scale { get; set; }
 
         /// <summary>
         /// The number of pages the converted area is fitted into in width; 0 does not fit it.
         /// </summary>
-        /// <example>1</example>
         public int? FitToWidth { get; set; }
 
         /// <summary>
         /// Specifies whether to include the headings to the output PDF file or not.
         /// </summary>
-        /// <example>false</example>
         public bool? Headings { get; set; }
 
         /// <summary>
         /// Specifies whether to include grid lines to the output PDF file or not.
         /// </summary>
-        /// <example>false</example>
         public bool? GridLines { get; set; }
 
         /// <summary>
@@ -1071,25 +1055,21 @@ public static class DocumentService
             /// <summary>
             /// The left margin of the output PDF file.
             /// </summary>
-            /// <example>0.7in</example>
             public string Left { get; set; }
 
             /// <summary>
             /// The right margin of the output PDF file.
             /// </summary>
-            /// <example>0.7in</example>
             public string Right { get; set; }
 
             /// <summary>
             /// The top margin of the output PDF file.
             /// </summary>
-            /// <example>0.75in</example>
             public string Top { get; set; }
 
             /// <summary>
             /// The bottom margin of the output PDF file.
             /// </summary>
-            /// <example>0.75in</example>
             public string Bottom { get; set; }
         }
 
@@ -1102,13 +1082,11 @@ public static class DocumentService
             /// <summary>
             /// The page height of the output PDF file.
             /// </summary>
-            /// <example>11.69in</example>
             public string Height { get; set; }
 
             /// <summary>
             /// The page width of the output PDF file.
             /// </summary>
-            /// <example>8.27in</example>
             public string Width { get; set; }
         }
     }

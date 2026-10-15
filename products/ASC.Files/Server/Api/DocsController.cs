@@ -74,7 +74,7 @@ public class DocsController(
     [SwaggerResponse(403, "You cannot read or copy the file or create files in the folder, or the file lies in a private room or in a room with a watermark")]
     [SwaggerResponse(404, "The file or the folder does not exist")]
     [HttpPost("converter")]
-    public async Task<FileDto<int>> ConvertFile(DocsConverterRequestDto inDto)
+    public async Task<FileDto<int>> ConvertFile(ConvertFileRequestDto inDto)
     {
         var file = await fileStorageService.GetFileAsync(inDto.FileId, -1);
 
@@ -121,9 +121,9 @@ public class DocsController(
     [SwaggerResponse(403, "You cannot edit or copy a file the script opens or write a result, a file the script opens lies in a private room or in a room with a watermark, the file to replace is locked, being edited or in the trash, or another script of yours is still queued or running")]
     [SwaggerResponse(404, "A file the script opens or replaces, or a target folder, does not exist")]
     [HttpPost("builder")]
-    public async Task<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
+    public async Task<FileOperationDto> RunBuilderScript(RunBuilderScriptRequestDto inDto)
     {
-        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs, inDto.Argument, commonLinkUtility.ServerRootPath);
+        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs?.MapToFileBuilderOutputData(), inDto.Argument, commonLinkUtility.ServerRootPath);
         var tasks = await fileBuilderOperationsManager.GetOperationResults(taskId);
 
         return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());

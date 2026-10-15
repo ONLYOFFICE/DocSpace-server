@@ -366,7 +366,7 @@ public class FileBuilderOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider) : FileOperationsManager<FileBuilderOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
-    public async Task<string> Publish(string script, int? folderId, Dictionary<string, DocsBuilderOutputDto> outputs, JsonElement? argument, string baseUri)
+    public async Task<string> Publish(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs, JsonElement? argument, string baseUri)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
@@ -374,11 +374,9 @@ public class FileBuilderOperationsManager(
 
         await _fileOperationsManagerHolder.CheckRunning(userId, FileOperationType.Build, "A document builder script of yours is already queued or running; wait until it finishes");
 
-        var outputData = outputs?.ToDictionary(x => x.Key, x => x.Value.MapToFileBuilderOutputData());
+        var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputs);
 
-        var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputData);
-
-        var data = new FileBuilderOperationData<int>(folderIds, fileIds, script, folderId, outputData, argument?.GetRawText(), baseUri, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
+        var data = new FileBuilderOperationData<int>(folderIds, fileIds, script, folderId, outputs, argument?.GetRawText(), baseUri, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
         var thirdPartyData = new FileBuilderOperationData<string>([], [], null, null, null, null, null, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
         var permissionsCheck = _serviceProvider.GetService<BuilderPermissionsCheck<int>>();

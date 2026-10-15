@@ -48,7 +48,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 ///   "argument": { "title": "Quarterly report" }
 /// }
 /// </example>
-public class DocsBuilderRequestDto
+public class RunBuilderScriptRequestDto
 {
     /// <summary>
     /// The document builder script. It names a portal file by its id where the document builder documentation
@@ -70,7 +70,7 @@ public class DocsBuilderRequestDto
     /// `builder.SaveFile("docx", "result.docx")`.
     /// </summary>
     /// <example>{"result.docx": {"fileId": 1234}, "result.pdf": {"folderId": 5678, "title": "Quarterly report.pdf"}}</example>
-    public Dictionary<string, DocsBuilderOutputDto> Outputs { get; set; }
+    public Dictionary<string, RunBuilderScriptOutputRequest> Outputs { get; set; }
 
     /// <summary>
     /// Values the script reads through the global `Argument` object, such as `Argument.title`. A JSON object without
@@ -92,7 +92,7 @@ public class DocsBuilderRequestDto
 ///   "title": "Quarterly report.pdf"
 /// }
 /// </example>
-public class DocsBuilderOutputDto
+public class RunBuilderScriptOutputRequest
 {
     /// <summary>
     /// The id of a portal file to store the result in as a new version, as reported by a folder listing such as
@@ -115,8 +115,8 @@ public class DocsBuilderOutputDto
     public string Title { get; set; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class DocsBuilderOutputDtoMapper
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class RunBuilderScriptOutputRequestMapper
 {
-    public static partial FileBuilderOutputData MapToFileBuilderOutputData(this DocsBuilderOutputDto source);
+    public static partial Dictionary<string, FileBuilderOutputData> MapToFileBuilderOutputData(this Dictionary<string, RunBuilderScriptOutputRequest> source);
 }
