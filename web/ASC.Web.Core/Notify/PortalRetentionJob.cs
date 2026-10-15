@@ -205,11 +205,13 @@ public class PortalRetentionJob(
 
     /// <summary>
     /// The day the add-ons paid from the portal's wallet are paid until, the latest of them, or null when it has
-    /// none. An add-on that was not renewed keeps its row with the day it ran out.
+    /// none. An add-on that was not renewed stays in the tariff among its overdue quotas, with the day it ran out.
     /// </summary>
     private static DateTime? AddOnsPaidUntil(Tariff tariff)
     {
-        return tariff.Quotas.Where(q => q.Wallet && q.DueDate.HasValue).Max(q => q.DueDate);
+        return tariff.Quotas.Concat(tariff.OverdueQuotas ?? [])
+            .Where(q => q.Wallet && q.DueDate.HasValue)
+            .Max(q => q.DueDate);
     }
 
     /// <summary>A blocked portal: told of its block if that failed, reminded of its deletion, or deleted.</summary>

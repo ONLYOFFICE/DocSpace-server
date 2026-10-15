@@ -406,15 +406,20 @@ public class PortalRetentionJobTests
 
     /// <summary>
     /// A free portal with an add-on bought from its wallet, paid until <paramref name="paidUntil"/>: the tariff keeps
-    /// the free startup quota next to the add-on, so the portal reads as free.
+    /// the free startup quota next to the add-on, so the portal reads as free. The add-on lies where the tariff
+    /// service puts it - among the quotas while it is paid, among the overdue ones once it has run out.
     /// </summary>
     private static PeriodicLetterContext FreeWithAddOn(Tenant tenant, DateTime lastActivity, DateTime paidUntil)
     {
+        var addOn = new Quota(-11, 1) { Wallet = true, Additional = true, DueDate = paidUntil };
+        var overdue = addOn.State == QuotaState.Overdue;
+
         return PeriodicLetterContexts.Free(tenant, _today, lastActivity) with
         {
             Tariff = new Tariff
             {
-                Quotas = [new Quota(-3, 1), new Quota(-11, 1) { Wallet = true, Additional = true, DueDate = paidUntil }],
+                Quotas = overdue ? [new Quota(-3, 1)] : [new Quota(-3, 1), addOn],
+                OverdueQuotas = overdue ? [addOn] : null,
                 State = TariffState.Paid,
                 DueDate = DateTime.MaxValue,
                 DelayDueDate = DateTime.MaxValue
