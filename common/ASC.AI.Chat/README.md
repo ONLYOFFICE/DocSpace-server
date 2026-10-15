@@ -41,15 +41,17 @@ portal address there.
 With `shareSystemServers` the host-configured servers of `ai.mcp` (the portal's own
 `docspace` server among them) are handed over too, with the user's session, so the agent can
 read and write the workspace itself; their endpoints must then be reachable from the agent's
-host, as the agent refuses a task whose server it cannot connect to. The files attached to the
-message, and the workspace files the model names, are read under the user's credentials and sent
-to the agent as bytes; the files the agent produces are saved into the agent room's Result
+host, as the agent refuses a task whose server it cannot connect to. No file content is sent:
+the ids of the files attached to the message, and of the files and folders the model names, are
+appended to the task's text, and the agent reads them itself through the portal's MCP server,
+which therefore has to be among the servers it gets (`shareSystemServers`). The originals are
+never changed: the files the agent produces are saved as new files into the agent room's Result
 Storage, else the current folder, else My documents. While an agent is configured the
 `onlyoffice_generate_*` tools, which only create empty files, are not offered.
 
 While the task runs the agent's steps (its one-line intent before every tool call) are shown live
-under the tool card, as text of the assistant message (`app/tools/toolProgress.ts`); the engine's
-own events replace it with the result when the task ends, and nothing of it is persisted.
+under the tool card: each becomes an MCP-shaped progress notification of the tool call, which the
+engine streams (`toolProgress`) until the result replaces it; nothing of it is persisted.
 
 ### License
 

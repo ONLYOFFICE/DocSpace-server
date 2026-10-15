@@ -32,12 +32,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // The document agent as one tool of the chat: `document_agent` hands a
-// request, the files attached to the message and the files the model names
-// to the external agent, which creates or edits office documents with
+// request to the external agent, which creates office documents with
 // ONLYOFFICE Document Builder in a sandbox of its own, and brings the result
-// back as files in the user's workspace. The agent runs on the chat's own
-// model profile and sees the custom MCP servers of the current scope, so the
-// delegated task has the same tools and the same model the chat does.
+// back as new files in the user's workspace. The workspace files and folders
+// the request is about (the message's attachments, the ids the model names)
+// go as ids in the task's text; the agent reads their content itself through
+// the portal's MCP server, and the originals stay as they are. The agent runs
+// on the chat's own model profile and sees the custom MCP servers of the
+// current scope, so the delegated task has the same tools and the same model
+// the chat does.
 //
 // Like `formAnalysisSubAgent`, this is a ToolsAdapter with a single tool
 // whose work happens elsewhere; unlike it, the work lives in another
@@ -61,12 +64,7 @@ import {
   getMyDocumentsFolderId,
   resolveAgentEntityId,
 } from "../storage/docspaceFilesApi.js";
-import {
-  downloadFile,
-  FileTooLargeError,
-  mediaTypeOf,
-  uploadFile,
-} from "../storage/docspaceFileTransfer.js";
+import { mediaTypeOf, uploadFile } from "../storage/docspaceFileTransfer.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import {
   getForwardedHeaders,
@@ -87,11 +85,8 @@ import logger from "../log.js";
 
 export const DOCUMENT_AGENT_TOOL_NAME = "document_agent";
 
-// One input or output file; the agent's own default ceiling is the same.
+// One file the agent produces; the agent's own default ceiling is the same.
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
-// All input files together: they travel base64 in one request body, which the
-// agent takes up to four times its file ceiling (see its requestBodyLimit).
-const MAX_INPUT_BYTES = 3 * MAX_FILE_BYTES;
 // Past the task timeout the agent reports a failure itself; the margin
 // covers the sandbox teardown and the files on their way back.
 const ABORT_MARGIN_MS = 60_000;
@@ -103,12 +98,14 @@ const RESERVED_SERVER_NAMES = new Set(["host", "docbuilder"]);
 const TOOL: TMCPItem = {
   name: DOCUMENT_AGENT_TOOL_NAME,
   description:
-    "Delegate the creation or editing of office documents (docx, xlsx, pptx, pdf) to the " +
-    "document agent, which works autonomously with ONLYOFFICE Document Builder and saves the " +
-    "resulting files into the workspace. Use it when the user asks for a real file with content: " +
+    "Delegate the creation of office documents (docx, xlsx, pptx, pdf) to the document agent, " +
+    "which works autonomously with ONLYOFFICE Document Builder and saves the resulting files " +
+    "into the workspace as new files. Use it when the user asks for a real file with content: " +
     "a report, a letter, a spreadsheet with data and charts, a presentation, a filled template. " +
-    "The files attached to the current message are passed on automatically; name other workspace " +
-    "files by id in `fileIds`. The call returns the agent's summary and the saved files with " +
+    "The agent reads workspace content itself by id: the files attached to the current message " +
+    "are passed on automatically; name other files in `fileIds` and folders in `folderIds`. " +
+    "Existing files are never changed: an edit comes back as a new file. " +
+    "The call returns the agent's summary and the saved files with " +
     "`url`; when you mention a file, link it exactly as `[<title>](<url>)`, copying `url` " +
     "verbatim. The task may take several minutes.",
   inputSchema: {
@@ -125,8 +122,13 @@ const TOOL: TMCPItem = {
         type: "array",
         items: { type: "string" },
         description:
-          "Ids of workspace files to hand to the agent as input, in addition to the message's " +
+          "Ids of workspace files the agent should read, in addition to the message's " +
           "attachments.",
+      },
+      folderIds: {
+        type: "array",
+        items: { type: "string" },
+        description: "Ids of workspace folders or rooms whose files the agent should read.",
       },
     },
     required: ["task"],
@@ -135,8 +137,6 @@ const TOOL: TMCPItem = {
   requireApproval: true,
   enabled: true,
 };
-
-type InputFile = { name: string; bytes: Uint8Array; mediaType: string };
 
 export const documentAgentTools: ToolsAdapter = {
   async getTools(): Promise<Record<string, TMCPItem[]>> {
@@ -162,17 +162,21 @@ export const documentAgentTools: ToolsAdapter = {
     }
     try {
       return JSON.stringify(
-        await run(config, task, fileIdsOf(args), entityId, options?.onprogress),
+        await run(
+          config,
+          task,
+          idsOf(args, "fileIds"),
+          idsOf(args, "folderIds"),
+          entityId,
+          options?.onprogress,
+        ),
       );
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
       const message = err instanceof Error ? err.message : String(err);
       logger.warn(`${DOCUMENT_AGENT_TOOL_NAME} failed: ${message}`);
-      if (err instanceof FileTooLargeError) {
-        return `The document agent could not take an input file: ${message}.`;
-      }
       if (err instanceof DocspaceApiHttpError) {
-        return `A workspace file could not be read: ${message}.`;
+        return `The workspace could not be reached: ${message}.`;
       }
       if (err instanceof DocumentAgentError) {
         return `The document agent is unavailable: ${message}.`;
@@ -185,8 +189,8 @@ export const documentAgentTools: ToolsAdapter = {
   },
 };
 
-function fileIdsOf(args: Record<string, unknown>): string[] {
-  const raw = getArray(args, "fileIds") ?? [];
+function idsOf(args: Record<string, unknown>, key: string): string[] {
+  const raw = getArray(args, key) ?? [];
   const ids: string[] = [];
   for (const value of raw) {
     if (typeof value === "string" && value.trim() !== "") {
@@ -202,6 +206,7 @@ async function run(
   config: DocumentAgentConfig,
   task: string,
   fileIds: string[],
+  folderIds: string[],
   entityId: string | undefined,
   onprogress: ProgressCallback | undefined,
 ): Promise<unknown> {
@@ -209,8 +214,8 @@ async function run(
   if (!profile) {
     return { error: "No model is configured for this chat, the document agent cannot run." };
   }
-  const [files, mcpServers, targetFolderId] = await Promise.all([
-    collectInputs(fileIds),
+  const [inputFileIds, mcpServers, targetFolderId] = await Promise.all([
+    inputFileIdsOf(fileIds),
     collectServers(config, entityId),
     resolveUploadTarget(entityId),
   ]);
@@ -229,8 +234,9 @@ async function run(
   };
   logger.info(
     `${DOCUMENT_AGENT_TOOL_NAME}: start entityId=${entityId ?? "-"} profile=${profile.id} ` +
-      `model=${profile.modelId} files=[${files.map((f) => f.name).join(",")}] ` +
-      `servers=[${Object.keys(mcpServers).join(",")}] target=${targetFolderId}`,
+      `model=${profile.modelId} files=[${inputFileIds.join(",")}] ` +
+      `folders=[${folderIds.join(",")}] servers=[${Object.keys(mcpServers).join(",")}] ` +
+      `target=${targetFolderId}`,
   );
 
   // The steps shown live are the agent's own, in the language of the request:
@@ -239,8 +245,8 @@ async function run(
   // MCP requires to increase. The agent gives no total.
   let step = 0;
   const result = await runDocumentTask(config, {
-    task,
-    files,
+    task: withInputIds(task, inputFileIds, folderIds),
+    files: [],
     settings,
     signal: AbortSignal.timeout(config.taskTimeoutSeconds * 1000 + ABORT_MARGIN_MS),
     onStatus: onprogress
@@ -374,10 +380,10 @@ function reasoningOf(profile: Profile): DocumentAgentSettings["model"]["reasonin
   return support?.defaultDepth ?? "medium";
 }
 
-// The attached files of the message plus the ids the model named, each read
-// under the caller's credentials. A file the user cannot read is refused by
-// DocSpace, and that failure ends the task before the agent is involved.
-async function collectInputs(fileIds: string[]): Promise<InputFile[]> {
+// The ids the model named plus the files attached to the message, once each.
+// Nothing is read here: the agent reads them through the portal's MCP server
+// under the caller's session, so what the user may not open, it cannot read.
+async function inputFileIdsOf(fileIds: string[]): Promise<string[]> {
   const ids = new Set<string>(fileIds);
   const refs = getRoundAttachmentIds();
   if (refs.length > 0) {
@@ -389,23 +395,26 @@ async function collectInputs(fileIds: string[]): Promise<InputFile[]> {
       }
     }
   }
-  const files: InputFile[] = [];
-  const names = new Set<string>();
-  let total = 0;
-  for (const id of ids) {
-    const file = await downloadFile(id, Math.min(MAX_FILE_BYTES, MAX_INPUT_BYTES - total));
-    total += file.bytes.byteLength;
-    // The agent refuses two inputs of one name; keep the first.
-    if (names.has(file.title)) {
-      logger.warn(
-        `${DOCUMENT_AGENT_TOOL_NAME}: duplicate input name ${file.title}, file ${id} skipped`,
-      );
-      continue;
-    }
-    names.add(file.title);
-    files.push({ name: file.title, bytes: file.bytes, mediaType: file.mediaType });
+  return [...ids];
+}
+
+// The task as the agent gets it: the model's request, then the workspace ids
+// it is about, with how to reach them.
+function withInputIds(task: string, fileIds: string[], folderIds: string[]): string {
+  if (fileIds.length === 0 && folderIds.length === 0) {
+    return task;
   }
-  return files;
+  const lines = [
+    "Workspace inputs: read their content with the DocSpace tools. Do not change them; " +
+      "save every result as a new file.",
+  ];
+  if (fileIds.length > 0) {
+    lines.push(`- file ids: ${fileIds.join(", ")}`);
+  }
+  if (folderIds.length > 0) {
+    lines.push(`- folder ids: ${folderIds.join(", ")}`);
+  }
+  return `${task}\n\n${lines.join("\n")}`;
 }
 
 // The MCP servers the agent gets: the custom servers of the round's scope,
