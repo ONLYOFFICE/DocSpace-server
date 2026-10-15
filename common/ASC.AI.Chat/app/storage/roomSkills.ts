@@ -247,13 +247,38 @@ export async function listRoomSkillFiles(roomId: string): Promise<AiFolderFile[]
 // the same address works on localhost, where the two hosts coincide. A
 // host-relative address (`/storage/files/...`) resolves against the proxy
 // the same way.
-function throughProxy(url: string): string {
-  const base = proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`;
+export function throughProxy(url: string, base: string = proxyBaseUrl): string {
+  const root = base.endsWith("/") ? base : `${base}/`;
   if (!/^https?:\/\//i.test(url)) {
-    return new URL(url, base).toString();
+    return new URL(url, root).toString();
   }
   const { pathname, search } = new URL(url);
-  return new URL(`${pathname}${search}`, base).toString();
+  return new URL(`${pathname}${search}`, root).toString();
+}
+
+/**
+ * `GET api/2.0/files/file/{id}/presigneduri` with the caller's credentials: the
+ * download address it mints, as the portal names it (its public host, or
+ * host-relative); see {@link throughProxy} for where to fetch it from.
+ */
+export async function presignedDownloadUrl(fileId: string): Promise<string> {
+  const uriUrl = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
+  const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
+  try {
+    const res = await fetch(uriUrl, { headers: getForwardedHeaders(), signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, uriUrl);
+    }
+    const raw: unknown = await res.json();
+    const downloadUrl = isObject(raw) ? asString(raw["response"]) : undefined;
+    if (!downloadUrl) {
+      throw new Error(`No download address for file ${fileId}`);
+    }
+    return downloadUrl;
+  } finally {
+    cancel();
+  }
 }
 
 /**
@@ -263,26 +288,7 @@ function throughProxy(url: string): string {
  * `MAX_SKILL_BYTES`.
  */
 export async function readFileText(fileId: string): Promise<string> {
-  const uriUrl = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
-  let downloadUrl: string | undefined;
-  {
-    const { signal, cancel } = withTimeout(undefined);
-    countFilesApiRead();
-    try {
-      const res = await fetch(uriUrl, { headers: getForwardedHeaders(), signal });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, uriUrl);
-      }
-      const raw: unknown = await res.json();
-      downloadUrl = isObject(raw) ? asString(raw["response"]) : undefined;
-    } finally {
-      cancel();
-    }
-  }
-  if (!downloadUrl) {
-    throw new Error(`No download address for file ${fileId}`);
-  }
-  const url = throughProxy(downloadUrl);
+  const url = throughProxy(await presignedDownloadUrl(fileId));
   const { signal, cancel } = withTimeout(undefined);
   try {
     // The caller's conditional headers describe the widget's request, not this

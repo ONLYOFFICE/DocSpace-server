@@ -48,13 +48,15 @@ told `readOnly: false` about: it runs its tools without asking anyone, so nothin
 workspace may be changed from a task. Next to it goes a small MCP server of this service itself
 (`app/tools/documentAgentFiles.ts`, at `/document-agent/files/mcp` under `filesUrl`) with one
 tool, `workspace_get_file_link`: a workspace file id in, the Files API's pre-signed download
-link out, re-hosted on `portalUrl`; the agent fetches the link itself, so the file lands in its
+link out, re-hosted on `portalUrl` (else on the portal address this service itself uses, `API_HOST`); the agent fetches the link itself, so the file lands in its
 sandbox as it is and Document Builder can open or edit it (`docspace_download_file_as_text`
 gives only the text). The agent presents the document agent's token (`X-Docagent-Token`) and
 the user's session, and a link is minted only for a file that session may read. With
 `shareSystemServers` the other host-configured servers of `ai.mcp` go
-along as well. Their endpoints must be reachable from the agent's host, as the agent refuses a
-task whose server it cannot connect to. The originals are
+along as well. Every server handed over must be reachable from the agent's host, as the agent
+refuses a task whose server it cannot connect to: the portal server's `ai.mcp` endpoint and
+`filesUrl` included, so an agent outside the deployment's network needs both named for it. The
+originals are
 never changed: the files the agent produces are saved as new files into the agent room's Result
 Storage, else the current folder, else My documents. While an agent is configured the
 `onlyoffice_generate_*` tools, which only create empty files, are not offered.

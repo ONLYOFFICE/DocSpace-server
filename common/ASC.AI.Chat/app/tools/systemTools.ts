@@ -128,7 +128,7 @@ function readCookie(cookieHeader: string | undefined, name: string): string | un
 // server rejects the request ("Authorization header is required").
 const AUTH_COOKIE = "asc_auth_key";
 
-function authorizationValue(headers: Record<string, string>): string | undefined {
+export function authorizationValue(headers: Record<string, string>): string | undefined {
   const cookie = headers["cookie"];
   return (
     readCookie(cookie, AUTH_COOKIE) ??
@@ -171,10 +171,18 @@ export function systemServerHeaders(): Record<string, string> {
 // The caller's session as the one cookie the portal API reads, for a client
 // outside this process that must act as the user against the portal itself
 // (the document agent's model requests through the gateway proxy). Only the
-// auth cookie goes: the rest of the browser's cookies are not the agent's.
+// auth cookie goes (or the `authorization` cookie a caller may carry in its
+// place, as `authorizationValue` accepts it): the rest of the browser's
+// cookies are not the agent's.
 export function sessionCookie(): string | undefined {
-  const token = readCookie(getForwardedHeaders()["cookie"], AUTH_COOKIE);
-  return token === undefined ? undefined : `${AUTH_COOKIE}=${token}`;
+  const cookie = getForwardedHeaders()["cookie"];
+  for (const name of [AUTH_COOKIE, "authorization"]) {
+    const value = readCookie(cookie, name);
+    if (value !== undefined) {
+      return `${name}=${value}`;
+    }
+  }
+  return undefined;
 }
 
 // Forward the caller's DocSpace auth/context headers to the MCP server so

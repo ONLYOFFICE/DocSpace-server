@@ -104,7 +104,7 @@ const ABORT_MARGIN_MS = 60_000;
 
 // Server names the agent accepts, and the two it keeps for itself.
 const SERVER_NAME = /^[a-z0-9_-]+$/;
-const RESERVED_SERVER_NAMES = new Set(["host", "docbuilder"]);
+const RESERVED_SERVER_NAMES = new Set(["sandbox", "docbuilder"]);
 
 const TOOL: TMCPItem = {
   name: DOCUMENT_AGENT_TOOL_NAME,
@@ -446,6 +446,14 @@ async function collectServers(
     if (!SERVER_NAME.test(name) || RESERVED_SERVER_NAMES.has(name)) {
       logger.warn(
         `${DOCUMENT_AGENT_TOOL_NAME}: MCP server "${name}" skipped, the agent cannot take that name`,
+      );
+      return;
+    }
+    // First come first served: the system servers go in before the custom
+    // ones, so a custom server cannot stand in for the portal's or ours.
+    if (name in out) {
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME}: MCP server "${name}" skipped, a server of that name is already handed over`,
       );
       return;
     }

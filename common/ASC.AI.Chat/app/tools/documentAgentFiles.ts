@@ -40,11 +40,15 @@
 // user's session and good for the portal's `auth:validinterval` (an hour by
 // default), on the host the agent reaches the portal at.
 //
-// Reached over the internal network only: the agent presents the shared
-// token of the document agent configuration and the user's session, which
-// this service hands it with the server (see documentAgent.ts
-// collectServers). One MCP session per request (the SDK's stateless mode):
-// nothing is kept between calls.
+// The gate is the shared token of the document agent configuration plus the
+// user's session, both of which this service hands the agent with the
+// server (see documentAgent.ts collectServers). The path sits outside the
+// API prefix, which is all the portal's router forwards to this service,
+// and the Docker install publishes no port of it, so in practice only the
+// internal network sees it; the token is what is relied on. One MCP session
+// per request (the SDK's stateless mode): nothing is kept between calls, and
+// a GET, which would open a server-to-client stream this server has no use
+// for, is answered 405 as the protocol allows.
 
 import { timingSafeEqual } from "crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -53,11 +57,12 @@ import type { Application, Request, Response } from "express";
 import { z } from "zod";
 import { getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
-import { getForwardedHeaders, countFilesApiRead } from "../requestContext.js";
-import { proxyBaseUrl, withTimeout } from "../storage/httpClient.js";
+import { getForwardedHeaders } from "../requestContext.js";
+import { proxyBaseUrl } from "../storage/httpClient.js";
 import { DocspaceApiHttpError, getFileInfo } from "../storage/docspaceFilesApi.js";
 import { mediaTypeOf } from "../storage/docspaceFileTransfer.js";
-import { asString, isObject } from "../narrow.js";
+import { presignedDownloadUrl, throughProxy } from "../storage/roomSkills.js";
+import { authorizationValue } from "./systemTools.js";
 import logger from "../log.js";
 
 /** The server's name in the agent's `mcpServers`: its tools reach the model as `workspace_*`. */
@@ -69,11 +74,12 @@ export const DOCUMENT_AGENT_TOKEN_HEADER = "x-docagent-token";
 
 export const GET_FILE_LINK_TOOL = "get_file_link";
 
-/**
- * Mounts the server. Every method of the path goes to the SDK's transport,
- * which answers a GET (no server-initiated stream here) with 405 as the
- * protocol allows; the agent's client takes that in stride.
- */
+// Headers of the agent's own request to this server, which describe that
+// request and not the user: kept from the Files API calls made on its
+// behalf. The token above all, a secret of this service and the agent that
+// the portal has no business seeing.
+const NOT_FOR_THE_PORTAL = [DOCUMENT_AGENT_TOKEN_HEADER, "accept", "mcp-protocol-version"];
+
 export function registerDocumentAgentFiles(app: Application): void {
   app.all(DOCUMENT_AGENT_FILES_PATH, (req, res) => {
     void serve(req, res);
@@ -91,13 +97,18 @@ async function serve(req: Request, res: Response): Promise<void> {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
-  // The user's session the agent was handed with the server: without it the
-  // Files API would answer the link request itself with 401, but the gap is
-  // clearer named here.
   const forwarded = getForwardedHeaders();
-  if (!forwarded["cookie"] && !forwarded["authorization"]) {
+  if (authorizationValue(forwarded) === undefined) {
     res.status(401).json({ error: "Unauthorized: no user session" });
     return;
+  }
+  if (req.method === "GET") {
+    res.setHeader("Allow", "POST, DELETE");
+    res.status(405).json({ error: "method not allowed" });
+    return;
+  }
+  for (const name of NOT_FOR_THE_PORTAL) {
+    delete forwarded[name];
   }
 
   const server = new McpServer({ name: "docspace-ai-chat", version: "1.0.0" });
@@ -117,7 +128,6 @@ async function serve(req: Request, res: Response): Promise<void> {
   );
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   res.on("close", () => {
-    void transport.close();
     void server.close();
   });
   try {
@@ -145,7 +155,8 @@ function presentsToken(req: Request, config: DocumentAgentConfig): boolean {
 
 // The tool: the file's title for the name the agent will save it under, then
 // the Files API's pre-signed download address, re-hosted where the agent
-// reaches the portal. A failure is a result the model reads, never a throw.
+// reaches the portal. A failure is a result the model reads, never a throw,
+// and names no address of ours.
 async function fileLink(config: DocumentAgentConfig, fileId: string) {
   try {
     const info = await getFileInfo(fileId);
@@ -153,8 +164,7 @@ async function fileLink(config: DocumentAgentConfig, fileId: string) {
       return failure(`file ${fileId} not found`);
     }
     const title = info.title ?? `file-${fileId}`;
-    const minted = await presignedUrl(fileId);
-    const uri = rehost(minted, config.portalUrl ?? proxyBaseUrl);
+    const uri = throughProxy(await presignedDownloadUrl(fileId), config.portalUrl ?? proxyBaseUrl);
     logger.info(`documentAgentFiles: link for file ${fileId} (${title}) minted`);
     return {
       content: [
@@ -170,46 +180,17 @@ async function fileLink(config: DocumentAgentConfig, fileId: string) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(`documentAgentFiles: no link for file ${fileId}: ${message}`);
-    if (err instanceof DocspaceApiHttpError && err.status === 403) {
-      return failure(`file ${fileId} cannot be read by the current user`);
+    if (err instanceof DocspaceApiHttpError) {
+      return failure(
+        err.status === 403
+          ? `file ${fileId} cannot be read by the current user`
+          : `file ${fileId}: the workspace answered ${err.status}`,
+      );
     }
-    return failure(`file ${fileId}: ${message}`);
+    return failure(`file ${fileId}: no download link could be made`);
   }
 }
 
 function failure(text: string) {
   return { content: [{ type: "text" as const, text }], isError: true };
-}
-
-/** `GET files/file/{id}/presigneduri` under the caller's session: the download address it mints. */
-async function presignedUrl(fileId: string): Promise<string> {
-  const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
-  const { signal, cancel } = withTimeout(undefined);
-  countFilesApiRead();
-  try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    const raw: unknown = await res.json();
-    const minted = isObject(raw) ? asString(raw["response"]) : undefined;
-    if (!minted) {
-      throw new Error("the Files API returned no download address");
-    }
-    return minted;
-  } finally {
-    cancel();
-  }
-}
-
-// The minted address names the portal's public host (or comes host-relative);
-// the agent reaches the portal at `base`, so only the path and query, which
-// carry the signature, are kept.
-function rehost(minted: string, base: string): string {
-  const root = base.endsWith("/") ? base : `${base}/`;
-  if (!/^https?:\/\//i.test(minted)) {
-    return new URL(minted, root).toString();
-  }
-  const { pathname, search } = new URL(minted);
-  return new URL(`${pathname}${search}`, root).toString();
 }
