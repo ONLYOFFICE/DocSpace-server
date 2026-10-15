@@ -92,11 +92,11 @@ public class DbTenantService(
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Tenant>> GetTenantsByStatusAsync(IEnumerable<TenantStatus> statuses)
+    public async Task<IEnumerable<int>> GetTenantIdsByStatusAsync(IEnumerable<TenantStatus> statuses)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return await tenantDbContext.TenantsByStatusAsync(statuses).Select(r => r.Map()).ToListAsync();
+        return await tenantDbContext.TenantIdsByStatusAsync(statuses).ToListAsync();
     }
 
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash)

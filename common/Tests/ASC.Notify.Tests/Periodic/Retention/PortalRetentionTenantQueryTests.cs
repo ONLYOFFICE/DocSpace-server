@@ -35,13 +35,13 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
 /// The query the retention job walks portals with. It runs against the stack's real database, so it
-/// proves the compiled query translates and maps, not only that it compiles. It only reads: the portal
+/// proves the compiled query translates, not only that it compiles. It only reads: the portal
 /// is shared by every letter test, so its status is never changed here.
 /// </summary>
 public class PortalRetentionTenantQueryTests
 {
     [Fact]
-    public async Task TenantsByStatus_ReturnsThePortalsInTheGivenStates()
+    public async Task TenantIdsByStatus_ReturnsThePortalsInTheGivenStates()
     {
         var stack = await LetterStackFixture.CurrentAsync();
 
@@ -49,14 +49,11 @@ public class PortalRetentionTenantQueryTests
 
         var tenantManager = scope.Services.GetRequiredService<TenantManager>();
 
-        var walked = await tenantManager.GetTenantsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked);
+        var walked = await tenantManager.GetTenantIdsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked);
 
-        walked.Should().ContainSingle(t => t.Id == stack.Portal.TenantId)
-            .Which.Alias.Should().Be(stack.Portal.PortalName, "the row is mapped, not only found");
+        walked.Should().ContainSingle(id => id == stack.Portal.TenantId).And.OnlyHaveUniqueItems();
 
-        walked.Should().OnlyContain(t => t.Status == TenantStatus.Active || t.Status == TenantStatus.Blocked);
-
-        (await tenantManager.GetTenantsByStatusAsync(TenantStatus.Blocked))
-            .Should().NotContain(t => t.Id == stack.Portal.TenantId, "an active portal is not a blocked one");
+        (await tenantManager.GetTenantIdsByStatusAsync(TenantStatus.Blocked))
+            .Should().NotContain(stack.Portal.TenantId, "an active portal is not a blocked one");
     }
 }

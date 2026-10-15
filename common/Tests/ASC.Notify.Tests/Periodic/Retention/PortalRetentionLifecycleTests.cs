@@ -77,9 +77,9 @@ public class PortalRetentionLifecycleTests
     /// <summary>The portal's status as the database has it, past every cache.</summary>
     private static async Task<bool> HasStatusAsync(IServiceScope scope, int tenantId, TenantStatus status)
     {
-        var tenants = await scope.ServiceProvider.GetRequiredService<TenantManager>().GetTenantsByStatusAsync(status);
+        var tenantIds = await scope.ServiceProvider.GetRequiredService<TenantManager>().GetTenantIdsByStatusAsync(status);
 
-        return tenants.Any(t => t.Id == tenantId);
+        return tenantIds.Contains(tenantId);
     }
 
     /// <summary>

@@ -91,10 +91,13 @@ public class TenantManager(
         return tenantService.GetTenantsAsync(ids);
     }
 
-    /// <summary>The portals in any of the given states, e.g. the active and the blocked ones the retention job walks.</summary>
-    public async Task<List<Tenant>> GetTenantsByStatusAsync(params TenantStatus[] statuses)
+    /// <summary>
+    /// The ids of the portals in any of the given states, e.g. the active and the blocked ones the retention job walks.
+    /// Only the ids: a caller walking many portals reads each one as it comes to it.
+    /// </summary>
+    public async Task<List<int>> GetTenantIdsByStatusAsync(params TenantStatus[] statuses)
     {
-        return (await tenantService.GetTenantsByStatusAsync(statuses)).ToList();
+        return (await tenantService.GetTenantIdsByStatusAsync(statuses)).ToList();
     }
 
     public Task<Tenant> GetTenantAsync(int tenantId)
