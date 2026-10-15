@@ -6643,6 +6643,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("delivery");
 
+                    b.Property<string>("LeaseId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("lease_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<DateTime?>("NextAttemptOn")
                         .HasColumnType("datetime")
                         .HasColumnName("next_attempt_on");
