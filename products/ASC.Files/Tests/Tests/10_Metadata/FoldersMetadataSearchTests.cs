@@ -42,6 +42,7 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
 {
     private const string ClientField = "Client";
     private const string AmountField = "Amount";
+    private const string HiddenField = "Reference";
 
     #region Sub-folders
 
@@ -313,6 +314,71 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
     }
 
     [Fact]
+    public async Task Folders_TextSearch_SkipsTheHiddenTemplateValues_UnlessAsked()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+
+        await data.AssignHiddenValueAsync(data.OtherFolderId, marker);
+
+        // the presence is seen first, with the hidden templates asked for, so the absence below is not the indexing lag
+        var included = await data.SearchByTextAsync(marker, expectedFolders: [data.OtherFolderId], expectedFiles: [], includeHiddenMetadata: true);
+
+        included.FolderIds().Should().Equal(data.OtherFolderId);
+        included.Folders.Single().MetadataMatches.Should().ContainSingle(m => m.FieldName == HiddenField && m.Value == marker);
+
+        var excluded = await data.SearchByTextAsync(marker, expectedFolders: [], expectedFiles: []);
+
+        excluded.FolderIds().Should().BeEmpty("the web client never shows a hidden template, so it must not find by its values either");
+
+        // the typed search takes the same flag in its body; the index already holds the value, so one read is enough
+        var typedIncluded = await data.Api.SearchFolderAsync(data.RoomId, new { filterValue = marker, includeHiddenMetadata = true }, TestContext.Current.CancellationToken);
+        var typedExcluded = await data.Api.SearchFolderAsync(data.RoomId, new { filterValue = marker }, TestContext.Current.CancellationToken);
+
+        typedIncluded.FolderIds().Should().Equal(data.OtherFolderId);
+        typedExcluded.FolderIds().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Folders_TextSearch_ReportsTheHiddenTemplateMatches_OnlyWhenAsked()
+    {
+        var data = await ArrangeAsync();
+
+        // the folder is found by its title either way; what differs is whether the page tells about the hidden value
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+        var folder = await CreateFolder($"{marker} folder", data.RoomId);
+
+        await data.AssignHiddenValueAsync(folder.Id, marker);
+
+        var excluded = await data.SearchByTextAsync(marker, expectedFolders: [folder.Id], expectedFiles: []);
+
+        excluded.FolderIds().Should().Equal(folder.Id);
+        excluded.Folders.Single().MetadataMatches.Should().BeNullOrEmpty("a field the web client never shows must not be reported as the place of the match");
+
+        var included = await data.SearchByTextAsync(marker, expectedFolders: [folder.Id], expectedFiles: [], includeHiddenMetadata: true);
+
+        included.Folders.Single().MetadataMatches.Should().ContainSingle(m => m.FieldName == HiddenField && m.Value == marker);
+    }
+
+    [Fact]
+    public async Task Folders_HiddenTemplateCondition_IsAppliedWithoutAsking()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+
+        var hidden = await data.AssignHiddenValueAsync(data.OtherFolderId, marker);
+
+        // a condition naming the field of a hidden template is an explicit request for it, no flag needed
+        var content = await data.SearchAsync(
+            new { fieldId = hidden.Field(HiddenField).Id, op = "eq", value = marker },
+            expectedFolders: [data.OtherFolderId], expectedFiles: [], templateId: hidden.Id);
+
+        content.FolderIds().Should().Equal(data.OtherFolderId);
+    }
+
+    [Fact]
     public async Task Folders_ListedWithoutText_CarryNoMetadataMatches()
     {
         var data = await ArrangeAsync();
@@ -535,27 +601,41 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
             };
         }
 
-        public Task<FolderContentResponse> SearchAsync(object condition, int[] expectedFolders, int[] expectedFiles, bool? withSubFolders = null)
+        public Task<FolderContentResponse> SearchAsync(object condition, int[] expectedFolders, int[] expectedFiles, bool? withSubFolders = null, int? templateId = null)
         {
-            return PollAsync(TemplateId, [condition], filterValue: null, withSubFolders, expectedFolders, expectedFiles);
+            return PollAsync(templateId ?? TemplateId, [condition], filterValue: null, withSubFolders, expectedFolders, expectedFiles);
         }
 
-        public Task<FolderContentResponse> SearchByTextAsync(string text, int[] expectedFolders, int[] expectedFiles)
+        public Task<FolderContentResponse> SearchByTextAsync(string text, int[] expectedFolders, int[] expectedFiles, bool? includeHiddenMetadata = null)
         {
-            return PollAsync(metadataTemplateId: null, conditions: null, filterValue: text, withSubFolders: null, expectedFolders, expectedFiles);
+            return PollAsync(metadataTemplateId: null, conditions: null, filterValue: text, withSubFolders: null, expectedFolders, expectedFiles, includeHiddenMetadata);
+        }
+
+        /// <summary>
+        /// Creates a hidden template with one string field, assigns it to the folder and stores the value in it.
+        /// </summary>
+        public async Task<MetadataTemplateResponse> AssignHiddenValueAsync(int folderId, string value)
+        {
+            var hidden = await api.CreateTemplateAsync("Hidden " + Guid.NewGuid().ToString()[..8],
+                [new MetadataFieldPayload { Name = HiddenField, Type = 0 }], TestContext.Current.CancellationToken, visible: false);
+
+            await api.AssignFolderTemplatesAsync(folderId, [hidden.Id], cascade: false, TestContext.Current.CancellationToken);
+            await api.SetFolderValuesAsync(folderId, [new MetadataValuePayload { FieldId = hidden.Field(HiddenField).Id, StringValue = value }], TestContext.Current.CancellationToken);
+
+            return hidden;
         }
 
         /// <summary>
         /// Requests the folder content, retrying until the expected identifiers are returned. The metadata values
         /// are indexed right after they are written, the retry only absorbs the indexing lag.
         /// </summary>
-        private async Task<FolderContentResponse> PollAsync(int? metadataTemplateId, object[]? conditions, string? filterValue, bool? withSubFolders, int[] expectedFolders, int[] expectedFiles)
+        private async Task<FolderContentResponse> PollAsync(int? metadataTemplateId, object[]? conditions, string? filterValue, bool? withSubFolders, int[] expectedFolders, int[] expectedFiles, bool? includeHiddenMetadata = null)
         {
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
 
             while (true)
             {
-                var content = await Api.GetFolderContentAsync(RoomId, metadataTemplateId, conditions, filterValue, withSubFolders, TestContext.Current.CancellationToken);
+                var content = await Api.GetFolderContentAsync(RoomId, metadataTemplateId, conditions, filterValue, withSubFolders, TestContext.Current.CancellationToken, includeHiddenMetadata: includeHiddenMetadata);
 
                 var matched = content.FolderIds().Order().SequenceEqual(expectedFolders.Order()) &&
                     content.FileIds().Order().SequenceEqual(expectedFiles.Order());

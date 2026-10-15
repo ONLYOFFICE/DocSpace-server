@@ -416,11 +416,11 @@ public class FileEntryDtoHelper(
 
     /// <summary>
     /// Fills the metadata of the entries of one page: their assigned templates, and, when the page was filtered by a search
-    /// text, where that text was met in their values. One round trip per kind, over the files and the folders together,
-    /// and nothing at all for a tenant without templates, which has no links and no values: the listing is the hottest
-    /// read path.
+    /// text, where that text was met in their values (in the hidden templates too when the search looked there). One
+    /// round trip per kind, over the files and the folders together, and nothing at all for a tenant without templates,
+    /// which has no links and no values: the listing is the hottest read path.
     /// </summary>
-    public async Task SetMetadataAsync(IReadOnlyCollection<FileEntryDto<int>> dtos, string searchText = null)
+    public async Task SetMetadataAsync(IReadOnlyCollection<FileEntryDto<int>> dtos, string searchText = null, bool includeHiddenTemplates = false)
     {
         if (dtos.Count == 0 || !await metadataTemplatesCache.HasTemplatesAsync())
         {
@@ -441,7 +441,7 @@ public class FileEntryDtoHelper(
             return;
         }
 
-        var matches = await metadataDao.GetTextMatchesAsync(fileIds, folderIds, searchText);
+        var matches = await metadataDao.GetTextMatchesAsync(fileIds, folderIds, searchText, includeHiddenTemplates);
 
         Assign(dtos, matches.ToLookup(m => (m.EntryType, m.EntryId)),
             (dto, entryMatches) => dto.MetadataMatches = entryMatches.Select(m => m.Map()).ToList());
