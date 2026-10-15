@@ -1830,11 +1830,13 @@ public class PaymentController(
     /// means leaving it out, and an empty set lifts them all. Read the current set from
     /// `GET api/2.0/portal/payment/ai-model/restrictions` and the model identifiers from
     /// `GET api/2.0/portal/payment/ai-prices` before calling. The installation needs a billing service and the AI
-    /// gateway configured, the portal needs a billing customer, and the caller needs the permission to edit the
-    /// portal settings as well as DocSpace administrator rights. The call is mutating and idempotent - sending the
-    /// same set twice leaves the same state - and it is written to the portal audit trail. It takes effect on the
-    /// next AI request, so a conversation already open on a model that has just been barred cannot go on with it. The
-    /// stored set comes back in the answer.
+    /// gateway configured, the portal needs a billing customer and the AI tools wallet service switched on with
+    /// `POST api/2.0/portal/payment/servicestate`, and the caller needs the permission to edit the portal settings as
+    /// well as DocSpace administrator rights. The call is mutating and idempotent - sending the same set twice leaves
+    /// the same state - and it is written to the portal audit trail. It takes effect on the next AI request, so a
+    /// conversation already open on a model that has just been barred cannot go on with it. The stored set comes
+    /// back in the answer. While AI tools is off the call is refused with 403 instead of being stored, because the
+    /// read reports an empty set then and nothing written could be read back.
     /// </remarks>
     /// <summary>
     /// Set restricted AI models
@@ -1843,7 +1845,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `models` is missing or `null`")]
-    [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
+    [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, the installation has no billing service or no AI gateway configured, or the AI tools wallet service is off for the portal")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpPut("ai-model/restrictions")]
@@ -1854,6 +1856,8 @@ public class PaymentController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        await paymentHelper.DemandAiEnabledAsync();
 
         return (await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models))?.Map();
     }
