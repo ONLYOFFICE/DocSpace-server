@@ -121,25 +121,4 @@ public class ThirdPartyRecentMissingFileTests(
         finished.Should().NotBeNull();
         finished!.Should().OnlyContain(r => r.Finished && string.IsNullOrEmpty(r.Error));
     }
-
-    /// <summary>
-    /// Polls the caller's Recent section on a deadline and returns the last titles it listed.
-    /// </summary>
-    private async Task<List<string>> PollRecentTitlesUntil(Func<List<string>, bool> until)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-
-        while (true)
-        {
-            var titles = (await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken))
-                .Response.Files.Select(f => f.Title).ToList();
-
-            if (until(titles) || DateTime.UtcNow >= deadline)
-            {
-                return titles;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
-    }
 }

@@ -241,6 +241,28 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     }
 
     /// <summary>
+    /// Polls the caller's Recent section on a deadline and returns the last titles it listed: adding
+    /// to Recent and removing from it are both applied after the request returns.
+    /// </summary>
+    protected async Task<List<string>> PollRecentTitlesUntil(Func<List<string>, bool> until)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+
+        while (true)
+        {
+            var titles = (await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken))
+                .Response.Files.Select(f => f.Title).ToList();
+
+            if (until(titles) || DateTime.UtcNow >= deadline)
+            {
+                return titles;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Deletes a third-party folder from the storage and waits for the operation to finish. A
     /// folder that is already gone is not an error.
     /// </summary>
