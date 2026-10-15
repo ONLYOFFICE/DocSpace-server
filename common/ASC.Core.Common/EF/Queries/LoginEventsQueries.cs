@@ -128,30 +128,17 @@ static file class Queries
                     .Select(r => (DateTime?)r.Date)
                     .FirstOrDefault());
 
-    // The same for the last successful sign-in. The actions are constants of the query, so they reach the database
-    // as a plain IN list rather than a collection parameter.
+    // The same for the last successful sign-in, or sign-out: whoever signed out was signed in. The actions are the
+    // list every other reader of successful sign-ins uses; a compiled query evaluates the field when it is compiled,
+    // so they reach the database as a plain IN list of constants. EF.Constant must not wrap it: it expects a
+    // parameter and fails to translate on the constant the compiled query has already made of the field.
     public static readonly Func<MessagesContext, int, Task<DateTime?>> LastSuccessLoginDateAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId) =>
                 ctx.LoginEvents
                     .Where(r => r.TenantId == tenantId
-                                && new[]
-                                {
-                                    (int)MessageAction.LoginSuccess,
-                                    (int)MessageAction.LoginSuccessViaSocialAccount,
-                                    (int)MessageAction.LoginSuccessViaSms,
-                                    (int)MessageAction.LoginSuccessViaApi,
-                                    (int)MessageAction.LoginSuccessViaSocialApp,
-                                    (int)MessageAction.LoginSuccessViaApiSms,
-                                    (int)MessageAction.LoginSuccessViaSSO,
-                                    (int)MessageAction.LoginSuccessViaApiSocialAccount,
-                                    (int)MessageAction.LoginSuccesViaTfaApp,
-                                    (int)MessageAction.LoginSuccessViaApiTfa,
-                                    (int)MessageAction.LoginSuccessViaOAuth,
-                                    (int)MessageAction.LoginSuccessViaPassword,
-                                    (int)MessageAction.AuthLinkActivated,
-                                    (int)MessageAction.Logout
-                                }.Contains(r.Action ?? 0))
+                                && (LoginActions.Success.Contains(r.Action ?? 0)
+                                    || r.Action == (int)MessageAction.Logout))
                     .OrderByDescending(r => r.Date)
                     .Select(r => (DateTime?)r.Date)
                     .FirstOrDefault());

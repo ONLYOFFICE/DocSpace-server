@@ -96,6 +96,34 @@ public class PortalActivityQueryTests
     }
 
     [Fact]
+    public async Task LastSuccessLoginDate_CountsASignOut()
+    {
+        var stack = await LetterStackFixture.CurrentAsync();
+
+        using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
+        using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
+
+        await using (var context = await scope.Services.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(TestContext.Current.CancellationToken))
+        {
+            // A sign-in, the sign-out that ended it, and a failed sign-in later still.
+            foreach (var (date, action) in new[]
+                     {
+                         (_future.AddDays(10), MessageAction.LoginSuccess),
+                         (_future.AddDays(20), MessageAction.Logout),
+                         (_future.AddDays(30), MessageAction.LoginFailInvalidCombination)
+                     })
+            {
+                context.LoginEvents.Add(new DbLoginEvent { TenantId = portal.TenantId, UserId = portal.Owner.Id, Date = date, Action = (int)action, Active = true });
+                await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+            }
+        }
+
+        var lastLoginOn = await scope.Services.GetRequiredService<LoginEventsRepository>().GetLastSuccessEventDateAsync(portal.TenantId);
+
+        (lastLoginOn?.Date).Should().Be(_future.AddDays(20), "whoever signed out was signed in until then");
+    }
+
+    [Fact]
     public async Task LastDates_OfAPortalWithoutEvents_AreNull()
     {
         var stack = await LetterStackFixture.CurrentAsync();
