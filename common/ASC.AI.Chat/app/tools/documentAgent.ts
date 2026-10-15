@@ -246,7 +246,6 @@ async function run(
   let step = 0;
   const result = await runDocumentTask(config, {
     task: withInputIds(task, inputFileIds, folderIds),
-    files: [],
     settings,
     signal: AbortSignal.timeout(config.taskTimeoutSeconds * 1000 + ABORT_MARGIN_MS),
     onStatus: onprogress

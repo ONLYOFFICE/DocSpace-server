@@ -33,7 +33,7 @@
 
 // One task on the document agent over A2A, through the protocol's own client
 // (`@a2a-js/sdk/client`): the agent card is read once, the message carries
-// the task text and the input files as bytes, the request's own
+// the task text (the workspace ids it is about included), the request's own
 // `metadata.docagent` the run settings (next to the message, never inside it:
 // the agent stores no request metadata, so the keys stay out of the task's
 // history), and the stream is drained until the task ends. The
@@ -72,7 +72,6 @@ export interface DocumentAgentSettings {
 
 export interface DocumentTaskInput {
   task: string;
-  files: readonly { name: string; bytes: Uint8Array; mediaType: string }[];
   settings: DocumentAgentSettings;
   signal: AbortSignal;
   /**
@@ -180,22 +179,13 @@ function textPart(text: string): Part {
   };
 }
 
-function filePart(file: DocumentTaskInput["files"][number]): Part {
-  return {
-    content: { $case: "raw", value: Buffer.from(file.bytes) },
-    metadata: undefined,
-    filename: file.name,
-    mediaType: file.mediaType,
-  };
-}
-
 function userMessage(input: DocumentTaskInput): Message {
   return {
     messageId: randomUUID(),
     contextId: "",
     taskId: "",
     role: Role.ROLE_USER,
-    parts: [textPart(input.task), ...input.files.map(filePart)],
+    parts: [textPart(input.task)],
     metadata: undefined,
     extensions: [],
     referenceTaskIds: [],
@@ -385,7 +375,7 @@ export async function runDocumentTask(
         const task = payload.value;
         if (taskId === undefined) {
           taskId = task.id;
-          logger.info(`documentAgent: task ${taskId} submitted (${input.files.length} file(s))`);
+          logger.info(`documentAgent: task ${taskId} submitted`);
         }
         const status = task.status;
         if (endsRun(status?.state)) {
