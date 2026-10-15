@@ -203,16 +203,20 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                       string fileName,
                                       ConvertFromFileBody body)
     {
-        logger.DebugDocServiceConvertFromFile(body.FileType, body.OutputType, fileName, filesLinkUtility.DocServiceConverterUrl);
+        var converterUrl = filesLinkUtility.DocServiceConverterUrl;
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+        var sslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync();
+
+        logger.DebugDocServiceConvertFromFile(body.FileType, body.OutputType, fileName, converterUrl);
         try
         {
             return await ASC.Files.Core.Helpers.DocumentService.GetConvertedFileAsync(
-                filesLinkUtility.DocServiceConverterUrl + FromFileSuffix,
+                converterUrl + FromFileSuffix,
                 file,
                 fileName,
                 body,
-                filesLinkUtility.DocServiceSignatureSecret,
-                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                signatureSecret,
+                sslVerification,
                 clientFactory);
         }
         catch (DocumentServiceException ex) when (GetCallerError(ex.Code) is { } error)
@@ -221,7 +225,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
         catch (Exception ex)
         {
-            throw CustomizeError(ex);
+            // error -3 is generic: a damaged source cannot be told from a failure of the service
+            var error = CustomizeError(ex).Message;
+            if (ex is DocumentServiceException { Code: DocumentServiceException.ErrorCode.Convert })
+            {
+                error += ". The file may be damaged or its content may not match its extension";
+            }
+
+            throw new CustomHttpException(HttpStatusCode.BadGateway, error);
         }
     }
 
@@ -234,7 +245,6 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         return code switch
         {
             DocumentServiceException.ErrorCode.ConvertPassword => "The document is protected with a password, and the password is missing or wrong",
-            DocumentServiceException.ErrorCode.Convert => "The document service could not read the file: it is damaged or its content does not match its extension",
             DocumentServiceException.ErrorCode.OutputType => "The document service cannot convert this file to the requested format",
             DocumentServiceException.ErrorCode.SizeLimit => "The file is too large for the document service to convert",
             _ => null

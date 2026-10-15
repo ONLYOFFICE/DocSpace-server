@@ -60,19 +60,21 @@ public class DocsController(
     /// itself are accepted. To convert while copying into another folder, a third-party one included, use
     /// `POST api/2.0/files/file/{fileId}/copyas`; to convert into the portal's own editable format beside the source,
     /// use `PUT api/2.0/files/file/{fileId}/checkconversion`. A missing or unsupported `outputtype` is refused with
-    /// 400, and so is a source the document service rejects: a wrong or missing `password`, a damaged file, or one too
-    /// large to convert; retrying the same request will not help. Missing access or a protected room is refused with
-    /// 403 and an unknown file or folder with 404, both before any conversion starts. A result that does not fit the
-    /// storage quota of the portal, the room or the caller is refused with 402.
+    /// 400, and so is a source the document service rejects: a wrong or missing `password`, or a file too large to
+    /// convert; retrying the same request will not help. Missing access or a protected room is refused with 403 and
+    /// an unknown file or folder with 404, both before any conversion starts. A result that does not fit the storage
+    /// quota of the portal, the room or the caller is refused with 402. A conversion the document service fails is
+    /// answered with 502: the service may be down or the file damaged; a retry helps only in the first case.
     /// </remarks>
     /// <summary>Convert a file</summary>
     /// <path>api/2.0/docs/converter</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The converted file, as it was saved in the portal", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it, `folderId` is missing for a caller without \"My documents\", or the document service rejects the source: a wrong or missing password, a damaged file, or one too large")]
+    [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it, `folderId` is missing for a caller without \"My documents\", or the document service rejects the source: a wrong or missing password, or a file too large")]
     [SwaggerResponse(402, "The result does not fit the storage quota of the portal, the room or the caller")]
     [SwaggerResponse(403, "You cannot read or copy the file or create files in the folder, or the file lies in a private room or in a room with a watermark")]
     [SwaggerResponse(404, "The file or the folder does not exist")]
+    [SwaggerResponse(502, "The document service is unreachable or failed the conversion without naming the reason; the source may be damaged")]
     [HttpPost("converter")]
     public async Task<FileDto<int>> ConvertFile(ConvertFileRequestDto inDto)
     {

@@ -314,7 +314,7 @@ public static class DocumentService
             // otherwise be saved as the converted document.
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"answered {(int)response.StatusCode} {response.StatusCode}");
+                throw new HttpRequestException($"answered {(int)response.StatusCode} {response.StatusCode}", null, response.StatusCode);
             }
 
             // A failure comes back as the ordinary json error answer, a success as the document itself.
