@@ -36,8 +36,10 @@ namespace ASC.People.Tests.Tests._16_ShareCandidates;
 /// <summary>
 /// The users offered to a caller that shares a document of its own. A user used to be offered every
 /// member of the portal, with the full profile of each, although it has no access to the contacts;
-/// now it is offered only the members of its rooms (directly or through a group), the accounts it is
-/// related to and those that already have access to the document, with a short profile.
+/// now it is offered only the owners and members of its rooms (directly or through a group), the
+/// accounts it is related to and those that already have access to the document, with a short profile.
+/// Guests are offered as to a room admin - only the related ones - because a share to any other guest
+/// is not accepted.
 /// </summary>
 public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidatesTestBase(fixture)
 {
@@ -130,20 +132,25 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         offered.Should().ContainSingle(u => u.Id == sharedWith.Id).Which.Shared.Should().Be(true);
     }
 
+    /// <summary>
+    /// A share to a guest is accepted only when the caller is related to that guest, so a guest the user
+    /// met in a room only is not offered either - it used to be offered and then silently dropped on save.
+    /// </summary>
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79163")]
-    public async Task GetUsersWithFilesShared_AsUser_OffersGuestOfItsRoomInGuestsArea()
+    public async Task GetUsersWithFilesShared_AsUser_DoesNotOfferGuestMetOnlyInARoom()
     {
         var caller = await InviteContact(EmployeeType.User);
         var roomGuest = await InviteGuest();
-        var strangerGuest = await InviteGuest();
         await CreateRoomWithMembersAsync(caller.Id, roomGuest.Id);
         var fileId = await CreateFileInMyDocumentsAsync(caller);
 
-        var offered = await UsersOfferedForFileAsync(caller, fileId, AccountSearchArea.Guests);
+        var guestsArea = await UsersOfferedForFileAsync(caller, fileId, AccountSearchArea.Guests);
+        var allAreas = await UsersOfferedForFileAsync(caller, fileId, AccountSearchArea.All);
 
-        offered.Select(u => u.Id).Should().Contain(roomGuest.Id).And.NotContain(strangerGuest.Id);
+        guestsArea.Select(u => u.Id).Should().NotContain(roomGuest.Id);
+        allAreas.Select(u => u.Id).Should().NotContain(roomGuest.Id);
     }
 
     [Fact]

@@ -817,12 +817,11 @@ internal abstract class SecurityBaseDao<T>(
         var q = filesDbContext.Users
             .Where(u => u.TenantId == tenantId && !u.Removed);
 
+        // The guests stay filtered by the caller's relations below, as for a room admin: a share to a guest is
+        // accepted only for a related one (CanUserShareAnotherUserAsync), so a guest met in a room only is not offered.
         if (knownToSubjects != null)
         {
             q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, entryId, entry.FileEntryType, knownToSubjects, parentUserIds, filesDbContext);
-
-            // The known users already include the guests the caller is related to, and the guests of its rooms.
-            includeStrangers = true;
         }
 
         if (employeeStatus.HasValue)
