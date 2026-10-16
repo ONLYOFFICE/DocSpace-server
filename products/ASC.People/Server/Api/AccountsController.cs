@@ -247,7 +247,7 @@ public class AccountsController<T>(
                            usersOffset,
                            usersCount))
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
+            yield return await employeeFullDtoHelper.GetShareCandidateAsync(item.UserInfo, item.Shared);
         }
     }
 }

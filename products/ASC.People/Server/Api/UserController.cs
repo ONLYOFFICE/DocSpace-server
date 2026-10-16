@@ -3367,7 +3367,7 @@ public class UserControllerAdditional<T>(
                            offset,
                            count))
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
+            yield return await employeeFullDtoHelper.GetShareCandidateAsync(u.UserInfo, u.Shared);
         }
     }
 }

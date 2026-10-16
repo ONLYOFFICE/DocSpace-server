@@ -197,7 +197,7 @@ public class EmployeeDtoHelper(
         return result;
     }
 
-    private async Task<bool> IsWithoutContactsAccessAsync(Guid userId)
+    protected async Task<bool> IsWithoutContactsAccessAsync(Guid userId)
     {
         var currentId = _authContext.CurrentAccount.ID;
 
