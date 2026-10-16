@@ -107,6 +107,9 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
 [Transient]
 public class FileBuilderOperation : ComposeFileOperation<FileBuilderOperationData<string>, FileBuilderOperationData<int>>
 {
+    // how long the queue keeps a task that publishes nothing; a run publishes more often, see HeartbeatIntervalMs
+    public const int TimeUntilUnregisterInSeconds = 60 * 11;
+
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Build;
     public FileBuilderOperation() { }
     public FileBuilderOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
@@ -125,6 +128,9 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
     private readonly FileBuilderOperationData<T> _data = data;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Build;
 
+    private const long HeartbeatIntervalMs = FileBuilderOperation.TimeUntilUnregisterInSeconds * 1000L / 10;
+    private long _lastHeartbeatAt;
+
     protected override int InitTotalProgressSteps()
     {
         return Files.Count + Folders.Count > 0 ? 1 : 0;
@@ -140,9 +146,13 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
         var runner = serviceScope.ServiceProvider.GetRequiredService<DocumentBuilderScriptRunner>();
         List<File<int>> saved = [];
 
+        // the window runs from the web-side publication, the wait for a worker slot included
+        _lastHeartbeatAt = Environment.TickCount64;
+        await PublishChanges();
+
         try
         {
-            await runner.RunAsync(_data.Script, _data.FolderId, _data.Outputs, _data.Argument, Headers, saved, CancellationToken);
+            await runner.RunAsync(_data.Script, _data.FolderId, _data.Outputs, _data.Argument, Headers, saved, HeartbeatAsync, CancellationToken);
         }
         catch (Exception e) when (e is not (OperationCanceledException or AuthorizingException or FileNotFoundException or DirectoryNotFoundException))
         {
@@ -156,5 +166,16 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
             Result = string.Join(SplitChar, saved.Select(f => "file_" + f.Id));
             IncrementProgress();
         }
+    }
+
+    private async Task HeartbeatAsync()
+    {
+        if (Environment.TickCount64 - _lastHeartbeatAt < HeartbeatIntervalMs)
+        {
+            return;
+        }
+
+        _lastHeartbeatAt = Environment.TickCount64;
+        await PublishChanges();
     }
 }

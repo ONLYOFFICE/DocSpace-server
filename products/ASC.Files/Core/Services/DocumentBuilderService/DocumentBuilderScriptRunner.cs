@@ -213,7 +213,8 @@ public class DocumentBuilderScriptRunner(
     /// the name the script saved it under: over an existing file as a new version of it, or into a folder as a new
     /// file. A produced file the map does not mention goes to <paramref name="folderId"/>, and failing that to the
     /// folder of the file the script opened. Saved files are added to <paramref name="saved"/> one by one, so a run
-    /// that fails part way still reports them.
+    /// that fails part way still reports them. <paramref name="heartbeat"/> is called between the steps, so the queue
+    /// does not drop a long run as abandoned.
     /// </summary>
     public async Task RunAsync(
         string script,
@@ -222,6 +223,7 @@ public class DocumentBuilderScriptRunner(
         string argument,
         IDictionary<string, StringValues> headers,
         List<File<int>> saved,
+        Func<Task> heartbeat,
         CancellationToken cancellationToken)
     {
         CheckScript(script);
@@ -229,11 +231,11 @@ public class DocumentBuilderScriptRunner(
 
         var targets = await ResolveOutputsAsync(script, outputs);
 
-        var (prepared, source) = await ResolveFilesAsync(script, publishCopies: true);
+        var (prepared, source) = await ResolveFilesAsync(script, publishCopies: true, heartbeat);
 
-        var urls = await BuildAsync(prepared, argument, cancellationToken);
+        var urls = await BuildAsync(prepared, argument, heartbeat, cancellationToken);
 
-        await SaveAsync(urls, targets, source, folderId, headers, saved);
+        await SaveAsync(urls, targets, source, folderId, headers, saved, heartbeat);
     }
 
     private static void CheckArgument(string argument)
@@ -338,7 +340,7 @@ public class DocumentBuilderScriptRunner(
     /// Checks every file the script opens and, when <paramref name="publishCopies"/> is set, replaces its identifier
     /// with an address the document service can download it from. Answers with the script and the file it opened first.
     /// </summary>
-    private async Task<(string Script, File<int> Source)> ResolveFilesAsync(string script, bool publishCopies)
+    private async Task<(string Script, File<int> Source)> ResolveFilesAsync(string script, bool publishCopies, Func<Task> heartbeat = null)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var prepared = new StringBuilder(script);
@@ -384,6 +386,7 @@ public class DocumentBuilderScriptRunner(
             if (publishCopies)
             {
                 prepared.Remove(id.Index, id.Length).Insert(id.Index, await GetBuilderUrlAsync(fileDao, file));
+                await heartbeat();
             }
 
             if (match.Groups["method"].Value == "OpenFile")
@@ -411,7 +414,7 @@ public class DocumentBuilderScriptRunner(
         return documentServiceConnector.ReplaceCommunityAddress(url);
     }
 
-    private async Task<Dictionary<string, string>> BuildAsync(string script, string argument, CancellationToken cancellationToken)
+    private async Task<Dictionary<string, string>> BuildAsync(string script, string argument, Func<Task> heartbeat, CancellationToken cancellationToken)
     {
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(script));
 
@@ -434,6 +437,7 @@ public class DocumentBuilderScriptRunner(
                 await Task.Delay(1000, deadline.Token);
 
                 (key, urls) = await documentServiceConnector.DocbuilderRequestAsync(key, null, true, deadline.Token);
+                await heartbeat();
             }
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
@@ -558,10 +562,13 @@ public class DocumentBuilderScriptRunner(
         File<int> source,
         int? folderId,
         IDictionary<string, StringValues> headers,
-        List<File<int>> saved)
+        List<File<int>> saved,
+        Func<Task> heartbeat)
     {
         foreach (var (name, url) in urls)
         {
+            await heartbeat();
+
             var extension = FileUtility.GetFileExtension(name);
 
             if (targets.TryGetValue(name, out var target))
