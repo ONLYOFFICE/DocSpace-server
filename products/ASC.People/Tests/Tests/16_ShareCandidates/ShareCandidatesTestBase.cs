@@ -41,7 +41,7 @@ namespace ASC.People.Tests.Tests._16_ShareCandidates;
 /// administrators and room admins are offered the portal as before. The lists are read with plain
 /// SQL, so a read right after the write that should change them is safe.
 /// </summary>
-public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : _14_GroupSearch.GroupSearchTestBase(fixture)
+public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : SharingTestBase(fixture)
 {
     /// <summary>
     /// A custom room created by the owner with the given subjects - users or groups - invited at

@@ -40,63 +40,8 @@ namespace ASC.People.Tests.Tests._14_GroupSearch;
 /// not from a search index, so a read right after the write that is supposed to make it visible is
 /// safe - no polling helper is needed here.
 /// </summary>
-public abstract class GroupSearchTestBase(AspireAppFixture fixture) : BaseTest(fixture)
+public abstract class GroupSearchTestBase(AspireAppFixture fixture) : SharingTestBase(fixture)
 {
-    /// <summary>
-    /// The system group of every account of the portal, the one group a caller that may not read the
-    /// groups of the portal is still offered when sharing.
-    /// </summary>
-    protected static Guid EveryoneGroupId { get; } = new("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e");
-
-    /// <summary>
-    /// Always created by the owner - group membership/management is portal-wide, not scoped to
-    /// whichever actor the test is currently impersonating.
-    /// </summary>
-    protected async Task<GroupDto> CreateGroupAsync(Guid? manager = null, List<Guid>? members = null, string? name = null)
-    {
-        await _peopleClient.Authenticate(Owner);
-
-        var request = new GroupRequestDto(
-            members: members ?? [],
-            groupManager: manager ?? Owner.Id,
-            groupName: name ?? "Autotest Group " + Guid.NewGuid().ToString()[..8]);
-
-        return (await _groupApi.AddGroupAsync(request, TestContext.Current.CancellationToken)).Response;
-    }
-
-    protected async Task<int> CreateFileInMyDocumentsAsync(User? actor = null, string? title = null)
-    {
-        await _filesClient.Authenticate(actor ?? Owner);
-
-        var file = await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileRequest(title ?? "Autotest File " + Guid.NewGuid().ToString()[..8]),
-            TestContext.Current.CancellationToken);
-
-        return file.Response.Id;
-    }
-
-    protected async Task<int> CreateFolderInMyDocumentsAsync(User? actor = null, string? title = null)
-    {
-        await _filesClient.Authenticate(actor ?? Owner);
-
-        var myDocs = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
-        var folder = await _foldersApi.CreateFolderAsync(
-            myDocs.Response.Current.Id,
-            new CreateFolderRequest(title ?? "Autotest Folder " + Guid.NewGuid().ToString()[..8]),
-            TestContext.Current.CancellationToken);
-
-        return folder.Response.Id;
-    }
-
-    protected async Task<int> CreateCustomRoomAsync(User? actor = null, string? title = null)
-    {
-        await _filesClient.Authenticate(actor ?? Owner);
-
-        var room = await CreateCustomRoom(title ?? "Autotest Room " + Guid.NewGuid().ToString()[..8]);
-
-        return room.Id;
-    }
-
     /// <summary>
     /// Shares a file with a group. The caller decides who is doing the sharing by having already
     /// authenticated <c>_filesClient</c> as that actor (typically as a side effect of
