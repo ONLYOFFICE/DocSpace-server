@@ -528,11 +528,13 @@ public class CreateServiceLimitRequestDto
     public int? QuantityValue { get; init; }
 
     /// <summary>
-    /// The calendar period the thresholds apply to, counted in UTC.
+    /// The calendar period the thresholds apply to. Periods are calendar-aligned in UTC rather than rolling: each one
+    /// resets at the start of the next minute, hour, day, month or year, a week on Monday, so a daily limit resets at
+    /// midnight UTC and not 24 hours after the first charge.
     /// </summary>
     /// <example>Day</example>
-    [EnumDataType(typeof(ServiceLimitPeriod))]
-    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
+    [EnumDataType(typeof(PriceTimeUnit))]
+    public PriceTimeUnit Period { get; init; } = PriceTimeUnit.Day;
 }
 
 /// <summary>
@@ -627,11 +629,13 @@ public class SetParticipantServiceLimitsRequestDto
     public int? QuantityValue { get; init; }
 
     /// <summary>
-    /// The calendar period the thresholds apply to, counted in UTC.
+    /// The calendar period the thresholds apply to. Periods are calendar-aligned in UTC rather than rolling: each one
+    /// resets at the start of the next minute, hour, day, month or year, a week on Monday, so a daily limit resets at
+    /// midnight UTC and not 24 hours after the first charge.
     /// </summary>
     /// <example>Day</example>
-    [EnumDataType(typeof(ServiceLimitPeriod))]
-    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
+    [EnumDataType(typeof(PriceTimeUnit))]
+    public PriceTimeUnit Period { get; init; } = PriceTimeUnit.Day;
 }
 
 

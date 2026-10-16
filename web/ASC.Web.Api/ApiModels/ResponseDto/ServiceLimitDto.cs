@@ -89,10 +89,11 @@ public class ServiceLimitDto
     public string ServiceUnit { get; init; }
 
     /// <summary>
-    /// The calendar period the thresholds apply to, counted in UTC.
+    /// The calendar period the thresholds apply to. It resets at the start of the next period in UTC (a week on
+    /// Monday), not a fixed time after the first charge.
     /// </summary>
     /// <example>Day</example>
-    public ServiceLimitPeriod Period { get; init; }
+    public PriceTimeUnit Period { get; init; }
 
     /// <summary>
     /// Whether the limit is in force. A switched-off limit no longer restricts the service and stays in the
@@ -168,10 +169,10 @@ public class ServiceLimitUsageDto
     public int ServiceLimitId { get; init; }
 
     /// <summary>
-    /// The calendar period the limit is reset with.
+    /// The calendar period the limit is reset with; `periodStart` and `periodEnd` bound the current one.
     /// </summary>
     /// <example>Day</example>
-    public ServiceLimitPeriod Period { get; init; }
+    public PriceTimeUnit Period { get; init; }
 
     /// <summary>
     /// The start of the current period, in UTC.

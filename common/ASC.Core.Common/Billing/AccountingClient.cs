@@ -228,7 +228,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     }
 
     public async Task<ServiceLimit> CreateServiceLimitAsync(string portalId, string serviceName, string customerParticipantName,
-        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+        decimal? amountValue, int? quantityValue, PriceTimeUnit period)
     {
         EnsureConfigured();
 
@@ -248,7 +248,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     /// returns the number of limits set.
     /// </summary>
     public async Task<int> SetParticipantServiceLimitsAsync(string portalId, string serviceName, List<string> customerParticipantNames,
-        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+        decimal? amountValue, int? quantityValue, PriceTimeUnit period)
     {
         EnsureConfigured();
 
@@ -735,28 +735,53 @@ public class ServiceInfo
     /// The account number.
     /// </summary>
     public int AccountNumber { get; init; }
+
+    /// <summary>
+    /// The service period.
+    /// </summary>
+    public PriceTimeUnit ServicePeriod { get; init; }
 }
 
 /// <summary>
-/// The time unit the price is bound to.
+/// A unit of time of the accounting service: the time unit a price is bound to, and the calendar period a service
+/// limit is reset with. Numbered as the accounting service numbers it.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PriceTimeUnit
 {
+    /// <summary>
+    /// No time unit: a price charged per use rather than per period, or a limit with no calendar period.
+    /// </summary>
     [Description("None")]
-    None,
+    None = 1,
+
+    /// <summary>One hour.</summary>
     [Description("Hour")]
-    Hour,
+    Hour = 2,
+
+    /// <summary>One day.</summary>
     [Description("Day")]
-    Day,
+    Day = 3,
+
+    /// <summary>One week.</summary>
     [Description("Week")]
-    Week,
+    Week = 4,
+
+    /// <summary>One month.</summary>
     [Description("Month")]
-    Month,
+    Month = 5,
+
+    /// <summary>One year.</summary>
     [Description("Year")]
-    Year,
+    Year = 6,
+
+    /// <summary>Three years.</summary>
     [Description("ThreeYears")]
-    ThreeYears
+    ThreeYears = 7,
+
+    /// <summary>One minute.</summary>
+    [Description("Minute")]
+    Minute = 8
 }
 
 /// <summary>
@@ -1191,56 +1216,6 @@ public class Currency
 }
 
 /// <summary>
-/// The calendar period a service limit counts the spending over. The period is calendar-aligned in UTC rather than
-/// rolling: a daily limit resets at midnight UTC, not 24 hours after the first charge.
-/// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum ServiceLimitPeriod
-{
-    /// <summary>
-    /// No calendar period. Accepted by the accounting service, but a limit is meant to use one of the periods below.
-    /// </summary>
-    [Description("None")]
-    None,
-
-    /// <summary>
-    /// From the start of the hour, reset at the start of the next hour.
-    /// </summary>
-    [Description("Hour")]
-    Hour,
-
-    /// <summary>
-    /// From midnight, reset at the next midnight. The usual choice and the default for a new limit.
-    /// </summary>
-    [Description("Day")]
-    Day,
-
-    /// <summary>
-    /// From Monday, reset on the next Monday.
-    /// </summary>
-    [Description("Week")]
-    Week,
-
-    /// <summary>
-    /// From the 1st of the month, reset on the 1st of the next month.
-    /// </summary>
-    [Description("Month")]
-    Month,
-
-    /// <summary>
-    /// From January 1, reset on the next January 1.
-    /// </summary>
-    [Description("Year")]
-    Year,
-
-    /// <summary>
-    /// A three-year window, reset when it ends.
-    /// </summary>
-    [Description("ThreeYears")]
-    ThreeYears
-}
-
-/// <summary>
 /// The field the service limits of the portal users are sorted by.
 /// </summary>
 public enum ServiceLimitOrderBy
@@ -1351,7 +1326,7 @@ public class ServiceLimit
     /// The calendar period the thresholds apply to.
     /// </summary>
     /// <example>Day</example>
-    public ServiceLimitPeriod Period { get; init; }
+    public PriceTimeUnit Period { get; init; }
 
     /// <summary>
     /// Whether the limit is in force. A switched-off limit stops restricting the service at once and stays in the
@@ -1388,7 +1363,7 @@ public class ServiceLimitUsage
     /// The calendar period the limit is reset with.
     /// </summary>
     /// <example>Day</example>
-    public ServiceLimitPeriod Period { get; init; }
+    public PriceTimeUnit Period { get; init; }
 
     /// <summary>
     /// The start of the current period, in UTC.
@@ -1468,7 +1443,7 @@ public record ServiceLimitCreateOperation(
     string CustomerParticipantName,
     decimal? AmountValue,
     int? QuantityValue,
-    ServiceLimitPeriod Period);
+    PriceTimeUnit Period);
 
 public record ServiceLimitUpdateOperation(
     int Id,
@@ -1482,7 +1457,7 @@ public record ServiceLimitParticipantSetOperation(
     List<string> CustomerParticipantNames,
     decimal? AmountValue,
     int? QuantityValue,
-    ServiceLimitPeriod Period);
+    PriceTimeUnit Period);
 
 public record SessionOpenOperation(
     string CustomerName,

@@ -255,7 +255,7 @@ public class TariffServiceServiceLimitTests
                     : ParticipantLimitsPage(UserC));
 
         await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
-        await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-tools", [UserC], 40m, null, ServiceLimitPeriod.Day);
+        await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-tools", [UserC], 40m, null, PriceTimeUnit.Day);
         await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
 
         // Two pages, the update, and the two pages again.

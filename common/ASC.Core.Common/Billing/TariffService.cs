@@ -1775,7 +1775,7 @@ public class TariffService(
         await hybridCache.RemoveAsync(GetParticipantServiceLimitsCacheKey(tenantId, serviceName));
     }
 
-    public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, PriceTimeUnit period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, serviceName, customerParticipantName, amountValue, quantityValue, period);
@@ -1803,7 +1803,7 @@ public class TariffService(
         return updated;
     }
 
-    public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, PriceTimeUnit period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, serviceName, customerParticipantNames, amountValue, quantityValue, period);

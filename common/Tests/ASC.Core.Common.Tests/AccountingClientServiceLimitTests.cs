@@ -78,7 +78,7 @@ public class AccountingClientServiceLimitTests
         serviceLimit.Currency.Should().Be("USD");
         serviceLimit.QuantityValue.Should().Be(1000);
         serviceLimit.ServiceUnit.Should().Be("request");
-        serviceLimit.Period.Should().Be(ServiceLimitPeriod.Day);
+        serviceLimit.Period.Should().Be(PriceTimeUnit.Day);
         serviceLimit.Enabled.Should().BeTrue();
         serviceLimit.Created.Should().Be(new DateTime(2026, 9, 1, 10, 30, 0, DateTimeKind.Utc));
         serviceLimit.Modified.Should().Be(new DateTime(2026, 9, 15, 8, 0, 0, DateTimeKind.Utc));
@@ -95,7 +95,7 @@ public class AccountingClientServiceLimitTests
         serviceLimit.Participant.Should().BeNull();
         serviceLimit.QuantityValue.Should().BeNull();
         serviceLimit.ServiceUnit.Should().BeNull();
-        serviceLimit.Period.Should().Be(ServiceLimitPeriod.Month);
+        serviceLimit.Period.Should().Be(PriceTimeUnit.Month);
         serviceLimit.Enabled.Should().BeFalse();
     }
 
@@ -126,7 +126,7 @@ public class AccountingClientServiceLimitTests
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/42/usage");
 
         usage.ServiceLimitId.Should().Be(42);
-        usage.Period.Should().Be(ServiceLimitPeriod.Day);
+        usage.Period.Should().Be(PriceTimeUnit.Day);
         usage.PeriodStart.Should().Be(new DateTime(2026, 10, 1, 0, 0, 0, DateTimeKind.Utc));
         usage.PeriodEnd.Should().Be(new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Utc));
         usage.AmountValue.Should().Be(50m);
@@ -213,7 +213,7 @@ public class AccountingClientServiceLimitTests
         var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, ServiceLimitJson));
 
         var serviceLimit = await client.CreateServiceLimitAsync("portal-1", "ai-tools", "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
-            50.5m, 1000, ServiceLimitPeriod.Day);
+            50.5m, 1000, PriceTimeUnit.Day);
 
         handler.LastMethod.Should().Be(HttpMethod.Post);
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit");
@@ -236,7 +236,7 @@ public class AccountingClientServiceLimitTests
         // The accounting service reads an absent field as "not set"; sending explicit nulls is not part of the contract.
         var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, ServiceLimitJson));
 
-        await client.CreateServiceLimitAsync("portal-1", "ai-tools", null, 100m, null, ServiceLimitPeriod.Month);
+        await client.CreateServiceLimitAsync("portal-1", "ai-tools", null, 100m, null, PriceTimeUnit.Month);
 
         using var body = JsonDocument.Parse(handler.LastRequestBody!);
         var root = body.RootElement;
@@ -270,7 +270,7 @@ public class AccountingClientServiceLimitTests
         var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, "2"));
 
         var count = await client.SetParticipantServiceLimitsAsync("portal-1", "ai-tools",
-            ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"], 40m, null, ServiceLimitPeriod.Day);
+            ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"], 40m, null, PriceTimeUnit.Day);
 
         handler.LastMethod.Should().Be(HttpMethod.Put);
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/participants");

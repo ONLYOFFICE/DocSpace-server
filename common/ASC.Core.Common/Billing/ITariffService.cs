@@ -76,9 +76,9 @@ public interface ITariffService
     Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName);
     Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string serviceName, ServiceLimitFilter filter);
     Task<List<ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string serviceName);
-    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, PriceTimeUnit period);
     Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, int id, decimal? amountValue, int? quantityValue, bool? enabled);
-    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, PriceTimeUnit period);
     Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string serviceName);
     Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, int id);
 
