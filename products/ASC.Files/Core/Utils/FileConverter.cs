@@ -645,7 +645,7 @@ public class FileConverter(
             throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (!await fileSecurity.CanCreateAsync(folder))
+        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }

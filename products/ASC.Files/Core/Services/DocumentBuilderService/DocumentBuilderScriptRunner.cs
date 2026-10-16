@@ -549,7 +549,7 @@ public class DocumentBuilderScriptRunner(
     {
         var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId).NotFoundIfNull("Folder not found");
 
-        if (!await fileSecurity.CanCreateAsync(folder))
+        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }

@@ -81,6 +81,10 @@ public static class DocSpaceHelper
     public static bool IsFillFormsRoom(FolderType? roomType) =>
         roomType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom or FolderType.USER;
 
+    // the roots of the sections that hold rooms: a file is never placed in them directly
+    public static bool IsRoomsSectionRoot(FolderType folderType) =>
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
         return FormsFillingSystemFolders.Contains(folderType);
