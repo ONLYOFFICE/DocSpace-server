@@ -3220,9 +3220,9 @@ public class UserControllerAdditional<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
-    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
-    /// accounts related to it and those with access to the room - each with a short profile without contacts, phone,
-    /// notes or location.
+    /// user sees only the accounts it already works with - the owners and members of its rooms, directly or through a
+    /// group, the accounts related to it and those with access to the room - each with a short profile without
+    /// contacts, phone, notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/room/{id}/search` instead.
     /// </remarks>
@@ -3256,9 +3256,9 @@ public class UserControllerAdditional<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
-    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
-    /// accounts related to it and those with access to the folder - each with a short profile without contacts, phone,
-    /// notes or location.
+    /// user sees only the accounts it already works with - the owners and members of its rooms, directly or through a
+    /// group, the accounts related to it and those with access to the folder - each with a short profile without
+    /// contacts, phone, notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/folder/{id}/search` instead.
     /// </remarks>
@@ -3292,9 +3292,9 @@ public class UserControllerAdditional<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
-    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
-    /// accounts related to it and those with access to the file - each with a short profile without contacts, phone,
-    /// notes or location.
+    /// user sees only the accounts it already works with - the owners and members of its rooms, directly or through a
+    /// group, the accounts related to it and those with access to the file - each with a short profile without
+    /// contacts, phone, notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/file/{id}/search` instead.
     /// </remarks>

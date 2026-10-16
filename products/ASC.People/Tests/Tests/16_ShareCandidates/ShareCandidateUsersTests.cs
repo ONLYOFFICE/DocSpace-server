@@ -57,6 +57,26 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         offered.Select(u => u.Id).Should().Contain(coMember.Id).And.NotContain(stranger.Id);
     }
 
+    /// <summary>
+    /// The owner of a room has no access record of its own - it is the author of the room - so it has to
+    /// be offered as well, or a user cannot share with the one who invited it.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_OffersOwnerOfItsRoom()
+    {
+        var roomOwner = await InviteContact(EmployeeType.RoomAdmin);
+        var caller = await InviteContact(EmployeeType.User);
+        var roomId = await CreateCustomRoomAsync(roomOwner);
+        await InviteToRoom(roomId, caller.Id, FileShare.Editing);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().Contain(roomOwner.Id);
+    }
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79163")]

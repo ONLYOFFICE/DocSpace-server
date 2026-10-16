@@ -1031,10 +1031,11 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     /// <summary>
-    /// Keeps the users the caller already works with: the members of the rooms it is in, directly or through a
-    /// group, the members of the groups added to those rooms, the accounts it is related to, and the users who
-    /// already have access to the entry. Rooms on third-party storage are not taken into account: their records
-    /// carry no internal folder id to check the room type by.
+    /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
+    /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the users
+    /// who already have access to the entry. The owner of a room has no record of its own - it is the author of the
+    /// room folder - so it is read from there. Rooms on third-party storage are not taken into account: their
+    /// records carry no internal folder id to check the room type by.
     /// </summary>
     /// <remarks>
     /// The known users are collected first, as one deduplicated set, and the users are joined to it, so the cost
@@ -1065,13 +1066,18 @@ internal abstract class SecurityBaseDao<T>(
                   knownToSubjects.Contains(mine.Subject) &&
                   folder.TenantId == tenantId &&
                   roomTypes.Contains(folder.FolderType)
-            select mine;
+            select new { mine.TenantId, mine.EntryId, mine.EntryType, folder.CreateBy };
 
         var roomSubjects =
-            from mine in callerRooms
+            from room in callerRooms
             join other in filesDbContext.Security
-                on new { mine.TenantId, mine.EntryId, mine.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
+                on new { room.TenantId, room.EntryId, room.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
             select other;
+
+        var roomOwners =
+            from room in callerRooms
+            join u in users on room.CreateBy equals u.Id
+            select u.Id;
 
         var roomUsers =
             from other in roomSubjects
@@ -1109,6 +1115,7 @@ internal abstract class SecurityBaseDao<T>(
             .Select(u => u.Id);
 
         var knownUsers = roomUsers
+            .Union(roomOwners)
             .Union(roomGroupMembers)
             .Union(relatedUsers)
             .Union(sharedUsers)

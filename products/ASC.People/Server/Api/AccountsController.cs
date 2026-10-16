@@ -85,9 +85,9 @@ public class AccountsController<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees everyone and a room admin every member and group but only the guests related to
-    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the members of its
-    /// rooms, directly or through a group, the accounts related to it and those with access to the room - each with a
-    /// short profile without contacts, phone, notes or location.
+    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the owners and
+    /// members of its rooms, directly or through a group, the accounts related to it and those with access to the room
+    /// - each with a short profile without contacts, phone, notes or location.
     /// </remarks>
     /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -119,9 +119,9 @@ public class AccountsController<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees everyone and a room admin every member and group but only the guests related to
-    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the members of its
-    /// rooms, directly or through a group, the accounts related to it and those with access to the folder - each with a
-    /// short profile without contacts, phone, notes or location.
+    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the owners and
+    /// members of its rooms, directly or through a group, the accounts related to it and those with access to the
+    /// folder - each with a short profile without contacts, phone, notes or location.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -153,9 +153,9 @@ public class AccountsController<T>(
     /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
     /// neither to get both, told apart by `shared`.
     /// A DocSpace administrator sees everyone and a room admin every member and group but only the guests related to
-    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the members of its
-    /// rooms, directly or through a group, the accounts related to it and those with access to the file - each with a
-    /// short profile without contacts, phone, notes or location.
+    /// it; a user or a guest gets only the Everyone group and the accounts it already works with - the owners and
+    /// members of its rooms, directly or through a group, the accounts related to it and those with access to the file
+    /// - each with a short profile without contacts, phone, notes or location.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>
