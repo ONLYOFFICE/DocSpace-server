@@ -1,0 +1,652 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Studio.Core.Notify;
+
+/// <summary>
+/// Applies the retention policy to one portal on the daily run: works out its category, asks
+/// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
+/// removes it when that is the answer. Stored per portal (<see cref="PortalRetentionSettings"/>) is
+/// only what the schedule cannot read anywhere else: while it is active, its last warning, its last
+/// sign-in and the day its activity was last read; once it is blocked, the category it was blocked under
+/// and the days of its letters.
+/// </summary>
+[Scope]
+public class PortalRetentionJob(
+    ILogger<PortalRetentionJob> logger,
+    PortalRetentionConfiguration configuration,
+    SettingsManager settingsManager,
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    CoreSettings coreSettings,
+    UserManager userManager,
+    StudioNotifyService studioNotifyService,
+    MessageService messageService,
+    PortalRemovalService portalRemovalService,
+    SecurityContext securityContext,
+    IServiceProvider serviceProvider)
+{
+    /// <summary>
+    /// How many days back a run looks for letters it has not sent. After a longer stop - or a run after run
+    /// that could not get through every portal - the older warnings are not worth a pile of letters at once;
+    /// the last reminder before a deletion is never lost to it.
+    /// </summary>
+    private const int MaxCatchUpDays = 7;
+
+    /// <summary>How many of the portals a run could not get through the log names when the run ends.</summary>
+    private const int IncompleteTenantsLogged = 20;
+
+    public PortalRetentionOptions Options => configuration.Options;
+
+    /// <summary>
+    /// The portals whose activity is read on every run, set by <see cref="BeginRunAsync"/>: those keeping their
+    /// login history shorter than the default, where a sign-in could come and go between two of the days the
+    /// activity is otherwise read on.
+    /// </summary>
+    private HashSet<int> _activityReadDaily = [];
+
+    /// <summary>The balance requests that failed in a row in this run; see <see cref="HasPositiveBalanceAsync"/>.</summary>
+    private int _balanceFailures;
+
+    /// <summary>
+    /// The portals of this run that may have had something due they could not be given - their balance was
+    /// unknown, applying the policy to them failed, or they failed before the policy got to them - so the run
+    /// must not count as got through; see <see cref="EndRunAsync"/>.
+    /// </summary>
+    private readonly HashSet<int> _incompleteTenants = [];
+
+    /// <summary>
+    /// Opens the daily run: the day the policy started counting in this installation, stamped on the
+    /// first run, and the last day a run got through, after which this one sends the letters.
+    /// </summary>
+    public async Task<(DateTime PolicyStart, DateTime? LastRunOn)> BeginRunAsync(DateTime today)
+    {
+        today = today.Date;
+        _balanceFailures = 0;
+        _incompleteTenants.Clear();
+
+        var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        if (settings.StartedOn is not { } startedOn)
+        {
+            startedOn = today;
+            settings.StartedOn = startedOn;
+            await settingsManager.SaveForDefaultTenantAsync(settings);
+        }
+
+        var lastRunOn = settings.LastRunOn?.Date;
+        var earliest = today.AddDays(-MaxCatchUpDays);
+
+        if (lastRunOn < earliest)
+        {
+            lastRunOn = earliest;
+        }
+
+        // Portals on the default audit settings keep no row, so this reads the few that changed them.
+        _activityReadDaily = (await settingsManager.LoadOfAllTenantsAsync<TenantAuditSettings>())
+            .Where(s => s.Value.LoginHistoryLifeTime < TenantAuditSettings.MaxLifeTime)
+            .Select(s => s.Key)
+            .ToHashSet();
+
+        logger.InformationPolicyStart(startedOn);
+        logger.InformationRunCovers(lastRunOn ?? today.AddDays(-1), today);
+
+        return (startedOn, lastRunOn);
+    }
+
+    /// <summary>
+    /// Closes the daily run once every portal has been through it. A run that stops halfway, or that left a
+    /// portal waiting for a letter it could not send, leaves the mark where it was, so the next one sends
+    /// what it could not; what was sent is kept with each portal and not sent again.
+    /// </summary>
+    public async Task EndRunAsync(DateTime today)
+    {
+        if (_incompleteTenants.Count > 0)
+        {
+            logger.WarningRunIncomplete(today.Date, _incompleteTenants.Count, string.Join(", ", _incompleteTenants.Take(IncompleteTenantsLogged)));
+
+            return;
+        }
+
+        var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        settings.LastRunOn = today.Date;
+        await settingsManager.SaveForDefaultTenantAsync(settings);
+    }
+
+    /// <summary>
+    /// Keeps the run from counting as got through, so the next one covers its days again: the portal
+    /// <paramref name="tenantId"/> failed before the policy was through with it, and what was due to it today
+    /// is still owed.
+    /// </summary>
+    public void MarkIncomplete(int tenantId)
+    {
+        _incompleteTenants.Add(tenantId);
+    }
+
+    /// <summary>
+    /// Applies the policy to the portal of <paramref name="context"/>, sending its letters through
+    /// <paramref name="client"/>. Returns true when the caller must leave the portal alone for the rest of
+    /// the run: it is blocked, it was just blocked, or it is gone. The letters of the days after
+    /// <paramref name="lastRunOn"/> (<see cref="BeginRunAsync"/>) are this run's; null means yesterday.
+    /// </summary>
+    public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn = null)
+    {
+        try
+        {
+            return await ApplyToPortalAsync(context, policyStart, client, senderName, lastRunOn);
+        }
+        catch
+        {
+            // The caller logs it and goes on to the next portal; the days of this run stay to be covered again.
+            MarkIncomplete(context.Tenant.Id);
+
+            throw;
+        }
+    }
+
+    private async Task<bool> ApplyToPortalAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn)
+    {
+        var blocked = context.Tenant.Status == TenantStatus.Blocked;
+        var formerPaying = !context.Quota.Free && context.Tariff.State == TariffState.NotPaid && context.DueDateIsNotMax;
+
+        // An add-on paid from the wallet keeps the free quota of the tariff it is bought on, so the portal reads as
+        // free; it is paying all the same until the add-on's due date.
+        var addOnsPaidUntil = AddOnsPaidUntil(context.Tariff);
+
+        if ((!context.Quota.Free && !formerPaying) || addOnsPaidUntil?.Date >= context.NowDate.Date)
+        {
+            // Paid, in its grace period, on a trial or paying for an add-on: not the policy's business.
+            return blocked;
+        }
+
+        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(context.Tenant.Id);
+
+        if (blocked)
+        {
+            await ApplyBlockedAsync(context, formerPaying, kept, client, senderName, lastRunOn);
+
+            // A blocked portal gets none of the ordinary letters, whatever today brought it.
+            return true;
+        }
+
+        return await ApplyActiveAsync(context, formerPaying, kept, policyStart, client, senderName, lastRunOn, addOnsPaidUntil);
+    }
+
+    /// <summary>
+    /// The day the add-ons paid from the portal's wallet are paid until, the latest of them, or null when it has
+    /// none. An add-on that was not renewed stays in the tariff among its overdue quotas, with the day it ran out.
+    /// </summary>
+    private static DateTime? AddOnsPaidUntil(Tariff tariff)
+    {
+        return tariff.Quotas.Concat(tariff.OverdueQuotas ?? [])
+            .Where(q => q.Wallet && q.DueDate.HasValue)
+            .Max(q => q.DueDate);
+    }
+
+    /// <summary>A blocked portal: told of its block if that failed, reminded of its deletion, or deleted.</summary>
+    private async Task ApplyBlockedAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, INotifyClient client, string senderName, DateTime? lastRunOn)
+    {
+        var blockedOn = context.Tenant.StatusChangeDate;
+
+        PortalRetentionDecision Decide(PortalRetentionCategory category) =>
+            PortalRetentionSchedule.DecideBlocked(Options.For(category), blockedOn, context.NowDate, lastRunOn, kept.FinalNoticeSentOn, kept.EarlyNoticeSentOn);
+
+        // The letters about the block go out right after it; when a failure in between kept them back, the next
+        // run sends them, so the owner hears of the block and of the way back before any reminder of the
+        // deletion. They always precede the reminders, so a portal reminded already is not owed them: it was
+        // blocked some other way, and the reminder recorded its category. A portal already due for deletion
+        // gets the letter about that instead.
+        if (kept.Category is { } blockedUnder && kept.BlockNoticeSentOn is null && kept.EarlyNoticeSentOn is null && kept.FinalNoticeSentOn is null
+            && Decide(blockedUnder) is { Step: not PortalRetentionStep.Delete } owed)
+        {
+            logger.InformationBlockLettersLate(context.Tenant.Id, context.Tenant.GetTenantDomain(coreSettings));
+
+            kept = await SendBlockLettersAsync(context, blockedUnder, owed with { Step = PortalRetentionStep.Block, Letter = PortalRetentionLetter.Blocked }, client, senderName, kept);
+        }
+
+        // A blocked portal keeps the category it was blocked under: the letter about the block named the
+        // deletion date of that category, and a balance that changes afterwards must not bring it forward.
+        // One blocked without a category on record - not by this job - is placed by its wallet instead.
+        var due = kept.Category is { } category
+            ? await DueAsync(context.Tenant, category, Decide(category))
+            : await ChooseByWalletAsync(context.Tenant, formerPaying, Decide);
+
+        if (due is { } step)
+        {
+            await ActAsync(context, step.Category, step.Decision, client, senderName, kept);
+        }
+    }
+
+    /// <summary>An active portal: warned, or blocked. Returns true when it has just been blocked.</summary>
+    private async Task<bool> ApplyActiveAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn,
+        DateTime? addOnsPaidUntil)
+    {
+        var tenant = context.Tenant;
+
+        // A lapsed tariff is the policy's only from its first unpaid day, once the grace period is over; a
+        // warning due while it was still in that period goes out on that day instead of never.
+        var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
+        var lastWarning = kept.LastWarning;
+
+        // The policy starts for this portal on its own day of the first wave, so the portals already idle when
+        // it first ran do not all come due on the same nights.
+        var portalPolicyStart = Options.FirstWaveDays > 0 ? policyStart.AddDays(tenant.Id % Options.FirstWaveDays) : policyStart;
+
+        // The count starts no earlier than the last change of status, which is what an unblocked portal starts
+        // again from, nor than the day the last add-on paid from the wallet ran out: until then the portal paid.
+        Func<PortalRetentionCategory, PortalRetentionDecision> CountedFrom(DateTime day) => category =>
+            PortalRetentionSchedule.DecideActive(Options.For(category), Later(Later(day, addOnsPaidUntil), tenant.StatusChangeDate), portalPolicyStart, context.NowDate,
+                noticesFrom, lastRunOn, lastWarning);
+
+        DateTime anchor;
+
+        if (formerPaying)
+        {
+            // Counted from the end of the subscription: activity after it changes nothing.
+            anchor = context.DueDate;
+        }
+        else
+        {
+            // Activity only moves the count forward, so the latest activity already seen bounds it from below:
+            // with nothing due counted from there, no block and no letter of that count is due counted from the
+            // real one either. A sign-in since the last read starts a new count, though, whose first warning
+            // may fall on a day the old count leaves empty - after its first warning a portal with money on its
+            // wallet hears nothing for months. So the database is asked on a day the schedule may act on, and
+            // in any case once the first warning's number of days has passed since it was last asked: a
+            // sign-in is then seen before the warning it starts is due. About once a month for a portal.
+            var seen = kept.LastActivityOn ?? DateTime.MinValue;
+
+            if (!_activityReadDaily.Contains(tenant.Id) && !ActivityReadDue(kept, context.NowDate) && NothingDue(formerPaying, CountedFrom(seen)))
+            {
+                return false;
+            }
+
+            var activity = await context.GetLastActivityAsync();
+
+            kept = await KeepLastActivityAsync(tenant.Id, activity.LastOn, context.NowDate, kept);
+            anchor = kept.LastActivityOn ?? activity.LastOn;
+        }
+
+        if (await ChooseByWalletAsync(tenant, formerPaying, CountedFrom(anchor)) is not { } step)
+        {
+            return false;
+        }
+
+        await ActAsync(context, step.Category, step.Decision, client, senderName, kept);
+
+        return step.Decision.Step == PortalRetentionStep.Block;
+    }
+
+    /// <summary>
+    /// What today brings a portal whose wallet decides its category, or null when nothing does. Both
+    /// schedules are asked first, so the accounting service is only asked on a day one of them has
+    /// something.
+    /// </summary>
+    private async Task<(PortalRetentionCategory Category, PortalRetentionDecision Decision)?> ChooseByWalletAsync(Tenant tenant, bool formerPaying, Func<PortalRetentionCategory, PortalRetentionDecision> decide)
+    {
+        var (plain, withBalance) = Categories(formerPaying);
+
+        var plainDecision = decide(plain);
+        var balanceDecision = decide(withBalance);
+
+        if ((plainDecision.Step == PortalRetentionStep.None && balanceDecision.Step == PortalRetentionStep.None) || await IsForbiddenDomainAsync(tenant))
+        {
+            return null;
+        }
+
+        if (await HasPositiveBalanceAsync(tenant) is not { } hasBalance)
+        {
+            // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow, and
+            // have tomorrow's run cover today again.
+            MarkIncomplete(tenant.Id);
+
+            return null;
+        }
+
+        return hasBalance ? DueOrNull(withBalance, balanceDecision) : DueOrNull(plain, plainDecision);
+    }
+
+    /// <summary>
+    /// Asks the accounting service whether money is left on the portal's wallet, waiting no longer than
+    /// <see cref="PortalRetentionOptions.BalanceTimeoutSeconds"/>; null when it could not tell. The run walks the
+    /// portals one by one, and every letter after the policy waits for it, so once
+    /// <see cref="PortalRetentionOptions.BalanceFailuresBeforeStop"/> requests in a row have failed the service is
+    /// not asked again until the next run.
+    /// </summary>
+    private async Task<bool?> HasPositiveBalanceAsync(Tenant tenant)
+    {
+        if (_balanceFailures >= Options.BalanceFailuresBeforeStop)
+        {
+            return null;
+        }
+
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(Options.BalanceTimeoutSeconds));
+
+        if (await tariffService.HasPositiveBalanceAsync(tenant.Id, deadline.Token) is { } hasBalance)
+        {
+            _balanceFailures = 0;
+
+            return hasBalance;
+        }
+
+        logger.WarningBalanceUnknown(tenant.Id);
+
+        if (++_balanceFailures == Options.BalanceFailuresBeforeStop)
+        {
+            logger.WarningAccountingUnavailable(_balanceFailures);
+        }
+
+        return null;
+    }
+
+    /// <summary>The two categories a portal may be in, by whether money is left on its wallet.</summary>
+    private static (PortalRetentionCategory Plain, PortalRetentionCategory WithBalance) Categories(bool formerPaying)
+    {
+        return formerPaying
+            ? (PortalRetentionCategory.FormerPaying, PortalRetentionCategory.FormerPayingWithBalance)
+            : (PortalRetentionCategory.Free, PortalRetentionCategory.FreeWithBalance);
+    }
+
+    /// <summary>
+    /// Whether the activity of a free portal is read today whatever its schedule says: the shorter first warning
+    /// of the two schedules the wallet may choose has passed since the last read, so a sign-in since then is seen
+    /// before the first warning of the count it starts is due. A portal never read yet is read on the first day
+    /// its schedule may act on, as the policy's first wave spreads them.
+    /// </summary>
+    private bool ActivityReadDue(PortalRetentionSettings kept, DateTime today)
+    {
+        if (kept.LastActivityReadOn is not { } readOn)
+        {
+            return false;
+        }
+
+        var (plain, withBalance) = Categories(formerPaying: false);
+        var first = Options.For(plain).FirstNoticeDays;
+        var second = Options.For(withBalance).FirstNoticeDays;
+
+        // A schedule without a first warning has none to miss.
+        var readEvery = first <= 0 ? second : second <= 0 ? first : Math.Min(first, second);
+
+        return readEvery > 0 && today.Date >= readOn.Date.AddDays(readEvery);
+    }
+
+    /// <summary>Whether neither schedule the wallet may choose has anything for the portal today.</summary>
+    private static bool NothingDue(bool formerPaying, Func<PortalRetentionCategory, PortalRetentionDecision> decide)
+    {
+        var (plain, withBalance) = Categories(formerPaying);
+
+        return decide(plain).Step == PortalRetentionStep.None && decide(withBalance).Step == PortalRetentionStep.None;
+    }
+
+    /// <summary>What today brings a portal of a known category, or null when nothing does.</summary>
+    private async Task<(PortalRetentionCategory Category, PortalRetentionDecision Decision)?> DueAsync(Tenant tenant, PortalRetentionCategory category, PortalRetentionDecision decision)
+    {
+        return decision.Step == PortalRetentionStep.None || await IsForbiddenDomainAsync(tenant) ? null : (category, decision);
+    }
+
+    private static (PortalRetentionCategory Category, PortalRetentionDecision Decision)? DueOrNull(PortalRetentionCategory category, PortalRetentionDecision decision)
+    {
+        return decision.Step == PortalRetentionStep.None ? null : (category, decision);
+    }
+
+    /// <summary>
+    /// Carries out the decision of the day, and keeps with the portal what the next days depend on: the
+    /// day a warning went out and the day it named for the block, the days the reminders before the
+    /// deletion went out.
+    /// </summary>
+    private async Task ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, PortalRetentionSettings kept)
+    {
+        var tenant = context.Tenant;
+
+        logger.InformationDecision(tenant.Id, tenant.GetTenantDomain(coreSettings), category, decision.Step, decision.Letter, decision.BlockOn, decision.DeleteOn);
+
+        switch (decision.Step)
+        {
+            case PortalRetentionStep.Notify:
+                await SendAsync(LetterFor(category, decision.Letter), context, category, decision, client, senderName);
+
+                var keep = decision.Letter switch
+                {
+                    // The block waits for the day this warning names.
+                    PortalRetentionLetter.FirstNotice or PortalRetentionLetter.SecondNotice or PortalRetentionLetter.MonthlyNotice =>
+                        kept with { LastWarning = new PortalRetentionWarning(context.NowDate, decision.BlockOn) },
+
+                    // Sent once, however many runs cover its day.
+                    PortalRetentionLetter.EarlyDeletionNotice => kept with { Category = category, EarlyNoticeSentOn = context.NowDate },
+
+                    // The deletion waits a full notice period after this reminder.
+                    PortalRetentionLetter.FinalDeletionNotice => kept with { Category = category, FinalNoticeSentOn = context.NowDate },
+
+                    _ => null
+                };
+
+                if (keep is not null)
+                {
+                    await settingsManager.SaveAsync(keep, tenant.Id);
+                }
+
+                break;
+
+            case PortalRetentionStep.Block:
+                await BlockAsync(context, category, decision, client, senderName);
+                break;
+
+            case PortalRetentionStep.Delete:
+                await RemoveAsync(context, category, decision, client, senderName);
+                break;
+        }
+    }
+
+    /// <summary>A portal on a forbidden domain is kept alive on purpose and never touched by the policy.</summary>
+    private async Task<bool> IsForbiddenDomainAsync(Tenant tenant)
+    {
+        if (!await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+        {
+            return false;
+        }
+
+        logger.InformationForbiddenDomain(tenant.Id, tenant.GetTenantDomain(coreSettings));
+
+        return true;
+    }
+
+    /// <summary>
+    /// The letter that carries a decision. The warnings before the block differ by category - the free
+    /// portal is told to sign in, the lapsed one to renew, the one with money left that the money goes with
+    /// it - while everything from the block on reads the same, the way back aside.
+    /// </summary>
+    private static Type LetterFor(PortalRetentionCategory category, PortalRetentionLetter? letter)
+    {
+        return letter switch
+        {
+            PortalRetentionLetter.Blocked => typeof(SaasOwnerRetentionBlockedNotifyAction),
+            PortalRetentionLetter.EarlyDeletionNotice => typeof(SaasOwnerRetentionDeletionReminderNotifyAction),
+            PortalRetentionLetter.FinalDeletionNotice => typeof(SaasOwnerRetentionFinalReminderNotifyAction),
+            _ => category switch
+            {
+                PortalRetentionCategory.Free => typeof(SaasOwnerRetentionInactivityWarningNotifyAction),
+                PortalRetentionCategory.FormerPaying => typeof(SaasOwnerRetentionUnpaidWarningNotifyAction),
+                _ => typeof(SaasOwnerRetentionWalletWarningNotifyAction)
+            }
+        };
+    }
+
+    private async Task SendAsync(Type letter, PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, string portalDomain = null)
+    {
+        var action = (PortalRetentionNotifyAction)serviceProvider.GetRequiredService(letter);
+
+        action.Init(category, decision, portalDomain);
+
+        await action.SendAsync(context, client, senderName);
+    }
+
+    /// <summary>
+    /// Blocks the portal and says so - to the owner, and, for a portal that has paid or still has money on
+    /// its wallet, to support, where a manager can step in.
+    /// </summary>
+    private async Task BlockAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
+    {
+        // Read again rather than saved as the run found it: the run takes hours, and saving the whole portal
+        // as it was then would undo a rename, a change of owner or a deactivation made in the meantime - or
+        // block a portal that is no longer active at all.
+        var tenant = await tenantManager.GetTenantAsync(context.Tenant.Id);
+
+        if (tenant?.Status != TenantStatus.Active)
+        {
+            return;
+        }
+
+        // Before the status, so a blocked portal always finds the category its letter was written for - and,
+        // with no day of the letters on record yet, a failure before they go out leaves them to the next run.
+        var kept = new PortalRetentionSettings { Category = category };
+
+        await settingsManager.SaveAsync(kept, tenant.Id);
+
+        tenant.SetStatus(TenantStatus.Blocked);
+        await tenantManager.SaveTenantAsync(tenant);
+
+        // The letters name the portal and link back to it as it is now, with the status date that ties the
+        // unblocking link to this block.
+        context = context with { Tenant = tenant };
+
+        // Written by the system: there is no request behind the daily job to take a user and an address from.
+        messageService.Send(MessageInitiator.System, MessageAction.PortalBlocked);
+
+        await SendBlockLettersAsync(context, category, decision, client, senderName, kept);
+    }
+
+    /// <summary>
+    /// Tells of the block - the owner, and, for a portal that has paid or still has money on its wallet,
+    /// support, where a manager can step in - and keeps the day it did.
+    /// </summary>
+    private async Task<PortalRetentionSettings> SendBlockLettersAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, PortalRetentionSettings kept)
+    {
+        var tenant = context.Tenant;
+
+        await SendAsync(typeof(SaasOwnerRetentionBlockedNotifyAction), context, category, decision, client, senderName);
+
+        if (category != PortalRetentionCategory.Free)
+        {
+            var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+            await studioNotifyService.SendMsgPortalBlockedToSupportAsync(tenant.GetTenantDomain(coreSettings), owner, category, decision.DeleteOn);
+        }
+
+        kept = kept with { BlockNoticeSentOn = context.NowDate };
+
+        await settingsManager.SaveAsync(kept, tenant.Id);
+
+        return kept;
+    }
+
+    /// <summary>
+    /// Keeps the latest activity with the portal when it is later than the one kept, and the day it was read.
+    /// The activity is the lower bound the next runs count from without asking the database, and it outlives
+    /// the login history: the portal's audit settings purge that, down to a day, and a count started from what
+    /// is left would jump back and bring the block at once. The day of the read decides when the database is
+    /// asked again in any case.
+    /// </summary>
+    private async Task<PortalRetentionSettings> KeepLastActivityAsync(int tenantId, DateTime lastActivityOn, DateTime today, PortalRetentionSettings kept)
+    {
+        var readOn = today.Date;
+
+        if (lastActivityOn <= kept.LastActivityOn && readOn == kept.LastActivityReadOn)
+        {
+            return kept;
+        }
+
+        kept = kept with
+        {
+            LastActivityOn = kept.LastActivityOn is { } keptOn && keptOn >= lastActivityOn ? keptOn : lastActivityOn,
+            LastActivityReadOn = readOn
+        };
+
+        await settingsManager.SaveAsync(kept, tenantId);
+
+        return kept;
+    }
+
+    /// <summary>The later of two days.</summary>
+    private static DateTime Later(DateTime day, DateTime? other)
+    {
+        return other?.Date > day.Date ? other.Value.Date : day.Date;
+    }
+
+    /// <summary>
+    /// Removes the portal. The letters go while its rows still exist: to the owner, and - for a portal that
+    /// has paid - to support, who make sure nothing is billed for it any more.
+    /// </summary>
+    private async Task RemoveAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
+    {
+        // Read again right before it, since nothing undoes a removal: only the block the decision was made for may
+        // go, and a portal unblocked in the meantime stays. The block is told by its day, as the unblocking link
+        // tells it: the database keeps the moment less precisely than it is set.
+        var tenant = await tenantManager.GetTenantAsync(context.Tenant.Id);
+
+        if (tenant?.Status != TenantStatus.Blocked || tenant.StatusChangeDate.Date != context.Tenant.StatusChangeDate.Date)
+        {
+            logger.InformationRemovalSkipped(context.Tenant.Id, tenant?.Status);
+            return;
+        }
+
+        context = context with { Tenant = tenant };
+
+        // Before the removal: it renames the alias, and the letter to support names the portal.
+        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+        var formerPaying = category is PortalRetentionCategory.FormerPaying or PortalRetentionCategory.FormerPayingWithBalance;
+
+        try
+        {
+            // The request to the identity service carries a token issued for the current account.
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+            await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true, async () =>
+            {
+                await SendAsync(typeof(SaasOwnerRetentionDeletedNotifyAction), context, category, decision, client, senderName, tenantDomain);
+
+                if (formerPaying)
+                {
+                    var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+
+                    await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+                }
+            });
+        }
+        finally
+        {
+            // the owner was authenticated only to remove the portal: keep that identity
+            // out of the tenants processed after this one
+            securityContext.Logout();
+        }
+    }
+}

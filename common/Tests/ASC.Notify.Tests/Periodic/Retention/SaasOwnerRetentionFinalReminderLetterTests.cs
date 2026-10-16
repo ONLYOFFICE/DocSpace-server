@@ -31,43 +31,37 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The "will be deleted" heads-up (<c>saas_admin_warning_after_three_months_v1</c>), sent in SaaS to the
-/// portal owner three months after the subscription expired. The portal is removed three months later,
-/// a week after <c>saas_admin_warning_after_half_year_v1</c>.
+/// The last reminder that a blocked portal is about to be deleted
+/// (<c>saas_owner_retention_final_reminder</c>), here for a lapsed portal that may still be unblocked
+/// from it. The earlier reminder is <see cref="SaasOwnerRetentionDeletionReminderLetterTests"/>.
 /// </summary>
-public class SaasAdminWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminWarningAfterThreeMonthsV1NotifyAction>
+public class SaasOwnerRetentionFinalReminderLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionFinalReminderNotifyAction>
 {
-    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPayingWithBalance;
 
-    private static string LegalTermsUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
-    }
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.FinalDeletionNotice;
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl(scope))
-            .And.Contain(LegalTermsUrl(scope.Culture))
-            .And.Contain(LetterEnvironment.SupportUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Subject.Should().Contain(ShortDay(DeleteOn, scope));
+
+        letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(ShortDay(DeleteOn, scope))
+            .And.Contain(scope.PortalUrl)
+            .And.Contain(Caption("ButtonUnblockPortal", scope))
+            .And.Contain(nameof(ConfirmType.PortalUnblock));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
+        letter.Subject.Should().Be($"Last chance to keep your {LetterEnvironment.LogoText} space (deleted on {ShortDay(DeleteOn, scope)})");
 
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for 3 months.")
-            .And.Contain("will be deleted after 6 months of inactivity")
-            .And.Contain("Privacy Policy")
-            .And.Contain("support team");
+        letter.Body.Should().Contain("is still blocked because its subscription has ended")
+            .And.Contain("This is a friendly last reminder")
+            .And.Contain("then renew your subscription to get back to work", "a portal that comes back unpaid has to be renewed to be used")
+            .And.Contain("unblock your space and back it up", "a portal that comes back unpaid can only be backed up");
     }
 }
