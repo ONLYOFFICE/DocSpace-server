@@ -38,8 +38,10 @@ import com.asc.authorization.application.security.filter.BasicSignatureAuthentic
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.converter.PublicClientRefreshTokenAuthenticationConverter;
 import com.asc.authorization.application.security.oauth.generator.PrefixedAuthorizationCodeGenerator;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.provider.PublicClientRefreshTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
 import com.asc.authorization.application.security.service.SignatureService;
@@ -243,6 +245,12 @@ public class AuthorizationServerConfiguration {
                                     return new OidcUserInfo(jwtPrincipal.getToken().getClaims());
                                   return new OidcUserInfo(Map.of("sub", authentication.getName()));
                                 })))
+        .clientAuthentication(
+            c ->
+                c.authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
+                    .authenticationProvider(
+                        new PublicClientRefreshTokenAuthenticationProvider(
+                            registeredClientRepository)))
         .tokenEndpoint(
             t ->
                 t.accessTokenRequestConverters(
