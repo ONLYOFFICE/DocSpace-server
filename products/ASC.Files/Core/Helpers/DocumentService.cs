@@ -629,7 +629,7 @@ public static class DocumentService
 
         if (string.IsNullOrEmpty(signatureSecret))
         {
-            content.Add(new StringContent(JsonSerializer.Serialize(body, body.GetType(), _bodySettings), Encoding.UTF8, "application/json"), "params");
+            content.Add(new StringContent(JsonSerializer.Serialize(body, body.GetType(), _tokenSettings), Encoding.UTF8, "application/json"), "params");
         }
         else
         {
