@@ -627,7 +627,6 @@ public class GroupControllerAdditional<T>(
     /// response.
     /// Pass `excludeShared` to keep only the groups that have no access to the room yet, which is the set to offer when
     /// adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/room/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a room</summary>
@@ -661,7 +660,7 @@ public class GroupControllerAdditional<T>(
     /// response.
     /// Pass `excludeShared` to keep only the groups that have no access to the folder yet, which is the set to offer
     /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
+    /// A user or a guest sharing its own folder may not read the groups of the portal and gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/folder/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a folder</summary>
@@ -694,7 +693,7 @@ public class GroupControllerAdditional<T>(
     /// response.
     /// Pass `excludeShared` to keep only the groups that have no access to the file yet, which is the set to offer when
     /// adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
+    /// A user or a guest sharing its own file may not read the groups of the portal and gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/file/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a file</summary>

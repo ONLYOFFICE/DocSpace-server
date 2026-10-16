@@ -74,20 +74,16 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the room with the ID given in the route, and
-    /// reports for each of them whether it already has access.
-    /// The caller has to be allowed to manage the access of that room: the operation answers 403 for a room the caller
-    /// cannot share and 404 for an ID that matches no room.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against the names and the email -
-    /// every space-separated term has to match, or any term when `filterSeparator` is given; an empty value returns an
-    /// empty list.
-    /// Groups come first and users after them, paged together by `count` and `startIndex`; the total count covers both.
-    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
-    /// neither to get both, told apart by `shared`.
-    /// A DocSpace administrator sees everyone and a room admin every member and group but only related guests; a user
-    /// or a guest gets the Everyone group, the members it already works with - owners and members of its rooms,
-    /// directly or through a group, and those with access to the room - and, like a room admin, related guests, each
-    /// with a short profile without contacts, phone, notes or location.
+    /// Searches the users and groups that can be given access to the room given in the route, and reports whether each
+    /// already has it.
+    /// Without the right to manage the access of that room the operation answers 403, and 404 when no room has the ID.
+    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
+    /// space-separated terms, or any term with `filterSeparator`; an empty value returns an empty list.
+    /// Groups come first, then users, paged together by `count` and `startIndex`.
+    /// `excludeShared` keeps the accounts without access and `includeShared` those with it; with neither, `shared`
+    /// tells them apart.
+    /// A DocSpace administrator sees everyone and a room admin every member and group but only the guests related to
+    /// it.
     /// </remarks>
     /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -108,20 +104,21 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the folder with the ID given in the route, and
-    /// reports for each of them whether it already has access.
-    /// The caller has to be allowed to manage the access of that folder: the operation answers 403 for a folder the
-    /// caller cannot share and 404 for an ID that matches no folder.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against the names and the email -
-    /// every space-separated term has to match, or any term when `filterSeparator` is given; an empty value returns an
-    /// empty list.
-    /// Groups come first and users after them, paged together by `count` and `startIndex`; the total count covers both.
-    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
-    /// neither to get both, told apart by `shared`.
-    /// A DocSpace administrator sees everyone and a room admin every member and group but only related guests; a user
-    /// or a guest gets the Everyone group, the members it already works with - owners and members of its rooms,
-    /// directly or through a group, and those with access to the folder - and, like a room admin, related guests, each
-    /// with a short profile without contacts, phone, notes or location.
+    /// Searches the users and groups that can be given access to the folder given in the route, and reports whether
+    /// each already has it.
+    /// Without the right to manage the access of that folder the operation answers 403, and 404 when no folder has the
+    /// ID.
+    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
+    /// space-separated terms, or any term with `filterSeparator`; an empty value returns an empty list.
+    /// Groups come first, then users, paged together by `count` and `startIndex`.
+    /// `excludeShared` keeps the accounts without access and `includeShared` those with it; with neither, `shared`
+    /// tells them apart.
+    /// A DocSpace administrator sees everyone and a room admin every member and group but only related guests.
+    /// A user or a guest sharing its own folder gets the Everyone group and the members it works with - owners and
+    /// members of its rooms, directly or through a group, and accounts given access to the folder in person, on it or a
+    /// parent folder - and, like a room admin, related guests.
+    /// Members of a group given access are not added, and for these callers only the id, names, email, avatars, type
+    /// flags, status and `shared` are filled in.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -142,20 +139,20 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the file with the ID given in the route, and
-    /// reports for each of them whether it already has access.
-    /// The caller has to be allowed to manage the access of that file: the operation answers 403 for a file the caller
-    /// cannot share and 404 for an ID that matches no file.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against the names and the email -
-    /// every space-separated term has to match, or any term when `filterSeparator` is given; an empty value returns an
-    /// empty list.
-    /// Groups come first and users after them, paged together by `count` and `startIndex`; the total count covers both.
-    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
-    /// neither to get both, told apart by `shared`.
-    /// A DocSpace administrator sees everyone and a room admin every member and group but only related guests; a user
-    /// or a guest gets the Everyone group, the members it already works with - owners and members of its rooms,
-    /// directly or through a group, and those with access to the file - and, like a room admin, related guests, each
-    /// with a short profile without contacts, phone, notes or location.
+    /// Searches the users and groups that can be given access to the file given in the route, and reports whether each
+    /// already has it.
+    /// Without the right to manage the access of that file the operation answers 403, and 404 when no file has the ID.
+    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
+    /// space-separated terms, or any term with `filterSeparator`; an empty value returns an empty list.
+    /// Groups come first, then users, paged together by `count` and `startIndex`.
+    /// `excludeShared` keeps the accounts without access and `includeShared` those with it; with neither, `shared`
+    /// tells them apart.
+    /// A DocSpace administrator sees everyone and a room admin every member and group but only related guests.
+    /// A user or a guest sharing its own file gets the Everyone group and the members it works with - owners and
+    /// members of its rooms, directly or through a group, and accounts given access to the file in person, on it or a
+    /// parent folder - and, like a room admin, related guests.
+    /// Members of a group given access are not added, and for these callers only the id, names, email, avatars, type
+    /// flags, status and `shared` are filled in.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>
