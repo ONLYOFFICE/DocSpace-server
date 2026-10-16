@@ -270,7 +270,9 @@ public class FileConverter(
     SocketManager socketManager,
     FileConverterQueue fileConverterQueue,
     TempStream tempStream,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    WebhookManager webhookManager,
+    NotifyClient notifyClient)
 {
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
@@ -653,7 +655,7 @@ public class FileConverter(
 
     // with the headers of the request the audit names its user; without them it records the document service
     public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist,
-        IDictionary<string, StringValues> headers = null)
+        IDictionary<string, StringValues> headers = null, MessageAction action = MessageAction.FileConverted)
     {
         var (newFile, isNewFile) = await PrepareConvertedFileAsync(folder, convertedFileType, title, updateIfExist);
 
@@ -673,7 +675,7 @@ public class FileConverter(
 
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
 
-            newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers);
+            newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers, action);
         }
         catch (HttpRequestException e)
         {
@@ -702,7 +704,8 @@ public class FileConverter(
         return await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers);
     }
 
-    private async Task<File<T>> StoreConvertedFileAsync<T>(File<T> newFile, bool isNewFile, Stream convertedFileStream, IDictionary<string, StringValues> headers)
+    private async Task<File<T>> StoreConvertedFileAsync<T>(File<T> newFile, bool isNewFile, Stream convertedFileStream, IDictionary<string, StringValues> headers,
+        MessageAction action = MessageAction.FileConverted)
     {
         newFile.ContentLength = convertedFileStream.Length;
         newFile = await daoFactory.GetFileDao<T>().SaveFileAsync(newFile, convertedFileStream);
@@ -718,16 +721,39 @@ public class FileConverter(
 
         if (headers != null)
         {
-            await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, headers, newFile.Title);
+            await filesMessageService.SendAsync(action, newFile, headers, newFile.Title);
         }
         else
         {
-            await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+            await filesMessageService.SendAsync(action, newFile, MessageInitiator.DocsService, newFile.Title);
         }
 
         await fileMarker.MarkAsNewAsync(newFile);
 
         return newFile;
+    }
+
+    /// <summary>
+    /// Announces a file the docs API created, as a file created in the portal is announced: the webhook, and the
+    /// notice to the room it was created in.
+    /// </summary>
+    public async Task AnnounceCreatedFileAsync<T>(File<T> file, Folder<T> folder)
+    {
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
+
+        var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
+        if (room == null || DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            return;
+        }
+
+        var userIds = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
+        if (room.CreateBy != authContext.CurrentAccount.ID)
+        {
+            userIds.Add(room.CreateBy);
+        }
+
+        await notifyClient.SendDocumentCreatedInRoom(room, userIds, file, authContext.CurrentAccount.ID);
     }
 
     /// <summary>
@@ -788,7 +814,10 @@ public class FileConverter(
             await using var converted = await documentServiceConnector.GetConvertedFileAsync(buffered, body.Title, body);
 
             // The source is kept, so the result goes in beside it under a free title rather than replacing anything.
-            return await SaveConvertedFileAsync(folder, converted, body.OutputType, body.Title, updateIfExist: false, headers);
+            var result = await SaveConvertedFileAsync(folder, converted, body.OutputType, body.Title, updateIfExist: false, headers);
+            await AnnounceCreatedFileAsync(result, folder);
+
+            return result;
         }
         finally
         {

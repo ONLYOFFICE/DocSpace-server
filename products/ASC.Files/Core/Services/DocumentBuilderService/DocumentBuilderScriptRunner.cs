@@ -601,15 +601,23 @@ public class DocumentBuilderScriptRunner(
                 }
 
                 var chosen = string.IsNullOrEmpty(target.Title) ? name : target.Title;
-                saved.Add(await fileConverter.SaveConvertedFileAsync(target.Folder, url, extension, chosen, updateIfExist: false, headers));
+                await SaveNewFileAsync(target.Folder, url, extension, chosen, headers, saved);
                 continue;
             }
 
             var parentId = folderId ?? source?.ParentId
                 ?? throw new ArgumentException($"\"{name}\" has nowhere to go: name a folder for it, or one for the request");
 
-            saved.Add(await fileConverter.SaveConvertedFileAsync(await GetWritableFolderAsync(parentId), url, extension, name, updateIfExist: false, headers));
+            await SaveNewFileAsync(await GetWritableFolderAsync(parentId), url, extension, name, headers, saved);
         }
+    }
+
+    private async Task SaveNewFileAsync(Folder<int> folder, string url, string extension, string title, IDictionary<string, StringValues> headers, List<File<int>> saved)
+    {
+        var file = await fileConverter.SaveConvertedFileAsync(folder, url, extension, title, updateIfExist: false, headers, MessageAction.FileCreated);
+        saved.Add(file);
+
+        await fileConverter.AnnounceCreatedFileAsync(file, folder);
     }
 
     /// <summary>A produced file's settled destination: a file to replace, or a folder and the title to save under.</summary>
