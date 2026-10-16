@@ -57,7 +57,9 @@ public class RoomLinkStorageAccessTests(
     /// <see cref="Uri"/> would otherwise fold them into <c>/</c> and collapse the dot segments client-side.
     /// The absolute variant names the file by its full path instead (<c>C:\Windows\win.ini</c>): a drive-letter
     /// segment resets the base path in <see cref="Path.Combine(string[])"/>, and the request must be refused
-    /// the same way, not end in a 400 from the storage's own containment check.
+    /// the same way, not end in a 400 from the storage's own containment check. That variant is Windows-only: the
+    /// path is split on both separators, so no segment can carry one, and on Linux only a leading <c>/</c> is
+    /// rooted - a segment like <c>C:</c> there is a plain directory name that cannot leave the storage root.
     /// </summary>
     [Theory]
     [InlineData(true, false)]
@@ -67,6 +69,8 @@ public class RoomLinkStorageAccessTests(
     public async Task GetStorageFile_PathOutsideModuleRoot_NotServed(bool anonymous, bool absolute)
     {
         // Arrange
+        Assert.SkipWhen(absolute && !OperatingSystem.IsWindows(), "Only Windows has rooted path segments (drive letters).");
+
         if (anonymous)
         {
             await UsePublicRoomSessionAsync();
@@ -186,12 +190,10 @@ public class RoomLinkStorageAccessTests(
             : "etc%5Cpasswd";
     }
 
-    /// <summary>The same file by its absolute path, with the separators percent-encoded.</summary>
+    /// <summary>The same file by its absolute path (Windows only), with the separators percent-encoded.</summary>
     private static string OutsideFileAbsolute()
     {
-        return OperatingSystem.IsWindows()
-            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "win.ini").Replace("\\", "%5C")
-            : "%5Cetc%5Cpasswd";
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "win.ini").Replace("\\", "%5C");
     }
 
     private async Task UsePublicRoomSessionAsync()
