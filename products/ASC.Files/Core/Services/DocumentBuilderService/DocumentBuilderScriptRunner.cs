@@ -181,7 +181,7 @@ public class DocumentBuilderScriptRunner(
 
         await ResolveOutputsAsync(script, outputs);
 
-        var (_, source) = await ResolveFilesAsync(script, publishCopies: false);
+        var (_, source, _) = await ResolveFilesAsync(script, publishCopies: false);
 
         var homeless = _saveFileCall.Matches(script)
             .Select(match => match.Groups["name"].Value)
@@ -231,7 +231,12 @@ public class DocumentBuilderScriptRunner(
 
         var targets = await ResolveOutputsAsync(script, outputs);
 
-        var (prepared, source) = await ResolveFilesAsync(script, publishCopies: true, heartbeat);
+        var (prepared, source, opened) = await ResolveFilesAsync(script, publishCopies: true, heartbeat);
+
+        foreach (var file in opened)
+        {
+            await filesMessageService.SendAsync(MessageAction.FileOpenedByDocumentBuilder, file, headers, file.Title);
+        }
 
         var urls = await BuildAsync(prepared, argument, heartbeat, cancellationToken);
 
@@ -338,9 +343,10 @@ public class DocumentBuilderScriptRunner(
 
     /// <summary>
     /// Checks every file the script opens and, when <paramref name="publishCopies"/> is set, replaces its identifier
-    /// with an address the document service can download it from. Answers with the script and the file it opened first.
+    /// with an address the document service can download it from. Answers with the script, the file it opened first
+    /// and every file it opens.
     /// </summary>
-    private async Task<(string Script, File<int> Source)> ResolveFilesAsync(string script, bool publishCopies, Func<Task> heartbeat = null)
+    private async Task<(string Script, File<int> Source, ICollection<File<int>> Opened)> ResolveFilesAsync(string script, bool publishCopies, Func<Task> heartbeat = null)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var prepared = new StringBuilder(script);
@@ -395,7 +401,7 @@ public class DocumentBuilderScriptRunner(
             }
         }
 
-        return (prepared.ToString(), source);
+        return (prepared.ToString(), source, checkedFiles.Values);
     }
 
     /// <summary>

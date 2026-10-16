@@ -441,6 +441,9 @@ public enum MessageAction
     [Description("File converted")]
     FileConverted = 5035,
 
+    [Description("File opened by a document builder script")]
+    FileOpenedByDocumentBuilder = 5208,
+
     [Description("File change owner")]
     FileChangeOwner = 5043,
 
