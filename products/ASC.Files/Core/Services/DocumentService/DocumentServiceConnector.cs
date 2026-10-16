@@ -47,12 +47,6 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
     CoreSettings coreSettings,
     IHttpClientFactory clientFactory)
 {
-    /// <summary>
-    /// The variant of a document service endpoint that takes the source uploaded with the request. The url properties
-    /// of <see cref="FilesLinkUtility"/> carry no trailing slash, so it is simply appended.
-    /// </summary>
-    private const string FromFileSuffix = "/from-file";
-
     public static string GenerateRevisionId(string expectedKey)
     {
         return ASC.Files.Core.Helpers.DocumentService.GenerateRevisionId(expectedKey);
@@ -203,7 +197,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                       string fileName,
                                       ConvertFromFileBody body)
     {
-        var converterUrl = filesLinkUtility.DocServiceConverterUrl;
+        var converterUrl = filesLinkUtility.DocServiceConverterFromFileUrl;
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
         var sslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync();
 
@@ -211,7 +205,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             return await ASC.Files.Core.Helpers.DocumentService.GetConvertedFileAsync(
-                converterUrl + FromFileSuffix,
+                converterUrl,
                 file,
                 fileName,
                 body,
@@ -263,7 +257,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             return await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestFromFileAsync(
-                filesLinkUtility.DocServiceDocbuilderUrl + FromFileSuffix,
+                filesLinkUtility.DocServiceDocbuilderFromFileUrl,
                 script,
                 scriptFileName,
                 body,
