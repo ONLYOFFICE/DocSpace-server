@@ -218,7 +218,8 @@
         "ImageGeneration",
         "OCR",
         "Vision",
-        "FormAnalysis"
+        "FormAnalysis",
+        "GenerateMeta"
       ],
       "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
     },
@@ -5683,6 +5684,132 @@
         ],
         "additionalProperties": false,
         "description": "Accepted-for-processing acknowledgement (conversion is asynchronous)."
+      }
+    },
+    "aiMetaGenerate": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "description": "Ids of the files to read, at most 20."
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "description": "Ids of the folders whose top-level files to read, at most 20."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What kind of metadata fields the caller is interested in; a hint for the model."
+          }
+        },
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Field name, at most 255 characters."
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "number",
+                    "date"
+                  ],
+                  "description": "Suggested value type."
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The proposed custom metadata fields."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "truncated": {
+                  "type": "boolean",
+                  "description": "Whether the document was cut to fit the model's budget."
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "truncated"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The documents the proposal was read from."
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "unsupported",
+                    "limit",
+                    "forbidden",
+                    "not_found",
+                    "empty",
+                    "failed"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The entries that were left out, with the reason for each."
+          }
+        },
+        "required": [
+          "fields",
+          "sources",
+          "skipped"
+        ],
+        "additionalProperties": false
       }
     },
     "aiAgentsCreate": {

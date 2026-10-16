@@ -156,6 +156,14 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     hasBody: true,
   },
   {
+    method: "POST",
+    path: "/meta/generate",
+    tag: "Metadata",
+    operationId: "aiMetaGenerate",
+    summary: "Generate metadata fields",
+    hasBody: true,
+  },
+  {
     method: "GET",
     path: "/agents",
     tag: "Agents",
@@ -338,6 +346,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
   Agents: "AI agent rooms (delegated to the .NET AI service).",
   Export: "Markdown → docx export.",
+  Metadata: "AI-proposed custom metadata fields for files.",
   Settings: "Portal-wide, vectorization and per-user AI settings.",
   Vectorization: "Vectorization tasks over portal content.",
   "OpenAI passthrough": "OpenAI-compatible endpoints proxied to a profile's provider.",

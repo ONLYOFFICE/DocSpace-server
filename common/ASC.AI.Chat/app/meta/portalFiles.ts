@@ -1,0 +1,320 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU AGPL version 3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * Read-only access to portal files for the metadata generator: list a
+ * folder's files and fetch one file's content as plain text. Both run under
+ * the caller's forwarded credentials, so the portal enforces the access
+ * rights and a file the caller cannot read answers 403 like everywhere else.
+ *
+ * The text comes from the Document Server conversion the Files API already
+ * offers (`PUT files/fileops/bulkdownload` with a target extension, then the
+ * finished operation's download URL) — the same path the portal's MCP tool
+ * `download_file_as_text` takes. `.txt` / `.csv` are downloaded as they are;
+ * every other extension is converted to the first of `.txt` / `.csv` that the
+ * portal's `extsConvertible` table allows (word-processing and presentation
+ * formats, pdf included, go to txt; spreadsheets to csv). Images and anything
+ * else outside the table are reported as unsupported.
+ */
+
+import { withTimeout, proxyBaseUrl } from "../storage/httpClient.js";
+import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import { getForwardedHeaders } from "../requestContext.js";
+import { getObject, getObjectArray, getString, isObject } from "../narrow.js";
+import logger from "../log.js";
+
+/** A file as the folder listing or the file-info endpoint describes it. */
+export interface PortalFile {
+  id: string;
+  title: string;
+  /** Extension with the leading dot, lower case (`.docx`); empty when unknown. */
+  ext: string;
+}
+
+const PLAIN_TEXT_EXTS = new Set([".txt", ".csv"]);
+const TEXT_TARGETS = [".txt", ".csv"] as const;
+
+/** How long one conversion may take before it is given up as hung. */
+const CONVERSION_BUDGET_MS = 90_000;
+/** Pause between two polls of the file-operations endpoint. */
+const POLL_INTERVAL_MS = 500;
+
+export class UnsupportedFileError extends Error {
+  constructor(
+    public readonly file: PortalFile,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+function envelope(raw: unknown): Record<string, unknown> | undefined {
+  return isObject(raw) ? getObject(raw, "response") : undefined;
+}
+
+// The list-shaped envelope: `{ response: [...] }`.
+function envelopeList(raw: unknown): unknown[] {
+  const list = isObject(raw) ? raw["response"] : undefined;
+  return Array.isArray(list) ? list : [];
+}
+
+function toPortalFile(raw: Record<string, unknown>): PortalFile | undefined {
+  const idValue = raw["id"];
+  const id =
+    typeof idValue === "number" ? String(idValue) : typeof idValue === "string" ? idValue : "";
+  const title = getString(raw, "title") ?? "";
+  if (!id || !title) {
+    return undefined;
+  }
+  const ext = (getString(raw, "fileExst") ?? extensionOf(title)).toLowerCase();
+  return { id, title, ext };
+}
+
+function extensionOf(title: string): string {
+  const dot = title.lastIndexOf(".");
+  return dot > 0 ? title.slice(dot) : "";
+}
+
+// A numeric id is an internal file and the Files API binds it as an integer;
+// anything else is a third-party id and stays a string.
+function idForBody(id: string): number | string {
+  return /^\d+$/.test(id) ? Number(id) : id;
+}
+
+async function portalGet(url: string, signal?: AbortSignal): Promise<unknown> {
+  const { signal: timed, cancel } = withTimeout(signal);
+  try {
+    const res = await fetch(url, { headers: getForwardedHeaders(), signal: timed });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    return await res.json();
+  } finally {
+    cancel();
+  }
+}
+
+/**
+ * The files of a folder, top level only, newest first, at most `count`.
+ * A folder the caller cannot open propagates the portal's 403 / 404.
+ */
+export async function listFolderFiles(folderId: string, count: number): Promise<PortalFile[]> {
+  const url =
+    `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(folderId)}` +
+    `?filterType=FilesOnly&count=${count}&sortBy=DateAndTime&sortOrder=descending`;
+  const body = envelope(await portalGet(url));
+  const files = body ? (getObjectArray(body, "files") ?? []) : [];
+  const result: PortalFile[] = [];
+  for (const raw of files) {
+    const file = toPortalFile(raw);
+    if (file) {
+      result.push(file);
+    }
+  }
+  logger.info(`meta.listFolderFiles(${folderId}) -> ${result.length} file(s)`);
+  return result;
+}
+
+/** One file as the Files API describes it; `undefined` on 404. */
+export async function getPortalFile(fileId: string): Promise<PortalFile | undefined> {
+  const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}`;
+  try {
+    const body = envelope(await portalGet(url));
+    return body ? toPortalFile(body) : undefined;
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 404) {
+      return undefined;
+    }
+    throw err;
+  }
+}
+
+let convertibleCache: Promise<Record<string, string[]>> | undefined;
+
+// `GET files/settings` → `extsConvertible`: source extension → target
+// extensions. The table is a portal-wide constant (it mirrors the Document
+// Server's formats file), so one read per process is enough.
+function getConvertible(): Promise<Record<string, string[]>> {
+  if (!convertibleCache) {
+    convertibleCache = (async () => {
+      const body = envelope(await portalGet(`${proxyBaseUrl}/api/2.0/files/settings`));
+      const table = body ? getObject(body, "extsConvertible") : undefined;
+      const result: Record<string, string[]> = {};
+      if (table) {
+        for (const [ext, targets] of Object.entries(table)) {
+          if (Array.isArray(targets)) {
+            result[ext.toLowerCase()] = targets.filter((t): t is string => typeof t === "string");
+          }
+        }
+      }
+      return result;
+    })();
+    convertibleCache.catch(() => {
+      convertibleCache = undefined;
+    });
+  }
+  return convertibleCache;
+}
+
+/** The text target (`.txt` / `.csv`) a file converts to, or `undefined`. */
+export async function textTargetFor(file: PortalFile): Promise<string | undefined> {
+  if (PLAIN_TEXT_EXTS.has(file.ext)) {
+    return file.ext;
+  }
+  const targets = (await getConvertible())[file.ext] ?? [];
+  return TEXT_TARGETS.find((t) => targets.includes(t));
+}
+
+interface FileOperation {
+  id: string;
+  finished: boolean;
+  error: string;
+  url: string | undefined;
+}
+
+function toOperation(raw: Record<string, unknown>): FileOperation | undefined {
+  const id = getString(raw, "id");
+  if (!id) {
+    return undefined;
+  }
+  return {
+    id,
+    finished: raw["finished"] === true,
+    error: getString(raw, "error") ?? "",
+    url: getString(raw, "url"),
+  };
+}
+
+async function startConversion(
+  file: PortalFile,
+  target: string,
+  signal: AbortSignal,
+): Promise<FileOperation> {
+  const url = `${proxyBaseUrl}/api/2.0/files/fileops/bulkdownload`;
+  const { signal: timed, cancel } = withTimeout(signal);
+  try {
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: { ...getForwardedHeaders(), "content-type": "application/json" },
+      body: JSON.stringify({ fileConvertIds: [{ key: idForBody(file.id), value: target }] }),
+      signal: timed,
+    });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    for (const raw of envelopeList(await res.json())) {
+      const op = isObject(raw) ? toOperation(raw) : undefined;
+      if (op) {
+        return op;
+      }
+    }
+    throw new Error(`bulkdownload for file ${file.id} returned no operation`);
+  } finally {
+    cancel();
+  }
+}
+
+async function waitForOperation(op: FileOperation, signal: AbortSignal): Promise<FileOperation> {
+  let current = op;
+  const url = `${proxyBaseUrl}/api/2.0/files/fileops`;
+  while (!current.finished && !current.error) {
+    signal.throwIfAborted();
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    const found = envelopeList(await portalGet(url, signal))
+      .map((raw) => (isObject(raw) ? toOperation(raw) : undefined))
+      .find((o) => o?.id === current.id);
+    if (!found) {
+      // The portal drops an operation from the list once it is read, so a
+      // vanished one that was already finished is not an error.
+      if (current.url) {
+        break;
+      }
+      throw new Error(`file operation ${current.id} disappeared before it finished`);
+    }
+    current = found;
+  }
+  if (current.error) {
+    throw new Error(`conversion failed: ${current.error}`);
+  }
+  return current;
+}
+
+// The operation's download URL names the portal's public host; inside the
+// deployment that host is not always reachable, so only its path is kept and
+// the request goes through the same proxy as every other Files API call.
+function throughProxy(downloadUrl: string): string {
+  try {
+    const parsed = new URL(downloadUrl, proxyBaseUrl);
+    return `${proxyBaseUrl}${parsed.pathname}${parsed.search}`;
+  } catch {
+    return downloadUrl;
+  }
+}
+
+/**
+ * The file's content as plain text. Throws {@link UnsupportedFileError} when
+ * the portal has no text conversion for the file's extension, a
+ * {@link DocspaceApiHttpError} when the portal refuses the file, and an
+ * `Error` when the conversion fails or exceeds its budget.
+ */
+export async function readFileAsText(file: PortalFile, signal?: AbortSignal): Promise<string> {
+  const target = await textTargetFor(file);
+  if (!target) {
+    throw new UnsupportedFileError(
+      file,
+      `no text conversion for ${file.ext || "a file without extension"}`,
+    );
+  }
+  const { signal: timed, cancel } = withTimeout(signal, CONVERSION_BUDGET_MS);
+  const started = Date.now();
+  try {
+    const op = await waitForOperation(await startConversion(file, target, timed), timed);
+    if (!op.url) {
+      throw new Error(`conversion of file ${file.id} finished without a download URL`);
+    }
+    const url = throughProxy(op.url);
+    const res = await fetch(url, {
+      headers: { ...getForwardedHeaders(), accept: "text/plain" },
+      signal: timed,
+    });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const text = await res.text();
+    logger.info(
+      `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
+    );
+    return text;
+  } finally {
+    cancel();
+  }
+}

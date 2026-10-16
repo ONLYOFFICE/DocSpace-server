@@ -561,6 +561,37 @@ export type Req_aiExportTextToDocx = {
 };
 /** Accepted-for-processing acknowledgement (conversion is asynchronous). */
 export type Res_aiExportTextToDocx = { success: boolean };
+
+export type Req_aiMetaGenerate = {
+  /** Ids of the files to read, at most 20. */
+  files?: (string | number)[];
+  /** Ids of the folders whose top-level files to read, at most 20. */
+  folders?: (string | number)[];
+  /** What kind of metadata fields the caller is interested in; a hint for the model. */
+  prompt?: string;
+};
+export type Res_aiMetaGenerate = {
+  /** The proposed custom metadata fields. */
+  fields: {
+    /** Field name, at most 255 characters. */
+    name: string;
+    /** Suggested value type. */
+    type: "text" | "number" | "date";
+  }[];
+  /** The documents the proposal was read from. */
+  sources: {
+    id: string;
+    title: string;
+    /** Whether the document was cut to fit the model's budget. */
+    truncated: boolean;
+  }[];
+  /** The entries that were left out, with the reason for each. */
+  skipped: {
+    id: string;
+    title?: string;
+    reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
+  }[];
+};
 /**
  * A DocSpace room id: an integer for native rooms, a string for
  * third-party-backed ones.

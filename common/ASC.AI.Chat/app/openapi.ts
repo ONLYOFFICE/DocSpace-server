@@ -355,6 +355,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiExportTextToDocx:
     "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
+  // Metadata.
+  aiMetaGenerate:
+    "Reads the selected files as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe them. `files` and `folders` are lists of entry ids, at least one of the two non-empty and each at most 20 long; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The files named directly come first, then the top-level files of each folder, newest first, until 20 files are collected; the rest are listed under `skipped` with the reason `limit`. Every file is converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
@@ -682,6 +686,15 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiExportTextToDocx: {
     "400": "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`.",
     "413": "The transcript is larger than 15 MB, this route's own parser limit.",
+  },
+
+  // Metadata.
+  aiMetaGenerate: {
+    "400": "`files` and `folders` are both empty, one of them is not a list of ids or holds more than 20, or `prompt` is not a string.",
+    "403": "A folder named in `folders` cannot be opened by the caller.",
+    "404": "A folder named in `folders` does not exist.",
+    "422": "None of the selected files could be read as text; `skipped` says why for each.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
   },
 
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
@@ -1272,6 +1285,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiExportTextToDocx:
     "Confirms the export was queued. The file arrives in the target folder later, announced by " +
     "a folder-modified socket event.",
+
+  aiMetaGenerate:
+    "The proposed fields, each with a name and a type, the documents the proposal was read from, " +
+    "and the entries that were left out with the reason for each.",
 
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",

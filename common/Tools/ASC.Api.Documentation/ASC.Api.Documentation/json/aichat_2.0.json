@@ -71,6 +71,11 @@
       "x-displayName": "Export"
     },
     {
+      "name": "AI / Metadata",
+      "description": "AI-proposed custom metadata fields for files.",
+      "x-displayName": "Metadata"
+    },
+    {
       "name": "AI / OpenAI passthrough",
       "description": "OpenAI-compatible endpoints proxied to a profile's provider.",
       "x-displayName": "OpenAI passthrough"
@@ -127,6 +132,7 @@
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
+        "AI / Metadata",
         "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
@@ -7957,6 +7963,209 @@
         }
       }
     },
+    "/api/2.0/ai/meta/generate": {
+      "post": {
+        "tags": [
+          "AI / Metadata"
+        ],
+        "operationId": "aiMetaGenerate",
+        "summary": "Generate metadata fields",
+        "description": "Reads the selected files as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe them. `files` and `folders` are lists of entry ids, at least one of the two non-empty and each at most 20 long; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The files named directly come first, then the top-level files of each folder, newest first, until 20 files are collected; the rest are listed under `skipped` with the reason `limit`. Every file is converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+        "responses": {
+          "200": {
+            "description": "The proposed fields, each with a name and a type, the documents the proposal was read from, and the entries that were left out with the reason for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Field name, at most 255 characters."
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "number",
+                              "date"
+                            ],
+                            "description": "Suggested value type."
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The proposed custom metadata fields."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean",
+                            "description": "Whether the document was cut to fit the model's budget."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "truncated"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The documents the proposal was read from."
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "unsupported",
+                              "limit",
+                              "forbidden",
+                              "not_found",
+                              "empty",
+                              "failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The entries that were left out, with the reason for each."
+                    }
+                  },
+                  "required": [
+                    "fields",
+                    "sources",
+                    "skipped"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`files` and `folders` are both empty, one of them is not a list of ids or holds more than 20, or `prompt` is not a string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A folder named in `folders` cannot be opened by the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A folder named in `folders` does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "None of the selected files could be read as text; `skipped` says why for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMetaGenerateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/agents": {
       "get": {
         "tags": [
@@ -10691,7 +10900,8 @@
           "ImageGeneration",
           "OCR",
           "Vision",
-          "FormAnalysis"
+          "FormAnalysis",
+          "GenerateMeta"
         ],
         "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
@@ -15435,6 +15645,36 @@
           "content",
           "folderId"
         ],
+        "additionalProperties": false
+      },
+      "AiMetaGenerateRequest": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "description": "Ids of the files to read, at most 20."
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "description": "Ids of the folders whose top-level files to read, at most 20."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What kind of metadata fields the caller is interested in; a hint for the model."
+          }
+        },
         "additionalProperties": false
       },
       "AiAgentsCreateRequest": {
