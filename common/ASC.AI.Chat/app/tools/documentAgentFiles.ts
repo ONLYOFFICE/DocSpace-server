@@ -31,14 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// A small MCP server of this service for the document agent, with one tool:
-// `get_file_link` turns a workspace file id into a download link. The agent
-// fetches the link itself (an MCP `resource_link` lands in its sandbox as a
-// file, which Document Builder can then open), so a task can edit an
-// existing document or fill a template; no file content passes through
-// here. The link is the Files API's own pre-signed address, minted under the
-// user's session and good for the portal's `auth:validinterval` (an hour by
-// default), on the host the agent reaches the portal at.
+// A small MCP server of this service for the document agent, with one tool
+// and one resource. `get_file_link` turns a workspace file id into an MCP
+// `resource_link` with a `workspace://files/<id>` uri; the agent reads such a
+// link back from this server with `resources/read`, in the same session, and
+// the file lands in its sandbox, which Document Builder can then open. So a
+// task can edit an existing document or fill a template. The bytes come from
+// the Files API's pre-signed download address, fetched here under the user's
+// session: fetched without one, as the agent would fetch an http link, the
+// portal takes the request for Document Server's and wants its JWT (403).
 //
 // The gate is the shared token of the document agent configuration plus the
 // user's session, both of which this service hands the agent with the
@@ -51,17 +52,16 @@
 // for, is answered 405 as the protocol allows.
 
 import { timingSafeEqual } from "crypto";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Application, Request, Response } from "express";
 import { z } from "zod";
 import { getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
-import { proxyBaseUrl } from "../storage/httpClient.js";
 import { DocspaceApiHttpError, getFileInfo } from "../storage/docspaceFilesApi.js";
 import { mediaTypeOf } from "../storage/docspaceFileTransfer.js";
-import { presignedDownloadUrl, throughProxy } from "../storage/roomSkills.js";
+import { FileTooLargeError, readFileBytes } from "../storage/roomSkills.js";
 import { authorizationValue } from "./systemTools.js";
 import logger from "../log.js";
 
@@ -73,6 +73,15 @@ export const DOCUMENT_AGENT_FILES_PATH = "/document-agent/files/mcp";
 export const DOCUMENT_AGENT_TOKEN_HEADER = "x-docagent-token";
 
 export const GET_FILE_LINK_TOOL = "get_file_link";
+
+/** The most a workspace file read for the agent may weigh; the agent's own `maxFileBytes` too. */
+export const MAX_FILE_BYTES = 32 * 1024 * 1024;
+
+// The uri of a workspace file as the agent sees it. Not http(s) on purpose:
+// the agent reads any other scheme from the server that handed it over,
+// which keeps the user's session on the read.
+const FILE_URI_SCHEME = "workspace";
+const FILE_URI_TEMPLATE = `${FILE_URI_SCHEME}://files/{fileId}`;
 
 // Headers of the agent's own request to this server, which describe that
 // request and not the user: kept from the Files API calls made on its
@@ -117,14 +126,23 @@ async function serve(req: Request, res: Response): Promise<void> {
     {
       title: "Get a file's download link",
       description:
-        "Returns a download link for a workspace file by its id. Fetching the link brings the " +
-        "file itself into your sandbox, as it is in the workspace (docx, xlsx, pptx, pdf, ...), " +
-        "so you can open or edit it with Document Builder. Use it when a task is about an " +
-        "existing file; `docspace_download_file_as_text` gives only its text.",
+        "Returns a link to a workspace file by its id. The link brings the file itself into " +
+        "your sandbox, as it is in the workspace (docx, xlsx, pptx, pdf, ...), so you can open " +
+        "or edit it with Document Builder. Use it when a task is about an existing file; " +
+        "`docspace_download_file_as_text` gives only its text.",
       inputSchema: { fileId: z.string().min(1).describe("The workspace file id") },
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     },
-    async ({ fileId }) => fileLink(config, fileId),
+    async ({ fileId }) => fileLink(fileId),
+  );
+  server.registerResource(
+    "workspace-file",
+    new ResourceTemplate(FILE_URI_TEMPLATE, { list: undefined }),
+    {
+      title: "Workspace file",
+      description: "A workspace file, as it is, by the id in its uri.",
+    },
+    async (uri, { fileId }) => readFile(uri, Array.isArray(fileId) ? fileId[0] : fileId),
   );
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   res.on("close", () => {
@@ -153,24 +171,23 @@ function presentsToken(req: Request, config: DocumentAgentConfig): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// The tool: the file's title for the name the agent will save it under, then
-// the Files API's pre-signed download address, re-hosted where the agent
-// reaches the portal. A failure is a result the model reads, never a throw,
-// and names no address of ours.
-async function fileLink(config: DocumentAgentConfig, fileId: string) {
+// The tool: the file's title for the name the agent will save it under, and
+// the uri the agent reads it back by. The file is looked up here so that a
+// missing or unreadable one is a result the model reads, never a throw, and
+// names no address of ours.
+async function fileLink(fileId: string) {
   try {
     const info = await getFileInfo(fileId);
     if (!info) {
       return failure(`file ${fileId} not found`);
     }
     const title = info.title ?? `file-${fileId}`;
-    const uri = throughProxy(await presignedDownloadUrl(fileId), config.portalUrl ?? proxyBaseUrl);
     logger.info(`documentAgentFiles: link for file ${fileId} (${title}) minted`);
     return {
       content: [
         {
           type: "resource_link" as const,
-          uri,
+          uri: `${FILE_URI_SCHEME}://files/${encodeURIComponent(fileId)}`,
           name: title,
           mimeType: mediaTypeOf(title),
           description: `Workspace file ${fileId}`,
@@ -180,15 +197,56 @@ async function fileLink(config: DocumentAgentConfig, fileId: string) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(`documentAgentFiles: no link for file ${fileId}: ${message}`);
-    if (err instanceof DocspaceApiHttpError) {
-      return failure(
-        err.status === 403
-          ? `file ${fileId} cannot be read by the current user`
-          : `file ${fileId}: the workspace answered ${err.status}`,
-      );
-    }
-    return failure(`file ${fileId}: no download link could be made`);
+    return failure(unreadable(fileId, err));
   }
+}
+
+// The resource: the file's bytes under the user's session, as one blob. A
+// failure is thrown: the SDK answers the read with an error the agent shows
+// the model as the reason the file was not saved.
+async function readFile(uri: URL, fileId: string | undefined) {
+  const id = fileId === undefined ? "" : decodeURIComponent(fileId);
+  if (id === "") {
+    throw new Error("the uri names no file");
+  }
+  try {
+    const info = await getFileInfo(id);
+    if (!info) {
+      throw new Error(`file ${id} not found`);
+    }
+    const title = info.title ?? `file-${id}`;
+    const bytes = await readFileBytes(id, MAX_FILE_BYTES);
+    logger.info(`documentAgentFiles: file ${id} (${title}) read, ${bytes.byteLength} bytes`);
+    return {
+      contents: [
+        {
+          uri: uri.href,
+          mimeType: mediaTypeOf(title),
+          blob: Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString("base64"),
+        },
+      ],
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn(`documentAgentFiles: file ${id} not read: ${message}`);
+    throw new Error(unreadable(id, err), { cause: err });
+  }
+}
+
+/** Why a file could not be read, for the model: its status, never our addresses. */
+function unreadable(fileId: string, err: unknown): string {
+  if (err instanceof DocspaceApiHttpError) {
+    return err.status === 403
+      ? `file ${fileId} cannot be read by the current user`
+      : `file ${fileId}: the workspace answered ${err.status}`;
+  }
+  if (err instanceof FileTooLargeError) {
+    return err.message;
+  }
+  if (err instanceof Error && err.message.startsWith(`file ${fileId}`)) {
+    return err.message;
+  }
+  return `file ${fileId} could not be read`;
 }
 
 function failure(text: string) {

@@ -291,14 +291,7 @@ export async function readFileText(fileId: string): Promise<string> {
   const url = throughProxy(await presignedDownloadUrl(fileId));
   const { signal, cancel } = withTimeout(undefined);
   try {
-    // The caller's conditional headers describe the widget's request, not this
-    // file: relayed, they could turn the download into a bodiless 304.
-    const headers = Object.fromEntries(
-      Object.entries(getForwardedHeaders()).filter(
-        ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
-      ),
-    );
-    const res = await fetch(url, { headers, signal });
+    const res = await fetch(url, { headers: downloadHeaders(), signal });
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
@@ -308,6 +301,71 @@ export async function readFileText(fileId: string): Promise<string> {
   } finally {
     cancel();
   }
+}
+
+/** A file the caller may read is larger than the limit its reader set. */
+export class FileTooLargeError extends Error {
+  constructor(fileId: string, limit: number) {
+    super(`file ${fileId} is over the limit of ${limit} bytes`);
+    this.name = "FileTooLargeError";
+  }
+}
+
+/**
+ * The file's bytes, as they are in the workspace, under the caller's
+ * session: the pre-signed address of {@link presignedDownloadUrl} fetched
+ * through the proxy. Read whole, so `limit` caps what is held in memory: a
+ * larger file throws {@link FileTooLargeError} as soon as the limit is
+ * passed, by the declared length or by the bytes received.
+ */
+export async function readFileBytes(fileId: string, limit: number): Promise<Uint8Array> {
+  const url = throughProxy(await presignedDownloadUrl(fileId));
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, { headers: downloadHeaders(), signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const declared = Number(res.headers.get("content-length"));
+    if (Number.isFinite(declared) && declared > limit) {
+      await res.body?.cancel();
+      throw new FileTooLargeError(fileId, limit);
+    }
+    if (!res.body) {
+      return new Uint8Array(0);
+    }
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        received += value.byteLength;
+        if (received > limit) {
+          throw new FileTooLargeError(fileId, limit);
+        }
+        chunks.push(value);
+      }
+    } finally {
+      await reader.cancel().catch(() => undefined);
+    }
+    return Buffer.concat(chunks, received);
+  } finally {
+    cancel();
+  }
+}
+
+// The caller's conditional headers describe the widget's request, not the
+// file: relayed, they could turn the download into a bodiless 304.
+function downloadHeaders(): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(getForwardedHeaders()).filter(
+      ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
+    ),
+  );
 }
 
 /**

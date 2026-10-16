@@ -85,6 +85,7 @@ import {
   DOCUMENT_AGENT_FILES_SERVER,
   DOCUMENT_AGENT_TOKEN_HEADER,
   GET_FILE_LINK_TOOL,
+  MAX_FILE_BYTES,
 } from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { agentAssignedProfileId } from "../controllers/agentProfile.js";
@@ -96,8 +97,6 @@ import logger from "../log.js";
 
 export const DOCUMENT_AGENT_TOOL_NAME = "document_agent";
 
-// One file the agent produces; the agent's own default ceiling is the same.
-const MAX_FILE_BYTES = 32 * 1024 * 1024;
 // Past the task timeout the agent reports a failure itself; the margin
 // covers the sandbox teardown and the files on their way back.
 const ABORT_MARGIN_MS = 60_000;
