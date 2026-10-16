@@ -135,6 +135,24 @@ public class QuotaSocketManager(
             });
     }
 
+    /// <summary>
+    /// Tells the clients that the spending limits of a wallet service changed, so they re-read them.
+    /// </summary>
+    /// <param name="serviceName">The wallet service whose limits changed.</param>
+    /// <param name="id">The ID of the single limit that changed; null when the change covers many user limits.</param>
+    /// <param name="userIds">
+    /// The users whose personal limits changed; each of them is told in their personal room
+    /// <c>{tenantId}-{userId}</c>. Null when the change concerns every user of the portal - a limit of the portal as a
+    /// whole, or a change whose users are not known - and the event goes to the quota room.
+    /// </param>
+    public async Task ChangeServiceLimitsAsync(string serviceName, int? id = null, IEnumerable<Guid> userIds = null)
+    {
+        // The socket service appends each user ID to the room, so the tenant alone makes the personal room.
+        var room = userIds != null ? $"{_tenantManager.GetCurrentTenantId()}" : GetQuotaRoom();
+
+        await MakeRequest("change-service-limits", new { room, serviceName, id, userIds });
+    }
+
     public async Task EncryptionProgressAsync(int percentage, string error)
     {
         await MakeRequest("encryption-progress", new { room = "storage-encryption", percentage, error }, tenantId: -1);

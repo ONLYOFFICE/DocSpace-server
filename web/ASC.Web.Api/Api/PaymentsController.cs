@@ -77,7 +77,8 @@ public class PaymentController(
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    PaymentHelper paymentHelper)
+    PaymentHelper paymentHelper,
+    QuotaSocketManager quotaSocketManager)
     : ControllerBase
 {
     /// <remarks>
@@ -1811,6 +1812,8 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceName, participantName);
 
+        await NotifyServiceLimitChangeAsync(serviceName, serviceLimit.Id, participantName);
+
         return serviceLimit.Map();
     }
 
@@ -1848,6 +1851,8 @@ public class PaymentController(
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceName, serviceLimit.Participant);
+
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceName, serviceLimit.Id, serviceLimit.Participant);
 
         return serviceLimit.Map();
     }
@@ -1904,6 +1909,8 @@ public class PaymentController(
 
         messageService.Send(MessageAction.CustomerServiceLimitsSet, MessageTarget.Create(userIds), serviceName);
 
+        await quotaSocketManager.ChangeServiceLimitsAsync(serviceName, userIds: userIds);
+
         return count;
     }
 
@@ -1941,6 +1948,9 @@ public class PaymentController(
 
         messageService.Send(MessageAction.CustomerServiceLimitsDisabled, serviceName);
 
+        // The accounting service reports how many user limits it switched off, not whose, so every user re-reads.
+        await quotaSocketManager.ChangeServiceLimitsAsync(serviceName);
+
         return count;
     }
 
@@ -1976,10 +1986,21 @@ public class PaymentController(
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceName, serviceLimit.Participant);
+
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceName, serviceLimit.Id, serviceLimit.Participant);
     }
 
     // The audit record names the service and, for a per-user limit, the user it is set for. The user ID goes both
     // into the details and into the target, because the display name may change later.
+    // A limit of one user concerns that user alone, so only they are told; a limit of the portal as a whole concerns
+    // everyone. The event only asks the clients to re-read, so it carries no thresholds.
+    private async Task NotifyServiceLimitChangeAsync(string serviceName, int id, string participantName)
+    {
+        var userIds = Guid.TryParse(participantName, out var userId) ? new[] { userId } : null;
+
+        await quotaSocketManager.ChangeServiceLimitsAsync(serviceName, id, userIds);
+    }
+
     private async Task SendServiceLimitAuditMessageAsync(MessageAction action, string serviceName, string participantName)
     {
         if (!Guid.TryParse(participantName, out var userId))

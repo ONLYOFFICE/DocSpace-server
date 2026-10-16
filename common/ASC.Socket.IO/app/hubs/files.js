@@ -441,6 +441,21 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:wallet-low-balance", {});
   }
 
+  // A personal limit goes to the personal room of each of its users (`${room}-${userId}`, where room is the tenant ID),
+  // a limit of the whole portal to the quota room.
+  function changeServiceLimits({ room, serviceName, id, userIds } = {}) {
+    logger.info(`change service limits of ${serviceName} in room ${room}${userIds ? ` for ${userIds.length} users` : ""}`);
+
+    const data = { serviceName, id };
+
+    if (userIds) {
+      userIds.forEach((userId) => filesIO.to(`${room}-${userId}`).emit("s:change-service-limits", data));
+      return;
+    }
+
+    filesIO.to(room).emit("s:change-service-limits", data);
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -671,6 +686,7 @@ module.exports = (io) => {
     changeAppEnabled,
     topUpWallet,
     walletLowBalance,
+    changeServiceLimits,
     updateHistory,
     logoutSession,
     changeMyType,
