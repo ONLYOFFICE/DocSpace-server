@@ -724,14 +724,15 @@ public class GroupControllerAdditional<T>(
         var count = inDto.Count;
         var text = inDto.Text;
 
+        var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
         var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, parentUserIds);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count, parentUserIds))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, offset, count, parentUserIds))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }

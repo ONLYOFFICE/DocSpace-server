@@ -51,8 +51,9 @@ public interface ISecurityDao<T>
     // already works with, or null when it may see every user of the portal.
     IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1);
     Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds);
-    IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count, IEnumerable<Guid> parentUserIds);
-    Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, IEnumerable<Guid> parentUserIds);
+    // everyoneOnly: the caller may not read the groups of the portal, so only the Everyone group is offered.
+    IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, int offset, int count, IEnumerable<Guid> parentUserIds);
+    Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, IEnumerable<Guid> parentUserIds);
     IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count);
     Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text);
     Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share);

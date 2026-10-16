@@ -668,7 +668,8 @@ public class FileSharing(
     FileSharingHelper fileSharingHelper,
     InvitationService invitationService,
     ExternalShare externalShare,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    PermissionContext permissionContext)
 {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
@@ -692,6 +693,15 @@ public class FileSharing(
         var groups = await userManager.GetUserGroupsAsync(currentUserId);
 
         return [currentUserId, .. groups.Select(g => g.ID)];
+    }
+
+    /// <summary>
+    /// Whether the current user may pick any group of the portal when sharing. It is the same permission that lets it
+    /// read the group list; without it only the Everyone group is offered.
+    /// </summary>
+    public async Task<bool> CanPickAnyGroupAsync()
+    {
+        return await permissionContext.CheckPermissionsAsync(Constants.Action_ReadGroups);
     }
 
     public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)

@@ -189,6 +189,7 @@ public class AccountsController<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
+        var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
         var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
 
         if (string.IsNullOrEmpty(text))
@@ -198,7 +199,7 @@ public class AccountsController<T>(
         }
 
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, parentUserIds);
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             text,
             inDto.EmployeeStatus,
@@ -220,7 +221,7 @@ public class AccountsController<T>(
 
         var groupsCount = 0;
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count, parentUserIds))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, offset, count, parentUserIds))
         {
             groupsCount++;
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);

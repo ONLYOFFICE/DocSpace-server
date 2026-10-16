@@ -621,7 +621,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count, IEnumerable<Guid> parentUserIds)
+    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, int offset, int count, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null || count == 0)
         {
@@ -644,7 +644,7 @@ internal abstract class SecurityBaseDao<T>(
             await filesDbContext.Groups.AddAsync(everyoneGroup);
             await filesDbContext.SaveChangesAsync();
 
-            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext, parentUserIds);
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, everyoneOnly, filesDbContext, parentUserIds);
 
             if (offset > 0)
             {
@@ -669,7 +669,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, IEnumerable<Guid> parentUserIds)
+    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null)
         {
@@ -695,7 +695,7 @@ internal abstract class SecurityBaseDao<T>(
 
             var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext,  parentUserIds);
+            var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, everyoneOnly, filesDbContext, parentUserIds);
 
             count = await q.CountAsync();
         });
@@ -716,9 +716,15 @@ internal abstract class SecurityBaseDao<T>(
         return everyoneGroup;
     }
 
-    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext, IEnumerable<Guid> parentUserIds)
+    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, bool everyoneOnly, FilesDbContext filesDbContext, IEnumerable<Guid> parentUserIds)
     {
         var q = filesDbContext.Groups.Where(g => g.TenantId == tenantId && !g.Removed);
+
+        if (everyoneOnly)
+        {
+            var everyoneId = Constants.GroupEveryone.ID;
+            q = q.Where(g => g.Id == everyoneId);
+        }
 
         if (!string.IsNullOrEmpty(text))
         {
