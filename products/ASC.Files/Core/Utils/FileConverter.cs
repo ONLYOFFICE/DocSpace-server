@@ -768,7 +768,7 @@ public class FileConverter(
 
         body.FileType = FileUtility.GetFileExtension(file.Title).TrimStart('.');
         body.Title = file.Title;
-        body.Key = await documentServiceHelper.GetDocKeyAsync(file);
+        body.Key = await documentServiceHelper.GetDocKeyAsync(file, body.GetMD5Hash());
 
         var toExtension = "." + body.OutputType.Trim('.');
 

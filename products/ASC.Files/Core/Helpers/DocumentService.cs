@@ -1200,6 +1200,16 @@ public static class DocumentService
         /// The settings for converting document files to PDF.
         /// </summary>
         public PdfData Pdf { get; set; }
+
+        // the parameters that shape the result, so a conversion cached with other ones is not served for these
+        public string GetMD5Hash()
+        {
+            var parameters = JsonSerializer.Serialize(new { OutputType, CodePage, Delimiter, DocumentLayout, DocumentRenderer, Region, Thumbnail, SpreadsheetLayout, Pdf, Watermark }, _bodySettings);
+
+            var bytes = MD5.HashData(Encoding.UTF8.GetBytes(parameters));
+
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
     }
 
     /// <summary>
