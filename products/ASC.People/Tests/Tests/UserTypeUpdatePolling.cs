@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._02_UserType;
+namespace ASC.People.Tests.Tests;
 
 /// <summary>
 /// A user type change (<c>startUserTypeUpdate</c>) runs as a background task - the outcome, and

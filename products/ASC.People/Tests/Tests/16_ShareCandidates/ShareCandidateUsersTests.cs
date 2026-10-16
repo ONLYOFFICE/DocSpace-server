@@ -184,7 +184,7 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     {
         var caller = await InviteContact(EmployeeType.User);
         var coMember = await InviteContact(EmployeeType.User);
-        await FillLocationAndNotesAsync(coMember);
+        await FillContactDetailsAsync(coMember);
         await CreateRoomWithMembersAsync(caller.Id, coMember.Id);
         var fileId = await CreateFileInMyDocumentsAsync(caller);
 
@@ -196,6 +196,9 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         profile.IsCollaborator.Should().BeTrue();
         profile.Location.Should().BeNull();
         profile.Notes.Should().BeNull();
+        profile.Contacts.Should().BeNullOrEmpty();
+        profile.MobilePhone.Should().BeNull();
+        profile.UserName.Should().BeNull();
         profile.RegistrationDate.Should().BeNull();
     }
 
@@ -206,14 +209,18 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     {
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         var stranger = await InviteContact(EmployeeType.User);
-        await FillLocationAndNotesAsync(stranger);
+        await FillContactDetailsAsync(stranger);
         var fileId = await CreateFileInMyDocumentsAsync(roomAdmin);
 
         var offered = await UsersOfferedForFileAsync(roomAdmin, fileId);
 
+        // The same fields the short profile leaves empty, filled in here, so its checks cannot pass by default.
         var profile = offered.Should().ContainSingle(u => u.Id == stranger.Id).Which;
         profile.Location.Should().Be(ProfileLocation);
         profile.Notes.Should().Be(ProfileNotes);
+        profile.Contacts.Should().ContainSingle(c => c.Type == ProfileContactType && c.Value == ProfileContactValue);
+        profile.UserName.Should().NotBeNullOrEmpty();
+        profile.RegistrationDate.Should().NotBeNull();
     }
 
     [Fact]
@@ -271,18 +278,134 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         strangerFound.Should().BeEmpty();
     }
 
-    private const string ProfileLocation = "Autotest Location";
-    private const string ProfileNotes = "Autotest Notes";
+    /// <summary>
+    /// A guest the user is related to is offered even when it is in none of the user's rooms. A user
+    /// cannot relate itself to a guest, so the relation is made while it is still a room admin -
+    /// inviting the guest to a room by email - and the guest then leaves the room before the demotion.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_OffersGuestItIsRelatedTo()
+    {
+        var caller = await InviteContact(EmployeeType.RoomAdmin);
+        var guest = await InviteGuest();
+        var roomId = await CreateRoomWithMembersAsync();
+        await InviteToRoom(roomId, caller.Id, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(caller);
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest([new RoomInvitation { Email = guest.Email, Access = FileShare.Read }], notify: false, message: "", culture: "en-US"),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(Owner);
+        await InviteToRoom(roomId, guest.Id, FileShare.None);
+
+        await _peopleClient.Authenticate(Owner);
+        await _userTypeApi.StartUserTypeUpdateAsync(new StartUpdateUserTypeDto(EmployeeType.User, caller.Id), TestContext.Current.CancellationToken);
+        var demotion = await UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, caller.Id);
+        demotion.IsCompleted.Should().BeTrue();
+        demotion.Error.Should().BeEmpty();
+
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        var offered = await UsersOfferedForFileAsync(caller, fileId, AccountSearchArea.Guests);
+
+        offered.Select(u => u.Id).Should().Contain(guest.Id);
+    }
 
     /// <summary>
-    /// Location and notes can only be set by the account itself, so it signs in to fill them.
+    /// An account the parent folder is shared with already has access to the document, so it is offered
+    /// - marked as shared - although it is in none of the user's rooms.
     /// </summary>
-    private async Task FillLocationAndNotesAsync(User user)
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_OffersAccountItsParentFolderIsSharedWith()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var folderMember = await InviteContact(EmployeeType.User);
+        var folderId = await CreateFolderInMyDocumentsAsync(caller);
+
+        await _sharingApi.SetFolderSecurityInfoAsync(
+            folderId,
+            new SecurityInfoSimpleRequestDto([new FileShareParams(folderMember.Id, FileShare.Read)], notify: false),
+            TestContext.Current.CancellationToken);
+        var file = await _filesApi.CreateFileAsync(
+            folderId,
+            new CreateFileRequest("Autotest File " + Guid.NewGuid().ToString()[..8]),
+            TestContext.Current.CancellationToken);
+
+        var offered = await UsersOfferedForFileAsync(caller, file.Response.Id);
+
+        offered.Should().ContainSingle(u => u.Id == folderMember.Id).Which.Shared.Should().Be(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetAccountsEntriesWithFoldersShared_AsUser_FindsCoMemberButNotStrangerByEmail()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var coMember = await InviteContact(EmployeeType.User);
+        var stranger = await InviteContact(EmployeeType.User);
+        await CreateRoomWithMembersAsync(caller.Id, coMember.Id);
+        var folderId = await CreateFolderInMyDocumentsAsync(caller);
+
+        await _peopleClient.Authenticate(caller);
+        var coMemberFound = await SearchFolderAccountIdsAsync(folderId, coMember.Email);
+        var strangerFound = await SearchFolderAccountIdsAsync(folderId, stranger.Email);
+
+        coMemberFound.Should().Contain(coMember.Id);
+        strangerFound.Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// A guest with full access to somebody's document may search whom to share it with, and is offered
+    /// by the same rule as a user: the members of its rooms, never a stranger.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetAccountsEntriesWithFilesShared_AsGuestWithFullAccess_FindsCoMemberButNotStranger()
+    {
+        var guest = await InviteGuest();
+        var coMember = await InviteContact(EmployeeType.User);
+        var stranger = await InviteContact(EmployeeType.User);
+        await CreateRoomWithMembersAsync(guest.Id, coMember.Id);
+
+        var fileId = await CreateFileInMyDocumentsAsync();
+        await _sharingApi.SetFileSecurityInfoAsync(
+            fileId,
+            new SecurityInfoSimpleRequestDto([new FileShareParams(guest.Id, FileShare.ReadWrite)], notify: false),
+            TestContext.Current.CancellationToken);
+
+        await _peopleClient.Authenticate(guest);
+        var coMemberFound = await SearchAccountIdsAsync(fileId, coMember.Email);
+        var strangerFound = await SearchAccountIdsAsync(fileId, stranger.Email);
+
+        coMemberFound.Should().Contain(coMember.Id);
+        strangerFound.Should().BeEmpty();
+    }
+
+    private const string ProfileLocation = "Autotest Location";
+    private const string ProfileNotes = "Autotest Notes";
+    private const string ProfileContactType = "skype";
+    private const string ProfileContactValue = "autotest.contact";
+
+    /// <summary>
+    /// Location, notes and contacts can only be set by the account itself, so it signs in to fill them.
+    /// </summary>
+    private async Task FillContactDetailsAsync(User user)
     {
         await _peopleClient.Authenticate(user);
         await _profilesApi.UpdateMemberAsync(
             user.Id.ToString(),
-            new UpdateMemberRequestDto(location: ProfileLocation, comment: ProfileNotes),
+            new UpdateMemberRequestDto(
+                location: ProfileLocation,
+                comment: ProfileNotes,
+                contacts: [new Contact(ProfileContactType, ProfileContactValue)]),
             TestContext.Current.CancellationToken);
     }
 
@@ -290,6 +413,20 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     {
         var entries = (await _peopleSearchApi.GetAccountsEntriesWithFilesSharedAsync(
             fileId,
+            filterValue: filterValue,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        return entries
+            .Select(e => e.ActualInstance)
+            .OfType<EmployeeFullDto>()
+            .Select(u => u.Id)
+            .ToList();
+    }
+
+    private async Task<List<Guid>> SearchFolderAccountIdsAsync(int folderId, string filterValue)
+    {
+        var entries = (await _peopleSearchApi.GetAccountsEntriesWithFoldersSharedAsync(
+            folderId,
             filterValue: filterValue,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 

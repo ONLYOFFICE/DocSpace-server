@@ -56,9 +56,9 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
     }
 
     /// <summary>
-    /// The owner of the file may search, but a user may not read the groups of the portal, so even a
-    /// group its file is already shared with is not offered - only the Everyone group is. The group
-    /// stays visible in the access list of the file.
+    /// Bug 79163: a user sharing its own file used to be offered every group of the portal, although it
+    /// may not read them. The search now offers it only the Everyone group - even a group the file is
+    /// already shared with is left out of the search, while that group stays in the access list.
     /// </summary>
     [Fact]
     [Trait("Category", "Bug")]
@@ -76,6 +76,9 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+
+        var access = (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        access.Select(a => a.SharedToGroup?.Id).Should().Contain(group.Id);
     }
 
     [Fact]
@@ -139,8 +142,9 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
     }
 
     /// <summary>
-    /// The owner of the folder may search, but a user may not read the groups of the portal, so even
-    /// a group its folder is already shared with is not offered - only the Everyone group is.
+    /// Bug 79163: a user sharing its own folder used to be offered every group of the portal, although
+    /// it may not read them. The search now offers it only the Everyone group - even a group the folder
+    /// is already shared with is left out of the search, while that group stays in the access list.
     /// </summary>
     [Fact]
     [Trait("Category", "Bug")]
@@ -158,6 +162,9 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         var result = (await _groupSearchApi.GetGroupsWithFoldersSharedAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+
+        var access = (await _sharingApi.GetFolderSecurityInfoAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        access.Select(a => a.SharedToGroup?.Id).Should().Contain(group.Id);
     }
 
     [Fact]

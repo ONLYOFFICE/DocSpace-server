@@ -95,9 +95,13 @@ public class ShareCandidateGroupsTests(AspireAppFixture fixture) : ShareCandidat
         var fileId = await CreateFileInMyDocumentsAsync(caller);
 
         await _peopleClient.Authenticate(caller);
-        var entries = (await _peopleSearchApi.GetAccountsEntriesWithFilesSharedAsync(fileId, filterValue: group.Name, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var groupEntries = (await _peopleSearchApi.GetAccountsEntriesWithFilesSharedAsync(fileId, filterValue: group.Name, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var everyoneEntries = (await _peopleSearchApi.GetAccountsEntriesWithFilesSharedAsync(fileId, filterValue: "Everyone", cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        entries.Select(e => e.ActualInstance).OfType<GroupDto>().Should().BeEmpty();
+        // The Everyone group does come back as a group here, so an empty result above is not a group the
+        // client failed to recognise.
+        everyoneEntries.Select(e => e.ActualInstance).OfType<GroupDto>().Should().ContainSingle(g => g.Id == EveryoneGroupId);
+        groupEntries.Select(e => e.ActualInstance).OfType<GroupDto>().Should().BeEmpty();
     }
 
     [Fact]
