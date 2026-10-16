@@ -154,10 +154,30 @@ function toValue(raw: Record<string, unknown> | undefined): FieldValue | undefin
   return value;
 }
 
+const FIELD_TYPE_NAMES: Record<string, FieldType> = {
+  string: FieldType.String,
+  date: FieldType.Date,
+  number: FieldType.Number,
+  singlechoice: FieldType.SingleChoice,
+  multichoice: FieldType.MultiChoice,
+};
+
+// The portal serializes the enum as a number; its name is accepted too in
+// case a serializer option ever flips it.
+function toFieldType(raw: unknown): FieldType | undefined {
+  if (typeof raw === "number") {
+    return (Object.values(FieldType) as number[]).includes(raw) ? (raw as FieldType) : undefined;
+  }
+  if (typeof raw === "string") {
+    return FIELD_TYPE_NAMES[raw.toLowerCase()];
+  }
+  return undefined;
+}
+
 function toField(raw: Record<string, unknown>): EntryField | undefined {
   const id = getNumber(raw, "id");
   const name = getString(raw, "name");
-  const type = getNumber(raw, "type");
+  const type = toFieldType(raw["type"]);
   if (id === undefined || !name || type === undefined) {
     return undefined;
   }
@@ -169,7 +189,7 @@ function toField(raw: Record<string, unknown>): EntryField | undefined {
       options.push({ id: optionId, value });
     }
   }
-  const field: EntryField = { id, name, type: type as FieldType, options };
+  const field: EntryField = { id, name, type, options };
   const value = toValue(getObject(raw, "value"));
   if (value) {
     field.value = value;

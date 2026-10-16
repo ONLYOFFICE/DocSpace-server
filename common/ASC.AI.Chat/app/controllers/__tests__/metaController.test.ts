@@ -1,0 +1,195 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../log.js", () => ({
+  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+vi.mock("../../storage/httpClient.js", () => ({
+  AiServiceHttpError: class AiServiceHttpError extends Error {},
+}));
+class FakeDocspaceApiHttpError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly statusText: string,
+  ) {
+    super(statusText);
+  }
+}
+const primeSourceMeta = vi.fn();
+vi.mock("../../storage/docspaceFilesApi.js", () => ({
+  DocspaceApiHttpError: FakeDocspaceApiHttpError,
+  primeSourceMeta,
+}));
+const generateMeta = vi.fn();
+vi.mock("../../meta/generateMeta.js", () => ({
+  generateMeta,
+  MAX_FILES: 20,
+  MAX_FOLDERS: 20,
+  NoContentError: class NoContentError extends Error {
+    readonly status = 422;
+    constructor(public readonly skipped: unknown[]) {
+      super("none readable");
+    }
+  },
+  NoProfileError: class NoProfileError extends Error {
+    readonly status = 503;
+    constructor() {
+      super("No model is configured");
+    }
+  },
+}));
+const fillMeta = vi.fn();
+vi.mock("../../meta/fillMeta.js", () => ({ fillMeta }));
+
+const { metaController } = await import("../metaController.js");
+const { NoContentError, NoProfileError } = await import("../../meta/generateMeta.js");
+
+type Handler = (req: never, res: never, next: never) => unknown;
+
+function run(handler: unknown, body: unknown) {
+  const res = {
+    statusCode: 200,
+    body: undefined as unknown,
+    headersSent: false,
+    status(code: number) {
+      this.statusCode = code;
+      return this;
+    },
+    json(payload: unknown) {
+      this.body = payload;
+      this.headersSent = true;
+      return this;
+    },
+    end() {
+      this.headersSent = true;
+    },
+  };
+  const req = { body, method: "POST", originalUrl: "/ai/meta/x" };
+  return Promise.resolve((handler as Handler)(req as never, res as never, vi.fn() as never)).then(
+    () => res,
+  );
+}
+
+describe("metaController.generate", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it.each([
+    [null, "body must be an object"],
+    [{}, "files or folders is required"],
+    [{ files: "1" }, "files must be an array of ids"],
+    [{ files: [""] }, "files must contain non-empty string or integer ids"],
+    [{ folders: [1.5] }, "folders must contain non-empty string or integer ids"],
+    [{ files: ["1"], prompt: 5 }, "prompt must be a string"],
+    [{ files: Array.from({ length: 21 }, (_, i) => i + 1) }, "files holds at most 20 ids"],
+    [{ folders: Array.from({ length: 21 }, (_, i) => `${i}`) }, "folders holds at most 20 ids"],
+  ])("rejects %j with 400", async (body, message) => {
+    const res = await run(metaController.generate, body);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: message });
+    expect(generateMeta).not.toHaveBeenCalled();
+  });
+
+  it("normalizes the ids, trims the prompt, attributes the round and answers the result", async () => {
+    generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
+    const res = await run(metaController.generate, {
+      files: [1, " 2 "],
+      folders: ["10"],
+      prompt: "  dates ",
+    });
+    expect(res.statusCode).toBe(200);
+    expect(generateMeta).toHaveBeenCalledWith({
+      files: ["1", "2"],
+      folders: ["10"],
+      prompt: "dates",
+    });
+    expect(primeSourceMeta).toHaveBeenCalledWith("10");
+  });
+
+  it("attributes a files-only request to its first file", async () => {
+    generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
+    await run(metaController.generate, { files: ["5"] });
+    expect(primeSourceMeta).toHaveBeenCalledWith("5", "file");
+  });
+
+  it("answers 422 with the skipped list when nothing could be read, and relays other statuses", async () => {
+    generateMeta.mockRejectedValueOnce(new NoContentError([{ id: "1", reason: "unsupported" }]));
+    let res = await run(metaController.generate, { files: ["1"] });
+    expect(res.statusCode).toBe(422);
+    expect(res.body).toEqual({
+      error: "none readable",
+      skipped: [{ id: "1", reason: "unsupported" }],
+    });
+
+    generateMeta.mockRejectedValueOnce(new FakeDocspaceApiHttpError(404, "Not Found"));
+    res = await run(metaController.generate, { folders: ["9"] });
+    expect(res.statusCode).toBe(404);
+
+    generateMeta.mockRejectedValueOnce(new NoProfileError());
+    res = await run(metaController.generate, { files: ["1"] });
+    expect(res.statusCode).toBe(503);
+    expect(res.body).toEqual({ error: "No model is configured" });
+
+    generateMeta.mockRejectedValueOnce(new Error("secret internals"));
+    res = await run(metaController.generate, { files: ["1"] });
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ error: "Internal server error" });
+  });
+});
+
+describe("metaController.fill", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it.each([
+    [{}, 'kind must be "file" or "folder"'],
+    [{ kind: "room", id: 1 }, 'kind must be "file" or "folder"'],
+    [{ kind: "file" }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: "abc-123" }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: 1, prompt: [] }, "prompt must be a string"],
+    [{ kind: "file", id: 1, overwrite: "yes" }, "overwrite must be a boolean"],
+  ])("rejects %j with 400", async (body, message) => {
+    const res = await run(metaController.fill, body);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: message });
+    expect(fillMeta).not.toHaveBeenCalled();
+  });
+
+  it("passes the normalized input on, overwrite false by default, and attributes the round to the entry", async () => {
+    fillMeta.mockResolvedValue({
+      metadata: {},
+      filled: [],
+      unresolved: [],
+      sources: [],
+      skipped: [],
+    });
+    const res = await run(metaController.fill, { kind: "folder", id: " 12 ", prompt: " totals " });
+    expect(res.statusCode).toBe(200);
+    expect(fillMeta).toHaveBeenCalledWith({
+      kind: "folder",
+      id: "12",
+      prompt: "totals",
+      overwrite: false,
+    });
+    expect(primeSourceMeta).toHaveBeenCalledWith("12", "folder");
+
+    await run(metaController.fill, { kind: "file", id: 3, overwrite: true });
+    expect(fillMeta).toHaveBeenLastCalledWith({
+      kind: "file",
+      id: "3",
+      prompt: undefined,
+      overwrite: true,
+    });
+    expect(primeSourceMeta).toHaveBeenLastCalledWith("3", "file");
+  });
+
+  it("answers 422 with the skipped list when the content could not be read, and 503 without a model", async () => {
+    fillMeta.mockRejectedValueOnce(new NoContentError([{ id: "3", reason: "empty" }]));
+    let res = await run(metaController.fill, { kind: "file", id: 3 });
+    expect(res.statusCode).toBe(422);
+    expect(res.body).toEqual({ error: "none readable", skipped: [{ id: "3", reason: "empty" }] });
+
+    fillMeta.mockRejectedValueOnce(new NoProfileError());
+    res = await run(metaController.fill, { kind: "file", id: 3 });
+    expect(res.statusCode).toBe(503);
+    expect(res.body).toEqual({ error: "No model is configured" });
+  });
+});

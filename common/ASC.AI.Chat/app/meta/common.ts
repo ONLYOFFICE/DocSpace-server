@@ -44,7 +44,7 @@ import logger from "../log.js";
 import {
   getPortalFile,
   listFolderFiles,
-  readFileAsText,
+  PortalTextReader,
   UnsupportedFileError,
 } from "./portalFiles.js";
 import type { PortalFile } from "./portalFiles.js";
@@ -173,6 +173,7 @@ export async function readDocuments(
   signal: AbortSignal,
 ): Promise<Document[]> {
   const results: (Document | undefined)[] = new Array(files.length);
+  const reader = new PortalTextReader(signal);
   let next = 0;
   const worker = async (): Promise<void> => {
     while (next < files.length) {
@@ -180,7 +181,7 @@ export async function readDocuments(
       next += 1;
       const file = files[index]!;
       try {
-        const raw = await readFileAsText(file, signal);
+        const raw = await reader.readFileAsText(file);
         const text = raw.trim();
         if (!text) {
           skipped.push({ id: file.id, title: file.title, reason: "empty" });
@@ -225,7 +226,7 @@ function skipReasonOf(err: unknown): SkipReason {
 
 // Spread the shared budget over the documents: each gets its own cap, and
 // when the sum still exceeds the total the longest ones are cut first.
-function fitBudget(documents: Document[]): void {
+export function fitBudget(documents: Document[]): void {
   const total = documents.reduce((sum, d) => sum + d.text.length, 0);
   if (total <= MAX_TOTAL_CHARS) {
     return;

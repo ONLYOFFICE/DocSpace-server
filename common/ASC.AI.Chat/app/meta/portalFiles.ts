@@ -67,6 +67,8 @@ const TEXT_TARGETS = [".txt", ".csv"] as const;
 const CONVERSION_BUDGET_MS = 90_000;
 /** Pause between two polls of the file-operations endpoint. */
 const POLL_INTERVAL_MS = 500;
+/** Polls an operation may be missing from the list before it counts as lost. */
+const MAX_POLL_MISSES = 3;
 
 export class UnsupportedFileError extends Error {
   constructor(
@@ -176,6 +178,11 @@ function getConvertible(): Promise<Record<string, string[]>> {
           }
         }
       }
+      if (Object.keys(result).length === 0) {
+        // No table means the settings call answered something unexpected;
+        // keep asking rather than pinning "nothing converts" for the process.
+        convertibleCache = undefined;
+      }
       return result;
     })();
     convertibleCache.catch(() => {
@@ -243,29 +250,91 @@ async function startConversion(
   }
 }
 
-async function waitForOperation(op: FileOperation, signal: AbortSignal): Promise<FileOperation> {
-  let current = op;
-  const url = `${proxyBaseUrl}/api/2.0/files/fileops`;
-  while (!current.finished && !current.error) {
-    signal.throwIfAborted();
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-    const found = envelopeList(await portalGet(url, signal))
-      .map((raw) => (isObject(raw) ? toOperation(raw) : undefined))
-      .find((o) => o?.id === current.id);
-    if (!found) {
-      // The portal drops an operation from the list once it is read, so a
-      // vanished one that was already finished is not an error.
-      if (current.url) {
-        break;
-      }
-      throw new Error(`file operation ${current.id} disappeared before it finished`);
+/**
+ * Polls `GET files/fileops` for the operations a reader started and settles
+ * each one as it finishes. One poller per reader: the list is the caller's
+ * own, and a read of it drops the finished operations, so several pollers
+ * for the same user would steal each other's results.
+ */
+class OperationWatcher {
+  private readonly waiters = new Map<
+    string,
+    { resolve: (op: FileOperation) => void; reject: (err: unknown) => void; misses: number }
+  >();
+  private timer: NodeJS.Timeout | undefined;
+
+  constructor(private readonly signal: AbortSignal) {}
+
+  wait(op: FileOperation): Promise<FileOperation> {
+    if (op.finished || op.error) {
+      return Promise.resolve(op);
     }
-    current = found;
+    return new Promise<FileOperation>((resolve, reject) => {
+      const onAbort = (): void => {
+        this.waiters.delete(op.id);
+        reject(this.signal.reason ?? new Error("aborted"));
+      };
+      this.signal.addEventListener("abort", onAbort, { once: true });
+      const settle =
+        <T>(fn: (v: T) => void) =>
+        (v: T) => {
+          this.signal.removeEventListener("abort", onAbort);
+          this.waiters.delete(op.id);
+          fn(v);
+        };
+      this.waiters.set(op.id, { resolve: settle(resolve), reject: settle(reject), misses: 0 });
+      this.schedule();
+    });
   }
-  if (current.error) {
-    throw new Error(`conversion failed: ${current.error}`);
+
+  private schedule(): void {
+    if (this.timer || this.waiters.size === 0 || this.signal.aborted) {
+      return;
+    }
+    this.timer = setTimeout(() => {
+      this.timer = undefined;
+      void this.poll();
+    }, POLL_INTERVAL_MS);
   }
-  return current;
+
+  private async poll(): Promise<void> {
+    if (this.waiters.size === 0) {
+      return;
+    }
+    let operations: FileOperation[];
+    try {
+      operations = envelopeList(
+        await portalGet(`${proxyBaseUrl}/api/2.0/files/fileops`, this.signal),
+      ).flatMap((raw) => {
+        const op = isObject(raw) ? toOperation(raw) : undefined;
+        return op ? [op] : [];
+      });
+    } catch (err) {
+      for (const waiter of [...this.waiters.values()]) {
+        waiter.reject(err);
+      }
+      return;
+    }
+    for (const [id, waiter] of [...this.waiters.entries()]) {
+      const found = operations.find((op) => op.id === id);
+      if (!found) {
+        // The list holds the operations still running or not yet read; one
+        // that is gone was finished and read by someone else (the portal UI
+        // polls the same list), so its result is lost to us.
+        waiter.misses += 1;
+        if (waiter.misses >= MAX_POLL_MISSES) {
+          waiter.reject(new Error(`file operation ${id} disappeared before it finished`));
+        }
+        continue;
+      }
+      if (found.error) {
+        waiter.reject(new Error(`conversion failed: ${found.error}`));
+      } else if (found.finished) {
+        waiter.resolve(found);
+      }
+    }
+    this.schedule();
+  }
 }
 
 // The operation's download URL names the portal's public host; inside the
@@ -281,40 +350,58 @@ function throughProxy(downloadUrl: string): string {
 }
 
 /**
- * The file's content as plain text. Throws {@link UnsupportedFileError} when
- * the portal has no text conversion for the file's extension, a
- * {@link DocspaceApiHttpError} when the portal refuses the file, and an
- * `Error` when the conversion fails or exceeds its budget.
+ * Reads files as text for one request. All conversions started through the
+ * same reader share one poller of the file-operations list and one abort
+ * signal.
  */
-export async function readFileAsText(file: PortalFile, signal?: AbortSignal): Promise<string> {
-  const target = await textTargetFor(file);
-  if (!target) {
-    throw new UnsupportedFileError(
-      file,
-      `no text conversion for ${file.ext || "a file without extension"}`,
-    );
+export class PortalTextReader {
+  private readonly watcher: OperationWatcher;
+
+  constructor(private readonly signal: AbortSignal) {
+    this.watcher = new OperationWatcher(signal);
   }
-  const { signal: timed, cancel } = withTimeout(signal, CONVERSION_BUDGET_MS);
-  const started = Date.now();
-  try {
-    const op = await waitForOperation(await startConversion(file, target, timed), timed);
-    if (!op.url) {
-      throw new Error(`conversion of file ${file.id} finished without a download URL`);
+
+  /**
+   * The file's content as plain text. Throws {@link UnsupportedFileError}
+   * when the portal has no text conversion for the file's extension, a
+   * {@link DocspaceApiHttpError} when the portal refuses the file, and an
+   * `Error` when the conversion fails or exceeds its budget.
+   */
+  async readFileAsText(file: PortalFile): Promise<string> {
+    const target = await textTargetFor(file);
+    if (!target) {
+      throw new UnsupportedFileError(
+        file,
+        `no text conversion for ${file.ext || "a file without extension"}`,
+      );
     }
-    const url = throughProxy(op.url);
-    const res = await fetch(url, {
-      headers: { ...getForwardedHeaders(), accept: "text/plain" },
-      signal: timed,
-    });
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    const { signal: timed, cancel } = withTimeout(this.signal, CONVERSION_BUDGET_MS);
+    const started = Date.now();
+    try {
+      const op = await this.watcher.wait(await startConversion(file, target, timed));
+      if (!op.url) {
+        throw new Error(`conversion of file ${file.id} finished without a download URL`);
+      }
+      const url = throughProxy(op.url);
+      const res = await fetch(url, {
+        headers: { ...getForwardedHeaders(), accept: "text/plain" },
+        signal: timed,
+      });
+      if (!res.ok) {
+        throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      }
+      const text = await res.text();
+      logger.info(
+        `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
+      );
+      return text;
+    } finally {
+      cancel();
     }
-    const text = await res.text();
-    logger.info(
-      `meta.readFileAsText(${file.id} "${file.title}" -> ${target}) ${text.length} chars in ${Date.now() - started}ms`,
-    );
-    return text;
-  } finally {
-    cancel();
   }
+}
+
+/** One-off read of a single file; see {@link PortalTextReader}. */
+export function readFileAsText(file: PortalFile, signal?: AbortSignal): Promise<string> {
+  return new PortalTextReader(signal ?? new AbortController().signal).readFileAsText(file);
 }

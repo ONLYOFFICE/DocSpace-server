@@ -33,7 +33,13 @@
 import { asyncHandler } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
-import { generateMeta, MAX_FILES, MAX_FOLDERS, NoContentError } from "../meta/generateMeta.js";
+import {
+  generateMeta,
+  MAX_FILES,
+  MAX_FOLDERS,
+  NoContentError,
+  NoProfileError,
+} from "../meta/generateMeta.js";
 import type { GenerateMetaInput } from "../meta/generateMeta.js";
 import { fillMeta } from "../meta/fillMeta.js";
 import type { FillMetaInput } from "../meta/fillMeta.js";
@@ -119,20 +125,40 @@ function asFillInput(body: unknown): FillMetaInput {
   };
 }
 
+// The two outcomes `asyncHandler` would otherwise flatten: a 422 that has to
+// carry the skipped list, and a 503 (the handler only relays 4xx statuses).
+function answerMetaError(
+  err: unknown,
+  res: { status: (code: number) => { json: (b: unknown) => unknown } },
+): boolean {
+  if (err instanceof NoContentError) {
+    res.status(err.status).json({ error: err.message, skipped: err.skipped });
+    return true;
+  }
+  if (err instanceof NoProfileError) {
+    res.status(err.status).json({ error: err.message });
+    return true;
+  }
+  return false;
+}
+
 export const metaController = {
   generate: asyncHandler(async (req, res) => {
     const input = asInput(req.body);
-    // Attribute the model round to the first folder the request names, the
-    // way every other model-bound route attributes its round to its scope.
-    await primeSourceMeta(input.folders[0]);
+    // Attribute the model round to the first folder the request names (or
+    // its first file), the way every other model-bound route attributes its
+    // round to its scope.
+    if (input.folders[0] !== undefined) {
+      await primeSourceMeta(input.folders[0]);
+    } else if (input.files[0] !== undefined) {
+      await primeSourceMeta(input.files[0], "file");
+    }
     try {
       res.json(await generateMeta(input));
     } catch (err) {
-      if (err instanceof NoContentError) {
-        res.status(err.status).json({ error: err.message, skipped: err.skipped });
-        return;
+      if (!answerMetaError(err, res)) {
+        throw err;
       }
-      throw err;
     }
   }),
 
@@ -142,11 +168,9 @@ export const metaController = {
     try {
       res.json(await fillMeta(input));
     } catch (err) {
-      if (err instanceof NoContentError) {
-        res.status(err.status).json({ error: err.message, skipped: err.skipped });
-        return;
+      if (!answerMetaError(err, res)) {
+        throw err;
       }
-      throw err;
     }
   }),
 };

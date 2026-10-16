@@ -127,7 +127,7 @@ const SYSTEM_PROMPT = [
   'Reply with one JSON object only, no prose, no markdown, no code fences: {"values":[{"key":"...","value":...}]}.',
 ].join("\n");
 
-interface Target {
+export interface Target {
   key: string;
   name: string;
   field?: EntryField;
@@ -150,7 +150,7 @@ function typeLabel(type: FieldType): string {
 
 // The fields to fill: every template field and custom field without a value,
 // or all of them with `overwrite`. The rest are reported as `already_set`.
-function selectTargets(
+export function selectTargets(
   metadata: EntryMetadata,
   overwrite: boolean,
   unresolved: UnresolvedField[],
@@ -195,7 +195,7 @@ function describeTargets(targets: Target[]): string {
   );
 }
 
-function buildUserMessage(
+export function buildUserMessage(
   kind: EntryKind,
   targets: Target[],
   documents: Document[],
@@ -270,7 +270,7 @@ function optionIdFor(field: EntryField, raw: unknown): string | undefined {
   return option?.id;
 }
 
-function resolveValue(target: Target, raw: unknown): Resolved {
+export function resolveValue(target: Target, raw: unknown): Resolved {
   if (!target.field) {
     const text = asText(raw);
     return text ? { ok: true, value: text } : { ok: false, reason: "invalid_value" };
@@ -314,7 +314,7 @@ function resolveValue(target: Target, raw: unknown): Resolved {
   }
 }
 
-function parseValues(text: string): Map<string, unknown> {
+export function parseValues(text: string): Map<string, unknown> {
   const parsed = parseJsonObject(text);
   const list = parsed?.["values"];
   const values = new Map<string, unknown>();

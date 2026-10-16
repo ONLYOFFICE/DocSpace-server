@@ -1,0 +1,272 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  FakeDocspaceApiHttpError,
+  fakeFetch,
+  headers,
+  logger,
+  portalJson,
+  PROXY,
+  textResponse,
+  withTimeout,
+} from "./mocks.js";
+
+vi.mock("../../log.js", () => ({ default: logger }));
+vi.mock("../../storage/httpClient.js", () => ({ withTimeout, proxyBaseUrl: PROXY }));
+vi.mock("../../requestContext.js", () => ({ getForwardedHeaders: () => headers }));
+vi.mock("../../storage/docspaceFilesApi.js", () => ({
+  DocspaceApiHttpError: FakeDocspaceApiHttpError,
+}));
+
+const { getPortalFile, listFolderFiles, PortalTextReader, textTargetFor, UnsupportedFileError } =
+  await import("../portalFiles.js");
+
+const SETTINGS = {
+  extsConvertible: {
+    ".docx": [".pdf", ".txt", ".odt"],
+    ".xlsx": [".pdf", ".csv", ".ods"],
+    ".pptx": [".pdf", ".txt"],
+    ".png": [".jpg"],
+  },
+};
+
+const settingsRoute = {
+  match: (url: string) => url.endsWith("/api/2.0/files/settings"),
+  answer: () => portalJson(SETTINGS),
+};
+
+type Route = { match: (url: string, init?: RequestInit) => boolean; answer: () => Response };
+
+function operation(id: string, extra: Record<string, unknown> = {}) {
+  return { id, operation: 3, progress: 0, error: "", processed: "0", finished: false, ...extra };
+}
+
+describe("folder listing and file info", () => {
+  beforeEach(() => vi.unstubAllGlobals());
+
+  it("lists a folder's files, top level, newest first, with the extension lower-cased", async () => {
+    const { fetchMock, calls } = fakeFetch([
+      {
+        match: (url) => url.includes("/api/2.0/files/12?"),
+        answer: () =>
+          portalJson({
+            files: [
+              { id: 1, title: "A.DOCX", fileExst: ".DOCX" },
+              { id: "2", title: "b.txt" },
+              { title: "no id" },
+            ],
+            folders: [{ id: 99, title: "sub" }],
+          }),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const files = await listFolderFiles("12", 21);
+    expect(files).toEqual([
+      { id: "1", title: "A.DOCX", ext: ".docx" },
+      { id: "2", title: "b.txt", ext: ".txt" },
+    ]);
+    const url = new URL(calls[0]!.url);
+    expect(url.pathname).toBe("/api/2.0/files/12");
+    expect(url.searchParams.get("filterType")).toBe("FilesOnly");
+    expect(url.searchParams.get("count")).toBe("21");
+    expect(url.searchParams.get("sortBy")).toBe("DateAndTime");
+    expect(url.searchParams.get("sortOrder")).toBe("descending");
+  });
+
+  it("answers undefined for a file the portal does not know and relays other failures", async () => {
+    const { fetchMock } = fakeFetch([
+      {
+        match: (url) => url.endsWith("/files/file/404"),
+        answer: () => new Response("", { status: 404, statusText: "Not Found" }),
+      },
+      {
+        match: (url) => url.endsWith("/files/file/403"),
+        answer: () => new Response("", { status: 403, statusText: "Forbidden" }),
+      },
+      {
+        match: (url) => url.endsWith("/files/file/1"),
+        answer: () => portalJson({ id: 1, title: "x.pdf", fileExst: ".pdf" }),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await getPortalFile("404")).toBeUndefined();
+    await expect(getPortalFile("403")).rejects.toMatchObject({ status: 403 });
+    expect(await getPortalFile("1")).toEqual({ id: "1", title: "x.pdf", ext: ".pdf" });
+  });
+});
+
+describe("textTargetFor", () => {
+  beforeEach(() => vi.unstubAllGlobals());
+
+  it("keeps txt/csv as they are and picks txt or csv from the conversion table", async () => {
+    const { fetchMock, calls } = fakeFetch([settingsRoute]);
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await textTargetFor({ id: "1", title: "a.txt", ext: ".txt" })).toBe(".txt");
+    expect(await textTargetFor({ id: "2", title: "a.csv", ext: ".csv" })).toBe(".csv");
+    expect(await textTargetFor({ id: "3", title: "a.docx", ext: ".docx" })).toBe(".txt");
+    expect(await textTargetFor({ id: "4", title: "a.xlsx", ext: ".xlsx" })).toBe(".csv");
+    expect(await textTargetFor({ id: "5", title: "a.png", ext: ".png" })).toBeUndefined();
+    expect(await textTargetFor({ id: "6", title: "noext", ext: "" })).toBeUndefined();
+    // The table is read once for the process.
+    expect(calls.filter((c) => c.url.endsWith("/files/settings"))).toHaveLength(1);
+  });
+});
+
+describe("PortalTextReader", () => {
+  beforeEach(() => vi.unstubAllGlobals());
+
+  it("converts through bulkdownload, polls the operation and downloads the text through the proxy", async () => {
+    let polls = 0;
+    const { fetchMock, calls } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url, init) => url.endsWith("/files/fileops/bulkdownload") && init?.method === "PUT",
+        answer: () => portalJson([operation("op-1")]),
+      },
+      {
+        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        answer: () => {
+          polls += 1;
+          return portalJson(
+            polls < 2
+              ? [operation("op-1", { progress: 50 })]
+              : [
+                  operation("op-1", {
+                    progress: 100,
+                    finished: true,
+                    url: "https://public.example.com/filehandler.ashx?action=bulk&ext=.txt",
+                  }),
+                ],
+          );
+        },
+      },
+      {
+        match: (url) => url.startsWith(`${PROXY}/filehandler.ashx?action=bulk`),
+        answer: () => textResponse("Hello, contract."),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const reader = new PortalTextReader(new AbortController().signal);
+    const text = await reader.readFileAsText({ id: "77", title: "c.docx", ext: ".docx" });
+    expect(text).toBe("Hello, contract.");
+
+    const start = calls.find((c) => c.url.endsWith("/fileops/bulkdownload"));
+    expect(JSON.parse(String(start?.init?.body))).toEqual({
+      fileConvertIds: [{ key: 77, value: ".txt" }],
+    });
+    expect(polls).toBe(2);
+    const download = calls.find((c) => c.url.includes("filehandler.ashx"));
+    expect(download?.url).toBe(`${PROXY}/filehandler.ashx?action=bulk&ext=.txt`);
+    expect((download?.init?.headers as Record<string, string>)["accept"]).toBe("text/plain");
+  }, 10_000);
+
+  it("shares one poll of the operations list between concurrent reads", async () => {
+    let polls = 0;
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url, init) => url.endsWith("/files/fileops/bulkdownload") && init?.method === "PUT",
+        answer: function (this: unknown) {
+          return portalJson([operation(`op-${Math.random()}`)]);
+        },
+      },
+    ]);
+    // The bulkdownload answer above cannot know which file it is for; give
+    // each one a deterministic id by patching the mock per call instead.
+    const started: string[] = [];
+    fetchMock.mockImplementation(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.endsWith("/files/settings")) {
+        return portalJson(SETTINGS);
+      }
+      if (url.endsWith("/fileops/bulkdownload")) {
+        const body = JSON.parse(String(init?.body)) as { fileConvertIds: { key: number }[] };
+        const id = `op-${body.fileConvertIds[0]!.key}`;
+        started.push(id);
+        return portalJson([operation(id)]);
+      }
+      if (url.endsWith("/api/2.0/files/fileops")) {
+        polls += 1;
+        return portalJson(
+          started.map((id) =>
+            operation(id, { finished: true, url: `https://x/filehandler.ashx?op=${id}` }),
+          ),
+        );
+      }
+      if (url.includes("filehandler.ashx")) {
+        return textResponse(`text of ${new URL(url).searchParams.get("op")}`);
+      }
+      return new Response("", { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const reader = new PortalTextReader(new AbortController().signal);
+    const [a, b] = await Promise.all([
+      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
+      reader.readFileAsText({ id: "2", title: "b.docx", ext: ".docx" }),
+    ]);
+    expect(a).toBe("text of op-1");
+    expect(b).toBe("text of op-2");
+    expect(polls).toBe(1);
+  }, 10_000);
+
+  it("fails the read when the conversion reports an error", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-err")]),
+      },
+      {
+        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        answer: () => portalJson([operation("op-err", { error: "Password protected" })]),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).rejects.toThrow(
+      /conversion failed: Password protected/,
+    );
+  }, 10_000);
+
+  it("gives up on an operation that vanished from the list before it finished", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-gone")]),
+      },
+      { match: (url) => url.endsWith("/api/2.0/files/fileops"), answer: () => portalJson([]) },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).rejects.toThrow(
+      /disappeared before it finished/,
+    );
+  }, 10_000);
+
+  it("refuses a file the portal cannot convert to text without calling the portal", async () => {
+    const { fetchMock, calls } = fakeFetch([settingsRoute]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(
+      reader.readFileAsText({ id: "1", title: "a.png", ext: ".png" }),
+    ).rejects.toBeInstanceOf(UnsupportedFileError);
+    expect(calls.some((c) => c.url.includes("bulkdownload"))).toBe(false);
+  });
+
+  it("relays a 403 from the conversion start", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => new Response("", { status: 403, statusText: "Forbidden" }),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(
+      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+});
