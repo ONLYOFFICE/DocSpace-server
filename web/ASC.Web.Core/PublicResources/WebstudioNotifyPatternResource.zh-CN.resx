@@ -946,7 +946,11 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>您好，$UserName!
 
-温馨提示，您已购买的资费套餐或服务未能自动续订。请您手动续订。
+温馨提示，您已购买的资费套餐或服务未能自动续订：
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+请您手动续订。
 
 $OrangeButton
 
@@ -1903,6 +1907,20 @@ IP: *$IP*
 浏览器: *$Browser*
 
 如果这是您本人的操作，则无需采取任何进一步措施。如果您不认识此登录，请立即更改您的密码。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>需要操作：您的 ${LetterLogoText} Wallet 无法使用自动充值</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>您好，$UserName！
+
+我们联系您是为了告知您，您当前的付款方式不支持自动充值：资金在银行转账结算后才会到达 ${LetterLogoText} Wallet，因此无法立即补充余额。
+
+因此，自动充值已被关闭。为避免付费服务中断，请手动为您的钱包余额充值，或切换到支持自动充值的付款方式。
 
 $OrangeButton
 

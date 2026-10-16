@@ -509,12 +509,15 @@ export async function resolveAgentEntityId(
 /**
  * Gate a client-supplied `entityId` on *accessibility* (not agent-ness). When
  * an entityId is present it must reference a folder the caller can actually
- * reach; a missing folder (404) or a no-access response (403) both surface as
- * a 404 so the endpoint never reveals whether the entity exists. An absent
- * entityId is the legitimate global scope and passes. Unlike
- * {@link resolveAgentEntityId} this does NOT require an agent room — an
- * accessible non-agent folder is a valid scope that degrades to global
- * downstream. Used to gate thread creation and entity-scoped reads.
+ * reach: a missing folder surfaces as 404, a folder the caller cannot open as
+ * 403 — the status the Files API itself answers, and the one the read routes
+ * already relay for the same folder through {@link resolveAgentEntityId}.
+ * Masking the 403 as 404 here hid nothing and made a write to a room answer
+ * differently from a read of it (Bug 83998). An absent entityId is the
+ * legitimate global scope and passes. Unlike {@link resolveAgentEntityId}
+ * this does NOT require an agent room — an accessible non-agent folder is a
+ * valid scope that degrades to global downstream. Used to gate thread
+ * creation and entity-scoped writes.
  */
 export async function assertEntityAccessible(
   entityId: string | undefined,
@@ -527,10 +530,12 @@ export async function assertEntityAccessible(
     accessible = (await getFolderInfoOnce(entityId)) !== undefined;
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 403) {
-      accessible = false; // no access → treat as not found (don't reveal it)
-    } else {
-      throw err; // genuine upstream failure (5xx) → propagate as-is
+      throw Object.assign(new Error(`Entity "${entityId}" is not accessible`), {
+        status: 403,
+        expose: true,
+      });
     }
+    throw err; // genuine upstream failure (5xx) → propagate as-is
   }
   if (!accessible) {
     throw Object.assign(new Error(`Entity "${entityId}" not found`), {

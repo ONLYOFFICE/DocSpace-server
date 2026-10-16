@@ -64,7 +64,7 @@ public class EncryptionOperation : DistributedTaskProgress
     {
         Id = id;
         _encryptionSettings = encryptionSettings;
-        _isEncryption = _encryptionSettings.Status == EncryprtionStatus.EncryptionStarted;
+        _isEncryption = _encryptionSettings.Status == EncryptionStatus.EncryptionStarted;
         _serverRootPath = serverRootPath;
     }
 
@@ -105,7 +105,7 @@ public class EncryptionOperation : DistributedTaskProgress
                 throw new NotSupportedException();
             }
 
-            if (_encryptionSettings.Status is EncryprtionStatus.Encrypted or EncryprtionStatus.Decrypted)
+            if (_encryptionSettings.Status is EncryptionStatus.Encrypted or EncryptionStatus.Decrypted)
             {
                 log.DebugStorageAlready(_encryptionSettings.Status);
 
@@ -291,11 +291,11 @@ public class EncryptionOperation : DistributedTaskProgress
     {
         if (_isEncryption)
         {
-            _encryptionSettings.Status = EncryprtionStatus.Encrypted;
+            _encryptionSettings.Status = EncryptionStatus.Encrypted;
         }
         else
         {
-            _encryptionSettings.Status = EncryprtionStatus.Decrypted;
+            _encryptionSettings.Status = EncryptionStatus.Decrypted;
             _encryptionSettings.Password = string.Empty;
         }
 

@@ -36,7 +36,6 @@ namespace ASC.Web.Core;
 public class WalletServiceDescriptionManager
 {
     private const string AgentSourceType = "Agent";
-    private const string FetchType = "fetch";
 
     private static readonly Dictionary<string, string> _mapping = new()
     {
@@ -45,6 +44,9 @@ public class WalletServiceDescriptionManager
         { "search", "num_results" },
         { "image", "total_tokens" }
     };
+
+    // The kinds of AI search operation that have a description and a unit of their own.
+    private static readonly HashSet<string> _aiSearchTypes = ["search", "fetch"];
 
     public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, Dictionary<string, string> metadata)
     {
@@ -83,13 +85,14 @@ public class WalletServiceDescriptionManager
             }
         }
 
-        // AI search bills page crawls under the same service as searches: only the type tells them apart.
+        // AI search bills web searches and page crawls under one service: only the type tells them apart.
+        // An operation without a known type stays plain AI search.
         if (serviceName == "ai-search" &&
             metadata != null &&
             metadata.TryGetValue(BillingClient.MetadataType, out var searchType) &&
-            searchType == FetchType)
+            _aiSearchTypes.Contains(searchType))
         {
-            serviceName = FetchType;
+            serviceName = searchType;
         }
 
         if (string.IsNullOrEmpty(serviceName))
@@ -113,7 +116,8 @@ public class WalletServiceDescriptionManager
         return (description, uom, quantity);
     }
 
-    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom)
+    // culture: a letter resolves the texts for its recipient; null takes the current UI culture
+    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom, CultureInfo culture = null)
     {
         // for testing purposes
         if (serviceName != null && serviceName.EndsWith("-1-hour"))
@@ -123,8 +127,8 @@ public class WalletServiceDescriptionManager
 
         var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
 
-        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}");
-        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}", culture);
+        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}", culture);
 
         return (serviceName, title, serviceUnit);
     }

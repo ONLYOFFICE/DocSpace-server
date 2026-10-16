@@ -41,4 +41,5 @@ public class AiSettings
     public required string EmbeddingModel { get; init; }
     public bool SystemAiEnabled { get; init; }
     public string? RecommendedModelForForms { get; init; }
+    public ToolPermissionMode ToolPermissionMode { get; init; }
 }

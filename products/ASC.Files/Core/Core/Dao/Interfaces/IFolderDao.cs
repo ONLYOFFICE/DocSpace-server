@@ -64,10 +64,12 @@ public interface IFolderDao<T>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
+        MetadataFilter metadataFilter = null);
 
     IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
-        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None);
+        bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
+        MetadataFilter metadataFilter = null);
 
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags,
         bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null);
@@ -108,9 +110,11 @@ public interface IFolderDao<T>
     /// <param name="parentType"></param>
     /// <param name="containingForms"></param>
     /// <param name="folderType"></param>
+    /// <param name="metadataFilter">the structured metadata filter</param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -126,8 +130,10 @@ public interface IFolderDao<T>
     /// <param name="searchSubfolders"></param>
     /// <param name="checkShare"></param>
     /// <param name="excludeSubject"></param>
+    /// <param name="metadataFilter">the structured metadata filter; the third-party folders never carry metadata and are left out when it is set</param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, IEnumerable<T> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, IEnumerable<T> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false,
+        MetadataFilter metadataFilter = null);
 
     /// <summary>
     ///     Get folder, contains folder with id
@@ -464,7 +470,8 @@ public interface IFolderDao<T>
     Task<(T RoomId, string RoomTitle, FolderType)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
     Task<Folder<T>> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
-        T roomId = default, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, List<FolderType> folderType = null);
+        T roomId = default, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task<bool> ContainsFormsInFolder(Folder<T> folder);
     Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
@@ -490,7 +497,8 @@ public interface IFolderDao<T>
     Task<Dictionary<T, ChatSettings>> GetChatSettingsAsync(IEnumerable<T> agentIds);
 
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
+        string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null);
 
     Task<int> GetSharedFoldersCountAsync(T parentId);
 

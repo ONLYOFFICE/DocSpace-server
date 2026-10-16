@@ -74,5 +74,5 @@ public class FileEncryptionInfoDto
     ///   }
     /// ]
     /// </example>
-    public List<FileKeys> FileKeys { get; set; }
+    public List<FileKeysDto> FileKeys { get; set; }
 }

@@ -924,7 +924,11 @@ Mensaje de excepción: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>¡Hola, $UserName!
 
-Nos ponemos en contacto con usted para informarle de que la renovación automática de su plan tarifario o de sus servicios no se ha podido realizar. Le rogamos que lo renueve manualmente.
+Nos ponemos en contacto con usted para informarle de que la renovación automática de su plan tarifario o de sus servicios no se ha podido realizar:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Le rogamos que lo renueve manualmente.
 
 $OrangeButton
 
@@ -1884,5 +1888,19 @@ Si fue usted — no se requieren más pasos. Si no reconoce este inicio de sesi�
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>¡Hola, $UserName!
+
+Nos ponemos en contacto para informarle que la recarga automática no es compatible con su método de pago actual: el dinero llega a ${LetterLogoText} Wallet solo después de que se liquide la transferencia bancaria, por lo que el saldo no puede reponerse de inmediato.
+
+Por lo tanto, la recarga automática ha sido desactivada. Para evitar cualquier interrupción de los servicios de pago, por favor recargue el saldo de su cartera manualmente o cambie a un método de pago que admita la recarga automática.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Acción requerida: La recarga automática no está disponible para su ${LetterLogoText} Wallet</value>
   </data>
 </root>

@@ -345,6 +345,20 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
+    /// <summary>
+    /// The IDs of the metadata templates assigned to the file entry.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<int> AssignedMetadataTemplates { get; set; }
+
+    /// <summary>
+    /// Where the search text of the listing was met in the metadata of the entry: one item per string value holding
+    /// the text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose
+    /// metadata contain it; an entry found by its title alone carries nothing here.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MetadataMatchDto> MetadataMatches { get; set; }
+
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {
@@ -373,6 +387,7 @@ public class FileEntryDtoHelper(
     ExternalDatabaseClient externalDatabaseClient,
     IFusionCache fusionCache,
     TenantManager tenantManager,
+    MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
@@ -386,6 +401,73 @@ public class FileEntryDtoHelper(
     // Live check that a form's submissions table really exists in the external database: FormFilling.ExternalDbTableName
     // is stored on export but never cleared, so it can outlive a reset/dropped/disabled external DB. A transient
     // failure must not break the entry DTO — hide the action instead.
+    /// <summary>
+    /// Fills the assigned metadata templates of one entry. For the info endpoints: a client re-reads a single row by them
+    /// after a socket event, and a row without its templates would drop them from the listing. The listing fills a whole
+    /// page at once with <see cref="SetMetadataAsync"/> instead of paying a query per entry.
+    /// </summary>
+    public async Task SetAssignedMetadataTemplatesAsync<T>(FileEntryDto<T> dto)
+    {
+        if (dto is FileEntryDto<int> entry)
+        {
+            await SetMetadataAsync([entry]);
+        }
+    }
+
+    /// <summary>
+    /// Fills the metadata of the entries of one page: their assigned templates, and, when the page was filtered by a search
+    /// text, where that text was met in their values (in the hidden templates too when the search looked there). One
+    /// round trip per kind, over the files and the folders together, and nothing at all for a tenant without templates,
+    /// which has no links and no values: the listing is the hottest read path.
+    /// </summary>
+    public async Task SetMetadataAsync(IReadOnlyCollection<FileEntryDto<int>> dtos, string searchText = null, bool includeHiddenTemplates = false)
+    {
+        if (dtos.Count == 0 || !await metadataTemplatesCache.HasTemplatesAsync())
+        {
+            return;
+        }
+
+        var fileIds = dtos.Where(d => d.FileEntryType == FileEntryType.File).Select(d => d.Id).ToList();
+        var folderIds = dtos.Where(d => d.FileEntryType == FileEntryType.Folder).Select(d => d.Id).ToList();
+        var metadataDao = _daoFactory.GetMetadataDao<int>();
+
+        var links = await metadataDao.GetLinksAsync(fileIds, folderIds).ToListAsync();
+
+        Assign(dtos, links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId),
+            (dto, templateIds) => dto.AssignedMetadataTemplates = templateIds.Distinct().ToList());
+
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            return;
+        }
+
+        var matches = await metadataDao.GetTextMatchesAsync(fileIds, folderIds, searchText, includeHiddenTemplates);
+
+        Assign(dtos, matches.ToLookup(m => (m.EntryType, m.EntryId)),
+            (dto, entryMatches) => dto.MetadataMatches = entryMatches.Select(m => m.Map()).ToList());
+    }
+
+    /// <summary>
+    /// Hands every entry of the page the rows read for it; an entry without rows is left as it is.
+    /// </summary>
+    private static void Assign<TRow>(IReadOnlyCollection<FileEntryDto<int>> dtos, ILookup<(FileEntryType, int), TRow> byEntry, Action<FileEntryDto<int>, IEnumerable<TRow>> set)
+    {
+        if (byEntry.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var dto in dtos)
+        {
+            var key = (dto.FileEntryType, dto.Id);
+
+            if (byEntry.Contains(key))
+            {
+                set(dto, byEntry[key]);
+            }
+        }
+    }
+
     protected async Task<bool> FormHasExternalDbTableAsync(string tableName)
     {
         if (string.IsNullOrEmpty(tableName) || !externalDatabaseClient.IsEnabled())

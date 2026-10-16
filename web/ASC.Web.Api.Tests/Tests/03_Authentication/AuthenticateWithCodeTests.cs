@@ -122,7 +122,7 @@ public class AuthenticateWithCodeTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _authenticationApi.AuthenticateMeFromBodyWithCodeAsync(
                 "123456",
-                new AuthWithCodeRequestsDto { UserName = "wrong@email.com", Password = "wrongpassword", Code = "123456" },
+                new AuthWithCodeRequestDto { UserName = "wrong@email.com", Password = "wrongpassword", Code = "123456" },
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -155,7 +155,7 @@ public class AuthenticateWithCodeTests(
     {
         await _webApiClient.Authenticate(Owner);
         await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken);
     }
 
     /// <summary>
@@ -166,7 +166,7 @@ public class AuthenticateWithCodeTests(
     {
         await _webApiClient.Authenticate(null);
         var result = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: user.Email, password: user.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: user.Email, password: user.Password), TestContext.Current.CancellationToken);
 
         return result.Response.TfaKey;
     }
@@ -176,7 +176,7 @@ public class AuthenticateWithCodeTests(
         await _webApiClient.Authenticate(null);
         return await _authenticationApi.AuthenticateMeFromBodyWithCodeAsync(
             code,
-            new AuthWithCodeRequestsDto { UserName = user.Email, Password = user.Password, Code = code },
+            new AuthWithCodeRequestDto { UserName = user.Email, Password = user.Password, Code = code },
             TestContext.Current.CancellationToken);
     }
 }

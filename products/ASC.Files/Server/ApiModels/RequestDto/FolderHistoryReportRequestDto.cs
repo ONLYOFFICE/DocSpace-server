@@ -46,9 +46,8 @@ public class FolderHistoryReportRequestDto
     public required int FolderId { get; set; }
 
     /// <summary>
-    /// The shape the report is written in: `Xlsx` produces a spreadsheet that is saved as a file of the portal, while
-    /// `Csv` produces a comma-separated text file that is uploaded to "My documents" without being reported back with
-    /// a file identifier.
+    /// The shape the report is written in: `Xlsx` produces a spreadsheet and `Csv` a comma-separated text file, and
+    /// either is saved as a file in "My documents".
     /// </summary>
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]

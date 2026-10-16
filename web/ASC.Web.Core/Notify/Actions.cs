@@ -1778,16 +1778,13 @@ public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
     protected override bool ToOwner => true;
     protected override bool TrulyYoursAsTableRow => true;
 
-    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    /// <summary>
+    /// Exactly the portals removed a week from now: every one the removal takes is told first, however long
+    /// it has been idle, and none it spares is told it will go.
+    /// </summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
     {
-        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
-        {
-            return false;
-        }
-
-        var lastActivity = await context.GetLastActivityDateAsync();
-
-        return lastActivity.AddMonths(6) <= context.NowDate && lastActivity.AddMonths(7) > context.NowDate;
+        return context.IsUnusedPortalRemovedAsync(daysAhead: 7);
     }
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
@@ -3460,16 +3457,25 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
         ];
     }
 
-    public void Init(UserInfo user)
+    // serviceName is the billing service of the subscription (TenantQuota.ServiceName); the letter names it the
+    // way the customer operations report does - "Business plan", "Admins" - in the recipient's culture. The unit
+    // is a label in front of the number ("Admins: 2"), as the report's column headers read, so it needs no
+    // agreement with the number in any language.
+    public void Init(UserInfo user, string serviceName, int quantity)
     {
         var culture = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
+        var (normalizedServiceName, title, unit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(serviceName, null, culture);
+
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue("ServiceName", title ?? normalizedServiceName),
+            new TagValue("ServiceUnit", unit ?? string.Empty),
+            new TagValue("ServiceQuantity", $"{quantity}"),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];

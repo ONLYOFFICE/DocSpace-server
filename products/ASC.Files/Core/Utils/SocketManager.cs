@@ -83,9 +83,9 @@ public class SocketManager(
         await MakeRequest("create-folder", folder, true, users);
     }
 
-    public async Task UpdateFileAsync<T>(File<T> file)
+    public async Task UpdateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("update-file", file, true);
+        await MakeRequest("update-file", file, true, users: users);
     }
 
     public async Task UpdateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)

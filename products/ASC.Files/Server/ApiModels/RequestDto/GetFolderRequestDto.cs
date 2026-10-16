@@ -196,6 +196,40 @@ public class GetFolderRequestDto<T>
     /// </summary>
     /// <example>1</example>
     public Location? Location { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// Supported for the rooms, the trash, the regular folders and the "Shared with me", "Recent" and "Favorites" sections
+    /// (the third-party entries never carry metadata and are left out); the "Templates" and "Private" sections reject it with 400.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"contains","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// A string field takes "eq" (the whole value) or "contains" (a part of it); a number or a date field takes "range" with inclusive bounds,
+    /// or "gt", "gte", "lt", "lte" with the single bound in "value"; a choice field takes "in". A date-only bound covers the whole day,
+    /// so "to":"2026-06-30" includes the values stored on 30 June and "gt":"2026-06-30" starts after it.
+    /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// The same filter is taken as a typed request body by POST api/2.0/files/{folderId}/search.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
+
+    /// <summary>
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "includeHiddenMetadata")]
+    public bool? IncludeHiddenMetadata { get; set; }
 }
 
 /// <summary>
@@ -262,7 +296,42 @@ public class GetCommonFolderRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// The third-party entries never carry metadata and are left out when the filter is set.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"contains","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// A string field takes "eq" or "contains"; a number or a date field takes "range" with inclusive bounds, or "gt", "gte", "lt", "lte" with the bound in "value";
+    /// a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
+
+    /// <summary>
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "includeHiddenMetadata")]
+    public bool? IncludeHiddenMetadata { get; set; }
 }
+
+/// <summary>
+/// The request parameters for getting the "Favorites" folder.
+/// </summary>
+public class GetFavoritesFolderRequestDto : GetCommonFolderRequestDto;
 
 /// <summary>
 /// The request parameters for getting the "My trash" folder.
@@ -336,6 +405,36 @@ public class GetMyTrashFolderRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// The third-party entries never carry metadata and are left out when the filter is set.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"contains","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// A string field takes "eq" or "contains"; a number or a date field takes "range" with inclusive bounds, or "gt", "gte", "lt", "lte" with the bound in "value";
+    /// a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
+
+    /// <summary>
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "includeHiddenMetadata")]
+    public bool? IncludeHiddenMetadata { get; set; }
 }
 
 /// <summary>
@@ -510,4 +609,34 @@ public class GetRecentFolderRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the recent files must be assigned to. On its own it narrows the listing to the files
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// The third-party files never carry metadata and are left out when the filter is set.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"contains","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// A string field takes "eq" or "contains"; a number or a date field takes "range" with inclusive bounds, or "gt", "gte", "lt", "lte" with the bound in "value";
+    /// a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
+
+    /// <summary>
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "includeHiddenMetadata")]
+    public bool? IncludeHiddenMetadata { get; set; }
 }

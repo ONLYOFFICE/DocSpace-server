@@ -57,7 +57,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -213,6 +213,7 @@ function buildContextFragment(entityId: string | undefined): string {
   lines.push(
     `- Today's date is ${today}.`,
     "- Prefer answering from the conversation when you can; use tools only when the request clearly needs data or actions in the workspace.",
+    "- When you link to a workspace file, use only a link a tool returned for it (its `url` or `webUrl`), copied verbatim. Never compose a link yourself from a file id or title; if no tool returned a link, name the file without one.",
   );
   return lines.join("\n");
 }
@@ -612,11 +613,30 @@ async function unknownProfileIdError(
   return aiToolsUnpaidError(profile.providerType);
 }
 
-// Sentinel message so the callers can tell the billing failure (402) apart
-// from the unknown-profile validation error (400) in unknownProfileIdError's
-// single string channel.
+// Sentinel so the callers can tell the billing failure (402) apart from the
+// unknown-profile validation error (400) in unknownProfileIdError's single
+// string channel. Never sent as-is: the 402 body carries the portal's
+// localized wording, see aiToolsUnpaidMessage.
 const AI_TOOLS_UNPAID_ERROR =
   "The AI Tools service is not paid for the current portal";
+
+// The 402 body for the unpaid gateway. The C# settings (`aiNotReadyMessage`)
+// carry the reason in the user's culture; this service has no resources of
+// its own, so answering with the English sentinel put a `ru` user back on an
+// untranslated refusal after the refusal moved out of the stream (Bug 84023,
+// same class as Bug 83048). Falls back to the sentinel when the portal
+// predates the field.
+async function aiToolsUnpaidMessage(): Promise<string> {
+  const primed = getChatContextSnapshot()?.aiNotReadyMessage;
+  if (primed) {
+    return primed;
+  }
+  const config = await aiService.get("/config").catch(() => undefined);
+  const message = isObject(config)
+    ? getString(config, "aiNotReadyMessage")
+    : undefined;
+  return message || AI_TOOLS_UNPAID_ERROR;
+}
 
 // 402 message when the effective profile rides the portal gateway while the
 // tenant's AI Tools wallet service is not paid, null otherwise. Without
@@ -645,6 +665,31 @@ async function aiToolsUnpaidError(
 
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // The body used to reach the engine unchecked: an unknown or missing
+    // actionType died in the assignment resolver and a missing userMessage
+    // in the attachment resolver, both as 500 (Bug 84294). Checked before
+    // anything is primed so a refused call has no side effects.
+    if (!isObject(req.body)) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!asActionType(req.body.actionType)) {
+      res.status(400).json({ error: "actionType is required and must be a known action type" });
+      return;
+    }
+    if (!hasPromptContent(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content or an attachment",
+      });
+      return;
+    }
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
+    }
     // Without this the provider request runs without the forwarded auth /
     // request headers, so a correct call comes back with an empty message
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
@@ -664,6 +709,37 @@ export const aiController = {
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // A missing systemPrompt went to the provider as an undefined system
+    // message and came back as a 500 (Bug 84299); a string `isStream` such
+    // as "false" counted as true and switched the answer to a stream
+    // (Bug 84300). Both are the caller's mistake, so 400, before anything
+    // is primed.
+    if (!isObject(req.body)) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (typeof req.body.systemPrompt !== "string" || req.body.systemPrompt.trim().length === 0) {
+      res.status(400).json({ error: "systemPrompt is required and must be a non-empty string" });
+      return;
+    }
+    if (!hasPromptContent(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content or an attachment",
+      });
+      return;
+    }
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
+    }
+    const isStream: unknown = req.body.isStream;
+    if (isStream !== undefined && isStream !== null && typeof isStream !== "boolean") {
+      res.status(400).json({ error: "isStream must be a boolean" });
+      return;
+    }
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
@@ -782,10 +858,12 @@ export const aiController = {
     // will actually be used is checked.
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
       if (profileError) {
-        res
-          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
-          .json({ error: profileError });
+        res.status(400).json({ error: profileError });
         return;
       }
     }
@@ -842,10 +920,12 @@ export const aiController = {
     // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
       if (profileError) {
-        res
-          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
-          .json({ error: profileError });
+        res.status(400).json({ error: profileError });
         return;
       }
     }

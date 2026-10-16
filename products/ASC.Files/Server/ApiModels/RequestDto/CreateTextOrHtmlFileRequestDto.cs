@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters of a text or HTML file created from content sent in the request.
 /// </summary>
-public class CreateTextOrHtmlFile
+public class CreateTextOrHtmlFileRequest
 {
     /// <summary>
     /// The title of the file. The extension the operation stands for is appended unless the title already ends with
@@ -79,5 +79,5 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// </summary>
     /// <example>{"title": "Document.txt", "content": "This is the file content", "createNewIfExist": false}</example>
     [FromBody]
-    public required CreateTextOrHtmlFile File { get; set; }
+    public required CreateTextOrHtmlFileRequest File { get; set; }
 }

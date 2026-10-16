@@ -42,7 +42,8 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
 import logger, { logStream } from "./app/log.js";
-import { getAppConfig } from "./config/index.js";
+import { coreCors, getAppConfig } from "./config/index.js";
+import { corsOptions } from "./app/cors.js";
 import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
 import { storage } from "./app/storage/index.js";
@@ -68,17 +69,6 @@ app.use((_req, res, next) => {
   }) as typeof res.writeHead;
   next();
 });
-
-// CORS is off by default: the chat UI reaches this service same-origin via
-// the DocSpace nginx (`/api/2.0/ai`), so no cross-origin request is
-// expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
-// on an authenticated, user-scoped API — undesirable. Set
-// `AI_CHAT_CORS_ORIGINS` (comma-separated) only if a real cross-origin
-// caller exists; an explicit allowlist is then honored with credentials.
-const corsOrigins = (process.env["AI_CHAT_CORS_ORIGINS"] ?? "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
 
 // strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
 // ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
@@ -117,10 +107,14 @@ app
   })
   .use(bodyParser.urlencoded({ extended: false }));
 
-if (corsOrigins.length > 0) {
-  app.use(cors({ origin: corsOrigins, credentials: true }));
-  logger.info(`CORS enabled for origins: ${corsOrigins.join(", ")}`);
+// CORS as the .NET services have it, from `core:cors` (see `app/cors.ts`).
+// Before the routes and their auth gate: a preflight carries no
+// credentials, and `cors()` answers it here and ends it.
+const corsPolicy = corsOptions(coreCors());
+if (corsPolicy) {
+  app.use(cors(corsPolicy));
 }
+logger.info(corsPolicy ? `CORS enabled for ${coreCors()}` : "CORS disabled");
 
 app.use(requestContextMiddleware);
 

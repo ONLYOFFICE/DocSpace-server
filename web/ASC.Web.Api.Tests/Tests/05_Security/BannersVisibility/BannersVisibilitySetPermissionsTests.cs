@@ -68,7 +68,7 @@ public class BannersVisibilitySetPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityBannersVisibilityApi.SetTenantBannerSettingsAsync(
-                new TenantBannerSettingsDto(true), TestContext.Current.CancellationToken));
+                new TenantBannerSettingsRequestDto(true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);

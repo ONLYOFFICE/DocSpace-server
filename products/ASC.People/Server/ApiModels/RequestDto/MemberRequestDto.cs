@@ -97,7 +97,7 @@ public class ChangePasswordByIdRequestDto
     /// confirmation token was issued for, and the account has to be active.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required Guid UserId { get; set; }
 
     /// <summary>
@@ -140,7 +140,7 @@ public class ChangeEmailByIdRequestDto
     /// confirmation token was issued for, and the account has to be active.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required Guid UserId { get; set; }
 
     /// <summary>
@@ -316,7 +316,7 @@ public class UpdateMemberRequestDto
 {
     /// <summary>
     /// The account the change applies to. It is read from this body by `POST api/2.0/people/email`, while
-    /// `PUT api/2.0/people/{userid}` takes the account from the route and ignores this field.
+    /// `PUT api/2.0/people/{userId}` takes the account from the route and ignores this field.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public string UserId { get; set; }
@@ -332,7 +332,7 @@ public class UpdateMemberRequestDto
     /// <summary>
     /// The new email address, up to 255 characters. It is read only by `POST api/2.0/people/email`, which either
     /// mails a confirmation letter or, for an administrator acting on somebody else, applies the address at once;
-    /// `PUT api/2.0/people/{userid}` ignores it.
+    /// `PUT api/2.0/people/{userId}` ignores it.
     /// </summary>
     /// <example>john.doe@example.com</example>
     [EmailAddress]
@@ -441,7 +441,7 @@ public class UpdateMemberByIdRequestDto
     /// The user ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>
@@ -461,7 +461,7 @@ public class UpdateMemberCultureByIdRequestDto
     /// The user ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>
@@ -469,13 +469,13 @@ public class UpdateMemberCultureByIdRequestDto
     /// </summary>
     /// <example>{"cultureName": "en-US"}</example>
     [FromBody]
-    public Culture Culture { get; set; }
+    public UpdateMemberCultureRequest Culture { get; set; }
 }
 
 /// <summary>
 /// The culture name parameters.
 /// </summary>
-public class Culture
+public class UpdateMemberCultureRequest
 {
     /// <summary>
     /// The user culture name (en-US, de, fr, es, ...).
@@ -510,7 +510,7 @@ public class UpdatePhotoMemberRequestDto
     /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>
@@ -531,7 +531,7 @@ public class GetMemberByIdRequestDto
     /// The user ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 }
 
@@ -640,7 +640,7 @@ public class ContactsRequestDto
     /// The user ID.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>
@@ -661,6 +661,6 @@ public class GuestShareRequestDto
     /// has to be one the caller can see.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public Guid UserId { get; set; }
 }

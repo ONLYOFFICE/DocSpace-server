@@ -82,7 +82,7 @@ public class ThumbnailsRequestDto
     /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>

@@ -462,7 +462,7 @@ public class ShareInheritanceTests(
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
         // Assert
-        externalShareData.Status.Should().Be(Status.RequiredPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.RequiredPassword);
         fileAccess.Should().NotBeNull();
         fileAccess.Title.Should().Be(file.Title);
     }

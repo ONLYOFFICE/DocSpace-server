@@ -59,7 +59,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         var updated = await _profilesApi.UpdateMemberCultureAsync(
             actor.Id.ToString(),
-            new Culture("es"),
+            new UpdateMemberCultureRequest("es"),
             TestContext.Current.CancellationToken);
 
         updated.Response.Id.Should().Be(actor.Id);
@@ -91,7 +91,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
             var exception = await Assert.ThrowsAsync<ApiException>(async () =>
                 await _profilesApi.UpdateMemberCultureAsync(
                     target.Id.ToString(),
-                    new Culture("es"),
+                    new UpdateMemberCultureRequest("es"),
                     TestContext.Current.CancellationToken));
 
             exception.ErrorCode.Should().Be(403);
@@ -139,7 +139,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
             var exception = await Assert.ThrowsAsync<ApiException>(async () =>
                 await _profilesApi.UpdateMemberCultureAsync(
                     target.Id.ToString(),
-                    new Culture("es"),
+                    new UpdateMemberCultureRequest("es"),
                     TestContext.Current.CancellationToken));
 
             exception.ErrorCode.Should().Be(403);
@@ -155,7 +155,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _profilesApi.UpdateMemberCultureAsync(
                 Owner.Id.ToString(),
-                new Culture("es"),
+                new UpdateMemberCultureRequest("es"),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -167,7 +167,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _profilesApi.UpdateMemberCultureAsync(
                 Guid.NewGuid().ToString(),
-                new Culture("es"),
+                new UpdateMemberCultureRequest("es"),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -182,7 +182,7 @@ public class UpdateMemberCultureTests(AspireAppFixture fixture) : BaseTest(fixtu
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _profilesApi.UpdateMemberCultureAsync(
                 Owner.Id.ToString(),
-                new Culture(new string('a', 260)),
+                new UpdateMemberCultureRequest(new string('a', 260)),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);

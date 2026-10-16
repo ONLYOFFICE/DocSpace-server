@@ -798,6 +798,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>客户端 {0} 密钥已重新生成</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>注意</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>报告显示了 {1} 个事件中最近的 {0} 个。要获取所有事件，请以 CSV 格式下载报告。</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>已重置向量化设置</value>
   </data>
@@ -1271,5 +1277,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI 代理的 MCP 服务器 {0} 已更新</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>元数据级联分配已启动：{0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>元数据字段已创建：{0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>元数据字段已删除：{0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>元数据字段已更新：{0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>元数据模板已分配：{0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>元数据模板已创建：{0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>元数据模板已删除：{0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>元数据模板分配已取消：{0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>元数据模板已更新：{0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>元数据值已更新：{0}</value>
   </data>
 </root>

@@ -52,7 +52,7 @@ public class GreetingSavePermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _greetingSettingsApi.SaveGreetingSettingsAsync(
-                new GreetingSettingsRequestsDto("Unauthorized Title"), TestContext.Current.CancellationToken));
+                new GreetingSettingsRequestDto("Unauthorized Title"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -71,7 +71,7 @@ public class GreetingSavePermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _greetingSettingsApi.SaveGreetingSettingsAsync(
-                new GreetingSettingsRequestsDto($"{employeeType} Title"), TestContext.Current.CancellationToken));
+                new GreetingSettingsRequestDto($"{employeeType} Title"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

@@ -105,6 +105,8 @@ public class GreetingSettingsController(
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "A localized message confirming that the greeting title has been saved", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, the `title` is longer than 255 characters, or on a free or trial cloud plan it breaks the character rule of the installation")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("")]
     public async Task<string> SaveGreetingSettings(GreetingSettingsRequestsDto inDto)
     {
@@ -152,6 +154,7 @@ public class GreetingSettingsController(
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "The greeting title in force after the restore, or the localized default caption when the installation configures none", typeof(string))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("restore")]
     public async Task<string> RestoreGreetingSettings()
     {

@@ -95,8 +95,10 @@ public interface IFileDao<T>
     /// <param name="searchText"></param>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
+    /// <param name="metadataFilter">the structured metadata filter; the third-party files never carry metadata and are left out when it is set</param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent,
+        MetadataFilter metadataFilter = null);
 
     /// <summary>
     ///
@@ -128,12 +130,13 @@ public interface IFileDao<T>
     /// <param name="applyFormStepFilter"></param>
     /// <param name="applyFfrStartedFormsFilter"></param>
     /// <param name="folderType"></param>
+    /// <param name="metadataFilter">the structured metadata filter</param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null);
 
     /// <summary>
     /// Get stream of file
@@ -497,14 +500,15 @@ public interface IFileDao<T>
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
-        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null);
+        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null);
 
     Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
     IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null);
 
     Task<int> GetSharedFilesCountAsync(T parentId);
 

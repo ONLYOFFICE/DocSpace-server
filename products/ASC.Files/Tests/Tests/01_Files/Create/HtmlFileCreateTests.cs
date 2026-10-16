@@ -52,7 +52,7 @@ public class HtmlFileCreateTests(
 
         var result = (await _filesApi.CreateHtmlFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest HTML File", "some text", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML File", "some text", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest HTML File.html");
@@ -70,12 +70,12 @@ public class HtmlFileCreateTests(
 
         var first = (await _filesApi.CreateHtmlFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest HTML Dedup", "some text", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest HTML Dedup", "some text", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateHtmlFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest HTML Dedup", "some text", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML Dedup", "some text", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().Be(first.Id);
@@ -87,7 +87,7 @@ public class HtmlFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs File", "<p>Hello world</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs File", "<p>Hello world</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest HTML My Docs File.html");
@@ -103,7 +103,7 @@ public class HtmlFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs No Content"), TestContext.Current.CancellationToken));
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs No Content"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }
@@ -114,11 +114,11 @@ public class HtmlFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Dedup", "<p>First</p>", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Dedup", "<p>First</p>", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Dedup", "<p>Second</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Dedup", "<p>Second</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().Be(first.Id);
@@ -130,11 +130,11 @@ public class HtmlFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Suffix", "<p>First</p>", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Suffix", "<p>First</p>", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Suffix", "<p>Second</p>", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Suffix", "<p>Second</p>", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
@@ -147,10 +147,10 @@ public class HtmlFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Default", "<p>First</p>"), TestContext.Current.CancellationToken)).Response;
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Default", "<p>First</p>"), TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest HTML My Docs Default", "<p>Second</p>"), TestContext.Current.CancellationToken)).Response;
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Default", "<p>Second</p>"), TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
     }

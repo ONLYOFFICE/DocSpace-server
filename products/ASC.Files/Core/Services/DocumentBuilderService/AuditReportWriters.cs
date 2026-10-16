@@ -33,7 +33,8 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-/// Identifies one audit report: how its file is named, which period it covers and which columns it shows.
+/// Identifies one audit report: how its file is named, which period it covers, which columns it shows and how
+/// many events the period holds.
 public sealed record AuditReportDescriptor(
     string NameFormat,
     string NameArg0,
@@ -41,7 +42,8 @@ public sealed record AuditReportDescriptor(
     DateTime? From,
     DateTime? To,
     CultureInfo Culture,
-    IReadOnlyList<AuditReportColumn> Columns);
+    IReadOnlyList<AuditReportColumn> Columns,
+    int TotalCount);
 
 public sealed record AuditReportColumn(string ResourceKey, PropertyInfo Property);
 
@@ -98,19 +100,51 @@ public class AuditXlsxReportWriter(
     DocumentBuilderTask documentBuilderTask,
     ReportHeaderService reportHeaderService,
     ReportResultFileSaver fileSaver,
-    FilesLinkUtility filesLinkUtility)
+    FilesLinkUtility filesLinkUtility,
+    IConfiguration configuration)
 {
     private const string ScriptName = "AuditReport.docbuilder";
+
+    // An audit row takes about 300 bytes of the script, so the script budget below fits some 300 000 rows. The
+    // default row limit stays under that and keeps the build near a minute (the document builder takes about 25 s
+    // per 100 000 rows); a sheet could not hold more than about a million rows in any case.
+    private const int DefaultMaxRows = 200_000;
+    private const int SheetMaxRows = 1_000_000;
+
+    // The document server downloads the script before it runs it and refuses one larger than its download limit,
+    // FileConverter.converter.maxDownloadBytes (100 MB by default). The events are written into the script itself,
+    // so the default budget stays safely under that limit.
+    private const long DefaultMaxScriptBytes = 90L * 1024 * 1024;
+
+    // The note is written once the rows are known and takes no more than this, whatever the language.
+    private const int RowLimitNoteReserve = 1024;
+
+    /// <summary>
+    /// How many events a workbook holds at most. The events come newest first, so a longer period keeps its most
+    /// recent events and the report header says how many were left out; the CSV format has no such limit.
+    /// </summary>
+    public int MaxRows { get; } = Math.Clamp(
+        int.TryParse(configuration["files:audit-report:xlsx-max-rows"], out var maxRows) ? maxRows : DefaultMaxRows,
+        1,
+        SheetMaxRows);
+
+    private readonly long _maxScriptBytes =
+        long.TryParse(configuration["files:audit-report:xlsx-max-script-bytes"], out var maxScriptBytes) && maxScriptBytes > 0
+            ? maxScriptBytes
+            : DefaultMaxScriptBytes;
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // Keeps non-Latin text as it is: escaped, every Cyrillic letter would take six bytes of the script instead
+        // of two. Quotes, backslashes and control characters are still escaped, so a value cannot leave its string.
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public async Task<AuditReportResult> WriteAsync<T>(
         Guid userId,
-        IEnumerable<T> events,
+        IAsyncEnumerable<IReadOnlyList<T>> batches,
         AuditReportDescriptor descriptor,
         Func<int, Task> onProgressAsync,
         CancellationToken cancellationToken) where T : BaseEvent
@@ -131,36 +165,16 @@ public class AuditXlsxReportWriter(
             ? $"{descriptor.From.Value.ConvertNumerals("d")} – {descriptor.To.Value.ConvertNumerals("d")}"
             : descriptor.From?.ConvertNumerals("d") ?? descriptor.To?.ConvertNumerals("d") ?? string.Empty;
 
-        var scriptInputData = new
-        {
-            resources = new
+        // Every cell of a column shares its format, so the rows carry the values alone. Text is forced for all but
+        // the dates to stop formulas from executing in user-controlled values, and the page column, which holds a
+        // URL long enough to wrap onto a second line, is kept on one.
+        var columns = props
+            .Select(p => new
             {
-                company = Resource.AccountingReportCompany + ":",
-                report = Resource.AccountingReportTitle + ":",
-                period = Resource.AccountingReportPeriod + ":",
-                dateGenerated = Resource.AccountingReportDateGenerated + ":",
-                sheetName = GetSheetName(descriptor.NameFormat),
-                dateGeneratedFormat = dateFormat
-            },
-            info = new
-            {
-                company = header.Company,
-                report = GetReportTitle(descriptor.NameFormat),
-                period,
-                dateGenerated = header.DateGenerated
-            },
-            logoSrc = header.LogoSrc,
-            logoWidthMm = header.LogoWidthMm,
-            logoHeightMm = header.LogoHeightMm,
-            themeColors = new
-            {
-                mainBgColor = header.MainBgColor,
-                lightBgColor = header.LightBgColor,
-                mainFontColor = header.MainFontColor
-            },
-            keys = headers,
-            aligns = headers.Select(_ => "left").ToList()
-        };
+                format = p.PropertyType == typeof(DateTime) ? dateFormat : "@",
+                wrap = p.Name == nameof(BaseEvent.Page) ? false : (bool?)null
+            })
+            .ToList();
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
@@ -168,17 +182,55 @@ public class AuditXlsxReportWriter(
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
         var outputFileName = string.Format(descriptor.NameFormat + ".xlsx", descriptor.NameArg0, descriptor.NameArg1);
 
-        script = script
-            .Replace("${inputData}", JsonSerializer.Serialize(scriptInputData, _jsonOptions))
-            .Replace("${tempFileName}", tempFileName);
+        // The input data follows the rows in the template, so it is filled in after them, once the number of rows
+        // that fit is known.
+        var scriptParts = script
+            .Replace("${tempFileName}", tempFileName)
+            .Split("${dataValues}");
 
-        var scriptParts = script.Split("${dataValues}");
+        string GetInputData(string rowLimitNote)
+        {
+            var scriptInputData = new
+            {
+                resources = new
+                {
+                    company = Resource.AccountingReportCompany + ":",
+                    report = Resource.AccountingReportTitle + ":",
+                    period = Resource.AccountingReportPeriod + ":",
+                    dateGenerated = Resource.AccountingReportDateGenerated + ":",
+                    rowLimit = AuditReportResource.ReportRowLimitLabel + ":",
+                    sheetName = GetSheetName(descriptor.NameFormat),
+                    dateGeneratedFormat = dateFormat
+                },
+                info = new
+                {
+                    company = header.Company,
+                    report = GetReportTitle(descriptor.NameFormat),
+                    period,
+                    dateGenerated = header.DateGenerated,
+                    rowLimit = rowLimitNote
+                },
+                logoSrc = header.LogoSrc,
+                logoWidthMm = header.LogoWidthMm,
+                logoHeightMm = header.LogoHeightMm,
+                themeColors = new
+                {
+                    mainBgColor = header.MainBgColor,
+                    lightBgColor = header.LightBgColor,
+                    mainFontColor = header.MainFontColor
+                },
+                keys = headers,
+                aligns = headers.Select(_ => "left").ToList(),
+                columns
+            };
 
-        // The page column holds a URL, which is long enough to wrap onto a second line in a cell that
-        // wraps. Resolved once per column rather than for every cell of every event.
-        var wraps = props
-            .Select(p => p.Name == nameof(BaseEvent.Page) ? false : (bool?)null)
-            .ToList();
+            return JsonSerializer.Serialize(scriptInputData, _jsonOptions);
+        }
+
+        var rowBudget = _maxScriptBytes
+            - Encoding.UTF8.GetByteCount(scriptParts[0])
+            - Encoding.UTF8.GetByteCount(scriptParts[1].Replace("${inputData}", GetInputData(null)))
+            - RowLimitNoteReserve;
 
         try
         {
@@ -186,30 +238,61 @@ public class AuditXlsxReportWriter(
             {
                 await writer.WriteAsync(scriptParts[0]);
 
-                foreach (var @event in events)
+                var written = 0;
+                var full = false;
+
+                // Leaving the loop at a limit disposes the stream, which stops reading the older events. The row
+                // limit is checked before a row is serialized and before the next batch is asked for, so a report
+                // cut at the end of a batch reads no batch it would drop.
+                await foreach (var batch in batches.WithCancellation(cancellationToken))
                 {
-                    var cells = new List<Cell>(props.Count);
-
-                    for (var i = 0; i < props.Count; i++)
+                    foreach (var @event in batch)
                     {
-                        var prop = props[i];
-                        var value = prop.GetValue(@event);
+                        if (written >= MaxRows)
+                        {
+                            full = true;
+                            break;
+                        }
 
-                        if (prop.PropertyType == typeof(DateTime))
+                        var row = new string[props.Count];
+
+                        for (var i = 0; i < props.Count; i++)
                         {
-                            cells.Add(new Cell(((DateTime)value).ConvertNumerals("G"), dateFormat));
+                            var value = props[i].GetValue(@event);
+
+                            row[i] = value is DateTime date ? date.ConvertNumerals("G") : value?.ToString();
                         }
-                        else
+
+                        var json = JsonSerializer.Serialize(row, _jsonOptions) + ",";
+
+                        rowBudget -= Encoding.UTF8.GetByteCount(json);
+
+                        if (rowBudget < 0)
                         {
-                            // force text format to stop formulas from executing in user-controlled values
-                            cells.Add(new Cell(value?.ToString(), "@", Wrap: wraps[i]));
+                            full = true;
+                            break;
                         }
+
+                        await writer.WriteAsync(json);
+
+                        written++;
                     }
 
-                    await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
+                    if (full || written >= MaxRows)
+                    {
+                        full = true;
+                        break;
+                    }
                 }
 
-                await writer.WriteAsync(scriptParts[1]);
+                // Only a report stopped at a limit says it left events out. The count is taken before the events
+                // are read, and events the retention cleanup removes meanwhile would otherwise read as cut off.
+                var rowLimitNote = full && written < descriptor.TotalCount
+                    ? string.Format(descriptor.Culture, AuditReportResource.ReportRowLimitNote,
+                        written.ToString("N0", descriptor.Culture), descriptor.TotalCount.ToString("N0", descriptor.Culture))
+                    : null;
+
+                await writer.WriteAsync(scriptParts[1].Replace("${inputData}", GetInputData(rowLimitNote)));
             }
 
             var inputData = new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
@@ -253,31 +336,59 @@ public class AuditXlsxReportWriter(
 
         return name.Length > 31 ? name[..31] : name;
     }
-
-    private sealed record Cell(string Value, string Format, string Halign = null, bool? Wrap = null);
 }
 
 /// <summary>
-/// Renders an audit report as a CSV file and uploads it. This path bypasses the document builder
-/// entirely, so it produces no file entry id.
+/// Renders an audit report as a CSV file and saves it into the author's "My documents" folder. This
+/// path bypasses the document builder entirely: the file is written batch by batch into a temporary
+/// file, so neither its size nor the length of the period is bounded by memory.
 /// </summary>
 [Scope]
 public class AuditCsvReportWriter(
+    TempStream tempStream,
     CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader)
+    ReportResultFileSaver fileSaver,
+    FilesLinkUtility filesLinkUtility,
+    CommonLinkUtility commonLinkUtility,
+    SetupInfo setupInfo)
 {
     public async Task<AuditReportResult> WriteAsync<T>(
-        IEnumerable<T> events,
+        Guid userId,
+        IAsyncEnumerable<IReadOnlyList<T>> batches,
         AuditReportDescriptor descriptor,
-        Func<int, Task> onProgressAsync) where T : BaseEvent
+        Func<int, Task> onProgressAsync,
+        CancellationToken cancellationToken) where T : BaseEvent
     {
         var reportName = string.Format(descriptor.NameFormat + ".csv", descriptor.NameArg0, descriptor.NameArg1);
 
+        await using var stream = tempStream.Create();
+
+        // UTF-8 with a byte order mark, which is what lets spreadsheet applications read non-Latin text right.
+        await csvFileHelper.CreateLargeFileAsync(stream, batches, new BaseEventMap<T>(), encoding: Encoding.UTF8, cancellationToken: cancellationToken);
+
         await onProgressAsync(50);
 
-        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<T>());
-        var fileUrl = await csvFileUploader.UploadFile(stream, reportName);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        return new AuditReportResult(default, reportName, fileUrl);
+        stream.Position = 0;
+
+        var file = await fileSaver.SaveToMyDocumentsAsync(userId, reportName, stream);
+
+        return new AuditReportResult(file.Id, file.Title, GetFileUrl(file));
+    }
+
+    // The editor opens a CSV by having the document server convert it, and the document server refuses
+    // a source larger than it downloads in one go, by default the same 100 MB as the single-request
+    // limit of the portal. Past that size the report is offered for download instead.
+    private string GetFileUrl(File<int> file)
+    {
+        if (file.ContentLength > setupInfo.AvailableFileSize)
+        {
+            return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id));
+        }
+
+        var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
+
+        return fileUrl + $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
     }
 }

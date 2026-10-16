@@ -361,7 +361,7 @@ public class GetSecurityInfoTests(
     {
         var file = await CreateFileInMy("Autotest Security Info File.docx", Owner);
 
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
 
         var securityInfos = (await _sharingApi.GetSecurityInfoAsync(
             new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken)).Response;

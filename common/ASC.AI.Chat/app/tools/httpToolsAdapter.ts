@@ -71,6 +71,41 @@ type ToolsList = {
     prompt: string;
 };
 
+// Relative editor link for a DocSpace file — the same shape the knowledge
+// search citations use. Relative on purpose: the chat renders links as plain
+// anchors, so a page-relative or invented href (`?fileId=1`, `Report.docx`)
+// resolves against the current `/ai-agents/<id>` page and opens a new empty
+// chat instead of the file (Bug 84152).
+export function fileEditorUrl(fileId: string | number): string {
+    return `/doceditor?fileId=${encodeURIComponent(String(fileId))}`;
+}
+
+const GENERATED_FILE_LINK_HINT =
+    "The result contains `url`, the relative link to the created file. " +
+    "When you mention the file in your reply, link it exactly as " +
+    "`[<title>](<url>)`, copying `url` verbatim — never invent, shorten or " +
+    "rewrite the link, and never link to the file by its id or title alone.";
+
+// Attach `url` to a generate-tool result so the model has a real link to
+// quote. C# `ToolResponse<GeneratedFileResult>` serializes as
+// `{ data: { id, title, parentId, parentTitle } }` (camelCase; PascalCase
+// tolerated for older servers). Anything else passes through untouched.
+export function withGeneratedFileUrl(value: unknown): unknown {
+    if (!isObject(value)) {
+        return value;
+    }
+    const data = isObject(value["data"]) ? value["data"] : isObject(value["Data"]) ? value["Data"] : null;
+    if (!data) {
+        return value;
+    }
+    const id = data["id"] ?? data["Id"];
+    if ((typeof id !== "number" && typeof id !== "string") || id === "") {
+        return value;
+    }
+    const dataKey = "data" in value ? "data" : "Data";
+    return { ...value, [dataKey]: { ...data, url: fileEditorUrl(id) } };
+}
+
 // `ToolContext` on the C# side — `{ folderId, formId, attachmentId }`. `entityId`
 // is the opaque widget scope token; for room-bound chat it carries the room id.
 // `attachmentId` keys the per-attachment analyze intent that gates the form-data tools.
@@ -225,6 +260,16 @@ function parseList(raw: unknown): ToolsList {
     return { tools, prompt };
 }
 
+// Tell the model how to link the file a generate tool created; the C# tool
+// descriptions say nothing about links, so without this it improvises one.
+function withLinkHints(tools: TMCPItem[]): TMCPItem[] {
+    return tools.map((tool) =>
+        APPROVAL_TOOL_NAMES.has(tool.name)
+            ? { ...tool, description: `${tool.description} ${GENERATED_FILE_LINK_HINT}`.trim() }
+            : tool,
+    );
+}
+
 /**
  * {@link ToolsAdapter} backed by the DocSpace AI integration endpoints
  * (`tools/list` / `tools/call`). Most tools served
@@ -317,7 +362,8 @@ export class HttpToolsAdapter implements ToolsAdapter {
             );
             return `Tool "${toolName}" failed: ${error}`;
         }
-        const value = "result" in result ? result["result"] : result["Result"];
+        const rawValue = "result" in result ? result["result"] : result["Result"];
+        const value = APPROVAL_TOOL_NAMES.has(toolName) ? withGeneratedFileUrl(rawValue) : rawValue;
         // Contract: a tool result must reach the engine as a string — the
         // same shape MCP tools produce. An object here would be spliced
         // verbatim into the tool message's `content` and break providers
@@ -371,6 +417,7 @@ export class HttpToolsAdapter implements ToolsAdapter {
             `docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`,
         );
         const parsed = parseList(raw);
+        parsed.tools = withLinkHints(parsed.tools);
         const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
         logger.info(
             `docspaceTools.list entityId=${entityId ?? "-"} -> ${parsed.tools.length} tool(s) in ${Date.now() - started}ms: [${names}]`,

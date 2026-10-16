@@ -50,7 +50,7 @@ public class ChangeVersionHistoryPermissionsTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -69,7 +69,7 @@ public class ChangeVersionHistoryPermissionsTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -88,7 +88,7 @@ public class ChangeVersionHistoryPermissionsTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -106,14 +106,14 @@ public class ChangeVersionHistoryPermissionsTests(
         await InviteToRoom(room.Id, admin, FileShare.RoomManager);
 
         var file = await CreateFile("Autotest Version History DSA RoomManager File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(admin);
 
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -138,7 +138,7 @@ public class ChangeVersionHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -162,7 +162,7 @@ public class ChangeVersionHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -185,7 +185,7 @@ public class ChangeVersionHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -209,7 +209,7 @@ public class ChangeVersionHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -228,7 +228,7 @@ public class ChangeVersionHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -240,7 +240,7 @@ public class ChangeVersionHistoryPermissionsTests(
         await _filesClient.Authenticate(Owner);
 
         var file = await CreateFile(fileTitle, room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         return (room, file);
     }

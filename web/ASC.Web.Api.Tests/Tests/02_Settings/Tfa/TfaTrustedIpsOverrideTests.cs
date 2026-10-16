@@ -78,7 +78,7 @@ public class TfaTrustedIpsOverrideTests(
         // Act — the mandatory user is still forced into TFA despite the trusted IP
         await _webApiClient.Authenticate(null);
         var mandatoryLogin = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
 
         // Assert
         mandatoryLogin.Response.Tfa.Should().BeTrue();
@@ -87,7 +87,7 @@ public class TfaTrustedIpsOverrideTests(
         // Act — the non-mandatory user is bypassed via the trusted IP
         await _webApiClient.Authenticate(null);
         var trustedLogin = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: trusted.Email, password: trusted.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: trusted.Email, password: trusted.Password), TestContext.Current.CancellationToken);
 
         // Assert
         trustedLogin.Response.Tfa.Should().BeFalse();
@@ -114,7 +114,7 @@ public class TfaTrustedIpsOverrideTests(
         // Act — a member of the mandatory group is still forced into TFA despite the trusted IP
         await _webApiClient.Authenticate(null);
         var mandatoryLogin = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
 
         // Assert
         mandatoryLogin.Response.Tfa.Should().BeTrue();
@@ -123,7 +123,7 @@ public class TfaTrustedIpsOverrideTests(
         // Act — a user outside the mandatory group is bypassed via the trusted IP
         await _webApiClient.Authenticate(null);
         var outsiderLogin = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: outsider.Email, password: outsider.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: outsider.Email, password: outsider.Password), TestContext.Current.CancellationToken);
 
         // Assert
         outsiderLogin.Response.Tfa.Should().BeFalse();

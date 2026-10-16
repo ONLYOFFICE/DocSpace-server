@@ -145,7 +145,7 @@ public class TimeZoneRequestDto
 ///   "limitedAccessForUsers": false
 /// }
 /// </example>
-public class TenantDevToolsAccessSettingsDto
+public class TenantDevToolsAccessSettingsRequestDto
 {
     /// <summary>
     /// Whether members holding the `User` role are barred from the developer tools - API keys, OAuth applications
@@ -163,7 +163,7 @@ public class TenantDevToolsAccessSettingsDto
 ///   "hidden": true
 /// }
 /// </example>
-public class TenantBannerSettingsDto
+public class TenantBannerSettingsRequestDto
 {
     /// <summary>
     /// Whether the promotional banners are hidden from every user of the portal. The flag is only honoured on a
@@ -181,7 +181,7 @@ public class TenantBannerSettingsDto
 ///   "enabled": false
 /// }
 /// </example>
-public class TenantAiAccessSettingsDto
+public class TenantAiAccessSettingsRequestDto
 {
     /// <summary>
     /// Whether AI is available on the portal at all - chat, agents and vectorization together. Switching it off

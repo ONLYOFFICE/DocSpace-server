@@ -50,7 +50,7 @@ public class DeepLinkConfigureTests(
 
         // Act
         var configured = await _commonSettingsApi.ConfigureDeepLinkAsync(
-            new DeepLinkConfigurationRequestsDto(new TenantDeepLinkSettings(DeepLinkHandlingMode.Web)),
+            new DeepLinkConfigurationRequestDto(new DeepLinkSettingsRequestDto(DeepLinkHandlingMode.Web)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -68,7 +68,7 @@ public class DeepLinkConfigureTests(
 
         // Act
         var configured = await _commonSettingsApi.ConfigureDeepLinkAsync(
-            new DeepLinkConfigurationRequestsDto(new TenantDeepLinkSettings(DeepLinkHandlingMode.ProvideChoice)),
+            new DeepLinkConfigurationRequestDto(new DeepLinkSettingsRequestDto(DeepLinkHandlingMode.ProvideChoice)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -85,7 +85,7 @@ public class DeepLinkConfigureTests(
 
         // Act
         var configured = await _commonSettingsApi.ConfigureDeepLinkAsync(
-            new DeepLinkConfigurationRequestsDto(new TenantDeepLinkSettings(DeepLinkHandlingMode.App)),
+            new DeepLinkConfigurationRequestDto(new DeepLinkSettingsRequestDto(DeepLinkHandlingMode.App)),
             TestContext.Current.CancellationToken);
 
         // Assert

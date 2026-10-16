@@ -128,7 +128,10 @@ public enum FolderType
     DefaultTemplates = 35,
 
     [Description("Forms")]
-    Forms = 36
+    Forms = 36,
+
+    [Description("Ai")]
+    Ai = 37
 }
 
 /// <summary>

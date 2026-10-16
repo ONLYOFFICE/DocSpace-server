@@ -94,7 +94,7 @@ public class PasswordSettingsTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new PasswordSettingsRequestsDto(12, true, true, true);
+        var request = new PasswordSettingsRequestDto(12, true, true, true);
 
         // Act
         var updated = await _securityApi.UpdatePasswordSettingsAsync(request, TestContext.Current.CancellationToken);
@@ -116,7 +116,7 @@ public class PasswordSettingsTests(
         // Arrange
         var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await _webApiClient.Authenticate(admin);
-        var request = new PasswordSettingsRequestsDto(15, true, false, false);
+        var request = new PasswordSettingsRequestDto(15, true, false, false);
 
         // Act
         var updated = await _securityApi.UpdatePasswordSettingsAsync(request, TestContext.Current.CancellationToken);
@@ -134,7 +134,7 @@ public class PasswordSettingsTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new PasswordSettingsRequestsDto(minLength, false, false, false);
+        var request = new PasswordSettingsRequestDto(minLength, false, false, false);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -154,7 +154,7 @@ public class PasswordSettingsTests(
         // Arrange
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
-        var request = new PasswordSettingsRequestsDto(10, false, false, false);
+        var request = new PasswordSettingsRequestDto(10, false, false, false);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

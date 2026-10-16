@@ -6,9 +6,12 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var MAX_COLUMN_WIDTH = 100;
 
-var inputData = ${inputData};
-
+// The rows come first: the server writes them as it reads the events, and fills in the input data after them,
+// once it knows how many rows fit into the script. A row holds only the values; each column's format and wrapping
+// are in inputData.columns.
 var values = [${dataValues}];
+
+var inputData = ${inputData};
 
 var oWorksheet = Api.GetActiveSheet();
 
@@ -57,7 +60,7 @@ function customizeWorksheet() {
 }
 
 function prepareInfo() {
-    return [
+    var info = [
         {
             height: 15.5,
             dataArray: [
@@ -85,12 +88,27 @@ function prepareInfo() {
                 { "value": inputData.resources.dateGenerated, "bold": true, valign: "center" },
                 { "value": inputData.info.dateGenerated, "fontColor": defaultFontColorGray, "format": inputData.resources.dateGeneratedFormat, valign: "center" }
             ]
-        },
-        {
-            height: 15.5,
-            dataArray: []
         }
     ];
+
+    // Only a report cut at its row limit carries the note. The note is a sentence: it runs on over the empty
+    // cells to its right rather than wrapping, and it does not widen the column it starts in.
+    if (inputData.info.rowLimit) {
+        info.push({
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.rowLimit, "bold": true, valign: "center" },
+                { "value": inputData.info.rowLimit, "fontColor": defaultFontColorGray, "format": "@", valign: "center", "wrap": false, "fixedWidth": true }
+            ]
+        });
+    }
+
+    info.push({
+        height: 15.5,
+        dataArray: []
+    });
+
+    return info;
 }
 
 function prepareHeader() {
@@ -116,14 +134,12 @@ function prepareData() {
     for (var i = 0; i < values.length; i++) {
         var rowValues = [];
         for (var j = 0; j < values[i].length; j++) {
-            var cell = values[i][j];
+            var column = inputData.columns[j];
             rowValues.push({
-                "value": cell.value,
-                "url": cell.url,
-                "halign": cell.halign,
+                "value": values[i][j],
                 valign: "center",
-                "format": cell.format,
-                "wrap": cell.wrap
+                "format": column.format,
+                "wrap": column.wrap
             });
         }
         table.push({ height: 19.5, dataArray: rowValues });
@@ -185,7 +201,7 @@ function writeTable(table) {
                 continue;
             }
 
-            var length = getMaxLineLength(data.value);
+            var length = data.fixedWidth ? 0 : getMaxLineLength(data.value);
             if (!columnMaxLengths[currentColIndex] || length > columnMaxLengths[currentColIndex]) {
                 columnMaxLengths[currentColIndex] = length;
             }

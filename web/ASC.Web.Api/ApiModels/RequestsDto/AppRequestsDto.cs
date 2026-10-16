@@ -41,15 +41,15 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 ///   "enabled": true
 /// }
 /// </example>
-public class SetAppEnabledBody
+public class SetAppEnabledRequest
 {
     /// <summary>
     /// Whether the application is available in this portal. Switching it off leaves its settings document stored, so
     /// switching it back on restores the configuration it had; connected clients are told of the new state without a
-    /// reload.
+    /// reload. The field is mandatory: a body without it is rejected with 400 and leaves the application as it was.
     /// </summary>
     /// <example>true</example>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 }
 
 /// <summary>
@@ -70,7 +70,7 @@ public class SetAppEnabledRequestDto
     /// through `PUT api/2.0/apps/{id}/settings`.
     /// </summary>
     [FromBody]
-    public required SetAppEnabledBody Body { get; set; }
+    public required SetAppEnabledRequest Body { get; set; }
 }
 
 /// <summary>
@@ -81,7 +81,7 @@ public class SetAppEnabledRequestDto
 ///   "settings": {}
 /// }
 /// </example>
-public class SetAppSettingsBody
+public class SetAppSettingsRequest
 {
     /// <summary>
     /// The configuration the application reads, as any valid JSON value. Its shape is defined by the application and
@@ -110,7 +110,7 @@ public class SetAppSettingsRequestDto
     /// The configuration to store for this portal, replacing whatever was stored before.
     /// </summary>
     [FromBody]
-    public required SetAppSettingsBody Body { get; set; }
+    public required SetAppSettingsRequest Body { get; set; }
 }
 
 /// <summary>

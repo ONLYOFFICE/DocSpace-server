@@ -935,7 +935,11 @@ Poikkeusviesti: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hei, $UserName!
 
-Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi hinnoittelupaketin tai palveluiden automaattista uusimista ei voitu suorittaa. Pyydämme sinua ystävällisesti uusimaan sen manuaalisesti.
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi hinnoittelupaketin tai palveluiden automaattista uusimista ei voitu suorittaa:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Pyydämme sinua ystävällisesti uusimaan sen manuaalisesti.
 
 $OrangeButton
 
@@ -1883,5 +1887,19 @@ Jos tämä olit sinä — mitään lisätoimia ei tarvita. Jos et tunnista tät�
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme yhteyttä ilmoittaaksemme, että automaattinen täydennys ei ole tuettu nykyisellä maksutavalläsi: rahat saapuvat ${LetterLogoText} Walletiin vasta pankkisiirron selvityksen jälkeen, joten saldoa ei voi täydentää heti.
+
+Automaattinen täydennys on siksi poistettu käytöstä. Välttääksesi maksupalvelujen keskeytyksen, täydennä lompakkosi saldo manuaalisesti tai siirry maksutapaan, joka tukee automaattista täydennystä.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Toiminto vaaditaan: Automaattinen täydennys ei ole käytettävissä ${LetterLogoText} Walletillesi</value>
   </data>
 </root>

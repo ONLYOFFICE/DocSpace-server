@@ -58,7 +58,7 @@ public class ThirdPartyRoomTests(
         // Act
         var room = (await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,
-            new CreateThirdPartyRoom(title: title, roomType: RoomType.CustomRoom),
+            new CreateThirdPartyRoomRequest(title: title, roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -143,11 +143,35 @@ public class ThirdPartyRoomTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 folderId,
-                new CreateThirdPartyRoom(title: UniqueTitle("TP Room Second"), roomType: RoomType.EditingRoom),
+                new CreateThirdPartyRoomRequest(title: UniqueTitle("TP Room Second"), roomType: RoomType.EditingRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403, "one connection can back one room only");
+    }
+
+    /// <summary>
+    /// <c>createAsNewFolder: true</c> kept the tags of the request but dropped <c>denyDownload: true</c>,
+    /// while the operation description promised the setting was dropped only when the room is the
+    /// connected folder itself. A third-party room has nowhere to store the setting, so the description
+    /// was corrected: <c>denyDownload</c> (like <c>indexing</c>) is accepted and ignored in both modes.
+    /// The test pins that documented behaviour.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84475")]
+    public async Task CreateRoomThirdParty_AsNewFolderWithDenyDownload_DenyDownloadIgnored()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var (_, _, roomId) = await CreateNextcloudRoom(
+            UniqueTitle("TP Room Deny Download"), createAsNewFolder: true, denyDownload: true);
+
+        // Assert
+        var reread = (await _roomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response;
+        reread.DenyDownload.Should().BeFalse("a third-party room does not keep the setting");
     }
 
     [Fact]

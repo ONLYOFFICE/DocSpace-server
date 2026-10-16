@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The default sharing rights to store for the calling account, sent as a bare array.
 /// </summary>
-public class DefaultAccessRightsrequestDto : IValidatableObject
+public class DefaultAccessRightsRequestDto : IValidatableObject
 {
     /// <summary>
     /// The access rights the sharing dialog should offer by default. The array is the whole request body rather than

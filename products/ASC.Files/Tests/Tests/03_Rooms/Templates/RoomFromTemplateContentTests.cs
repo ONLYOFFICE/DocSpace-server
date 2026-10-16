@@ -178,7 +178,7 @@ public class RoomFromTemplateContentTests(
         var copiedFolder = copyContent.Folders.Should().ContainSingle(f => f.Title == "Isolated Folder").Which;
 
         // Act
-        await _foldersApi.DeleteFolderAsync(copiedFolder.Id, new DeleteFolder(deleteAfter: false, immediately: true), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(copiedFolder.Id, new DeleteFolderRequest(deleteAfter: false, immediately: true), TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         // Assert

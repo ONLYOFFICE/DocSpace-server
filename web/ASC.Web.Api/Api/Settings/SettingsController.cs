@@ -53,7 +53,7 @@ public partial class SettingsController(
     IConfiguration configuration,
     StorageFactory storageFactory,
     SetupInfo setupInfo,
-    ExternalResourceSettings externalResourceSettings,
+    ExternalResourcesDtoHelper externalResourcesDtoHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     ConsumerFactory consumerFactory,
     CustomNamingPeople customNamingPeople,
@@ -133,7 +133,7 @@ public partial class SettingsController(
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
             LogoText = await tenantLogoManager.GetLogoTextAsync(),
-            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings, isDocSpaceAdmin: isDocSpaceAdmin)
+            ExternalResources = externalResourcesDtoHelper.Get(additionalWhiteLabelSettings, isDocSpaceAdmin)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
@@ -151,7 +151,7 @@ public partial class SettingsController(
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
             settings.NameSchemaId = (await customNamingPeople.GetCurrent()).Id;
-            settings.DomainValidator = tenantDomainValidator;
+            settings.DomainValidator = tenantDomainValidator.Map();
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
@@ -234,7 +234,7 @@ public partial class SettingsController(
 
         if (!authContext.IsAuthenticated || (inDto.WithPassword.HasValue && inDto.WithPassword.Value))
         {
-            settings.PasswordHash = passwordHasher;
+            settings.PasswordHash = passwordHasher.Map();
         }
 
         return settings;
@@ -258,6 +258,8 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Confirmation message that the trusted mail domain settings were saved", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `type`, `domains` or `inviteUsersAsVisitors`, or the trust type is `Custom` and the domain list is empty or holds an empty or malformed domain")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("maildomainsettings")]
     public async Task<string> SaveMailDomainSettings(MailDomainSettingsRequestsDto inDto)
     {
@@ -306,12 +308,12 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(200, "The default per-user storage quota settings as they were stored", typeof(EntityQuotaSettingsDto))]
     [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -361,7 +363,7 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerUserDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
@@ -377,15 +379,17 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Current per-user default storage quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(200, "Current per-user default storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(304, "The per-user quota settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
+    public async Task<EntityQuotaSettingsDto> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext.GetIfModifiedSince());
 
-        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result.Map();
     }
 
     /// <remarks>
@@ -402,10 +406,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Saved default per-room storage quota settings", typeof(TenantRoomQuotaSettings))]
+    [SwaggerResponse(200, "Saved default per-room storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for room quotas")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("roomquotasettings")]
-    public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -449,7 +456,7 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerRoomDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
@@ -466,10 +473,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/aiagentquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Saved default AI agent storage quota settings", typeof(TenantAiAgentQuotaSettings))]
+    [SwaggerResponse(200, "Saved default AI agent storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for AI agent quotas")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("aiagentquotasettings")]
-    public async Task<TenantAiAgentQuotaSettings> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -511,7 +521,7 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerAiAgentDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
@@ -527,10 +537,12 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettings))]
+    [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
     [SwaggerResponse(400, "The handling mode is not one of the supported deep link handling values")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(500, "The request body has no `deepLinkSettings`")]
     [HttpPost("deeplink")]
-    public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
+    public async Task<TenantDeepLinkSettingsDto> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!Enum.IsDefined(inDto.DeepLinkSettings.HandlingMode))
@@ -543,7 +555,7 @@ public partial class SettingsController(
         tenantDeepLinkSettings.HandlingMode = inDto.DeepLinkSettings.HandlingMode;
         await settingsManager.SaveAsync(tenantDeepLinkSettings, tenant.Id);
 
-        return tenantDeepLinkSettings;
+        return tenantDeepLinkSettings.Map();
     }
 
     /// <remarks>
@@ -560,14 +572,15 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/deeplink</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Current deep link handling settings", typeof(TenantDeepLinkSettings))]
+    [SwaggerResponse(200, "Current deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
+    [SwaggerResponse(304, "The deep link settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("deeplink")]
     [AllowAnonymous]
-    public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
+    public async Task<TenantDeepLinkSettingsDto> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
 
-        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result.Map();
     }
 
     /// <remarks>
@@ -583,11 +596,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Saved tenant storage quota settings", typeof(TenantQuotaSettings))]
+    [SwaggerResponse(200, "Saved tenant storage quota settings", typeof(TenantQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `tenantId`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for tenant quotas")]
-    [SwaggerResponse(405, "The caller is not a DocSpace administrator, or the portal is not a Standalone installation")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(415, "The caller is not a DocSpace administrator, or the portal is not a Standalone installation")]
     [HttpPut("tenantquotasettings")]
-    public async Task<TenantQuotaSettings> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
+    public async Task<TenantQuotaSettingsDto> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -625,7 +640,7 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerPortalDisabled);
         }
 
-        return tenantQuotaSetting;
+        return tenantQuotaSetting.Map();
     }
 
     /// <remarks>
@@ -641,6 +656,7 @@ public partial class SettingsController(
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Language codes of every culture currently enabled on the portal", typeof(IEnumerable<string>))]
+    [SwaggerResponse(304, "The list of enabled cultures has not changed since the `ETag` sent back in `If-None-Match`; the body is empty")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -662,11 +678,11 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Every time zone known to the host, with its IANA ID and display name", typeof(List<TimezonesRequestsDto>))]
+    [SwaggerResponse(200, "Every time zone known to the host, with its IANA ID and display name", typeof(List<TimezoneDto>))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
-    public async Task<List<TimezonesRequestsDto>> GetTimeZones()
+    public async Task<List<TimezoneDto>> GetTimeZones()
     {
         await securityContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
@@ -676,11 +692,11 @@ public partial class SettingsController(
             timeZones.Add(TimeZoneInfo.Utc);
         }
 
-        var listOfTimezones = new List<TimezonesRequestsDto>();
+        var listOfTimezones = new List<TimezoneDto>();
 
         foreach (var tz in timeZones.OrderBy(z => z.BaseUtcOffset))
         {
-            listOfTimezones.Add(new TimezonesRequestsDto
+            listOfTimezones.Add(new TimezoneDto
             {
                 Id = TimeZoneConverter.GetIanaTimeZoneId(tz),
                 DisplayName = TimeZoneConverter.GetTimeZoneDisplayName(tz)
@@ -723,9 +739,9 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Confirmation that the DNS mapping was updated", typeof(string))]
-    [SwaggerResponse(400, "The domain name is invalid, or collides with the portal's reserved base domain")]
-    [SwaggerResponse(402, "This option is not available under the portal's current pricing plan")]
-    [SwaggerResponse(405, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
+    [SwaggerResponse(500, "The installation hides the DNS settings section, or the domain name is not a valid host name, lies under the portal's base domain, has a length outside the allowed range, is reserved, or is already the alias or mapped domain of a portal, this one included")]
     [HttpPut("dns")]
     public async Task<string> SaveDnsSettings(DnsSettingsRequestsDto inDto)
     {
@@ -782,6 +798,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Absolute URL of the portal's current logo image", typeof(string))]
+    [SwaggerResponse(304, "The portal logo has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("logo")]
     public async Task<string> GetPortalLogo()
     {
@@ -804,19 +821,22 @@ public partial class SettingsController(
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettings))]
-    [SwaggerResponse(400, "The email address is malformed, or the password is empty")]
-    [SwaggerResponse(402, "The supplied license is missing, invalid, expired, or its user quota does not cover the portal")]
+    [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
+    [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
+    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
-    public async Task<WizardSettings> CompleteWizard(WizardRequestsDto inDto)
+    public async Task<WizardSettingsDto> CompleteWizard(WizardRequestsDto inDto)
     {
         await securityContext.AuthByClaimAsync();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await firstTimeTenantSettings.SaveDataAsync(inDto);
+        var settings = await firstTimeTenantSettings.SaveDataAsync(inDto);
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -856,6 +876,7 @@ public partial class SettingsController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Current color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(304, "The color theme configuration has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetPortalColorTheme()
@@ -879,6 +900,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SavePortalColorTheme(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -889,7 +911,7 @@ public partial class SettingsController(
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
-                var theme = inDto.Theme;
+                var theme = inDto.Theme.Map();
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
                 {
@@ -956,6 +978,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeletePortalColorTheme(DeleteColorThemeRequestDto inDto)
     {
@@ -991,7 +1014,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "The admin helper tip was dismissed for the caller")]
-    [SwaggerResponse(405, "The caller is not a DocSpace administrator, or the portal is on SaaS, custom mode, or not Standalone")]
+    [SwaggerResponse(415, "The caller is not a DocSpace administrator, or the portal is on SaaS, custom mode, or not Standalone")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelper()
     {
@@ -1059,9 +1082,10 @@ public partial class SettingsController(
     /// <summary>Set the default folder</summary>
     /// <path>api/2.0/settings/defaultFolder</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Saved default folder setting for the current user", typeof(StudioDefaultPageSettings))]
+    [SwaggerResponse(200, "Saved default folder setting for the current user", typeof(StudioDefaultPageSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultFolderType`, the folder is not one a start page can be set to, or a guest chooses My documents")]
     [HttpPut("defaultfolder")]
-    public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
+    public async Task<StudioDefaultPageSettingsDto> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {
         List<FolderType> allowedFolderTypes =
         [
@@ -1090,7 +1114,7 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.DefaultStartPageSettingsUpdated);
 
-        return defaultPageSettings;
+        return defaultPageSettings.Map();
     }
 
     /// <remarks>
@@ -1103,12 +1127,15 @@ public partial class SettingsController(
     /// <summary>Update the email activation settings</summary>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Email activation settings exactly as submitted", typeof(EmailActivationSettings))]
+    [SwaggerResponse(200, "Email activation settings exactly as submitted", typeof(EmailActivationSettingsDto))]
     [HttpPut("emailactivation")]
-    public async Task<EmailActivationSettings> UpdateEmailActivationSettings(EmailActivationSettings inDto)
+    public async Task<EmailActivationSettingsDto> UpdateEmailActivationSettings(EmailActivationSettingsRequestDto inDto)
     {
-        await settingsManager.SaveForCurrentUserAsync(inDto);
-        return inDto;
+        var settings = inDto.Map();
+
+        await settingsManager.SaveForCurrentUserAsync(settings);
+
+        return (await settingsManager.LoadForCurrentUserAsync<EmailActivationSettings>()).Map();
     }
 
     /// <remarks>
@@ -1124,6 +1151,7 @@ public partial class SettingsController(
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
     [SwaggerResponse(200, "Per-category space usage statistics for the requested module", typeof(List<UsageSpaceStatItemDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
@@ -1190,9 +1218,10 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Third-party providers with a manageable key, and their last-saved key values", typeof(IEnumerable<AuthServiceRequestsDto>))]
+    [SwaggerResponse(200, "Third-party providers with a manageable key, and their last-saved key values", typeof(IEnumerable<AuthServiceDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("authservice")]
-    public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
+    public async Task<IEnumerable<AuthServiceDto>> GetAuthServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1202,7 +1231,7 @@ public partial class SettingsController(
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .ToAsyncEnumerable()
-            .Select(async (Consumer r, CancellationToken _) => await AuthServiceRequestsDto.From(r, logoText))
+            .Select(async (Consumer r, CancellationToken _) => await AuthServiceDto.From(r, logoText))
             .ToListAsync();
     }
 
@@ -1221,10 +1250,11 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
     [SwaggerResponse(200, "Whether the provider's keys actually changed", typeof(bool))]
-    [SwaggerResponse(400, "The submitted keys failed the provider's own validation")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name` or `props`, a key has no `name` or `value` or a `value` longer than 4000 characters, or the submitted keys failed the provider's own validation")]
     [SwaggerResponse(402, "The provider is a paid option not covered by the portal's current pricing plan")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or the provider is unknown or its keys cannot be set")]
     [HttpPost("authservice")]
-    public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
+    public async Task<bool> SaveAuthKeys(SaveAuthKeysRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1304,18 +1334,21 @@ public partial class SettingsController(
     /// <summary>Test external database connection</summary>
     /// <path>api/2.0/settings/authservice/externaldb/test</path>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Connection test result: a success flag and, on failure, an error message", typeof(ConnectionTestResult))]
+    [SwaggerResponse(200, "Connection test result: a success flag and, on failure, an error message", typeof(ConnectionTestResultDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("authservice/externaldb/test")]
-    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    public async Task<ConnectionTestResultDto> TestExternalDatabaseConnection(ExternalDatabaseConnectionRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (inDto.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
+        var settings = inDto.Map();
+
+        if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
         {
-            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly);
+            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly).Map();
         }
 
-        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
+        return (await ExternalDatabaseProvider.TestConnectionAsync(settings, storageFactory, tenantManager.GetCurrentTenantId())).Map();
     }
 
     /// <remarks>
@@ -1329,6 +1362,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Payment-related settings: sales contact, buy URL, Standalone flag, license, and quota cap", typeof(PaymentSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<PaymentSettingsDto> GetPaymentSettings()
@@ -1364,11 +1398,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/devtoolsaccess</path>
     [Tags("Settings / Access to DevTools")]
-    [SwaggerResponse(200, "Whether the `User` role is currently restricted from using the developer tools", typeof(TenantDevToolsAccessSettings))]
+    [SwaggerResponse(200, "Whether the `User` role is currently restricted from using the developer tools", typeof(TenantDevToolsAccessSettingsDto))]
     [HttpGet("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettings()
+    public async Task<TenantDevToolsAccessSettingsDto> GetTenantAccessDevToolsSettings()
     {
-        return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+        var settings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1383,9 +1419,10 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/security/devtoolsaccess</path>
     [Tags("Security / Access to DevTools")]
-    [SwaggerResponse(200, "Saved developer tools access restriction for the `User` role", typeof(TenantDevToolsAccessSettings))]
+    [SwaggerResponse(200, "Saved developer tools access restriction for the `User` role", typeof(TenantDevToolsAccessSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> SetTenantDevToolsAccessSettings(TenantDevToolsAccessSettingsDto inDto)
+    public async Task<TenantDevToolsAccessSettingsDto> SetTenantDevToolsAccessSettings(TenantDevToolsAccessSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1395,7 +1432,7 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.DevToolsAccessSettingsChanged);
 
-        return settings;
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1410,11 +1447,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
-    [SwaggerResponse(200, "Whether the portal's promotional banners are currently hidden", typeof(TenantBannerSettings))]
+    [SwaggerResponse(200, "Whether the portal's promotional banners are currently hidden", typeof(TenantBannerSettingsDto))]
     [HttpGet("banner")]
-    public async Task<TenantBannerSettings> GetTenantBannerSettings()
+    public async Task<TenantBannerSettingsDto> GetTenantBannerSettings()
     {
-        return await settingsManager.LoadAsync<TenantBannerSettings>();
+        var settings = await settingsManager.LoadAsync<TenantBannerSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1430,9 +1469,11 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]
-    [SwaggerResponse(200, "Saved promotional banners visibility setting", typeof(TenantBannerSettings))]
+    [SwaggerResponse(200, "Saved promotional banners visibility setting", typeof(TenantBannerSettingsDto))]
+    [SwaggerResponse(402, "The portal is not an Enterprise installation")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("banner")]
-    public async Task<TenantBannerSettings> SetTenantBannerSettings(TenantBannerSettingsDto inDto)
+    public async Task<TenantBannerSettingsDto> SetTenantBannerSettings(TenantBannerSettingsRequestDto inDto)
     {
         if (!tenantExtra.Enterprise)
         {
@@ -1447,7 +1488,7 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.BannerSettingsChanged);
 
-        return settings;
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1461,11 +1502,13 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/ai-access</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Whether AI functionality is currently enabled for the portal", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(200, "Whether AI functionality is currently enabled for the portal", typeof(TenantAiAccessSettingsDto))]
     [HttpGet("ai-access")]
-    public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
+    public async Task<TenantAiAccessSettingsDto> GetTenantAiAccessSettings()
     {
-        return await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1481,10 +1524,10 @@ public partial class SettingsController(
     /// </summary>
     /// <path>api/2.0/settings/ai-access</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Saved AI access setting for the portal", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(200, "Saved AI access setting for the portal", typeof(TenantAiAccessSettingsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, so the AI access setting cannot be changed")]
     [HttpPost("ai-access")]
-    public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
+    public async Task<TenantAiAccessSettingsDto> SetTenantAiAccessSettings(TenantAiAccessSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1496,7 +1539,7 @@ public partial class SettingsController(
 
         messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
 
-        return settings;
+        return settings.Map();
     }
 
     private async Task DemandStatisticPermissionAsync()
@@ -1522,6 +1565,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Whether inviting new members and new guests is currently allowed", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(304, "The invitation settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("invitationsettings")]
     [AllowAnonymous]
     public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettings()
@@ -1545,6 +1589,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Saved user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("invitationsettings")]
     public async Task<TenantUserInvitationSettingsDto> UpdateInvitationSettings(TenantUserInvitationSettingsRequestDto inDto)
     {

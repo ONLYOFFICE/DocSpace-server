@@ -798,6 +798,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Αναδημιουργήθηκε το μυστικό {0} του πελάτη</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Σημείωση</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Η έκθεση εμφανίζει τα {0} πιο πρόσφατα από τα {1} συμβάντα. Για να λάβετε όλα τα συμβάντα, κατεβάστε την έκθεση σε μορφή CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Έχει γίνει επαναφορά ρυθμίσεων διανυσματικοποίησης</value>
   </data>
@@ -1271,5 +1277,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Ο διακομιστής MCP {0} του AI πράκτορα ενημερώθηκε</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Η κλιμακωτή ανάθεση μεταδεδομένων ξεκίνησε: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Το πεδίο μεταδεδομένων δημιουργήθηκε: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Το πεδίο μεταδεδομένων διαγράφηκε: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Το πεδίο μεταδεδομένων ενημερώθηκε: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Το πρότυπο μεταδεδομένων ανατέθηκε: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Το πρότυπο μεταδεδομένων δημιουργήθηκε: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Το πρότυπο μεταδεδομένων διαγράφηκε: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Η ανάθεση του προτύπου μεταδεδομένων ακυρώθηκε: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Το πρότυπο μεταδεδομένων ενημερώθηκε: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Οι τιμές μεταδεδομένων ενημερώθηκαν: {0}</value>
   </data>
 </root>

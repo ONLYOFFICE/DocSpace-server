@@ -63,8 +63,8 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The installed web plugin, enabled, with the `url` its script is served from", typeof(WebPluginDto))]
-    [SwaggerResponse(400, "The uploaded package is missing, of the wrong type, too large, or its manifest is rejected")]
-    [SwaggerResponse(403, "Web plugins or plugin uploads are switched off for the installation, or `system` was requested outside a standalone installation")]
+    [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, or the portal already holds the maximum number of plugins")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, the request is not a form, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -151,6 +151,7 @@ public class WebPluginsController(
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The requested web plugin with the state the portal stored for it", typeof(WebPluginDto))]
     [SwaggerResponse(403, "Web plugins are switched off for the installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPlugin(WebPluginNameRequestDto inDto)
     {
@@ -180,7 +181,9 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The state and the settings of the web plugin are saved for the portal")]
-    [SwaggerResponse(403, "Web plugins are switched off for the installation, or the caller may not edit the portal settings")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `settings`, or `settings` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, web plugins are switched off for the installation, or switching the plugin on would push the Content Security Policy header over its size limit")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal")]
     [HttpPut("{name}")]
     public async Task UpdateWebPlugin(WebPluginRequestsDto inDto)
     {
@@ -193,6 +196,39 @@ public class WebPluginsController(
         messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
+    }
+
+    /// <remarks>
+    /// Picks up a web plugin whose files were replaced in storage without an upload, for example a new version of an
+    /// installation-wide plugin put in place during a deployment. The `name` is the manifest name published by
+    /// `GET api/2.0/settings/webplugins`, matched without regard to case. Editing the portal settings is required, so
+    /// a portal owner or administrator, and the installation has to have web plugins enabled in its configuration.
+    /// The server compares the version of the plugin it serves with the `version` of the manifest in storage and,
+    /// only when they differ or the plugin appeared in or vanished from storage, re-reads the plugin list on every
+    /// server: for all portals when the plugin is installation-wide, for this portal alone otherwise, and notifies
+    /// the connected clients of this portal. The call is idempotent: with matching versions nothing changes, so a
+    /// repeat is safe. The response is the plugin as served after the check. The stored state, the settings and the
+    /// Content Security Policy of the portal are left as they are. To install a new version use
+    /// `POST api/2.0/settings/webplugins` instead.
+    /// </remarks>
+    /// <summary>Refresh a web plugin</summary>
+    /// <path>api/2.0/settings/webplugins/{name}/refresh</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "The web plugin as served after the version check", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or web plugins are switched off for the installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal after the check")]
+    [HttpPut("{name}/refresh")]
+    public async Task<WebPluginDto> RefreshWebPlugin(WebPluginNameRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var webPlugin = await webPluginManager.RefreshWebPluginAsync(tenant.Id, inDto.Name);
+
+        var outDto = await mapper.ToDtoManual(webPlugin);
+
+        return outDto;
     }
 
     /// <remarks>
@@ -212,7 +248,8 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The web plugin and the files of its package are removed from the portal")]
-    [SwaggerResponse(403, "Web plugins or plugin deletion are switched off, the caller may not edit the portal settings, or the plugin is installation-wide outside a standalone installation")]
+    [SwaggerResponse(403, "Web plugins or plugin deletion are switched off, the caller has no portal-settings right, or the plugin is installation-wide outside a standalone installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal, or the files of its package are missing from storage")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)
     {

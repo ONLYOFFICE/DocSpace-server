@@ -410,7 +410,7 @@ public class RoomShareTests(
         var externalShareData = (await _sharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        externalShareData.Status.Should().Be(Status.RequiredPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.RequiredPassword);
     }
 
     [Fact]
@@ -435,8 +435,8 @@ public class RoomShareTests(
         var externalShareData = (await _sharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
-        externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
-        externalShareData.Status.Should().Be(Status.Ok);
+        externalShareDataWrongPassword.Status.Should().Be(ExternalShareStatus.InvalidPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.Ok);
     }
 
     [Fact]
@@ -965,7 +965,7 @@ public class RoomShareTests(
         await _webApiClient.Authenticate(Owner);
         var fullLink = await _webApiClient.GetAsync(new Uri(shortLink).PathAndQuery, TestContext.Current.CancellationToken);
         var key = HttpUtility.ParseQueryString(fullLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(key!, uiD: Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new CheckConfirmRequestDto(key!, uiD: Owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1001,7 +1001,7 @@ public class RoomShareTests(
         await _webApiClient.Authenticate(user);
         var fullInvitationLink = await _webApiClient.GetAsync(new Uri(shortInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullInvitationLinkKey = HttpUtility.ParseQueryString(fullInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new CheckConfirmRequestDto(fullInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var info = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1026,7 +1026,7 @@ public class RoomShareTests(
         await _webApiClient.Authenticate(user);
         var fullUpdatedInvitationLink = await _webApiClient.GetAsync(new Uri(shortUpdatedInvitationLink).PathAndQuery, TestContext.Current.CancellationToken);
         var fullUpdatedInvitationLinkKey = HttpUtility.ParseQueryString(fullUpdatedInvitationLink.RequestMessage?.RequestUri?.Query!)["key"];
-        await _authenticationApi.CheckConfirmAsync(new EmailValidationKeyModel(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
+        await _authenticationApi.CheckConfirmAsync(new CheckConfirmRequestDto(fullUpdatedInvitationLinkKey!, uiD: owner.Id, type: ConfirmType.LinkInvite), TestContext.Current.CancellationToken);
 
         var updatedInfo = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
@@ -1067,7 +1067,7 @@ public class RoomShareTests(
 
         // Act 2: owner grants user a role on the form
         await _filesClient.Authenticate(Owner);
-        var roles = new List<FormRole>
+        var roles = new List<FormRoleRequest>
         {
             new()
             {

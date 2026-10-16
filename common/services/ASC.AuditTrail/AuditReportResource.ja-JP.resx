@@ -1137,6 +1137,12 @@
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
     <value>AIエージェントのデフォルトストレージ割り当てが無効になりました</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>注記</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>このレポートには、{1} 件のイベントのうち最新の {0} 件が表示されています。すべてのイベントを取得するには、レポートを CSV 形式でダウンロードしてください。</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>ベクトル化設定がリセットされました</value>
   </data>
@@ -1271,5 +1277,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AIエージェントのMCPサーバー {0} が更新されました</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>メタデータのカスケード割り当てを開始しました: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>メタデータフィールドが作成されました: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>メタデータフィールドが削除されました: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>メタデータフィールドが更新されました: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>メタデータテンプレートが割り当てられました: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>メタデータテンプレートが作成されました: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>メタデータテンプレートが削除されました: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>メタデータテンプレートの割り当てが解除されました: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>メタデータテンプレートが更新されました: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>メタデータの値が更新されました: {0}</value>
   </data>
 </root>

@@ -57,6 +57,7 @@ global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging.Abstractions;
@@ -65,3 +66,5 @@ global using Polly;
 global using Polly.Retry;
 
 global using ZiggyCreatures.Caching.Fusion;
+
+global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

@@ -36,6 +36,7 @@ namespace ASC.Files.Core.Core.Entries;
 /// <summary>
 /// The location context of the request.
 /// </summary>
+[OpenApiSchemaName("RequestLocation")]
 public enum Location
 {
     [Description("Room")]

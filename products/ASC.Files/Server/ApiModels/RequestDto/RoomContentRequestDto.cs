@@ -130,6 +130,14 @@ public class RoomContentRequestDto
     public RoomPrivacyFilter? PrivacyFilter { get; set; }
 
     /// <summary>
+    /// Keeps only the rooms that hold a .ai folder in their root. The content of that folder is read with
+    /// `GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms with and without the folder.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "withAiFolder")]
+    public bool? WithAiFolder { get; set; }
+
+    /// <summary>
     /// How many rooms one page may carry. Ask for the next page by raising the start index by the number of rooms
     /// already received.
     /// </summary>
@@ -179,4 +187,36 @@ public class RoomContentRequestDto
     /// <example>1</example>
     [FromQuery(Name = "groupId")]
     public int? GroupId { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"contains","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// A string field takes "eq" (the whole value) or "contains" (a part of it); a number or a date field takes "range" with inclusive bounds,
+    /// or "gt", "gte", "lt", "lte" with the single bound in "value"; a choice field takes "in". A date-only bound covers the whole day,
+    /// so "to":"2026-06-30" includes the values stored on 30 June and "gt":"2026-06-30" starts after it.
+    /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// The same filter is taken as a typed request body by POST api/2.0/files/rooms/search.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
+
+    /// <summary>
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "includeHiddenMetadata")]
+    public bool? IncludeHiddenMetadata { get; set; }
 }

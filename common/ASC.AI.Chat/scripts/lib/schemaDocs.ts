@@ -128,7 +128,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiAiSendStreamBody: {
+  AiSendStreamBody: {
     examples: {
       threadId: EXAMPLE_IDS.thread,
       userMessage: { role: "user", content: "Summarise the attached contract." },
@@ -138,7 +138,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiAiActionArgs: {
+  AiActionArgs: {
     examples: {
       tools: [],
       isReasoning: false,
@@ -146,7 +146,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiAiToolCallData: {
+  AiToolCallData: {
     examples: {
       threadId: EXAMPLE_IDS.thread,
       messageId: EXAMPLE_IDS.message,
@@ -178,7 +178,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiTMCPItem: {
+  AiMCPItem: {
     examples: {
       name: "docspace_get_folder",
       description: "Read the contents of a DocSpace folder.",
@@ -227,7 +227,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiTProvider: {
+  AiProvider: {
     examples: {
       type: "openai",
       name: "OpenAI GPT-4o",
@@ -264,7 +264,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
-  AiTErrorData: {
+  AiErrorData: {
     description: "A field-scoped validation error: which form field was rejected, and why.",
     properties: {
       field: "The rejected field.",

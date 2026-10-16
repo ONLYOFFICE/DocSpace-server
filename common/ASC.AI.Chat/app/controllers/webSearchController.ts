@@ -45,11 +45,13 @@ async function checkConfigUrl(config: WebSearchConfig): Promise<void> {
 
 const engine = new WebSearchEngine({ storage });
 
-// testConnection is the one route here that never touches the C# storage —
-// the probe goes straight to the search provider — so it inherits none of
-// the downstream gates. Borrow them: a throwaway config read runs the same
-// [AiFeature] (AI disabled) and employee-type (Guest) checks and rethrows
-// their 403 before any outbound connection is made (Bugs 83234 / 83235).
+// The write routes reach the C# storage only after validating the body and
+// (configure) probing the provider, and testConnection never reaches it at
+// all, so none of them inherits the downstream gates in time. Borrow them: a
+// throwaway config read runs the same [AiFeature] (AI disabled) and
+// employee-type (Guest) checks and rethrows their 403 before any body is
+// judged or any outbound connection is made (Bugs 83234 / 83235 for the
+// probe; 84312 / 84313 for configure; 84431 / 84432 for set-active-config).
 async function assertWebSearchAccess(): Promise<void> {
   await storage.webSearch.read();
 }
@@ -167,16 +169,22 @@ export const webSearchController = {
   }),
 
   configure: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const args = unpackConfig(req.body);
     const entityId = asEntityId(args.entityId);
     await assertEntityAccessible(entityId);
     const config = asConfig(args.body);
     await checkConfigUrl(config);
     const result = await engine.configure(config, entityId);
-    res.json(result);
+    // A configuration the provider probe refused is a client error, not a
+    // stored outcome: nothing was saved, so answer 400 with the engine's
+    // field-level reason rather than a 200 carrying `success: false`
+    // (Bug 83994).
+    res.status(result.success ? 200 : 400).json(result);
   }),
 
   setActiveConfig: asyncHandler(async (req, res) => {
+    await assertWebSearchAccess();
     const args = unpackConfig(req.body);
     const entityId = asEntityId(args.entityId);
     await assertEntityAccessible(entityId);

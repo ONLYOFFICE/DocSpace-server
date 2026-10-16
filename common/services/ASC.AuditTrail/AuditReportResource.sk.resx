@@ -807,6 +807,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Znovu vygenerované tajný kód klienta {0}</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Poznámka</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Report zobrazuje posledných {0} z {1} udalostí. Ak chcete získať všetky udalosti, stiahnite si report vo formáte CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavenia vektorizácie boli obnovené</value>
   </data>
@@ -1271,5 +1277,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Server MCP {0} agenta AI bol aktualizovaný</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Kaskádové priraďovanie metadát bolo spustené: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Pole metadát bolo vytvorené: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Pole metadát bolo odstránené: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Pole metadát bolo aktualizované: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Šablóna metadát bola priradená: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Šablóna metadát bola vytvorená: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Šablóna metadát bola odstránená: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Priradenie šablóny metadát bolo zrušené: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Šablóna metadát bola aktualizovaná: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Hodnoty metadát boli aktualizované: {0}</value>
   </data>
 </root>

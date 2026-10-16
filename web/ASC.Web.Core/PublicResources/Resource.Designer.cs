@@ -376,7 +376,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Backup.
+        ///   Looks up a localized string similar to Copies.
         /// </summary>
         public static string AccountingCustomerOperationServiceUOM_backup {
             get {

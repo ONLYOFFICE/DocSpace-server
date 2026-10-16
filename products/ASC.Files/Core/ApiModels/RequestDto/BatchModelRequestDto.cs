@@ -190,7 +190,7 @@ public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
 /// <summary>
 /// The parameters of a single file deletion.
 /// </summary>
-public class Delete
+public class DeleteFileRequest
 {
     /// <summary>
     /// When to delete: `true` waits until the editing session on the file has ended, `false` deletes at once, pulling
@@ -224,7 +224,7 @@ public class DeleteRequestDto<T> : FileOperationRequestBaseDto
     /// </summary>
     /// <example>{"deleteAfter": false, "immediately": false}</example>
     [FromBody]
-    public required Delete File { get; set; }
+    public required DeleteFileRequest File { get; set; }
 }
 
 /// <summary>

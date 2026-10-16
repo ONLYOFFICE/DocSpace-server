@@ -44,13 +44,13 @@ public abstract class FavoritesTestBase(
 {
     protected async Task<FileDto> CreateTextFile(string title, int folderId, string content = "hello")
     {
-        var wrapper = await _filesApi.CreateTextFileAsync(folderId, new CreateTextOrHtmlFile(title, content, true), TestContext.Current.CancellationToken);
+        var wrapper = await _filesApi.CreateTextFileAsync(folderId, new CreateTextOrHtmlFileRequest(title, content, true), TestContext.Current.CancellationToken);
         return wrapper.Response;
     }
 
     protected async Task<FileDto> CreateHtmlFile(string title, int folderId, string content = "<p>test</p>")
     {
-        var wrapper = await _filesApi.CreateHtmlFileAsync(folderId, new CreateTextOrHtmlFile(title, content, true), TestContext.Current.CancellationToken);
+        var wrapper = await _filesApi.CreateHtmlFileAsync(folderId, new CreateTextOrHtmlFileRequest(title, content, true), TestContext.Current.CancellationToken);
         return wrapper.Response;
     }
 
@@ -74,7 +74,7 @@ public abstract class FavoritesTestBase(
     /// <summary>Moves a file to trash and waits for the asynchronous delete operation to finish.</summary>
     protected async Task DeleteFileToTrash(int fileId)
     {
-        await _filesApi.DeleteFileAsync(fileId, new Delete(false, false), false, TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(fileId, new DeleteFileRequest(false, false), false, TestContext.Current.CancellationToken);
         await WaitLongOperation();
     }
 

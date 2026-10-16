@@ -91,28 +91,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, the password does not meet the password policy, the first and last name are both empty or not a valid user name, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered, as when `email` is empty or the `portalName` requested on a server installation is already taken"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -200,28 +186,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -309,28 +281,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -418,28 +376,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -491,7 +435,7 @@
         "operationId": "remove",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -502,7 +446,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -514,7 +458,7 @@
             }
           },
           {
-            "name": "AffiliateId",
+            "name": "affiliateId",
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
@@ -527,7 +471,7 @@
             }
           },
           {
-            "name": "PartnerId",
+            "name": "partnerId",
             "in": "query",
             "description": "The partner ID.",
             "schema": {
@@ -540,7 +484,7 @@
             }
           },
           {
-            "name": "Campaign",
+            "name": "campaign",
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
@@ -551,7 +495,7 @@
             }
           },
           {
-            "name": "FirstName",
+            "name": "firstName",
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
@@ -564,7 +508,7 @@
             }
           },
           {
-            "name": "Email",
+            "name": "email",
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
@@ -578,7 +522,7 @@
             }
           },
           {
-            "name": "Industry",
+            "name": "industry",
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
@@ -590,7 +534,7 @@
             }
           },
           {
-            "name": "Language",
+            "name": "language",
             "in": "query",
             "description": "The portal language.",
             "schema": {
@@ -603,7 +547,7 @@
             }
           },
           {
-            "name": "LastName",
+            "name": "lastName",
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
@@ -616,7 +560,7 @@
             }
           },
           {
-            "name": "Module",
+            "name": "module",
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
@@ -629,7 +573,7 @@
             }
           },
           {
-            "name": "Password",
+            "name": "password",
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
@@ -642,7 +586,7 @@
             }
           },
           {
-            "name": "PasswordHash",
+            "name": "passwordHash",
             "in": "query",
             "description": "The password hash.",
             "schema": {
@@ -653,7 +597,7 @@
             }
           },
           {
-            "name": "Phone",
+            "name": "phone",
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
@@ -666,7 +610,7 @@
             }
           },
           {
-            "name": "RecaptchaResponse",
+            "name": "recaptchaResponse",
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
@@ -677,7 +621,7 @@
             }
           },
           {
-            "name": "RecaptchaType",
+            "name": "recaptchaType",
             "in": "query",
             "description": "The type of CAPTCHA validation used.",
             "schema": {
@@ -686,7 +630,7 @@
             "example": 0
           },
           {
-            "name": "Region",
+            "name": "region",
             "in": "query",
             "description": "The portal region.",
             "schema": {
@@ -699,7 +643,7 @@
             }
           },
           {
-            "name": "AWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
@@ -710,7 +654,7 @@
             }
           },
           {
-            "name": "Status",
+            "name": "status",
             "in": "query",
             "description": "The tenant status.",
             "schema": {
@@ -719,7 +663,7 @@
             "example": 0
           },
           {
-            "name": "SkipWelcome",
+            "name": "skipWelcome",
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
@@ -730,7 +674,7 @@
             }
           },
           {
-            "name": "TimeZoneName",
+            "name": "timeZoneName",
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
@@ -743,7 +687,7 @@
             }
           },
           {
-            "name": "Spam",
+            "name": "spam",
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
@@ -754,7 +698,7 @@
             }
           },
           {
-            "name": "Calls",
+            "name": "calls",
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
@@ -765,7 +709,7 @@
             }
           },
           {
-            "name": "AppKey",
+            "name": "appKey",
             "in": "query",
             "description": "The application key.",
             "schema": {
@@ -776,7 +720,7 @@
             }
           },
           {
-            "name": "LimitedAccessSpace",
+            "name": "limitedAccessSpace",
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
@@ -787,7 +731,7 @@
             }
           },
           {
-            "name": "ThirdPartyProfile",
+            "name": "thirdPartyProfile",
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
@@ -798,7 +742,7 @@
             }
           },
           {
-            "name": "Provider",
+            "name": "provider",
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
@@ -809,7 +753,7 @@
             }
           },
           {
-            "name": "AccessToken",
+            "name": "accessToken",
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
@@ -820,7 +764,7 @@
             }
           },
           {
-            "name": "CodeOAuth",
+            "name": "codeOAuth",
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
@@ -842,6 +786,12 @@
               }
             }
           },
+          "400": {
+            "description": "A query value is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, no portal matches them, or the portal is the last one with full space access"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -854,16 +804,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -951,6 +891,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, or no portal matches them"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -963,16 +909,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1060,18 +996,11 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, or `portalName` is empty, already taken, too short or holds characters a portal address may not have, or could not be checked"
+          },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1123,7 +1052,7 @@
         "operationId": "getPortals",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -1134,7 +1063,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -1146,7 +1075,7 @@
             }
           },
           {
-            "name": "AffiliateId",
+            "name": "affiliateId",
             "in": "query",
             "description": "The affiliate ID.",
             "schema": {
@@ -1159,7 +1088,7 @@
             }
           },
           {
-            "name": "PartnerId",
+            "name": "partnerId",
             "in": "query",
             "description": "The partner ID.",
             "schema": {
@@ -1172,7 +1101,7 @@
             }
           },
           {
-            "name": "Campaign",
+            "name": "campaign",
             "in": "query",
             "description": "The portal campaign.",
             "schema": {
@@ -1183,7 +1112,7 @@
             }
           },
           {
-            "name": "FirstName",
+            "name": "firstName",
             "in": "query",
             "description": "The first name of the portal owner.",
             "schema": {
@@ -1196,7 +1125,7 @@
             }
           },
           {
-            "name": "Email",
+            "name": "email",
             "in": "query",
             "description": "The email address of the portal owner.",
             "schema": {
@@ -1210,7 +1139,7 @@
             }
           },
           {
-            "name": "Industry",
+            "name": "industry",
             "in": "query",
             "description": "The tenant industry.",
             "schema": {
@@ -1222,7 +1151,7 @@
             }
           },
           {
-            "name": "Language",
+            "name": "language",
             "in": "query",
             "description": "The portal language.",
             "schema": {
@@ -1235,7 +1164,7 @@
             }
           },
           {
-            "name": "LastName",
+            "name": "lastName",
             "in": "query",
             "description": "The last name of the portal owner.",
             "schema": {
@@ -1248,7 +1177,7 @@
             }
           },
           {
-            "name": "Module",
+            "name": "module",
             "in": "query",
             "description": "The name for the storage module to be configured.",
             "schema": {
@@ -1261,7 +1190,7 @@
             }
           },
           {
-            "name": "Password",
+            "name": "password",
             "in": "query",
             "description": "The password of the portal owner.",
             "schema": {
@@ -1274,7 +1203,7 @@
             }
           },
           {
-            "name": "PasswordHash",
+            "name": "passwordHash",
             "in": "query",
             "description": "The password hash.",
             "schema": {
@@ -1285,7 +1214,7 @@
             }
           },
           {
-            "name": "Phone",
+            "name": "phone",
             "in": "query",
             "description": "The phone numberr of the portal owner.",
             "schema": {
@@ -1298,7 +1227,7 @@
             }
           },
           {
-            "name": "RecaptchaResponse",
+            "name": "recaptchaResponse",
             "in": "query",
             "description": "The user's response to the CAPTCHA challenge.",
             "schema": {
@@ -1309,7 +1238,7 @@
             }
           },
           {
-            "name": "RecaptchaType",
+            "name": "recaptchaType",
             "in": "query",
             "description": "The type of CAPTCHA validation used.",
             "schema": {
@@ -1318,7 +1247,7 @@
             "example": 0
           },
           {
-            "name": "Region",
+            "name": "region",
             "in": "query",
             "description": "The portal region.",
             "schema": {
@@ -1331,7 +1260,7 @@
             }
           },
           {
-            "name": "AWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
@@ -1342,7 +1271,7 @@
             }
           },
           {
-            "name": "Status",
+            "name": "status",
             "in": "query",
             "description": "The tenant status.",
             "schema": {
@@ -1351,7 +1280,7 @@
             "example": 0
           },
           {
-            "name": "SkipWelcome",
+            "name": "skipWelcome",
             "in": "query",
             "description": "Specifies whether to send the welcome email to the user or not.",
             "schema": {
@@ -1362,7 +1291,7 @@
             }
           },
           {
-            "name": "TimeZoneName",
+            "name": "timeZoneName",
             "in": "query",
             "description": "The portal time zone name.",
             "schema": {
@@ -1375,7 +1304,7 @@
             }
           },
           {
-            "name": "Spam",
+            "name": "spam",
             "in": "query",
             "description": "Specifies if the ONLYOFFICE newsletter is allowed or not.",
             "schema": {
@@ -1386,7 +1315,7 @@
             }
           },
           {
-            "name": "Calls",
+            "name": "calls",
             "in": "query",
             "description": "Specifies if the calls are available for the current tenant or not.",
             "schema": {
@@ -1397,7 +1326,7 @@
             }
           },
           {
-            "name": "AppKey",
+            "name": "appKey",
             "in": "query",
             "description": "The application key.",
             "schema": {
@@ -1408,7 +1337,7 @@
             }
           },
           {
-            "name": "LimitedAccessSpace",
+            "name": "limitedAccessSpace",
             "in": "query",
             "description": "Specifies whether the access to the space management is limited or not.",
             "schema": {
@@ -1419,7 +1348,7 @@
             }
           },
           {
-            "name": "ThirdPartyProfile",
+            "name": "thirdPartyProfile",
             "in": "query",
             "description": "The serialized third party profile.",
             "schema": {
@@ -1430,7 +1359,7 @@
             }
           },
           {
-            "name": "Provider",
+            "name": "provider",
             "in": "query",
             "description": "The type of authentication provider (e.g., internal, Google, Azure).",
             "schema": {
@@ -1441,7 +1370,7 @@
             }
           },
           {
-            "name": "AccessToken",
+            "name": "accessToken",
             "in": "query",
             "description": "The access token used for authentication with external providers.",
             "schema": {
@@ -1452,7 +1381,7 @@
             }
           },
           {
-            "name": "CodeOAuth",
+            "name": "codeOAuth",
             "in": "query",
             "description": "The authorization code used for obtaining OAuth tokens.",
             "schema": {
@@ -1481,28 +1410,17 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "A query value is longer than its limit or `email` is malformed"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portals or their statistics could not be read"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -1590,25 +1508,17 @@
               }
             }
           },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, or no third-party profile was resolved and `email` or `passwordHash` is empty"
+          },
+          "401": {
+            "description": "Too many attempts came from this network address and the reCAPTCHA response is invalid"
+          },
+          "403": {
+            "description": "Too many attempts came from this network address and no reCAPTCHA response was sent"
+          },
+          "500": {
+            "description": "No portal has an account with this email address and password hash, or the lookup failed"
           },
           "502": {
             "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
@@ -1671,6 +1581,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
           },
           "401": {
             "description": "Unauthorized",
@@ -1763,6 +1676,9 @@
               }
             }
           },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -1835,7 +1751,7 @@
         "operationId": "getSettings",
         "parameters": [
           {
-            "name": "PortalName",
+            "name": "portalName",
             "in": "query",
             "description": "The portal name.",
             "schema": {
@@ -1848,7 +1764,7 @@
             }
           },
           {
-            "name": "TenantId",
+            "name": "tenantId",
             "in": "query",
             "description": "The tenant ID.",
             "schema": {
@@ -1860,7 +1776,7 @@
             }
           },
           {
-            "name": "Key",
+            "name": "key",
             "in": "query",
             "description": "The settings parameter key.",
             "schema": {
@@ -1873,7 +1789,7 @@
             }
           },
           {
-            "name": "Value",
+            "name": "value",
             "in": "query",
             "description": "The settings parameter value.",
             "schema": {
@@ -1895,6 +1811,12 @@
               }
             }
           },
+          "400": {
+            "description": "A query value is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, or `key` is empty"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -1907,16 +1829,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2004,6 +1916,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or a field is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, `key` or `value` is empty, or the `value` of `BaseDomain` is not a DNS host name"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -2016,16 +1934,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2113,6 +2021,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or `hostName` is empty, longer than 255 characters or not a DNS host name"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -2125,16 +2039,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {

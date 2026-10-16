@@ -39,7 +39,7 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 /// </summary>
 public interface ICustomerReportBuilder
 {
-    Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data);
+    Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data, CancellationToken cancellationToken);
 }
 
 /// Carries the data shared by every report flavour, computed once before the report is built.
@@ -49,7 +49,8 @@ public sealed record RenderContext(
     DateTime UtcStartDate,
     DateTime UtcEndDate,
     JsonSerializerOptions Options,
-    ReportHeader Header);
+    ReportHeader Header,
+    CancellationToken CancellationToken);
 
 /// Horizontal alignment of a report cell. The document builder expects these as the lowercase
 /// strings it passes to SetAlignHorizontal, which is what the camel-case enum converter on
@@ -68,9 +69,20 @@ public sealed record ReportColumn(string Header, ReportColumnAlign Align = Repor
 /// the caption shown above it and the number format of the aggregated value.
 public sealed record ReportPivotDataField(string Field, string Aggregation, string Caption, string Format);
 
+/// Direction of a pivot sort. Reaches the script by its lowercase name, like <see cref="ReportColumnAlign"/>.
+public enum ReportPivotSortOrder
+{
+    Ascending,
+    Descending
+}
+
+/// Orders the items of a pivot row field. By is either the source column of one of the data fields,
+/// to order the items by their aggregated values, or the row field itself, to order them by caption.
+public sealed record ReportPivotSort(string RowField, string By, ReportPivotSortOrder Order);
+
 /// An optional second sheet summarizing the detail table as a pivot. Fields are addressed by their
 /// localized column header, because that is what the pivot reads from the source range's header row.
-public sealed record ReportPivot(string SheetName, List<string> RowFields, List<ReportPivotDataField> DataFields);
+public sealed record ReportPivot(string SheetName, List<string> RowFields, List<ReportPivotDataField> DataFields, ReportPivotSort Sort = null);
 
 /// The report-specific pieces, resolved after the user's culture is applied so that
 /// the sheet name, report title, file name and column headers are localized correctly.
@@ -114,10 +126,14 @@ public abstract class CustomerReportBuilderBase(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         // The script reads the alignments as the lowercase strings it hands to SetAlignHorizontal,
         // so ReportColumnAlign has to reach it by name rather than by its numeric value.
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        // The data is written into the script, which the document server refuses past its download
+        // limit: escaped to \uXXXX, every non-Latin letter would take six bytes of it instead of two.
+        // Quotes, backslashes and control characters are still escaped.
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data)
+    public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data, CancellationToken cancellationToken)
     {
         var tenant = TenantManager.GetCurrentTenant();
 
@@ -131,7 +147,7 @@ public abstract class CustomerReportBuilderBase(
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var context = await CreateRenderContextAsync(tenant, userCulture, data);
+        var context = await CreateRenderContextAsync(tenant, userCulture, data, cancellationToken);
 
         return await BuildCoreAsync(context, data);
     }
@@ -141,14 +157,14 @@ public abstract class CustomerReportBuilderBase(
 
     // Builds the shared date range and the header block. The header is built here, once, so that
     // every flavour shares one instance.
-    private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData)
+    private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData, CancellationToken cancellationToken)
     {
         var utcStartDate = TenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = TenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var header = await reportHeaderService.BuildAsync(userCulture);
 
-        return new RenderContext(tenant, userCulture, utcStartDate, utcEndDate, _jsonOptions, header);
+        return new RenderContext(tenant, userCulture, utcStartDate, utcEndDate, _jsonOptions, header, cancellationToken);
     }
 
     // Scaffolding for the single-table report flavours: assembles the shared header block (logo,

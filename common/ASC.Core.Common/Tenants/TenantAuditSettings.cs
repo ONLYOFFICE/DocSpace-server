@@ -69,15 +69,3 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
-
-/// <summary>
-/// The tenant audit settings wrapper.
-/// </summary>
-public class TenantAuditSettingsWrapper
-{
-    /// <summary>
-    /// The tenant audit settings parameters.
-    /// </summary>
-    /// <example>{"loginHistoryLifeTime": 180, "auditTrailLifeTime": 180}</example>
-    public TenantAuditSettings Settings { get; set; }
-}

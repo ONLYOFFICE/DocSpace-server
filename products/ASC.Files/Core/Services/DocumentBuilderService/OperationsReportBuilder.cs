@@ -97,7 +97,10 @@ public class OperationsReportBuilder(
         // Second sheet: how much each participant spent in total over the reported period. Only the
         // debit side is summed - credits are top-ups, not consumption. The currency is a row field
         // of its own, so each participant is totalled per currency; a pivot always lays its row
-        // fields out ahead of the values, which is why it precedes the total.
+        // fields out ahead of the values, which is why it precedes the total. When every operation
+        // shares one currency the script leaves that field out and names the currency in the total's
+        // caption instead. The biggest spenders come first rather than the participants in
+        // alphabetical order.
         var pivot = new ReportPivot(
             Resource.AccountingCustomerOperationsReportSummarySheetName,
             [Resource.AccountingCustomerOperationContact, Resource.AccountingCustomerOperationCurrency],
@@ -107,7 +110,11 @@ public class OperationsReportBuilder(
                     "Sum",
                     Resource.AccountingCustomerOperationsReportSummaryDebit,
                     MoneyFormat)
-            ]);
+            ],
+            new ReportPivotSort(
+                Resource.AccountingCustomerOperationContact,
+                Resource.AccountingCustomerOperationDebit,
+                ReportPivotSortOrder.Descending));
 
         var definition = new ReportDefinition(
             Resource.AccountingCustomerOperationsReportSheetName,
@@ -130,7 +137,7 @@ public class OperationsReportBuilder(
                     OrderType = taskData.OrderType
                 };
 
-                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter, context.CancellationToken))
                 {
                     if (records is not { Count: > 0 })
                     {
@@ -165,22 +172,15 @@ public class OperationsReportBuilder(
         return null;
     }
 
-    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
+    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var offset = 0;
-        var limit = 1000;
+        filter.Limit = 1000;
 
-        while (true)
+        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter, cancellationToken))
         {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
-
             if (report?.Collection == null)
             {
-                yield return null;
-                break;
+                continue;
             }
 
             var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
@@ -205,13 +205,6 @@ public class OperationsReportBuilder(
             }
 
             yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
         }
     }
 

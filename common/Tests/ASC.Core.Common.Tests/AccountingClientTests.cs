@@ -86,6 +86,156 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetCustomerOperationPages_AdvancesOffsetByItemsUntilTotalQuantity()
+    {
+        var queries = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            queries.Add(request.RequestUri!.Query);
+            var offset = int.Parse(ParseQuery(request.RequestUri)["offset"]);
+
+            return Json(HttpStatusCode.OK, OperationsPage(count: Math.Min(2, 5 - offset), totalQuantity: 5));
+        });
+
+        var pages = new List<Report>();
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+        {
+            pages.Add(page);
+        }
+
+        pages.Select(p => p.Collection.Count).Should().Equal(2, 2, 1);
+        queries.Select(q => ParseQuery(new Uri(BaseUrl + q))["offset"]).Should().Equal("0", "2", "4");
+        queries.Should().AllSatisfy(q =>
+        {
+            // The filter's own Offset stays unset, so the page token is the only offset parameter.
+            q.TrimStart('?').Split('&').Count(p => p.StartsWith("offset=", StringComparison.Ordinal)).Should().Be(1);
+            ParseQuery(new Uri(BaseUrl + q))["limit"].Should().Be("2");
+        });
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_StopsOnEmptyPage_EvenBelowTotalQuantity()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, OperationsPage(count: ++calls == 1 ? 3 : 0, totalQuantity: 100)));
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 3 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(3);
+        calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_ErrorOnLaterPage_IsMappedByExceptionFactory()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ => ++calls == 1
+            ? Json(HttpStatusCode.OK, OperationsPage(count: 2, totalQuantity: 10))
+            : Json(HttpStatusCode.BadRequest, "Customer not found"));
+
+        var act = async () =>
+        {
+            await foreach (var _ in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+            {
+            }
+        };
+
+        await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
+        calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetCustomerServiceUsagePages_PagesTheUsagePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath + "?offset=" + ParseQuery(request.RequestUri)["offset"]);
+            var offset = int.Parse(ParseQuery(request.RequestUri)["offset"]);
+
+            return Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("{}", Math.Min(2, 3 - offset)))}}],"totalQuantity":3}""");
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerServiceUsagePages("portal-1", new UsageFilter { Limit = 2 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(3);
+        paths.Should().Equal("/api/customer/portal-1/usage?offset=0", "/api/customer/portal-1/usage?offset=2");
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_ServerCapsPageSize_AdvancesByItemsReceived()
+    {
+        var offsets = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            var offset = ParseQuery(request.RequestUri!)["offset"];
+            offsets.Add(offset);
+
+            // Asked for 1000, the service returns at most 100 per page.
+            return Json(HttpStatusCode.OK, OperationsPage(count: Math.Min(100, 250 - int.Parse(offset)), totalQuantity: 250));
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 1000 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(250);
+        offsets.Should().Equal("0", "100", "200");
+    }
+
+    // The paging relies on totalQuantity: without it a full first page is all a report gets. This pins that
+    // dependency, so a change of the accounting contract shows up here rather than as a truncated report.
+    [Theory]
+    [InlineData("""{"collection":[{},{}],"totalQuantity":0}""")]
+    [InlineData("""{"collection":[{},{}]}""")]
+    public async Task GetCustomerOperationPages_StopsAfterFirstPage_WhenTotalQuantityIsZeroOrMissing(string firstPage)
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ =>
+        {
+            calls++;
+            return Json(HttpStatusCode.OK, firstPage);
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(2);
+        calls.Should().Be(1);
+    }
+
+    [Fact]
+    public void GetCustomerOperationPages_FilterOffsetSet_ThrowsBeforeAnyRequest()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ =>
+        {
+            calls++;
+            return Json(HttpStatusCode.OK, OperationsPage(count: 0, totalQuantity: 0));
+        });
+
+        var operations = () => client.GetCustomerOperationPages("portal-1", new OperationFilter { Offset = 10 });
+        var usage = () => client.GetCustomerServiceUsagePages("portal-1", new UsageFilter { Offset = 10 });
+
+        operations.Should().ThrowExactly<ArgumentException>().WithParameterName("filter");
+        usage.Should().ThrowExactly<ArgumentException>().WithParameterName("filter");
+        calls.Should().Be(0);
+    }
+
+    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
@@ -278,6 +428,11 @@ public class AccountingClientTests
 
         var provider = services.BuildServiceProvider();
         return (provider.GetRequiredService<AccountingClient>(), handler);
+    }
+
+    private static string OperationsPage(int count, int totalQuantity)
+    {
+        return $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("""{"service":"backup"}""", count))}}],"totalQuantity":{{totalQuantity}}}""";
     }
 
     internal static HttpResponseMessage Json(HttpStatusCode status, string json)

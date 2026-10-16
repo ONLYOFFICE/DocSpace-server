@@ -51,7 +51,7 @@ public class FileLockTests(
         var file = await CreateFileInMy("Autotest Lock File.docx", Owner);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -64,10 +64,10 @@ public class FileLockTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         var file = await CreateFileInMy("Autotest Unlock File.docx", Owner);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(false), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(false), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -84,7 +84,7 @@ public class FileLockTests(
         var file = await CreateFile("Autotest Lock Room File.docx", room.Id);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -97,10 +97,10 @@ public class FileLockTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         var file = await CreateFileInMy("Autotest Idempotent Lock File.docx", Owner);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -115,7 +115,7 @@ public class FileLockTests(
         var file = await CreateFileInMy("Autotest Idempotent Unlock File.docx", Owner);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(false), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(false), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -131,7 +131,7 @@ public class FileLockTests(
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(999999999, new LockFileParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(999999999, new LockFileRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
     }
@@ -151,11 +151,11 @@ public class FileLockTests(
 
         foreach (var file in files)
         {
-            await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+            await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
         }
 
         // Act
-        await _filesApi.LockFileAsync(files[1].Id, new LockFileParameters(false), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(files[1].Id, new LockFileRequest(false), TestContext.Current.CancellationToken);
 
         // Assert: unlocking the second file must not affect the lock state of the other two.
         var info0 = await GetFile(files[0].Id);

@@ -1004,7 +1004,11 @@ Exception message: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hello, $UserName!
 
-We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed. We kindly ask you to renew it manually.
+We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+We kindly ask you to renew it manually.
 
 $OrangeButton
 

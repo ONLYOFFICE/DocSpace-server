@@ -807,6 +807,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Секрет клієнта {0} повторно створено</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Примітка</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>У звіті показано останні {0} з {1} подій. Щоб отримати всі події, завантажте звіт у форматі CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Параметри векторизації скинуто</value>
   </data>
@@ -1271,5 +1277,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP-сервер {0} AI-агента оновлено</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Каскадне призначення метаданих розпочато: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Поле метаданих створено: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Поле метаданих видалено: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Поле метаданих оновлено: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Шаблон метаданих призначено: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Шаблон метаданих створено: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Шаблон метаданих видалено: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Призначення шаблону метаданих скасовано: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Шаблон метаданих оновлено: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Значення метаданих оновлено: {0}</value>
   </data>
 </root>

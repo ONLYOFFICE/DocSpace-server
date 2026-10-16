@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters of a file copy that may change the format on the way.
 /// </summary>
-public class CopyAs<T>
+public class CopyAsRequest<T>
 {
     /// <summary>
     /// The title of the copy, extension included. That extension decides the format: the same one as the source
@@ -92,5 +92,5 @@ public class CopyAsRequestDto<T>
     /// {"destTitle": "Contract copy.pdf", "destFolderId": 1, "enableExternalExt": false, "toForm": true}
     /// </example>
     [FromBody]
-    public required CopyAs<JsonElement> File { get; set; }
+    public required CopyAsRequest<JsonElement> File { get; set; }
 }

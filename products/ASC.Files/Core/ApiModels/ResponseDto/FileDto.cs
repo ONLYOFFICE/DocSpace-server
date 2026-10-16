@@ -297,7 +297,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// Null for anything that is not a picture the portal can show, and also when the file could not be read.
     /// </summary>
     /// <example>{"width": 1920, "height": 1080}</example>
-    public Size Dimensions { get; set; }
+    public ImageSizeDto Dimensions { get; set; }
 }
 
 [Scope]
@@ -328,8 +328,9 @@ public class FileDtoHelper(
     IFusionCache fusionCache,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
+    MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -464,7 +465,7 @@ public class FileDtoHelper(
                 await using var stream = await _daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
                 using var image = new MagickImage();
                 image.Ping(stream);
-                result.Dimensions = new Size
+                result.Dimensions = new ImageSizeDto
                 {
                     Height = image.Height,
                     Width = image.Width

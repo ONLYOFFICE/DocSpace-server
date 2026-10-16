@@ -110,7 +110,7 @@ public class TfaAppCodesTests(
         await _webApiClient.Authenticate(null);
         var login = await _authenticationApi.AuthenticateMeFromBodyWithCodeAsync(
             backupCode,
-            new AuthWithCodeRequestsDto { UserName = Owner.Email, Password = Owner.Password, Code = backupCode },
+            new AuthWithCodeRequestDto { UserName = Owner.Email, Password = Owner.Password, Code = backupCode },
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -126,7 +126,7 @@ public class TfaAppCodesTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _authenticationApi.AuthenticateMeFromBodyWithCodeAsync(
                 backupCode,
-                new AuthWithCodeRequestsDto { UserName = Owner.Email, Password = Owner.Password, Code = backupCode },
+                new AuthWithCodeRequestDto { UserName = Owner.Email, Password = Owner.Password, Code = backupCode },
                 TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(401);
     }
