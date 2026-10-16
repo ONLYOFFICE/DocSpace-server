@@ -46,6 +46,7 @@ import { coreCors, getAppConfig } from "./config/index.js";
 import { corsOptions } from "./app/cors.js";
 import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
+import { DOCUMENT_AGENT_OUTPUTS_PATH } from "./app/tools/documentAgentFiles.js";
 import { storage } from "./app/storage/index.js";
 
 const config = getAppConfig();
@@ -91,11 +92,18 @@ const OPENAI_PASSTHROUGH_PREFIX = `${API_PREFIX}/openai/`;
 const TEXT_TO_DOCX_PATH = `${API_PREFIX}/text-to-docx`;
 const docxJsonParser = bodyParser.json({ strict: false, limit: "15mb" });
 
+// The document agent delivers result files as raw bodies of their own media
+// type (see documentAgentFiles.ts receive); a .json file would otherwise be
+// parsed here and the handler left with no bytes to save.
+
 app
   .use(morgan("combined", { stream: logStream }))
   .use(cookieParser())
   .use((req, res, next) => {
-    if (req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX)) {
+    if (
+      req.path.startsWith(OPENAI_PASSTHROUGH_PREFIX) ||
+      req.path === DOCUMENT_AGENT_OUTPUTS_PATH
+    ) {
       next();
       return;
     }

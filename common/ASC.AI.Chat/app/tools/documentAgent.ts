@@ -63,8 +63,8 @@ import {
   getFolderInfo,
   getMyDocumentsFolderId,
   resolveAgentEntityId,
+  getFileInfo,
 } from "../storage/docspaceFilesApi.js";
-import { mediaTypeOf, uploadFile } from "../storage/docspaceFileTransfer.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import {
   getForwardedHeaders,
@@ -83,6 +83,8 @@ import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import {
   DOCUMENT_AGENT_FILES_PATH,
   DOCUMENT_AGENT_FILES_SERVER,
+  DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM,
+  DOCUMENT_AGENT_OUTPUTS_PATH,
   DOCUMENT_AGENT_TOKEN_HEADER,
   GET_FILE_LINK_TOOL,
   MAX_FILE_BYTES,
@@ -233,9 +235,15 @@ async function run(
     return { error: "There is no folder the resulting files could be saved into." };
   }
 
+  // The result files come back through this service (see documentAgentFiles.ts
+  // receive): the agent posts each one here, with the shared token and the
+  // user's session, and it is inserted into the target folder as the user.
+  const outputsUrl = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
+  outputsUrl.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, targetFolderId);
   const settings: DocumentAgentSettings = {
     model: modelSettings(profile, config),
     mcpServers,
+    outputs: { url: outputsUrl.href, headers: ownServerHeaders(config) },
     limits: {
       taskTimeoutSeconds: config.taskTimeoutSeconds,
       maxFileBytes: MAX_FILE_BYTES,
@@ -266,27 +274,19 @@ async function run(
       : undefined,
   });
 
+  // Every artifact is a file the outputs endpoint took: its url is the editor
+  // link the endpoint answered, resolved by the agent against the endpoint's
+  // address, so only the file id in it is ours. The title is read back: a
+  // same-named file was saved under a numbered one.
   const saved: { id: string; title: string; url: string }[] = [];
-  const notSaved: string[] = [];
   for (const artifact of result.artifacts) {
-    try {
-      const file = await uploadFile(
-        targetFolderId,
-        artifact.name,
-        artifact.bytes,
-        artifact.mediaType === "application/octet-stream"
-          ? mediaTypeOf(artifact.name)
-          : artifact.mediaType,
-      );
-      saved.push({ id: file.id, title: file.title, url: fileEditorUrl(file.id) });
-    } catch (err) {
-      logger.warn(
-        `${DOCUMENT_AGENT_TOOL_NAME}: ${artifact.name} not saved into ${targetFolderId}: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      notSaved.push(artifact.name);
+    const id = savedFileId(artifact.url);
+    if (id === undefined) {
+      logger.warn(`${DOCUMENT_AGENT_TOOL_NAME}: artifact ${artifact.name} names no file of ours`);
+      continue;
     }
+    const info = await getFileInfo(id).catch(() => undefined);
+    saved.push({ id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) });
   }
 
   if (result.state !== "completed") {
@@ -299,9 +299,18 @@ async function run(
     data: {
       summary: result.text,
       files: saved,
-      ...(notSaved.length > 0 ? { notSaved } : {}),
     },
   };
+}
+
+/** The file id of an editor link as `fileEditorUrl` builds it, whatever host the agent put in front. */
+function savedFileId(url: string): string | undefined {
+  const parsed = URL.parse(url);
+  if (parsed === null || !parsed.pathname.endsWith("/doceditor")) {
+    return undefined;
+  }
+  const id = parsed.searchParams.get("fileId");
+  return id ? id : undefined;
 }
 
 // The chat's own model: the round's profile when the handler recorded one,
@@ -485,12 +494,11 @@ async function collectServers(
   // This service's own server (see documentAgentFiles.ts): the agent presents
   // the shared token and the user's session, the same session the portal
   // server gets, so a link is minted only for a file the user may read.
-  const session = sessionCookie();
-  const authorization = getForwardedHeaders()["authorization"];
-  add(DOCUMENT_AGENT_FILES_SERVER, `${config.filesUrl}${DOCUMENT_AGENT_FILES_PATH}`, {
-    [DOCUMENT_AGENT_TOKEN_HEADER]: config.token,
-    ...(session ? { cookie: session } : authorization ? { authorization } : {}),
-  });
+  add(
+    DOCUMENT_AGENT_FILES_SERVER,
+    `${config.filesUrl}${DOCUMENT_AGENT_FILES_PATH}`,
+    ownServerHeaders(config),
+  );
 
   const custom = await resolveCustomServers(entityId);
   for (const [name, server] of Object.entries(custom)) {
@@ -498,6 +506,16 @@ async function collectServers(
     add(name, server.url, headers);
   }
   return out;
+}
+
+/** What the agent presents to this service's own routes: the shared token and the user's session. */
+function ownServerHeaders(config: DocumentAgentConfig): Record<string, string> {
+  const session = sessionCookie();
+  const authorization = getForwardedHeaders()["authorization"];
+  return {
+    [DOCUMENT_AGENT_TOKEN_HEADER]: config.token,
+    ...(session ? { cookie: session } : authorization ? { authorization } : {}),
+  };
 }
 
 function stringHeaders(headers: Record<string, unknown>): Record<string, string> {

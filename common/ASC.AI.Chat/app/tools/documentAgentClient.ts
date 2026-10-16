@@ -67,6 +67,8 @@ export interface DocumentAgentSettings {
     source?: { id: string; type?: string; title?: string };
   };
   mcpServers?: Record<string, { url: string; headers?: Record<string, string> }>;
+  /** Where the agent delivers every result file; required by the agent. */
+  outputs: { url: string; headers?: Record<string, string> };
   limits?: { maxToolCalls?: number; taskTimeoutSeconds?: number; maxFileBytes?: number };
 }
 
@@ -93,7 +95,8 @@ export interface DocumentTaskOutput {
     | "unknown";
   /** The agent's final text: its summary, or the reason it did not finish. */
   text: string;
-  artifacts: { name: string; bytes: Uint8Array; mediaType: string }[];
+  /** One per delivered file: its name, type and where the outputs endpoint said it is. */
+  artifacts: { name: string; mediaType: string; url: string }[];
 }
 
 export class DocumentAgentError extends Error {
@@ -222,17 +225,19 @@ function messageText(message: Message | undefined): string {
     .trim();
 }
 
+// The bytes never come this way: the agent uploaded the file to the outputs
+// endpoint and the part carries the Location that endpoint answered.
 function artifactFiles(artifact: Artifact): DocumentTaskOutput["artifacts"] {
   const out: DocumentTaskOutput["artifacts"] = [];
   for (const part of artifact.parts) {
-    if (part.content?.$case !== "raw") {
+    if (part.content?.$case !== "url") {
       continue;
     }
     const name = part.filename || artifact.name || "output";
     out.push({
       name,
-      bytes: part.content.value,
       mediaType: part.mediaType || "application/octet-stream",
+      url: part.content.value,
     });
   }
   return out;
