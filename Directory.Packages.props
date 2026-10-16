@@ -87,6 +87,8 @@
     <PackageVersion Include="log4net" Version="3.0.3" />
     <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="15.0.0" />
     <PackageVersion Include="MailKit" Version="4.18.1" />
+    <!-- Transitive pin: Aspire.Hosting 13.6.1 (via StreamJsonRpc) pulls MessagePack 2.5.302, which has a known moderate-severity vulnerability (GHSA-qhrr-8q5h-9q3h, fixed in 2.5.303). Stay on 2.x: StreamJsonRpc is built against the 2.x API. Drop the pin once Aspire ships a patched dependency. -->
+    <PackageVersion Include="MessagePack" Version="2.5.307" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
@@ -131,7 +133,7 @@
     <PackageVersion Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.80.1" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
-    <PackageVersion Include="Microsoft.Windows.Compatibility" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Windows.Compatibility" Version="10.0.13" />
     <PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.12" />
     <PackageVersion Include="Microting.EntityFrameworkCore.MySql.Json.Microsoft" Version="10.0.12" />
     <PackageVersion Include="Moq" Version="4.21.0" />
