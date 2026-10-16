@@ -637,7 +637,7 @@ export type Res_aiMetaFill = {
   unresolved: {
     fieldId?: number;
     name: string;
-    reason: "already_set" | "not_found" | "invalid_value" | "unknown_option";
+    reason: "already_set" | "not_found" | "invalid_value" | "unknown_option" | "write_failed";
   }[];
   /** The documents the values were read from. */
   sources: { id: string; title: string; truncated: boolean }[];

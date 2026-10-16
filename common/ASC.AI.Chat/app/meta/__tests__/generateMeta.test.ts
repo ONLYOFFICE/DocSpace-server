@@ -122,6 +122,23 @@ describe("generateMeta", () => {
     expect(customSync).not.toHaveBeenCalled();
   });
 
+  it("answers the model's failure as 502 and a throttled call as 429", async () => {
+    customSync.mockRejectedValueOnce(new Error("invalid api key"));
+    await expect(generateMeta({ files: ["1"], folders: [] })).rejects.toMatchObject({
+      status: 502,
+    });
+    customSync.mockRejectedValueOnce({ status: 429, message: "slow down" });
+    await expect(generateMeta({ files: ["1"], folders: [] })).rejects.toMatchObject({
+      status: 429,
+    });
+  });
+
+  it("answers 422 for a folder without files", async () => {
+    const failure = await generateMeta({ files: [], folders: ["7"] }).catch((e: unknown) => e);
+    expect(failure).toBeInstanceOf(NoContentError);
+    expect((failure as Error).message).toBe("The selection holds no files");
+  });
+
   it("answers an empty field list when the model does not follow the format", async () => {
     customSync.mockResolvedValue(assistantText("I cannot help with that."));
     const result = await generateMeta({ files: ["1"], folders: [] });

@@ -330,6 +330,53 @@ describe("fillMeta", () => {
     expect(readFileAsText).not.toHaveBeenCalled();
   });
 
+  it("reports a refused write per field and fails only when nothing was written", async () => {
+    customSync.mockResolvedValue(
+      assistantText(
+        JSON.stringify({
+          values: [
+            { key: "f1", value: "ACME" },
+            { key: "c0", value: "Apollo" },
+          ],
+        }),
+      ),
+    );
+    vi.mocked(portalMetadata.setValues).mockRejectedValueOnce(
+      new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
+    );
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false });
+    expect(result.filled).toEqual([{ name: "Project", value: "Apollo" }]);
+    expect(result.unresolved).toEqual(
+      expect.arrayContaining([{ fieldId: 1, name: "Counterparty", reason: "write_failed" }]),
+    );
+
+    vi.mocked(portalMetadata.setValues).mockRejectedValueOnce(
+      new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
+    );
+    vi.mocked(portalMetadata.setCustomFields).mockRejectedValueOnce(
+      new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
+    );
+    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+      status: 403,
+    });
+
+    // A portal failure that is not a refusal is not swallowed.
+    vi.mocked(portalMetadata.setValues).mockRejectedValueOnce(
+      new FakeDocspaceApiHttpError(500, "Internal Server Error", "u"),
+    );
+    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+      status: 500,
+    });
+  });
+
+  it("answers the model's failure with its own status", async () => {
+    customSync.mockRejectedValueOnce(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+      status: 504,
+    });
+    expect(portalMetadata.setValues).not.toHaveBeenCalled();
+  });
+
   it("refuses an entry without any metadata field", async () => {
     vi.mocked(portalMetadata.getEntryMetadata).mockResolvedValue({
       templates: [],

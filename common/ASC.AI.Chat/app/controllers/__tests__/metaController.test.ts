@@ -3,9 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../log.js", () => ({
   default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
-vi.mock("../../storage/httpClient.js", () => ({
-  AiServiceHttpError: class AiServiceHttpError extends Error {},
-}));
+class FakeAiServiceHttpError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly statusText: string,
+  ) {
+    super(statusText);
+  }
+}
+vi.mock("../../storage/httpClient.js", () => ({ AiServiceHttpError: FakeAiServiceHttpError }));
+const assertAiAccess = vi.fn(async () => {});
+vi.mock("../aiAccess.js", () => ({ assertAiAccess }));
 class FakeDocspaceApiHttpError extends Error {
   constructor(
     public readonly status: number,
@@ -36,12 +44,21 @@ vi.mock("../../meta/generateMeta.js", () => ({
       super("No model is configured");
     }
   },
+  ModelCallError: class ModelCallError extends Error {
+    constructor(
+      public readonly status: number,
+      message: string,
+    ) {
+      super(message);
+    }
+  },
 }));
 const fillMeta = vi.fn();
 vi.mock("../../meta/fillMeta.js", () => ({ fillMeta }));
 
 const { metaController } = await import("../metaController.js");
-const { NoContentError, NoProfileError } = await import("../../meta/generateMeta.js");
+const { ModelCallError, NoContentError, NoProfileError } =
+  await import("../../meta/generateMeta.js");
 
 type Handler = (req: never, res: never, next: never) => unknown;
 
@@ -70,7 +87,31 @@ function run(handler: unknown, body: unknown) {
 }
 
 describe("metaController.generate", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    assertAiAccess.mockResolvedValue(undefined);
+  });
+
+  it("answers the AI-access refusal before touching the body", async () => {
+    assertAiAccess.mockRejectedValueOnce(new FakeAiServiceHttpError(403, "Forbidden"));
+    const res = await run(metaController.generate, { files: ["1"] });
+    expect(res.statusCode).toBe(403);
+    expect(generateMeta).not.toHaveBeenCalled();
+    expect(primeSourceMeta).not.toHaveBeenCalled();
+  });
+
+  it("relays the model-call outcomes with their own statuses", async () => {
+    for (const [status, message] of [
+      [429, "The model provider is rate-limiting requests"],
+      [502, "The model request failed"],
+      [504, "The model did not answer within the time budget"],
+    ] as const) {
+      generateMeta.mockRejectedValueOnce(new ModelCallError(status, message));
+      const res = await run(metaController.generate, { files: ["1"] });
+      expect(res.statusCode).toBe(status);
+      expect(res.body).toEqual({ error: message });
+    }
+  });
 
   it.each([
     [null, "body must be an object"],
@@ -136,10 +177,15 @@ describe("metaController.generate", () => {
 });
 
 describe("metaController.fill", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    assertAiAccess.mockResolvedValue(undefined);
+  });
 
   it.each([
     [{}, 'kind must be "file" or "folder"'],
+    [{ kind: "file", id: 0 }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: "-5" }, "id must be the integer id of a file or folder"],
     [{ kind: "room", id: 1 }, 'kind must be "file" or "folder"'],
     [{ kind: "file" }, "id must be the integer id of a file or folder"],
     [{ kind: "file", id: "abc-123" }, "id must be the integer id of a file or folder"],
@@ -191,5 +237,14 @@ describe("metaController.fill", () => {
     res = await run(metaController.fill, { kind: "file", id: 3 });
     expect(res.statusCode).toBe(503);
     expect(res.body).toEqual({ error: "No model is configured" });
+
+    fillMeta.mockRejectedValueOnce(new ModelCallError(504, "late"));
+    res = await run(metaController.fill, { kind: "file", id: 3 });
+    expect(res.statusCode).toBe(504);
+
+    assertAiAccess.mockRejectedValueOnce(new FakeAiServiceHttpError(403, "Forbidden"));
+    res = await run(metaController.fill, { kind: "file", id: 3 });
+    expect(res.statusCode).toBe(403);
+    expect(fillMeta).toHaveBeenCalledTimes(3);
   });
 });

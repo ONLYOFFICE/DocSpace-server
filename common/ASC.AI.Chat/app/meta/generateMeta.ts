@@ -38,30 +38,35 @@
  * a budget) regardless of what the model would have chosen to look at.
  */
 
-import { customSync } from "@onlyoffice/ai-chat/core";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { extractText } from "../forms/suggestedQuestions.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import {
+  assertNotTimedOut,
   collectFiles,
   formatDocuments,
+  GENERATION_BUDGET_MS,
   MAX_PROMPT_CHARS,
   NoContentError,
   NoProfileError,
   parseJsonObject,
   readDocuments,
   resolveMetaProfile,
+  runModel,
   toSources,
   totalChars,
 } from "./common.js";
 import type { Document, MetaSkipped, MetaSource } from "./common.js";
 
-export { MAX_FILES, MAX_FOLDERS, NoContentError, NoProfileError } from "./common.js";
-
-/** The model round's budget. */
-const GENERATION_BUDGET_MS = 120_000;
+export {
+  MAX_FILES,
+  MAX_FOLDERS,
+  ModelCallError,
+  NoContentError,
+  NoProfileError,
+} from "./common.js";
 /** Fields the answer carries at most — the portal holds 50 custom fields per entry. */
 const MAX_FIELDS = 50;
 /** A custom field name on the portal is at most 255 characters. */
@@ -152,6 +157,7 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   try {
     const documents = await readDocuments(files, skipped, controller.signal);
+    assertNotTimedOut(controller.signal);
     if (documents.length === 0) {
       throw new NoContentError(skipped);
     }
@@ -162,12 +168,14 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
       `meta.generate: ${documents.length} document(s), ${totalChars(documents)} chars, ` +
         `profile "${profile.name}" (${profile.modelId})`,
     );
-    const message = await customSync({
-      profile,
-      messages: [{ role: "user", content: buildUserMessage(documents, prompt || undefined) }],
-      systemPrompt: SYSTEM_PROMPT,
-      signal: controller.signal,
-    });
+    const message = await runModel(
+      {
+        profile,
+        systemPrompt: SYSTEM_PROMPT,
+        userMessage: buildUserMessage(documents, prompt || undefined),
+      },
+      controller.signal,
+    );
     const fields = parseFields(extractText(message));
     logger.info(`meta.generate: ${fields.length} field(s) in ${Date.now() - started}ms`);
     return { fields, sources: toSources(documents), skipped };

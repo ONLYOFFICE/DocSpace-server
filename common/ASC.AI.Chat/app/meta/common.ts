@@ -36,8 +36,9 @@
  * each cut to a budget) and the report of what was left out.
  */
 
-import { ActionType } from "@onlyoffice/ai-chat/core";
+import { ActionType, customSync, getErrorStatus } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
+import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import logger from "../log.js";
@@ -94,7 +95,70 @@ export class NoContentError extends Error {
   readonly status = 422;
   readonly expose = true;
   constructor(public readonly skipped: MetaSkipped[]) {
-    super("None of the selected files could be read as text");
+    super(
+      skipped.length === 0
+        ? "The selection holds no files"
+        : "None of the selected files could be read as text",
+    );
+  }
+}
+
+/**
+ * The model round did not produce an answer: the request's budget ran out
+ * (504), the provider throttled the call (429) or failed (502). The detail
+ * stays in the log; the client gets the status and a short reason.
+ */
+export class ModelCallError extends Error {
+  readonly expose = true;
+  constructor(
+    public readonly status: 429 | 502 | 504,
+    message: string,
+    public override readonly cause?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+/** The model round's budget, reading the files included. */
+export const GENERATION_BUDGET_MS = 120_000;
+
+/**
+ * One model round. A failure is classified into a {@link ModelCallError} so
+ * the controller can answer with a status that says what happened instead
+ * of a bare 500.
+ */
+export async function runModel(
+  args: { profile: Profile; systemPrompt: string; userMessage: string },
+  signal: AbortSignal,
+): Promise<ThreadMessageLike> {
+  try {
+    return await customSync({
+      profile: args.profile,
+      messages: [{ role: "user", content: args.userMessage }],
+      systemPrompt: args.systemPrompt,
+      signal,
+    });
+  } catch (err) {
+    throw classifyModelError(err, signal);
+  }
+}
+
+export function classifyModelError(err: unknown, signal: AbortSignal): ModelCallError {
+  if (signal.aborted || (err instanceof Error && err.name === "AbortError")) {
+    return new ModelCallError(504, "The model did not answer within the time budget", err);
+  }
+  if (getErrorStatus(err) === 429) {
+    return new ModelCallError(429, "The model provider is rate-limiting requests", err);
+  }
+  const detail = err instanceof Error ? err.message : String(err);
+  logger.error(`meta: model call failed: ${detail}`);
+  return new ModelCallError(502, "The model request failed", err);
+}
+
+/** Thrown when the budget ran out while the files were still being read. */
+export function assertNotTimedOut(signal: AbortSignal): void {
+  if (signal.aborted) {
+    throw new ModelCallError(504, "Reading the files did not finish within the time budget");
   }
 }
 

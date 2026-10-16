@@ -6023,7 +6023,8 @@
                     "already_set",
                     "not_found",
                     "invalid_value",
-                    "unknown_option"
+                    "unknown_option",
+                    "write_failed"
                   ]
                 }
               },

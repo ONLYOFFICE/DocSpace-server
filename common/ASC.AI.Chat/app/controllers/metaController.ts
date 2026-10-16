@@ -31,12 +31,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { asyncHandler } from "./_helpers.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { isObject } from "../narrow.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import {
   generateMeta,
   MAX_FILES,
   MAX_FOLDERS,
+  ModelCallError,
   NoContentError,
   NoProfileError,
 } from "../meta/generateMeta.js";
@@ -104,9 +106,10 @@ function asFillInput(body: unknown): FillMetaInput {
       : typeof rawId === "string"
         ? rawId.trim()
         : "";
-  // Metadata lives on internal entries only (integer ids); a third-party id
-  // has no metadata to fill and the Files API would answer 404 anyway.
-  if (!/^\d+$/.test(id)) {
+  // Metadata lives on internal entries only (positive integer ids); a
+  // third-party id has no metadata to fill and the Files API would answer
+  // 404 anyway.
+  if (!/^[1-9]\d*$/.test(id)) {
     badRequest("id must be the integer id of a file or folder");
   }
   const prompt = body["prompt"];
@@ -125,8 +128,9 @@ function asFillInput(body: unknown): FillMetaInput {
   };
 }
 
-// The two outcomes `asyncHandler` would otherwise flatten: a 422 that has to
-// carry the skipped list, and a 503 (the handler only relays 4xx statuses).
+// The outcomes `asyncHandler` would otherwise flatten: a 422 that has to
+// carry the skipped list, and the 5xx statuses with a reason (the handler
+// relays 4xx statuses only and turns everything else into a bare 500).
 function answerMetaError(
   err: unknown,
   res: { status: (code: number) => { json: (b: unknown) => unknown } },
@@ -135,7 +139,7 @@ function answerMetaError(
     res.status(err.status).json({ error: err.message, skipped: err.skipped });
     return true;
   }
-  if (err instanceof NoProfileError) {
+  if (err instanceof NoProfileError || err instanceof ModelCallError) {
     res.status(err.status).json({ error: err.message });
     return true;
   }
@@ -144,6 +148,9 @@ function answerMetaError(
 
 export const metaController = {
   generate: asyncHandler(async (req, res) => {
+    // A caller without AI access gets the 403 every other AI route answers,
+    // before any file of theirs is read.
+    await assertAiAccess();
     const input = asInput(req.body);
     // Attribute the model round to the first folder the request names (or
     // its first file), the way every other model-bound route attributes its
@@ -163,6 +170,7 @@ export const metaController = {
   }),
 
   fill: asyncHandler(async (req, res) => {
+    await assertAiAccess();
     const input = asFillInput(req.body);
     await primeSourceMeta(input.id, input.kind);
     try {

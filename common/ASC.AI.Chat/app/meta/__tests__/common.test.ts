@@ -11,6 +11,11 @@ vi.mock("../../storage/index.js", () => ({
     profiles: { readById: vi.fn() },
   },
 }));
+const customSync = vi.fn();
+vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  customSync,
+}));
 
 const readFileAsText = vi.fn<(file: { id: string }) => Promise<string>>();
 vi.mock("../portalFiles.js", () => ({
@@ -26,13 +31,17 @@ const portalFiles = await import("../portalFiles.js");
 const { storage } = await import("../../storage/index.js");
 type MetaSkipped = import("../common.js").MetaSkipped;
 const {
+  classifyModelError,
   collectFiles,
   fitBudget,
   formatDocuments,
   MAX_FILES,
+  ModelCallError,
+  NoContentError,
   parseJsonObject,
   readDocuments,
   resolveMetaProfile,
+  runModel,
 } = await import("../common.js");
 
 const file = (id: string) => ({ id, title: `${id}.docx`, ext: ".docx" });
@@ -168,5 +177,49 @@ describe("formatDocuments and parseJsonObject", () => {
     expect(parseJsonObject("[1,2]")).toBeUndefined();
     expect(parseJsonObject("{not json}")).toBeUndefined();
     expect(parseJsonObject("")).toBeUndefined();
+  });
+});
+
+describe("the model round's failures", () => {
+  it("classifies a timeout, a throttled call and anything else", () => {
+    const live = new AbortController().signal;
+    const aborted = AbortSignal.abort();
+    expect(classifyModelError(new Error("x"), aborted)).toMatchObject({ status: 504 });
+    const abortError = Object.assign(new Error("aborted"), { name: "AbortError" });
+    expect(classifyModelError(abortError, live)).toMatchObject({ status: 504 });
+    expect(classifyModelError({ status: 429, message: "slow down" }, live)).toMatchObject({
+      status: 429,
+    });
+    expect(classifyModelError(new Error("ECONNRESET"), live)).toMatchObject({
+      status: 502,
+      message: "The model request failed",
+    });
+    expect(classifyModelError("odd", live)).toBeInstanceOf(ModelCallError);
+  });
+
+  it("runs one round and wraps a provider failure", async () => {
+    customSync.mockResolvedValueOnce({ role: "assistant", content: "ok" });
+    const profile = { id: "p" } as never;
+    await expect(
+      runModel({ profile, systemPrompt: "s", userMessage: "u" }, new AbortController().signal),
+    ).resolves.toEqual({ role: "assistant", content: "ok" });
+    expect(customSync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profile,
+        systemPrompt: "s",
+        messages: [{ role: "user", content: "u" }],
+      }),
+    );
+    customSync.mockRejectedValueOnce(new Error("invalid api key"));
+    await expect(
+      runModel({ profile, systemPrompt: "s", userMessage: "u" }, new AbortController().signal),
+    ).rejects.toMatchObject({ status: 502 });
+  });
+
+  it("tells an empty selection from unreadable files", () => {
+    expect(new NoContentError([]).message).toBe("The selection holds no files");
+    expect(new NoContentError([{ id: "1", reason: "failed" }]).message).toBe(
+      "None of the selected files could be read as text",
+    );
   });
 });

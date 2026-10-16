@@ -40,21 +40,24 @@
  * empty and is reported, never invented.
  */
 
-import { customSync } from "@onlyoffice/ai-chat/core";
 import { markForwardHeadersToProvider } from "../requestContext.js";
+import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
 import { extractText } from "../forms/suggestedQuestions.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import {
+  assertNotTimedOut,
   collectFiles,
   formatDocuments,
+  GENERATION_BUDGET_MS,
   MAX_PROMPT_CHARS,
   NoContentError,
   NoProfileError,
   parseJsonObject,
   readDocuments,
   resolveMetaProfile,
+  runModel,
   toSources,
   totalChars,
 } from "./common.js";
@@ -74,12 +77,11 @@ import type {
   ValueRequest,
 } from "./portalMetadata.js";
 
-/** The model round's budget. */
-const GENERATION_BUDGET_MS = 120_000;
 /** A text value on the portal is at most 8000 characters. */
 const MAX_TEXT_VALUE = 8_000;
 
-export type UnresolvedReason = "already_set" | "not_found" | "invalid_value" | "unknown_option";
+export type UnresolvedReason =
+  "already_set" | "not_found" | "invalid_value" | "unknown_option" | "write_failed";
 
 export interface FillMetaInput {
   kind: EntryKind;
@@ -363,6 +365,7 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   try {
     const documents = await readDocuments(files, skipped, controller.signal);
+    assertNotTimedOut(controller.signal);
     if (documents.length === 0) {
       throw new NoContentError(skipped);
     }
@@ -373,22 +376,20 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
       `meta.fill: ${input.kind} ${input.id}, ${targets.length} field(s), ${documents.length} document(s), ` +
         `${totalChars(documents)} chars, profile "${profile.name}" (${profile.modelId})`,
     );
-    const message = await customSync({
-      profile,
-      messages: [
-        {
-          role: "user",
-          content: buildUserMessage(input.kind, targets, documents, prompt || undefined),
-        },
-      ],
-      systemPrompt: SYSTEM_PROMPT,
-      signal: controller.signal,
-    });
+    const message = await runModel(
+      {
+        profile,
+        systemPrompt: SYSTEM_PROMPT,
+        userMessage: buildUserMessage(input.kind, targets, documents, prompt || undefined),
+      },
+      controller.signal,
+    );
     const answers = parseValues(extractText(message));
 
     const values: ValueRequest[] = [];
     const customs: { name: string; value: string }[] = [];
-    const filled: FilledField[] = [];
+    const typedFilled: FilledField[] = [];
+    const customFilled: FilledField[] = [];
     for (const target of targets) {
       const raw = answers.get(target.key);
       if (raw === undefined || raw === null || raw === "") {
@@ -402,21 +403,47 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
       }
       if (target.field) {
         values.push({ fieldId: target.field.id, ...(resolved.value as FieldValue) });
-        filled.push({ fieldId: target.field.id, name: target.name, value: resolved.value });
+        typedFilled.push({ fieldId: target.field.id, name: target.name, value: resolved.value });
       } else {
         customs.push({ name: target.name, value: resolved.value as string });
-        filled.push({ name: target.name, value: resolved.value });
+        customFilled.push({ name: target.name, value: resolved.value });
       }
     }
     logger.info(
-      `meta.fill: ${filled.length} value(s) resolved, ${unresolved.length} unresolved in ${Date.now() - started}ms`,
+      `meta.fill: ${typedFilled.length + customFilled.length} value(s) resolved, ` +
+        `${unresolved.length} unresolved in ${Date.now() - started}ms`,
     );
 
-    if (values.length > 0) {
-      await setValues(input.kind, input.id, values);
-    }
-    if (customs.length > 0) {
-      await setCustomFields(input.kind, input.id, customs);
+    // Two writes, two rights checks on the portal. When one of them is
+    // refused the other may already have landed, so a refusal is reported
+    // per field as `write_failed` and the request fails only when nothing
+    // was written at all.
+    const filled: FilledField[] = [];
+    let refusal: DocspaceApiHttpError | undefined;
+    const write = async (fields: FilledField[], run: () => Promise<unknown>): Promise<void> => {
+      if (fields.length === 0) {
+        return;
+      }
+      try {
+        await run();
+        filled.push(...fields);
+      } catch (err) {
+        if (!(err instanceof DocspaceApiHttpError) || err.status >= 500) {
+          throw err;
+        }
+        logger.warn(
+          `meta.fill: writing ${fields.length} value(s) to ${input.kind} ${input.id} refused with ${err.status}`,
+        );
+        refusal ??= err;
+        for (const field of fields) {
+          unresolved.push({ fieldId: field.fieldId, name: field.name, reason: "write_failed" });
+        }
+      }
+    };
+    await write(typedFilled, () => setValues(input.kind, input.id, values));
+    await write(customFilled, () => setCustomFields(input.kind, input.id, customs));
+    if (refusal && filled.length === 0) {
+      throw refusal;
     }
     const after = filled.length > 0 ? await getEntryMetadata(input.kind, input.id) : metadata;
     return { metadata: after, filled, unresolved, sources: toSources(documents), skipped };
