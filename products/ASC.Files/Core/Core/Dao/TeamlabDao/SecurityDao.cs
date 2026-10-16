@@ -720,6 +720,8 @@ internal abstract class SecurityBaseDao<T>(
     {
         var q = filesDbContext.Groups.Where(g => g.TenantId == tenantId && !g.Removed);
 
+        // Not precompiled on purpose: one more predicate on a query that is built per call from the request filters
+        // (text, excludeShared), so there is no compiled query to put it in.
         if (everyoneOnly)
         {
             var everyoneId = Constants.GroupEveryone.ID;
@@ -1043,6 +1045,11 @@ internal abstract class SecurityBaseDao<T>(
     /// types, which a set operation does not accept. The caller's subjects come in as a list of values, so its rooms
     /// are found through the subject index: with the caller's groups looked up in a subquery, or with the sets
     /// written as correlated <c>Any</c> calls, every room of the portal was scanned.
+    /// <para>
+    /// Not precompiled on purpose: it is a filter composed into the query of <c>GetUsersWithSharedQuery</c>, which
+    /// is itself built per call from the request filters (area, types, inviter, text, shared), so it cannot be a
+    /// compiled query of its own.
+    /// </para>
     /// </remarks>
     private static IQueryable<User> FilterByKnownTo(
         IQueryable<User> q,
