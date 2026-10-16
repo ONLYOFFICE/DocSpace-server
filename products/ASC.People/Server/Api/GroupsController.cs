@@ -617,16 +617,17 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <remarks>
-    /// Returns the groups that can be given access to the room with the ID given in the route, and reports for each
-    /// of them whether it already has access to that room.
-    /// The caller has to be allowed to manage the access of that room, and the ID has to belong to an existing room,
-    /// so the operation answers 403 for a room the caller cannot share and 404 for an ID that matches nothing.
+    /// Returns the groups that can be given access to the room with the ID given in the route, and reports for each of
+    /// them whether it already has access to that room.
+    /// The caller has to be allowed to manage the access of that room, and the ID has to belong to an existing room, so
+    /// the operation answers 403 for a room the caller cannot share and 404 for an ID that matches nothing.
     /// The call is read-only and, unlike the account search, works without a filter: leaving `filterValue` empty
     /// returns every group instead of nothing, and a value narrows the result by group name.
     /// The result is paged by `count` and `startIndex`, with the number of matching groups in the total count of the
     /// response.
-    /// Pass `excludeShared` to keep only the groups that have no access to the room yet, which is the set to offer
-    /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
+    /// Pass `excludeShared` to keep only the groups that have no access to the room yet, which is the set to offer when
+    /// adding new ones; without it every matching group comes back and `shared` tells them apart.
+    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/room/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a room</summary>
@@ -649,8 +650,8 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the groups that can be given access to the folder with the ID given in the route, and reports for
-    /// each of them whether it already has access to that folder.
+    /// Returns the groups that can be given access to the folder with the ID given in the route, and reports for each
+    /// of them whether it already has access to that folder.
     /// The caller has to be allowed to manage the access of that folder, and the ID has to belong to an existing
     /// folder, so the operation answers 403 for a folder the caller cannot share and 404 for an ID that matches
     /// nothing.
@@ -660,6 +661,7 @@ public class GroupControllerAdditional<T>(
     /// response.
     /// Pass `excludeShared` to keep only the groups that have no access to the folder yet, which is the set to offer
     /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
+    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/folder/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a folder</summary>
@@ -682,16 +684,17 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the groups that can be given access to the file with the ID given in the route, and reports for each
-    /// of them whether it already has access to that file.
-    /// The caller has to be allowed to manage the access of that file, and the ID has to belong to an existing file,
-    /// so the operation answers 403 for a file the caller cannot share and 404 for an ID that matches nothing.
+    /// Returns the groups that can be given access to the file with the ID given in the route, and reports for each of
+    /// them whether it already has access to that file.
+    /// The caller has to be allowed to manage the access of that file, and the ID has to belong to an existing file, so
+    /// the operation answers 403 for a file the caller cannot share and 404 for an ID that matches nothing.
     /// The call is read-only and, unlike the account search, works without a filter: leaving `filterValue` empty
     /// returns every group instead of nothing, and a value narrows the result by group name.
     /// The result is paged by `count` and `startIndex`, with the number of matching groups in the total count of the
     /// response.
-    /// Pass `excludeShared` to keep only the groups that have no access to the file yet, which is the set to offer
-    /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
+    /// Pass `excludeShared` to keep only the groups that have no access to the file yet, which is the set to offer when
+    /// adding new ones; without it every matching group comes back and `shared` tells them apart.
+    /// A user or a guest, who may not read the groups of the portal, gets only the Everyone group.
     /// To search users and groups together, use `GET api/2.0/accounts/file/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a file</summary>

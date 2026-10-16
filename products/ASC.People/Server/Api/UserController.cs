@@ -3211,16 +3211,18 @@ public class UserControllerAdditional<T>(
     : ApiControllerBase
 {
     /// <remarks>
-    /// Returns the accounts that are relevant to the room with the ID given in the route, and reports for each of
-    /// them whether it already has access to that room.
-    /// The caller only needs read access to the room, not the right to manage its access, but a guest may not call
-    /// it at all; an ID that matches no room answers 404.
-    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
-    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
-    /// of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
-    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// Returns the accounts that are relevant to the room with the ID given in the route, and reports for each of them
+    /// whether it already has access.
+    /// The caller only needs read access to the room, not the right to manage its access, but a guest may not call it
+    /// at all; an ID that matches no room answers 404.
+    /// The call is read-only, works without a filter - an empty `filterValue` returns every matching account - and is
+    /// paged by `count` and `startIndex`, with the number of matches in the total count.
+    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
+    /// neither to get both, told apart by `shared`.
+    /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
+    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
+    /// accounts related to it and those with access to the room - each with a short profile without contacts, phone,
+    /// notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/room/{id}/search` instead.
     /// </remarks>
@@ -3246,15 +3248,17 @@ public class UserControllerAdditional<T>(
     }
     /// <remarks>
     /// Returns the accounts that are relevant to the folder with the ID given in the route, and reports for each of
-    /// them whether it already has access to that folder.
-    /// The caller only needs read access to the folder, not the right to manage its access, but a guest may not call
-    /// it at all; an ID that matches no folder answers 404.
-    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
-    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
-    /// of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
-    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// them whether it already has access.
+    /// The caller only needs read access to the folder, not the right to manage its access, but a guest may not call it
+    /// at all; an ID that matches no folder answers 404.
+    /// The call is read-only, works without a filter - an empty `filterValue` returns every matching account - and is
+    /// paged by `count` and `startIndex`, with the number of matches in the total count.
+    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
+    /// neither to get both, told apart by `shared`.
+    /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
+    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
+    /// accounts related to it and those with access to the folder - each with a short profile without contacts, phone,
+    /// notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/folder/{id}/search` instead.
     /// </remarks>
@@ -3279,16 +3283,18 @@ public class UserControllerAdditional<T>(
         }
     }
     /// <remarks>
-    /// Returns the accounts that are relevant to the file with the ID given in the route, and reports for each of
-    /// them whether it already has access to that file.
-    /// The caller only needs read access to the file, not the right to manage its access, but a guest may not call
-    /// it at all; an ID that matches no file answers 404.
-    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
-    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
-    /// of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
-    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// Returns the accounts that are relevant to the file with the ID given in the route, and reports for each of them
+    /// whether it already has access.
+    /// The caller only needs read access to the file, not the right to manage its access, but a guest may not call it
+    /// at all; an ID that matches no file answers 404.
+    /// The call is read-only, works without a filter - an empty `filterValue` returns every matching account - and is
+    /// paged by `count` and `startIndex`, with the number of matches in the total count.
+    /// Pass `excludeShared` to keep only the accounts without access, `includeShared` to keep only those with it, or
+    /// neither to get both, told apart by `shared`.
+    /// A DocSpace administrator sees every account and a room admin every member but only the guests related to it; a
+    /// user sees only the accounts it already works with - the members of its rooms, directly or through a group, the
+    /// accounts related to it and those with access to the file - each with a short profile without contacts, phone,
+    /// notes or location.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/file/{id}/search` instead.
     /// </remarks>
