@@ -762,6 +762,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal Deactivated</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal blocked by the retention policy</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal unblocked</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal Deleted</value>
   </data>

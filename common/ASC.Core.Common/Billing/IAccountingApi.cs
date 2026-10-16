@@ -41,7 +41,7 @@ namespace ASC.Core.Billing;
 public interface IAccountingApi
 {
     [Get("/customer/{portalId}/balance")]
-    Task<Balance> GetCustomerBalanceAsync(string portalId);
+    Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default);
 
     [Post("/session/open")]
     Task<Session> OpenCustomerSessionAsync([Body] SessionOpenOperation data);

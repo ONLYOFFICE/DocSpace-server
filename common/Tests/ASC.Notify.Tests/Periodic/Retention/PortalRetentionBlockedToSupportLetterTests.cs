@@ -1,0 +1,70 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Notify.Tests.Periodic.Retention;
+
+/// <summary>
+/// The note to support that the retention policy has blocked a portal
+/// (<c>portal_retention_blocked_to_support</c>): which portal, whose, and by when it is deleted.
+/// </summary>
+public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalRetentionBlockedToSupportNotifyAction>
+{
+    private const string Domain = "retention-blocked.example.com";
+
+    private static readonly DateTime _deleteOn = new(2026, 12, 3);
+
+    protected override Task InitAsync(PortalRetentionBlockedToSupportNotifyAction action, LetterScope scope)
+    {
+        action.Init(scope.Recipient, Domain, PortalRetentionCategory.FormerPaying, _deleteOn);
+
+        return Task.CompletedTask;
+    }
+
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Domain)
+            .And.Contain(scope.Recipient.Email)
+            .And.Contain(nameof(PortalRetentionCategory.FormerPaying))
+            .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture")
+            .And.NotContain(nameof(ConfirmType.PortalUnblock), "the owner's link signs its holder in as the owner, so support never gets it");
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Subject.Should().Be($"The portal {Domain} has been blocked by the retention policy", "the portal is named, not the product");
+
+        letter.Body.Should().Contain($"The portal {Domain} has been blocked by the retention policy")
+            .And.Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.")
+            .And.Contain("make the portal active again before that date");
+    }
+}
