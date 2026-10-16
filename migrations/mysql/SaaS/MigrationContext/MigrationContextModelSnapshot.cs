@@ -3896,6 +3896,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("LastModified")
                         .HasDatabaseName("last_modified");
 
+                    b.HasIndex("TenantId", "UserGroupId", "Removed")
+                        .HasDatabaseName("tenant_groupid");
+
                     b.ToTable("core_usergroup", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
