@@ -66,6 +66,14 @@ public class PaymentHelper(
         }
     }
 
+    public async Task DemandAiEnabledAsync()
+    {
+        if (!await aiGateway.IsAiEnabledAsync())
+        {
+            throw new InvalidOperationException("AI Tools service is not enabled for the portal");
+        }
+    }
+
     public async Task DemandAdminAsync()
     {
         if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))

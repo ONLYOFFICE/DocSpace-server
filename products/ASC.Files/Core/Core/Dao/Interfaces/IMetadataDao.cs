@@ -93,9 +93,10 @@ public interface IMetadataDao<T>
     /// <summary>
     /// The string values of the files and the folders that contain the text, with their fields, in the order of the
     /// fields within the entry. The text is matched as a substring without regard to case, the way the text search
-    /// confirms its candidates, so every entry the search returned by its metadata has at least one match here.
+    /// confirms its candidates, so every entry the search returned by its metadata has at least one match here. The
+    /// values of the hidden templates are reported only when asked for, as the search finds by them only when asked.
     /// </summary>
-    Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds, string text);
+    Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds, string text, bool includeHiddenTemplates);
     Task DeleteValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
 
     /// <summary>

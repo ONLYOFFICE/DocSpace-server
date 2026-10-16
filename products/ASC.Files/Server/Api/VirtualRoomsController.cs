@@ -1363,7 +1363,7 @@ public class VirtualRoomsCommonController(
             }
         }
 
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter,
             inDto.SubjectId, inDto.SubjectOwnerId, inDto.WithoutTags ?? false, tagNames, inDto.ExcludeSubject ?? false, inDto.Provider ?? ProviderFilter.None,
@@ -1386,7 +1386,7 @@ public class VirtualRoomsCommonController(
     {
         var parentId = await GetRoomsSectionIdAsync(inDto.SearchArea);
 
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.FilterValue, metadataFilter);
     }
@@ -1472,7 +1472,7 @@ public class VirtualRoomsCommonController(
             withAiFolder: withAiFolder,
             metadataFilter: metadataFilter);
 
-        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue);
+        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue, metadataFilter?.IncludeHiddenTemplates ?? false);
 
         return dto.NotFoundIfNull();
     }

@@ -294,12 +294,12 @@ internal class FolderDao(
                 // the string metadata values take part in the general text search: the folders matched by them are
                 // united with the folders matched by their titles
                 q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.Folder, factoryIndexerFolderMetadata, searchIds, searchText, GetSearchText(searchText),
-                    await metadataTemplatesCache.HasTemplatesAsync(), r => r.Id);
+                    await metadataTemplatesCache.HasTemplatesAsync(), metadataFilter?.IncludeHiddenTemplates ?? false, r => r.Id);
             }
             else if (await metadataTemplatesCache.HasTemplatesAsync())
             {
                 var lowerText = GetSearchText(searchText);
-                var globalTextIds = MetadataSearchQuery.TemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.Folder, lowerText);
+                var globalTextIds = MetadataSearchQuery.TemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.Folder, lowerText, metadataFilter?.IncludeHiddenTemplates ?? false);
 
                 q = q.Where(r => r.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(r.Id));
             }
