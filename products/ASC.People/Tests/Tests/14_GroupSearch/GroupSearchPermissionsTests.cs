@@ -55,8 +55,15 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// The owner of the file may search, but a user may not read the groups of the portal, so even a
+    /// group its file is already shared with is not offered - only the Everyone group is. The group
+    /// stays visible in the access list of the file.
+    /// </summary>
     [Fact]
-    public async Task GetGroupsWithFilesShared_FileOwnerUser_GetsGroupsSharedWithOwnFile()
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetGroupsWithFilesShared_FileOwnerUser_IsOfferedOnlyEveryone()
     {
         var group = await CreateGroupAsync();
 
@@ -68,7 +75,7 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         await _peopleClient.Authenticate(user);
         var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        result.First(g => g.Id == group.Id).Shared.Should().Be(true);
+        result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
     }
 
     [Fact]
@@ -131,8 +138,14 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// The owner of the folder may search, but a user may not read the groups of the portal, so even
+    /// a group its folder is already shared with is not offered - only the Everyone group is.
+    /// </summary>
     [Fact]
-    public async Task GetGroupsWithFoldersShared_FolderOwnerUser_GetsGroupsSharedWithOwnFolder()
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetGroupsWithFoldersShared_FolderOwnerUser_IsOfferedOnlyEveryone()
     {
         var group = await CreateGroupAsync();
 
@@ -144,7 +157,7 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         await _peopleClient.Authenticate(user);
         var result = (await _groupSearchApi.GetGroupsWithFoldersSharedAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        result.First(g => g.Id == group.Id).Shared.Should().Be(true);
+        result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
     }
 
     [Fact]

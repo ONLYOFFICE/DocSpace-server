@@ -43,6 +43,12 @@ namespace ASC.People.Tests.Tests._14_GroupSearch;
 public abstract class GroupSearchTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
     /// <summary>
+    /// The system group of every account of the portal, the one group a caller that may not read the
+    /// groups of the portal is still offered when sharing.
+    /// </summary>
+    protected static Guid EveryoneGroupId { get; } = new("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e");
+
+    /// <summary>
     /// Always created by the owner - group membership/management is portal-wide, not scoped to
     /// whichever actor the test is currently impersonating.
     /// </summary>
