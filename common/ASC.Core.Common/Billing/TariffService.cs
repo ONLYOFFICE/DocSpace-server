@@ -1468,6 +1468,40 @@ public class TariffService(
 
     #region Accounting
 
+    public async Task<bool?> HasPositiveBalanceAsync(int tenantId, CancellationToken cancellationToken = default)
+    {
+        if (!accountingClient.Configured)
+        {
+            return false;
+        }
+
+        // Not through GetCustomerBalanceAsync: it answers null both for a portal without a wallet and for
+        // a failed request, and a decision that may block a portal has to tell the two apart. It also
+        // asks the service directly, past the cache, since the answer is only needed on a few days.
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            var balance = await accountingClient.GetCustomerBalanceAsync(portalId, cancellationToken);
+
+            return balance?.SubAccounts?.Any(s => s.Amount > 0) ?? false;
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            return false;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The caller gave up waiting: not knowing is the answer, and the caller says so.
+            return null;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return null;
+        }
+    }
+
     public async Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false)
     {
         if (!accountingClient.Configured)
@@ -1593,6 +1627,34 @@ public class TariffService(
         {
             LogError(error, tenantId.ToString());
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Every page of operations in turn, <see cref="PagedFilter.Limit"/> per page; the requests are sent while the
+    /// result is enumerated. Failures are not caught: the caller decides, and a report task fails instead of
+    /// producing a silently truncated document.
+    /// </summary>
+    public async IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        await foreach (var page in accountingClient.GetCustomerOperationPages(portalId, filter).AsPages().WithCancellation(cancellationToken))
+        {
+            yield return page;
+        }
+    }
+
+    /// <summary>
+    /// Every page of service usage records in turn, as in <see cref="GetCustomerOperationPagesAsync"/>.
+    /// </summary>
+    public async IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        await foreach (var page in accountingClient.GetCustomerServiceUsagePages(portalId, filter).AsPages().WithCancellation(cancellationToken))
+        {
+            yield return page;
         }
     }
 

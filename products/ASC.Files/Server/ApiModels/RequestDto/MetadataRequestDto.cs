@@ -607,7 +607,18 @@ public class FolderMetadataSearch
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
-    /// The text to search for in the titles and in the custom fields.
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    public bool? IncludeHiddenMetadata { get; set; }
+
+    /// <summary>
+    /// The text to search for in the titles and in the string metadata values of the entries, the custom fields and the
+    /// template fields alike; an entry found by its metadata says where in "metadataMatches".
     /// </summary>
     /// <example>ACME</example>
     public string FilterValue { get; set; }
@@ -671,7 +682,18 @@ public class RoomsMetadataSearchRequestDto
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
-    /// The text to search for in the room titles and in the custom fields.
+    /// Whether the text search, and the "metadataMatches" it reports, also look at the values of the hidden metadata
+    /// templates (created with "visible" false for the metadata a service keeps for itself, which the web client never
+    /// shows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.
+    /// "metadataTemplateId" and "metadataFilters" are not concerned: a hidden template or field named there is searched
+    /// either way.
+    /// </summary>
+    /// <example>false</example>
+    public bool? IncludeHiddenMetadata { get; set; }
+
+    /// <summary>
+    /// The text to search for in the room titles and in the string metadata values of the rooms, the custom fields and
+    /// the template fields alike; a room found by its metadata says where in "metadataMatches".
     /// </summary>
     /// <example>ACME</example>
     public string FilterValue { get; set; }

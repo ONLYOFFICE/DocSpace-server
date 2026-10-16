@@ -40,11 +40,11 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
-    public async Task<Balance> GetCustomerBalanceAsync(string portalId)
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default)
     {
         EnsureConfigured();
 
-        return await accountingApi.GetCustomerBalanceAsync(portalId);
+        return await accountingApi.GetCustomerBalanceAsync(portalId, cancellationToken);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
@@ -97,6 +97,41 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         EnsureConfigured();
 
         return await accountingApi.GetCustomerServiceUsageAsync(portalId, filter);
+    }
+
+    /// <summary>
+    /// Every operation matching the filter, one page per request; the page size is <see cref="PagedFilter.Limit"/>,
+    /// <see cref="PagedFilter.Offset"/> must stay unset. Requests are sent while the result is enumerated.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="PagedFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<Report, Operation> GetCustomerOperationPages(string portalId, OperationFilter filter)
+    {
+        EnsureConfigured();
+        EnsureNoOffset(filter);
+
+        return accountingApi.GetCustomerOperationPages(portalId, filter);
+    }
+
+    /// <summary>
+    /// Every service usage record matching the filter, paged as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="PagedFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<UsageReport, CustomerServiceUsage> GetCustomerServiceUsagePages(string portalId, UsageFilter filter)
+    {
+        EnsureConfigured();
+        EnsureNoOffset(filter);
+
+        return accountingApi.GetCustomerServiceUsagePages(portalId, filter);
+    }
+
+    // The page offset travels in a query parameter of its own, so a filter offset would put a second "offset"
+    // into every request and leave it to the accounting service which one wins.
+    private static void EnsureNoOffset(PagedFilter filter)
+    {
+        if (filter?.Offset != null)
+        {
+            throw new ArgumentException($"{nameof(PagedFilter.Offset)} must be unset for the paged methods.", nameof(filter));
+        }
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
@@ -306,13 +341,16 @@ public class PagedFilter : DateRangeFilter
     /// <summary>
     /// The number of items to skip before starting to return results. Used for pagination.
     /// </summary>
-    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    /// <remarks>
+    /// For a single page only. Leave it unset for the paged methods (<see cref="AccountingClient.GetCustomerOperationPages"/>,
+    /// <see cref="AccountingClient.GetCustomerServiceUsagePages"/>): they send the offset in a parameter of their own.
+    /// </remarks>
     public int? Offset { get; set; }
 
     /// <summary>
     /// The maximum number of items to return in the response.
     /// </summary>
-    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    /// <remarks>For the paged methods this is the page size of every request.</remarks>
     public int? Limit { get; set; }
 
     /// <summary>

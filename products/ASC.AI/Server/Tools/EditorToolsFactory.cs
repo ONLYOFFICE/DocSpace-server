@@ -109,7 +109,7 @@ public class EditorToolsFactory(
 
     private async Task<FileCreateTarget?> TryCreateAgentTargetAsync(Folder<int> agent)
     {
-        if (!await fileSecurity.CanUseChatAsync(agent))
+        if (!await fileSecurity.CanUseAiAsync(agent))
         {
             return null;
         }

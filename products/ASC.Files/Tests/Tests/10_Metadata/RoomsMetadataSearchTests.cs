@@ -79,6 +79,53 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         var rooms = await data.SearchByTextAsync(marker, expected: [data.MatchingRoomId]);
 
         rooms.RoomIds().Should().Equal(data.MatchingRoomId);
+
+        // the rooms page says where the text was met, the way the folder listing does
+        var match = rooms.Folders.Single().MetadataMatches.Should().ContainSingle().Which;
+        match.FieldName.Should().Be("Reference");
+        match.Value.Should().Be(marker);
+        match.TemplateId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Rooms_TextSearch_FindsTheRoomByItsTemplateFieldValue()
+    {
+        var data = await ArrangeAsync();
+
+        // the string values of the template fields take part in the free text search too, and the page names the field
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+
+        await data.Api.SetFolderValuesAsync(data.MatchingRoomId, [new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = marker }], TestContext.Current.CancellationToken);
+
+        var rooms = await data.SearchByTextAsync(marker, expected: [data.MatchingRoomId]);
+
+        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
+
+        var match = rooms.Folders.Single().MetadataMatches.Should().ContainSingle().Which;
+        match.TemplateId.Should().Be(data.TemplateId);
+        match.FieldId.Should().Be(data.FieldId(ClientField));
+        match.FieldName.Should().Be(ClientField);
+        match.Value.Should().Be(marker);
+    }
+
+    [Fact]
+    public async Task Rooms_TextSearch_SkipsTheHiddenTemplateValues_UnlessAsked()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+        var hidden = await data.Api.CreateTemplateAsync("Hidden " + Guid.NewGuid().ToString()[..8],
+            [new MetadataFieldPayload { Name = "Reference", Type = 0 }], TestContext.Current.CancellationToken, visible: false);
+
+        await data.Api.AssignFolderTemplatesAsync(data.BareRoomId, [hidden.Id], cascade: false, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderValuesAsync(data.BareRoomId, [new MetadataValuePayload { FieldId = hidden.Field("Reference").Id, StringValue = marker }], TestContext.Current.CancellationToken);
+
+        // the presence is seen first, with the hidden templates asked for, so the absence below is not the indexing lag
+        var included = await data.SearchByTextAsync(marker, expected: [data.BareRoomId], includeHiddenMetadata: true);
+        included.RoomIds().Should().Equal(data.BareRoomId);
+
+        var excluded = await data.SearchByTextAsync(marker, expected: []);
+        excluded.RoomIds().Should().BeEmpty("the web client never shows a hidden template, so it must not find by its values either");
     }
 
     [Fact]
@@ -183,10 +230,10 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        // the operator used to be ignored: "contains" ran as an exact match and returned nothing, without a hint why
+        // the operator used to be ignored: an unknown one ran as an exact match and returned nothing, without a hint why
         using var response = await data.Api.GetRoomsResponseAsync(
             metadataTemplateId: data.TemplateId,
-            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "contains", value = "ACM" }],
+            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "startswith", value = "ACM" }],
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

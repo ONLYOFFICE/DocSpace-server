@@ -31,34 +31,40 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The first warning a free portal gets (<c>saas_admin_startup_warning_after_three_months_v1</c>), sent to
-/// the owner after three months without activity. The six-month letter and the removal follow.
+/// The block of a lapsed portal, as its payer reads it (<c>saas_owner_retention_blocked</c>): the payer is
+/// not the owner, so the letter carries no unblocking link - that link signs its holder in as the owner -
+/// and sends the payer to support instead.
 /// </summary>
-public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
+public class SaasOwnerRetentionBlockedPayerLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionBlockedNotifyAction>
 {
-    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPaying;
+
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.Blocked;
+
+    protected override string PreviewName(SaasOwnerRetentionBlockedNotifyAction action) => action.ID + "_payer";
+
+    protected override UserInfo Reader(LetterScope scope)
+    {
+        var payer = (UserInfo)scope.Recipient.Clone();
+        payer.Id = Guid.NewGuid();
+
+        return payer;
+    }
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl(scope))
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(Caption("ButtonContactSupport", scope), "the payer is sent to support")
+            .And.NotContain(Caption("ButtonUnblockPortal", scope))
+            .And.NotContain(nameof(ConfirmType.PortalUnblock), "the owner's link never goes to anyone but the owner");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
-
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for 3 months.")
-            .And.Contain("will be deleted after 6 months of inactivity")
-            .And.Contain($"Simply log in now to keep your {logoText} active");
+        letter.Body.Should().Contain("has ended, we")
+            .And.Contain("Just get in touch with our support team before")
+            .And.NotContain("Just unblock your space");
     }
 }

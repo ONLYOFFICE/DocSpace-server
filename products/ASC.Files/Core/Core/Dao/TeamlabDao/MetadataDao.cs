@@ -767,6 +767,22 @@ internal class MetadataDao(
         }
     }
 
+    public async Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<int> fileIds, IEnumerable<int> folderIds, string text, bool includeHiddenTemplates)
+    {
+        var lowerText = GetSearchText(text);
+
+        if (string.IsNullOrEmpty(lowerText))
+        {
+            return [];
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.MetadataTextMatchesAsync(tenantId, fileIds, folderIds, lowerText, includeHiddenTemplates).ToListAsync();
+    }
+
     public async Task DeleteValuesAsync(int entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

@@ -73,6 +73,67 @@ export function attachmentLimitError(userMessage: unknown): string | null {
   return null;
 }
 
+const MESSAGE_ROLES: ReadonlySet<string> = new Set(["user", "assistant", "system"]);
+
+// Whether a message body carries something worth storing: non-blank text
+// (a string, a string part or a `text` part) or any typed non-text part - a
+// file or image attachment, a tool call, a reasoning block. Mirrors the
+// send path's prompt check, which accepts an attachment-only message, and
+// additionally lets a tool-call-only assistant message through, since the
+// widget persists one when it cancels a client-side tool.
+function hasMessageContent(content: unknown): boolean {
+  if (typeof content === "string") {
+    return content.trim().length > 0;
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  for (const part of content) {
+    if (typeof part === "string") {
+      if (part.trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (!isObject(part)) {
+      continue;
+    }
+    const type = part["type"];
+    if (type === "text") {
+      if (typeof part["text"] === "string" && part["text"].trim().length > 0) {
+        return true;
+      }
+      continue;
+    }
+    if (typeof type === "string" && type.length > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Validation error for a message handed to the thread storage routes, or
+ * `null` when it is storable: an object with a known `role` and a content
+ * that is a non-blank string or a part list with at least one real part.
+ * The storage keeps whatever it is given verbatim, so an empty or
+ * role-less body used to be stored and served back as a message
+ * (Bugs 84409, 84410, 84412, 84413).
+ */
+export function invalidMessageError(message: unknown): string | null {
+  if (!isObject(message)) {
+    return "message is required and must be an object";
+  }
+  const role = message["role"];
+  if (typeof role !== "string" || !MESSAGE_ROLES.has(role)) {
+    return "message.role must be one of user, assistant, system";
+  }
+  if (!hasMessageContent(message["content"])) {
+    return "message.content must be a non-empty string or a list with at least one non-empty part";
+  }
+  return null;
+}
+
 export type TypedRequest<ReqBody = unknown, ReqQuery = Record<string, unknown>> = Request<
   Record<string, string>,
   unknown,
@@ -190,9 +251,11 @@ export function asyncHandler<ReqBody = unknown, ReqQuery = Record<string, unknow
     try {
       await handler(req, res, next);
     } catch (err) {
-      logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+      const { status, message } = clientError(err);
+      if (status >= 500) {
+        logger.error(`${req.method} ${req.originalUrl} failed: ${errorDetails(err)}`);
+      }
       if (!res.headersSent) {
-        const { status, message } = clientError(err);
         res.status(status).json({ error: message });
       } else {
         res.end();

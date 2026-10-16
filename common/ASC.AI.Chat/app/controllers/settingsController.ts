@@ -31,6 +31,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService } from "../storage/httpClient.js";
+import { isObject } from "../narrow.js";
 import { asyncHandler } from "./_helpers.js";
 
 // Thin proxy for the .NET AI settings endpoints (SettingsController,
@@ -63,9 +64,20 @@ export const settingsController = {
     res.json(settings);
   }),
 
-  // PUT config/user → `PUT internal/ai/config/user`.
+  // PUT config/user → `PUT internal/ai/config/user`. The AI service keeps
+  // the current value for a field the body does not carry, so a body the
+  // JSON parser could not read (text/plain, no content type) arrived as `{}`
+  // and answered 200 having stored nothing (Bug 84430). The one field the
+  // settings carry is required here.
   setUserSettings: asyncHandler(async (req, res) => {
-    const settings = await aiService.put("/config/user", req.body ?? {}, { raw: true });
+    const body: unknown = req.body;
+    if (!isObject(body) || typeof body["chatRecommendedModelVisible"] !== "boolean") {
+      res.status(400).json({
+        error: "chatRecommendedModelVisible is required and must be a boolean",
+      });
+      return;
+    }
+    const settings = await aiService.put("/config/user", body, { raw: true });
     res.json(settings);
   }),
 

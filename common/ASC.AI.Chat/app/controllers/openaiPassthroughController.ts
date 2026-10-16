@@ -335,13 +335,18 @@ function commitJsonHeaders(res: Response): void {
 // the server log where it cannot leak the provider URL.
 function writeSseError(res: Response, detail: string, status: number): void {
   let envelope: unknown;
-  try {
-    const parsed: unknown = JSON.parse(detail);
-    if (isObject(parsed) && isObject(parsed["error"])) {
-      envelope = parsed;
+  // A 5xx envelope is never the provider's own OpenAI-shaped one worth
+  // relaying: the AI service's carries a stack trace, the gateway's its
+  // internals. Those stay in the log the caller already wrote.
+  if (status < 500) {
+    try {
+      const parsed: unknown = JSON.parse(detail);
+      if (isObject(parsed) && isObject(parsed["error"])) {
+        envelope = parsed;
+      }
+    } catch {
+      /* fall through to the generic envelope */
     }
-  } catch {
-    /* fall through to the generic envelope */
   }
   envelope ??= {
     error: {
@@ -400,27 +405,113 @@ function upstreamAbortSignal(res: Response): AbortSignal {
 }
 
 // Hard cap on the buffered body, enforced both up front (declared
-// Content-Length) and while reading (the nginx `location ~* /ai` enforces
-// the same limit) — legitimate vision/OCR data URLs stay well below.
+// Content-Length) and while reading — legitimate vision/OCR data URLs stay
+// well below. A third-party provider is called directly and keeps the
+// generous ceiling. The ONLYOFFICE provider is reached through the AI
+// service, which runs on Kestrel's default 30,000,000-byte request cap and
+// answers a bigger body with an unmapped 500 carrying its stack trace, so
+// for it the 413 has to fire here first (Bug 84415).
 const MAX_BODY_BYTES = 100 * 1024 * 1024;
+const MAX_ONLYOFFICE_BODY_BYTES = 28 * 1024 * 1024;
+
+function maxBodyBytes(providerType: string | undefined): number {
+  return providerType === "onlyoffice" ? MAX_ONLYOFFICE_BODY_BYTES : MAX_BODY_BYTES;
+}
 
 class BodyTooLargeError extends Error {}
 
 // Read the raw request body into a single buffer, rejecting anything over
-// MAX_BODY_BYTES as it arrives (the declared-length check upstream only
-// catches honest clients).
-async function readRequestBody(req: Readable): Promise<Buffer> {
+// `limit` as it arrives (the declared-length check upstream only catches
+// honest clients).
+async function readRequestBody(req: Readable, limit: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
     const buf: Buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
     total += buf.length;
-    if (total > MAX_BODY_BYTES) {
+    if (total > limit) {
       throw new BodyTooLargeError();
     }
     chunks.push(buf);
   }
   return Buffer.concat(chunks);
+}
+
+type ShapedBody = { body: Buffer } | { error: string };
+
+function isJsonContentType(contentType: string | undefined): boolean {
+  return (contentType ?? "").toLowerCase().includes("json");
+}
+
+// The one parse this route spends on the plugin's body (only JSON, only up
+// to `MAX_PARSE_BYTES`; a bigger or non-JSON body is forwarded untouched as
+// before), serving two purposes:
+//
+// - `images/generations`: check the documented OpenAI fields, so a body the
+//   provider would answer with a 500 is refused here with a 400 (Bug 84414).
+//   Only those fields — the route is a passthrough by contract and a provider
+//   may accept extras of its own.
+// - `chat/completions`: fill in `model` from the profile when the body
+//   names none, which is what this route has always documented (Bug 84416).
+//   A `model` the body carries wins, so the plugin's own choice stands.
+function shapeBody(
+  body: Buffer,
+  contentType: string | undefined,
+  subPath: string,
+  modelId: string | undefined,
+): ShapedBody {
+  if (!isJsonContentType(contentType) || body.length > MAX_PARSE_BYTES) {
+    return { body };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body.toString("utf8"));
+  } catch {
+    return { body };
+  }
+  if (!isObject(parsed)) {
+    return { body };
+  }
+  if (subPath === "images/generations") {
+    const error = imageRequestError(parsed);
+    return error ? { error } : { body };
+  }
+  if (subPath === "chat/completions" && parsed["model"] === undefined && modelId) {
+    return { body: Buffer.from(JSON.stringify({ model: modelId, ...parsed }), "utf8") };
+  }
+  return { body };
+}
+
+function imageRequestError(body: Record<string, unknown>): string | undefined {
+  const prompt = body["prompt"];
+  if (typeof prompt !== "string" || prompt.trim().length === 0) {
+    return "prompt is required and must be a non-empty string";
+  }
+  const n = body["n"];
+  if (n !== undefined && n !== null && (!Number.isInteger(n) || (n as number) < 1)) {
+    return "n must be a positive integer";
+  }
+  for (const field of ["model", "size", "quality", "style", "response_format"]) {
+    const value = body[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      return `${field} must be a string`;
+    }
+  }
+  return undefined;
+}
+
+// Everything the provider or the hop in front of it answers with a 5xx is
+// kept out of the reply: the AI service's error envelope carries the
+// exception's stack trace and the gateway's host, and the gateway's own 500
+// names its Go types. The detail goes to the log; the client gets a fixed
+// 502 envelope (Bugs 84414, 84415, 84433, 84434). 4xx answers keep passing
+// through — the plugin's SDK raises them as APIErrors with the provider's
+// own message.
+async function logUpstreamFailure(route: string, upstream: globalThis.Response): Promise<void> {
+  const detail = await upstream.text().catch(() => "");
+  logger.error(
+    `${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`,
+  );
 }
 
 function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = false) {
@@ -454,8 +545,9 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     const search = remaining.length > 0 ? `?${remaining}` : "";
     const target = `${base}/${subPath}${search}`;
 
+    const bodyLimit = maxBodyBytes(profile.providerType);
     const declaredLength = Number(req.headers["content-length"]);
-    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    if (Number.isFinite(declaredLength) && declaredLength > bodyLimit) {
       openAiError(res, 413, "Request body too large", "invalid_request_error");
       return;
     }
@@ -470,7 +562,7 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
     // serialized-JSON requests byte for byte.
     let body: Buffer;
     try {
-      body = await readRequestBody(req);
+      body = await readRequestBody(req, bodyLimit);
     } catch (err) {
       if (err instanceof BodyTooLargeError) {
         openAiError(res, 413, "Request body too large", "invalid_request_error");
@@ -480,6 +572,13 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       logger.warn(`openai passthrough: reading request body failed: ${err}`);
       return;
     }
+
+    const shaped = shapeBody(body, req.headers["content-type"], subPath, profile.modelId);
+    if ("error" in shaped) {
+      openAiError(res, 400, shaped.error, "invalid_request_error");
+      return;
+    }
+    body = shaped.body;
 
     // Everything the ONLYOFFICE provider adds on the engine paths, added here
     // by the host instead — the engine is not involved on this route. Only for
@@ -606,6 +705,13 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
         logger.error(
           `openai passthrough ${subPath}: padded reply met a text/event-stream body — the round cannot be relayed`,
         );
+      } else if (upstream.status >= 500) {
+        // The 200 is on the wire, so the failure is reported inside the body
+        // — with the generic envelope, never the upstream's own.
+        await logUpstreamFailure(`openai passthrough ${subPath}`, upstream);
+        res.write(JSON.stringify(errorEnvelope("Upstream request failed", "server_error")));
+        res.end();
+        return;
       } else if (
         !upstream.ok ||
         !(contentType ?? "application/json").toLowerCase().includes("json")
@@ -637,8 +743,14 @@ function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = fal
       return;
     }
 
+    if (!earlyHeartbeat && upstream.status >= 500) {
+      await logUpstreamFailure(`openai passthrough ${subPath}`, upstream);
+      openAiError(res, 502, "Upstream request failed", "server_error");
+      return;
+    }
+
     if (!earlyHeartbeat) {
-      // Provider errors (4xx/5xx) pass through with their status and body so
+      // Provider errors (4xx) pass through with their status and body so
       // the plugin's SDK raises a proper APIError instead of a generic one.
       res.status(upstream.status);
       if (contentType) {

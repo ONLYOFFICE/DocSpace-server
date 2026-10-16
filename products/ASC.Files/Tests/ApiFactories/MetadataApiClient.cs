@@ -458,7 +458,8 @@ public class MetadataApiClient(HttpClient client)
         int? searchArea = null,
         int? roomType = null,
         string? rawMetadataFilters = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
         var query = new List<string>();
 
@@ -489,6 +490,11 @@ public class MetadataApiClient(HttpClient client)
             query.Add($"type={roomType.Value}");
         }
 
+        if (includeHiddenMetadata.HasValue)
+        {
+            query.Add($"includeHiddenMetadata={(includeHiddenMetadata.Value ? "true" : "false")}");
+        }
+
         var path = "api/2.0/files/rooms" + (query.Count > 0 ? "?" + string.Join('&', query) : "");
 
         return await client.GetAsync(path, cancellationToken);
@@ -500,9 +506,10 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         int? searchArea = null,
         int? roomType = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
-        using var response = await GetRoomsResponseAsync(metadataTemplateId, metadataFilters, filterValue, searchArea, roomType, cancellationToken: cancellationToken);
+        using var response = await GetRoomsResponseAsync(metadataTemplateId, metadataFilters, filterValue, searchArea, roomType, cancellationToken: cancellationToken, includeHiddenMetadata: includeHiddenMetadata);
 
         return await ReadAsync<RoomsContentResponse>(response, cancellationToken);
     }
@@ -522,9 +529,10 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         bool? withSubFolders = null,
         CancellationToken cancellationToken = default,
-        string? extension = null)
+        string? extension = null,
+        bool? includeHiddenMetadata = null)
     {
-        using var response = await GetFolderContentResponseAsync(folderId, metadataTemplateId, metadataFilters, filterValue, withSubFolders, extension, cancellationToken);
+        using var response = await GetFolderContentResponseAsync(folderId, metadataTemplateId, metadataFilters, filterValue, withSubFolders, extension, cancellationToken, includeHiddenMetadata);
 
         return await ReadAsync<FolderContentResponse>(response, cancellationToken);
     }
@@ -539,7 +547,8 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         bool? withSubFolders = null,
         string? extension = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
         var query = new List<string>();
 
@@ -566,6 +575,11 @@ public class MetadataApiClient(HttpClient client)
         if (withSubFolders.HasValue)
         {
             query.Add($"withSubFolders={(withSubFolders.Value ? "true" : "false")}");
+        }
+
+        if (includeHiddenMetadata.HasValue)
+        {
+            query.Add($"includeHiddenMetadata={(includeHiddenMetadata.Value ? "true" : "false")}");
         }
 
         var path = $"api/2.0/files/{folderId}" + (query.Count > 0 ? "?" + string.Join('&', query) : "");
@@ -870,4 +884,16 @@ public class RoomEntryResponse
     public int Id { get; init; }
     public string Title { get; init; } = "";
     public List<int>? AssignedMetadataTemplates { get; init; }
+    public List<MetadataMatchResponse>? MetadataMatches { get; init; }
+}
+
+/// <summary>
+/// Where the text search met the metadata of an entry: the field and the whole stored value.
+/// </summary>
+public class MetadataMatchResponse
+{
+    public int? TemplateId { get; init; }
+    public int? FieldId { get; init; }
+    public string FieldName { get; init; } = "";
+    public string Value { get; init; } = "";
 }

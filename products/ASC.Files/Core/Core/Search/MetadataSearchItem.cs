@@ -42,10 +42,17 @@ public class MetadataFieldValueSearch
     public int FieldId { get; set; }
 
     /// <summary>
-    /// The string value lowered at write time so the term query is case-insensitive.
+    /// The string value lowered at write time so the term query of the exact match is case-insensitive.
     /// </summary>
     [Keyword]
     public string StringValue { get; set; }
+
+    /// <summary>
+    /// The same string value split into words by the analyzer of the titles, for the substring condition: a wildcard
+    /// per word of the condition, the way a title is searched.
+    /// </summary>
+    [Text(Analyzer = "whitespacecustom")]
+    public string StringText { get; set; }
 
     public DateTime? DateValue { get; set; }
     public long? NumberValue { get; set; }
@@ -73,8 +80,8 @@ public abstract class MetadataSearchItemBase : ISearchItem
     public List<MetadataFieldValueSearch> Values { get; set; }
 
     /// <summary>
-    /// The concatenated string values of the globally visible system template fields.
-    /// They participate in the general text search without selecting a template.
+    /// The concatenated string values of the entry, whatever template their fields belong to (the custom fields of the
+    /// hidden system template included). They take part in the general text search without selecting a template.
     /// </summary>
     [Text(Analyzer = "whitespacecustom")]
     public string GlobalText { get; set; }
@@ -88,18 +95,22 @@ public abstract class MetadataSearchItemBase : ISearchItem
     }
 }
 
+// The full indexing pass is incremental by the modified date of the values and keeps its last-indexed mark per index
+// name, so a change of what a document holds (the global text used to carry the system template values only) is rolled
+// out under a new name: the first pass creates the index and rebuilds every document from the database, and until then
+// the writes are skipped and the searches fall back to SQL.
 [Transient]
 public class DbFileMetadataSearch : MetadataSearchItemBase
 {
     [Ignore]
-    public override string IndexName => "files_metadata_file";
+    public override string IndexName => "files_metadata_file_v2";
 }
 
 [Transient]
 public class DbFolderMetadataSearch : MetadataSearchItemBase
 {
     [Ignore]
-    public override string IndexName => "files_metadata_folder";
+    public override string IndexName => "files_metadata_folder_v2";
 }
 
 [Scope]
@@ -290,13 +301,6 @@ public static class MetadataSearchHelper
 
         var fieldTemplates = fields.ToDictionary(f => f.Id, f => f.TemplateId);
 
-        var tenantIds = rows.Select(r => r.TenantId).Distinct().ToList();
-
-        var systemTemplates = await filesDbContext.MetadataTemplates
-            .Where(t => t.IsSystem && tenantIds.Contains(t.TenantId))
-            .Select(t => new { t.TenantId, t.Id })
-            .ToDictionaryAsync(t => t.TenantId, t => t.Id);
-
         var ids = rows.Select(r => r.EntryId).Distinct().ToList();
 
         Dictionary<(int TenantId, int EntryId), int> parents;
@@ -332,8 +336,6 @@ public static class MetadataSearchHelper
             var values = new List<MetadataFieldValueSearch>();
             var globalTextParts = new List<string>();
 
-            systemTemplates.TryGetValue(entryGroup.Key.TenantId, out var systemTemplateId);
-
             foreach (var fieldGroup in entryGroup.GroupBy(r => r.FieldId))
             {
                 if (!fieldTemplates.TryGetValue(fieldGroup.Key, out var templateId))
@@ -353,12 +355,14 @@ public static class MetadataSearchHelper
                     TemplateId = templateId,
                     FieldId = fieldGroup.Key,
                     StringValue = optionIds.Count > 0 ? null : first.ValueString?.ToLowerInvariant(),
+                    StringText = optionIds.Count > 0 ? null : first.ValueString,
                     DateValue = optionIds.Count > 0 ? null : first.ValueDate,
                     NumberValue = optionIds.Count > 0 ? null : first.ValueNumber,
                     OptionIds = optionIds.Count > 0 ? optionIds : null
                 });
 
-                if (systemTemplateId != 0 && templateId == systemTemplateId && !string.IsNullOrEmpty(first.ValueString))
+                // every string value feeds the free text search, the custom fields and the template fields alike
+                if (optionIds.Count == 0 && !string.IsNullOrEmpty(first.ValueString))
                 {
                     globalTextParts.Add(first.ValueString);
                 }
