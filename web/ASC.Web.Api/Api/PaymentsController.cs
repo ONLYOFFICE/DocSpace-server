@@ -1621,12 +1621,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/{id}</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service limit with its thresholds, period and state", typeof(ServiceLimit))]
+    [SwaggerResponse(200, "The service limit with its thresholds, period and state", typeof(ServiceLimitDto))]
     [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
     [HttpGet("servicelimit/{id:int}")]
-    public async Task<ServiceLimit> GetServiceLimit(ServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitDto> GetServiceLimit(ServiceLimitRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1636,7 +1636,7 @@ public class PaymentController(
 
         var serviceLimit = await tariffService.GetServiceLimitAsync(tenant.Id, inDto.Id);
 
-        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
+        return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
     }
 
     /// <remarks>
@@ -1656,12 +1656,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/{id}/usage</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "What was spent against the limit in its current period and what is left", typeof(ServiceLimitUsage))]
+    [SwaggerResponse(200, "What was spent against the limit in its current period and what is left", typeof(ServiceLimitUsageDto))]
     [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
     [HttpGet("servicelimit/{id:int}/usage")]
-    public async Task<ServiceLimitUsage> GetServiceLimitUsage(ServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitUsageDto> GetServiceLimitUsage(ServiceLimitRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1671,7 +1671,7 @@ public class PaymentController(
 
         var usage = await tariffService.GetServiceLimitUsageAsync(tenant.Id, inDto.Id);
 
-        return usage ?? throw new ItemNotFoundException("Service limit could not be found");
+        return usage?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
     }
 
     /// <remarks>
@@ -1688,11 +1688,11 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/customer/{serviceName}</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The portal-wide limit of the service, or an empty result when the portal has no billing customer", typeof(ServiceLimit))]
+    [SwaggerResponse(200, "The portal-wide limit of the service, or an empty result when the portal has no billing customer", typeof(ServiceLimitDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The service is not a wallet service of this installation, or no portal-wide limit is set on it")]
     [HttpGet("servicelimit/customer/{serviceName}")]
-    public async Task<ServiceLimit> GetCustomerServiceLimit(CustomerServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitDto> GetCustomerServiceLimit(CustomerServiceLimitRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1710,7 +1710,7 @@ public class PaymentController(
 
         var serviceLimit = await tariffService.GetCustomerServiceLimitAsync(tenant.Id, serviceName);
 
-        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
+        return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
     }
 
     /// <remarks>
@@ -1727,12 +1727,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "A page of the user limits of the service with its paging information, or an empty result when the portal has no billing customer", typeof(ServiceLimitReport))]
+    [SwaggerResponse(200, "A page of the user limits of the service with its paging information, or an empty result when the portal has no billing customer", typeof(ServiceLimitReportDto))]
     [SwaggerResponse(400, "`offset` is negative, `limit` is outside the allowed page size, or `orderBy` or `orderType` is not one of its values")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The service is not a wallet service of this installation")]
     [HttpGet("servicelimit/customer/{serviceName}/participants")]
-    public async Task<ServiceLimitReport> GetParticipantServiceLimits(ParticipantServiceLimitsRequestDto inDto)
+    public async Task<ServiceLimitReportDto> GetParticipantServiceLimits(ParticipantServiceLimitsRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1756,7 +1756,7 @@ public class PaymentController(
             OrderType = inDto.OrderType
         };
 
-        return await tariffService.GetParticipantServiceLimitsAsync(tenant.Id, serviceName, filter);
+        return (await tariffService.GetParticipantServiceLimitsAsync(tenant.Id, serviceName, filter))?.Map();
     }
 
     /// <remarks>
@@ -1776,12 +1776,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimit))]
+    [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimitDto))]
     [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given, a threshold is negative or above its maximum, or `period` is not one of its values")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, the service is not a wallet service of this installation, or the user does not exist")]
     [HttpPost("servicelimit")]
-    public async Task<ServiceLimit> CreateServiceLimit(CreateServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitDto> CreateServiceLimit(CreateServiceLimitRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1811,7 +1811,7 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceName, participantName);
 
-        return serviceLimit;
+        return serviceLimit.Map();
     }
 
     /// <remarks>
@@ -1831,12 +1831,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimit))]
+    [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimitDto))]
     [SwaggerResponse(400, "The ID is zero or negative, or a threshold is negative or above its maximum")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
     [HttpPut("servicelimit")]
-    public async Task<ServiceLimit> UpdateServiceLimit(UpdateServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitDto> UpdateServiceLimit(UpdateServiceLimitRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1849,7 +1849,7 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceName, serviceLimit.Participant);
 
-        return serviceLimit;
+        return serviceLimit.Map();
     }
 
     /// <remarks>
