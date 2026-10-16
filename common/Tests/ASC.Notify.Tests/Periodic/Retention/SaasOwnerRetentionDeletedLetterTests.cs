@@ -31,42 +31,38 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The last warning before a free portal is removed (<c>saas_admin_startup_warning_after_half_year_v1</c>),
-/// sent to the owner after six months without activity. The portal goes a week later.
+/// The portal has been deleted by the retention policy (<c>saas_owner_retention_deleted</c>). The removal
+/// renames the alias before the letter is rendered, so the letter names the address the job captured
+/// before it, as text rather than a link.
 /// </summary>
-public class SaasAdminStartupWarningAfterHalfYearLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>
+public class SaasOwnerRetentionDeletedLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletedNotifyAction>
 {
-    private static string FeedbackUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "registrationcanceled", culture, "https://www.onlyoffice.com/registration-canceled.aspx");
-    }
+    private const string Domain = "retention-deleted.example.com";
 
-    private static string LegalTermsUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
-    }
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
+
+    protected override PortalRetentionLetter? Letter => null;
+
+    protected override string? PortalDomain => Domain;
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", scope.Culture))
-            .And.Contain(FeedbackUrl(scope.Culture))
-            .And.Contain(LegalTermsUrl(scope.Culture))
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(Domain, "the letter names the portal by the address it had")
+            .And.Contain(Caption("ButtonShareFeedback", scope))
+            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "docspace_deleted.gif"));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space has been deleted");
 
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for more than half a year.")
+        letter.Body.Should().Contain("Your space has been deleted")
+            .And.Contain("used for a long time")
+            .And.Contain("a try", "a free portal is thanked for trying the product")
             .And.Contain("Privacy Policy")
-            .And.Contain("just enter it and make any action");
+            .And.Contain("create a new space");
     }
 }
