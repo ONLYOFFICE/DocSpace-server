@@ -228,6 +228,14 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
+    /// The personal spending limit set on the AI tools for this user. Null when the user has no personal limit, when
+    /// the portal has no billing service, or when the caller is neither a DocSpace administrator nor the user; a
+    /// limit set for the portal as a whole is not reflected here. The value can lag a change made outside the portal
+    /// by a few minutes.
+    /// </summary>
+    public UserServiceLimitDto AiToolsLimit { get; set; }
+
+    /// <summary>
     /// The current login event ID.
     /// </summary>
     /// <example>123</example>
@@ -279,6 +287,7 @@ public class EmployeeFullDtoHelper(
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+        ITariffService tariffService,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
@@ -396,6 +405,11 @@ public class EmployeeFullDtoHelper(
             }
         }
 
+        if (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID)
+        {
+            result.AiToolsLimit = await GetAiToolsLimitAsync(tenant.Id, userInfo.Id);
+        }
+
         // if (userInfo.Sex.HasValue)
         // {
         //     result.Sex = userInfo.Sex.Value ? "male" : "female";
@@ -509,5 +523,27 @@ public class EmployeeFullDtoHelper(
         {
             employeeWraperFull.Contacts = contacts;
         }
+    }
+
+    // Reads the cached list of all user limits of the service, so a page of users costs the accounting service one
+    // request at most instead of one per user.
+    private async Task<UserServiceLimitDto> GetAiToolsLimitAsync(int tenantId, Guid userId)
+    {
+        var aiToolsQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
+        if (string.IsNullOrEmpty(aiToolsQuota?.ServiceName))
+        {
+            return null;
+        }
+
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(tenantId, aiToolsQuota.ServiceName);
+
+        // A switched-off limit stays in the history next to the one in force, so the one in force wins.
+        var serviceLimit = serviceLimits
+            .Where(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId)
+            .OrderByDescending(limit => limit.Enabled)
+            .ThenByDescending(limit => limit.Modified)
+            .FirstOrDefault();
+
+        return serviceLimit?.ToUserServiceLimitDto();
     }
 }

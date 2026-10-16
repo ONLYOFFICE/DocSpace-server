@@ -102,6 +102,15 @@ public interface IAccountingApi
     [Get("/serviceLimit/customer/{portalId}/{serviceName}/participants")]
     Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string serviceName, [Query] ServiceLimitFilter filter);
 
+    /// <summary>
+    /// All the limits set on a service for the customer participants, page by page; paging as in
+    /// <see cref="GetCustomerOperationPages"/>. Leave <see cref="ServiceLimitFilter.Offset"/> unset - the offset
+    /// travels in its own query parameter.
+    /// </summary>
+    [Get("/serviceLimit/customer/{portalId}/{serviceName}/participants")]
+    [Paged(Items = nameof(ServiceLimitReport.Collection), Total = nameof(ServiceLimitReport.TotalQuantity))]
+    PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string serviceName, [Query] ServiceLimitFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
     [Post("/serviceLimit")]
     Task<ServiceLimit> CreateServiceLimitAsync([Body] ServiceLimitCreateOperation data);
 

@@ -40,14 +40,20 @@ namespace ASC.Core.Common.Tests;
 /// </summary>
 /// <remarks>
 /// The tenant's balance is seeded into the cache under the key <see cref="TariffService"/> reads it from, so the
-/// balance lookup never reaches the portal key, the distributed lock or the accounting service. Every other
-/// dependency of <see cref="TariffService"/> is unused on this path and passed as null.
+/// balance lookup never reaches the portal key, the distributed lock or the accounting service. The portal key comes
+/// from a real <see cref="CoreSettings"/> over a tenant service that knows no tenants, and every other dependency of
+/// <see cref="TariffService"/> is unused on these paths and passed as null.
 /// </remarks>
 public class TariffServiceServiceLimitTests
 {
     private const int TenantId = 1;
     private const int OwnAccountNumber = 1001;
     private const int OtherAccountNumber = 2002;
+    private const string PaymentRegion = "portal-";
+    private const int TotalParticipantLimits = 3;
+    private const string UserA = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
+    private const string UserB = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
+    private const string UserC = "16fd2706-8baf-433b-82eb-8c7fada847da";
 
     [Fact]
     public async Task GetServiceLimit_LimitOfThisPortal_ReturnsIt()
@@ -190,6 +196,72 @@ public class TariffServiceServiceLimitTests
         handler.LastMethod.Should().Be(HttpMethod.Get);
     }
 
+    [Fact]
+    public async Task GetCachedParticipantServiceLimits_ReadsEveryPageOnce_ThenServesFromCache()
+    {
+        var requests = new List<Uri>();
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request =>
+            {
+                requests.Add(request.RequestUri!);
+                return AccountingClientTests.ParseQuery(request.RequestUri!)["offset"] == "0"
+                    ? ParticipantLimitsPage(UserA, UserB)
+                    : ParticipantLimitsPage(UserC);
+            });
+
+        var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+
+        first.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
+        second.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
+        handler.CallCount.Should().Be(2);
+
+        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-tools/participants"));
+        requests.Select(uri => AccountingClientTests.ParseQuery(uri)["offset"]).Should().Equal("0", "2");
+        requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["limit"].Should().Be("100"));
+    }
+
+    [Fact]
+    public async Task GetCachedParticipantServiceLimits_PortalNotACustomer_ReturnsEmpty()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, "Customer not found"));
+
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+
+        serviceLimits.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetCachedParticipantServiceLimits_AccountingFails_ReturnsEmptyInsteadOfThrowing()
+    {
+        // The user lists read these limits; an unreachable accounting service must not break them.
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => AccountingClientTests.Json(HttpStatusCode.InternalServerError, "boom"));
+
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+
+        serviceLimits.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SetParticipantServiceLimits_DropsTheCache_SoTheNextReadSeesTheChange()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Put
+                ? AccountingClientTests.Json(HttpStatusCode.OK, "1")
+                : AccountingClientTests.ParseQuery(request.RequestUri!)["offset"] == "0"
+                    ? ParticipantLimitsPage(UserA, UserB)
+                    : ParticipantLimitsPage(UserC));
+
+        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-tools", [UserC], 40m, null, ServiceLimitPeriod.Day);
+        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+
+        // Two pages, the update, and the two pages again.
+        handler.CallCount.Should().Be(5);
+    }
+
     private static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
         Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder)
     {
@@ -199,11 +271,17 @@ public class TariffServiceServiceLimitTests
         await hybridCache.SetAsync(TariffService.GetAccountingBalanceCacheKey(TenantId), balance, TimeSpan.FromMinutes(5),
             token: TestContext.Current.CancellationToken);
 
+        // A SaaS portal unknown to the tenant service gets the portal ID "<payment region><tenant ID>".
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["core:payment:region"] = PaymentRegion })
+            .Build();
+        var coreSettings = new CoreSettings(DefaultResultProxy<ITenantService>.Create(), new CoreBaseSettings(configuration), configuration, null!);
+
         var tariffService = new TariffService(
             quotaService: null!,
             tenantService: null!,
             coreBaseSettings: null!,
-            coreSettings: null!,
+            coreSettings: coreSettings,
             configuration: null!,
             coreDbContextManager: null!,
             cache: null!,
@@ -218,6 +296,14 @@ public class TariffServiceServiceLimitTests
             tenantExtraConfig: null!);
 
         return (tariffService, handler);
+    }
+
+    private static HttpResponseMessage ParticipantLimitsPage(params string[] participants)
+    {
+        var limits = participants.Select((participant, index) =>
+            $$"""{"id":{{100 + index}},"serviceName":"ai-tools","customerAccountNumber":{{OwnAccountNumber}},"participant":"{{participant}}","amountValue":40,"currency":"USD","period":"Day","enabled":true}""");
+
+        return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
     }
 
     private static bool IsUsageRequest(HttpRequestMessage request)

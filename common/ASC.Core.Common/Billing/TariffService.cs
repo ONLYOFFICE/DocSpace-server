@@ -72,6 +72,10 @@ public class TariffService(
 
     private const int DefaultTrialPeriod = 30;
     private const int MaxTopUpAttempts = 5;
+
+    private static readonly TimeSpan _participantServiceLimitsCacheDuration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _participantServiceLimitsFailureCacheDuration = TimeSpan.FromMinutes(1);
+    private const int ParticipantServiceLimitsPageSize = 100;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
 
     //private readonly int _activeUsersMin;
@@ -1717,10 +1721,68 @@ public class TariffService(
         return await accountingClient.GetParticipantServiceLimitsAsync(portalId, serviceName, filter);
     }
 
+    /// <summary>
+    /// Every limit set on the service for the users of the tenant, read in full from the accounting service and cached
+    /// for a few minutes. It backs per-user lists, which would otherwise ask the accounting service once per user. The
+    /// service limit operations of this class drop the cache, but a limit changed outside the portal shows up only
+    /// when the cache expires. Empty when the accounting service is not configured, the portal is not its customer, or
+    /// it cannot be reached.
+    /// </summary>
+    public async Task<List<ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string serviceName)
+    {
+        if (!accountingClient.Configured)
+        {
+            return [];
+        }
+
+        return await hybridCache.GetOrSetAsync<List<ServiceLimit>>(GetParticipantServiceLimitsCacheKey(tenantId, serviceName), async (ctx, token) =>
+        {
+            try
+            {
+                var portalId = await coreSettings.GetKeyAsync(tenantId);
+                var filter = new ServiceLimitFilter { Limit = ParticipantServiceLimitsPageSize };
+
+                var serviceLimits = new List<ServiceLimit>();
+                await foreach (var page in accountingClient.GetParticipantServiceLimitPages(portalId, serviceName, filter).AsPages().WithCancellation(token))
+                {
+                    serviceLimits.AddRange(page.Collection ?? []);
+                }
+
+                return serviceLimits;
+            }
+            catch (AccountingException exception) when (exception is AccountingCustomerNotFoundException or AccountingNotFoundException)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                return [];
+            }
+            catch (Exception error) when (error is not OperationCanceledException)
+            {
+                // Keep the failure for a short while only, so the lists come back as soon as the accounting service does.
+                LogError(error, tenantId.ToString());
+                ctx.Options.Duration = _participantServiceLimitsFailureCacheDuration;
+                return [];
+            }
+        }, opt => opt.SetDuration(_participantServiceLimitsCacheDuration));
+    }
+
+    internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string serviceName)
+    {
+        return $"{tenantId}:accounting:servicelimits:{serviceName?.ToLowerInvariant()}";
+    }
+
+    private async Task ClearParticipantServiceLimitsCacheAsync(int tenantId, string serviceName)
+    {
+        await hybridCache.RemoveAsync(GetParticipantServiceLimitsCacheKey(tenantId, serviceName));
+    }
+
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.CreateServiceLimitAsync(portalId, serviceName, customerParticipantName, amountValue, quantityValue, period);
+        var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, serviceName, customerParticipantName, amountValue, quantityValue, period);
+
+        await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceName);
+
+        return serviceLimit;
     }
 
     /// <summary>
@@ -1734,19 +1796,31 @@ public class TariffService(
             return null;
         }
 
-        return await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
+        var updated = await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
+
+        await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceName);
+
+        return updated;
     }
 
     public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.SetParticipantServiceLimitsAsync(portalId, serviceName, customerParticipantNames, amountValue, quantityValue, period);
+        var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, serviceName, customerParticipantNames, amountValue, quantityValue, period);
+
+        await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceName);
+
+        return count;
     }
 
     public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string serviceName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.DisableParticipantServiceLimitsAsync(portalId, serviceName);
+        var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, serviceName);
+
+        await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceName);
+
+        return count;
     }
 
     /// <summary>
@@ -1770,6 +1844,10 @@ public class TariffService(
             // Deleted by a concurrent request between the owner check and the deletion.
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             return null;
+        }
+        finally
+        {
+            await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceName);
         }
 
         return serviceLimit;

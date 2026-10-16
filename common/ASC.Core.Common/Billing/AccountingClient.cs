@@ -208,6 +208,25 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.GetParticipantServiceLimitsAsync(portalId, serviceName, filter);
     }
 
+    /// <summary>
+    /// Every limit set on the service for the participants of the customer, one page per request; the page size is
+    /// <see cref="ServiceLimitFilter.Limit"/>, <see cref="ServiceLimitFilter.Offset"/> must stay unset. Requests are
+    /// sent while the result is enumerated.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="ServiceLimitFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string serviceName, ServiceLimitFilter filter)
+    {
+        EnsureConfigured();
+
+        // The page offset travels in a query parameter of its own, as in EnsureNoOffset.
+        if (filter?.Offset != null)
+        {
+            throw new ArgumentException($"{nameof(ServiceLimitFilter.Offset)} must be unset for the paged methods.", nameof(filter));
+        }
+
+        return accountingApi.GetParticipantServiceLimitPages(portalId, serviceName, filter);
+    }
+
     public async Task<ServiceLimit> CreateServiceLimitAsync(string portalId, string serviceName, string customerParticipantName,
         decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
