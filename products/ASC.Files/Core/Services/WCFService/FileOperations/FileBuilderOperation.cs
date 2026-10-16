@@ -146,12 +146,12 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
         var runner = serviceScope.ServiceProvider.GetRequiredService<DocumentBuilderScriptRunner>();
         List<File<int>> saved = [];
 
-        // the window runs from the web-side publication, the wait for a worker slot included
-        _lastHeartbeatAt = Environment.TickCount64;
-        await PublishChanges();
-
         try
         {
+            // the window runs from the web-side publication, the wait for a worker slot included
+            _lastHeartbeatAt = Environment.TickCount64;
+            await PublishChanges();
+
             await runner.RunAsync(_data.Script, _data.FolderId, _data.Outputs, _data.Argument, Headers, saved, HeartbeatAsync, CancellationToken);
         }
         catch (Exception e) when (e is not (OperationCanceledException or AuthorizingException or FileNotFoundException or DirectoryNotFoundException))
