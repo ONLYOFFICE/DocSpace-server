@@ -813,7 +813,7 @@ internal abstract class SecurityBaseDao<T>(
 
         if (knownToSubjects != null)
         {
-            q = FilterByKnownTo(q, tenantId, entryId, entry.FileEntryType, knownToSubjects, parentUserIds, filesDbContext);
+            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, entryId, entry.FileEntryType, knownToSubjects, parentUserIds, filesDbContext);
 
             // The known users already include the guests the caller is related to, and the guests of its rooms.
             includeStrangers = true;
@@ -1031,13 +1031,17 @@ internal abstract class SecurityBaseDao<T>(
     /// carry no internal folder id to check the room type by.
     /// </summary>
     /// <remarks>
-    /// Every set is an uncorrelated subquery that the database materializes once, and the caller's subjects come
-    /// in as a list of values: written as correlated <c>Any</c> calls, or with the caller's groups looked up in a
-    /// subquery, the rooms were scanned again for every user of the portal.
+    /// The known users are collected first, as one deduplicated set, and the users are joined to it, so the cost
+    /// follows the number of known users rather than the size of the portal - the count has no page limit to stop
+    /// at. Every branch selects <c>core_user.id</c> itself: the user ids of the other tables have different column
+    /// types, which a set operation does not accept. The caller's subjects come in as a list of values, so its rooms
+    /// are found through the subject index: with the caller's groups looked up in a subquery, or with the sets
+    /// written as correlated <c>Any</c> calls, every room of the portal was scanned.
     /// </remarks>
-    private IQueryable<User> FilterByKnownTo(
+    private static IQueryable<User> FilterByKnownTo(
         IQueryable<User> q,
         int tenantId,
+        Guid currentUserId,
         string entryId,
         FileEntryType entryType,
         IReadOnlyCollection<Guid> knownToSubjects,
@@ -1045,6 +1049,7 @@ internal abstract class SecurityBaseDao<T>(
         FilesDbContext filesDbContext)
     {
         var roomTypes = DocSpaceHelper.RoomTypes;
+        var users = filesDbContext.Users.Where(u => u.TenantId == tenantId);
 
         var callerRooms =
             from mine in filesDbContext.Security
@@ -1062,33 +1067,48 @@ internal abstract class SecurityBaseDao<T>(
                 on new { mine.TenantId, mine.EntryId, mine.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
             select other;
 
-        var roomUsers = roomSubjects
-            .Where(s => s.SubjectType == SubjectType.User)
-            .Select(s => s.Subject);
+        var roomUsers =
+            from other in roomSubjects
+            join u in users on other.Subject equals u.Id
+            where other.SubjectType == SubjectType.User
+            select u.Id;
 
         var roomGroups = roomSubjects
             .Where(s => s.SubjectType == SubjectType.Group)
             .Select(s => s.Subject);
 
-        var roomGroupMembers = filesDbContext.UserGroup
-            .Where(ug => ug.TenantId == tenantId && !ug.Removed && roomGroups.Contains(ug.UserGroupId))
-            .Select(ug => ug.Userid);
+        // A group added to many rooms is listed once, so its members are read once, not once per room.
+        var roomGroupMembers =
+            from groupId in roomGroups.Distinct()
+            join ug in filesDbContext.UserGroup on groupId equals ug.UserGroupId
+            join u in users on ug.Userid equals u.Id
+            where ug.TenantId == tenantId && !ug.Removed
+            select u.Id;
 
-        var currentUserId = _authContext.CurrentAccount.ID;
-        var relatedUsers = filesDbContext.UserRelations
-            .Where(r => r.TenantId == tenantId && r.SourceUserId == currentUserId)
-            .Select(r => r.TargetUserId);
+        var relatedUsers = users
+            .Where(u => filesDbContext.UserRelations
+                .Where(r => r.TenantId == tenantId && r.SourceUserId == currentUserId)
+                .Select(r => r.TargetUserId)
+                .Contains(u.Id))
+            .Select(u => u.Id);
 
-        var sharedUsers = filesDbContext.Security
-            .Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entryType)
-            .Select(s => s.Subject);
+        var sharedUsers =
+            from s in filesDbContext.Security
+            join u in users on s.Subject equals u.Id
+            where s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entryType
+            select u.Id;
 
-        return q.Where(u =>
-            roomUsers.Contains(u.Id) ||
-            roomGroupMembers.Contains(u.Id) ||
-            relatedUsers.Contains(u.Id) ||
-            sharedUsers.Contains(u.Id) ||
-            parentUserIds.Contains(u.Id));
+        var parentUsers = users
+            .Where(u => parentUserIds.Contains(u.Id))
+            .Select(u => u.Id);
+
+        var knownUsers = roomUsers
+            .Union(roomGroupMembers)
+            .Union(relatedUsers)
+            .Union(sharedUsers)
+            .Union(parentUsers);
+
+        return q.Join(knownUsers, u => u.Id, id => id, (u, _) => u);
     }
 
     internal async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureShareRecordsAsync(FileEntry<T> entry)
