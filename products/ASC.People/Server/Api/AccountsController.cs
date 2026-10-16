@@ -188,6 +188,7 @@ public class AccountsController<T>(
 
         var securityDao = daoFactory.GetSecurityDao<T>();
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
 
         if (string.IsNullOrEmpty(text))
@@ -206,6 +207,7 @@ public class AccountsController<T>(
             inDto.IncludeShared ?? false,
             separator,
             includeStrangers,
+            knownToSubjects,
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
@@ -235,6 +237,7 @@ public class AccountsController<T>(
                            inDto.IncludeShared ?? false,
                            separator,
                            includeStrangers,
+                           knownToSubjects,
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,

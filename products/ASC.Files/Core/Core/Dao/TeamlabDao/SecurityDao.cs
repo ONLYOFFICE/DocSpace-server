@@ -742,7 +742,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0)
         {
@@ -754,7 +754,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator,
-            includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+            includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         if (offset > 0)
         {
@@ -773,7 +773,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null)
         {
@@ -784,7 +784,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         return await q1.CountAsync();
     }
@@ -801,6 +801,7 @@ internal abstract class SecurityBaseDao<T>(
         FilesDbContext filesDbContext,
         string separator,
         bool includeStrangers,
+        IReadOnlyCollection<Guid> knownToSubjects,
         Area area,
         bool? invitedByMe,
         Guid? inviterId,
@@ -809,6 +810,14 @@ internal abstract class SecurityBaseDao<T>(
     {
         var q = filesDbContext.Users
             .Where(u => u.TenantId == tenantId && !u.Removed);
+
+        if (knownToSubjects != null)
+        {
+            q = FilterByKnownTo(q, tenantId, entryId, entry.FileEntryType, knownToSubjects, parentUserIds, filesDbContext);
+
+            // The known users already include the guests the caller is related to, and the guests of its rooms.
+            includeStrangers = true;
+        }
 
         if (employeeStatus.HasValue)
         {
@@ -1013,6 +1022,73 @@ internal abstract class SecurityBaseDao<T>(
             .ThenBy(u => u.User.FirstName);
 
         return q1;
+    }
+
+    /// <summary>
+    /// Keeps the users the caller already works with: the members of the rooms it is in, directly or through a
+    /// group, the members of the groups added to those rooms, the accounts it is related to, and the users who
+    /// already have access to the entry. Rooms on third-party storage are not taken into account: their records
+    /// carry no internal folder id to check the room type by.
+    /// </summary>
+    /// <remarks>
+    /// Every set is an uncorrelated subquery that the database materializes once, and the caller's subjects come
+    /// in as a list of values: written as correlated <c>Any</c> calls, or with the caller's groups looked up in a
+    /// subquery, the rooms were scanned again for every user of the portal.
+    /// </remarks>
+    private IQueryable<User> FilterByKnownTo(
+        IQueryable<User> q,
+        int tenantId,
+        string entryId,
+        FileEntryType entryType,
+        IReadOnlyCollection<Guid> knownToSubjects,
+        IEnumerable<Guid> parentUserIds,
+        FilesDbContext filesDbContext)
+    {
+        var roomTypes = DocSpaceHelper.RoomTypes;
+
+        var callerRooms =
+            from mine in filesDbContext.Security
+            join folder in filesDbContext.Folders on mine.InternalEntryId equals folder.Id
+            where mine.TenantId == tenantId &&
+                  mine.EntryType == FileEntryType.Folder &&
+                  knownToSubjects.Contains(mine.Subject) &&
+                  folder.TenantId == tenantId &&
+                  roomTypes.Contains(folder.FolderType)
+            select mine;
+
+        var roomSubjects =
+            from mine in callerRooms
+            join other in filesDbContext.Security
+                on new { mine.TenantId, mine.EntryId, mine.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
+            select other;
+
+        var roomUsers = roomSubjects
+            .Where(s => s.SubjectType == SubjectType.User)
+            .Select(s => s.Subject);
+
+        var roomGroups = roomSubjects
+            .Where(s => s.SubjectType == SubjectType.Group)
+            .Select(s => s.Subject);
+
+        var roomGroupMembers = filesDbContext.UserGroup
+            .Where(ug => ug.TenantId == tenantId && !ug.Removed && roomGroups.Contains(ug.UserGroupId))
+            .Select(ug => ug.Userid);
+
+        var currentUserId = _authContext.CurrentAccount.ID;
+        var relatedUsers = filesDbContext.UserRelations
+            .Where(r => r.TenantId == tenantId && r.SourceUserId == currentUserId)
+            .Select(r => r.TargetUserId);
+
+        var sharedUsers = filesDbContext.Security
+            .Where(s => s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entryType)
+            .Select(s => s.Subject);
+
+        return q.Where(u =>
+            roomUsers.Contains(u.Id) ||
+            roomGroupMembers.Contains(u.Id) ||
+            relatedUsers.Contains(u.Id) ||
+            sharedUsers.Contains(u.Id) ||
+            parentUserIds.Contains(u.Id));
     }
 
     internal async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureShareRecordsAsync(FileEntry<T> entry)

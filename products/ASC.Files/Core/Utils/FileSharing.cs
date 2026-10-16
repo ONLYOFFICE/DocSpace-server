@@ -675,6 +675,25 @@ public class FileSharing(
         return await fileSharingHelper.CanSetAccessAsync(entry);
     }
 
+    /// <summary>
+    /// Returns the subjects whose rooms decide which users the current user may pick when sharing - its own id and
+    /// the ids of its groups - or <c>null</c> when it may pick from every user of the portal.
+    /// A user or a guest has no access to the contacts of the portal, so it only gets the users it already works with.
+    /// </summary>
+    public async Task<IReadOnlyCollection<Guid>> GetKnownToSubjectsAsync()
+    {
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if (!await userManager.IsUserAsync(currentUserId) && !await userManager.IsGuestAsync(currentUserId))
+        {
+            return null;
+        }
+
+        var groups = await userManager.GetUserGroupsAsync(currentUserId);
+
+        return [currentUserId, .. groups.Select(g => g.ID)];
+    }
+
     public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
     {
         if (entry == null)
