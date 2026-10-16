@@ -46,7 +46,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Links;
 [Trait("Bug", "84541")]
 public class RoomLinkStorageAccessTests(
     AspireAppFixture fixture)
-    : Logos.RoomLogoTestBase(fixture)
+    : RoomLogoTestBase(fixture)
 {
     private const string AnonymousSessionCookie = "anonymous_session_key";
 
@@ -86,14 +86,45 @@ public class RoomLinkStorageAccessTests(
     }
 
     /// <summary>
+    /// The traversal that matters most in a multi-tenant installation: from the visitor's <c>userPhotos</c> root
+    /// (<c>$STORAGE_ROOT/Studio/{tenant}/userphotos</c>) five levels up to <c>$STORAGE_ROOT</c> and down into the
+    /// stored content of a document (<c>Products/Files/{tenant}/folder_N/file_N/v1/content.docx</c>), which
+    /// otherwise needs a signed, expiring link and a download right. Unlike the OS file of the cases above, the
+    /// target is a real file of this very portal, so the case depends neither on the drive nor on the OS. Before
+    /// the fix it came back with 200 and the document.
+    /// </summary>
+    [Fact]
+    public async Task GetStorageFile_PathIntoFilesContent_NotServed()
+    {
+        // Arrange
+        var (roomId, token) = await CreatePublicRoomLinkAsync();
+        var file = await CreateFile("Autotest Storage Traversal.docx", roomId);
+        await OpenLinkAnonymouslyAsync(roomId, token);
+
+        // TenantPath.CreatePath: the tenant id as "00/00/00".
+        var tenantPath = TenantId.ToString("00/00/00", CultureInfo.InvariantCulture).Replace("/", "%5C");
+        var url = "storage/userPhotos/root/" + string.Concat(Enumerable.Repeat("..%5C", 5)) +
+                  $"Products%5CFiles%5C{tenantPath}%5Cfolder_{(file.Id / 1000 + 1) * 1000}%5Cfile_{file.Id}%5Cv1%5Ccontent.docx";
+
+        // Act
+        using var response = await _studioClient.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.Forbidden);
+    }
+
+    /// <summary>
     /// The anonymous session cookie opens only the modules a public room page shows. Outside them it must not
     /// pass the handler's authorization gate at all: the gate runs before the file lookup, so a cookie that still
     /// passed it would answer 404 for a missing file (and 200 for an existing one), while a closed module answers
-    /// 403 whatever the path is.
+    /// 403 whatever the path is. <c>files</c> and <c>migration</c> also require a signed, expiring link; a cookie
+    /// that passed the gate reached that check without one and ended in a 400, never in the 403 of a closed module.
     /// </summary>
     [Theory]
     [InlineData("webplugins")]
     [InlineData("customnavigation")]
+    [InlineData("files")]
+    [InlineData("migration")]
     public async Task GetStorageFile_OtherModuleWithAnonymousSession_Forbidden(string module)
     {
         // Arrange
