@@ -200,6 +200,9 @@ export default function registerRoutes(app: Application): void {
   // `GenerateMeta` model which custom fields describe them (see
   // metaController). One synchronous round, no thread.
   router.post("/meta/generate", metaController.generate);
+  // Metadata filling: reads one entry's fields and the content behind it and
+  // writes the values the text supports through the Files metadata API.
+  router.post("/meta/fill", metaController.fill);
 
   router.get("/agents", agentsController.getAgents);
   router.get("/agents/news", agentsController.getAgentsNews);

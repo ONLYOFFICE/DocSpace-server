@@ -592,6 +592,62 @@ export type Res_aiMetaGenerate = {
     reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
   }[];
 };
+
+export type Req_aiMetaFill = {
+  /** The entry's table. */
+  kind: "file" | "folder";
+  /** The entry's integer id. */
+  id: string | number;
+  /** What to pay attention to; a hint for the model. */
+  prompt?: string;
+  /** Also replace the fields that already carry a value. Default false. */
+  overwrite?: boolean;
+};
+/** A metadata value: exactly one member, by the field's type. */
+export type AiMetadataValue = {
+  stringValue?: string;
+  numberValue?: number;
+  /** ISO 8601 date-time, UTC midnight of the date. */
+  dateValue?: string;
+  optionIds?: string[];
+};
+export type AiEntryMetadataField = {
+  id: number;
+  name: string;
+  /** `MetadataFieldType`: 0 String, 1 Date, 2 Number, 3 SingleChoice, 4 MultiChoice. */
+  type: number;
+  options: { id: string; value: string }[];
+  value?: AiMetadataValue;
+};
+export type AiEntryMetadata = {
+  templates: { id: number; name: string; fields: AiEntryMetadataField[] }[];
+  customFields: { name: string; value: string }[];
+};
+export type Res_aiMetaFill = {
+  /** The entry's metadata after the write, as `GET api/2.0/files/metadata/{kind}/{id}` returns it. */
+  metadata: AiEntryMetadata;
+  /** The values written: a typed value for a template field, a string for a custom field. */
+  filled: {
+    /** Absent for a custom field. */
+    fieldId?: number;
+    name: string;
+    value: AiMetadataValue | string;
+  }[];
+  /** The fields left as they were, with the reason for each. */
+  unresolved: {
+    fieldId?: number;
+    name: string;
+    reason: "already_set" | "not_found" | "invalid_value" | "unknown_option";
+  }[];
+  /** The documents the values were read from. */
+  sources: { id: string; title: string; truncated: boolean }[];
+  /** The entries that were left out, with the reason for each. */
+  skipped: {
+    id: string;
+    title?: string;
+    reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
+  }[];
+};
 /**
  * A DocSpace room id: an integer for native rooms, a string for
  * third-party-backed ones.

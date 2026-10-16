@@ -35,6 +35,9 @@ import { isObject } from "../narrow.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { generateMeta, MAX_FILES, MAX_FOLDERS, NoContentError } from "../meta/generateMeta.js";
 import type { GenerateMetaInput } from "../meta/generateMeta.js";
+import { fillMeta } from "../meta/fillMeta.js";
+import type { FillMetaInput } from "../meta/fillMeta.js";
+import type { EntryKind } from "../meta/portalMetadata.js";
 
 function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
@@ -80,6 +83,42 @@ function asInput(body: unknown): GenerateMetaInput {
   return { files, folders, prompt: typeof prompt === "string" ? prompt.trim() : undefined };
 }
 
+function asFillInput(body: unknown): FillMetaInput {
+  if (!isObject(body)) {
+    badRequest("body must be an object");
+  }
+  const kind = body["kind"];
+  if (kind !== "file" && kind !== "folder") {
+    badRequest('kind must be "file" or "folder"');
+  }
+  const rawId = body["id"];
+  const id =
+    typeof rawId === "number" && Number.isInteger(rawId)
+      ? String(rawId)
+      : typeof rawId === "string"
+        ? rawId.trim()
+        : "";
+  // Metadata lives on internal entries only (integer ids); a third-party id
+  // has no metadata to fill and the Files API would answer 404 anyway.
+  if (!/^\d+$/.test(id)) {
+    badRequest("id must be the integer id of a file or folder");
+  }
+  const prompt = body["prompt"];
+  if (prompt !== undefined && prompt !== null && typeof prompt !== "string") {
+    badRequest("prompt must be a string");
+  }
+  const overwrite = body["overwrite"];
+  if (overwrite !== undefined && overwrite !== null && typeof overwrite !== "boolean") {
+    badRequest("overwrite must be a boolean");
+  }
+  return {
+    kind: kind as EntryKind,
+    id,
+    prompt: typeof prompt === "string" ? prompt.trim() : undefined,
+    overwrite: overwrite === true,
+  };
+}
+
 export const metaController = {
   generate: asyncHandler(async (req, res) => {
     const input = asInput(req.body);
@@ -88,6 +127,20 @@ export const metaController = {
     await primeSourceMeta(input.folders[0]);
     try {
       res.json(await generateMeta(input));
+    } catch (err) {
+      if (err instanceof NoContentError) {
+        res.status(err.status).json({ error: err.message, skipped: err.skipped });
+        return;
+      }
+      throw err;
+    }
+  }),
+
+  fill: asyncHandler(async (req, res) => {
+    const input = asFillInput(req.body);
+    await primeSourceMeta(input.id, input.kind);
+    try {
+      res.json(await fillMeta(input));
     } catch (err) {
       if (err instanceof NoContentError) {
         res.status(err.status).json({ error: err.message, skipped: err.skipped });

@@ -359,6 +359,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiMetaGenerate:
     "Reads the selected files as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe them. `files` and `folders` are lists of entry ids, at least one of the two non-empty and each at most 20 long; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The files named directly come first, then the top-level files of each folder, newest first, until 20 files are collected; the rest are listed under `skipped` with the reason `limit`. Every file is converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
 
+  aiMetaFill:
+    "Fills the metadata of one file or folder from the text behind it and writes the result. `kind` names the entry's table (`file` or `folder`) and `id` its integer identifier; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`. The fields are the entry's own: every field of the templates it carries, assigned or inherited through a cascade, and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, or for a folder its top-level files, newest first, 20 at most, each converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need. The answer carries the entry's metadata after the write, the values written, the fields left empty with the reason for each, and the documents that were read.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
@@ -694,6 +697,13 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "403": "A folder named in `folders` cannot be opened by the caller.",
     "404": "A folder named in `folders` does not exist.",
     "422": "None of the selected files could be read as text; `skipped` says why for each.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+  },
+  aiMetaFill: {
+    "400": "`kind` is not `file` or `folder`, `id` is not an integer id, `prompt` is not a string, or `overwrite` is not a boolean.",
+    "403": "The caller cannot read the entry, or cannot edit it when the values are written.",
+    "404": "The entry does not exist.",
+    "422": "The entry has no metadata fields to fill, or none of its content could be read as text.",
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
   },
 
@@ -1289,6 +1299,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiMetaGenerate:
     "The proposed fields, each with a name and a type, the documents the proposal was read from, " +
     "and the entries that were left out with the reason for each.",
+
+  aiMetaFill:
+    "The entry's metadata after the write, the values that were written, the fields left empty " +
+    "with the reason for each, and the documents the values were read from.",
 
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",
