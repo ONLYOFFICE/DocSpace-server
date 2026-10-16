@@ -542,6 +542,11 @@ public class DocumentBuilderScriptRunner(
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(file, daoFactory.GetCacheFolderDao<int>()))
+        {
+            throw new InvalidOperationException($"File {fileId} lies in a private room or in a room with a watermark, where a result cannot replace it");
+        }
+
         return file;
     }
 
@@ -552,6 +557,11 @@ public class DocumentBuilderScriptRunner(
         if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(folder, daoFactory.GetCacheFolderDao<int>()))
+        {
+            throw new InvalidOperationException($"Folder {folderId} lies in a private room or in a room with a watermark, where a result cannot be saved");
         }
 
         return folder;

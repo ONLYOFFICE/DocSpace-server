@@ -181,6 +181,19 @@ public static class DocSpaceHelper
         return LocatedInPrivateRoom(room) || IsWatermarkEnabled(room);
     }
 
+    // for a target folder the folder itself counts, as a result may be saved straight into the room
+    public static async Task<bool> IsConversionForbiddenAsync<T>(Folder<T> folder, IFolderDao<T> folderDao)
+    {
+        if (folder.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        {
+            return false;
+        }
+
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
+
+        return LocatedInPrivateRoom(room) || IsWatermarkEnabled(room);
+    }
+
     public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
         if (file.ProviderEntry || file.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))

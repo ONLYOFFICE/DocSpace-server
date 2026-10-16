@@ -744,6 +744,11 @@ public class FileConverter(
         // before the source is read and the document service does any work
         await CheckCanSaveIntoAsync(folder);
 
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(folder, daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new InvalidOperationException("A converted file cannot be saved into a private room or a room with a watermark");
+        }
+
         if (!await fileSecurity.CanCopyAsync(file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
