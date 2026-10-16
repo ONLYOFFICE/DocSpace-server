@@ -79,6 +79,30 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         offered.Select(u => u.Id).Should().Contain(roomOwner.Id);
     }
 
+    /// <summary>
+    /// A room template keeps a room type but is no room: access to it only allows to create rooms from
+    /// it, so the others it is given to are not people the user works with.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_DoesNotOfferRecipientsOfTemplateItWasGiven()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var templateRecipient = await InviteContact(EmployeeType.RoomAdmin);
+        var templateId = await CreateTemplateSharedWithAsync(caller.Email, templateRecipient.Email);
+
+        // Without the caller's own record on the template the test would pass for the wrong reason.
+        var templateShares = (await _roomsApi.GetRoomSecurityInfoAsync(templateId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        templateShares.Select(s => s.SharedToUser?.Id).Should().Contain([caller.Id, templateRecipient.Id]);
+
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().NotContain(templateRecipient.Id);
+    }
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79163")]

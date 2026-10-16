@@ -1035,8 +1035,9 @@ internal abstract class SecurityBaseDao<T>(
     /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
     /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the users
     /// who already have access to the entry. The owner of a room has no record of its own - it is the author of the
-    /// room folder - so it is read from there. Rooms on third-party storage are not taken into account: their
-    /// records carry no internal folder id to check the room type by.
+    /// room folder - so it is read from there. Restricted access is no membership, and room templates are not
+    /// rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
+    /// to check the room type by.
     /// </summary>
     /// <remarks>
     /// The known users are collected first, as one deduplicated set, and the users are joined to it, so the cost
@@ -1064,20 +1065,33 @@ internal abstract class SecurityBaseDao<T>(
         var roomTypes = DocSpaceHelper.RoomTypes;
         var users = filesDbContext.Users.Where(u => u.TenantId == tenantId);
 
+        // A Restrict record is no membership, and a room the caller is restricted from personally is hidden from it
+        // even when one of its groups has access (the same rule as the room listing in FolderDao). Room templates
+        // keep a room type but live under the RoomTemplates root: access to one only allows to create rooms from it.
         var callerRooms =
             from mine in filesDbContext.Security
             join folder in filesDbContext.Folders on mine.InternalEntryId equals folder.Id
+            join parent in filesDbContext.Folders on folder.ParentId equals parent.Id
             where mine.TenantId == tenantId &&
                   mine.EntryType == FileEntryType.Folder &&
+                  mine.Share != Security.FileShare.Restrict &&
                   knownToSubjects.Contains(mine.Subject) &&
                   folder.TenantId == tenantId &&
-                  roomTypes.Contains(folder.FolderType)
+                  roomTypes.Contains(folder.FolderType) &&
+                  parent.FolderType != FolderType.RoomTemplates &&
+                  !filesDbContext.Security.Any(r =>
+                      r.TenantId == tenantId &&
+                      r.EntryId == mine.EntryId &&
+                      r.EntryType == FileEntryType.Folder &&
+                      r.Subject == currentUserId &&
+                      r.Share == Security.FileShare.Restrict)
             select new { mine.TenantId, mine.EntryId, mine.EntryType, folder.CreateBy };
 
         var roomSubjects =
             from room in callerRooms
             join other in filesDbContext.Security
                 on new { room.TenantId, room.EntryId, room.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
+            where other.Share != Security.FileShare.Restrict
             select other;
 
         var roomOwners =

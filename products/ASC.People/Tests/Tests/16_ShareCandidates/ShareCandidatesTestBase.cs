@@ -60,6 +60,37 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
     }
 
     /// <summary>
+    /// A room template made by the owner from an empty custom room and given to the accounts with the
+    /// given emails. Template creation runs in the background, so its status is polled on a deadline
+    /// and the last observed one is asserted.
+    /// </summary>
+    protected async Task<int> CreateTemplateSharedWithAsync(params string[] emails)
+    {
+        var sourceRoomId = await CreateCustomRoomAsync();
+
+        await _roomsApi.CreateRoomTemplateAsync(
+            new RoomTemplateDto(sourceRoomId, "Autotest Template " + Guid.NewGuid().ToString()[..8], share: [.. emails]),
+            TestContext.Current.CancellationToken);
+
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var status = (await _roomsApi.GetRoomTemplateCreatingStatusAsync(TestContext.Current.CancellationToken)).Response;
+
+            if (status is { IsCompleted: true } || DateTime.UtcNow >= deadline)
+            {
+                status.Should().NotBeNull("the room template creation status must be reported within 30 seconds");
+                status.IsCompleted.Should().BeTrue("the room template must be created within 30 seconds (error '{0}')", status.Error);
+
+                return status.TemplateId;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// The users the caller is offered for its file, read as the share dialog reads them: every
     /// active account of the area, without a search term.
     /// </summary>
