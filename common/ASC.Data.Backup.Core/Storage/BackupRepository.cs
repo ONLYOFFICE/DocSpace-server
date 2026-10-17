@@ -73,6 +73,16 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         return await Queries.BackupsAsync(backupContext, tenantId).ToListAsync();
     }
 
+    /// <summary>
+    /// The archive names of the tenant's backups that start with the prefix, deleted ones included:
+    /// a name is only reused once nothing in the history has ever carried it.
+    /// </summary>
+    public async Task<List<string>> GetBackupNamesAsync(int tenantId, string namePrefix)
+    {
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.BackupNamesAsync(backupContext, tenantId, namePrefix).ToListAsync();
+    }
+
     public async Task MigrationBackupRecordsAsync(int tenantId, int newTenantId, string region)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
@@ -190,6 +200,13 @@ static file class Queries
                 ctx.Backups
 
                     .Where(b => b.TenantId == tenantId && b.Removed == false));
+
+    public static readonly Func<BackupsContext, int, string, IAsyncEnumerable<string>> BackupNamesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (BackupsContext ctx, int tenantId, string namePrefix) =>
+                ctx.Backups
+                    .Where(b => b.TenantId == tenantId && b.Name.StartsWith(namePrefix))
+                    .Select(b => b.Name));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsForMigrationAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
