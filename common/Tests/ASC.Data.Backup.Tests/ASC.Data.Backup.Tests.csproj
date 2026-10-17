@@ -33,6 +33,9 @@
         <ProjectReference Include="..\ASC.Tests.Common\ASC.Tests.Common.csproj" />
         <ProjectReference Include="..\..\..\web\ASC.Web.Api\ASC.Web.Api.csproj" Aliases="ASCWebApi" />
         <ProjectReference Include="..\..\services\ASC.Data.Backup\ASC.Data.Backup.csproj" Aliases="ASCBackup" />
+        <ProjectReference Include="..\..\services\ASC.Data.Backup.Worker\ASC.Data.Backup.Worker.csproj" Aliases="ASCBackupWorker" />
+        <ProjectReference Include="..\..\..\products\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
+        <ProjectReference Include="..\..\..\products\ASC.Files\Server\ASC.Files.csproj" Aliases="ASCFiles" />
     </ItemGroup>
 
     <ItemGroup>

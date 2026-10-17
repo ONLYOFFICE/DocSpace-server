@@ -35,13 +35,15 @@
 namespace ASC.Data.Backup.Tests.ApiFactories;
 
 /// <summary>
-/// The backup suite's Aspire host: Web.Api (portal registration and sign-in) is always started by
-/// the base fixture, plus the backup service itself. The backup worker is not waited on: nothing
-/// here needs a finished archive yet.
+/// The backup suite's Aspire host: Web.Api (portal registration, sign-in, payments) is always
+/// started by the base fixture, plus the backup service and the worker that writes the archives,
+/// People (the members a permission test invites), Files (the rooms and folders a backup is
+/// written to) and Nextcloud (the third-party storage a backup can be written to).
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
-    protected override IEnumerable<string> Resources => [ResourceNames.Backup];
+    protected override IEnumerable<string> Resources =>
+        [ResourceNames.Backup, ResourceNames.BackupWorker, ResourceNames.People, ResourceNames.Files, ResourceNames.Nextcloud];
 
     protected override PortalClients CreateClients(PortalContext context)
     {

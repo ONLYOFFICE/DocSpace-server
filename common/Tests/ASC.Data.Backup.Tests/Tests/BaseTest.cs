@@ -44,8 +44,21 @@ public class BaseTest(
     protected User Owner => _clients.Owner;
 
     protected HttpClient _backupClient = null!;
+    protected HttpClient _peopleClient = null!;
+    protected HttpClient _filesClient = null!;
+    protected HttpClient _webApiClient = null!;
+
     protected RawApiClient _backup = null!;
     protected BackupApi _backupApi = null!;
+
+    protected ProfilesApi _profilesApi = null!;
+
+    protected RoomsApi _roomsApi = null!;
+    protected FoldersApi _foldersApi = null!;
+    protected ThirdPartyIntegrationApi _thirdPartyIntegrationApi = null!;
+
+    protected PaymentApi _paymentApi = null!;
+    protected SettingsAuthorizationApi _settingsAuthorizationApi = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -53,8 +66,18 @@ public class BaseTest(
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
 
         _backupClient = _clients.BackupHttpClient;
+        _peopleClient = _clients.PeopleHttpClient;
+        _filesClient = _clients.FilesHttpClient;
+        _webApiClient = _clients.WebApiHttpClient;
+
         _backup = _clients.Backup;
         _backupApi = _clients.BackupApi;
+        _profilesApi = _clients.ProfilesApi;
+        _roomsApi = _clients.RoomsApi;
+        _foldersApi = _clients.FoldersApi;
+        _thirdPartyIntegrationApi = _clients.ThirdPartyIntegrationApi;
+        _paymentApi = _clients.PaymentApi;
+        _settingsAuthorizationApi = _clients.SettingsAuthorizationApi;
 
         await _backupClient.Authenticate(Owner);
     }
@@ -63,5 +86,28 @@ public class BaseTest(
     {
         _clients.Dispose();
         return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Invites a member of any type, routing guests through <see cref="InviteGuest"/> - the single
+    /// dispatcher a role-parameterised theory goes through.
+    /// </summary>
+    protected async Task<User> InviteMember(EmployeeType employeeType, User? user = null)
+    {
+        return employeeType == EmployeeType.Guest
+            ? await InviteGuest(user)
+            : await InviteContact(employeeType, user);
+    }
+
+    /// <summary>Invites and registers a new member of the given type into this test's portal.</summary>
+    protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
+    {
+        return Invitations.InviteContactAsync(_profilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Creates an activated guest with a known password in this test's portal.</summary>
+    protected Task<User> InviteGuest(User? user = null)
+    {
+        return Invitations.InviteGuestAsync(_peopleClient, user ?? Owner, TestContext.Current.CancellationToken);
     }
 }

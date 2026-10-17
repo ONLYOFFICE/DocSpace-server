@@ -49,28 +49,8 @@ namespace ASC.Data.Backup.Tests.Tests.Schedule;
 /// </remarks>
 public class CreateBackupScheduleValidationTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : BackupScheduleTestBase(fixture)
 {
-    private const string CreateSchedulePath = "api/2.0/backup/createbackupschedule";
-
-    private static readonly CreateBackupScheduleRequestDto _baselineSchedule = new()
-    {
-        StorageType = BackupStorageType.DataStore,
-        BackupsStored = 7,
-        CronParams = new BackupCronRequest(BackupPeriod.EveryWeek, 5, 2)
-    };
-
-    // A valid DataStore schedule that individual cases break one field of.
-    private static CreateBackupScheduleRequestDto Valid(BackupCronRequest? cronParams = null)
-    {
-        return new CreateBackupScheduleRequestDto
-        {
-            StorageType = BackupStorageType.DataStore,
-            BackupsStored = 5,
-            CronParams = cronParams ?? new BackupCronRequest(BackupPeriod.EveryDay, 3)
-        };
-    }
-
     private static readonly Dictionary<string, Func<CreateBackupScheduleValidationTests, Task<int>>> _failsWith500 = new()
     {
         // Raw, with a JSON content type and nothing in it - what the TypeScript client sends. The
@@ -130,41 +110,10 @@ public class CreateBackupScheduleValidationTests(
     [MemberData(nameof(FailsWith500Cases))]
     public async Task CreateBackupSchedule_InvalidBody_ReturnsBadRequestAndKeepsStoredSchedule(string name)
     {
-        // Arrange
-        var created = await _backupApi.CreateBackupScheduleAsync(_baselineSchedule, TestContext.Current.CancellationToken);
-        created.Response.Should().BeTrue();
-
-        var before = (await _backupApi.GetBackupScheduleAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        before.BackupsStored.Should().Be(7);
-
         // Act
-        var status = await _failsWith500[name](this);
+        var status = await SendInvalidScheduleAsync(() => _failsWith500[name](this));
 
         // Assert
-        var after = (await _backupApi.GetBackupScheduleAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        after.Should().BeEquivalentTo(before);
-
         status.Should().Be(400);
-    }
-
-    private async Task<int> SendTypedAsync(CreateBackupScheduleRequestDto? dto)
-    {
-        try
-        {
-            await _backupApi.CreateBackupScheduleAsync(dto, TestContext.Current.CancellationToken);
-
-            return 200;
-        }
-        catch (ApiException e)
-        {
-            return e.ErrorCode;
-        }
-    }
-
-    private async Task<int> SendRawAsync(string rawJson)
-    {
-        using var response = await _backup.PostRawAsync(CreateSchedulePath, rawJson, TestContext.Current.CancellationToken);
-
-        return (int)response.StatusCode;
     }
 }

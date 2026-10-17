@@ -31,11 +31,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Text.Json;
+global using System.Text.RegularExpressions;
+
 global using ASC.Data.Backup.Tests.ApiFactories;
+global using ASC.Data.Backup.Tests.Tests.Restore;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
 global using DocSpace.API.SDK.Api.Backup;
+global using DocSpace.API.SDK.Api.Files;
+global using DocSpace.API.SDK.Api.People;
+global using DocSpace.API.SDK.Api.Rooms;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
@@ -43,5 +50,7 @@ global using FluentAssertions;
 
 global using Xunit;
 
+global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
+global using SettingsAuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using Task = System.Threading.Tasks.Task;
 global using User = ASC.Tests.Common.Data.User;

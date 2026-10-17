@@ -40,13 +40,42 @@ namespace ASC.Data.Backup.Tests.ApiFactories;
 public sealed class PortalClients : PortalClientsBase
 {
     public HttpClient BackupHttpClient { get; }
+    public HttpClient PeopleHttpClient { get; }
+    public HttpClient FilesHttpClient { get; }
+
+    // Backup service - raw access for the bodies the generated DTOs cannot carry
     public RawApiClient Backup { get; }
     public BackupApi BackupApi { get; }
+
+    // People service - members a permission test invites
+    public ProfilesApi ProfilesApi { get; }
+
+    // Files service - the rooms, folders and third-party storages a backup is written to
+    public RoomsApi RoomsApi { get; }
+    public FoldersApi FoldersApi { get; }
+    public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+
+    // Web.Api service - the wallet the paid backups are charged to, and the consumer keys of S3
+    public PaymentApi PaymentApi { get; }
+    public SettingsAuthorizationApi SettingsAuthorizationApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
         BackupHttpClient = CreateClient(ResourceNames.Backup);
         Backup = new RawApiClient(BackupHttpClient);
         BackupApi = new BackupApi(BackupHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.Backup) });
+
+        PeopleHttpClient = CreateClient(ResourceNames.People);
+        ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
+
+        FilesHttpClient = CreateClient(ResourceNames.Files);
+        var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
+        RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
+        ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+
+        var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
+        PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
+        SettingsAuthorizationApi = new SettingsAuthorizationApi(WebApiHttpClient, webApiConfig);
     }
 }
