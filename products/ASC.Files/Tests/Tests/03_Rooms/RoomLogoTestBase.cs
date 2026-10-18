@@ -31,13 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Tests._03_Rooms.Logos;
+namespace ASC.Files.Tests.Tests._03_Rooms;
 
 /// <summary>
 /// Shared setup for the room-logo suites (<c>POST /files/logos</c>,
 /// <c>POST/DELETE /files/rooms/{id}/logo</c>): image generators mirroring the TS suite's
 /// <c>src/utils/test-image.ts</c>, upload/create helpers and a raw multipart client for the
-/// requests the typed SDK cannot express.
+/// requests the typed SDK cannot express. It sits above <c>Logos/</c> because the storage access
+/// suite in <c>Links/</c> serves room logos too.
 /// </summary>
 public abstract class RoomLogoTestBase(
     AspireAppFixture fixture)

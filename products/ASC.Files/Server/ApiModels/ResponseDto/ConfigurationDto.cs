@@ -613,7 +613,10 @@ public class ConfigurationConverter<T>(
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> configConverter, AuthContext authContext)
+public class EditorConfigurationConverter<T>(
+    CustomizationConfigConverter<T> configConverter,
+    AuthContext authContext,
+    ILogger<EditorConfigurationConverter<T>> logger)
 {
     public async Task<EditorConfigurationDto> Convert(Configuration<T> configuration, File<T> file)
     {
@@ -625,7 +628,7 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         }
 
         var fileType = configuration.GetFileType(file);
-        var recent = await source.GetRecent(fileType, file.Id).ToListAsync();
+        var recent = await GetRecentAsync(source, fileType, file);
         var result = new EditorConfigurationDto
         {
             CallbackUrl = await source.GetCallbackUrl(file),
@@ -644,6 +647,25 @@ public class EditorConfigurationConverter<T>(CustomizationConfigConverter<T> con
         };
 
         return result;
+    }
+
+    /// <summary>
+    /// The recent list is an optional part of the configuration: it reads the caller's history, including
+    /// entries of connected storages that may no longer answer, so a failure there must not keep the
+    /// document itself from opening. The configuration is then returned without the list.
+    /// </summary>
+    private async Task<List<RecentConfigDto>> GetRecentAsync(EditorConfiguration<T> source, FileType fileType, File<T> file)
+    {
+        try
+        {
+            return await source.GetRecent(fileType, file.Id).ToListAsync();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.ErrorGetRecent(file.Id.ToString(), ex);
+
+            return [];
+        }
     }
 }
 

@@ -269,7 +269,10 @@ public class FileConverter(
     IHttpClientFactory clientFactory,
     SocketManager socketManager,
     FileConverterQueue fileConverterQueue,
-    IHttpContextAccessor httpContextAccessor)
+    TempStream tempStream,
+    IHttpContextAccessor httpContextAccessor,
+    WebhookManager webhookManager,
+    NotifyClient notifyClient)
 {
     public bool EnableAsUploaded => fileUtility.ExtsMustConvert.Count > 0 && !string.IsNullOrEmpty(filesLinkUtility.DocServiceConverterUrl);
 
@@ -600,22 +603,14 @@ public class FileConverter(
         return newFile;
     }
 
-    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist)
+    private async Task<(File<T> NewFile, bool IsNewFile)> PrepareConvertedFileAsync<T>(Folder<T> folder, string convertedFileType, string title, bool updateIfExist)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         File<T> newFile = null;
         var isNewFile = false;
         var newFileTitle = FileUtility.ReplaceFileExtension(title, convertedFileType);
 
-        if (Equals(folder.Id, 0))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
-        if (!await fileSecurity.CanCreateAsync(folder))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
-        }
+        await CheckCanSaveIntoAsync(folder);
 
         if (updateIfExist)
         {
@@ -642,6 +637,28 @@ public class FileConverter(
         newFile.ConvertedType = null;
         newFile.ThumbnailStatus = Thumbnail.Waiting;
 
+        return (newFile, isNewFile);
+    }
+
+    private async Task CheckCanSaveIntoAsync<T>(Folder<T> folder)
+    {
+        if (Equals(folder.Id, 0))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    // with the headers of the request the audit names its user; without them it records the document service
+    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist,
+        IDictionary<string, StringValues> headers = null, MessageAction action = MessageAction.FileConverted)
+    {
+        var (newFile, isNewFile) = await PrepareConvertedFileAsync(folder, convertedFileType, title, updateIfExist);
+
         using var request = new HttpRequestMessage();
         request.RequestUri = new Uri(convertedFileUrl);
 
@@ -657,17 +674,8 @@ public class FileConverter(
             }
 
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
-            newFile.ContentLength = convertedFileStream.Length;
-            newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
 
-            if (!isNewFile)
-            {
-                await socketManager.UpdateFileAsync(newFile);
-            }
-            else
-            {
-                await socketManager.CreateFileAsync(newFile);
-            }
+            newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers, action);
         }
         catch (HttpRequestException e)
         {
@@ -681,10 +689,142 @@ public class FileConverter(
             throw new Exception(errorString);
         }
 
-        await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+        return newFile;
+    }
+
+    /// <summary>
+    /// Saves content the caller already holds, for a conversion whose answer is the document itself instead of an
+    /// address to download it from.
+    /// </summary>
+    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, Stream convertedFileStream, string convertedFileType, string title, bool updateIfExist,
+        IDictionary<string, StringValues> headers = null)
+    {
+        var (newFile, isNewFile) = await PrepareConvertedFileAsync(folder, convertedFileType, title, updateIfExist);
+
+        return await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers);
+    }
+
+    private async Task<File<T>> StoreConvertedFileAsync<T>(File<T> newFile, bool isNewFile, Stream convertedFileStream, IDictionary<string, StringValues> headers,
+        MessageAction action = MessageAction.FileConverted)
+    {
+        newFile.ContentLength = convertedFileStream.Length;
+        newFile = await daoFactory.GetFileDao<T>().SaveFileAsync(newFile, convertedFileStream);
+
+        if (!isNewFile)
+        {
+            await socketManager.UpdateFileAsync(newFile);
+        }
+        else
+        {
+            await socketManager.CreateFileAsync(newFile);
+        }
+
+        if (headers != null)
+        {
+            await filesMessageService.SendAsync(action, newFile, headers, newFile.Title);
+        }
+        else
+        {
+            await filesMessageService.SendAsync(action, newFile, MessageInitiator.DocsService, newFile.Title);
+        }
 
         await fileMarker.MarkAsNewAsync(newFile);
 
         return newFile;
+    }
+
+    /// <summary>
+    /// Announces a file the docs API created, as a file created in the portal is announced: the webhook, and the
+    /// notice to the room it was created in.
+    /// </summary>
+    public async Task AnnounceCreatedFileAsync<T>(File<T> file, Folder<T> folder)
+    {
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
+
+        var room = await daoFactory.GetFolderDao<T>().GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
+        if (room == null || DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
+        {
+            return;
+        }
+
+        var userIds = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
+        if (room.CreateBy != authContext.CurrentAccount.ID)
+        {
+            userIds.Add(room.CreateBy);
+        }
+
+        await notifyClient.SendDocumentCreatedInRoom(room, userIds, file, authContext.CurrentAccount.ID);
+    }
+
+    /// <summary>
+    /// Converts a file the portal holds by uploading its content to the document service, instead of publishing the
+    /// source and handing over an address for it to fetch, and saves the result into <paramref name="folder"/>. The
+    /// conversion parameters are the ones the document service defines, except for the format, the name and the
+    /// caching key, which are read off the file.
+    /// </summary>
+    public async Task<File<T>> ConvertFromFileAsync<T>(File<T> file, Folder<T> folder, ConvertFromFileBody body, IDictionary<string, StringValues> headers)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(body);
+
+        // before the source is read and the document service does any work
+        await CheckCanSaveIntoAsync(folder);
+
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(folder, daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new InvalidOperationException("A converted file cannot be saved into a private room or a room with a watermark");
+        }
+
+        if (!await fileSecurity.CanCopyAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
+        }
+
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(file, daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new InvalidOperationException("A file in a private room or in a room with a watermark cannot be converted");
+        }
+
+        // The format, the name and the caching key belong to the file, not to the request, so they are always taken
+        // from it: a caller-supplied key would serve a stale result out of the document service cache.
+        if (string.IsNullOrEmpty(body.OutputType))
+        {
+            throw new ArgumentException("Extension for conversion is not known", nameof(body));
+        }
+
+        body.FileType = FileUtility.GetFileExtension(file.Title).TrimStart('.');
+        body.Title = file.Title;
+        body.Key = await documentServiceHelper.GetDocKeyAsync(file, body.GetMD5Hash());
+
+        var toExtension = "." + body.OutputType.Trim('.');
+
+        if (!await EnableConvertAsync(file, toExtension, false))
+        {
+            throw new ArgumentException($"A {FileUtility.GetFileExtension(file.Title)} file cannot be converted to {toExtension}", nameof(body));
+        }
+
+        await using var source = await daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
+
+        // The document service client retries a failed POST, and a retry can only replay the upload when the stream
+        // can seek back to where it started.
+        var (buffered, isBufferOwned) = await tempStream.TryGetBufferedAsync(source);
+
+        try
+        {
+            await using var converted = await documentServiceConnector.GetConvertedFileAsync(buffered, body.Title, body);
+
+            // The source is kept, so the result goes in beside it under a free title rather than replacing anything.
+            var result = await SaveConvertedFileAsync(folder, converted, body.OutputType, body.Title, updateIfExist: false, headers);
+            await AnnounceCreatedFileAsync(result, folder);
+
+            return result;
+        }
+        finally
+        {
+            if (isBufferOwned)
+            {
+                await buffered.DisposeAsync();
+            }
+        }
     }
 }
