@@ -252,11 +252,11 @@ public class BackupController(
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued backup job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, or a dump was requested on a portal that is not a standalone installation")]
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
-    [SwaggerResponse(500, "A key or value of `storageParams` is null, `ThridpartyDocuments` storage has no `folderId`, or `Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(500, "`Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
@@ -269,7 +269,11 @@ public class BackupController(
         }
 
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
-        var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+        var storageParams = inDto.StorageParams == null
+            ? new Dictionary<string, string>()
+            : inDto.StorageParams.ToDictionary(
+                r => r?.Key?.ToString() ?? throw new ArgumentException("every item of storageParams must have a key"),
+                r => r.Value?.ToString() ?? throw new ArgumentException("every item of storageParams must have a value"));
 
         var canParse = false;
         if (storageParams.TryGetValue("folderId", out var param))
@@ -295,13 +299,15 @@ public class BackupController(
                 await quotaController.QuotaUsedCheckAsync(0, authContext.CurrentAccount.ID);
             }
 
-            if (int.TryParse(storageParams["folderId"], out var fId))
+            var folderId = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
+
+            if (int.TryParse(folderId, out var fId))
             {
                 await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(folderId);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)

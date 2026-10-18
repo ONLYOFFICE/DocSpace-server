@@ -39,8 +39,9 @@ namespace ASC.Data.Backup.Tests.Tests.Start;
 /// request without parameters. Each case proves the request started nothing.
 /// </summary>
 /// <remarks>
-/// BUG 84512: these end in an unhandled exception (500) instead of the 400 that the same controller returns
-/// for a <c>folderId</c> of the wrong form ("wrong folder type"). The generated DTO always writes the
+/// BUG 84512: these used to end in an unhandled exception (500) - the controller read the key and value of
+/// a null item and looked up a <c>folderId</c> that was not there. Both are now refused with 400, like a
+/// <c>folderId</c> of the wrong form ("wrong folder type"). The generated DTO always writes the
 /// <c>key</c> and <c>value</c> of an item, so "without a value" and "a null folderId" are the same request.
 /// </remarks>
 public class StartBackupUnhandledValidationTests(
