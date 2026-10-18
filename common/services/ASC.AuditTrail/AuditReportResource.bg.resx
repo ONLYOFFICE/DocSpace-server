@@ -244,13 +244,13 @@
     <value>Изтеглен отчет за потребителски операции</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Създаден лимит на разходите за услуга: {0}</value>
+    <value>Създаден лимит на разходите за услуга: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Актуализиран лимит на разходите за услуга: {0}</value>
+    <value>Актуализиран лимит на разходите за услуга: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Изтрит лимит на разходите за услуга: {0}</value>
+    <value>Изтрит лимит на разходите за услуга: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Зададени лимити на разходите за услуга за потребители: {0}</value>

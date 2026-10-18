@@ -244,13 +244,13 @@
     <value>Relatório de operações do cliente baixado</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Limite de gastos do serviço criado: {0}</value>
+    <value>Limite de gastos do serviço criado: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Limite de gastos do serviço atualizado: {0}</value>
+    <value>Limite de gastos do serviço atualizado: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Limite de gastos do serviço excluído: {0}</value>
+    <value>Limite de gastos do serviço excluído: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Limites de gastos do serviço definidos para usuários: {0}</value>

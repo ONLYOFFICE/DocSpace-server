@@ -250,13 +250,13 @@
     <value>Отчет об операциях клиента загружен</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Создан лимит расходов на услугу: {0}</value>
+    <value>Создан лимит расходов на услугу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Изменен лимит расходов на услугу: {0}</value>
+    <value>Изменен лимит расходов на услугу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Удален лимит расходов на услугу: {0}</value>
+    <value>Удален лимит расходов на услугу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Установлены лимиты расходов на услугу для пользователей: {0}</value>

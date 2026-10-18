@@ -244,13 +244,13 @@
     <value>Poročilo o poslovanju stranke preneseno</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Omejitev porabe za storitev ustvarjena: {0}</value>
+    <value>Omejitev porabe za storitev ustvarjena: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Omejitev porabe za storitev posodobljena: {0}</value>
+    <value>Omejitev porabe za storitev posodobljena: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Omejitev porabe za storitev izbrisana: {0}</value>
+    <value>Omejitev porabe za storitev izbrisana: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Omejitve porabe za storitev nastavljene za uporabnike: {0}</value>

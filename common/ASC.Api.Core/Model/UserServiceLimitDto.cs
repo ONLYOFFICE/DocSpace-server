@@ -34,40 +34,46 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// A spending limit a portal administrator set on a pay-as-you-go wallet service for one user.
+/// The spending limit on the AI services in force for one user: the user's personal limit, or else the limit for every
+/// user, together with what the user spent against it.
 /// </summary>
 public class UserServiceLimitDto
 {
     /// <summary>
     /// The service limit ID, used to read, change, switch off or delete the limit through the
-    /// `api/2.0/portal/payment/servicelimit` operations.
+    /// `api/2.0/portal/payment/servicelimit` operations. For the limit for every user it is the same for all users.
     /// </summary>
     /// <example>42</example>
     public int Id { get; init; }
 
     /// <summary>
-    /// The most money the service may cost the user per period, in `currency`; null when the limit has no money
+    /// Whether the limit is the user's own (`Custom`) or the limit for every user (`Global`) the user falls back to.
+    /// </summary>
+    /// <example>Custom</example>
+    public ServiceLimitScope Scope { get; init; }
+
+    /// <summary>
+    /// The most money the AI services may cost the user per period, in `currency`; null when the limit has no money
     /// threshold.
     /// </summary>
     /// <example>40</example>
     public decimal? AmountValue { get; init; }
 
     /// <summary>
-    /// The currency of the service `amountValue` is expressed in; null when the limit has no money threshold.
+    /// The currency `amountValue` is expressed in; null when the limit has no money threshold.
     /// </summary>
     /// <example>USD</example>
     public string Currency { get; init; }
 
     /// <summary>
-    /// The largest quantity of the service the user may consume per period, in `serviceUnit`; null when the limit
+    /// The largest quantity the AI services may consume for the user per period, in `serviceUnit`; null when the limit
     /// has no quantity threshold.
     /// </summary>
     /// <example>1000</example>
     public int? QuantityValue { get; init; }
 
     /// <summary>
-    /// The unit of the service `quantityValue` is expressed in, such as pages, requests or gigabytes; null when the
-    /// limit has no quantity threshold.
+    /// The unit `quantityValue` is expressed in; null when the limit has no quantity threshold.
     /// </summary>
     /// <example>request</example>
     public string ServiceUnit { get; init; }
@@ -80,10 +86,10 @@ public class UserServiceLimitDto
     public ServiceLimitPeriod Period { get; init; }
 
     /// <summary>
-    /// Whether the limit is in force. A switched-off limit no longer restricts the user and can be switched back on.
+    /// What the user spent against the limit in the current period and what is left. Null when the user has not used
+    /// the AI services yet, so there is nothing counted against the limit.
     /// </summary>
-    /// <example>true</example>
-    public bool Enabled { get; init; }
+    public ServiceLimitUsageDto Usage { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

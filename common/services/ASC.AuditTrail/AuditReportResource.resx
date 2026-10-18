@@ -271,13 +271,13 @@
     <value>Customer operations report downloaded</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Customer service limit created: {0}</value>
+    <value>Customer service limit created: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Customer service limit updated: {0}</value>
+    <value>Customer service limit updated: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Customer service limit deleted: {0}</value>
+    <value>Customer service limit deleted: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Customer service limits set for users: {0}</value>

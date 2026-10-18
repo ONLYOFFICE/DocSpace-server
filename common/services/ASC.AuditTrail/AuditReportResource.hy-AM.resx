@@ -244,13 +244,13 @@
     <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Ծառայության ծախսերի սահմանաչափը ստեղծվել է՝ {0}</value>
+    <value>Ծառայության ծախսերի սահմանաչափը ստեղծվել է՝ {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Ծառայության ծախսերի սահմանաչափը թարմացվել է՝ {0}</value>
+    <value>Ծառայության ծախսերի սահմանաչափը թարմացվել է՝ {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Ծառայության ծախսերի սահմանաչափը ջնջվել է՝ {0}</value>
+    <value>Ծառայության ծախսերի սահմանաչափը ջնջվել է՝ {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Օգտատերերի համար սահմանվել են ծառայության ծախսերի սահմանաչափեր՝ {0}</value>

@@ -228,12 +228,12 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// The personal spending limit set on the AI tools for this user. Null when the user has no personal limit, when
-    /// the portal has no billing service, or when the caller is neither a DocSpace administrator nor the user; a
-    /// limit set for the portal as a whole is not reflected here. The value can lag a change made outside the portal
-    /// by a few minutes.
+    /// The spending limit on the AI services in force for this user - the personal one, or else the limit for every
+    /// user - with what the user spent against it. Null when no such limit applies to the user, when the portal has no
+    /// billing service, or when the caller is neither a DocSpace administrator nor the user; the limit of the portal as
+    /// a whole is not reflected here. The value, and the spending in particular, can lag by a few minutes.
     /// </summary>
-    public UserServiceLimitDto AiToolsLimit { get; set; }
+    public UserServiceLimitDto AiServicesLimit { get; set; }
 
     /// <summary>
     /// The current login event ID.
@@ -407,7 +407,7 @@ public class EmployeeFullDtoHelper(
 
         if (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID)
         {
-            result.AiToolsLimit = await GetAiToolsLimitAsync(tenant.Id, userInfo.Id);
+            result.AiServicesLimit = (await tariffService.GetCachedUserServiceLimitAsync(tenant.Id, ServiceLimitGroups.AiServices, userInfo.Id))?.ToUserServiceLimitDto();
         }
 
         // if (userInfo.Sex.HasValue)
@@ -523,17 +523,5 @@ public class EmployeeFullDtoHelper(
         {
             employeeWraperFull.Contacts = contacts;
         }
-    }
-
-    // Reads the cached list of the limits in force for the users of the AI services, so a page of users costs the
-    // accounting service one request at most instead of one per user.
-    private async Task<UserServiceLimitDto> GetAiToolsLimitAsync(int tenantId, Guid userId)
-    {
-        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices);
-
-        var serviceLimit = serviceLimits
-            .FirstOrDefault(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId);
-
-        return serviceLimit?.ToUserServiceLimitDto();
     }
 }

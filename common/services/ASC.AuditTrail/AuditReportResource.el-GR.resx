@@ -244,13 +244,13 @@
     <value>Έχει γίνει λήψη αναφοράς λειτουργιών πελάτη</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Δημιουργήθηκε όριο δαπανών υπηρεσίας: {0}</value>
+    <value>Δημιουργήθηκε όριο δαπανών υπηρεσίας: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Το όριο δαπανών υπηρεσίας ενημερώθηκε: {0}</value>
+    <value>Το όριο δαπανών υπηρεσίας ενημερώθηκε: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Το όριο δαπανών υπηρεσίας διαγράφηκε: {0}</value>
+    <value>Το όριο δαπανών υπηρεσίας διαγράφηκε: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Ορίστηκαν όρια δαπανών υπηρεσίας για χρήστες: {0}</value>

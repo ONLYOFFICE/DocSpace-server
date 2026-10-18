@@ -244,13 +244,13 @@
     <value>Klienta darbību ziņojums lejupielādēts</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Pakalpojuma izdevumu limits izveidots: {0}</value>
+    <value>Pakalpojuma izdevumu limits izveidots: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Pakalpojuma izdevumu limits atjaunināts: {0}</value>
+    <value>Pakalpojuma izdevumu limits atjaunināts: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Pakalpojuma izdevumu limits dzēsts: {0}</value>
+    <value>Pakalpojuma izdevumu limits dzēsts: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Pakalpojuma izdevumu limiti iestatīti lietotājiem: {0}</value>

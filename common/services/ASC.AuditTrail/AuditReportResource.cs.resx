@@ -238,13 +238,13 @@
     <value>Zpráva o operacích zákazníka stažena</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Limit výdajů na službu vytvořen: {0}</value>
+    <value>Limit výdajů na službu vytvořen: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Limit výdajů na službu aktualizován: {0}</value>
+    <value>Limit výdajů na službu aktualizován: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Limit výdajů na službu odstraněn: {0}</value>
+    <value>Limit výdajů na službu odstraněn: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Limity výdajů na službu nastaveny pro uživatele: {0}</value>

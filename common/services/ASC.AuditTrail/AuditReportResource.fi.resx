@@ -244,13 +244,13 @@
     <value>Asiakastoimintojen raportti ladattu</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Palvelun kulutusraja luotu: {0}</value>
+    <value>Palvelun kulutusraja luotu: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Palvelun kulutusraja päivitetty: {0}</value>
+    <value>Palvelun kulutusraja päivitetty: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Palvelun kulutusraja poistettu: {0}</value>
+    <value>Palvelun kulutusraja poistettu: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Palvelun kulutusrajat asetettu käyttäjille: {0}</value>

@@ -244,13 +244,13 @@
     <value>Müşteri işlemleri raporu indirildi</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Hizmet harcama limiti oluşturuldu: {0}</value>
+    <value>Hizmet harcama limiti oluşturuldu: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Hizmet harcama limiti güncellendi: {0}</value>
+    <value>Hizmet harcama limiti güncellendi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Hizmet harcama limiti silindi: {0}</value>
+    <value>Hizmet harcama limiti silindi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Kullanıcılar için hizmet harcama limitleri ayarlandı: {0}</value>

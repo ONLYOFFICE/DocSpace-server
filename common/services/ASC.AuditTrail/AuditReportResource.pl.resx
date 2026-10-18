@@ -244,13 +244,13 @@
     <value>Raport operacji klienta został pobrany</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Limit wydatków na usługę został utworzony: {0}</value>
+    <value>Limit wydatków na usługę został utworzony: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Limit wydatków na usługę został zaktualizowany: {0}</value>
+    <value>Limit wydatków na usługę został zaktualizowany: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Limit wydatków na usługę został usunięty: {0}</value>
+    <value>Limit wydatków na usługę został usunięty: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Limity wydatków na usługę zostały ustawione dla użytkowników: {0}</value>

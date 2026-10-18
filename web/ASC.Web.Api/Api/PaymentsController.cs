@@ -1782,7 +1782,7 @@ public class PaymentController(
         var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Scope, participantName,
             inDto.AmountValue, inDto.QuantityValue, inDto.Period);
 
-        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, participantName);
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, inDto.Scope, participantName);
 
         await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, participantName);
 
@@ -1822,7 +1822,7 @@ public class PaymentController(
         var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled)
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
-        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceGroupName, serviceLimit.Participant);
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
 
         await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Participant);
 
@@ -1953,7 +1953,7 @@ public class PaymentController(
         var serviceLimit = await tariffService.DeleteServiceLimitAsync(tenantId, inDto.Id)
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
-        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceGroupName, serviceLimit.Participant);
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
 
         await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Participant);
     }
@@ -1967,19 +1967,20 @@ public class PaymentController(
         await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id, userIds);
     }
 
-    // The audit record names the service group and, for a personal limit, the user it is set for; the user ID goes into
-    // the target, because the display name may change later.
-    private async Task SendServiceLimitAuditMessageAsync(MessageAction action, string serviceGroupName, string participantName)
+    // The audit record names the service group and, as its second parameter, the scope of the limit - for a personal
+    // limit together with the user it is set for. The user ID goes into the target, because the display name may
+    // change later.
+    private async Task SendServiceLimitAuditMessageAsync(MessageAction action, string serviceGroupName, ServiceLimitScope scope, string participantName)
     {
         if (!Guid.TryParse(participantName, out var userId))
         {
-            messageService.Send(action, serviceGroupName);
+            messageService.Send(action, null, serviceGroupName, scope.ToString());
             return;
         }
 
         var userName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, false, false);
 
-        messageService.Send(action, MessageTarget.Create(userId), $"{serviceGroupName} ({userName})");
+        messageService.Send(action, MessageTarget.Create(userId), serviceGroupName, $"{scope} ({userName})");
     }
 
     /// <remarks>

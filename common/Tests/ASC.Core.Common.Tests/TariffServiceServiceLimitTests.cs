@@ -275,6 +275,100 @@ public class TariffServiceServiceLimitTests
         handler.CallCount.Should().Be(5);
     }
 
+    [Fact]
+    public async Task GetCachedUserServiceLimit_UserWithAPersonalLimit_ReturnsItWithTheUsage()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request) ? GlobalLimitResponse(enabled: true) : ParticipantRows(Row(42, "Custom", UserA)));
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
+
+        serviceLimit.Id.Should().Be(42);
+        serviceLimit.Scope.Should().Be(ServiceLimitScope.Custom);
+        serviceLimit.Usage.AmountConsumed.Should().Be(12.5m);
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetCachedUserServiceLimit_UserUnderTheLimitForEveryUser_ReturnsThatRowWithTheUsage()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request) ? GlobalLimitResponse(enabled: true) : ParticipantRows(Row(42, "Custom", UserA), Row(43, "Global", UserB)));
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserB));
+
+        serviceLimit.Id.Should().Be(43);
+        serviceLimit.Scope.Should().Be(ServiceLimitScope.Global);
+        serviceLimit.Usage.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetCachedUserServiceLimit_UserNotInTheList_FallsBackToTheLimitForEveryUser()
+    {
+        // The accounting service lists only the users it has met; the others are still under the limit for every user.
+        var globalRequests = 0;
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request =>
+            {
+                if (IsGlobalRequest(request))
+                {
+                    globalRequests++;
+                    return GlobalLimitResponse(enabled: true);
+                }
+
+                return ParticipantRows(Row(42, "Custom", UserA));
+            });
+
+        var first = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));
+        var second = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserB));
+
+        first.Id.Should().Be(43);
+        first.Scope.Should().Be(ServiceLimitScope.Global);
+        first.Usage.Should().BeNull();
+        second.Id.Should().Be(43);
+        globalRequests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetCachedUserServiceLimit_LimitForEveryUserSwitchedOff_ReturnsNull()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request) ? GlobalLimitResponse(enabled: false) : ParticipantRows());
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));
+
+        serviceLimit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetCachedUserServiceLimit_NoLimitAtAll_ReturnsNull()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request)
+                ? AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""")
+                : ParticipantRows());
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));
+
+        serviceLimit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task CreateServiceLimit_DropsBothCaches_SoTheNextReadSeesTheChange()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Post
+                ? ServiceLimitResponse(OwnAccountNumber)
+                : IsGlobalRequest(request) ? GlobalLimitResponse(enabled: true) : ParticipantRows());
+
+        await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));
+        await tariffService.CreateServiceLimitAsync(TenantId, "ai-services", ServiceLimitScope.Global, null, 50m, null, ServiceLimitPeriod.Day);
+        await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));
+
+        // The list and the limit for every user, the creation, and both again.
+        handler.CallCount.Should().Be(5);
+    }
+
     private static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
         Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder)
     {
@@ -317,6 +411,28 @@ public class TariffServiceServiceLimitTests
             $$"""{"id":{{100 + index}},"serviceGroupName":"ai-services","scope":"Custom","customerAccountNumber":{{OwnAccountNumber}},"participant":"{{participant}}","amountValue":40,"currency":"USD","period":"Day","enabled":true}""");
 
         return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
+    }
+
+    private static bool IsGlobalRequest(HttpRequestMessage request)
+    {
+        return request.RequestUri!.AbsolutePath.EndsWith("/global", StringComparison.Ordinal);
+    }
+
+    private static HttpResponseMessage GlobalLimitResponse(bool enabled)
+    {
+        return AccountingClientTests.Json(HttpStatusCode.OK,
+            $$"""{"id":43,"serviceGroupName":"ai-services","customerAccountNumber":{{OwnAccountNumber}},"scope":"Global","amountValue":50,"currency":"USD","period":"Day","enabled":{{(enabled ? "true" : "false")}}}""");
+    }
+
+    private static string Row(int id, string scope, string participant)
+    {
+        return $$$"""{"id":{{{id}}},"serviceGroupName":"ai-services","customerAccountNumber":{{{OwnAccountNumber}}},"scope":"{{{scope}}}","participant":"{{{participant}}}","amountValue":40,"currency":"USD","period":"Day","enabled":true,"usage":{"periodStart":"2026-10-18T00:00:00Z","periodEnd":"2026-10-18T23:59:59Z","amountConsumed":12.5,"amountAvailable":27.5,"quantityConsumed":0}}""";
+    }
+
+    // One page holding every row, so the paged read stops after it.
+    private static HttpResponseMessage ParticipantRows(params string[] rows)
+    {
+        return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", rows)}}],"totalQuantity":{{rows.Length}}}""");
     }
 
     private static HttpResponseMessage ServiceLimitResponse(int customerAccountNumber)

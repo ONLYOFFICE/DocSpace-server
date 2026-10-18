@@ -244,13 +244,13 @@
     <value>Извештај о корисничким операцијама преузет</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Ограничење потрошње за услугу је креирано: {0}</value>
+    <value>Ограничење потрошње за услугу је креирано: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Ограничење потрошње за услугу је ажурирано: {0}</value>
+    <value>Ограничење потрошње за услугу је ажурирано: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Ограничење потрошње за услугу је избрисано: {0}</value>
+    <value>Ограничење потрошње за услугу је избрисано: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Ограничења потрошње за услугу су постављена за кориснике: {0}</value>

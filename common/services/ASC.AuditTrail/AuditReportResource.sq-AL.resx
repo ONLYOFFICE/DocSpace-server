@@ -238,13 +238,13 @@
     <value>Raporti i operacioneve të klientit u shkarkua</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Kufiri i shpenzimeve për shërbimin u krijua: {0}</value>
+    <value>Kufiri i shpenzimeve për shërbimin u krijua: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Kufiri i shpenzimeve për shërbimin u përditësua: {0}</value>
+    <value>Kufiri i shpenzimeve për shërbimin u përditësua: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Kufiri i shpenzimeve për shërbimin u fshi: {0}</value>
+    <value>Kufiri i shpenzimeve për shërbimin u fshi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Kufijtë e shpenzimeve për shërbimin u vendosën për përdoruesit: {0}</value>

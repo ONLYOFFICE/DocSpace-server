@@ -244,13 +244,13 @@
     <value>تم تنزيل تقرير عمليات العملاء</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>تم إنشاء حد الإنفاق على الخدمة: {0}</value>
+    <value>تم إنشاء حد الإنفاق على الخدمة: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>تم تحديث حد الإنفاق على الخدمة: {0}</value>
+    <value>تم تحديث حد الإنفاق على الخدمة: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>تم حذف حد الإنفاق على الخدمة: {0}</value>
+    <value>تم حذف حد الإنفاق على الخدمة: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>تم تعيين حدود الإنفاق على الخدمة للمستخدمين: {0}</value>

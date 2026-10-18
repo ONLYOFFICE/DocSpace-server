@@ -178,51 +178,6 @@ public class ServiceLimitReportDto
     public int TotalQuantity { get; init; }
 }
 
-/// <summary>
-/// What has been spent against a spending limit in its current period, and what is left.
-/// </summary>
-public class ServiceLimitUsageDto
-{
-    /// <summary>
-    /// The start of the current period, in UTC.
-    /// </summary>
-    /// <example>2026-10-18T00:00:00Z</example>
-    public DateTime PeriodStart { get; init; }
-
-    /// <summary>
-    /// The end of the current period, in UTC: the moment the spending starts again from zero. Null for a lifetime
-    /// limit, which never resets.
-    /// </summary>
-    /// <example>2026-10-18T23:59:59Z</example>
-    public DateTime? PeriodEnd { get; init; }
-
-    /// <summary>
-    /// The money charged in the current period, in the currency of the limit.
-    /// </summary>
-    /// <example>12.5</example>
-    public decimal AmountConsumed { get; init; }
-
-    /// <summary>
-    /// The money still available in the current period: the threshold less what was charged and what is reserved for
-    /// operations in progress, never below zero. Null when the limit has no money threshold.
-    /// </summary>
-    /// <example>27.5</example>
-    public decimal? AmountAvailable { get; init; }
-
-    /// <summary>
-    /// The quantity consumed in the current period, in the unit of the limit.
-    /// </summary>
-    /// <example>250</example>
-    public int QuantityConsumed { get; init; }
-
-    /// <summary>
-    /// The quantity still available in the current period, never below zero; null when the limit has no quantity
-    /// threshold.
-    /// </summary>
-    /// <example>750</example>
-    public int? QuantityAvailable { get; init; }
-}
-
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class ServiceLimitDtoMapper
 {

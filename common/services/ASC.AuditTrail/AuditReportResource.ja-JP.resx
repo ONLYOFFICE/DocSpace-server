@@ -238,13 +238,13 @@
     <value>顧客操作レポートがダウンロードされました</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>サービスの支出上限が作成されました: {0}</value>
+    <value>サービスの支出上限が作成されました: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>サービスの支出上限が更新されました: {0}</value>
+    <value>サービスの支出上限が更新されました: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>サービスの支出上限が削除されました: {0}</value>
+    <value>サービスの支出上限が削除されました: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>ユーザーのサービス支出上限が設定されました: {0}</value>

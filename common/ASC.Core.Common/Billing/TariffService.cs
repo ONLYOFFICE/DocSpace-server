@@ -1797,14 +1797,69 @@ public class TariffService(
         }, opt => opt.SetDuration(_participantServiceLimitsCacheDuration));
     }
 
+    /// <summary>
+    /// The limit in force for the user on the service group: the user's personal limit, or else the one for every user,
+    /// both from the caches of <see cref="GetCachedParticipantServiceLimitsAsync"/>. The personal limit and the one for
+    /// every user found in the list of the users come with the user's spending; the one for every user applied to a
+    /// user the accounting service has not met yet comes without it. Null when no limit applies to the user.
+    /// </summary>
+    public async Task<ServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
+    {
+        var serviceLimits = await GetCachedParticipantServiceLimitsAsync(tenantId, groupName);
+
+        var serviceLimit = serviceLimits.FirstOrDefault(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId);
+        if (serviceLimit != null)
+        {
+            return serviceLimit;
+        }
+
+        var globalServiceLimit = await GetCachedGlobalServiceLimitAsync(tenantId, groupName);
+
+        return globalServiceLimit is { Enabled: true } ? globalServiceLimit : null;
+    }
+
+    // The limit for every user, cached like the list of the users: a user missing from that list falls back to it.
+    private async Task<ServiceLimit> GetCachedGlobalServiceLimitAsync(int tenantId, string groupName)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        return await hybridCache.GetOrSetAsync<ServiceLimit>(GetGlobalServiceLimitCacheKey(tenantId, groupName), async (ctx, _) =>
+        {
+            try
+            {
+                return await GetGlobalServiceLimitAsync(tenantId, groupName);
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                return null;
+            }
+            catch (Exception error) when (error is not OperationCanceledException)
+            {
+                LogError(error, tenantId.ToString());
+                ctx.Options.Duration = _participantServiceLimitsFailureCacheDuration;
+                return null;
+            }
+        }, opt => opt.SetDuration(_participantServiceLimitsCacheDuration));
+    }
+
     internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName)
     {
         return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}";
     }
 
-    private async Task ClearParticipantServiceLimitsCacheAsync(int tenantId, string groupName)
+    internal static string GetGlobalServiceLimitCacheKey(int tenantId, string groupName)
+    {
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:global";
+    }
+
+    private async Task ClearServiceLimitsCacheAsync(int tenantId, string groupName)
     {
         await hybridCache.RemoveAsync(GetParticipantServiceLimitsCacheKey(tenantId, groupName));
+        await hybridCache.RemoveAsync(GetGlobalServiceLimitCacheKey(tenantId, groupName));
     }
 
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
@@ -1812,7 +1867,7 @@ public class TariffService(
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period);
 
-        await ClearParticipantServiceLimitsCacheAsync(tenantId, groupName);
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return serviceLimit;
     }
@@ -1830,7 +1885,7 @@ public class TariffService(
 
         var updated = await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
 
-        await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
+        await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
 
         return updated;
     }
@@ -1840,7 +1895,7 @@ public class TariffService(
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period);
 
-        await ClearParticipantServiceLimitsCacheAsync(tenantId, groupName);
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return count;
     }
@@ -1850,7 +1905,7 @@ public class TariffService(
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName);
 
-        await ClearParticipantServiceLimitsCacheAsync(tenantId, groupName);
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return count;
     }
@@ -1880,7 +1935,7 @@ public class TariffService(
         }
         finally
         {
-            await ClearParticipantServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
+            await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
         }
 
         return serviceLimit;

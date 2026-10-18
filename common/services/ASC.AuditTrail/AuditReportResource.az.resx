@@ -238,13 +238,13 @@
     <value>Müştəri əməliyyatları hesabatı endirildi</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Xidmət üzrə xərc limiti yaradıldı: {0}</value>
+    <value>Xidmət üzrə xərc limiti yaradıldı: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Xidmət üzrə xərc limiti yeniləndi: {0}</value>
+    <value>Xidmət üzrə xərc limiti yeniləndi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Xidmət üzrə xərc limiti silindi: {0}</value>
+    <value>Xidmət üzrə xərc limiti silindi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>İstifadəçilər üçün xidmət üzrə xərc limitləri təyin edildi: {0}</value>

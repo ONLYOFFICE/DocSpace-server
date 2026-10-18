@@ -244,13 +244,13 @@
     <value>Kundenvorgangsbericht heruntergeladen</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Ausgabenlimit für Dienst erstellt: {0}</value>
+    <value>Ausgabenlimit für Dienst erstellt: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Ausgabenlimit für Dienst aktualisiert: {0}</value>
+    <value>Ausgabenlimit für Dienst aktualisiert: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Ausgabenlimit für Dienst gelöscht: {0}</value>
+    <value>Ausgabenlimit für Dienst gelöscht: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
     <value>Ausgabenlimits für Dienst für Benutzer festgelegt: {0}</value>
