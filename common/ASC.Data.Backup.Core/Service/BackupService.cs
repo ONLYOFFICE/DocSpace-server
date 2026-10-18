@@ -139,7 +139,12 @@ public class BackupService(
                 return;
             }
         }
-        await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
+
+        if (!await backupRepository.TryMarkBackupRecordRemovedAsync(backupRecord.Id))
+        {
+            // Already removed, by an earlier or a concurrent delete: that one deletes the archive.
+            return;
+        }
 
         var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
         if (storage == null)
