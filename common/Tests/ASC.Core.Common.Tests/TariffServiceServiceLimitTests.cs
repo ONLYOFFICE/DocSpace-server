@@ -128,47 +128,6 @@ public class TariffServiceServiceLimitTests
     }
 
     [Fact]
-    public async Task GetServiceLimitUsage_LimitOfThisPortal_ReturnsUsage()
-    {
-        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            request => IsUsageRequest(request) ? UsageResponse() : ServiceLimitResponse(OwnAccountNumber));
-
-        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 42);
-
-        usage.Should().NotBeNull();
-        usage.ServiceLimitId.Should().Be(42);
-        usage.AmountConsumed.Should().Be(12.5m);
-        handler.CallCount.Should().Be(2);
-        handler.LastUri!.AbsolutePath.Should().EndWith("/usage");
-    }
-
-    [Fact]
-    public async Task GetServiceLimitUsage_LimitOfAnotherPortal_ReturnsNullWithoutRequestingUsage()
-    {
-        // The usage has no owner of its own, so the limit is checked first and the usage of a foreign limit is never read.
-        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            request => IsUsageRequest(request) ? UsageResponse() : ServiceLimitResponse(OtherAccountNumber));
-
-        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 42);
-
-        usage.Should().BeNull();
-        handler.CallCount.Should().Be(1);
-        handler.LastUri!.AbsolutePath.Should().NotEndWith("/usage");
-    }
-
-    [Fact]
-    public async Task GetServiceLimitUsage_UnknownId_ReturnsNull()
-    {
-        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
-
-        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 999999);
-
-        usage.Should().BeNull();
-        handler.CallCount.Should().Be(1);
-    }
-
-    [Fact]
     public async Task DeleteServiceLimit_LimitOfThisPortal_DeletesAndReturnsIt()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
@@ -197,6 +156,59 @@ public class TariffServiceServiceLimitTests
     }
 
     [Fact]
+    public async Task DeleteServiceLimit_AlreadyDeletedByAConcurrentRequest_ReturnsNull()
+    {
+        // The accounting service answers a deletion of a limit it does not have with 400, not 404.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Delete
+                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Service limit 42 does not exist"}""")
+                : ServiceLimitResponse(OwnAccountNumber));
+
+        var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, 42);
+
+        deleted.Should().BeNull();
+        handler.CallCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetTotalServiceLimit_ReadsThePortalLimitWithItsUsage()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => AccountingClientTests.Json(HttpStatusCode.OK,
+                """{"id":41,"serviceGroupName":"ai-services","scope":"Total","amountValue":500,"currency":"USD","period":"Month","enabled":true,"usage":{"periodStart":"2026-10-01T00:00:00Z","amountConsumed":312.4,"amountAvailable":187.6,"quantityConsumed":0}}"""));
+
+        var serviceLimit = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
+
+        serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
+        serviceLimit.Usage.AmountAvailable.Should().Be(187.6m);
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/total");
+        AccountingClientTests.ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
+    }
+
+    [Fact]
+    public async Task GetTotalServiceLimit_NoneSet_ReturnsNull()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+
+        var serviceLimit = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
+
+        serviceLimit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetGlobalServiceLimit_NoneSet_ReturnsNull()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+
+        var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
+
+        serviceLimit.Should().BeNull();
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/global");
+    }
+
+    [Fact]
     public async Task GetCachedParticipantServiceLimits_ReadsEveryPageOnce_ThenServesFromCache()
     {
         var requests = new List<Uri>();
@@ -209,16 +221,17 @@ public class TariffServiceServiceLimitTests
                     : ParticipantLimitsPage(UserC);
             });
 
-        var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
-        var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+        var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         first.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
         second.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
         handler.CallCount.Should().Be(2);
 
-        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-tools/participants"));
+        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/participants"));
         requests.Select(uri => AccountingClientTests.ParseQuery(uri)["offset"]).Should().Equal("0", "2");
         requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["limit"].Should().Be("100"));
+        requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["includeUsage"].Should().Be("true"));
     }
 
     [Fact]
@@ -227,7 +240,7 @@ public class TariffServiceServiceLimitTests
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
             _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, "Customer not found"));
 
-        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         serviceLimits.Should().BeEmpty();
     }
@@ -239,7 +252,7 @@ public class TariffServiceServiceLimitTests
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             _ => AccountingClientTests.Json(HttpStatusCode.InternalServerError, "boom"));
 
-        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         serviceLimits.Should().BeEmpty();
     }
@@ -254,9 +267,9 @@ public class TariffServiceServiceLimitTests
                     ? ParticipantLimitsPage(UserA, UserB)
                     : ParticipantLimitsPage(UserC));
 
-        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
-        await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-tools", [UserC], 40m, null, PriceTimeUnit.Day);
-        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-tools");
+        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+        await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-services", [UserC], 40m, null, ServiceLimitPeriod.Day);
+        await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         // Two pages, the update, and the two pages again.
         handler.CallCount.Should().Be(5);
@@ -301,25 +314,14 @@ public class TariffServiceServiceLimitTests
     private static HttpResponseMessage ParticipantLimitsPage(params string[] participants)
     {
         var limits = participants.Select((participant, index) =>
-            $$"""{"id":{{100 + index}},"serviceName":"ai-tools","customerAccountNumber":{{OwnAccountNumber}},"participant":"{{participant}}","amountValue":40,"currency":"USD","period":"Day","enabled":true}""");
+            $$"""{"id":{{100 + index}},"serviceGroupName":"ai-services","scope":"Custom","customerAccountNumber":{{OwnAccountNumber}},"participant":"{{participant}}","amountValue":40,"currency":"USD","period":"Day","enabled":true}""");
 
         return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
-    }
-
-    private static bool IsUsageRequest(HttpRequestMessage request)
-    {
-        return request.RequestUri!.AbsolutePath.EndsWith("/usage", StringComparison.Ordinal);
-    }
-
-    private static HttpResponseMessage UsageResponse()
-    {
-        return AccountingClientTests.Json(HttpStatusCode.OK,
-            """{"serviceLimitId":42,"period":"Day","periodStart":"2026-10-01T00:00:00Z","periodEnd":"2026-10-02T00:00:00Z","amountValue":50,"amountConsumed":12.5,"amountAvailable":37.5,"currency":"USD","quantityConsumed":0}""");
     }
 
     private static HttpResponseMessage ServiceLimitResponse(int customerAccountNumber)
     {
         return AccountingClientTests.Json(HttpStatusCode.OK,
-            $$"""{"id":42,"serviceName":"ai-tools","customerAccountNumber":{{customerAccountNumber}},"amountValue":50,"currency":"USD","period":"Day","enabled":true}""");
+            $$"""{"id":42,"serviceGroupName":"ai-services","scope":"Custom","customerAccountNumber":{{customerAccountNumber}},"amountValue":50,"currency":"USD","period":"Day","enabled":true}""");
     }
 }

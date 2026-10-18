@@ -79,14 +79,14 @@ public interface ITariffService
     List<string> GetSupportedAccountingCurrencies();
     Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
     Task<ServiceLimit> GetServiceLimitAsync(int tenantId, int id);
-    Task<ServiceLimitUsage> GetServiceLimitUsageAsync(int tenantId, int id);
-    Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName);
-    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string serviceName, ServiceLimitFilter filter);
-    Task<List<ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string serviceName);
-    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, PriceTimeUnit period);
+    Task<ServiceLimit> GetTotalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimit> GetGlobalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string groupName, ServiceLimitFilter filter);
+    Task<List<ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName);
+    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
     Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, int id, decimal? amountValue, int? quantityValue, bool? enabled);
-    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, PriceTimeUnit period);
-    Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string serviceName);
+    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName);
     Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, int id);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);

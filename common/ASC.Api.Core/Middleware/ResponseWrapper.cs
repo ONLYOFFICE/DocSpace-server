@@ -100,6 +100,19 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 withStackTrace = false;
                 break;
+            // A service limit the accounting service refuses to create or change because of the values the caller chose
+            // (a second limit of the same scope, a quantity threshold for services with different units): the caller is
+            // told the reason, without a stack trace.
+            case AccountingConflictException e:
+                status = HttpStatusCode.Conflict;
+                message = e.Message;
+                withStackTrace = false;
+                break;
+            case AccountingBadRequestException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;

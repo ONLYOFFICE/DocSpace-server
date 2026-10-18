@@ -525,24 +525,14 @@ public class EmployeeFullDtoHelper(
         }
     }
 
-    // Reads the cached list of all user limits of the service, so a page of users costs the accounting service one
-    // request at most instead of one per user.
+    // Reads the cached list of the limits in force for the users of the AI services, so a page of users costs the
+    // accounting service one request at most instead of one per user.
     private async Task<UserServiceLimitDto> GetAiToolsLimitAsync(int tenantId, Guid userId)
     {
-        var aiToolsQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-        if (string.IsNullOrEmpty(aiToolsQuota?.ServiceName))
-        {
-            return null;
-        }
+        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices);
 
-        var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(tenantId, aiToolsQuota.ServiceName);
-
-        // A switched-off limit stays in the history next to the one in force, so the one in force wins.
         var serviceLimit = serviceLimits
-            .Where(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId)
-            .OrderByDescending(limit => limit.Enabled)
-            .ThenByDescending(limit => limit.Modified)
-            .FirstOrDefault();
+            .FirstOrDefault(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId);
 
         return serviceLimit?.ToUserServiceLimitDto();
     }

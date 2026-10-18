@@ -34,21 +34,22 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// A spending limit on a pay-as-you-go wallet service, set for the whole portal or for one of its users.
+/// A spending limit on the AI services: for the portal as a whole, for every user, or for one user.
 /// </summary>
 public class ServiceLimitDto
 {
     /// <summary>
-    /// The service limit ID, used to read, change, switch off or delete the limit.
+    /// The service limit ID, used to read, change, switch off or delete the limit. In the list of the users the same
+    /// ID repeats for every user the limit for every user applies to.
     /// </summary>
     /// <example>42</example>
     public int Id { get; init; }
 
     /// <summary>
-    /// The limited wallet service, named the way the billing catalogue names it.
+    /// The limited service group; the AI services are `ai-services`.
     /// </summary>
-    /// <example>ai-tools</example>
-    public string ServiceName { get; init; }
+    /// <example>ai-services</example>
+    public string ServiceGroupName { get; init; }
 
     /// <summary>
     /// The number of the billing account of the portal the limit belongs to.
@@ -57,47 +58,60 @@ public class ServiceLimitDto
     public int CustomerAccountNumber { get; init; }
 
     /// <summary>
-    /// The ID of the portal user the limit is set for; null when the limit covers the portal as a whole.
+    /// Whom the limit applies to.
+    /// </summary>
+    /// <example>Custom</example>
+    public ServiceLimitScope Scope { get; init; }
+
+    /// <summary>
+    /// The ID of the portal user the limit applies to: the user of a personal limit, or, in the list of the users, the
+    /// user a limit for every user applies to. Null for a limit of the portal as a whole, and for a limit for every
+    /// user read on its own.
     /// </summary>
     /// <example>3f2504e0-4f89-11d3-9a0c-0305e82c3301</example>
     public string Participant { get; init; }
 
     /// <summary>
-    /// The most money the service may cost per period, in `currency`; null when the limit has no money threshold.
+    /// The most money the AI services may cost per period, in `currency`; null when the limit has no money threshold.
     /// </summary>
     /// <example>50</example>
     public decimal? AmountValue { get; init; }
 
     /// <summary>
-    /// The currency of the service `amountValue` is expressed in; null when the limit has no money threshold.
+    /// The currency `amountValue` is expressed in; null when the limit has no money threshold.
     /// </summary>
     /// <example>USD</example>
     public string Currency { get; init; }
 
     /// <summary>
-    /// The largest quantity of the service that may be consumed per period, in `serviceUnit`; null when the limit
-    /// has no quantity threshold.
+    /// The largest quantity the AI services may consume per period, in `serviceUnit`; null when the limit has no
+    /// quantity threshold.
     /// </summary>
     /// <example>1000</example>
     public int? QuantityValue { get; init; }
 
     /// <summary>
-    /// The unit of the service `quantityValue` is expressed in, such as pages, requests or gigabytes; null when the
-    /// limit has no quantity threshold.
+    /// The unit `quantityValue` is expressed in; null when the limit has no quantity threshold.
     /// </summary>
     /// <example>request</example>
     public string ServiceUnit { get; init; }
 
     /// <summary>
-    /// The calendar period the thresholds apply to. It resets at the start of the next period in UTC (a week on
-    /// Monday), not a fixed time after the first charge.
+    /// The window the thresholds apply to. A day, week or month resets at the start of the next one in UTC (a week on
+    /// Monday), not a fixed time after the first charge; a lifetime limit never resets.
     /// </summary>
     /// <example>Day</example>
-    public PriceTimeUnit Period { get; init; }
+    public ServiceLimitPeriod Period { get; init; }
 
     /// <summary>
-    /// Whether the limit is in force. A switched-off limit no longer restricts the service and stays in the
-    /// history.
+    /// The moment a lifetime limit counts from, in UTC; null for the other periods.
+    /// </summary>
+    /// <example>2026-10-01T09:12:00Z</example>
+    public DateTime? UsageFrom { get; init; }
+
+    /// <summary>
+    /// Whether the limit is in force. A switched-off limit no longer restricts the AI services and can be switched
+    /// back on.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; init; }
@@ -113,17 +127,24 @@ public class ServiceLimitDto
     /// </summary>
     /// <example>2026-09-15T08:00:00Z</example>
     public DateTime Modified { get; init; }
+
+    /// <summary>
+    /// What was spent against the limit in its current period and what is left. Filled for the limit of the portal as
+    /// a whole and in the list of the users; null where the spending is not read, such as for a limit read by its ID
+    /// or the limit for every user, whose spending is counted per user.
+    /// </summary>
+    public ServiceLimitUsageDto Usage { get; init; }
 }
 
 /// <summary>
-/// A page of the spending limits set on a wallet service for individual portal users.
+/// A page of the spending limits in force for the portal users.
 /// </summary>
 public class ServiceLimitReportDto
 {
     /// <summary>
-    /// The user limits of this page; empty when no user has a limit on the service or the page is past the end.
+    /// The limits of this page, one per user; empty when no limit applies to any user or the page is past the end.
     /// </summary>
-    /// <example>[{"id": 42, "serviceName": "ai-tools", "customerAccountNumber": 12345, "participant": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z"}]</example>
+    /// <example>[{"id": 42, "serviceGroupName": "ai-services", "customerAccountNumber": 12345, "scope": "Custom", "participant": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "usageFrom": null, "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z", "usage": {"periodStart": "2026-10-18T00:00:00Z", "periodEnd": "2026-10-18T23:59:59Z", "amountConsumed": 12.5, "amountAvailable": 27.5, "quantityConsumed": 0, "quantityAvailable": null}}]</example>
     public List<ServiceLimitDto> Collection { get; init; }
 
     /// <summary>
@@ -145,98 +166,61 @@ public class ServiceLimitReportDto
     public int TotalPage { get; init; }
 
     /// <summary>
-    /// The number of this page within the whole list.
+    /// The number of this page, starting from 1.
     /// </summary>
     /// <example>1</example>
     public int CurrentPage { get; init; }
 
     /// <summary>
-    /// The number of user limits on the service across all pages.
+    /// The number of users with a limit in force across all pages.
     /// </summary>
     /// <example>60</example>
     public int TotalQuantity { get; init; }
 }
 
 /// <summary>
-/// What has been spent against a service limit in its current calendar period, and what is left.
+/// What has been spent against a spending limit in its current period, and what is left.
 /// </summary>
 public class ServiceLimitUsageDto
 {
     /// <summary>
-    /// The ID of the service limit the usage is counted for.
-    /// </summary>
-    /// <example>42</example>
-    public int ServiceLimitId { get; init; }
-
-    /// <summary>
-    /// The calendar period the limit is reset with; `periodStart` and `periodEnd` bound the current one.
-    /// </summary>
-    /// <example>Day</example>
-    public PriceTimeUnit Period { get; init; }
-
-    /// <summary>
     /// The start of the current period, in UTC.
     /// </summary>
-    /// <example>2026-10-01T00:00:00Z</example>
+    /// <example>2026-10-18T00:00:00Z</example>
     public DateTime PeriodStart { get; init; }
 
     /// <summary>
-    /// The end of the current period, in UTC: the moment the consumed figures reset to zero.
+    /// The end of the current period, in UTC: the moment the spending starts again from zero. Null for a lifetime
+    /// limit, which never resets.
     /// </summary>
-    /// <example>2026-10-02T00:00:00Z</example>
-    public DateTime PeriodEnd { get; init; }
+    /// <example>2026-10-18T23:59:59Z</example>
+    public DateTime? PeriodEnd { get; init; }
 
     /// <summary>
-    /// The money threshold of the limit, in `currency`; null when the limit has no money threshold.
-    /// </summary>
-    /// <example>50</example>
-    public decimal? AmountValue { get; init; }
-
-    /// <summary>
-    /// The money charged for the service in the current period, in `currency`. Operations that have started but
-    /// not finished yet count with their expected cost.
+    /// The money charged in the current period, in the currency of the limit.
     /// </summary>
     /// <example>12.5</example>
     public decimal AmountConsumed { get; init; }
 
     /// <summary>
-    /// The money still available in the current period, in `currency`; zero once the threshold is reached, and
-    /// null when the limit has no money threshold.
+    /// The money still available in the current period: the threshold less what was charged and what is reserved for
+    /// operations in progress, never below zero. Null when the limit has no money threshold.
     /// </summary>
-    /// <example>37.5</example>
+    /// <example>27.5</example>
     public decimal? AmountAvailable { get; init; }
 
     /// <summary>
-    /// The currency of the amounts; null when the limit has no money threshold.
-    /// </summary>
-    /// <example>USD</example>
-    public string Currency { get; init; }
-
-    /// <summary>
-    /// The quantity threshold of the limit, in `serviceUnit`; null when the limit has no quantity threshold.
-    /// </summary>
-    /// <example>1000</example>
-    public int? QuantityValue { get; init; }
-
-    /// <summary>
-    /// The quantity of the service consumed in the current period, in `serviceUnit`.
+    /// The quantity consumed in the current period, in the unit of the limit.
     /// </summary>
     /// <example>250</example>
     public int QuantityConsumed { get; init; }
 
     /// <summary>
-    /// The quantity still available in the current period, in `serviceUnit`; zero once the threshold is reached,
-    /// and null when the limit has no quantity threshold.
+    /// The quantity still available in the current period, never below zero; null when the limit has no quantity
+    /// threshold.
     /// </summary>
     /// <example>750</example>
     public int? QuantityAvailable { get; init; }
-
-    /// <summary>
-    /// The unit of the quantities, such as pages, requests or gigabytes; null when the limit has no quantity
-    /// threshold.
-    /// </summary>
-    /// <example>request</example>
-    public string ServiceUnit { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

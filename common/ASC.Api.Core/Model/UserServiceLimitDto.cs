@@ -73,11 +73,11 @@ public class UserServiceLimitDto
     public string ServiceUnit { get; init; }
 
     /// <summary>
-    /// The calendar period the thresholds apply to. It resets at the start of the next period in UTC (a week on
-    /// Monday), not a fixed time after the first charge.
+    /// The window the thresholds apply to. It resets at the start of the next day, week or month in UTC (a week on
+    /// Monday), not a fixed time after the first charge; a lifetime limit never resets.
     /// </summary>
     /// <example>Day</example>
-    public PriceTimeUnit Period { get; init; }
+    public ServiceLimitPeriod Period { get; init; }
 
     /// <summary>
     /// Whether the limit is in force. A switched-off limit no longer restricts the user and can be switched back on.
