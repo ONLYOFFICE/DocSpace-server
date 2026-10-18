@@ -91,6 +91,14 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AccountingPaymentRequiredException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            // A charge refused by a spending limit belongs with the payment failures above, but it is the caller's
+            // own setting rather than a missing payment, so the reason (which limit, what is left, until when) is
+            // passed on, without a stack trace.
+            case AccountingServiceLimitExceededException e:
+                status = HttpStatusCode.PaymentRequired;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             // Asking for the configuration, quota or usage of a DocsCloud tenant the portal never activated is a
             // client error, not a server fault: the caller is told what is missing, without a stack trace.
             // The other DocsCloud failures (service not configured, authorization rejected) are ours to fix,
