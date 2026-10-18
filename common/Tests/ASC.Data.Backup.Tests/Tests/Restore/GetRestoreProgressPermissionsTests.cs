@@ -35,35 +35,46 @@
 namespace ASC.Data.Backup.Tests.Tests.Restore;
 
 /// <summary>
-/// GET /api/2.0/backup/getrestoreprogress: the state of the restore is visible to the portal settings
-/// permission only.
+/// GET /api/2.0/backup/getrestoreprogress answers every caller, anonymous ones included. That is by
+/// design: while a portal is being restored every visitor is shown the "preparing portal" page, which
+/// polls this endpoint, and the sessions of the restored portal are not valid yet. With no restore going
+/// on the answer carries no job.
 /// </summary>
 /// <remarks>
-/// BUG 79676: the endpoint answered any caller, anonymous ones included, instead of refusing with 401 and 403.
+/// BUG 79676 asked for 401 and 403 here instead; it was closed as invalid for the reason above.
 /// </remarks>
 public class GetRestoreProgressPermissionsTests(
     AspireAppFixture fixture)
     : BackupPermissionsTests(fixture)
 {
     [Fact]
-    [Trait("Bug", "79676")]
-    public async Task GetRestoreProgress_Anonymous_ReturnsUnauthorized()
+    public async Task GetRestoreProgress_Anonymous_ReturnsNoJob()
     {
-        // Act & Assert
-        await ExpectUnauthorizedAsync(() => _backupApi.GetRestoreProgressAsync(cancellationToken: TestContext.Current.CancellationToken));
+        // Arrange
+        await _backupClient.Authenticate(null);
+
+        // Act
+        var progress = await _backupApi.GetRestoreProgressAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        progress.StatusCode.Should().Be(200);
+        progress.Response.Should().BeNull();
     }
 
     [Theory]
-    [Trait("Bug", "79676")]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]
     [InlineData(EmployeeType.Guest)]
-    public async Task GetRestoreProgress_NonAdmin_ReturnsForbidden(EmployeeType employeeType)
+    public async Task GetRestoreProgress_NonAdmin_ReturnsNoJob(EmployeeType employeeType)
     {
         // Arrange
         await AuthenticateAsMemberAsync(employeeType);
 
-        // Act & Assert
-        await ExpectForbiddenAsync(() => _backupApi.GetRestoreProgressAsync(cancellationToken: TestContext.Current.CancellationToken));
+        // Act
+        var progress = await _backupApi.GetRestoreProgressAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        progress.StatusCode.Should().Be(200);
+        progress.Response.Should().BeNull();
     }
 }
