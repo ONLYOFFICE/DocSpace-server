@@ -9,9 +9,10 @@ muted rooms), the Telegram link of a profile, the push device registration, the 
 SMTP settings with the test message, the sign-in page contact form and join invitation, and the
 catalogue of letters: which event sends which letter, to whom, over which channel, and whether a
 subscription setting silences it. Letter texts are named by the subject a reader sees. Real-time
-socket events, the audit trail, webhooks and the invitation letters' triggers are other
-capabilities (`history-and-audit`, `webhooks-and-api-keys`, `invitations`,
-`backup-and-restore`) and are referenced only.
+socket events, the audit trail, webhooks, the invitation letters' triggers and the blocking,
+unblocking and removal of a portal behind the retention letters are other capabilities
+(`history-and-audit`, `webhooks-and-api-keys`, `invitations`, `backup-and-restore`,
+`portal-lifecycle`) and are referenced only.
 
 Sources: the integration tests of `web/ASC.Web.Api.Tests` (`02_Settings/Notifications`,
 `02_Settings/Messages`, `05_Security/Smtp`), `products/ASC.Files/Tests` (`03_Rooms/NewItems`),
@@ -111,7 +112,7 @@ stop the hourly room digest and the letters and pushes a room or a document send
 (sharing, mention, room invitation, role change, archive, new document, upload, folder, room
 deleted). Daily feed off SHALL stop the daily digest. Useful tips off SHALL stop only the
 after-registration marketing letters. A muted room SHALL be left out of the at-once letters,
-pushes and mentions for that member alone.
+pushes and mentions for that member.
 
 #### Scenario: Room activity switched off
 
@@ -441,8 +442,8 @@ Sharing with `notify` SHALL send "Documents. Access granted to document: <title>
 folder: <title>") with the access level and message, by e-mail, Telegram and push, to recipients
 subscribed to room activity. `sendEditorNotify` SHALL send "<brand> notification. Mentioned in
 document" with the note cut to 200 characters and a link to the mention, to listed accounts that
-can read the file, are subscribed and did not mute the room; it needs comment rights (403) and an
-existing file (404).
+can read the file, are subscribed and did not mute the room; it needs comment rights (403) and
+an existing file (404).
 
 #### Scenario: Mention of a member who can read the file
 
@@ -507,24 +508,135 @@ customer data.
 - **WHEN** the owner confirms the deletion of a free portal
 - **THEN** only the owner receives "<brand> has been deleted"
 
-### Requirement: Unused portal warnings and removal
+### Requirement: Which portals the retention policy counts
 
-On a hosted installation a daily job SHALL send the owner of a free portal idle for three months
-"Your <brand> will be deleted" on the monthly anniversary of its creation, again from six
-months, and remove the portal a week after the six-month warning. A portal whose paid tariff
-lapsed SHALL be warned three and six months after the due date and removed six months and a
-week after it. A forbidden domain is neither warned nor removed; nothing is sent before the
-installation started counting.
+On a hosted installation the daily job SHALL count towards blocking and deleting every free
+portal and every portal whose paid tariff lapsed past its grace period, unless it pays for an
+add-on; paid and trial portals and forbidden domains are left alone. A free portal is counted
+from its last sign-in or audit event, a lapsed one from its due date, never from before its last
+unblocking, its last add-on's end or the policy's first run (spread over 30 days by portal).
 
-#### Scenario: Free portal idle for six months
+#### Scenario: Paying portal
 
-- **WHEN** nobody signed in or did anything on a free portal for six months and a week
-- **THEN** the owner got "Your <brand> will be deleted" a week earlier and the portal is removed
+- **WHEN** a portal is on a paid tariff, in its grace period, or free but paying for an add-on
+- **THEN** the policy sends it nothing and does not count it, however long it has been idle
 
-#### Scenario: Free portal idle for one month
+#### Scenario: Add-on ran out
 
-- **WHEN** the last activity is a month old
-- **THEN** neither warning is sent
+- **WHEN** a free portal last used 50 days ago paid for an add-on until 30 days ago
+- **THEN** its count starts the day the add-on ran out, and today it gets the first warning naming a block 30 days ahead
+
+#### Scenario: Lapsed portal still used
+
+- **WHEN** a portal's tariff lapsed 60 days ago and somebody signed in yesterday
+- **THEN** the activity does not count: the portal gets the second warning of a lapsed portal
+
+#### Scenario: Idle when the policy first ran
+
+- **WHEN** a portal had been idle for a year when the installation first ran the policy
+- **THEN** its count starts on its own day of the first 30 days, not at its last activity, so it is warned a month after that day
+
+### Requirement: Retention warnings before the block
+
+A free portal with an empty wallet SHALL be warned on day 30 of its count and blocked on day
+60; a lapsed one warned on days 30 and 60, blocked on day 90; one with money on its wallet
+warned on day 30, monthly from month 6 to 11, blocked after a year. The owner and the payer of
+a lapsed portal get "Your <brand> space misses you (action needed by <date>)" or, with money
+left, "You still have funds in your <brand> space (action needed by <date>)" by e-mail, naming
+the block and deletion days in the portal's time zone.
+
+#### Scenario: Free portal idle for a month
+
+- **WHEN** nobody signed in or did anything on a free portal with an empty wallet for 30 days
+- **THEN** the owner gets "Your <brand> space misses you (action needed by <date>)" with the sign-in button, and nothing on day 29
+
+#### Scenario: Grace period covers the first warning
+
+- **WHEN** a lapsed tariff's grace period lasts 30 days
+- **THEN** the first warning goes out on day 31, the first unpaid day, and the second on day 60 as before
+
+#### Scenario: Money left on the wallet
+
+- **WHEN** a free or lapsed portal still has money on its wallet
+- **THEN** it gets "You still have funds in your <brand> space (action needed by <date>)" on day 30 and once a month from month 6 to month 11, with the wallet and renewal links
+
+#### Scenario: Missed days
+
+- **WHEN** the job did not run for several days, or a run failed on the portal
+- **THEN** the next run sends the latest warning of the days missed, at most a week back, and never a warning it already sent
+
+#### Scenario: Block reached without a warning
+
+- **WHEN** the count reaches the block day and no warning of this count was ever sent
+- **THEN** the portal is warned first and blocked 30 days after the warning, never on an unannounced day
+
+#### Scenario: Portal west of UTC
+
+- **WHEN** the portal's time zone is west of UTC
+- **THEN** the letter names the local day on which the UTC block day begins, one day earlier, never a day the portal is already blocked on
+
+### Requirement: Blocking an unused portal
+
+On the block day the portal SHALL be blocked and the owner (and the payer of a lapsed portal)
+sent "Your <brand> space is blocked, but your data is safe until <date>": with the unblocking
+button for the owner of a portal that paid or has money left, the support button otherwise. For
+every portal but a free one support gets "The portal <host> has been blocked by the retention
+policy". A blocked portal gets no other periodic letter; the unblocking link reactivates it and
+restarts its count.
+
+#### Scenario: Free portal blocked
+
+- **WHEN** a free portal with an empty wallet reaches day 60 of its count
+- **THEN** it is blocked, the owner's letter sends them to support and carries no unblocking link, and support gets no letter
+
+#### Scenario: Lapsed portal blocked
+
+- **WHEN** a lapsed portal reaches day 90
+- **THEN** the owner's letter carries the unblocking button, the payer's letter the support button, and support gets "The portal <host> has been blocked by the retention policy" with the owner, the category and the deletion date
+
+#### Scenario: Letter lost after the block
+
+- **WHEN** the portal was blocked but the letter about it failed to go out
+- **THEN** the next run sends it once, before any reminder of the deletion
+
+#### Scenario: Unblocking link
+
+- **WHEN** the owner follows the unblocking link of the current block
+- **THEN** the portal is active again and counted from that day; a link of an earlier block, or one for a portal no longer blocked, is refused with 401, and an ordinary sign-in token with 403
+
+### Requirement: Deletion reminders and removal of a blocked portal
+
+A blocked free portal with an empty wallet SHALL be deleted 30 days after the block, any other
+90 days after. The owner (and payer) get "Your <brand> space will be deleted soon (deleted on
+<date>)" 30 days before (not the free portal) and "Last chance to keep your <brand> space
+(deleted on <date>)" 7 days before, then "Your <brand> space has been deleted" naming the old
+address; for a lapsed portal support gets "<brand> has been deleted". No setting silences a
+retention letter.
+
+#### Scenario: Blocked free portal nobody unblocks
+
+- **WHEN** a free portal has been blocked for 23 days
+- **THEN** the owner gets "Last chance to keep your <brand> space (deleted on <date>)", and on day 30 the portal is removed and the owner gets "Your <brand> space has been deleted"
+
+#### Scenario: Lapsed portal removed
+
+- **WHEN** a blocked lapsed portal reaches day 90
+- **THEN** the owner and the payer get the deletion letter and support gets "<brand> has been deleted" with the customer data
+
+#### Scenario: Final reminder sent late
+
+- **WHEN** the final reminder could only be sent after its day
+- **THEN** the deletion moves back to a week after the day it went out
+
+#### Scenario: Unblocked after the run read it
+
+- **WHEN** the portal was unblocked after the run found it due for deletion
+- **THEN** it is not removed
+
+#### Scenario: Wallet changes after the block
+
+- **WHEN** the wallet of a blocked portal empties or fills
+- **THEN** the retention period announced by the block letter stays as it was
 
 ### Requirement: After-registration letters
 
