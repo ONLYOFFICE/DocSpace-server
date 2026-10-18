@@ -39,8 +39,9 @@ namespace ASC.Data.Backup.Tests.Tests.Schedule;
 /// case first stores a baseline schedule, then sends the invalid one and proves the baseline survived.
 /// </summary>
 /// <remarks>
-/// BUG 84510: the server accepts these with 200 and stores them, replacing the working schedule with one
-/// that can never run. They have to be rejected with 400.
+/// BUG 84510: the server used to accept these with 200 and store them, replacing the working schedule with
+/// one that could never run. Creating a schedule now refuses a storage type the backup storages do not
+/// handle and a third-party consumer without a known module with 400, before anything is stored.
 /// </remarks>
 public class CreateBackupScheduleAcceptedInvalidValidationTests(
     AspireAppFixture fixture)

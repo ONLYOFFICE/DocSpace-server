@@ -56,7 +56,8 @@ public class BackupService(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         StorageFactory storageFactory,
-        MessageService messageService)
+        MessageService messageService,
+        ConsumerFactory consumerFactory)
 {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
@@ -378,6 +379,7 @@ public class BackupService(
         }
 
         ValidateCronSettings(cronParams);
+        ValidateScheduleStorage(storageType, storageParams);
 
         var scheduleRequest = new CreateScheduleRequest
         {
@@ -590,6 +592,30 @@ public class BackupService(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Refuses a storage no scheduled backup could ever be written to, so that a broken request cannot
+    /// replace a working schedule: a storage type the backup storages do not handle, or a third-party
+    /// consumer without a known <c>module</c>.
+    /// </summary>
+    private void ValidateScheduleStorage(BackupStorageType storageType, Dictionary<string, string> storageParams)
+    {
+        if (storageType is not (BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments or BackupStorageType.DataStore
+            or BackupStorageType.Local or BackupStorageType.ThirdPartyConsumer))
+        {
+            throw new ArgumentException("storageType must be Documents, ThridpartyDocuments, DataStore, Local or ThirdPartyConsumer");
+        }
+
+        if (storageType == BackupStorageType.ThirdPartyConsumer)
+        {
+            var module = storageParams.GetValueOrDefault("module");
+
+            if (string.IsNullOrEmpty(module) || string.IsNullOrEmpty(consumerFactory.GetByKey<DataStoreConsumer>(module).Name))
+            {
+                throw new ArgumentException("storageParams must contain the module of a known storage");
+            }
+        }
     }
 
     private static void ValidateCronSettings(CronParams cronParams)
