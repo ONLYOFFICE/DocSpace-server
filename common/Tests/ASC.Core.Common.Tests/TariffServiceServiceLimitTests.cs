@@ -209,6 +209,34 @@ public class TariffServiceServiceLimitTests
     }
 
     [Fact]
+    public async Task TotalAndGlobalLimits_PortalUnknownToTheAccountingService_ReturnNull()
+    {
+        // The accounting service answers an unknown customer with 400; for the portal that simply means no limit.
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
+
+        var total = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
+        var global = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
+
+        total.Should().BeNull();
+        global.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetParticipantServiceLimits_PortalUnknownToTheAccountingService_ReturnsAnEmptyPage()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
+
+        var report = await tariffService.GetParticipantServiceLimitsAsync(TenantId, "ai-services", new ServiceLimitFilter { Offset = 50, Limit = 10 });
+
+        report.Collection.Should().BeEmpty();
+        report.TotalQuantity.Should().Be(0);
+        report.Offset.Should().Be(50);
+        report.Limit.Should().Be(10);
+    }
+
+    [Fact]
     public async Task GetCachedParticipantServiceLimits_ReadsEveryPageOnce_ThenServesFromCache()
     {
         var requests = new List<Uri>();

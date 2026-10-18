@@ -1692,7 +1692,7 @@ public class PaymentController(
     /// Lists, one page at a time, the spending limit on the AI services in force for each portal user, with what the
     /// user spent against it in the current period and what is left. Only a DocSpace administrator may read it, an
     /// installation without a billing service answers 403, a portal with no billing customer answers 404, and the call
-    /// is read-only. A user's own limit wins over the one for every user: an item with the scope `Custom` is a
+    /// is read-only; a portal with no limits gets an empty page. A user's own limit wins over the one for every user: an item with the scope `Custom` is a
     /// personal limit, one with `Global` the limit for every user, its ID repeated for each user it applies to.
     /// Switched-off limits are not listed, and a user who has not used the AI services yet may be missing. `offset`
     /// and `limit` page through the result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer
@@ -1836,8 +1836,8 @@ public class PaymentController(
     /// settings as well as DocSpace administrator rights. At least one of `amountValue` and `quantityValue` must be
     /// given, every user in `userIds` must exist on the portal, and a user listed twice is limited once. Unlike
     /// `PUT api/2.0/portal/payment/servicelimit`, this sets the whole limit: a threshold left out is removed, and the
-    /// period may change. Each personal limit applies instead of the one for every user, and the limit of the portal is
-    /// checked on top. The call is mutating and idempotent, and it is written to the portal audit trail. The answer is
+    /// period may change, though a lifetime limit set to lifetime again keeps counting from where it was. Each personal
+    /// limit applies instead of the one for every user, and the limit of the portal is checked on top. The call is mutating and idempotent, and it is written to the portal audit trail. The answer is
     /// the number of personal limits that were set; the result is listed by
     /// `GET api/2.0/portal/payment/servicelimit/participants`.
     /// </remarks>

@@ -76,6 +76,7 @@ public class TariffService(
     private static readonly TimeSpan _participantServiceLimitsCacheDuration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _participantServiceLimitsFailureCacheDuration = TimeSpan.FromMinutes(1);
     private const int ParticipantServiceLimitsPageSize = 100;
+    private const int ParticipantServiceLimitsDefaultPageSize = 25;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
 
     //private readonly int _activeUsersMin;
@@ -1710,7 +1711,7 @@ public class TariffService(
 
     /// <summary>
     /// Returns the limit of the portal as a whole on the service group, with its spending in the current period, or
-    /// null when none is set.
+    /// null when none is set - including for a portal the accounting service does not know yet.
     /// </summary>
     public async Task<ServiceLimit> GetTotalServiceLimitAsync(int tenantId, string groupName)
     {
@@ -1720,7 +1721,7 @@ public class TariffService(
         {
             return await accountingClient.GetTotalServiceLimitAsync(portalId, groupName, includeUsage: true);
         }
-        catch (AccountingNotFoundException exception)
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
         {
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             return null;
@@ -1728,8 +1729,9 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Returns the limit for every user on the service group, or null when none is set. It carries no spending: that
-    /// is counted per user and comes with <see cref="GetParticipantServiceLimitsAsync"/>.
+    /// Returns the limit for every user on the service group, or null when none is set - including for a portal the
+    /// accounting service does not know yet. It carries no spending: that is counted per user and comes with
+    /// <see cref="GetParticipantServiceLimitsAsync"/>.
     /// </summary>
     public async Task<ServiceLimit> GetGlobalServiceLimitAsync(int tenantId, string groupName)
     {
@@ -1739,17 +1741,38 @@ public class TariffService(
         {
             return await accountingClient.GetGlobalServiceLimitAsync(portalId, groupName);
         }
-        catch (AccountingNotFoundException exception)
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
         {
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             return null;
         }
     }
 
+    /// <summary>
+    /// Returns a page of the limits in force for the users of the tenant on the service group. A portal the accounting
+    /// service does not know yet has no limits, so it gets an empty page, as the accounting service answers when no limit
+    /// is set.
+    /// </summary>
     public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string groupName, ServiceLimitFilter filter)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.GetParticipantServiceLimitsAsync(portalId, groupName, filter);
+
+        try
+        {
+            return await accountingClient.GetParticipantServiceLimitsAsync(portalId, groupName, filter);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+
+            return new ServiceLimitReport
+            {
+                Collection = [],
+                Offset = filter?.Offset ?? 0,
+                Limit = filter?.Limit ?? ParticipantServiceLimitsDefaultPageSize,
+                CurrentPage = 1
+            };
+        }
     }
 
     /// <summary>
