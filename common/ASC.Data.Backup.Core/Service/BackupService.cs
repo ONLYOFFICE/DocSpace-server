@@ -262,7 +262,8 @@ public class BackupService(
         else
         {
             request.StorageType = storageType;
-            request.FilePathOrId = storageParams["filePath"];
+            request.FilePathOrId = storageParams.GetValueOrDefault("filePath")
+                ?? throw new ArgumentException("backupId must be the ID of a backup, or storageParams must contain filePath");
 
             if (request.StorageType == BackupStorageType.Local && enqueueTask)
             {

@@ -559,11 +559,10 @@ public class BackupController(
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued restoring job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, `backupId` is not a GUID and `storageParams` has no `filePath`, or an item of `storageParams` is null, has no key or no value, or repeats a key")]
     [SwaggerResponse(402, "The pricing plan of this portal does not allow restoring")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The backup record was not found, the file given in `filePath` or its folder was not found, or, for `Local` storage, no backup archive has been uploaded to the portal")]
-    [SwaggerResponse(500, "`backupId` is not a GUID and `storageParams` has no `filePath`, or a key or value of `storageParams` is null")]
     [HttpPost("startrestore")]
     public async Task<BackupProgressDto> StartBackupRestore(StartBackupRestoreRequestDto inDto)
     {
@@ -574,7 +573,11 @@ public class BackupController(
 
         await backupService.DemandPermissionsRestoreAsync();
 
-        var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+        var storageParams = inDto.StorageParams == null
+            ? new Dictionary<string, string>()
+            : inDto.StorageParams.ToDictionary(
+                r => r?.Key?.ToString() ?? throw new ArgumentException("every item of storageParams must have a key"),
+                r => r.Value?.ToString() ?? throw new ArgumentException("every item of storageParams must have a value"));
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")

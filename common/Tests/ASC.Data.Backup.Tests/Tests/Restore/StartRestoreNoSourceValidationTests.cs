@@ -40,13 +40,11 @@ namespace ASC.Data.Backup.Tests.Tests.Restore;
 /// anything that could reach the restore queue.
 /// </summary>
 /// <remarks>
-/// BUG 84513: no usable source reaches the controller, which then looks up a <c>filePath</c> storage
-/// parameter that is not there and ends in an unhandled exception (500). The same endpoint answers 400
-/// when <c>backupId</c> is missing altogether, and the other actions of this controller return 400 for bad
-/// input. Not run, because no request of these kinds can be proven unable to start a restore: any
-/// <c>backupId</c> that is a GUID (so any test of a backup that does not exist), any <c>storageParams</c>
-/// with a <c>filePath</c> (so a path that does not exist and a storage type that does not match it), a
-/// <c>storageType</c> outside the enum (the missing-source error is raised first and hides it) and
+/// BUG 84513: such a body used to end in an unhandled exception (500) - the service looked up a
+/// <c>filePath</c> storage parameter that was not there, and the controller read the key and value of a
+/// null <c>storageParams</c> item. Both are now refused with 400 before a restore is queued. Cases that
+/// cannot be proven unable to start a restore are not sent at all: any <c>backupId</c> that is a GUID,
+/// any <c>storageParams</c> with a <c>filePath</c>, a <c>storageType</c> outside the enum and
 /// <c>dump: true</c>.
 /// </remarks>
 public class StartRestoreNoSourceValidationTests(
