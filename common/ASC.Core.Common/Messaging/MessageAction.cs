@@ -441,6 +441,9 @@ public enum MessageAction
     [Description("File converted")]
     FileConverted = 5035,
 
+    [Description("File opened by a document builder script")]
+    FileOpenedByDocumentBuilder = 5208,
+
     [Description("File change owner")]
     FileChangeOwner = 5043,
 
@@ -1048,20 +1051,34 @@ public enum MessageAction
     [Description("MCP server of AI agent updated")]
     UpdatedServerOfAgent = 6109,
 
+    /// <summary>
+    /// The retention policy blocked the portal after a long period without use. Written by the system,
+    /// so the event names no user.
+    /// </summary>
+    [Description("Portal blocked")]
+    PortalBlocked = 6110,
+
+    /// <summary>
+    /// A portal blocked by the retention policy was made active again with the owner's unblocking link,
+    /// on behalf of the owner.
+    /// </summary>
+    [Description("Portal unblocked")]
+    PortalUnblocked = 6111,
+
     [Description("Customer service limit created")]
-    CustomerServiceLimitCreated = 6110,
+    CustomerServiceLimitCreated = 6112,
 
     [Description("Customer service limit updated")]
-    CustomerServiceLimitUpdated = 6111,
+    CustomerServiceLimitUpdated = 6113,
 
     [Description("Customer service limits set for users")]
-    CustomerServiceLimitsSet = 6112,
+    CustomerServiceLimitsSet = 6114,
 
     [Description("Customer service limits of users disabled")]
-    CustomerServiceLimitsDisabled = 6113,
+    CustomerServiceLimitsDisabled = 6115,
 
     [Description("Customer service limit deleted")]
-    CustomerServiceLimitDeleted = 6114,
+    CustomerServiceLimitDeleted = 6116,
 
     #endregion
 

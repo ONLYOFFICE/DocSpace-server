@@ -1141,6 +1141,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Opened By Document Builder Script: {0}.
+        /// </summary>
+        public static string FileOpenedByDocumentBuilder {
+            get {
+                return ResourceManager.GetString("FileOpenedByDocumentBuilder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Change: {0}.
         /// </summary>
         public static string FileOpenedForChange {
@@ -2239,6 +2248,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Portal blocked by the retention policy.
+        /// </summary>
+        public static string PortalBlocked {
+            get {
+                return ResourceManager.GetString("PortalBlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Portal Deactivated.
         /// </summary>
         public static string PortalDeactivated {
@@ -2262,6 +2280,15 @@ namespace ASC.AuditTrail {
         public static string PortalRenamed {
             get {
                 return ResourceManager.GetString("PortalRenamed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Portal unblocked.
+        /// </summary>
+        public static string PortalUnblocked {
+            get {
+                return ResourceManager.GetString("PortalUnblocked", resourceCulture);
             }
         }
         

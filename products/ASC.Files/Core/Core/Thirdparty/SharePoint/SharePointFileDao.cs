@@ -105,7 +105,9 @@ internal class SharePointFileDao(
             return AsyncEnumerable.Empty<File<string>>();
         }
 
-        var files = GetFilesAsync(fileIds);
+        // SharePoint answers with null for a file it no longer has; such an id must drop out here,
+        // before the predicates below read its fields.
+        var files = GetFilesAsync(fileIds).Where(x => x != null);
 
         //Filter
         if (subjectID != Guid.Empty)

@@ -81,6 +81,10 @@ public static class DocSpaceHelper
     public static bool IsFillFormsRoom(FolderType? roomType) =>
         roomType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom or FolderType.USER;
 
+    // the roots of the sections that hold rooms: a file is never placed in them directly
+    public static bool IsRoomsSectionRoot(FolderType folderType) =>
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
         return FormsFillingSystemFolders.Contains(folderType);
@@ -164,6 +168,30 @@ public static class DocSpaceHelper
     public static bool LocatedInPrivateRoom<T>(Folder<T> room)
     {
         return room is { SettingsPrivate: true };
+    }
+
+    /// <summary>
+    /// Whether the file lies in a private room or in a room with a watermark, whose content is not converted into a
+    /// file of its own: such a file would leave the room unencrypted or without the watermark.
+    /// </summary>
+    public static async Task<bool> IsConversionForbiddenAsync<T>(FileEntry<T> file, IFolderDao<T> folderDao)
+    {
+        var room = await GetParentRoom(file, folderDao);
+
+        return LocatedInPrivateRoom(room) || IsWatermarkEnabled(room);
+    }
+
+    // for a target folder the folder itself counts, as a result may be saved straight into the room
+    public static async Task<bool> IsConversionForbiddenAsync<T>(Folder<T> folder, IFolderDao<T> folderDao)
+    {
+        if (folder.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        {
+            return false;
+        }
+
+        var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
+
+        return LocatedInPrivateRoom(room) || IsWatermarkEnabled(room);
     }
 
     public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)

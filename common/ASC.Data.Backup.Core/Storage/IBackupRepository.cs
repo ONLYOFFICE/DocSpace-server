@@ -39,6 +39,7 @@ public interface IBackupRepository
     Task<BackupRecord> GetBackupRecordAsync(string hash, int tenant);
     Task<BackupSchedule> GetBackupScheduleAsync(int tenantId, bool? dump);
     Task<List<BackupRecord>> GetBackupRecordsByTenantIdAsync(int tenantId);
+    Task<List<string>> GetBackupNamesAsync(int tenantId, string namePrefix);
     Task<List<BackupRecord>> GetExpiredBackupRecordsAsync();
     Task<List<BackupRecord>> GetScheduledBackupRecordsAsync();
     Task<List<BackupSchedule>> GetBackupSchedulesAsync();

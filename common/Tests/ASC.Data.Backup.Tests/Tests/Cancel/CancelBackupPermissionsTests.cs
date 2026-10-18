@@ -31,34 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
 
-/// <summary>
-/// The first warning a free portal gets (<c>saas_admin_startup_warning_after_three_months_v1</c>), sent to
-/// the owner after three months without activity. The six-month letter and the removal follow.
-/// </summary>
-public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
+namespace ASC.Data.Backup.Tests.Tests.Cancel;
+
+/// <summary>POST /api/2.0/backup/cancelbackup: only the portal owner and the portal administrators may cancel.</summary>
+public class CancelBackupPermissionsTests(
+    AspireAppFixture fixture)
+    : BackupPermissionsTests(fixture)
 {
-    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
-
-    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    [Fact]
+    public async Task CancelBackup_Anonymous_ReturnsUnauthorized()
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl(scope))
-            .And.Contain(LetterEnvironment.PortalUrl);
+        // Act & Assert
+        await ExpectUnauthorizedAsync(() => _backupApi.CancelBackupAsync(TestContext.Current.CancellationToken));
     }
 
-    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    [Theory]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task CancelBackup_NonAdmin_ReturnsForbidden(EmployeeType employeeType)
     {
-        var logoText = LetterEnvironment.LogoText;
+        // Arrange
+        await AuthenticateAsMemberAsync(employeeType);
 
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for 3 months.")
-            .And.Contain("will be deleted after 6 months of inactivity")
-            .And.Contain($"Simply log in now to keep your {logoText} active");
+        // Act & Assert
+        await ExpectForbiddenAsync(() => _backupApi.CancelBackupAsync(TestContext.Current.CancellationToken));
     }
 }

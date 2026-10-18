@@ -134,8 +134,8 @@ public class BackupController(
     /// `cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0
     /// to 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with
     /// Sunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for
-    /// `EveryDay`, and because an omitted `day` is stored as 0, which neither period accepts, a weekly or
-    /// monthly schedule sent without it fails instead of falling back to a default.
+    /// `EveryDay`, and a weekly or monthly schedule sent without it is rejected with 400 instead of falling
+    /// back to a default.
     /// `backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older
     /// copies are removed by a background cleaner, and only the ones this schedule created: archives made by
     /// `POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops
@@ -149,11 +149,11 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, the number of the stored copies is outside 1-30, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
+    [SwaggerResponse(400, "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, the `folderId` or `filePath` key the storage type needs is missing, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
-    [SwaggerResponse(500, "`cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, a key or value of `storageParams` is null, the `folderId` or `filePath` key the storage type needs is missing, or `Local` storage was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(500, "A key or value of `storageParams` is null, or `Local` storage was requested on a portal that is not a standalone installation")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
@@ -165,11 +165,12 @@ public class BackupController(
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
         var backupStored = inDto.BackupsStored ?? 1;
+        var cronParams = inDto.CronParams ?? throw new ArgumentException("cronParams is required");
         var cron = new CronParams
         {
-            Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
-            Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day ?? 0
+            Period = cronParams.Period ?? BackupPeriod.EveryDay,
+            Hour = cronParams.Hour,
+            Day = cronParams.Day ?? 0
         };
         if (backupStored is > 30 or < 1)
         {
@@ -178,14 +179,15 @@ public class BackupController(
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
+            var folderId = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
 
-            if (int.TryParse(storageParams["folderId"], out var fId))
+            if (int.TryParse(folderId, out var fId))
             {
                 await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(folderId);
             }
         }
         await backupService.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);

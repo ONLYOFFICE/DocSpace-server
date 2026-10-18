@@ -44,7 +44,7 @@ public class SaasAdminHandyAppsLetterTests : PeriodicLetterTestBase<SaasAdminHan
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonGoToDocSpace", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(LetterEnvironment.PortalUrl);
+            .And.Contain(scope.PortalUrl);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

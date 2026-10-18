@@ -40,11 +40,11 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
-    public async Task<Balance> GetCustomerBalanceAsync(string portalId)
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default)
     {
         EnsureConfigured();
 
-        return await accountingApi.GetCustomerBalanceAsync(portalId);
+        return await accountingApi.GetCustomerBalanceAsync(portalId, cancellationToken);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
