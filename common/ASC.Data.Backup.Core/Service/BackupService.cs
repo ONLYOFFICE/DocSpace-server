@@ -126,7 +126,7 @@ public class BackupService(
     {
         await DemandPermissionsBackupAsync();
 
-        var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
+        var backupRecord = await backupRepository.GetBackupRecordAsync(backupId) ?? throw new ItemNotFoundException("Backup not found");
         if (backupRecord.TenantId == -1)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();

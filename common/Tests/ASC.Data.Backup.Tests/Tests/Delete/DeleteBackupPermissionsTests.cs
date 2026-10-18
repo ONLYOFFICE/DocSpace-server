@@ -51,6 +51,10 @@ public class DeleteBackupPermissionsTests(
         await ExpectUnauthorizedAsync(() => _backupApi.DeleteBackupAsync(_unknownId, TestContext.Current.CancellationToken));
     }
 
+    /// <summary>
+    /// BUG 80605: an ID with no backup record used to fail with 500 - the service read the tenant of a
+    /// record it had not found. It now answers 404 before anything is deleted.
+    /// </summary>
     [Fact]
     [Trait("Bug", "80605")]
     public async Task DeleteBackup_UnknownId_ReturnsNotFound()

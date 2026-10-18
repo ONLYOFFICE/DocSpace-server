@@ -498,7 +498,7 @@ public class BackupController(
     /// answers true, so the result confirms that the request was accepted rather than that anything was
     /// deleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.
     /// The record is removed before the archive, so when the storage can no longer be reached the archive
-    /// stays behind with nothing pointing at it.
+    /// stays behind with nothing pointing at it. An ID that no backup has ever had is answered with 404.
     /// </remarks>
     /// <summary>Delete the backup</summary>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
@@ -506,7 +506,7 @@ public class BackupController(
     [SwaggerResponse(200, "True once the request has been accepted, whether or not a backup was deleted", typeof(bool))]
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(500, "There is no backup record with this ID")]
+    [SwaggerResponse(404, "There is no backup record with this ID")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupRequestDto inDto)
     {
