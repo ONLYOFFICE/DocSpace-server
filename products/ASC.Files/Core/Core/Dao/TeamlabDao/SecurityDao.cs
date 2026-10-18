@@ -1109,12 +1109,13 @@ internal abstract class SecurityBaseDao<T>(
             .Where(s => s.SubjectType == SubjectType.Group)
             .Select(s => s.Subject);
 
-        // A group added to many rooms is listed once, so its members are read once, not once per room.
+        // A group added to many rooms is listed once, so its members are read once, not once per room. Only
+        // Contains rows are membership: the manager of a group has a row of its own, which is no membership.
         var roomGroupMembers =
             from groupId in roomGroups.Distinct()
             join ug in filesDbContext.UserGroup on groupId equals ug.UserGroupId
             join u in users on ug.Userid equals u.Id
-            where ug.TenantId == tenantId && !ug.Removed
+            where ug.TenantId == tenantId && !ug.Removed && ug.RefType == UserGroupRefType.Contains
             select u.Id;
 
         var relatedUsers = users
