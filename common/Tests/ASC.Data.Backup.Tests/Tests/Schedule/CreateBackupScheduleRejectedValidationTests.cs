@@ -108,6 +108,11 @@ public class CreateBackupScheduleRejectedValidationTests(
         status.Should().Be(404);
     }
 
+    /// <summary>
+    /// BUG 84511: a non-numeric folderId of a Documents schedule used to be looked up as a third-party folder
+    /// and answered with a misleading 404 ("Selector '' not found"). It is now refused with 400, as
+    /// startbackup already did.
+    /// </summary>
     [Fact]
     [Trait("Bug", "84511")]
     public async Task CreateBackupSchedule_NonNumericFolderId_ReturnsBadRequestAndKeepsStoredSchedule()

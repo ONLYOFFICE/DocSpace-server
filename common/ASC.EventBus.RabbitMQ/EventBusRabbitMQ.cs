@@ -45,21 +45,33 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private readonly IEventBusSubscriptionsManager _subsManager;
     private readonly IServiceProvider _serviceProvider;
     private readonly int _retryCount;
+    private readonly ushort _prefetchCount;
     private readonly IIntegrationEventSerializer _serializer;
 
     private const int MaxPooledPublisherChannels = 16;
 
     private string _consumerTag;
     private IChannel _consumerChannel;
+    private EventBusConsumer _consumer;
     private string _queueName;
     private readonly string _deadLetterQueueName;
+    // the routing keys bound to the queues, kept to bind them again on a queue the broker had dropped;
+    // the subscriptions manager has no way to list its events
+    private readonly ConcurrentDictionary<string, byte> _boundEvents = new();
 
     private readonly Task _initializeTask;
     private readonly SemaphoreSlim _consumeSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _recreateSemaphore = new(1, 1);
+    private static readonly TimeSpan _initialRecreateDelay = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _maxRecreateDelay = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan _disposeRecreationWait = TimeSpan.FromSeconds(10);
+    private readonly CancellationTokenSource _disposeCts = new();
     private readonly ConcurrentBag<IChannel> _publisherChannelPool = [];
     private int _pooledPublisherChannelCount;
     private readonly ResiliencePipeline _publishPipeline;
     private volatile bool _disposing;
+    // running while the consumer is missing on a live connection, null otherwise; a reference, so no lock
+    private volatile Stopwatch _consumerOutage;
 
     private static readonly ResiliencePropertyKey<Guid> _eventIdPropertyKey = new("event-id");
 
@@ -71,7 +83,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                             IEventBusSubscriptionsManager subsManager,
                             IIntegrationEventSerializer serializer,
                             string queueName = null,
-                            int retryCount = 5)
+                            int retryCount = 5,
+                            ushort prefetchCount = 10)
     {
         _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -81,6 +94,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _retryCount = retryCount;
+        _prefetchCount = prefetchCount;
         _subsManager.OnEventRemoved += async (s, e) =>
                                                     {
                                                         await SubsManager_OnEventRemovedAsync(s, e);
@@ -137,6 +151,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
     private async Task SubsManager_OnEventRemovedAsync(object sender, string eventName)
     {
+        _boundEvents.TryRemove(eventName, out _);
+
         if (!_persistentConnection.IsConnected)
         {
             await _persistentConnection.TryConnectAsync();
@@ -301,6 +317,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
             await _consumerChannel.QueueBindAsync(queue: _queueName,
                                 exchange: EXCHANGE_NAME,
                                 routingKey: eventName);
+
+            _boundEvents.TryAdd(eventName, 0);
         }
     }
 
@@ -321,6 +339,37 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _subsManager.RemoveDynamicSubscription<TH>(eventName);
     }
 
+    /// <summary>
+    /// What keeps this instance from handling its queue, with the time it has lasted, counted from the first call
+    /// that found it: the connection being down, or, with the connection up, the consumer missing. Null while the
+    /// connection is up and the consumer is in place or, with no subscriptions, not needed at all.
+    /// </summary>
+    public (bool Connected, TimeSpan DownTime)? GetConsumerDownTime()
+    {
+        if (_persistentConnection.GetDisconnectedTime() is { } disconnectedTime)
+        {
+            // the consumer cannot come back before the connection does, so its own clock starts only after that
+            _consumerOutage = null;
+
+            return (false, disconnectedTime);
+        }
+
+        // a closed channel shows in IsOpen, which automatic recovery turns back on; a broker-side cancel leaves
+        // the channel open and only the consumer knows about it. The consumer's own IsRunning would cover both,
+        // but around a connection recovery it depends on the order the client resets and sets it in
+        if (_subsManager.IsEmpty
+            || _consumerChannel is { IsOpen: true } && _consumer is { CancelledByBroker: false } && !string.IsNullOrEmpty(_consumerTag))
+        {
+            _consumerOutage = null;
+
+            return null;
+        }
+
+        var outage = _consumerOutage ??= Stopwatch.StartNew();
+
+        return (true, outage.Elapsed);
+    }
+
     public void Dispose()
     {
         DisposeAsync().AsTask().GetAwaiter().GetResult();
@@ -330,7 +379,23 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     {
         _disposing = true;
 
-        await CloseChannelAsync(_consumerChannel);
+        // a recreation in flight could open a consumer after the close below, one that would keep taking messages
+        // until the connection goes; stop its backoff and wait for it, but never hold the shutdown for long
+        await _disposeCts.CancelAsync();
+
+        var recreationDone = await _recreateSemaphore.WaitAsync(_disposeRecreationWait);
+
+        try
+        {
+            await CloseChannelAsync(_consumerChannel);
+        }
+        finally
+        {
+            if (recreationDone)
+            {
+                _recreateSemaphore.Release();
+            }
+        }
 
         // an in-flight publication may still return a channel to the pool after this drain,
         // but a leaked channel at process shutdown is harmless, so a single pass is enough
@@ -388,10 +453,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                 return;
             }
 
-            var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
+            var consumer = new EventBusConsumer(_consumerChannel, Consumer_CancelledByBroker);
 
             consumer.ReceivedAsync += Consumer_Received;
             consumer.ShutdownAsync += Consumer_Shutdown;
+            _consumer = consumer;
             _consumerTag = await _consumerChannel.BasicConsumeAsync(
                 queue: _queueName,
                 autoAck: false,
@@ -403,25 +469,99 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         }
     }
 
-    private async Task Consumer_Shutdown(object sender, ShutdownEventArgs @event)
+    private Task Consumer_Shutdown(object sender, ShutdownEventArgs @event)
     {
-        if (!_disposing)
+        // closed by us: DisposeAsync, the last subscription removed, or a channel being replaced
+        if (_disposing || @event.Initiator == ShutdownInitiator.Application)
         {
-            _logger.WarningModelIsShutdown(@event.Cause?.ToString(), @event.Exception);
+            return Task.CompletedTask;
         }
 
-        await Task.CompletedTask;
+        _logger.WarningModelIsShutdown(@event.Cause?.ToString(), @event.Exception);
+
+        // any other reason took the connection down with the channel: automatic recovery reopens
+        // this very channel together with its consumer, so a consumer of our own would be a duplicate.
+        // The reply code tells the two apart whatever the connection state is by the time this runs
+        if (!IsChannelLevelError(@event))
+        {
+            return Task.CompletedTask;
+        }
+
+        var channel = ((AsyncEventingBasicConsumer)sender).Channel;
+
+        // the client's frame-reading loop waits for this handler, and opening a new channel
+        // needs that loop to read the broker's reply, so the recreation must not be awaited here
+        _ = Task.Run(() => RecreateConsumerAsync(channel));
+
+        return Task.CompletedTask;
+    }
+
+    private void Consumer_CancelledByBroker(IChannel channel, string consumerTag)
+    {
+        if (_disposing)
+        {
+            return;
+        }
+
+        // the queue was deleted (or otherwise taken away) under the consumer, while its channel stays open,
+        // so nothing else would ever start a new consumer; like a channel close, not awaited in the handler
+        _logger.WarningConsumerCancelledByBroker(consumerTag);
+
+        _ = Task.Run(() => RecreateConsumerAsync(channel, cancelledByBroker: true));
+    }
+
+    // AMQP soft errors: the broker closes the channel and keeps the connection
+    private static bool IsChannelLevelError(ShutdownEventArgs @event)
+    {
+        return @event.Initiator == ShutdownInitiator.Peer
+            && @event.ReplyCode is Constants.ContentTooLarge or Constants.NoRoute or Constants.NoConsumers
+                or Constants.AccessRefused or Constants.NotFound or Constants.ResourceLocked or Constants.PreconditionFailed;
     }
 
     private async Task Consumer_Received(object sender, BasicDeliverEventArgs eventArgs)
     {
+        // a delivery tag is only valid on the channel that delivered the message
+        var channel = ((AsyncEventingBasicConsumer)sender).Channel;
+        var deliveryTag = eventArgs.DeliveryTag;
+
         var eventName = eventArgs.RoutingKey;
 
-        var @event = GetEvent(eventName, eventArgs.Body.Span.ToArray());
+        if (_disposing)
+        {
+            // shutting down: the subscriptions are being cleared and the handlers' scope is going away;
+            // left unsettled, the message goes back to the queue once the channel closes
+            return;
+        }
+
+        if (!channel.IsOpen)
+        {
+            // the broker requeues every unsettled delivery of a closed channel,
+            // so handling this one now would only run it a second time
+            _logger.DebugSkipDeliveryOnClosedChannel(eventName, deliveryTag);
+
+            return;
+        }
+
+        IntegrationEvent @event;
+
+        try
+        {
+            @event = GetEvent(eventName, eventArgs.Body.Span.ToArray());
+        }
+        catch (Exception ex)
+        {
+            // an exception leaving this handler would keep the message unacknowledged
+            // until the broker's consumer timeout closes the whole channel
+            _logger.ErrorDeserializingEvent(eventName, ex);
+
+            await SettleAsync(() => channel.BasicRejectAsync(deliveryTag, requeue: false), deliveryTag);
+
+            return;
+        }
 
         if (@event == null)
         {
-            await _consumerChannel.BasicRejectAsync(eventArgs.DeliveryTag, requeue: false);
+            await SettleAsync(() => channel.BasicRejectAsync(deliveryTag, requeue: false), deliveryTag);
 
             _logger.WarningUnknownEvent(eventName);
 
@@ -444,7 +584,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
                     _logger.DebugBeforeRejectEvent(eventName, message);
 
-                    await _consumerChannel.BasicRejectAsync(eventArgs.DeliveryTag, requeue: false);
+                    await SettleAsync(() => channel.BasicRejectAsync(deliveryTag, requeue: false), deliveryTag);
 
                     _logger.DebugRejectEvent(eventName);
                 }
@@ -455,7 +595,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                     _logger.DebugBeforeNackEvent(eventName, message);
 
                     // anti-pattern https://github.com/LeanKit-Labs/wascally/issues/36
-                    await _consumerChannel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
+                    await SettleAsync(() => channel.BasicNackAsync(deliveryTag, multiple: false, requeue: true), deliveryTag);
 
                     _logger.DebugNackEvent(eventName);
                 }
@@ -477,14 +617,14 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
             if (_rejectedEvents.ContainsKey(ex.EventId))
             {
                 _rejectedEvents.TryRemove(ex.EventId, out _);
-                await _consumerChannel.BasicRejectAsync(eventArgs.DeliveryTag, requeue: false);
+                await SettleAsync(() => channel.BasicRejectAsync(deliveryTag, requeue: false), deliveryTag);
 
                 _logger.DebugRejectEvent(eventName);
             }
             else
             {
                 _rejectedEvents.TryAdd(ex.EventId, eventArgs.Body.Span.ToArray());
-                await _consumerChannel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
+                await SettleAsync(() => channel.BasicNackAsync(deliveryTag, multiple: false, requeue: true), deliveryTag);
 
                 _logger.DebugNackEvent(eventName);
             }
@@ -496,10 +636,22 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
             _logger.ErrorProcessingMessage(message, ex);
         }
 
-        await _consumerChannel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
+        await SettleAsync(() => channel.BasicAckAsync(deliveryTag, multiple: false), deliveryTag);
     }
 
-
+    private async Task SettleAsync(Func<ValueTask> settle, ulong deliveryTag)
+    {
+        try
+        {
+            await settle();
+        }
+        catch (AlreadyClosedException ex)
+        {
+            // the broker closed the channel while the message was handled and will redeliver it;
+            // letting this escape would raise a callback exception for nothing
+            _logger.WarningSettleOnClosedChannel(deliveryTag, ex);
+        }
+    }
 
     private async Task<IChannel> CreateConsumerChannelAsync()
     {
@@ -512,50 +664,148 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         var channel = await _persistentConnection.CreateModelAsync();
 
-        await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME,
-                                type: "direct");
-
-        await channel.ExchangeDeclareAsync(exchange: DEAD_LETTER_EXCHANGE_NAME,
-                                type: "direct");
-
-        await channel.QueueDeclareAsync(queue: _deadLetterQueueName,
-                        durable: true,
-                        exclusive: false,
-                        autoDelete: false,
-                        arguments: null);
-
-
-        var arguments = new Dictionary<string, object>
+        try
         {
-            { "x-dead-letter-exchange", DEAD_LETTER_EXCHANGE_NAME }
-        };
+            // without a prefetch limit the broker pushes the whole queue at once, and its consumer
+            // timeout runs from delivery, so the tail of a large backlog times out while still waiting
+            // for the sequential handler; global: false limits each consumer, not the whole channel
+            await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: _prefetchCount, global: false);
 
-        await channel.QueueDeclareAsync(queue: _queueName,
-                                durable: true,
-                                exclusive: false,
-                                autoDelete: false,
-                                arguments: arguments);
+            await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME,
+                                    type: "direct");
 
-        channel.CallbackExceptionAsync += RecreateChannel;
+            await channel.ExchangeDeclareAsync(exchange: DEAD_LETTER_EXCHANGE_NAME,
+                                    type: "direct");
+
+            await channel.QueueDeclareAsync(queue: _deadLetterQueueName,
+                            durable: true,
+                            exclusive: false,
+                            autoDelete: false,
+                            arguments: null);
+
+
+            var arguments = new Dictionary<string, object>
+            {
+                { "x-dead-letter-exchange", DEAD_LETTER_EXCHANGE_NAME }
+            };
+
+            await channel.QueueDeclareAsync(queue: _queueName,
+                                    durable: true,
+                                    exclusive: false,
+                                    autoDelete: false,
+                                    arguments: arguments);
+
+            // a queue declared above in place of one the broker had dropped comes without bindings and would
+            // never get a message; binding again an existing binding is a no-op, so do it on every recreation
+            foreach (var eventName in _boundEvents.Keys)
+            {
+                await channel.QueueBindAsync(queue: _deadLetterQueueName,
+                                    exchange: DEAD_LETTER_EXCHANGE_NAME,
+                                    routingKey: eventName);
+
+                await channel.QueueBindAsync(queue: _queueName,
+                                    exchange: EXCHANGE_NAME,
+                                    routingKey: eventName);
+            }
+        }
+        catch
+        {
+            // a declaration the broker refuses (e.g. a queue declared with other arguments) closes
+            // the channel on its side only: left as is, it stays registered for automatic recovery,
+            // and RecreateConsumerAsync would add one such channel per retry until the next recovery
+            // reopened them all
+            await CloseChannelAsync(channel);
+
+            throw;
+        }
+
+        channel.CallbackExceptionAsync += Channel_CallbackException;
 
         return channel;
     }
 
-    private async Task RecreateChannel(object sender, CallbackExceptionEventArgs e)
+    private Task Channel_CallbackException(object sender, CallbackExceptionEventArgs e)
     {
+        // a failed callback leaves the channel open; when the channel is closed instead,
+        // Consumer_Shutdown brings the consumer back
         _logger.WarningCallbackException(e.Exception);
 
-        _logger.WarningRecreatingChannel();
+        return Task.CompletedTask;
+    }
 
-        _consumerChannel.Dispose();
+    private async Task RecreateConsumerAsync(IChannel lostChannel, bool cancelledByBroker = false)
+    {
+        await _recreateSemaphore.WaitAsync();
 
-        _consumerChannel = await CreateConsumerChannelAsync();
-        _consumerTag = string.Empty;
+        try
+        {
+            // already replaced by an earlier call, reopened by automatic recovery, or no subscriptions
+            // left to consume for; a consumer cancelled by the broker leaves its channel open
+            if (_disposing || !ReferenceEquals(lostChannel, _consumerChannel) || (lostChannel.IsOpen && !cancelledByBroker) || string.IsNullOrEmpty(_queueName))
+            {
+                return;
+            }
 
-        await StartBasicConsumeAsync();
+            _logger.WarningRecreatingChannel();
 
-        _logger.InfoCreatedConsumerChannel();
+            // a channel closed by the broker stays registered for automatic recovery until it is
+            // closed locally (Dispose alone skips that), and the next connection recovery would
+            // revive it together with its consumer
+            await CloseChannelAsync(lostChannel);
 
+            _consumerTag = string.Empty;
+
+            var delay = _initialRecreateDelay;
+
+            while (!_disposing)
+            {
+                IChannel channel = null;
+
+                try
+                {
+                    channel = await CreateConsumerChannelAsync();
+
+                    _consumerChannel = channel;
+
+                    await StartBasicConsumeAsync();
+
+                    if (_disposing)
+                    {
+                        // DisposeAsync gave up waiting for this recreation and has already closed the channel it saw
+                        await CloseChannelAsync(channel);
+
+                        return;
+                    }
+
+                    _logger.InfoCreatedConsumerChannel();
+
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.WarningCouldNotRecreateChannel(delay.TotalSeconds, ex);
+
+                    await CloseChannelAsync(channel);
+
+                    _consumerTag = string.Empty;
+                }
+
+                try
+                {
+                    await Task.Delay(delay, _disposeCts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+
+                delay = delay * 2 < _maxRecreateDelay ? delay * 2 : _maxRecreateDelay;
+            }
+        }
+        finally
+        {
+            _recreateSemaphore.Release();
+        }
     }
 
     private IntegrationEvent GetEvent(string eventName, byte[] serializedMessage)
@@ -622,6 +872,30 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                 await Task.Yield();
                 await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
             }
+        }
+    }
+
+    private sealed class EventBusConsumer(IChannel channel, Action<IChannel, string> cancelledByBroker) : AsyncEventingBasicConsumer(channel)
+    {
+        private volatile bool _cancelledByBroker;
+
+        // basic.cancel and consume-ok arrive on the consumer's own channel, so they cannot overtake each other
+        public bool CancelledByBroker => _cancelledByBroker;
+
+        public override async Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default)
+        {
+            _cancelledByBroker = true;
+
+            await base.HandleBasicCancelAsync(consumerTag, cancellationToken);
+
+            cancelledByBroker(Channel, consumerTag);
+        }
+
+        public override Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default)
+        {
+            _cancelledByBroker = false;
+
+            return base.HandleBasicConsumeOkAsync(consumerTag, cancellationToken);
         }
     }
 }
