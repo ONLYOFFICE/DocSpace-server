@@ -49,35 +49,6 @@ public class SaveFileAsPdfTests(
     AspireAppFixture fixture)
     : SaveFileAsPdfTestBase(fixture)
 {
-    /// <summary>
-    /// BUG 80743: saving a file as PDF into a room has to answer with the new <c>.pdf</c> file, titled
-    /// as requested with the extension appended and located in the requested folder.
-    /// </summary>
-    /// <remarks>
-    /// Needs a document server reachable from the portal: the conversion is a real
-    /// <c>GetConvertedUriAsync</c> call, which the integration-test AppHost does not provision, so this
-    /// case cannot pass on a bare harness whatever the product does.
-    /// </remarks>
-    [Fact]
-    [Trait("Bug", "80743")]
-    public async Task SaveFileAsPdf_ToRoom_SavesPdfInSpecifiedFolder()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var source = await CreateFileInMy("Autotest Source File For PDF.docx", Owner);
-        var room = await CreateCustomRoom("Autotest Room For PDF");
-
-        // Act
-        var saved = (await _filesApi.SaveFileAsPdfAsync(
-            source.Id,
-            new SaveAsPdfRequest(room.Id, "Autotest Saved As PDF"),
-            TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        saved.Title.Should().Be("Autotest Saved As PDF.pdf");
-        saved.FolderId.Should().Be(room.Id);
-    }
-
     [Fact]
     public async Task SaveFileAsPdf_NonExistentSource_Returns404AndCreatesNothing()
     {
