@@ -15,10 +15,10 @@ extension {{projectName}}API {
 {{> modelOneOf}}{{/vendorExtensions.x-is-one-of-interface}}{{^vendorExtensions.x-is-one-of-interface}}{{#isArray}}
 {{> modelArray}}{{/isArray}}{{^isArray}}{{#isEnum}}
 {{> modelEnum}}{{/isEnum}}{{^isEnum}}
-{{> modelObject}}{{/isEnum}}{{/isArray}}{{/vendorExtensions.x-is-one-of-interface}}{{/model}}{{/models}}
+{{#vendorExtensions.x-is-api-date-time}}{{> modelApiDateTime}}{{/vendorExtensions.x-is-api-date-time}}{{^vendorExtensions.x-is-api-date-time}}{{> modelObject}}{{/vendorExtensions.x-is-api-date-time}}{{/isEnum}}{{/isArray}}{{/vendorExtensions.x-is-one-of-interface}}{{/model}}{{/models}}
 {{#swiftUseApiNamespace}}
 }
-{{/swiftUseApiNamespace}}{{#models}}{{#model}}{{#vendorExtensions.x-swift-identifiable}}
+{{/swiftUseApiNamespace}}{{#models}}{{#model}}{{^vendorExtensions.x-is-one-of-interface}}{{#vendorExtensions.x-swift-identifiable}}
 @available(iOS 13, tvOS 13, watchOS 6, macOS 10.15, *)
 extension {{#swiftUseApiNamespace}}{{projectName}}API.{{/swiftUseApiNamespace}}{{{classname}}}: Identifiable {}
-{{/vendorExtensions.x-swift-identifiable}}{{/model}}{{/models}}
+{{/vendorExtensions.x-swift-identifiable}}{{/vendorExtensions.x-is-one-of-interface}}{{/model}}{{/models}}

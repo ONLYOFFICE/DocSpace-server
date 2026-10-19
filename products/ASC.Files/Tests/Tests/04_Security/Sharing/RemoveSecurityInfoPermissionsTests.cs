@@ -126,23 +126,100 @@ public class RemoveSecurityInfoPermissionsTests(
     }
 
     /// <summary>
-    /// BUG 83262: a read-only guest got 200 from RemoveSecurityInfo on the owner's file. Fixed in
-    /// the <c>FileStorageService.RemoveAceAsync</c> rewrite rejecting callers who cannot set access.
+    /// BUG 83262: a member the file was shared with directly got 403 from RemoveSecurityInfo, so
+    /// they could not take the file out of their own "Shared with me". The original expectation
+    /// (403 for a read-only guest) was wrong: removing one's own access is self-removal, not
+    /// revoking someone else's rights.
     /// </summary>
-    [Fact]
+    [Theory]
     [Trait("Bug", "83262")]
-    public async Task RemoveSecurityInfo_Guest_CannotRemoveSharingFromOwnerFile_Returns403()
+    [InlineData(EmployeeType.Guest)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    public async Task RemoveSecurityInfo_MemberWithReadAccess_RemovesSharedFileFromOwnList_Returns200(EmployeeType memberType)
     {
         var file = await CreateFileInMy("Autotest Remove Security File.docx", Owner);
-        var guest = await InviteGuest();
+        var member = memberType == EmployeeType.Guest ? await InviteGuest() : await InviteContact(memberType);
 
-        await ShareFile(file.Id, guest.Id, FileShare.Read);
+        await ShareFile(file.Id, member.Id, FileShare.Read);
 
-        await _filesClient.Authenticate(guest);
+        await _filesClient.Authenticate(member);
+        var result = (await _sharingApi.RemoveSecurityInfoAsync(
+            new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken)).Response;
+
+        result.Should().BeTrue();
+
+        var sharedWithMe = await GetSharedWithMe(member);
+        sharedWithMe.Files.Should().NotContain(f => f.Title == file.Title);
+    }
+
+    /// <summary>
+    /// BUG 83262, folder variant: a member a folder was shared with directly got 403 from
+    /// RemoveSecurityInfo and could not take the folder out of their own "Shared with me".
+    /// </summary>
+    [Theory]
+    [Trait("Bug", "83262")]
+    [InlineData(EmployeeType.Guest)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    public async Task RemoveSecurityInfo_MemberWithReadAccess_RemovesSharedFolderFromOwnList_Returns200(EmployeeType memberType)
+    {
+        var folder = await CreateFolderInMy("Autotest Remove Security Folder", Owner);
+        var member = memberType == EmployeeType.Guest ? await InviteGuest() : await InviteContact(memberType);
+
+        await ShareFolder(folder.Id, member.Id, FileShare.Read);
+
+        await _filesClient.Authenticate(member);
+        var result = (await _sharingApi.RemoveSecurityInfoAsync(
+            new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, TestContext.Current.CancellationToken)).Response;
+
+        result.Should().BeTrue();
+
+        // FolderContentDto.Folders is typed FileEntryBaseDto, which carries Title but not Id.
+        var sharedWithMe = await GetSharedWithMe(member);
+        sharedWithMe.Folders.Should().NotContain(f => f.Title == folder.Title);
+    }
+
+    [Fact]
+    [Trait("Bug", "83262")]
+    public async Task RemoveSecurityInfo_User_CannotRemoveSharingFromOwnerFolder_Returns403()
+    {
+        var folder = await CreateFolderInMy("Autotest Remove Security Folder", Owner);
+        var user = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
-            await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken));
+            await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    [Trait("Bug", "83262")]
+    public async Task RemoveSecurityInfo_User_CannotRemoveSharingFromAnotherUsersFolder_Idor_Returns403()
+    {
+        var folder = await CreateFolderInMy("Autotest Remove Security Folder", Owner);
+        var targetUser = await InviteContact(EmployeeType.User);
+
+        await ShareFolder(folder.Id, targetUser.Id, FileShare.Read);
+
+        var attacker = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(attacker);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _sharingApi.RemoveSecurityInfoAsync(new BaseBatchRequestDto { FolderIds = [new(folder.Id)] }, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+
+        var sharedWithMe = await GetSharedWithMe(targetUser);
+        sharedWithMe.Folders.Should().Contain(f => f.Title == folder.Title);
+    }
+
+    private async Task<FolderContentDto> GetSharedWithMe(User user)
+    {
+        var sharedWithMeId = await GetShareFolderIdAsync(user);
+
+        return (await _foldersApi.GetFolderByFolderIdAsync(sharedWithMeId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
     /// <summary>

@@ -181,6 +181,16 @@ public class MetadataApiClient(HttpClient client)
     }
 
     /// <summary>
+    /// Assigns the templates to the folder. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> AssignFolderTemplatesResponseAsync(int folderId, IEnumerable<int> templateIds, bool cascade, CancellationToken cancellationToken)
+    {
+        var body = new { templateIds = templateIds.ToList(), cascade, conflictResolveType = 0 };
+
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/templates", body, cancellationToken);
+    }
+
+    /// <summary>
     /// Assigns the templates to the file. Returns the raw response so the error cases can be asserted on the status code.
     /// </summary>
     public Task<HttpResponseMessage> AssignFileTemplatesResponseAsync(int fileId, IEnumerable<int> templateIds, CancellationToken cancellationToken)
@@ -209,6 +219,24 @@ public class MetadataApiClient(HttpClient client)
         var wrapper = await response.Content.ReadFromJsonAsync<MetadataApiResponse<MetadataOperationResponse>>(_jsonOptions, cancellationToken);
 
         return wrapper?.Response;
+    }
+
+    /// <summary>
+    /// Turns the cascade of a template the folder carries on or off. Returns the raw response so the error cases can be
+    /// asserted on the status code. <paramref name="conflictResolveType"/>: Skip = 0, Overwrite = 1.
+    /// </summary>
+    public Task<HttpResponseMessage> UpdateFolderTemplateResponseAsync(int folderId, int templateId, bool cascade, CancellationToken cancellationToken, int conflictResolveType = 0)
+    {
+        var body = new { cascade, conflictResolveType };
+
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/templates/{templateId}", body, cancellationToken);
+    }
+
+    public async Task<MetadataOperationResponse> UpdateFolderTemplateAsync(int folderId, int templateId, bool cascade, CancellationToken cancellationToken, int conflictResolveType = 0)
+    {
+        using var response = await UpdateFolderTemplateResponseAsync(folderId, templateId, cascade, cancellationToken, conflictResolveType);
+
+        return await ReadAsync<MetadataOperationResponse>(response, cancellationToken);
     }
 
     public async Task UnassignFolderTemplateAsync(int folderId, int templateId, CancellationToken cancellationToken)
@@ -430,7 +458,8 @@ public class MetadataApiClient(HttpClient client)
         int? searchArea = null,
         int? roomType = null,
         string? rawMetadataFilters = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
         var query = new List<string>();
 
@@ -461,6 +490,11 @@ public class MetadataApiClient(HttpClient client)
             query.Add($"type={roomType.Value}");
         }
 
+        if (includeHiddenMetadata.HasValue)
+        {
+            query.Add($"includeHiddenMetadata={(includeHiddenMetadata.Value ? "true" : "false")}");
+        }
+
         var path = "api/2.0/files/rooms" + (query.Count > 0 ? "?" + string.Join('&', query) : "");
 
         return await client.GetAsync(path, cancellationToken);
@@ -472,9 +506,10 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         int? searchArea = null,
         int? roomType = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
-        using var response = await GetRoomsResponseAsync(metadataTemplateId, metadataFilters, filterValue, searchArea, roomType, cancellationToken: cancellationToken);
+        using var response = await GetRoomsResponseAsync(metadataTemplateId, metadataFilters, filterValue, searchArea, roomType, cancellationToken: cancellationToken, includeHiddenMetadata: includeHiddenMetadata);
 
         return await ReadAsync<RoomsContentResponse>(response, cancellationToken);
     }
@@ -494,9 +529,10 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         bool? withSubFolders = null,
         CancellationToken cancellationToken = default,
-        string? extension = null)
+        string? extension = null,
+        bool? includeHiddenMetadata = null)
     {
-        using var response = await GetFolderContentResponseAsync(folderId, metadataTemplateId, metadataFilters, filterValue, withSubFolders, extension, cancellationToken);
+        using var response = await GetFolderContentResponseAsync(folderId, metadataTemplateId, metadataFilters, filterValue, withSubFolders, extension, cancellationToken, includeHiddenMetadata);
 
         return await ReadAsync<FolderContentResponse>(response, cancellationToken);
     }
@@ -511,7 +547,8 @@ public class MetadataApiClient(HttpClient client)
         string? filterValue = null,
         bool? withSubFolders = null,
         string? extension = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool? includeHiddenMetadata = null)
     {
         var query = new List<string>();
 
@@ -538,6 +575,11 @@ public class MetadataApiClient(HttpClient client)
         if (withSubFolders.HasValue)
         {
             query.Add($"withSubFolders={(withSubFolders.Value ? "true" : "false")}");
+        }
+
+        if (includeHiddenMetadata.HasValue)
+        {
+            query.Add($"includeHiddenMetadata={(includeHiddenMetadata.Value ? "true" : "false")}");
         }
 
         var path = $"api/2.0/files/{folderId}" + (query.Count > 0 ? "?" + string.Join('&', query) : "");
@@ -691,6 +733,17 @@ public class EntryTemplateResponse
     public int Id { get; init; }
     public string Name { get; init; } = "";
     public bool Visible { get; init; }
+
+    /// <summary>
+    /// Whether the template cascades from the entry; always false on a file.
+    /// </summary>
+    public bool Cascade { get; init; }
+
+    /// <summary>
+    /// The <c>MetadataConflictResolveType</c> of the cascade (Skip = 0, Overwrite = 1), null while the template does not cascade.
+    /// </summary>
+    public int? ConflictResolveType { get; init; }
+
     public List<EntryFieldResponse> Fields { get; init; } = [];
 
     public EntryFieldResponse Field(string name)
@@ -745,6 +798,20 @@ public class MetadataOperationResponse
     public double Progress { get; init; }
     public bool IsCompleted { get; init; }
     public string? Error { get; init; }
+
+    /// <summary>
+    /// The templates the pass propagates; empty when there is no pass to report.
+    /// </summary>
+    public List<int> TemplateIds { get; init; } = [];
+}
+
+/// <summary>
+/// The user object a template reports as its author: the part of the EmployeeDto the assertions need.
+/// </summary>
+public class MetadataUserResponse
+{
+    public Guid Id { get; init; }
+    public string DisplayName { get; init; } = "";
 }
 
 public class MetadataTemplateResponse
@@ -752,6 +819,8 @@ public class MetadataTemplateResponse
     public int Id { get; init; }
     public string Name { get; init; } = "";
     public bool Visible { get; init; }
+    public MetadataUserResponse? CreateBy { get; init; }
+    public MetadataUserResponse? ModifiedBy { get; init; }
     public List<MetadataFieldResponse> Fields { get; init; } = [];
 
     public MetadataFieldResponse Field(string name)
@@ -815,4 +884,16 @@ public class RoomEntryResponse
     public int Id { get; init; }
     public string Title { get; init; } = "";
     public List<int>? AssignedMetadataTemplates { get; init; }
+    public List<MetadataMatchResponse>? MetadataMatches { get; init; }
+}
+
+/// <summary>
+/// Where the text search met the metadata of an entry: the field and the whole stored value.
+/// </summary>
+public class MetadataMatchResponse
+{
+    public int? TemplateId { get; init; }
+    public int? FieldId { get; init; }
+    public string FieldName { get; init; } = "";
+    public string Value { get; init; } = "";
 }

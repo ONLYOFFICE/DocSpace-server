@@ -188,6 +188,89 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
     }
 
+    /// <summary>
+    /// Converts a file the portal already holds by uploading its content to the document service, instead of handing
+    /// over an address for it to fetch. The conversion parameters travel as the document service defines them, and the
+    /// answer is the converted document itself.
+    /// </summary>
+    public async Task<Stream> GetConvertedFileAsync(Stream file,
+                                      string fileName,
+                                      ConvertFromFileBody body)
+    {
+        var converterUrl = filesLinkUtility.DocServiceConverterFromFileUrl;
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+        var sslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync();
+
+        logger.DebugDocServiceConvertFromFile(body.FileType, body.OutputType, fileName, converterUrl);
+        try
+        {
+            return await ASC.Files.Core.Helpers.DocumentService.GetConvertedFileAsync(
+                converterUrl,
+                file,
+                fileName,
+                body,
+                signatureSecret,
+                sslVerification,
+                clientFactory);
+        }
+        catch (DocumentServiceException ex) when (GetCallerError(ex.Code) is { } error)
+        {
+            throw new ArgumentException(error, ex);
+        }
+        catch (Exception ex)
+        {
+            // error -3 is generic: a damaged source cannot be told from a failure of the service
+            var error = CustomizeError(ex).Message;
+            if (ex is DocumentServiceException { Code: DocumentServiceException.ErrorCode.Convert })
+            {
+                error += ". The file may be damaged or its content may not match its extension";
+            }
+
+            throw new CustomHttpException(HttpStatusCode.BadGateway, error);
+        }
+    }
+
+    /// <summary>
+    /// The conversion failures caused by the source or the request rather than by the document service, worded for
+    /// the caller; any other code answers null.
+    /// </summary>
+    private static string GetCallerError(DocumentServiceException.ErrorCode code)
+    {
+        return code switch
+        {
+            DocumentServiceException.ErrorCode.ConvertPassword => "The document is protected with a password, and the password is missing or wrong",
+            DocumentServiceException.ErrorCode.OutputType => "The document service cannot convert this file to the requested format",
+            DocumentServiceException.ErrorCode.SizeLimit => "The file is too large for the document service to convert",
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Runs a document builder script by uploading it to the document service, instead of publishing it to the portal
+    /// temporary storage and handing over an address for it to fetch.
+    /// </summary>
+    public async Task<(string BuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestFromFileAsync(Stream script,
+                                           string scriptFileName,
+                                           BuilderFromFileBody body)
+    {
+        logger.DebugDocServiceBuilderRequestKey(body.Key, body.Async);
+        try
+        {
+            return await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestFromFileAsync(
+                filesLinkUtility.DocServiceDocbuilderFromFileUrl,
+                script,
+                scriptFileName,
+                body,
+                filesLinkUtility.DocServiceSignatureSecret,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                clientFactory);
+        }
+        catch (Exception ex)
+        {
+            throw CustomizeError(ex);
+        }
+    }
+
     public async Task<string> GetVersionAsync()
     {
         logger.DebugDocServiceRequestVersion();
@@ -458,7 +541,11 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
     private Exception CustomizeError(Exception ex)
     {
         var error = FilesCommonResource.ErrorMessage_DocServiceException;
-        if (!string.IsNullOrEmpty(ex.Message))
+        if (ex is DocumentServiceException documentServiceException)
+        {
+            error += $" ({ex.Message}, error {(int)documentServiceException.Code})";
+        }
+        else if (!string.IsNullOrEmpty(ex.Message))
         {
             error += $" ({ex.Message})";
         }

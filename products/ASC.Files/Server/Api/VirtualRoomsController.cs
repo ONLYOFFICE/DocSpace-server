@@ -119,19 +119,31 @@ public class VirtualRoomsInternalController(
     /// Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as
     /// `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with
     /// `GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot
-    /// is refused, and a room that does not exist or holds no .ai folder is answered as not found.
+    /// is refused, and a room that does not exist is answered as not found. A room that holds no .ai folder is
+    /// answered with an empty page: no files and folders, a zero `total`, no `current` folder and empty `pathParts`.
     /// </remarks>
     /// <summary>Get the .ai folder of a room</summary>
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents, or an empty page without `current` when the room holds no .ai folder", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
-    [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
+    [SwaggerResponse(404, "The room does not exist")]
     [HttpGet("{id}/ai")]
     public async Task<FolderContentDto<int>> GetRoomAiFolder(GetRoomAiFolderRequestDto inDto)
     {
         var aiFolder = await _fileStorageService.GetRoomAiFolderAsync(inDto.Id);
+        if (aiFolder is null)
+        {
+            return new FolderContentDto<int>
+            {
+                Files = [],
+                Folders = [],
+                PathParts = new List<object>(),
+                StartIndex = inDto.StartIndex,
+                Total = 0
+            };
+        }
 
         return await folderContentDtoHelper.GetAsync(aiFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
@@ -370,7 +382,9 @@ public class VirtualRoomsThirdPartyController(
     /// The caller needs the right to create rooms, which a portal user and a guest do not have; a public room is
     /// refused while the administrator restricts external access, and reaching the room limit of the tariff is
     /// refused too. With `createAsNewFolder` the room is a new subfolder named after `title`, otherwise the folder
-    /// from the path becomes the room itself and `indexing`, `denyDownload`, `tags` and `logo` are then dropped. The
+    /// from the path becomes the room itself and `tags` and `logo` are then dropped. A third-party room keeps neither
+    /// `indexing` nor `denyDownload` in either mode: both are accepted and ignored, and the room reads back with them
+    /// off. The
     /// answer is the new room, whose identifiers are strings; a public or a form-filling room already has its primary
     /// link, readable with `GET api/2.0/files/rooms/{id}/link`.
     /// </remarks>
@@ -466,8 +480,8 @@ public abstract class VirtualRoomsController<T>(
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller may not edit this room, the room does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
-    [SwaggerResponse(404, "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(403, "The caller may not edit this room, the room lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "No room has this id, the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range, or `logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
@@ -494,7 +508,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
-    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuota(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -505,8 +519,18 @@ public abstract class VirtualRoomsController<T>(
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
+            if (room is null)
+            {
+                continue;
+            }
+
             folderTitles.Add(room.Title);
             yield return await _folderDtoHelper.GetAsync(room);
+        }
+
+        if (folderTitles.Count == 0)
+        {
+            yield break;
         }
 
         if (inDto.Quota >= 0)
@@ -535,7 +559,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
-    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuota(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
@@ -546,9 +570,19 @@ public abstract class VirtualRoomsController<T>(
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
+            if (room is null)
+            {
+                continue;
+            }
+
             folderTitles.Add(room.Title);
 
             yield return await _folderDtoHelper.GetAsync(room);
+        }
+
+        if (folderTitles.Count == 0)
+        {
+            yield break;
         }
 
         filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), folderTitles.ToArray());
@@ -1329,7 +1363,7 @@ public class VirtualRoomsCommonController(
             }
         }
 
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter,
             inDto.SubjectId, inDto.SubjectOwnerId, inDto.WithoutTags ?? false, tagNames, inDto.ExcludeSubject ?? false, inDto.Provider ?? ProviderFilter.None,
@@ -1352,7 +1386,7 @@ public class VirtualRoomsCommonController(
     {
         var parentId = await GetRoomsSectionIdAsync(inDto.SearchArea);
 
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.FilterValue, metadataFilter);
     }
@@ -1438,7 +1472,7 @@ public class VirtualRoomsCommonController(
             withAiFolder: withAiFolder,
             metadataFilter: metadataFilter);
 
-        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
+        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue, metadataFilter?.IncludeHiddenTemplates ?? false);
 
         return dto.NotFoundIfNull();
     }

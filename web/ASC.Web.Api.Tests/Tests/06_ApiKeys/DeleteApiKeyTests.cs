@@ -82,4 +82,45 @@ public class DeleteApiKeyTests(
         result.Data.Count.Should().Be(1);
         result.Data.Links.Should().ContainSingle(link => link.Action == "DELETE" && link.Href.Contains(created.Response.Id.ToString()));
     }
+
+    /// <summary>
+    /// Bug 84483: deleting a well-formed keyId that matched no key used to fail with a 500; the endpoint now
+    /// answers 404 when the key is not found.
+    /// </summary>
+    [Trait("Bug", "84483")]
+    [Fact]
+    public async Task DeleteApiKey_UnknownKeyId_ReturnsNotFound()
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.DeleteApiKeyAsync(Guid.Empty, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    /// <summary>
+    /// Bug 84483: deleting the same key a second time used to fail with a 500; the endpoint now
+    /// answers 404 when the key is not found.
+    /// </summary>
+    [Trait("Bug", "84483")]
+    [Fact]
+    public async Task DeleteApiKey_AlreadyDeletedKey_ReturnsNotFound()
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+        var created = await _apiKeysApi.CreateApiKeyAsync(
+            new CreateApiKeyRequestDto("Autotest Twice Key"), TestContext.Current.CancellationToken);
+        await _apiKeysApi.DeleteApiKeyAsync(created.Response.Id, TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.DeleteApiKeyAsync(created.Response.Id, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
 }

@@ -131,12 +131,12 @@ public class CreateClientRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
-  @LogoSize(maxBytes = 256000, maxLength = 2000000)
+  @LogoSize(maxBytes = 25600, maxLength = 2000000)
   @Schema(
       description =
           "The client logo as a data URI carrying base64 image data, shown on the consent screen. "
               + "Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed "
-              + "2000000 characters and the decoded image may not exceed 256000 bytes.",
+              + "2000000 characters and the decoded image may not exceed 25600 bytes.",
       example =
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
   private String logo;
