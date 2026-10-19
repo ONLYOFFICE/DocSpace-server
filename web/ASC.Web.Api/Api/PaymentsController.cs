@@ -1878,7 +1878,8 @@ public class PaymentController(
         var count = await tariffService.SetParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices, participantNames,
             inDto.AmountValue, inDto.QuantityValue, inDto.Period);
 
-        messageService.Send(MessageAction.CustomerServiceLimitsSet, MessageTarget.Create(userIds), ServiceLimitGroups.AiServices);
+        // The explicit type argument picks the list overload; with a List<Guid> the compiler takes the single-value one.
+        messageService.Send(MessageAction.CustomerServiceLimitsSet, MessageTarget.Create<Guid>(userIds), ServiceLimitGroups.AiServices);
 
         await quotaSocketManager.ChangeServiceLimitsAsync(ServiceLimitGroups.AiServices, userIds: userIds);
 
