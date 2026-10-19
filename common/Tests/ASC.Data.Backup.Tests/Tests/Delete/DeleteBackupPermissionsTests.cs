@@ -63,6 +63,31 @@ public class DeleteBackupPermissionsTests(
         await ExpectStatusAsync(() => _backupApi.DeleteBackupAsync(Guid.Empty, TestContext.Current.CancellationToken), 404);
     }
 
+    /// <remarks>
+    /// BUG 80608 in the TypeScript suite expects 402 here and marks it as failing on a local instance. A
+    /// standalone installation does not require a paid plan, so the owner is answered for the id (404, nothing
+    /// to delete), never for the plan and never for the permissions.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "80608")]
+    public async Task DeleteBackup_OwnerOnStandalone_IsNotRefusedForThePlan()
+    {
+        // Act
+        var status = 200;
+
+        try
+        {
+            await _backupApi.DeleteBackupAsync(_unknownId, TestContext.Current.CancellationToken);
+        }
+        catch (ApiException e)
+        {
+            status = e.ErrorCode;
+        }
+
+        // Assert
+        status.Should().NotBe(402).And.NotBe(403);
+    }
+
     [Theory]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]

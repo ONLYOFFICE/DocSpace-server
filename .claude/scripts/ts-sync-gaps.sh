@@ -6,14 +6,14 @@
 # git-range delta of test titles cannot do this job — it only sees what changed between two
 # commits, so anything never ported before the baseline stays invisible on every run.
 #
-# Usage:  .claude/scripts/ts-sync-gaps.sh [ts-area ...]     (default: files folders rooms)
+# Usage:  .claude/scripts/ts-sync-gaps.sh [ts-area ...]     (default: every area under src/tests)
 # Run from the repo root (server/). The TypeScript suite is expected at ../tests/api-tests.
 
 set -euo pipefail
 
 ts_root="../tests/api-tests/src/tests"
 areas=("${@:-}")
-[ -z "${areas[0]:-}" ] && areas=(files folders rooms)
+[ -z "${areas[0]:-}" ] && areas=(.)
 
 [ -d "$ts_root" ] || { echo "TypeScript suite not found at $ts_root" >&2; exit 1; }
 
@@ -24,14 +24,14 @@ cd "$ts_root"
 
 # --- 1. Bug numbers -----------------------------------------------------------------------------
 # Every .NET suite is searched, not just Files: a room bug may be covered in Web.Api or People.
-grep -rhoE "BUG [0-9]{5}" "${areas[@]}" | grep -oE "[0-9]{5}" | sort -u > "$tmp/ts_bugs"
+grep -rhoE "BUG[ -]?[0-9]{5}" "${areas[@]}" | grep -oE "[0-9]{5}" | sort -u > "$tmp/ts_bugs"
 cd - >/dev/null
-grep -rhoE 'Trait\("Bug", "[0-9]{5}"' --include=*.cs products web common \
+grep -rhoE 'Trait\("Bug", "[0-9]{5}"' --include=*.cs --exclude-dir=bin --exclude-dir=obj products web common \
   | grep -oE "[0-9]{5}" | sort -u > "$tmp/net_bugs"
 
 echo "== Bug numbers in TypeScript with no [Trait(\"Bug\", ...)] anywhere in the .NET suites =="
 comm -23 "$tmp/ts_bugs" "$tmp/net_bugs" | while read -r bug; do
-    printf '  %s  %s\n' "$bug" "$(cd "$ts_root" && grep -rl "BUG $bug" "${areas[@]}" | paste -sd' ' -)"
+    printf '  %s  %s\n' "$bug" "$(cd "$ts_root" && grep -rlE "BUG[ -]?$bug" "${areas[@]}" | paste -sd' ' -)"
 done
 echo
 
@@ -41,12 +41,15 @@ echo
 # families; the bug pass cannot, because a family may carry only a couple of bug-tagged tests.
 # Anchored on the TS SDK's own area segments (`ownerApi.rooms.getRoomsFolder(...)`). Without that
 # anchor the pattern also swallows assertion and helper calls — toBe, toContain, skip, delete.
-ts_areas='rooms|files|folders|operations|filesSettings|sharing|thirdPartyIntegration|roomQuota|groups|privacyroom|profiles|userStatus|userType|settingsQuota'
+# The area list is read from the TS SDK wrapper itself (`rooms: new RoomsApi(...)`). A hardcoded
+# list silently skipped every area it did not name and reported a false clean.
+ts_areas=$(grep -oE "^\s+[a-zA-Z0-9]+: new [A-Za-z0-9]+Api\(" "$ts_root/../services/api-sdk.ts" \
+  | sed -E 's/^\s+([a-zA-Z0-9]+):.*/\1/' | sort -u | paste -sd'|')
 (cd "$ts_root" && grep -rhoE "\.($ts_areas)\.[a-zA-Z0-9_]+\(" "${areas[@]}") \
   | sed -E 's/.*\.([a-zA-Z0-9_]+)\($/\1/' | sort -u > "$tmp/ts_ops"
 
-grep -rhoE "[A-Za-z0-9_]+Async\(" --include=*.cs \
-     products/ASC.Files/Tests web/ASC.Web.Api.Tests products/ASC.People/Tests \
+grep -rhoE "[A-Za-z0-9_]+Async\(" --include=*.cs --exclude-dir=bin --exclude-dir=obj \
+     products/*/Tests products/ASC.AI/ASC.AI.Tests web/ASC.Web.Api.Tests common/Tests \
   | sed 's/Async(//' | sort -u > "$tmp/net_ops"
 
 echo "== TypeScript SDK operations with no matching *Async in the .NET suites =="

@@ -90,6 +90,7 @@ public class PaymentPricesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81516")]
     public async Task GetPortalPrices_RoomAdmin_ThrowsAccessDenied()
     {
         // Arrange
@@ -105,6 +106,7 @@ public class PaymentPricesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81516")]
     public async Task GetPortalPrices_User_ThrowsAccessDenied()
     {
         // Arrange
@@ -120,6 +122,7 @@ public class PaymentPricesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81516")]
     public async Task GetPortalPrices_Guest_ThrowsAccessDenied()
     {
         // Arrange
