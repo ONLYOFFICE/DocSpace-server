@@ -200,7 +200,7 @@ describe("metaController.fill", () => {
     expect(fillMeta).not.toHaveBeenCalled();
   });
 
-  it("passes the normalized input on, overwrite false by default, and attributes the round to the entry", async () => {
+  it("passes the normalized input on, overwrite false and dryRun true by default, and attributes the round to the entry", async () => {
     fillMeta.mockResolvedValue({
       metadata: {},
       filled: [],
@@ -215,18 +215,21 @@ describe("metaController.fill", () => {
       id: "12",
       prompt: "totals",
       overwrite: false,
-      dryRun: false,
+      dryRun: true,
     });
     expect(primeSourceMeta).toHaveBeenCalledWith("12", "folder");
 
-    await run(metaController.fill, { kind: "file", id: 3, overwrite: true, dryRun: true });
+    await run(metaController.fill, { kind: "file", id: 3, overwrite: true, dryRun: false });
     expect(fillMeta).toHaveBeenLastCalledWith({
       kind: "file",
       id: "3",
       prompt: undefined,
       overwrite: true,
-      dryRun: true,
+      dryRun: false,
     });
+
+    await run(metaController.fill, { kind: "file", id: 3, dryRun: null });
+    expect(fillMeta).toHaveBeenLastCalledWith(expect.objectContaining({ dryRun: true }));
     expect(primeSourceMeta).toHaveBeenLastCalledWith("3", "file");
   });
 

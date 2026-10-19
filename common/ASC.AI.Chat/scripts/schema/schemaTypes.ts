@@ -602,7 +602,7 @@ export type Req_aiMetaFill = {
   prompt?: string;
   /** Also replace the fields that already carry a value. Default false. */
   overwrite?: boolean;
-  /** Resolve the values but write nothing; the caller writes what the user confirms. Default false. */
+  /** Resolve the values but write nothing; the caller writes what the user confirms. Default true: a write needs an explicit false. */
   dryRun?: boolean;
 };
 /** A metadata value: exactly one member, by the field's type. */

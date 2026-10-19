@@ -129,7 +129,8 @@ function asFillInput(body: unknown): FillMetaInput {
     id,
     prompt: typeof prompt === "string" ? prompt.trim() : undefined,
     overwrite: overwrite === true,
-    dryRun: dryRun === true,
+    // Writing is opt-in: the user confirms the proposed values first.
+    dryRun: dryRun !== false,
   };
 }
 

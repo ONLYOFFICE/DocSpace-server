@@ -88,7 +88,10 @@ export interface FillMetaInput {
   id: string;
   prompt?: string;
   overwrite: boolean;
-  /** Resolve the values but write nothing; the caller writes what the user confirms. */
+  /**
+   * Resolve the values but write nothing; the caller writes what the user
+   * confirms. The default: a write needs an explicit `dryRun: false`.
+   */
   dryRun: boolean;
 }
 
