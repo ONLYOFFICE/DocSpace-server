@@ -594,8 +594,7 @@ func (o *{{{classname}}}) UnmarshalJSON(data []byte) (err error) {
 {{#isMap}}
 	var{{{classname}}} := _{{{classname}}}{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	err = decoder.Decode(&var{{{classname}}})
+	err = json.Unmarshal(data, &var{{{classname}}})
 
 	if err != nil {
 		return err
