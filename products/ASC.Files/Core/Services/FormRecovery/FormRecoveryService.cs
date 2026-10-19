@@ -48,7 +48,16 @@ public class FormRecoveryService(
     TenantUtil tenantUtil,
     ILogger<FormRecoveryService> logger)
 {
-    private const int IndexLookupBatchSize = 1000;
+    private const int LookupBatchSize = 1000;
+
+    // A run holds the report back until it ends, so the rest of a large loss is left for the next report.
+    private const int MaxSubmissionsPerRun = 100;
+
+    // A file that fails this often is not read through the builder again until it gets a new version.
+    private const int MaxRecoveryAttempts = 3;
+
+    // The key a form submission takes in EntryManager: the recovery is safe only while the two are the same.
+    private static string GetSubmissionLockKey(int roomId, int originalFormId) => $"fillform_{roomId}_{originalFormId}";
 
     private sealed class FormVersion(File<int> file)
     {
@@ -58,6 +67,17 @@ public class FormRecoveryService(
 
         // The fields could not be read, so a submission matching no version may still be of this one.
         public bool KeysFailed { get; set; }
+
+        // The description written on submission is kept; one read back from a file is written only when there is none.
+        public bool HasMetadata { get; set; }
+    }
+
+    private enum RecoveryOutcome
+    {
+        Recovered,
+        Skipped,
+        Failed,
+        Unrecoverable
     }
 
     /// <summary>
@@ -112,16 +132,14 @@ public class FormRecoveryService(
             .ToList();
         var recoveredVersions = new HashSet<int>();
 
-        foreach (var orphan in orphans)
+        foreach (var orphan in orphans.Take(MaxSubmissionsPerRun))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var (outcome, version) = (RecoveryOutcome.Failed, 0);
             try
             {
-                if (await RecoverSubmissionAsync(orphan, doneFolder, roomId, form, versions, fileDao, cancellationToken) is { } version)
-                {
-                    recoveredVersions.Add(version);
-                }
+                (outcome, version) = await RecoverSubmissionAsync(orphan, doneFolder, roomId, form, versions, fileDao, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -131,7 +149,24 @@ public class FormRecoveryService(
             {
                 logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
             }
+
+            if (outcome == RecoveryOutcome.Recovered)
+            {
+                recoveredVersions.Add(version);
+            }
+            else if (outcome is RecoveryOutcome.Failed or RecoveryOutcome.Unrecoverable)
+            {
+                await CountFailedAttemptAsync(orphan, roomId, form, fileDao, outcome == RecoveryOutcome.Unrecoverable);
+            }
         }
+
+        if (recoveredVersions.Count == 0)
+        {
+            return;
+        }
+
+        await factoryIndexerFormMetadata.RefreshAsync();
+        await factoryIndexerForm.RefreshAsync();
 
         // The external database is filled from the index, as its sync button does.
         foreach (var version in recoveredVersions)
@@ -141,12 +176,12 @@ public class FormRecoveryService(
     }
 
     // Empty when the index cannot be read, so that a failed query does not make every form look missing.
-    // A file already found unrecoverable is left out until it gets a new version.
+    // A file that failed too often is left out until it gets a new version.
     private async Task<List<File<int>>> FindOrphansAsync(IFileDao<int> fileDao, Folder<int> doneFolder)
     {
         // A file put here by hand may lack the form category, so the extension decides.
         var completed = await fileDao.GetFilesAsync(doneFolder.Id, null, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false)
-            .Where(f => string.Equals(FileUtility.GetFileExtension(f.Title), ".pdf", StringComparison.OrdinalIgnoreCase))
+            .Where(f => FileUtility.GetFileTypeByFileName(f.Title) == FileType.Pdf)
             .ToListAsync();
 
         if (completed.Count == 0)
@@ -165,25 +200,27 @@ public class FormRecoveryService(
         await factoryIndexerForm.RefreshAsync();
 
         var indexed = new HashSet<int>();
-        foreach (var ids in completed.Select(f => f.Id).Chunk(IndexLookupBatchSize))
+        foreach (var ids in completed.Select(f => f.Id).Chunk(LookupBatchSize))
         {
-            var (success, items) = await factoryIndexerForm.TrySelectAsync(r => r.In(s => s.Id, ids).Limit(0, ids.Length));
+            var (success, found) = await factoryIndexerForm.TrySelectIdsAsync(r => r.In(s => s.Id, ids).Limit(0, ids.Length));
             if (!success)
             {
                 logger.WarnRecoveryIndexQueryFailed(doneFolder.Id);
                 return [];
             }
 
-            indexed.UnionWith(items.Select(i => i.Id));
+            indexed.UnionWith(found);
         }
 
         var orphans = new List<File<int>>();
-        foreach (var file in completed.Where(f => !indexed.Contains(f.Id)))
+        foreach (var files in completed.Where(f => !indexed.Contains(f.Id)).Chunk(LookupBatchSize))
         {
-            if ((await fileDao.GetProperties(file.Id))?.FormFilling?.RecoveryFailedVersion != file.Version)
+            var properties = await fileDao.GetPropertiesAsync(files.Select(f => f.Id));
+            orphans.AddRange(files.Where(f =>
             {
-                orphans.Add(file);
-            }
+                var formFilling = properties.GetValueOrDefault(f.Id)?.FormFilling;
+                return formFilling?.RecoveryFailedVersion != f.Version || (formFilling.RecoveryFailedAttempts ?? 0) < MaxRecoveryAttempts;
+            }));
         }
 
         return orphans;
@@ -198,6 +235,7 @@ public class FormRecoveryService(
         }
 
         var keys = await formFillingReportCreator.TryGetIndexedFieldKeysAsync(version.File.Id, version.File.Version);
+        version.HasMetadata = keys != null;
         if (keys == null)
         {
             try
@@ -221,8 +259,8 @@ public class FormRecoveryService(
         return keys;
     }
 
-    // The version the submission was indexed under; null when it was skipped.
-    private async Task<int?> RecoverSubmissionAsync(
+    // The version is set for a recovered submission only.
+    private async Task<(RecoveryOutcome Outcome, int Version)> RecoverSubmissionAsync(
         File<int> orphan,
         Folder<int> doneFolder,
         int roomId,
@@ -236,42 +274,35 @@ public class FormRecoveryService(
         if (keys.Count == 0)
         {
             logger.WarnRecoveryNoFormData(orphan.Id, form.Id);
-            await MarkRecoveryFailedAsync(orphan, roomId, form, fileDao);
-            return null;
+            return (RecoveryOutcome.Unrecoverable, 0);
         }
 
         // A completed form does not record its version: the newest one with the same fields is taken, and a file matching
         // none is skipped, since the report lays the values out by the columns of the version.
-        int? version = null;
+        FormVersion version = null;
         for (var i = versions.Count - 1; i >= 0 && version == null; i--)
         {
             if ((await GetVersionKeysAsync(versions[i], cancellationToken)).SetEquals(keys))
             {
-                version = versions[i].File.Version;
+                version = versions[i];
             }
         }
 
         if (version == null)
         {
             logger.WarnRecoveryVersionUnmatched(orphan.Id, form.Id, roomId);
-            if (!versions.Any(v => v.KeysFailed))
-            {
-                await MarkRecoveryFailedAsync(orphan, roomId, form, fileDao);
-            }
-
-            return null;
+            return (versions.Any(v => v.KeysFailed) ? RecoveryOutcome.Failed : RecoveryOutcome.Unrecoverable, 0);
         }
 
-        // A submission saves and indexes its PDF under this lock, so a file still not indexed once it is taken was lost.
-        // A file without a number gets the next one, saved on it so that a retry reuses it.
+        // A submission saves and indexes its PDF under this lock, refreshing the index, so a file still not indexed once
+        // it is taken was lost. A file without a number gets the next one, saved on it so that a retry reuses it.
         int resultFormNumber;
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{form.Id}"))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
         {
-            await factoryIndexerForm.RefreshAsync();
-            var (success, indexed) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, orphan.Id).Limit(0, 1));
+            var (success, indexed) = await factoryIndexerForm.TrySelectIdsAsync(r => r.Where(s => s.Id, orphan.Id).Limit(0, 1));
             if (!success || indexed.Count > 0)
             {
-                return null;
+                return (RecoveryOutcome.Skipped, 0);
             }
 
             var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
@@ -280,7 +311,13 @@ public class FormRecoveryService(
             resultFormNumber = properties.FormFilling.ResultFormNumber;
             if (resultFormNumber == 0)
             {
+                // The filling was stopped while the run went on.
                 var formProperties = await fileDao.GetProperties(form.Id);
+                if (formProperties?.FormFilling == null)
+                {
+                    return (RecoveryOutcome.Skipped, 0);
+                }
+
                 resultFormNumber = ++formProperties.FormFilling.ResultFormNumber;
                 await fileDao.SaveProperties(form.Id, formProperties);
 
@@ -292,22 +329,37 @@ public class FormRecoveryService(
             }
         }
 
-        await formFillingReportCreator.IndexRecoveredSubmissionAsync(
-            orphan, form.Id, version.Value, roomId, resultFormNumber, formsDataJson, tenantUtil.DateTimeToUtc(orphan.CreateOn));
+        if (!await formFillingReportCreator.IndexRecoveredSubmissionAsync(
+                orphan, form.Id, version.File.Version, roomId, resultFormNumber, formsDataJson, tenantUtil.DateTimeToUtc(orphan.CreateOn), !version.HasMetadata))
+        {
+            return (RecoveryOutcome.Failed, 0);
+        }
 
-        return version;
+        version.HasMetadata = true;
+
+        return (RecoveryOutcome.Recovered, version.File.Version);
     }
 
-    // Until the file gets a new version, so that the next report does not read it through the builder again.
-    // Under the submission lock, as the other writes of the file's properties.
-    private async Task MarkRecoveryFailedAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao)
+    // Counted for the version of the file, so that a new version is read again; an unrecoverable file takes all the
+    // attempts at once. Under the submission lock, as the other writes of the file's properties.
+    private async Task CountFailedAttemptAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, bool unrecoverable)
     {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{form.Id}"))
+        try
         {
-            var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
-            properties.FormFilling ??= new FormFillingProperties<int>();
-            properties.FormFilling.RecoveryFailedVersion = orphan.Version;
-            await fileDao.SaveProperties(orphan.Id, properties);
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
+            {
+                var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
+                var formFilling = properties.FormFilling ??= new FormFillingProperties<int>();
+
+                var attempts = formFilling.RecoveryFailedVersion == orphan.Version ? formFilling.RecoveryFailedAttempts ?? 0 : 0;
+                formFilling.RecoveryFailedVersion = orphan.Version;
+                formFilling.RecoveryFailedAttempts = unrecoverable ? MaxRecoveryAttempts : attempts + 1;
+                await fileDao.SaveProperties(orphan.Id, properties);
+            }
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorRecoverySubmissionFailed(e, orphan.Id, form.Id);
         }
     }
 }

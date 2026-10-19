@@ -41,10 +41,11 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly DistributedTaskQueue<FormRecoveryTask> _queue = queueFactory.CreateQueue<FormRecoveryTask>();
 
-    public static string GetTaskId(int tenantId, int originalFormId) => $"{TaskIdPrefix}_{tenantId}_{originalFormId}";
+    // Per user, as the report it starts: a second request of the same user waits for the running one.
+    public static string GetTaskId(int tenantId, Guid userId, int originalFormId) => $"{TaskIdPrefix}_{tenantId}_{userId}_{originalFormId}";
 
     /// <summary>
-    /// Queues the recovery of the form; false when one is already running for it.
+    /// Queues the recovery of the form for the user; false when one is already running, which starts the report itself.
     /// </summary>
     public async Task<bool> TryEnqueueAsync(FormRecoveryTask newTask)
     {

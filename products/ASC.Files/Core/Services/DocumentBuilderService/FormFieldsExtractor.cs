@@ -59,7 +59,7 @@ public class FormFieldsExtractor(
         string sourceUrl;
         await using (var stream = await daoFactory.GetFileDao<int>().GetFileStreamAsync(file))
         {
-            sourceUrl = documentServiceConnector.ReplaceCommunityAddress(await pathProvider.GetTempUrlAsync(stream, ".pdf"));
+            sourceUrl = documentServiceConnector.ReplaceCommunityAddress(await pathProvider.GetTempUrlAsync(stream, FileUtility.GetFileExtension(file.Title)));
         }
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName)
@@ -72,9 +72,7 @@ public class FormFieldsExtractor(
 
         var resultUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(script, tempFileName, ""), cancellationToken);
 
-#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
 
         return (await httpClient.GetStringAsync(resultUrl, cancellationToken)).Trim();
     }

@@ -59,7 +59,7 @@ public class FormRecoveryTask : DistributedTaskProgress
         _tenantId = tenantId;
         _userId = userId;
         _reportData = reportData;
-        Id = FormRecoveryTaskManager.GetTaskId(tenantId, reportData.OriginalFormId);
+        Id = FormRecoveryTaskManager.GetTaskId(tenantId, userId, reportData.OriginalFormId);
         Status = DistributedTaskStatus.Created;
     }
 
@@ -81,10 +81,6 @@ public class FormRecoveryTask : DistributedTaskProgress
             await scope.ServiceProvider.GetRequiredService<FormRecoveryService>()
                 .RecoverAsync(_reportData.RoomId, _reportData.OriginalFormId, CancellationToken);
 
-            var reportTask = scope.ServiceProvider.GetRequiredService<FormFillingReportTask>();
-            reportTask.Init(_baseUri, _tenantId, _userId, _reportData, DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
-            await scope.ServiceProvider.GetRequiredService<DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData>>().StartTask(reportTask);
-
             Status = DistributedTaskStatus.Completed;
         }
         catch (OperationCanceledException)
@@ -100,6 +96,18 @@ public class FormRecoveryTask : DistributedTaskProgress
         }
         finally
         {
+            // Whatever became of the recovery: the client already waits for the report, which reports its own failures.
+            try
+            {
+                var reportTask = scope.ServiceProvider.GetRequiredService<FormFillingReportTask>();
+                reportTask.Init(_baseUri, _tenantId, _userId, _reportData, DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
+                await scope.ServiceProvider.GetRequiredService<DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData>>().StartTask(reportTask);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+
             IsCompleted = true;
             Percentage = 100;
 

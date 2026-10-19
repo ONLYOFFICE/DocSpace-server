@@ -155,9 +155,14 @@ public class FormFillingProperties<T>
     public string ExternalDbTableName { get; set; }
 
     /// <summary>
-    /// The version of the completed form whose responses cannot be read back for the search index; recovery skips it.
+    /// The version of the completed form whose responses failed to be read back for the search index.
     /// </summary>
     public int? RecoveryFailedVersion { get; set; }
+
+    /// <summary>
+    /// The failed attempts to recover that version; at the limit recovery skips the file.
+    /// </summary>
+    public int? RecoveryFailedAttempts { get; set; }
 
 }
 
