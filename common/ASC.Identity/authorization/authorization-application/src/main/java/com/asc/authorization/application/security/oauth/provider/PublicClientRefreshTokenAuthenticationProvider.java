@@ -42,6 +42,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
@@ -51,25 +53,33 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
  * <p>Spring's {@code PublicClientAuthenticationProvider} requires a {@code code_verifier}, which
  * only an authorization code request has, so it rejects every refresh request from a public client.
  * This provider accepts a {@link ClientAuthenticationMethod#NONE} authentication for the {@code
- * refresh_token} grant when the registered client allows that method (PKCE enabled). The refresh
+ * refresh_token} grant when the registered client allows that method (PKCE enabled) and the refresh
+ * token was issued without a secret ({@link #CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE}). The refresh
  * token itself is then validated by {@code OAuth2RefreshTokenAuthenticationProvider}: it must be
  * active and issued to this client. Refresh tokens are rotated on every use ({@code
- * reuseRefreshTokens(false)}), as OAuth 2.0 Security BCP requires for public clients.
+ * reuseRefreshTokens(false)}).
  *
  * <p>Any other authentication, including {@code NONE} on the authorization code grant, is left to
  * the default providers.
  */
 public class PublicClientRefreshTokenAuthenticationProvider implements AuthenticationProvider {
+  public static final String CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE =
+      "client_authentication_method";
+
   private final RegisteredClientRepository registeredClientRepository;
+  private final OAuth2AuthorizationService authorizationService;
 
   /**
    * Constructs a new {@code PublicClientRefreshTokenAuthenticationProvider}.
    *
    * @param registeredClientRepository the repository used to look up the client
+   * @param authorizationService the service used to look up the authorization of the refresh token
    */
   public PublicClientRefreshTokenAuthenticationProvider(
-      RegisteredClientRepository registeredClientRepository) {
+      RegisteredClientRepository registeredClientRepository,
+      OAuth2AuthorizationService authorizationService) {
     this.registeredClientRepository = registeredClientRepository;
+    this.authorizationService = authorizationService;
   }
 
   private static OAuth2AuthenticationException invalidClient(String parameterName) {
@@ -85,8 +95,10 @@ public class PublicClientRefreshTokenAuthenticationProvider implements Authentic
    *
    * @param authentication the {@link OAuth2ClientAuthenticationToken} to authenticate
    * @return the authenticated client, or {@code null} when this provider does not apply
-   * @throws AuthenticationException {@code invalid_client} when the client is unknown or does not
-   *     allow authentication without a secret
+   * @throws AuthenticationException {@code invalid_client} when the client is unknown, does not
+   *     allow authentication without a secret, or the refresh token was issued with the secret;
+   *     {@code invalid_request} when the refresh token is missing; {@code invalid_grant} when it is
+   *     unknown or belongs to another client
    */
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -110,6 +122,22 @@ public class PublicClientRefreshTokenAuthenticationProvider implements Authentic
     if (!registeredClient
         .getClientAuthenticationMethods()
         .contains(ClientAuthenticationMethod.NONE)) throw invalidClient("authentication_method");
+
+    if (!(clientAuthentication.getAdditionalParameters().get(OAuth2ParameterNames.REFRESH_TOKEN)
+            instanceof String refreshToken)
+        || refreshToken.isBlank())
+      throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
+
+    var authorization =
+        authorizationService.findByToken(refreshToken, OAuth2TokenType.REFRESH_TOKEN);
+    if (authorization == null
+        || !registeredClient.getId().equals(authorization.getRegisteredClientId()))
+      throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
+
+    if (!ClientAuthenticationMethod.NONE
+        .getValue()
+        .equals(authorization.getAttribute(CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE)))
+      throw invalidClient(OAuth2ParameterNames.CLIENT_SECRET);
 
     return new OAuth2ClientAuthenticationToken(
         registeredClient, ClientAuthenticationMethod.NONE, null);

@@ -68,6 +68,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -151,6 +152,7 @@ public class AuthorizationServerConfiguration {
       HttpSecurity http,
       SecurityConfigurationProperties securityConfigurationProperties,
       RegisteredClientRepository registeredClientRepository,
+      OAuth2AuthorizationService authorizationService,
       SignatureService signatureService) {
     var fallbackScopeAuthorizationCodeRequestConverter =
         new FallbackScopeAuthorizationCodeRequestConverter(registeredClientRepository);
@@ -250,7 +252,7 @@ public class AuthorizationServerConfiguration {
                 c.authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
                     .authenticationProvider(
                         new PublicClientRefreshTokenAuthenticationProvider(
-                            registeredClientRepository)))
+                            registeredClientRepository, authorizationService)))
         .tokenEndpoint(
             t ->
                 t.accessTokenRequestConverters(

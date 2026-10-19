@@ -43,12 +43,16 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 public class PublicClientRefreshTokenAuthenticationProviderTest {
   private RegisteredClientRepository repository;
+  private OAuth2AuthorizationService authorizationService;
   private PublicClientRefreshTokenAuthenticationProvider provider;
 
   private static RegisteredClient client(String id, ClientAuthenticationMethod... methods) {
@@ -65,25 +69,63 @@ public class PublicClientRefreshTokenAuthenticationProviderTest {
 
   private static OAuth2ClientAuthenticationToken publicAuthentication(
       String clientId, String grantType) {
+    return publicAuthentication(clientId, grantType, "public-token");
+  }
+
+  private static OAuth2ClientAuthenticationToken publicAuthentication(
+      String clientId, String grantType, String refreshToken) {
     return new OAuth2ClientAuthenticationToken(
         clientId,
         ClientAuthenticationMethod.NONE,
         null,
-        Map.of("grant_type", grantType, "refresh_token", "token"));
+        Map.of("grant_type", grantType, "refresh_token", refreshToken));
+  }
+
+  private static OAuth2Authorization authorization(
+      RegisteredClient client, ClientAuthenticationMethod issuedWith) {
+    var builder =
+        OAuth2Authorization.withRegisteredClient(client)
+            .principalName("user")
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
+    if (issuedWith != null)
+      builder.attribute(
+          PublicClientRefreshTokenAuthenticationProvider.CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE,
+          issuedWith.getValue());
+    return builder.build();
+  }
+
+  private void issued(String token, OAuth2Authorization authorization) {
+    when(authorizationService.findByToken(token, OAuth2TokenType.REFRESH_TOKEN))
+        .thenReturn(authorization);
+  }
+
+  private void assertError(String errorCode, OAuth2ClientAuthenticationToken authentication) {
+    var exception =
+        assertThrows(
+            OAuth2AuthenticationException.class, () -> provider.authenticate(authentication));
+    assertEquals(errorCode, exception.getError().getErrorCode());
   }
 
   @BeforeEach
   void setUp() {
     repository = mock(RegisteredClientRepository.class);
-    when(repository.findByClientId("pkce"))
+    authorizationService = mock(OAuth2AuthorizationService.class);
+    var pkce =
+        client(
+            "pkce", ClientAuthenticationMethod.CLIENT_SECRET_POST, ClientAuthenticationMethod.NONE);
+    when(repository.findByClientId("pkce")).thenReturn(pkce);
+    when(repository.findByClientId("other"))
         .thenReturn(
             client(
-                "pkce",
+                "other",
                 ClientAuthenticationMethod.CLIENT_SECRET_POST,
                 ClientAuthenticationMethod.NONE));
     when(repository.findByClientId("confidential"))
         .thenReturn(client("confidential", ClientAuthenticationMethod.CLIENT_SECRET_POST));
-    provider = new PublicClientRefreshTokenAuthenticationProvider(repository);
+    issued("public-token", authorization(pkce, ClientAuthenticationMethod.NONE));
+    issued("secret-token", authorization(pkce, ClientAuthenticationMethod.CLIENT_SECRET_POST));
+    issued("legacy-token", authorization(pkce, null));
+    provider = new PublicClientRefreshTokenAuthenticationProvider(repository, authorizationService);
   }
 
   @Test
@@ -96,6 +138,41 @@ public class PublicClientRefreshTokenAuthenticationProviderTest {
     assertTrue(result.isAuthenticated());
     assertEquals("pkce", result.getRegisteredClient().getClientId());
     assertEquals(ClientAuthenticationMethod.NONE, result.getClientAuthenticationMethod());
+  }
+
+  @Test
+  void whenTokenWasIssuedWithSecret_thenInvalidClient() {
+    assertError(
+        OAuth2ErrorCodes.INVALID_CLIENT,
+        publicAuthentication("pkce", "refresh_token", "secret-token"));
+  }
+
+  @Test
+  void whenTokenPredatesTheAttribute_thenInvalidClient() {
+    assertError(
+        OAuth2ErrorCodes.INVALID_CLIENT,
+        publicAuthentication("pkce", "refresh_token", "legacy-token"));
+  }
+
+  @Test
+  void whenTokenIsUnknown_thenInvalidGrant() {
+    assertError(
+        OAuth2ErrorCodes.INVALID_GRANT, publicAuthentication("pkce", "refresh_token", "unknown"));
+  }
+
+  @Test
+  void whenTokenBelongsToAnotherClient_thenInvalidGrant() {
+    assertError(
+        OAuth2ErrorCodes.INVALID_GRANT,
+        publicAuthentication("other", "refresh_token", "public-token"));
+  }
+
+  @Test
+  void whenRefreshTokenIsMissing_thenInvalidRequest() {
+    assertError(
+        OAuth2ErrorCodes.INVALID_REQUEST,
+        new OAuth2ClientAuthenticationToken(
+            "pkce", ClientAuthenticationMethod.NONE, null, Map.of("grant_type", "refresh_token")));
   }
 
   @Test
@@ -119,7 +196,7 @@ public class PublicClientRefreshTokenAuthenticationProviderTest {
   @Test
   void whenGrantIsAuthorizationCode_thenLeftToDefaultProviders() {
     assertNull(provider.authenticate(publicAuthentication("pkce", "authorization_code")));
-    verifyNoInteractions(repository);
+    verifyNoInteractions(repository, authorizationService);
   }
 
   @Test
