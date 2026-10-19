@@ -181,7 +181,7 @@ public class TariffServiceServiceLimitTests
 
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
         serviceLimit.Usage.AmountAvailable.Should().Be(187.6m);
-        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/total");
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/total");
         AccountingClientTests.ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
     }
 
@@ -205,7 +205,7 @@ public class TariffServiceServiceLimitTests
         var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
 
         serviceLimit.Should().BeNull();
-        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/global");
+        handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/global");
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public class TariffServiceServiceLimitTests
         second.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
         handler.CallCount.Should().Be(2);
 
-        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/customer/{PaymentRegion}{TenantId}/ai-services/participants"));
+        requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants"));
         requests.Select(uri => AccountingClientTests.ParseQuery(uri)["offset"]).Should().Equal("0", "2");
         requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["limit"].Should().Be("100"));
         requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["includeUsage"].Should().Be("true"));

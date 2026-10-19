@@ -118,7 +118,7 @@ public class AccountingClientServiceLimitTests
         var serviceLimit = await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/customer/portal-1/ai-services/total");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/total");
         AccountingClientTests.ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
 
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
@@ -152,7 +152,7 @@ public class AccountingClientServiceLimitTests
         var serviceLimit = await client.GetGlobalServiceLimitAsync("portal-1", "ai-services");
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/customer/portal-1/ai-services/global");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/global");
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Global);
     }
 
@@ -181,7 +181,7 @@ public class AccountingClientServiceLimitTests
         var report = await client.GetParticipantServiceLimitsAsync("portal-1", "ai-services", filter);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/customer/portal-1/ai-services/participants");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/participants");
 
         var query = AccountingClientTests.ParseQuery(handler.LastUri);
         query["offset"].Should().Be("10");
@@ -299,7 +299,7 @@ public class AccountingClientServiceLimitTests
         var count = await client.DisableParticipantServiceLimitsAsync("portal-1", "ai-services");
 
         handler.LastMethod.Should().Be(HttpMethod.Put);
-        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/customer/portal-1/ai-services/participants/disable");
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/participants/disable");
         count.Should().Be(5);
     }
 

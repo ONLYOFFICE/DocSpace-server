@@ -52,7 +52,7 @@ public interface IAccountingApi
     [Put("/session/extend")]
     Task<Session> ExtendCustomerSessionAsync([Query] int sessionId, [Query] int duration);
 
-    [Post("/operation/sessionComplete")]
+    [Post("/session/complete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);
 
     [Get("/customer/{portalId}/operations")]
@@ -84,22 +84,22 @@ public interface IAccountingApi
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();
 
-    [Get("/service/{serviceName}/name")]
+    [Get("/service/by-name/{serviceName}")]
     Task<ServiceInfo> GetServiceInfoAsync(string serviceName);
 
-    [Get("/price/service/{serviceId}")]
+    [Get("/servicePrice/by-service/{serviceId}")]
     Task<List<ServicePriceInfo>> GetServicePricesAsync(int serviceId, [Query] bool active);
 
     [Get("/serviceLimit/{id}")]
     Task<ServiceLimit> GetServiceLimitAsync(int id);
 
-    [Get("/serviceLimit/customer/{portalId}/{groupName}/total")]
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/total")]
     Task<ServiceLimit> GetTotalServiceLimitAsync(string portalId, string groupName, [Query] bool includeUsage);
 
-    [Get("/serviceLimit/customer/{portalId}/{groupName}/global")]
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/global")]
     Task<ServiceLimit> GetGlobalServiceLimitAsync(string portalId, string groupName);
 
-    [Get("/serviceLimit/customer/{portalId}/{groupName}/participants")]
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
     Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string groupName, [Query] ServiceLimitFilter filter);
 
     /// <summary>
@@ -107,7 +107,7 @@ public interface IAccountingApi
     /// <see cref="GetCustomerOperationPages"/>. Leave <see cref="ServiceLimitFilter.Offset"/> unset - the offset
     /// travels in its own query parameter.
     /// </summary>
-    [Get("/serviceLimit/customer/{portalId}/{groupName}/participants")]
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
     [Paged(Items = nameof(ServiceLimitReport.Collection), Total = nameof(ServiceLimitReport.TotalQuantity))]
     PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string groupName, [Query] ServiceLimitFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 
@@ -120,7 +120,7 @@ public interface IAccountingApi
     [Put("/serviceLimit/participants")]
     Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
 
-    [Put("/serviceLimit/customer/{portalId}/{groupName}/participants/disable")]
+    [Put("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants/disable")]
     Task<int> DisableParticipantServiceLimitsAsync(string portalId, string groupName);
 
     [Delete("/serviceLimit/{id}")]

@@ -236,6 +236,51 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetServiceInfo_BuildsByNamePath()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, """{"id":7,"name":"backup","priceValue":1.5,"currencyId":1}"""));
+
+        var serviceInfo = await client.GetServiceInfoAsync("backup");
+
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/service/by-name/backup");
+        serviceInfo.Id.Should().Be(7);
+    }
+
+    [Fact]
+    public async Task GetServicePrices_ResolvesTheServiceThenBuildsByServicePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath);
+            return request.RequestUri.AbsolutePath.Contains("/servicePrice/")
+                ? Json(HttpStatusCode.OK, """[{"id":12,"serviceId":7,"timeUnit":"Minute","servicePrice":0.5}]""")
+                : Json(HttpStatusCode.OK, """{"id":7,"name":"ai-tools"}""");
+        });
+
+        var prices = await client.GetServicePricesAsync("ai-tools", active: true);
+
+        paths.Should().Equal("/api/service/by-name/ai-tools", "/api/servicePrice/by-service/7");
+        prices.Should().ContainSingle().Which.TimeUnit.Should().Be(PriceTimeUnit.Minute);
+    }
+
+    [Fact]
+    public async Task CompleteCustomerSession_PostsToSessionCompletePath()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
+
+        await client.CompleteCustomerSessionAsync("portal-1", "backup", 42, 3, "3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/complete");
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        body.RootElement.GetProperty("sessionId").GetInt32().Should().Be(42);
+        body.RootElement.GetProperty("customerName").GetString().Should().Be("portal-1");
+    }
+
+    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
