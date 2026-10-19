@@ -255,10 +255,15 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         Guid threadId,
         int count,
         DateTimeOffset? cursorCreatedAt = null,
-        Guid? cursorId = null)
+        Guid? cursorId = null,
+        string? direction = null)
     {
         var query = new List<string> { $"count={count}" };
 
+        if (direction is not null)
+        {
+            query.Add($"direction={direction}");
+        }
         if (cursorCreatedAt is not null)
         {
             query.Add($"cursor.createdAt={Uri.EscapeDataString(cursorCreatedAt.Value.ToString("O"))}");

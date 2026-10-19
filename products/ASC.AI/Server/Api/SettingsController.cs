@@ -112,13 +112,16 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
 
     /// <remarks>
     /// Returns how tool calls made by the model are approved for the current user. The stored mode applies to every
-    /// chat of the user in the portal; while nothing is stored, the default mode is returned.
+    /// chat of the user in the portal; while nothing is stored, the default mode is returned. Available to DocSpace
+    /// admins, room admins and users; guests are refused.
     /// </remarks>
     /// <summary>Get the tool permission mode</summary>
     /// <path>api/2.0/ai/config/tool-mode</path>
     [Tags("AI / Settings")]
     [SwaggerResponse(200, "Tool permission mode", typeof(ToolPermissionModeDto))]
+    [SwaggerResponse(403, "AI is disabled for the portal, or the caller is a guest")]
     [HttpGet("config/tool-mode")]
+    [AiFeature]
     public async Task<ToolPermissionModeDto> GetToolPermissionModeAsync()
     {
         var mode = await aiSettingsService.GetToolPermissionModeAsync();
@@ -127,15 +130,17 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
 
     /// <remarks>
     /// Stores how tool calls made by the model are approved for the current user. The mode applies to every chat of the
-    /// user in the portal and replaces the one stored before. A value outside the declared members is rejected rather
-    /// than coerced.
+    /// user in the portal and replaces the one stored before. Available to DocSpace admins, room admins and users; guests
+    /// are refused. A value outside the declared members is rejected rather than coerced.
     /// </remarks>
     /// <summary>Set the tool permission mode</summary>
     /// <path>api/2.0/ai/config/tool-mode</path>
     [Tags("AI / Settings")]
     [SwaggerResponse(200, "Tool permission mode", typeof(ToolPermissionModeDto))]
     [SwaggerResponse(400, "The mode is not one of the declared members")]
+    [SwaggerResponse(403, "AI is disabled for the portal, or the caller is a guest")]
     [HttpPut("config/tool-mode")]
+    [AiFeature]
     public async Task<ToolPermissionModeDto> SetToolPermissionModeAsync(SetToolPermissionModeRequestDto inDto)
     {
         var mode = await aiSettingsService.SetToolPermissionModeAsync(inDto.Body.Mode);

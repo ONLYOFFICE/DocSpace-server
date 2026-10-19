@@ -54,7 +54,7 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
-    /// Selects the identifiers of the entries whose system template values match the free text, see <see cref="TrySelectMetadataIdsAsync{TDoc}"/> for the failure rule.
+    /// Selects the identifiers of the entries whose string metadata values match the free text, see <see cref="TrySelectMetadataIdsAsync{TDoc}"/> for the failure rule.
     /// </summary>
     public static Task<(bool Success, List<int> Ids)> TrySelectGlobalTextIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, string searchText)
         where TDoc : MetadataSearchItemBase
@@ -129,10 +129,10 @@ public static class MetadataSearchQuery
 
     /// <summary>
     /// Adds the free text part of a listing once the title index answered with <paramref name="titleIds"/>: the string
-    /// values of the system template take part in the text search, so the entries whose metadata match are united
-    /// with the entries whose titles match. Without a system template the tenant has no such values, and the title
-    /// ids are applied as they are, which spares the metadata index request and the SQL fallback on every search.
-    /// The metadata candidates the index returns are confirmed against the value table, the same way
+    /// values of every template (the custom fields included) take part in the text search, so the entries whose
+    /// metadata match are united with the entries whose titles match. Without a template the tenant has no values,
+    /// and the title ids are applied as they are, which spares the metadata index request and the SQL fallback on
+    /// every search. The metadata candidates the index returns are confirmed against the value table, the same way
     /// <see cref="ApplyFilterAsync{TRow, TDoc}"/> confirms its conditions: a document holding a value that has since
     /// been cleared (the index was down at that moment, and the full pass never reconciles a removed value) would
     /// otherwise keep the entry in the text search results for good.
@@ -146,11 +146,12 @@ public static class MetadataSearchQuery
         List<int> titleIds,
         string searchText,
         string lowerText,
-        bool hasSystemTemplate,
+        bool hasTemplates,
+        bool includeHiddenTemplates,
         Expression<Func<TRow, int>> idSelector)
         where TDoc : MetadataSearchItemBase
     {
-        if (!hasSystemTemplate)
+        if (!hasTemplates)
         {
             return WhereId(query, idSelector, id => titleIds.Contains(id));
         }
@@ -160,7 +161,7 @@ public static class MetadataSearchQuery
         // the metadata index is not there yet (it is created by the first full indexing pass) or it is overflowing:
         // the global metadata part of the search comes from the database alone; with the index it is narrowed to
         // the candidates the index returned first, so the confirmation probes a handful of rows instead of scanning
-        var globalTextSqlIds = SystemTemplateTextEntryIds(filesDbContext, tenantId, entryType, lowerText);
+        var globalTextSqlIds = TemplateTextEntryIds(filesDbContext, tenantId, entryType, lowerText, includeHiddenTemplates);
 
         if (success)
         {
@@ -181,7 +182,8 @@ public static class MetadataSearchQuery
 
     /// <summary>
     /// Builds the OpenSearch selector for the structured metadata filter. All conditions are combined with AND,
-    /// the options within a single choice condition are combined with OR.
+    /// the options within a single choice condition are combined with OR. The exact string match is a term on the
+    /// keyword value, the substring match a wildcard per word on its text copy, the way the titles are searched.
     /// </summary>
     public static Func<Selector<TDoc>, Selector<TDoc>> BuildSelector<TDoc>(MetadataFilter metadataFilter)
         where TDoc : MetadataSearchItemBase
@@ -192,6 +194,11 @@ public static class MetadataSearchQuery
             {
                 switch (condition.FieldType)
                 {
+                    case MetadataFieldType.String when condition.StringContains:
+                        s.Nested(a => a.Values, b =>
+                            b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
+                            Selector<TDoc>.Contains(b, c => c.Values.Select(v => v.StringText), condition.StringValue));
+                        break;
                     case MetadataFieldType.String:
                         s.Nested(a => a.Values, b =>
                             b.Term(c => c.Values.Select(v => v.FieldId), condition.FieldId) &&
@@ -206,12 +213,26 @@ public static class MetadataSearchQuery
 
                                 if (condition.DateFrom.HasValue)
                                 {
-                                    r.GreaterThanOrEquals(condition.DateFrom.Value);
+                                    if (condition.FromExclusive)
+                                    {
+                                        r.GreaterThan(condition.DateFrom.Value);
+                                    }
+                                    else
+                                    {
+                                        r.GreaterThanOrEquals(condition.DateFrom.Value);
+                                    }
                                 }
 
                                 if (condition.DateTo.HasValue)
                                 {
-                                    r.LessThanOrEquals(condition.DateTo.Value);
+                                    if (condition.ToExclusive)
+                                    {
+                                        r.LessThan(condition.DateTo.Value);
+                                    }
+                                    else
+                                    {
+                                        r.LessThanOrEquals(condition.DateTo.Value);
+                                    }
                                 }
 
                                 return r;
@@ -226,12 +247,26 @@ public static class MetadataSearchQuery
 
                                 if (condition.NumberFrom.HasValue)
                                 {
-                                    r.GreaterThanOrEquals(condition.NumberFrom.Value);
+                                    if (condition.FromExclusive)
+                                    {
+                                        r.GreaterThan(condition.NumberFrom.Value);
+                                    }
+                                    else
+                                    {
+                                        r.GreaterThanOrEquals(condition.NumberFrom.Value);
+                                    }
                                 }
 
                                 if (condition.NumberTo.HasValue)
                                 {
-                                    r.LessThanOrEquals(condition.NumberTo.Value);
+                                    if (condition.ToExclusive)
+                                    {
+                                        r.LessThan(condition.NumberTo.Value);
+                                    }
+                                    else
+                                    {
+                                        r.LessThanOrEquals(condition.NumberTo.Value);
+                                    }
                                 }
 
                                 return r;
@@ -255,7 +290,7 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
-    /// Builds the OpenSearch selector for the free text search over the globally visible system template fields.
+    /// Builds the OpenSearch selector for the free text search over the string values of the entries.
     /// </summary>
     public static Func<Selector<TDoc>, Selector<TDoc>> BuildGlobalTextSelector<TDoc>(string searchText)
         where TDoc : MetadataSearchItemBase
@@ -283,17 +318,25 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
-    /// The SQL counterpart of <see cref="BuildGlobalTextSelector{TDoc}"/>: the identifiers of the entries whose
-    /// system template string values contain the text. The text is expected to be already lowered.
+    /// The SQL counterpart of <see cref="BuildGlobalTextSelector{TDoc}"/>: the identifiers of the entries holding a
+    /// string value that contains the text. The text is expected to be already lowered. The values of the hidden
+    /// templates count only on request (<see cref="MetadataFilter.IncludeHiddenTemplates"/>); the index document holds
+    /// them regardless, it only proposes candidates and this query is what confirms them.
     /// </summary>
-    public static IQueryable<int> SystemTemplateTextEntryIds(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, string lowerText)
+    public static IQueryable<int> TemplateTextEntryIds(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, string lowerText, bool includeHiddenTemplates)
     {
-        return filesDbContext.MetadataValues
-            .Where(v => v.TenantId == tenantId && v.EntryType == entryType && v.ValueString.ToLower().Contains(lowerText) &&
-                filesDbContext.MetadataFields.Any(f => f.TenantId == tenantId && f.Id == v.FieldId &&
-                    filesDbContext.MetadataTemplates.Any(t => t.TenantId == tenantId && t.Id == f.TemplateId && t.IsSystem)))
-            .Select(v => v.EntryId)
-            .Distinct();
+        var values = filesDbContext.MetadataValues
+            .Where(v => v.TenantId == tenantId && v.EntryType == entryType && v.ValueString.ToLower().Contains(lowerText));
+
+        if (!includeHiddenTemplates)
+        {
+            // the system template of the custom fields is never hidden, but it is kept in with its flag for the day it is
+            values = values.Where(v => filesDbContext.MetadataFields
+                .Join(filesDbContext.MetadataTemplates, f => f.TemplateId, t => t.Id, (f, t) => new { f.Id, t.Visible, t.IsSystem })
+                .Any(x => x.Id == v.FieldId && (x.Visible || x.IsSystem)));
+        }
+
+        return values.Select(v => v.EntryId).Distinct();
     }
 
     /// <summary>
@@ -323,21 +366,39 @@ public static class MetadataSearchQuery
         {
             case MetadataFieldType.String:
                 var stringValue = condition.StringValue;
-                return v => v.FieldId == fieldId && v.ValueString.ToLower() == stringValue;
+                return condition.StringContains
+                    ? v => v.FieldId == fieldId && v.ValueString.ToLower().Contains(stringValue)
+                    : v => v.FieldId == fieldId && v.ValueString.ToLower() == stringValue;
 
             case MetadataFieldType.Date:
-                var dateFrom = condition.DateFrom;
-                var dateTo = condition.DateTo;
-                return v => v.FieldId == fieldId &&
-                    (dateFrom == null || v.ValueDate >= dateFrom) &&
-                    (dateTo == null || v.ValueDate <= dateTo);
+                var dateParts = new List<Expression<Func<DbFilesMetadataValue, bool>>> { v => v.FieldId == fieldId };
+
+                if (condition.DateFrom is { } dateFrom)
+                {
+                    dateParts.Add(condition.FromExclusive ? v => v.ValueDate > dateFrom : v => v.ValueDate >= dateFrom);
+                }
+
+                if (condition.DateTo is { } dateTo)
+                {
+                    dateParts.Add(condition.ToExclusive ? v => v.ValueDate < dateTo : v => v.ValueDate <= dateTo);
+                }
+
+                return And(dateParts);
 
             case MetadataFieldType.Number:
-                var numberFrom = condition.NumberFrom;
-                var numberTo = condition.NumberTo;
-                return v => v.FieldId == fieldId &&
-                    (numberFrom == null || v.ValueNumber >= numberFrom) &&
-                    (numberTo == null || v.ValueNumber <= numberTo);
+                var numberParts = new List<Expression<Func<DbFilesMetadataValue, bool>>> { v => v.FieldId == fieldId };
+
+                if (condition.NumberFrom is { } numberFrom)
+                {
+                    numberParts.Add(condition.FromExclusive ? v => v.ValueNumber > numberFrom : v => v.ValueNumber >= numberFrom);
+                }
+
+                if (condition.NumberTo is { } numberTo)
+                {
+                    numberParts.Add(condition.ToExclusive ? v => v.ValueNumber < numberTo : v => v.ValueNumber <= numberTo);
+                }
+
+                return And(numberParts);
 
             case MetadataFieldType.SingleChoice:
             case MetadataFieldType.MultiChoice:
@@ -347,6 +408,23 @@ public static class MetadataSearchQuery
             default:
                 throw new ArgumentOutOfRangeException(nameof(condition), condition.FieldType, @"Unknown metadata field type");
         }
+    }
+
+    /// <summary>
+    /// Joins the value predicates with AND into one lambda over a single parameter, so the bounds of a range are
+    /// chosen in code (strict or inclusive, present or absent) instead of being switched inside the SQL.
+    /// </summary>
+    private static Expression<Func<DbFilesMetadataValue, bool>> And(List<Expression<Func<DbFilesMetadataValue, bool>>> parts)
+    {
+        var first = parts[0];
+        var body = first.Body;
+
+        foreach (var part in parts.Skip(1))
+        {
+            body = Expression.AndAlso(body, new ParameterReplaceVisitor(part.Parameters[0], first.Parameters[0]).Visit(part.Body));
+        }
+
+        return Expression.Lambda<Func<DbFilesMetadataValue, bool>>(body, first.Parameters);
     }
 
     /// <summary>

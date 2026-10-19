@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -275,6 +276,22 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
+   * Reads up to {@code maxItems} items of an index query, following DynamoDB's pages.
+   *
+   * @param index the index to query
+   * @param request the query, whose limit applies to each page
+   * @param maxItems the maximum number of items to return
+   * @return up to {@code maxItems} items, in query order
+   */
+  private static List<ClientDynamoEntity> queryPages(
+      DynamoDbIndex<ClientDynamoEntity> index, QueryEnhancedRequest request, int maxItems) {
+    return index.query(request).stream()
+        .flatMap(page -> page.items().stream())
+        .limit(maxItems)
+        .toList();
+  }
+
+  /**
    * Persists a new client entity into DynamoDB.
    *
    * @param entity the {@link ClientDynamoEntity} to be saved
@@ -365,9 +382,7 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
             .limit(limit + 1);
     if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
 
-    var request = requestBuilder.build();
-    var page = index.query(request).stream().findFirst();
-    return page.map(Page::items).orElse(Collections.emptyList());
+    return queryPages(index, requestBuilder.build(), limit + 1);
   }
 
   /**
@@ -405,9 +420,7 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
             .limit(limit + 1);
     if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
 
-    var request = requestBuilder.build();
-    var page = index.query(request).stream().findFirst();
-    return page.map(Page::items).orElse(Collections.emptyList());
+    return queryPages(index, requestBuilder.build(), limit + 1);
   }
 
   /**

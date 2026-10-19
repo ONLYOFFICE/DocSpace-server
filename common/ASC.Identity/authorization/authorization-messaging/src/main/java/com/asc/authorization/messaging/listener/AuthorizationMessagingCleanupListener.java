@@ -33,9 +33,7 @@
 
 package com.asc.authorization.messaging.listener;
 
-import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
-import com.asc.authorization.data.consent.repository.JpaConsentRepository;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
@@ -51,9 +49,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Listener component for processing messages related to client removal events.
@@ -72,26 +67,25 @@ import org.springframework.transaction.support.TransactionTemplate;
     containerFactory = "rabbitSingleManualContainerFactory")
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class AuthorizationMessagingCleanupListener {
-  /** Transaction manager for handling database transactions. */
-  private final PlatformTransactionManager transactionManager;
-
-  /** Repository for managing authorization entities. */
-  private final JpaAuthorizationRepository jpaAuthorizationRepository;
-
-  /** Repository for managing consent entities. */
-  private final JpaConsentRepository jpaConsentRepository;
+  /** Removes the authorizations and consents of the removed clients, chunk by chunk. */
+  private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
 
   /** Cache holding the clients resolved from the registration service. */
   private final RegisteredClientCacheService registeredClientCacheService;
 
   /**
-   * Handles message processing with transaction management and error handling.
+   * Handles message processing with error handling.
+   *
+   * <p>The operation is not wrapped in one transaction: {@link
+   * AuthorizationMessagingCleanupService} commits every chunk on its own, so a large removal never
+   * has to fit into a single transaction. When it fails part way, the message is rejected, the
+   * dead-letter retry delivers it again and the next attempt continues with whatever rows are left.
    *
    * @param deliveryTag the delivery tag for the message
    * @param channel the RabbitMQ channel
-   * @param operation the operation to perform within a transaction
+   * @param operation the removal to perform
    * @param cacheEviction discards the cached clients the removal invalidated, run once {@code
-   *     operation} has committed so that a rolled back removal leaves the cache alone
+   *     operation} has completed so that a failed removal leaves the cache alone
    * @param entityType the type of entity being processed (client, user, tenant)
    * @throws IOException if an I/O error occurs during message handling
    */
@@ -103,28 +97,14 @@ public class AuthorizationMessagingCleanupListener {
       String entityType)
       throws IOException {
     try {
-      var template = new TransactionTemplate(transactionManager);
-      template.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-      template.setTimeout(2);
-      template.execute(
-          status -> {
-            try {
-              operation.run();
-              return null;
-            } catch (Exception ex) {
-              log.warn("Failed to remove authorizations and consents for {}", entityType, ex);
-              status.setRollbackOnly();
-              throw ex;
-            }
-          });
-
+      operation.run();
       cacheEviction.run();
       channel.basicAck(deliveryTag, false);
     } catch (IOException e) {
       log.warn("Received an unsupported message format: {}", e.getMessage());
       channel.basicAck(deliveryTag, false);
     } catch (Exception e) {
-      log.error("Error processing removal event: {}", e.getMessage(), e);
+      log.error("Failed to remove authorizations and consents for {}", entityType, e);
       channel.basicNack(deliveryTag, false, false);
     } finally {
       MDC.clear();
@@ -164,8 +144,7 @@ public class AuthorizationMessagingCleanupListener {
         channel,
         () -> {
           log.info("Removing authorizations and consents for client: {}", event.getClientId());
-          jpaAuthorizationRepository.deleteAllAuthorizationsByClientId(event.getClientId());
-          jpaConsentRepository.deleteAllConsentsByClientId(event.getClientId());
+          authorizationMessagingCleanupService.onClientRemoved(event.getClientId());
           log.info(
               "Authorizations and consents for client {} have been removed", event.getClientId());
         },
@@ -193,21 +172,8 @@ public class AuthorizationMessagingCleanupListener {
         channel,
         () -> {
           log.info("Removing authorizations and consents for user: {}", event.getUserId());
-          jpaAuthorizationRepository.deleteAllAuthorizationsByPrincipalId(event.getUserId());
-          jpaConsentRepository.deleteAllConsentsByPrincipalId(event.getUserId());
-
-          // The grants above are the ones the departing user made, these are the ones anyone made
-          // to the clients they created, which their own principal id does not reach.
-          if (event.getTenantId() > 0) {
-            jpaAuthorizationRepository.deleteAllAuthorizationsByOwner(
-                event.getTenantId(), event.getUserId());
-            jpaConsentRepository.deleteAllConsentsByOwner(event.getTenantId(), event.getUserId());
-          } else {
-            log.warn(
-                "Skipping removal of grants made to the clients of user {}: event carries no tenant id",
-                event.getUserId());
-          }
-
+          authorizationMessagingCleanupService.onUserRemoved(
+              event.getTenantId(), event.getUserId());
           log.info("Authorizations and consents for user {} have been removed", event.getUserId());
         },
         () -> evictTenantClients(event.getTenantId(), "user " + event.getUserId()),
@@ -233,14 +199,7 @@ public class AuthorizationMessagingCleanupListener {
         channel,
         () -> {
           log.info("Removing authorizations and consents for tenant: {}", event.getTenantId());
-          jpaConsentRepository.deleteAllConsentsByTenantId(event.getTenantId());
-          jpaAuthorizationRepository.deleteAllAuthorizationsByTenantId(event.getTenantId());
-
-          // The grants above are the ones the tenant's own users made, these are the ones users of
-          // any other tenant made to the departing tenant's clients.
-          jpaConsentRepository.deleteAllConsentsByOwnerTenantId(event.getTenantId());
-          jpaAuthorizationRepository.deleteAllAuthorizationsByOwnerTenantId(event.getTenantId());
-
+          authorizationMessagingCleanupService.onTenantRemoved(event.getTenantId());
           log.info(
               "Authorizations and consents for tenant {} have been removed", event.getTenantId());
         },

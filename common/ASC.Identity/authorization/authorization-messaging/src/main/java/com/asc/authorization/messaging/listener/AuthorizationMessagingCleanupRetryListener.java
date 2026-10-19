@@ -34,6 +34,7 @@
 package com.asc.authorization.messaging.listener;
 
 import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -64,7 +65,9 @@ public class AuthorizationMessagingCleanupRetryListener {
    *
    * <p>If the retry count (from the x-death header) is less than or equal to 5, the message is
    * re-sent to the exchange for reprocessing. If the retry count exceeds 5, the message is
-   * considered as failed and logged.
+   * considered as failed and logged at ERROR together with its payload (the ids of the removed
+   * client, user or tenant), so that a cleanup that never completed can be found and replayed. Each
+   * attempt resumes where the previous one stopped, because the cleanup commits chunk by chunk.
    *
    * @param message the incoming RabbitMQ message from the dead-letter queue.
    */
@@ -80,8 +83,10 @@ public class AuthorizationMessagingCleanupRetryListener {
               AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
           log.info("Retrying message for queue: {}, attempt: {}", entry.get("queue"), counter);
         } else {
-          throw new RuntimeException(
-              "Exhausted number of retries for queue: " + entry.get("queue"));
+          log.error(
+              "Exhausted retries for queue: {}, authorization cleanup was not completed for: {}",
+              entry.get("queue"),
+              new String(message.getBody(), StandardCharsets.UTF_8));
         }
       } catch (Exception e) {
         log.error("Could not process cleanup for queue: {}", entry.get("queue"), e);

@@ -83,6 +83,7 @@ global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Common.Threading.HeartBeat.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
@@ -278,6 +279,7 @@ global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
+global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
 global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = ASC.Files.Core.Security.FileShare;

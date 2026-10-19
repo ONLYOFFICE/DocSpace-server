@@ -334,6 +334,46 @@ public class MetadataOperationDto
     public List<int> TemplateIds { get; set; }
 }
 
+/// <summary>
+/// Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,
+/// with the field it belongs to.
+/// </summary>
+public class MetadataMatchDto
+{
+    /// <summary>
+    /// The ID of the metadata template the matching field belongs to. Null for a custom field, which belongs to no
+    /// template the API shows.
+    /// </summary>
+    /// <example>3</example>
+    public int? TemplateId { get; set; }
+
+    /// <summary>
+    /// The ID of the matching template field. Null for a custom field, which is addressed by its name alone.
+    /// </summary>
+    /// <example>12</example>
+    public int? FieldId { get; set; }
+
+    /// <summary>
+    /// The name of the matching field: the template field or the custom field as it is shown in the entry metadata.
+    /// </summary>
+    /// <example>Client</example>
+    public string FieldName { get; set; }
+
+    /// <summary>
+    /// The stored value that holds the searched text, as it was written, not only the matching part of it.
+    /// </summary>
+    /// <example>ACME Corporation</example>
+    public string Value { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class MetadataMatchDtoMapper
+{
+    [MapperIgnoreSource(nameof(MetadataTextMatch.EntryId))]
+    [MapperIgnoreSource(nameof(MetadataTextMatch.EntryType))]
+    public static partial MetadataMatchDto Map(this MetadataTextMatch source);
+}
+
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper, EmployeeDtoHelper employeeDtoHelper)

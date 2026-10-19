@@ -172,7 +172,9 @@ public class RoomTemplateCreatingStatusTests(
         adminStatus.TemplateId.Should().Be(adminTemplateId);
     }
 
-    // The TypeScript "status after failed template creation" scenario (roomId 999999999 completing
+    // Bug 83370 (TypeScript: "status after failed template creation returns isCompleted=true and a
+    // non-empty error") is deliberately not ported: its precondition is unreachable here. The TypeScript
+    // "status after failed template creation" scenario (roomId 999999999 completing
     // asynchronously with isCompleted:true and a non-empty error) is not reproducible here: on this
     // portal CreateRoomTemplateAsync rejects a non-existent roomId synchronously (see
     // RoomTemplateCreateTests.CreateRoomTemplate_NonExistentRoomId_ShouldReturnNotFound) — no

@@ -142,6 +142,7 @@ public class AppsController(
     /// Disabling an application does not delete its settings document, which stays saved and applies again as soon as
     /// the application is enabled. The response is the application in its new state, including that settings document.
     /// Only the enabled flag is affected here: to change the settings document use `PUT api/2.0/apps/{id}/settings`.
+    /// The enabled field is mandatory, and a body without it is rejected with 400 rather than read as false.
     /// </remarks>
     /// <summary>
     /// Enable or disable an app
@@ -149,6 +150,7 @@ public class AppsController(
     /// <path>api/2.0/apps/{id}/enabled</path>
     [Tags("Apps")]
     [SwaggerResponse(200, "The application in its new state, with the saved settings document left untouched", typeof(AppDto))]
+    [SwaggerResponse(400, "The request body is not a valid JSON document or has no enabled field, so the state is not changed")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(404, "No application with this identifier is configured on this installation")]
     [HttpPut("{id}/enabled")]

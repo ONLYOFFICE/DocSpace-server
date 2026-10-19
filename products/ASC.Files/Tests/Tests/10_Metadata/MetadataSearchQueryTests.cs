@@ -96,6 +96,18 @@ public class MetadataSearchQueryTests
         Matches(condition, String("acme", OtherFieldId)).Should().BeFalse();
     }
 
+    [Fact]
+    public void String_ShouldMatch_OnSubstring_WhenContains()
+    {
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.String, StringValue = "acme", StringContains = true };
+
+        Matches(condition, String("acme")).Should().BeTrue();
+        Matches(condition, String("ACME Corp")).Should().BeTrue();
+        Matches(condition, String("the Acme")).Should().BeTrue();
+        Matches(condition, String("globex")).Should().BeFalse();
+        Matches(condition, String("acme", OtherFieldId)).Should().BeFalse();
+    }
+
     #endregion
 
     #region Number
@@ -133,6 +145,18 @@ public class MetadataSearchQueryTests
     }
 
     [Fact]
+    public void Number_ShouldExcludeTheBounds_WhenExclusive()
+    {
+        var above = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberFrom = 10, FromExclusive = true };
+        var below = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberTo = 20, ToExclusive = true };
+
+        Matches(above, Number(10)).Should().BeFalse();
+        Matches(above, Number(11)).Should().BeTrue();
+        Matches(below, Number(20)).Should().BeFalse();
+        Matches(below, Number(19)).Should().BeTrue();
+    }
+
+    [Fact]
     public void Number_ShouldNotMatch_WhenFieldIsDifferent()
     {
         var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberFrom = 10, NumberTo = 20 };
@@ -167,6 +191,19 @@ public class MetadataSearchQueryTests
         Matches(condition, Date(from)).Should().BeTrue();
         Matches(condition, Date(from.AddYears(10))).Should().BeTrue();
         Matches(condition, Date(from.AddSeconds(-1))).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Date_ShouldExcludeTheBounds_WhenExclusive()
+    {
+        var bound = new DateTime(2026, 6, 30, 12, 0, 0, DateTimeKind.Utc);
+        var after = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Date, DateFrom = bound, FromExclusive = true };
+        var before = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Date, DateTo = bound, ToExclusive = true };
+
+        Matches(after, Date(bound)).Should().BeFalse();
+        Matches(after, Date(bound.AddSeconds(1))).Should().BeTrue();
+        Matches(before, Date(bound)).Should().BeFalse();
+        Matches(before, Date(bound.AddSeconds(-1))).Should().BeTrue();
     }
 
     [Fact]

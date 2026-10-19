@@ -407,7 +407,7 @@ public class IdentityMinifiedServiceIT {
               .uri(WEB_API + "/clients/" + createdClientId + "/activation")
               .header(HttpHeaders.COOKIE, defaultUserCookie())
               .contentType(MediaType.APPLICATION_JSON)
-              .body("{\"enabled\": false}")
+              .body("{\"status\": false}")
               .retrieve()
               .toEntity(String.class);
 
@@ -433,7 +433,7 @@ public class IdentityMinifiedServiceIT {
               .uri(WEB_API + "/clients/" + createdClientId + "/activation")
               .header(HttpHeaders.COOKIE, defaultUserCookie())
               .contentType(MediaType.APPLICATION_JSON)
-              .body("{\"enabled\": true}")
+              .body("{\"status\": true}")
               .retrieve()
               .toEntity(String.class);
 

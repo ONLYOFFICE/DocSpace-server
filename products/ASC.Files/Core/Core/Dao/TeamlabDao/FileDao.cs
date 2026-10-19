@@ -3011,10 +3011,10 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    // the string values of the system template take part in the general text search: the files matched by
-                    // them are united with the files matched by their own fields
+                    // the string metadata values take part in the general text search: the files matched by them are
+                    // united with the files matched by their own fields
                     q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.File, factoryIndexerFileMetadata, searchIds, searchText, GetSearchText(searchText),
-                        await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
+                        await metadataTemplatesCache.HasTemplatesAsync(), metadataFilter?.IncludeHiddenTemplates ?? false, r => r.Id);
                 }
                 else
                 {
@@ -3032,10 +3032,10 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    if (await metadataTemplatesCache.HasSystemTemplateAsync())
+                    if (await metadataTemplatesCache.HasTemplatesAsync())
                     {
                         var lowerText = GetSearchText(searchText);
-                        var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
+                        var globalTextIds = MetadataSearchQuery.TemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText, metadataFilter?.IncludeHiddenTemplates ?? false);
 
                         q = q.Where(f => f.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(f.Id));
                     }
