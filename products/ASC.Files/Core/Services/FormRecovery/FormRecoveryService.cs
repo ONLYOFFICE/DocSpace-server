@@ -55,6 +55,9 @@ public class FormRecoveryService(
         public File<int> File { get; } = file;
 
         public HashSet<string> Keys { get; set; }
+
+        // The fields could not be read, so a submission matching no version may still be of this one.
+        public bool KeysFailed { get; set; }
     }
 
     /// <summary>
@@ -138,6 +141,7 @@ public class FormRecoveryService(
     }
 
     // Empty when the index cannot be read, so that a failed query does not make every form look missing.
+    // A file already found unrecoverable is left out until it gets a new version.
     private async Task<List<File<int>>> FindOrphansAsync(IFileDao<int> fileDao, Folder<int> doneFolder)
     {
         // A file put here by hand may lack the form category, so the extension decides.
@@ -173,7 +177,16 @@ public class FormRecoveryService(
             indexed.UnionWith(items.Select(i => i.Id));
         }
 
-        return completed.Where(f => !indexed.Contains(f.Id)).ToList();
+        var orphans = new List<File<int>>();
+        foreach (var file in completed.Where(f => !indexed.Contains(f.Id)))
+        {
+            if ((await fileDao.GetProperties(file.Id))?.FormFilling?.RecoveryFailedVersion != file.Version)
+            {
+                orphans.Add(file);
+            }
+        }
+
+        return orphans;
     }
 
     // From the index, or from that version of the form file; read once per run.
@@ -199,6 +212,7 @@ public class FormRecoveryService(
             {
                 logger.WarnRecoveryVersionFieldsFailed(e, version.File.Id, version.File.Version);
                 keys = [];
+                version.KeysFailed = true;
             }
         }
 
@@ -222,6 +236,7 @@ public class FormRecoveryService(
         if (keys.Count == 0)
         {
             logger.WarnRecoveryNoFormData(orphan.Id, form.Id);
+            await MarkRecoveryFailedAsync(orphan, roomId, form, fileDao);
             return null;
         }
 
@@ -239,6 +254,11 @@ public class FormRecoveryService(
         if (version == null)
         {
             logger.WarnRecoveryVersionUnmatched(orphan.Id, form.Id, roomId);
+            if (!versions.Any(v => v.KeysFailed))
+            {
+                await MarkRecoveryFailedAsync(orphan, roomId, form, fileDao);
+            }
+
             return null;
         }
 
@@ -276,5 +296,18 @@ public class FormRecoveryService(
             orphan, form.Id, version.Value, roomId, resultFormNumber, formsDataJson, tenantUtil.DateTimeToUtc(orphan.CreateOn));
 
         return version;
+    }
+
+    // Until the file gets a new version, so that the next report does not read it through the builder again.
+    // Under the submission lock, as the other writes of the file's properties.
+    private async Task MarkRecoveryFailedAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao)
+    {
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{roomId}_{form.Id}"))
+        {
+            var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
+            properties.FormFilling ??= new FormFillingProperties<int>();
+            properties.FormFilling.RecoveryFailedVersion = orphan.Version;
+            await fileDao.SaveProperties(orphan.Id, properties);
+        }
     }
 }
