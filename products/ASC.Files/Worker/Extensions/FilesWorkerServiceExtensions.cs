@@ -86,6 +86,7 @@ public static class FilesWorkerServiceExtensions
         }
 
         services.RegisterQueue<ExternalDbSyncTask>(10);
+        services.RegisterQueue<FormVersionCheckTask>(2);
         services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
@@ -162,8 +163,8 @@ public static class FilesWorkerServiceExtensions
                 ExternalDbFormSubmissionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<BuiltinDbFormSubmissionIntegrationEvent,
                 BuiltinDbFormSubmissionIntegrationEventHandler>(),
-            eventBus.SubscribeAsync<BuiltinDbFormVersionIntegrationEvent,
-                BuiltinDbFormVersionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FormVersionCheckIntegrationEvent,
+                FormVersionCheckIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ExternalDbRoomSyncIntegrationEvent,
                 ExternalDbRoomSyncIntegrationEventHandler>(),
             eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,

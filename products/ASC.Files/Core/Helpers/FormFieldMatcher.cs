@@ -35,8 +35,9 @@ namespace ASC.Files.Core.Helpers;
 
 /// <summary>
 /// Compares the fields of two form versions. Fields with the same column name anchor the comparison in form order;
-/// between two anchors, removed and added fields of the same column types are paired one to one as renames, while
-/// fields only added or only removed keep the table (a removed field keeps its column with the earlier answers).
+/// between two anchors, removed and added fields are paired as renames by their column types in form order when only
+/// one pairing is the longest, and the rest are removed or added: a removed field keeps its column with the earlier
+/// answers. Two fields given one key, which then share their value, count as one.
 /// </summary>
 internal static class FormFieldMatcher
 {
@@ -44,7 +45,7 @@ internal static class FormFieldMatcher
 
     /// <summary>
     /// The renamed fields, empty when the fields are the same, added or removed. Null when the new version needs a table
-    /// of its own: a field changed its type, or the pairing is not certain.
+    /// of its own: a field kept its key under another type, or more than one pairing of renamed fields is possible.
     /// </summary>
     public static List<FormFieldRename> Match(IEnumerable<FormMetadata> previous, IEnumerable<FormMetadata> current)
     {
@@ -80,23 +81,81 @@ internal static class FormFieldMatcher
                 continue;
             }
 
-            if (removed.Count != added.Count)
+            var pairs = PairByType(removed, added);
+            if (pairs == null)
             {
                 return null;
             }
 
-            for (var k = 0; k < removed.Count; k++)
-            {
-                if (!SameColumnType(removed[k].Column, added[k].Column))
-                {
-                    return null;
-                }
-
-                renames.Add(new FormFieldRename { OldKey = removed[k].Metadata.Key, NewKey = added[k].Metadata.Key });
-            }
+            renames.AddRange(pairs.Select(p => new FormFieldRename { OldKey = p.Removed.Metadata.Key, NewKey = p.Added.Metadata.Key }));
         }
 
         return renames;
+    }
+
+    // The longest pairing of the fields by column type, kept in form order on both sides; null when another pairing is
+    // as long, since which field became which is then a guess. The pairing that takes the earliest fields and the one
+    // that takes the latest are the two extremes of all the longest ones, so they agree only when it is the one.
+    private static List<(Field Removed, Field Added)> PairByType(List<Field> removed, List<Field> added)
+    {
+        int n = removed.Count, m = added.Count;
+        bool Same(int r, int a) => SameColumnType(removed[r].Column, added[a].Column);
+
+        var suffix = new int[n + 1, m + 1];
+        for (var r = n - 1; r >= 0; r--)
+        {
+            for (var a = m - 1; a >= 0; a--)
+            {
+                suffix[r, a] = Same(r, a) ? suffix[r + 1, a + 1] + 1 : Math.Max(suffix[r + 1, a], suffix[r, a + 1]);
+            }
+        }
+
+        var prefix = new int[n + 1, m + 1];
+        for (var r = 1; r <= n; r++)
+        {
+            for (var a = 1; a <= m; a++)
+            {
+                prefix[r, a] = Same(r - 1, a - 1) ? prefix[r - 1, a - 1] + 1 : Math.Max(prefix[r - 1, a], prefix[r, a - 1]);
+            }
+        }
+
+        var earliest = new List<(int, int)>();
+        for (int r = 0, a = 0; r < n && a < m;)
+        {
+            if (Same(r, a) && suffix[r, a] == suffix[r + 1, a + 1] + 1)
+            {
+                earliest.Add((r++, a++));
+            }
+            else if (suffix[r + 1, a] == suffix[r, a])
+            {
+                r++;
+            }
+            else
+            {
+                a++;
+            }
+        }
+
+        var latest = new List<(int, int)>();
+        for (int r = n, a = m; r > 0 && a > 0;)
+        {
+            if (Same(r - 1, a - 1) && prefix[r, a] == prefix[r - 1, a - 1] + 1)
+            {
+                latest.Add((--r, --a));
+            }
+            else if (prefix[r - 1, a] == prefix[r, a])
+            {
+                r--;
+            }
+            else
+            {
+                a--;
+            }
+        }
+
+        latest.Reverse();
+
+        return earliest.SequenceEqual(latest) ? earliest.Select(p => (removed[p.Item1], added[p.Item2])).ToList() : null;
     }
 
     private static List<Field> ToFields(IEnumerable<FormMetadata> metadata)

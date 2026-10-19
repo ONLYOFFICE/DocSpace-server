@@ -38,11 +38,11 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 /// version in the background.
 /// </summary>
 [ProtoContract]
-public record BuiltinDbFormVersionIntegrationEvent : IntegrationEvent
+public record FormVersionCheckIntegrationEvent : IntegrationEvent
 {
-    private BuiltinDbFormVersionIntegrationEvent() : base() { }
+    private FormVersionCheckIntegrationEvent() : base() { }
 
-    public BuiltinDbFormVersionIntegrationEvent(Guid createBy, int tenantId, int originalFormId, string baseUri)
+    public FormVersionCheckIntegrationEvent(Guid createBy, int tenantId, int originalFormId, string baseUri)
         : base(createBy, tenantId)
     {
         OriginalFormId = originalFormId;

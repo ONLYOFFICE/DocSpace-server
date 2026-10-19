@@ -63,7 +63,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         // Resolved from the per-execution scope: the tenant and user context the report depends on
         // is only established after DoJob has created that scope.
         var data = await serviceProvider.GetRequiredService<FormFillingReportBuilder>()
-            .BuildAsync(_userId, _data.RoomId, _data.OriginalFormId, _data.OriginalFormVersion);
+            .BuildAsync(_userId, _data.RoomId, _data.OriginalFormId);
 
         script = script
             .Replace("${tempFileName}", tempFileName)

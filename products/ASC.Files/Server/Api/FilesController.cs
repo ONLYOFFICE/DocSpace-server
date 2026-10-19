@@ -1183,12 +1183,12 @@ public abstract class FilesController<T>(
     /// them while the fields stayed in place, so that the user can say whether they keep their meaning. A confirmed
     /// version keeps its submissions together with the earlier ones for the analysis of responses; until the answer its
     /// submissions are kept in a table of their own, nothing is lost either way. Each pair is described by the field
-    /// type, its options and the tip the author set, never by entered values. The answer goes to
-    /// `PUT api/2.0/files/file/{fileId}/fieldrenames`. The comparison runs in the background once the filling is started
-    /// and after each save of a started form, or with the first submission of a version at the latest; when it opens a
+    /// type, its options and the tip the author set, never by entered values. The answer goes to `PUT
+    /// api/2.0/files/file/{fileId}/fieldrenames`. The comparison runs in the background once the filling is started and
+    /// after each save of a started form, or with the first submission of a version at the latest; when it opens a
     /// question, the form is updated through the socket and lists `fieldRenamesPending` as the cue to call this. A form
-    /// that is not started has nothing to ask yet. The caller needs the right to start the filling, which the room admin
-    /// and a member with content-creator rights have. The call is read-only.
+    /// that is not started has nothing to ask yet. The caller needs the right to start the filling, which the room
+    /// admin and a member with content-creator rights have. The call is read-only.
     /// </remarks>
     /// <summary>
     /// Get renamed form fields
@@ -1206,14 +1206,16 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Answers whether the renamed fields of one form version, as `GET api/2.0/files/file/{fileId}/fieldrenames`
-    /// reported them, keep their meaning. True keeps the submissions of the version together with the earlier ones for
-    /// the analysis of responses: the columns of the shared table are renamed, and submissions the version already has
-    /// are moved there in the background, so the analysis may show them apart for a short while. When the move is not
-    /// possible at the moment, as while the search index is unavailable, it is retried with the next submission of the
-    /// version or the next start or save of the form; the answer is kept and not asked again. False leaves the version a table of its own. The answer is accepted
-    /// at any time while the question is open, also after the filling started and responses arrived; a `version`
-    /// without an open question changes nothing, so a repeated answer is harmless. The caller needs the right to start
-    /// the filling. The call is mutating and answers with the questions left open.
+    /// reported them, keep their meaning. True keeps the submissions of the version together with the earlier ones, on
+    /// one sheet of the spreadsheet report and in one table of the forms database the room writes to: the columns of
+    /// that table are renamed, and submissions the version already has are copied there in the background, so the
+    /// analysis may show them apart for a short while. The built-in database then drops the table of the version, while
+    /// an external database keeps it as it was. When the copy is not possible at the moment, as while the search index
+    /// is unavailable, it is retried with the next submission of the version or the next start or save of the form; the
+    /// answer is kept and not asked again. False leaves the version a table and a sheet of its own. The answer is
+    /// accepted at any time while the question is open, also after the filling started and responses arrived; a
+    /// `version` without an open question changes nothing, so a repeated answer is harmless. The caller needs the right
+    /// to start the filling. The call is mutating and answers with the questions left open.
     /// </remarks>
     /// <summary>
     /// Answer renamed form fields
@@ -1232,9 +1234,10 @@ public abstract class FilesController<T>(
     /// <remarks>
     /// Returns everything that has been submitted against one PDF form: `metadata` describes the fields of the form,
     /// in the order they are laid out, and `submissions` carries one record per completed copy, each of them holding
-    /// the values that were entered. It is the data behind the results table a client shows for a form, and the same
-    /// data the spreadsheet report of `POST api/2.0/files/file/{fileId}/xlsx` is built from. Only the submissions of
-    /// the version that is currently being filled are reported. The form has to be a PDF form whose filling has been
+    /// the values that were entered. It is the data behind the results table a client shows for a form. Only the
+    /// submissions of the version that is currently being filled are reported; the spreadsheet report of
+    /// `POST api/2.0/files/file/{fileId}/xlsx` carries every version, one sheet per group of versions that share their
+    /// fields. The form has to be a PDF form whose filling has been
     /// started and which is still the original form of its room; a form that was never started, a copy of a form and
     /// a form whose room has been moved away are all refused. Read access to the form is enough, so every member of
     /// the room can read the results, while a caller without access to it is refused with 403. The operation is

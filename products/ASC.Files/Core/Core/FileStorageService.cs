@@ -5833,7 +5833,7 @@ public class FileStorageService //: IFileStorageService
         if (action == FormFillingManageAction.Start && room.FolderType == FolderType.FillingFormsRoom
             && form is File<int> startedForm && properties is EntryProperties<int> startedProperties)
         {
-            await formFillingReportCreator.RequestBuiltinDbVersionCheckAsync(startedForm, startedProperties.FormFilling);
+            await formFillingReportCreator.RequestVersionCheckAsync(startedForm, startedProperties.FormFilling);
         }
 
         if (formFillersLosingTheForm is { Count: > 0 })
@@ -5846,7 +5846,7 @@ public class FileStorageService //: IFileStorageService
     {
         var (form, _) = await GetFormForFieldRenamesAsync(formId);
 
-        await formFillingReportCreator.AnswerBuiltinDbFieldRenamesAsync(form.Id, version, confirm);
+        await formFillingReportCreator.AnswerFieldRenamesAsync(form.Id, version, confirm);
 
         return ToFormFieldRenamesDto((await daoFactory.GetFileDao<int>().GetProperties(form.Id)).FormFilling);
     }

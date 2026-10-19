@@ -308,7 +308,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
     }
 
-    protected static string MapPgType(DbColumnDefinition col) => col.Type switch
+    private static string MapPgType(DbColumnDefinition col) => col.Type switch
     {
         DbColumnType.Integer => "INTEGER",
         DbColumnType.Boolean => "BOOLEAN",
@@ -367,6 +367,232 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         var result = await cmd.ExecuteScalarAsync();
         return Convert.ToInt64(result) > 0;
+    }
+
+    /// <summary>
+    /// Renames the columns of a form table and adds the missing ones; one transaction except on MySQL, whose DDL commits
+    /// at once. Changes nothing when a column would take the name of another one or keep its name under another type:
+    /// the data of two fields would mix.
+    /// </summary>
+    public async Task<FormTableChange> AlterTableAsync(string tableName, IReadOnlyCollection<(string OldName, string NewName)> renames, IEnumerable<DbColumnDefinition> columns)
+    {
+        ValidateTableName(tableName);
+        var dbType = DatabaseType;
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+        await using var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+
+        var existing = await GetColumnTypesAsync(connection, tx, tableName, dbType);
+        if (existing.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var statements = new List<string>();
+        if (!TryRename(tableName, q, existing, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        foreach (var column in columns)
+        {
+            var type = MapType(column, dbType);
+            if (existing.TryGetValue(ValidateColumnName(column.Name), out var existingType))
+            {
+                if (GetTypeClass(existingType) != GetTypeClass(type))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            existing[column.Name] = type;
+            statements.Add($"ALTER TABLE {q}{tableName}{q} ADD COLUMN {q}{column.Name}{q} {type}");
+        }
+
+        await ExecuteAsync(connection, tx, statements);
+        if (tx != null)
+        {
+            await tx.CommitAsync();
+        }
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Renames the columns of the target table, adds the columns of the source one and copies its rows; one transaction
+    /// except on MySQL, where the conflicts are found before anything changes. A row whose form_id the target already
+    /// holds is kept as it is there. Changes nothing on the same conflicts as <see cref="AlterTableAsync"/>.
+    /// </summary>
+    public async Task<FormTableChange> MergeTableAsync(string targetTable, string sourceTable, IReadOnlyCollection<(string OldName, string NewName)> renames)
+    {
+        ValidateTableName(targetTable);
+        ValidateTableName(sourceTable);
+        var dbType = DatabaseType;
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+        await using var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+
+        var target = await GetColumnTypesAsync(connection, tx, targetTable, dbType);
+        var source = await GetColumnTypesAsync(connection, tx, sourceTable, dbType);
+        if (target.Count == 0 || source.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var statements = new List<string>();
+        if (!TryRename(targetTable, q, target, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        foreach (var (name, type) in source)
+        {
+            if (target.TryGetValue(ValidateColumnName(name), out var targetType))
+            {
+                if (GetTypeClass(targetType) != GetTypeClass(type))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            statements.Add($"ALTER TABLE {q}{targetTable}{q} ADD COLUMN {q}{name}{q} {type}");
+        }
+
+        var columnList = string.Join(", ", source.Keys.Select(c => $"{q}{c}{q}"));
+        statements.Add(dbType switch
+        {
+            ExternalDatabaseType.MySql =>
+                $"INSERT INTO `{targetTable}` ({columnList}) SELECT * FROM (SELECT {columnList} FROM `{sourceTable}`) AS src " +
+                $"ON DUPLICATE KEY UPDATE `{targetTable}`.`form_id` = `{targetTable}`.`form_id`",
+            ExternalDatabaseType.Sqlite =>
+                $"INSERT INTO \"{targetTable}\" ({columnList}) SELECT {columnList} FROM \"{sourceTable}\" WHERE true ON CONFLICT(\"form_id\") DO NOTHING",
+            _ =>
+                $"INSERT INTO \"{targetTable}\" ({columnList}) SELECT {columnList} FROM \"{sourceTable}\" ON CONFLICT (\"form_id\") DO NOTHING"
+        });
+
+        await ExecuteAsync(connection, tx, statements);
+        if (tx != null)
+        {
+            await tx.CommitAsync();
+        }
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Whether the error says a value does not fit a column (its type, options or length), so the same statement fails
+    /// again however often it is retried; a lost connection is not such an error.
+    /// </summary>
+    public static bool IsDataViolation(Exception exception) => exception switch
+    {
+        PostgresException pg => pg.SqlState.StartsWith("22", StringComparison.Ordinal) || pg.SqlState.StartsWith("23", StringComparison.Ordinal),
+        MySqlConnector.MySqlException my => (int)my.ErrorCode is 1265 or 1366 or 1406 or 3819,
+        Microsoft.Data.Sqlite.SqliteException sqlite => sqlite.SqliteErrorCode is 19 or 20,
+        _ => false
+    };
+
+    // Column name to its declared type; empty when the table does not exist.
+    private static async Task<Dictionary<string, string>> GetColumnTypesAsync(DbConnection connection, DbTransaction? tx, string tableName, ExternalDatabaseType dbType)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = dbType switch
+        {
+            ExternalDatabaseType.MySql =>
+                "SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @tableName ORDER BY ORDINAL_POSITION",
+            ExternalDatabaseType.Sqlite => "SELECT name, type FROM pragma_table_info(@tableName) ORDER BY cid",
+            ExternalDatabaseType.PostgreSql =>
+                "SELECT column_name, data_type FROM information_schema.columns " +
+                "WHERE table_schema = current_schema() AND table_name = @tableName ORDER BY ordinal_position",
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
+        };
+        var param = cmd.CreateParameter();
+        param.ParameterName = "@tableName";
+        param.Value = tableName;
+        cmd.Parameters.Add(param);
+
+        var columns = new Dictionary<string, string>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            columns[reader.GetString(0)] = reader.GetString(1);
+        }
+
+        return columns;
+    }
+
+    // Renames in order; false when a new name is taken by another column.
+    private static bool TryRename(string tableName, char q, Dictionary<string, string> columns, IEnumerable<(string OldName, string NewName)> renames, List<string> statements)
+    {
+        foreach (var rename in renames)
+        {
+            var oldName = ValidateColumnName(rename.OldName);
+            var newName = ValidateColumnName(rename.NewName);
+            if (oldName == newName || !columns.Remove(oldName, out var type))
+            {
+                continue;
+            }
+
+            if (!columns.TryAdd(newName, type))
+            {
+                return false;
+            }
+
+            statements.Add($"ALTER TABLE {q}{tableName}{q} RENAME COLUMN {q}{oldName}{q} TO {q}{newName}{q}");
+        }
+
+        return true;
+    }
+
+    private static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType) => dbType switch
+    {
+        ExternalDatabaseType.MySql => MapMySqlType(column),
+        ExternalDatabaseType.Sqlite => MapSqliteType(column),
+        _ => MapPgType(column)
+    };
+
+    // The kind of value a declared type holds, so that the types of the three databases compare: an option list is
+    // text, and SQLite keeps booleans as integers.
+    private static string GetTypeClass(string type)
+    {
+        var t = type.ToLowerInvariant();
+
+        return t switch
+        {
+            _ when t.StartsWith("tinyint(1)", StringComparison.Ordinal) || t.StartsWith("bool", StringComparison.Ordinal) => "boolean",
+            _ when t.StartsWith("int", StringComparison.Ordinal) || t.StartsWith("bigint", StringComparison.Ordinal)
+                || t.StartsWith("smallint", StringComparison.Ordinal) || t.StartsWith("tinyint", StringComparison.Ordinal) => "integer",
+            _ when t.StartsWith("timestamp", StringComparison.Ordinal) || t.StartsWith("datetime", StringComparison.Ordinal) => "datetime",
+            "date" => "date",
+            _ => "text"
+        };
+    }
+
+    private static string ValidateColumnName(string name)
+    {
+        return _tableNameRegex.IsMatch(name) ? name : throw new ArgumentException($"Invalid column name: {name}", nameof(name));
+    }
+
+    private static async Task ExecuteAsync(DbConnection connection, DbTransaction? tx, IEnumerable<string> statements)
+    {
+        foreach (var statement in statements)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = statement;
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 
     public async Task<long> CountAsync(string tableName)
@@ -1534,4 +1760,11 @@ internal static partial class ExternalDatabaseClientLogger
 {
     [LoggerMessage(LogLevel.Error, "Insert into table {TableName} failed")]
     public static partial void ErrorInsertFailed(this ILogger<ExternalDatabaseClient> logger, Exception exception, string tableName);
+}
+
+public enum FormTableChange
+{
+    Changed,
+    Missing,
+    Conflict
 }

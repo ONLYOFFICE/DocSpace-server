@@ -87,7 +87,15 @@ public class FormSchemaProvider(
             return await TryGetBuiltinTableNameAsync(file);
         }
 
-        var cacheKey = GetTableNameCacheKey(tenantManager.GetCurrentTenantId(), file);
+        // Read first and left uncached: filling starts at any moment, and a confirmed rename moves the version to
+        // another table; neither costs an external call.
+        if (await GetStartedFormFillingAsync(file) is not { } formFilling)
+        {
+            return null;
+        }
+
+        var tableName = FormFillingReportCreator.GetVersionTableName(formFilling, file.Id, file.Version);
+        var cacheKey = GetTableNameCacheKey(tenantManager.GetCurrentTenantId(), tableName);
 
         var cached = await fusionCache.TryGetAsync<string?>(cacheKey);
         if (cached.HasValue)
@@ -95,17 +103,10 @@ public class FormSchemaProvider(
             return cached.Value;
         }
 
-        // Left uncached: filling starts at any moment, and this branch costs no external call anyway.
-        if (await GetStartedFormFillingAsync(file) is null)
-        {
-            return null;
-        }
-
-        var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
         var exists = await externalDatabaseClient.TableExistsAsync(tableName);
 
-        // A table is created once per form version and never renamed, so a hit stays valid. The
-        // "not yet" answer is held far shorter — it flips as soon as the first submission lands.
+        // An existing table stays, so a hit stays valid. The "not yet" answer is held far shorter — it flips as soon
+        // as the first submission lands.
         await fusionCache.SetAsync<string?>(
             cacheKey,
             exists ? tableName : null,
@@ -132,9 +133,9 @@ public class FormSchemaProvider(
         return formFilling?.StartFilling == true && formFilling.OriginalFormId == file.Id ? formFilling : null;
     }
 
-    private static string GetTableNameCacheKey(int tenantId, File<int> file)
+    private static string GetTableNameCacheKey(int tenantId, string tableName)
     {
-        return $"ai:form:table:{tenantId}:{file.Id}:{file.Version}";
+        return $"ai:form:table:{tenantId}:{tableName}";
     }
 
     /// <summary>Full schema. Null when there is no submission table or it cannot be read.</summary>

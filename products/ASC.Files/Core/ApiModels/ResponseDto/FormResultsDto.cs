@@ -71,7 +71,7 @@ public class FormSubmissionsDto
     /// <summary>
     /// One entry per completed copy, ordered by the copy number that `formsData` carries. An empty list means nothing
     /// has been completed for the version that is currently being filled; the copies of earlier versions of the form
-    /// are not reported here.
+    /// are not reported here, only in the spreadsheet report.
     /// </summary>
     /// <example>[]</example>
     public IEnumerable<FormResultsDto> Submissions { get; set; }

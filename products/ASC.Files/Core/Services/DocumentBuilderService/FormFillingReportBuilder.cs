@@ -41,7 +41,6 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 public class FormFillingReportBuilder(
     UserManager userManager,
     IDaoFactory daoFactory,
-    SettingsManager settingsManager,
     TenantManager tenantManager,
     FormFillingReportCreator formFillingReportCreator,
     CommonLinkUtility commonLinkUtility,
@@ -49,7 +48,10 @@ public class FormFillingReportBuilder(
     FileUtility fileUtility,
     TenantUtil tenantUtil)
 {
-    public async Task<object> BuildAsync(Guid userId, int roomId, int originalFormId, int originalFormVersion)
+    // An Excel sheet name holds at most 31 characters.
+    private const int SheetNameLimit = 31;
+
+    public async Task<object> BuildAsync(Guid userId, int roomId, int originalFormId)
     {
         var user = await userManager.GetUsersAsync(userId);
         var fileDao = daoFactory.GetFileDao<int>();
@@ -58,101 +60,129 @@ public class FormFillingReportBuilder(
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var formFillingResults = await formFillingReportCreator.GetFormFillingResults(roomId, originalFormId, originalFormVersion);
+        var reportSheets = await formFillingReportCreator.GetReportSheetsAsync(roomId, originalFormId);
 
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
         CultureInfo.CurrentCulture = tenantCulture;
         CultureInfo.CurrentUICulture = tenantCulture;
 
-        var keys = new List<string>();
-        var values = new List<List<object>>();
-        if (formFillingResults.Any())
+        var submissionIds = reportSheets.SelectMany(sheet => sheet.Submissions).Select(submission => submission.Id).ToList();
+        var formsDataFiles = submissionIds.Count > 0
+            ? await fileDao.GetFilesAsync(submissionIds).ToDictionaryAsync(f => f.Id)
+            : [];
+
+        var properties = await fileDao.GetProperties(originalFormId);
+
+        var title = properties?.FormFilling?.Title;
+        if (string.IsNullOrEmpty(title))
         {
-            var formsData = formFillingResults.FirstOrDefault().FormsData;
-            if (formsData.Any())
-            {
-                keys.Add(FilesCommonResource.FormNumber);
-                keys.AddRange(formsData.Skip(1).Where(d => d.Type != "picture" && d.Type != "signature").Select(field => field.Key));
-                keys.Add(FilesCommonResource.Date);
-                keys.Add(FilesCommonResource.LinkToForm);
-
-                var dateFormat = DocumentBuilderScriptHelper.GetLongDateTimeFormat(tenantCulture);
-
-                foreach (var formFillingRes in formFillingResults)
-                {
-                    var t = new List<object>();
-                    foreach (var field in formFillingRes.FormsData)
-                    {
-                        if (field.Type is "picture" or "signature")
-                        {
-                            continue;
-                        }
-                        t.Add(new
-                        {
-                            format = field.Type == "dateTime" ? $"{tenantCulture.DateTimeFormat.ShortDatePattern}" : "@",
-                            value = field.Value,
-                            url = ""
-                        });
-                    }
-                    t.Add(new
-                    {
-                        format = dateFormat,
-                        value = tenantUtil.DateTimeFromUtc(formFillingRes.CreateOn).ConvertNumerals("G"),
-                        url = ""
-                    });
-                    var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
-                    if (formsDataFile != null)
-                    {
-                        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-                        t.Add(new
-                        {
-                            format = "@",
-                            value = FilesCommonResource.OpenForm,
-                            url = resultUrl
-                        });
-                    }
-                    values.Add(t);
-                }
-            }
+            var form = await fileDao.GetFileAsync(originalFormId);
+            title = Path.GetFileNameWithoutExtension(form?.Title ?? string.Empty);
         }
 
-        var properties = await daoFactory.GetFileDao<int>().GetProperties(originalFormId);
-        var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
-        var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+        var dateFormat = DocumentBuilderScriptHelper.GetLongDateTimeFormat(tenantCulture);
+        var sheets = reportSheets
+            .Select(sheet => BuildSheet(sheet, reportSheets.Count == 1 ? title : GetSheetName(sheet.Versions), formsDataFiles, tenantCulture, dateFormat))
+            .ToList();
 
-        var sheetName = properties?.FormFilling?.Title;
-        if (string.IsNullOrEmpty(sheetName))
+        if (sheets.Count == 0)
         {
-            var form = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
-            sheetName = Path.GetFileNameWithoutExtension(form?.Title ?? string.Empty);
+            sheets.Add(new { name = title, keys = new List<string>(), formats = new List<string>(), values = new List<List<string>>(), links = new List<string>() });
         }
 
         return new
         {
-            resources = new
-            {
-                sheetName
-            },
-
-            themeColors = new
-            {
-                mainBgColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 1),
-                lightBgColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Main.Accent, 0.08),
-                mainFontColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1)
-            },
-
-            data = new
-            {
-                keys,
-                values
-            }
+            linkText = FilesCommonResource.OpenForm,
+            sheets
         };
+    }
+
+    // Columns are the fields of the newest version, then those only older versions had; a field repeated in a form
+    // (as radio buttons are) keeps a column per occurrence. The script writes the values as they are and formats each
+    // column, the form links are passed apart.
+    private object BuildSheet(FormReportSheet sheet, string name, Dictionary<int, File<int>> formsDataFiles, CultureInfo culture, string dateFormat)
+    {
+        var rows = sheet.Submissions
+            .Select(submission => (Submission: submission, Fields: GetFields(sheet, submission)))
+            .ToList();
+
+        var columnTypes = new Dictionary<(string Key, int Occurrence), string>();
+        foreach (var (_, fields) in rows.OrderByDescending(row => row.Submission.OriginalFormVersion))
+        {
+            foreach (var (column, field) in fields)
+            {
+                columnTypes.TryAdd(column, field.Type);
+            }
+        }
+
+        var columns = columnTypes.Keys.ToList();
+
+        var keys = new List<string> { FilesCommonResource.FormNumber };
+        keys.AddRange(columns.Select(column => column.Key));
+        keys.Add(FilesCommonResource.Date);
+        keys.Add(FilesCommonResource.LinkToForm);
+
+        var formats = new List<string> { "@" };
+        formats.AddRange(columns.Select(column => columnTypes[column] == "dateTime" ? culture.DateTimeFormat.ShortDatePattern : "@"));
+        formats.Add(dateFormat);
+
+        var values = new List<List<string>>(rows.Count);
+        var links = new List<string>(rows.Count);
+        foreach (var (submission, fields) in rows)
+        {
+            var row = new List<string>(columns.Count + 2) { submission.FormsData?.FirstOrDefault()?.Value };
+            row.AddRange(columns.Select(column => fields.TryGetValue(column, out var field) ? field.Value : null));
+            row.Add(tenantUtil.DateTimeFromUtc(submission.CreateOn).ConvertNumerals("G"));
+            values.Add(row);
+
+            links.Add(formsDataFiles.TryGetValue(submission.Id, out var formsDataFile)
+                ? commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version))
+                : null);
+        }
+
+        return new { name, keys, formats, values, links };
+    }
+
+    private static Dictionary<(string Key, int Occurrence), FormsItemData> GetFields(FormReportSheet sheet, DbFormsItemDataSearch submission)
+    {
+        var fields = new Dictionary<(string Key, int Occurrence), FormsItemData>();
+        foreach (var field in (submission.FormsData ?? []).Skip(1).Where(FormFillingReportCreator.IsExportableField))
+        {
+            var key = sheet.MapKey(submission.OriginalFormVersion, field.Key);
+            var occurrence = 0;
+            while (!fields.TryAdd((key, occurrence), field))
+            {
+                occurrence++;
+            }
+        }
+
+        return fields;
+    }
+
+    // Consecutive versions are written as a range: "v1-v3, v5".
+    private static string GetSheetName(IReadOnlyList<int> versions)
+    {
+        var runs = new List<string>();
+        for (var i = 0; i < versions.Count; i++)
+        {
+            var first = versions[i];
+            while (i + 1 < versions.Count && versions[i + 1] == versions[i] + 1)
+            {
+                i++;
+            }
+
+            runs.Add(first == versions[i] ? $"v{first}" : $"v{first}-v{versions[i]}");
+        }
+
+        var name = string.Join(", ", runs);
+
+        return name.Length <= SheetNameLimit ? name : name[..(SheetNameLimit - 3)] + "...";
     }
 }
 
 /// <summary>
 /// Stores the generated form-filling report. Unlike the other report tasks this one updates an
-/// existing results file - bumping its version or replacing the current one in place.
+/// existing results file, replacing its current version in place.
 /// </summary>
 [Scope]
 public class FormFillingResultFileWriter(
@@ -177,23 +207,11 @@ public class FormFillingResultFileWriter(
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
-        if (origProperties.FormFilling.IsVersionChanged)
-        {
-            resultFile.Version++;
-            resultFile.VersionGroup++;
-            resultFile.ContentLength = stream.Length;
+        // A new form version gets a sheet of its own in the same report rather than a new report version.
+        resultFile.CreateOn = tenantUtil.DateTimeNow();
+        resultFile.ContentLength = stream.Length;
 
-            resultFile = await fileDao.SaveFormFileAsync(resultFile, stream, false);
-            origProperties.FormFilling.IsVersionChanged = false;
-            await fileDao.SaveProperties(originalFormId, origProperties);
-        }
-        else
-        {
-            resultFile.CreateOn = tenantUtil.DateTimeNow();
-            resultFile.ContentLength = stream.Length;
-
-            resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
-        }
+        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {

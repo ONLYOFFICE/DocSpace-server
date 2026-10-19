@@ -155,26 +155,27 @@ public class FormFillingProperties<T>
     public string ExternalDbTableName { get; set; }
 
     /// <summary>
-    /// The last form version whose fields were compared with the previous version for the built-in database.
+    /// The last form version whose fields were compared with the previous version.
     /// </summary>
-    public int BuiltinDbCheckedVersion { get; set; }
+    public int FieldsCheckedVersion { get; set; }
 
     /// <summary>
     /// The modification time, in ticks, of the checked version when it was compared; a version overwritten since is
     /// compared again.
     /// </summary>
-    public long BuiltinDbCheckedStamp { get; set; }
+    public long FieldsCheckedStamp { get; set; }
 
     /// <summary>
-    /// The form versions that keep their submissions in the built-in table of an earlier version.
+    /// The form versions that keep their submissions in the table of an earlier version, in the forms database and in
+    /// the spreadsheet report.
     /// </summary>
-    public List<FormVersionLink> BuiltinDbVersionLinks { get; set; }
+    public List<FormVersionLink> VersionLinks { get; set; }
 
     /// <summary>
     /// The links the form versions may take, applied with the first submission of the version or, when it already has
     /// submissions, with the answer about its renamed fields.
     /// </summary>
-    public List<FormVersionLink> BuiltinDbPendingLinks { get; set; }
+    public List<FormVersionLink> PendingVersionLinks { get; set; }
 }
 
 /// <summary>

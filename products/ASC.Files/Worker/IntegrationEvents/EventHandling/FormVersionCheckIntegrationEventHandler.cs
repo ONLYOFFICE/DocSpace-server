@@ -34,15 +34,13 @@
 namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
 [Scope]
-public class BuiltinDbFormVersionIntegrationEventHandler(
-    ILogger<BuiltinDbFormVersionIntegrationEventHandler> logger,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    CommonLinkUtility commonLinkUtility,
-    FormFillingReportCreator formFillingReportCreator)
-    : IIntegrationEventHandler<BuiltinDbFormVersionIntegrationEvent>
+public class FormVersionCheckIntegrationEventHandler(
+    ILogger<FormVersionCheckIntegrationEventHandler> logger,
+    IServiceProvider serviceProvider,
+    FormVersionCheckTaskManager taskManager)
+    : IIntegrationEventHandler<FormVersionCheckIntegrationEvent>
 {
-    public async Task Handle(BuiltinDbFormVersionIntegrationEvent @event)
+    public async Task Handle(FormVersionCheckIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
 
@@ -52,14 +50,9 @@ public class BuiltinDbFormVersionIntegrationEventHandler(
 
             try
             {
-                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-                await securityContext.AuthenticateMeWithoutCookieAsync(@event.CreateBy);
-                if (!string.IsNullOrEmpty(@event.BaseUri))
-                {
-                    commonLinkUtility.ServerUri = @event.BaseUri;
-                }
-
-                await formFillingReportCreator.CheckBuiltinDbVersionAsync(@event.OriginalFormId);
+                var task = serviceProvider.GetRequiredService<FormVersionCheckTask>();
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, @event.OriginalFormId);
+                await taskManager.EnqueueAsync(task);
             }
             catch (Exception ex)
             {
