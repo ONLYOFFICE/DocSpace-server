@@ -78,4 +78,38 @@ public class CopyFileAsTests(
         var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         destContent.Files.Should().Contain(f => f.Title == "Autotest Copied File.docx");
     }
+
+    /// <summary>
+    /// BUG 80745: <c>enableExternalExt: true</c> is meant to keep a title with a non-standard
+    /// extension (<c>.md</c>) as it is.
+    /// </summary>
+    /// <remarks>
+    /// <c>CopyAsRequestDto.EnableExternalExt</c> is declared, but <c>FilesController.CopyFileAs</c> never
+    /// passes it on and <c>FilesControllerHelper.CopyFileAsAsync</c> has no parameter for it: a
+    /// <c>.docx</c> to <c>.md</c> copy always goes through <c>FileConverter.ExecAsync</c>, so the TS
+    /// expectation (a <c>.md</c> copy in the destination room) is unreachable until the flag is honoured.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "80745")]
+    public async Task CopyFileAs_NonStandardExtensionWithEnableExternalExt_KeepsTitleInDestination()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("Autotest Source File For Ext.docx", Owner);
+        var destRoom = await CreateCustomRoom("Autotest Room For External Ext");
+
+        var copyRequest = new CopyAsRequest(
+            destTitle: "Autotest Copied File.md",
+            destFolderId: new CopyAsRequestDestFolderId(destRoom.Id),
+            enableExternalExt: true);
+
+        // Act
+        var copied = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyRequest, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        copied.Title.Should().Be("Autotest Copied File.md");
+
+        var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        destContent.Files.Should().Contain(f => f.Title == "Autotest Copied File.md");
+    }
 }
