@@ -88,6 +88,8 @@ export interface FillMetaInput {
   id: string;
   prompt?: string;
   overwrite: boolean;
+  /** Resolve the values but write nothing; the caller writes what the user confirms. */
+  dryRun: boolean;
 }
 
 export interface FilledField {
@@ -104,6 +106,8 @@ export interface UnresolvedField {
 }
 
 export interface FillMetaResult {
+  /** Whether the values were only proposed (`true`) or written as well. */
+  dryRun: boolean;
   metadata: EntryMetadata;
   filled: FilledField[];
   unresolved: UnresolvedField[];
@@ -150,8 +154,10 @@ function typeLabel(type: FieldType): string {
   }
 }
 
-// The fields to fill: every template field and custom field without a value,
-// or all of them with `overwrite`. The rest are reported as `already_set`.
+// The fields to fill: every field of the visible templates and every custom
+// field without a value, or all of them with `overwrite`. The rest are
+// reported as `already_set`. A hidden template is skipped the way the UI and
+// the search skip it.
 export function selectTargets(
   metadata: EntryMetadata,
   overwrite: boolean,
@@ -160,6 +166,9 @@ export function selectTargets(
   const targets: Target[] = [];
   const seen = new Set<number>();
   for (const template of metadata.templates) {
+    if (!template.visible) {
+      continue;
+    }
     for (const field of template.fields) {
       if (seen.has(field.id)) {
         continue;
@@ -346,14 +355,15 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
   const unresolved: UnresolvedField[] = [];
   const targets = selectTargets(metadata, input.overwrite, unresolved);
   const hasFields =
-    metadata.templates.some((t) => t.fields.length > 0) || metadata.customFields.length > 0;
+    metadata.templates.some((t) => t.visible && t.fields.length > 0) ||
+    metadata.customFields.length > 0;
   if (!hasFields) {
     throw new NothingToFillError();
   }
   const skipped: MetaSkipped[] = [];
   if (targets.length === 0) {
     logger.info(`meta.fill: ${input.kind} ${input.id} has no empty fields, nothing to do`);
-    return { metadata, filled: [], unresolved, sources: [], skipped };
+    return { dryRun: input.dryRun, metadata, filled: [], unresolved, sources: [], skipped };
   }
 
   const files = await collectFiles(
@@ -414,6 +424,17 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
         `${unresolved.length} unresolved in ${Date.now() - started}ms`,
     );
 
+    if (input.dryRun) {
+      return {
+        dryRun: true,
+        metadata,
+        filled: [...typedFilled, ...customFilled],
+        unresolved,
+        sources: toSources(documents),
+        skipped,
+      };
+    }
+
     // Two writes, two rights checks on the portal. When one of them is
     // refused the other may already have landed, so a refusal is reported
     // per field as `write_failed` and the request fails only when nothing
@@ -446,7 +467,14 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
       throw refusal;
     }
     const after = filled.length > 0 ? await getEntryMetadata(input.kind, input.id) : metadata;
-    return { metadata: after, filled, unresolved, sources: toSources(documents), skipped };
+    return {
+      dryRun: false,
+      metadata: after,
+      filled,
+      unresolved,
+      sources: toSources(documents),
+      skipped,
+    };
   } finally {
     clearTimeout(timer);
   }

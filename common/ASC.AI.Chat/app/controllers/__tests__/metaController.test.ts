@@ -192,6 +192,7 @@ describe("metaController.fill", () => {
     [{ kind: "file", id: 1.5 }, "id must be the integer id of a file or folder"],
     [{ kind: "file", id: 1, prompt: [] }, "prompt must be a string"],
     [{ kind: "file", id: 1, overwrite: "yes" }, "overwrite must be a boolean"],
+    [{ kind: "file", id: 1, dryRun: 1 }, "dryRun must be a boolean"],
   ])("rejects %j with 400", async (body, message) => {
     const res = await run(metaController.fill, body);
     expect(res.statusCode).toBe(400);
@@ -214,15 +215,17 @@ describe("metaController.fill", () => {
       id: "12",
       prompt: "totals",
       overwrite: false,
+      dryRun: false,
     });
     expect(primeSourceMeta).toHaveBeenCalledWith("12", "folder");
 
-    await run(metaController.fill, { kind: "file", id: 3, overwrite: true });
+    await run(metaController.fill, { kind: "file", id: 3, overwrite: true, dryRun: true });
     expect(fillMeta).toHaveBeenLastCalledWith({
       kind: "file",
       id: "3",
       prompt: undefined,
       overwrite: true,
+      dryRun: true,
     });
     expect(primeSourceMeta).toHaveBeenLastCalledWith("3", "file");
   });

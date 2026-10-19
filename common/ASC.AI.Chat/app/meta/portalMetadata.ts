@@ -76,6 +76,8 @@ export interface EntryField {
 export interface EntryTemplate {
   id: number;
   name: string;
+  /** A hidden template is kept out of the UI and of the search; `fill` skips it too. */
+  visible: boolean;
   fields: EntryField[];
 }
 
@@ -215,7 +217,12 @@ export function parseEntryMetadata(raw: unknown): EntryMetadata {
         fields.push(parsed);
       }
     }
-    templates.push({ id, name: getString(template, "name") ?? "", fields });
+    templates.push({
+      id,
+      name: getString(template, "name") ?? "",
+      visible: template["visible"] !== false,
+      fields,
+    });
   }
   for (const field of getObjectArray(raw, "customFields") ?? []) {
     const name = getString(field, "name");

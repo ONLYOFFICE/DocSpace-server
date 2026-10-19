@@ -571,12 +571,12 @@ export type Req_aiMetaGenerate = {
   prompt?: string;
 };
 export type Res_aiMetaGenerate = {
-  /** The proposed custom metadata fields. */
+  /** The proposed custom metadata fields with the values the text supports. */
   fields: {
     /** Field name, at most 255 characters. */
     name: string;
-    /** Suggested value type. */
-    type: "text" | "number" | "date";
+    /** The value found in the documents, or null when the text does not state one. */
+    value: string | null;
   }[];
   /** The documents the proposal was read from. */
   sources: {
@@ -602,6 +602,8 @@ export type Req_aiMetaFill = {
   prompt?: string;
   /** Also replace the fields that already carry a value. Default false. */
   overwrite?: boolean;
+  /** Resolve the values but write nothing; the caller writes what the user confirms. Default false. */
+  dryRun?: boolean;
 };
 /** A metadata value: exactly one member, by the field's type. */
 export type AiMetadataValue = {
@@ -620,13 +622,15 @@ export type AiEntryMetadataField = {
   value?: AiMetadataValue;
 };
 export type AiEntryMetadata = {
-  templates: { id: number; name: string; fields: AiEntryMetadataField[] }[];
+  templates: { id: number; name: string; visible: boolean; fields: AiEntryMetadataField[] }[];
   customFields: { name: string; value: string }[];
 };
 export type Res_aiMetaFill = {
-  /** The entry's metadata after the write, as `GET api/2.0/files/metadata/{kind}/{id}` returns it. */
+  /** Whether the values were only proposed (`true`) or written as well. */
+  dryRun: boolean;
+  /** The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it. */
   metadata: AiEntryMetadata;
-  /** The values written: a typed value for a template field, a string for a custom field. */
+  /** The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field. */
   filled: {
     /** Absent for a custom field. */
     fieldId?: number;

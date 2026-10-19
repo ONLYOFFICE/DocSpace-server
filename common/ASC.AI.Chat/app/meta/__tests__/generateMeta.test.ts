@@ -35,18 +35,20 @@ const { generateMeta, NoContentError, NoProfileError, parseFields } =
 const PROFILE = { id: "p1", name: "GPT", modelId: "gpt-x" };
 
 describe("parseFields", () => {
-  it("reads names and types, defaults the type, deduplicates ignoring case and caps the list", () => {
+  it("reads names and values, deduplicates ignoring case and caps the list", () => {
     const fields = parseFields(
-      '```json\n{"fields":[{"name":" Contract  date ","type":"date"},{"name":"Amount","type":"NUMBER"},' +
-        '{"name":"contract date","type":"text"},{"name":"Notes"},{"name":"","type":"text"},' +
-        '{"name":"Weird","type":"boolean"},"Plain string"]}\n```',
+      '```json\n{"fields":[{"name":" Contract  date ","value":" 2024-03-01 "},{"name":"Amount","value":1500},' +
+        '{"name":"contract date","value":"other"},{"name":"Notes"},{"name":"","value":"x"},' +
+        '{"name":"Missing","value":null},{"name":"Blank","value":"  "},{"name":"Odd","value":{"a":1}},"Plain string"]}\n```',
     );
     expect(fields).toEqual([
-      { name: "Contract date", type: "date" },
-      { name: "Amount", type: "number" },
-      { name: "Notes", type: "text" },
-      { name: "Weird", type: "text" },
-      { name: "Plain string", type: "text" },
+      { name: "Contract date", value: "2024-03-01" },
+      { name: "Amount", value: "1500" },
+      { name: "Notes", value: null },
+      { name: "Missing", value: null },
+      { name: "Blank", value: null },
+      { name: "Odd", value: null },
+      { name: "Plain string", value: null },
     ]);
     const many = parseFields(
       JSON.stringify({ fields: Array.from({ length: 60 }, (_, i) => ({ name: `F${i}` })) }),
@@ -54,8 +56,11 @@ describe("parseFields", () => {
     expect(many).toHaveLength(50);
   });
 
-  it("drops a name over the portal's limit and answers nothing for a non-object", () => {
+  it("drops a name over the portal's limit, blanks an over-long value, and answers nothing for a non-object", () => {
     expect(parseFields(JSON.stringify({ fields: [{ name: "x".repeat(256) }] }))).toEqual([]);
+    expect(
+      parseFields(JSON.stringify({ fields: [{ name: "Long", value: "v".repeat(8001) }] })),
+    ).toEqual([{ name: "Long", value: null }]);
     expect(parseFields("no json here")).toEqual([]);
     expect(parseFields('{"other":[]}')).toEqual([]);
   });
@@ -72,7 +77,7 @@ describe("generateMeta", () => {
   it("reads the files, runs the model once with the user's note as a hint and reports the fields", async () => {
     customSync.mockResolvedValue(
       assistantText(
-        '{"fields":[{"name":"Counterparty","type":"text"},{"name":"Date","type":"date"}]}',
+        '{"fields":[{"name":"Counterparty","value":"ACME"},{"name":"Date","value":null}]}',
       ),
     );
     const result = await generateMeta({
@@ -81,8 +86,8 @@ describe("generateMeta", () => {
       prompt: "<b>dates</b> only",
     });
     expect(result.fields).toEqual([
-      { name: "Counterparty", type: "text" },
-      { name: "Date", type: "date" },
+      { name: "Counterparty", value: "ACME" },
+      { name: "Date", value: null },
     ]);
     expect(result.sources).toEqual([
       { id: "1", title: "1.docx", truncated: false },

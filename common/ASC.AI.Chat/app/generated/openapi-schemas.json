@@ -1981,6 +1981,9 @@
               "name": {
                 "type": "string"
               },
+              "visible": {
+                "type": "boolean"
+              },
               "fields": {
                 "type": "array",
                 "items": {
@@ -1991,6 +1994,7 @@
             "required": [
               "id",
               "name",
+              "visible",
               "fields"
             ],
             "additionalProperties": false
@@ -5851,23 +5855,21 @@
                   "type": "string",
                   "description": "Field name, at most 255 characters."
                 },
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "text",
-                    "number",
-                    "date"
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
                   ],
-                  "description": "Suggested value type."
+                  "description": "The value found in the documents, or null when the text does not state one."
                 }
               },
               "required": [
                 "name",
-                "type"
+                "value"
               ],
               "additionalProperties": false
             },
-            "description": "The proposed custom metadata fields."
+            "description": "The proposed custom metadata fields with the values the text supports."
           },
           "sources": {
             "type": "array",
@@ -5960,6 +5962,10 @@
           "overwrite": {
             "type": "boolean",
             "description": "Also replace the fields that already carry a value. Default false."
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Resolve the values but write nothing; the caller writes what the user confirms. Default false."
           }
         },
         "required": [
@@ -5971,9 +5977,13 @@
       "response": {
         "type": "object",
         "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "description": "Whether the values were only proposed (`true`) or written as well."
+          },
           "metadata": {
             "$ref": "#/components/schemas/AiEntryMetadata",
-            "description": "The entry's metadata after the write, as `GET api/2.0/files/metadata/{kind}/{id}` returns it."
+            "description": "The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it."
           },
           "filled": {
             "type": "array",
@@ -6004,7 +6014,7 @@
               ],
               "additionalProperties": false
             },
-            "description": "The values written: a typed value for a template field, a string for a custom field."
+            "description": "The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field."
           },
           "unresolved": {
             "type": "array",
@@ -6093,6 +6103,7 @@
           }
         },
         "required": [
+          "dryRun",
           "metadata",
           "filled",
           "unresolved",

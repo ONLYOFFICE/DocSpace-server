@@ -54,6 +54,7 @@ describe("parseEntryMetadata", () => {
     expect(parsed.templates).toHaveLength(1);
     const [template] = parsed.templates;
     expect(template?.id).toBe(7);
+    expect(template?.visible).toBe(true);
     expect(template?.fields.map((f) => [f.id, f.type])).toEqual([
       [1, FieldType.String],
       [2, FieldType.Date],
@@ -79,6 +80,7 @@ describe("parseEntryMetadata", () => {
       templates: [
         {
           id: 1,
+          visible: false,
           fields: [
             { id: 1, name: "A", type: "MultiChoice" },
             { id: 2, name: "B", type: "date" },
@@ -93,6 +95,7 @@ describe("parseEntryMetadata", () => {
       [1, FieldType.MultiChoice],
       [2, FieldType.Date],
     ]);
+    expect(parsed.templates[0]?.visible).toBe(false);
     expect(parsed.customFields).toEqual([]);
   });
 

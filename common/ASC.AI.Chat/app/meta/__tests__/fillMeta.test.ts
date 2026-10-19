@@ -77,6 +77,7 @@ const METADATA: EntryMetadata = {
     {
       id: 1,
       name: "Contract",
+      visible: true,
       fields: [
         field(1, "Counterparty", FieldType.String),
         field(2, "Signed on", FieldType.Date),
@@ -86,7 +87,14 @@ const METADATA: EntryMetadata = {
       ],
     },
     // The same field inherited through a second template is listed once.
-    { id: 2, name: "Inherited", fields: [field(1, "Counterparty", FieldType.String)] },
+    {
+      id: 2,
+      name: "Inherited",
+      visible: true,
+      fields: [field(1, "Counterparty", FieldType.String)],
+    },
+    // A hidden template is not filled, like the UI and the search ignore it.
+    { id: 3, name: "Hidden", visible: false, fields: [field(9, "Secret", FieldType.String)] },
   ],
   customFields: [
     { name: "Project", value: "" },
@@ -95,7 +103,7 @@ const METADATA: EntryMetadata = {
 };
 
 describe("selectTargets", () => {
-  it("takes the empty fields, reports the set ones and never lists a field twice", () => {
+  it("takes the empty fields of the visible templates, reports the set ones and never lists a field twice", () => {
     const unresolved: UnresolvedField[] = [];
     const targets = selectTargets(METADATA, false, unresolved);
     expect(targets.map((t) => t.key)).toEqual(["f1", "f2", "f4", "f5", "c0"]);
@@ -109,6 +117,7 @@ describe("selectTargets", () => {
     const unresolved: UnresolvedField[] = [];
     const targets = selectTargets(METADATA, true, unresolved);
     expect(targets.map((t) => t.key)).toEqual(["f1", "f2", "f3", "f4", "f5", "c0", "c1"]);
+    expect(targets.some((t) => t.field?.id === 9)).toBe(false);
     expect(unresolved).toEqual([]);
   });
 });
@@ -256,8 +265,9 @@ describe("fillMeta", () => {
       .mockResolvedValueOnce(METADATA)
       .mockResolvedValueOnce(after);
 
-    const result = await fillMeta({ kind: "file", id: "42", overwrite: false });
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
 
+    expect(result.dryRun).toBe(false);
     expect(portalMetadata.setValues).toHaveBeenCalledWith("file", "42", [
       { fieldId: 1, stringValue: "ACME" },
       { fieldId: 2, dateValue: "2024-03-01T00:00:00.000Z" },
@@ -294,7 +304,7 @@ describe("fillMeta", () => {
         }),
       ),
     );
-    const result = await fillMeta({ kind: "folder", id: "7", overwrite: false });
+    const result = await fillMeta({ kind: "folder", id: "7", overwrite: false, dryRun: false });
     expect(portalMetadata.setValues).not.toHaveBeenCalled();
     expect(portalMetadata.setCustomFields).toHaveBeenCalledWith("folder", "7", [
       { name: "Project", value: "Apollo" },
@@ -318,12 +328,13 @@ describe("fillMeta", () => {
         {
           id: 1,
           name: "T",
+          visible: true,
           fields: [field(1, "A", FieldType.String, { value: { stringValue: "x" } })],
         },
       ],
       customFields: [],
     });
-    const result = await fillMeta({ kind: "file", id: "1", overwrite: false });
+    const result = await fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false });
     expect(result.filled).toEqual([]);
     expect(result.unresolved).toEqual([{ fieldId: 1, name: "A", reason: "already_set" }]);
     expect(customSync).not.toHaveBeenCalled();
@@ -344,7 +355,7 @@ describe("fillMeta", () => {
     vi.mocked(portalMetadata.setValues).mockRejectedValueOnce(
       new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
     );
-    const result = await fillMeta({ kind: "file", id: "42", overwrite: false });
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false });
     expect(result.filled).toEqual([{ name: "Project", value: "Apollo" }]);
     expect(result.unresolved).toEqual(
       expect.arrayContaining([{ fieldId: 1, name: "Counterparty", reason: "write_failed" }]),
@@ -356,7 +367,9 @@ describe("fillMeta", () => {
     vi.mocked(portalMetadata.setCustomFields).mockRejectedValueOnce(
       new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
     );
-    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+    await expect(
+      fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false }),
+    ).rejects.toMatchObject({
       status: 403,
     });
 
@@ -364,17 +377,56 @@ describe("fillMeta", () => {
     vi.mocked(portalMetadata.setValues).mockRejectedValueOnce(
       new FakeDocspaceApiHttpError(500, "Internal Server Error", "u"),
     );
-    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+    await expect(
+      fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false }),
+    ).rejects.toMatchObject({
       status: 500,
     });
   });
 
   it("answers the model's failure with its own status", async () => {
     customSync.mockRejectedValueOnce(Object.assign(new Error("aborted"), { name: "AbortError" }));
-    await expect(fillMeta({ kind: "file", id: "42", overwrite: false })).rejects.toMatchObject({
+    await expect(
+      fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: false }),
+    ).rejects.toMatchObject({
       status: 504,
     });
     expect(portalMetadata.setValues).not.toHaveBeenCalled();
+  });
+
+  it("with dryRun resolves the values, writes nothing and says so", async () => {
+    customSync.mockResolvedValue(
+      assistantText(
+        JSON.stringify({
+          values: [
+            { key: "f1", value: "ACME" },
+            { key: "c0", value: "Apollo" },
+          ],
+        }),
+      ),
+    );
+    const result = await fillMeta({ kind: "file", id: "42", overwrite: false, dryRun: true });
+    expect(result.dryRun).toBe(true);
+    expect(result.filled).toEqual([
+      { fieldId: 1, name: "Counterparty", value: { stringValue: "ACME" } },
+      { name: "Project", value: "Apollo" },
+    ]);
+    expect(result.metadata).toBe(METADATA);
+    expect(portalMetadata.setValues).not.toHaveBeenCalled();
+    expect(portalMetadata.setCustomFields).not.toHaveBeenCalled();
+    expect(portalMetadata.getEntryMetadata).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses an entry whose only template is hidden", async () => {
+    vi.mocked(portalMetadata.getEntryMetadata).mockResolvedValue({
+      templates: [
+        { id: 3, name: "Hidden", visible: false, fields: [field(9, "Secret", FieldType.String)] },
+      ],
+      customFields: [],
+    });
+    await expect(
+      fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
+    ).rejects.toBeInstanceOf(NothingToFillError);
   });
 
   it("refuses an entry without any metadata field", async () => {
@@ -382,29 +434,31 @@ describe("fillMeta", () => {
       templates: [],
       customFields: [],
     });
-    await expect(fillMeta({ kind: "file", id: "1", overwrite: false })).rejects.toBeInstanceOf(
-      NothingToFillError,
-    );
+    await expect(
+      fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
+    ).rejects.toBeInstanceOf(NothingToFillError);
   });
 
   it("answers 503 without a profile, relays a portal refusal and reports unreadable content", async () => {
     vi.mocked(storage.assignments.readByType).mockResolvedValue(null);
-    await expect(fillMeta({ kind: "file", id: "1", overwrite: false })).rejects.toBeInstanceOf(
-      NoProfileError,
-    );
+    await expect(
+      fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
+    ).rejects.toBeInstanceOf(NoProfileError);
 
     vi.mocked(storage.assignments.readByType).mockResolvedValue("p1");
     vi.mocked(portalMetadata.getEntryMetadata).mockRejectedValueOnce(
       new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
     );
-    await expect(fillMeta({ kind: "file", id: "1", overwrite: false })).rejects.toMatchObject({
+    await expect(
+      fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
+    ).rejects.toMatchObject({
       status: 403,
     });
 
     readFileAsText.mockRejectedValue(new Error("boom"));
-    await expect(fillMeta({ kind: "file", id: "1", overwrite: false })).rejects.toBeInstanceOf(
-      NoContentError,
-    );
+    await expect(
+      fillMeta({ kind: "file", id: "1", overwrite: false, dryRun: false }),
+    ).rejects.toBeInstanceOf(NoContentError);
     expect(customSync).not.toHaveBeenCalled();
   });
 });

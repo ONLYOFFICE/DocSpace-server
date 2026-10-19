@@ -120,11 +120,16 @@ function asFillInput(body: unknown): FillMetaInput {
   if (overwrite !== undefined && overwrite !== null && typeof overwrite !== "boolean") {
     badRequest("overwrite must be a boolean");
   }
+  const dryRun = body["dryRun"];
+  if (dryRun !== undefined && dryRun !== null && typeof dryRun !== "boolean") {
+    badRequest("dryRun must be a boolean");
+  }
   return {
     kind: kind as EntryKind,
     id,
     prompt: typeof prompt === "string" ? prompt.trim() : undefined,
     overwrite: overwrite === true,
+    dryRun: dryRun === true,
   };
 }
 
