@@ -61,6 +61,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -101,6 +102,7 @@ public class AuthorizationServerConfiguration {
 
   private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
   private static final String CLIENT_SECRET_POST = "client_secret_post";
+  private static final String NONE = "none";
 
   private static final String AUTHORIZATION_CODE = "authorization_code";
   private static final String PERSONAL_ACCESS_TOKEN = "personal_access_token";
@@ -195,6 +197,7 @@ public class AuthorizationServerConfiguration {
                                 methods -> {
                                   methods.clear();
                                   methods.add(CLIENT_SECRET_POST);
+                                  methods.add(NONE);
                                 })
                             .tokenIntrospectionEndpointAuthenticationMethods(
                                 methods -> {
@@ -205,6 +208,7 @@ public class AuthorizationServerConfiguration {
                                 methods -> {
                                   methods.clear();
                                   methods.add(CLIENT_SECRET_POST);
+                                  methods.add(NONE);
                                 })))
         .oidc(
             oidcConfigurer ->
@@ -225,6 +229,7 @@ public class AuthorizationServerConfiguration {
                                             methods -> {
                                               methods.clear();
                                               methods.add(CLIENT_SECRET_POST);
+                                              methods.add(NONE);
                                             })
                                         .tokenIntrospectionEndpointAuthenticationMethods(
                                             methods -> {
@@ -235,6 +240,7 @@ public class AuthorizationServerConfiguration {
                                             methods -> {
                                               methods.clear();
                                               methods.add(CLIENT_SECRET_POST);
+                                              methods.add(NONE);
                                             })
                                         .build()))
                     .userInfoEndpoint(
@@ -249,7 +255,12 @@ public class AuthorizationServerConfiguration {
                                 })))
         .clientAuthentication(
             c ->
-                c.authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
+                c.authenticationConverter(
+                        new PublicClientRefreshTokenAuthenticationConverter(
+                            PathPatternRequestMatcher.withDefaults()
+                                .matcher(
+                                    HttpMethod.POST,
+                                    authorizationServerSettings().getTokenRevocationEndpoint())))
                     .authenticationProvider(
                         new PublicClientRefreshTokenAuthenticationProvider(
                             registeredClientRepository, authorizationService)))

@@ -45,6 +45,7 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,11 +60,22 @@ import org.springframework.util.StringUtils;
  *     com.asc.authorization.application.security.oauth.provider.PublicClientRefreshTokenAuthenticationProvider
  */
 public class PublicClientRefreshTokenAuthenticationConverter implements AuthenticationConverter {
+  private final RequestMatcher revocationEndpointMatcher;
 
   /**
-   * Converts the request, or returns {@code null} when it is not a public client refresh request.
+   * Constructs a new {@code PublicClientRefreshTokenAuthenticationConverter}.
    *
-   * @param request the token endpoint request
+   * @param revocationEndpointMatcher matches requests to the token revocation endpoint
+   */
+  public PublicClientRefreshTokenAuthenticationConverter(RequestMatcher revocationEndpointMatcher) {
+    this.revocationEndpointMatcher = revocationEndpointMatcher;
+  }
+
+  /**
+   * Converts the request, or returns {@code null} when it is not a public client refresh or
+   * revocation request.
+   *
+   * @param request the token or token revocation endpoint request
    * @return an unauthenticated {@link OAuth2ClientAuthenticationToken}, or {@code null}
    * @throws OAuth2AuthenticationException {@code invalid_request} when {@code client_id} is
    *     repeated or empty
@@ -71,31 +83,32 @@ public class PublicClientRefreshTokenAuthenticationConverter implements Authenti
   @Override
   public Authentication convert(HttpServletRequest request) {
     if (!HttpMethod.POST.matches(request.getMethod())
-        || !AuthorizationGrantType.REFRESH_TOKEN
-            .getValue()
-            .equals(request.getParameter(OAuth2ParameterNames.GRANT_TYPE))
-        || request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
-      return null;
-    }
+        || request.getHeader(HttpHeaders.AUTHORIZATION) != null) return null;
 
-    var parameters = request.getParameterMap();
+    var parameters = FormParameters.from(request);
+    if (!(AuthorizationGrantType.REFRESH_TOKEN
+            .getValue()
+            .equals(parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE))
+        || revocationEndpointMatcher.matches(request))) return null;
+
     if (parameters.containsKey(OAuth2ParameterNames.CLIENT_SECRET)
         || parameters.containsKey(OAuth2ParameterNames.CLIENT_ASSERTION)) return null;
 
     var clientIds = parameters.get(OAuth2ParameterNames.CLIENT_ID);
     if (clientIds == null) return null;
 
-    if (clientIds.length != 1 || !StringUtils.hasText(clientIds[0]))
+    if (clientIds.size() != 1 || !StringUtils.hasText(clientIds.getFirst()))
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
 
     var additionalParameters = new HashMap<String, Object>();
     parameters.forEach(
-        (key, val) -> {
+        (key, values) -> {
           if (!OAuth2ParameterNames.CLIENT_ID.equals(key))
-            additionalParameters.put(key, val.length == 1 ? val[0] : val);
+            additionalParameters.put(
+                key, values.size() == 1 ? values.getFirst() : values.toArray(String[]::new));
         });
 
     return new OAuth2ClientAuthenticationToken(
-        clientIds[0], ClientAuthenticationMethod.NONE, null, additionalParameters);
+        clientIds.getFirst(), ClientAuthenticationMethod.NONE, null, additionalParameters);
   }
 }

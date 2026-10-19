@@ -106,6 +106,15 @@ public class PublicClientRefreshTokenAuthenticationProviderTest {
     assertEquals(errorCode, exception.getError().getErrorCode());
   }
 
+  private static OAuth2ClientAuthenticationToken publicRevocation(String clientId, String token) {
+    return new OAuth2ClientAuthenticationToken(
+        clientId, ClientAuthenticationMethod.NONE, null, Map.of("token", token));
+  }
+
+  private void issuedAny(String token, OAuth2Authorization authorization) {
+    when(authorizationService.findByToken(token, null)).thenReturn(authorization);
+  }
+
   @BeforeEach
   void setUp() {
     repository = mock(RegisteredClientRepository.class);
@@ -138,6 +147,43 @@ public class PublicClientRefreshTokenAuthenticationProviderTest {
     assertTrue(result.isAuthenticated());
     assertEquals("pkce", result.getRegisteredClient().getClientId());
     assertEquals(ClientAuthenticationMethod.NONE, result.getClientAuthenticationMethod());
+  }
+
+  @Test
+  void whenPkceClientRevokesPublicToken_thenAuthenticated() {
+    issuedAny(
+        "public-token",
+        authorizationService.findByToken("public-token", OAuth2TokenType.REFRESH_TOKEN));
+
+    var result =
+        (OAuth2ClientAuthenticationToken)
+            provider.authenticate(publicRevocation("pkce", "public-token"));
+
+    assertTrue(result.isAuthenticated());
+    assertEquals(ClientAuthenticationMethod.NONE, result.getClientAuthenticationMethod());
+  }
+
+  @Test
+  void whenPkceClientRevokesSecretBoundToken_thenInvalidClient() {
+    issuedAny(
+        "secret-token",
+        authorizationService.findByToken("secret-token", OAuth2TokenType.REFRESH_TOKEN));
+
+    assertError(OAuth2ErrorCodes.INVALID_CLIENT, publicRevocation("pkce", "secret-token"));
+  }
+
+  @Test
+  void whenPkceClientRevokesUnknownToken_thenAuthenticatedSpring() {
+    var result =
+        (OAuth2ClientAuthenticationToken)
+            provider.authenticate(publicRevocation("pkce", "unknown"));
+
+    assertTrue(result.isAuthenticated());
+  }
+
+  @Test
+  void whenConfidentialClientRevokesWithoutSecret_thenInvalidClient() {
+    assertError(OAuth2ErrorCodes.INVALID_CLIENT, publicRevocation("confidential", "public-token"));
   }
 
   @Test

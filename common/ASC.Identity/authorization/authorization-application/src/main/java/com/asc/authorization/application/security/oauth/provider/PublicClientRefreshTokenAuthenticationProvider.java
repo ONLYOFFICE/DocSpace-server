@@ -48,7 +48,8 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
 /**
- * Authenticates public clients (PKCE, no client secret) on the {@code refresh_token} grant.
+ * Authenticates public clients (PKCE, no client secret) on the {@code refresh_token} grant and on
+ * token revocation.
  *
  * <p>Spring's {@code PublicClientAuthenticationProvider} requires a {@code code_verifier}, which
  * only an authorization code request has, so it rejects every refresh request from a public client.
@@ -57,7 +58,13 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
  * token was issued without a secret ({@link #CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE}). The refresh
  * token itself is then validated by {@code OAuth2RefreshTokenAuthenticationProvider}: it must be
  * active and issued to this client. Refresh tokens are rotated on every use ({@code
- * reuseRefreshTokens(false)}).
+ * reuseRefreshTokens(false)}). Revocation without a secret follows the same rule; an unknown token
+ * or one issued to another client is left to {@code OAuth2TokenRevocationAuthenticationProvider}.
+ *
+ * <p>Reusing a rotated refresh token is rejected but does not revoke the token family. A client and
+ * user share one authorization, so when the legitimate user signs in again (after its own refresh
+ * fails), the new tokens replace any stolen ones. Tracking rotated tokens would not help either
+ * while a theft goes unnoticed: reuse is only detected once the legitimate client refreshes.
  *
  * <p>Any other authentication, including {@code NONE} on the authorization code grant, is left to
  * the default providers.
@@ -91,26 +98,25 @@ public class PublicClientRefreshTokenAuthenticationProvider implements Authentic
   }
 
   /**
-   * Authenticates a public client refresh request.
+   * Authenticates a public client refresh or revocation request.
    *
    * @param authentication the {@link OAuth2ClientAuthenticationToken} to authenticate
    * @return the authenticated client, or {@code null} when this provider does not apply
    * @throws AuthenticationException {@code invalid_client} when the client is unknown, does not
-   *     allow authentication without a secret, or the refresh token was issued with the secret;
-   *     {@code invalid_request} when the refresh token is missing; {@code invalid_grant} when it is
+   *     allow authentication without a secret, or the token was issued with the secret; {@code
+   *     invalid_request} when the token is missing; {@code invalid_grant} when a refresh token is
    *     unknown or belongs to another client
    */
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     var clientAuthentication = (OAuth2ClientAuthenticationToken) authentication;
+    var parameters = clientAuthentication.getAdditionalParameters();
+    var grantType = parameters.get(OAuth2ParameterNames.GRANT_TYPE);
+    var revocation = grantType == null && parameters.containsKey(OAuth2ParameterNames.TOKEN);
     if (!ClientAuthenticationMethod.NONE.equals(
             clientAuthentication.getClientAuthenticationMethod())
-        || !AuthorizationGrantType.REFRESH_TOKEN
-            .getValue()
-            .equals(
-                clientAuthentication
-                    .getAdditionalParameters()
-                    .get(OAuth2ParameterNames.GRANT_TYPE))) return null;
+        || !(revocation || AuthorizationGrantType.REFRESH_TOKEN.getValue().equals(grantType)))
+      return null;
 
     var clientId = clientAuthentication.getPrincipal();
     if (clientId == null || clientId.toString().isBlank())
@@ -123,16 +129,21 @@ public class PublicClientRefreshTokenAuthenticationProvider implements Authentic
         .getClientAuthenticationMethods()
         .contains(ClientAuthenticationMethod.NONE)) throw invalidClient("authentication_method");
 
-    if (!(clientAuthentication.getAdditionalParameters().get(OAuth2ParameterNames.REFRESH_TOKEN)
-            instanceof String refreshToken)
-        || refreshToken.isBlank())
+    if (!(parameters.get(
+                revocation ? OAuth2ParameterNames.TOKEN : OAuth2ParameterNames.REFRESH_TOKEN)
+            instanceof String token)
+        || token.isBlank())
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
 
     var authorization =
-        authorizationService.findByToken(refreshToken, OAuth2TokenType.REFRESH_TOKEN);
+        authorizationService.findByToken(token, revocation ? null : OAuth2TokenType.REFRESH_TOKEN);
     if (authorization == null
-        || !registeredClient.getId().equals(authorization.getRegisteredClientId()))
+        || !registeredClient.getId().equals(authorization.getRegisteredClientId())) {
+      if (revocation)
+        return new OAuth2ClientAuthenticationToken(
+            registeredClient, ClientAuthenticationMethod.NONE, null);
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
+    }
 
     if (!ClientAuthenticationMethod.NONE
         .getValue()

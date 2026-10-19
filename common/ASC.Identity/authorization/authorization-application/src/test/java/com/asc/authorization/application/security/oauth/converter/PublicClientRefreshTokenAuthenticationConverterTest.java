@@ -37,15 +37,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 public class PublicClientRefreshTokenAuthenticationConverterTest {
   private final PublicClientRefreshTokenAuthenticationConverter converter =
-      new PublicClientRefreshTokenAuthenticationConverter();
+      new PublicClientRefreshTokenAuthenticationConverter(
+          PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/oauth2/revoke"));
 
   private static MockHttpServletRequest refreshRequest() {
     var request = new MockHttpServletRequest("POST", "/oauth2/token");
@@ -66,6 +69,39 @@ public class PublicClientRefreshTokenAuthenticationConverterTest {
     assertEquals("refresh_token", authentication.getAdditionalParameters().get("grant_type"));
     assertEquals("token", authentication.getAdditionalParameters().get("refresh_token"));
     assertFalse(authentication.getAdditionalParameters().containsKey("client_id"));
+  }
+
+  private static MockHttpServletRequest revocationRequest(String path) {
+    var request = new MockHttpServletRequest("POST", path);
+    request.addParameter("token", "token");
+    request.addParameter("token_type_hint", "refresh_token");
+    request.addParameter("client_id", "client");
+    return request;
+  }
+
+  @Test
+  void whenRevocationRequestHasOnlyClientId_thenPublicClientAuthentication() {
+    var authentication =
+        (OAuth2ClientAuthenticationToken) converter.convert(revocationRequest("/oauth2/revoke"));
+
+    assertNotNull(authentication);
+    assertEquals("client", authentication.getPrincipal());
+    assertEquals(ClientAuthenticationMethod.NONE, authentication.getClientAuthenticationMethod());
+    assertEquals("token", authentication.getAdditionalParameters().get("token"));
+    assertFalse(authentication.getAdditionalParameters().containsKey("grant_type"));
+  }
+
+  @Test
+  void whenRevocationRequestHasClientSecret_thenNotConverted() {
+    var request = revocationRequest("/oauth2/revoke");
+    request.addParameter("client_secret", "secret");
+
+    assertNull(converter.convert(request));
+  }
+
+  @Test
+  void whenIntrospectionRequestHasOnlyClientId_thenNotConverted() {
+    assertNull(converter.convert(revocationRequest("/oauth2/introspect")));
   }
 
   @Test
