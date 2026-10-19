@@ -391,6 +391,32 @@ public class AccountingClientServiceLimitTests
     }
 
     [Fact]
+    public async Task CreateServiceLimit_UnknownServiceGroup_ThrowsBadRequestNotCustomerNotFound()
+    {
+        // The accounting service answers a missing service group with 400 "... not found" as well; the portal does have
+        // a customer, so the reason must reach the caller instead of turning into "Customer not found".
+        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+            """{"title":"Bad request","status":400,"detail":"Service group 'ai-services' not found","instance":"/api/serviceLimit"}"""));
+
+        var act = async () => await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Total, null, 50m, null, ServiceLimitPeriod.Day);
+
+        (await act.Should().ThrowExactlyAsync<AccountingBadRequestException>())
+            .Which.Message.Should().Be("Service group 'ai-services' not found");
+    }
+
+    [Fact]
+    public async Task GetTotalServiceLimit_UnknownCustomer_ThrowsCustomerNotFoundWithoutRetry()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+            """{"title":"Bad request","status":400,"detail":"Customer account 'portal-1' not found"}"""));
+
+        var act = async () => await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
+
+        await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetTotalServiceLimit_NoLimitSet_ThrowsNotFoundWithoutRetry()
     {
         // A missing limit is a definitive result, so the GET must not be retried.
@@ -428,7 +454,7 @@ public class AccountingClientServiceLimitTests
                 : AccountingClientTests.Json(HttpStatusCode.OK, """{"accountNumber":7}""");
         });
 
-        var balance = await client.GetCustomerBalanceAsync("portal-1");
+        var balance = await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         balance.AccountNumber.Should().Be(7);
         handler.CallCount.Should().Be(2);

@@ -1660,7 +1660,12 @@ public static class AccountingHttpClientExtension
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        if (IsCustomerNotFound(response.StatusCode, content))
+        var serviceLimitRequest = IsServiceLimitRequest(response.RequestMessage);
+
+        // On the service limit paths a 400 "not found" may name something other than the customer - a service group the
+        // accounting service does not have - and reporting that as a missing customer would hide the real reason.
+        if (IsCustomerNotFound(response.StatusCode, content) &&
+            (!serviceLimitRequest || GetProblemDetail(content).StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
         {
             return new AccountingCustomerNotFoundException();
         }
@@ -1683,8 +1688,9 @@ public static class AccountingHttpClientExtension
         }
 
         // The service limit operations pass values the portal user chose, so their 400 explains a mistake of that user
-        // (a quantity threshold for services with different units, a missing threshold). Elsewhere a 400 is our bug.
-        if (response.StatusCode == HttpStatusCode.BadRequest && IsServiceLimitRequest(response.RequestMessage))
+        // (a quantity threshold for services with different units, a missing threshold) or a gap in the setup of the
+        // accounting service (a missing service group). Elsewhere a 400 is our bug.
+        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest)
         {
             return new AccountingBadRequestException(GetProblemDetail(content));
         }
