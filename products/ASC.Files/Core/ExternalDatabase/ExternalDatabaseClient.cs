@@ -339,7 +339,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         DbColumnType.Date => "DATE",
         DbColumnType.DateTime => "DATETIME",
         DbColumnType.Enum when col.EnumValues?.Count > 0 =>
-            $"ENUM({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "\\'")}'"))})",
+            $"ENUM({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("\\", "\\\\").Replace("'", "''")}'"))})",
         DbColumnType.Enum => "VARCHAR(255)",
         _ => "TEXT"
     };

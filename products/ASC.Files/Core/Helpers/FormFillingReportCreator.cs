@@ -1074,7 +1074,7 @@ public class FormFillingReportCreator(
         }
 
         properties.FormFilling.ExternalDbTableName = tableName;
-        await fileDao.SaveProperties(originalFormId, properties);
+        await SaveFormPropertiesAsync(originalFormId, properties);
 
         var originalForm = await fileDao.GetFileAsync(originalFormId);
         if (originalForm != null)
@@ -1253,7 +1253,7 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// All submissions of the form split into report sheets, newest first: the versions linked to one table form one sheet
-    /// under their latest field keys, whichever database takes the submissions.
+    /// under their latest field keys, whichever database takes the submissions. Null when the search index cannot be read.
     /// </summary>
     public async Task<List<FormReportSheet>> GetReportSheetsAsync(int roomId, int originalFormId)
     {
@@ -1262,7 +1262,12 @@ public class FormFillingReportCreator(
             .Where(s => s.RoomId, roomId)
             .Where(s => s.OriginalFormId, originalFormId)
             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
-        if (!success || result.Count == 0)
+        if (!success)
+        {
+            return null;
+        }
+
+        if (result.Count == 0)
         {
             return [];
         }

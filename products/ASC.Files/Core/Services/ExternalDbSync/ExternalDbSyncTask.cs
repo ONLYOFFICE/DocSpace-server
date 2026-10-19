@@ -146,7 +146,7 @@ public class ExternalDbSyncTask : ExternalDbSyncTaskBase
                         if (properties?.FormFilling != null)
                         {
                             properties.FormFilling.ExternalDbTableName = FormFillingReportCreator.GetVersionTableName(properties.FormFilling, form.OriginalFormId, version);
-                            await fileDao.SaveProperties(form.OriginalFormId, properties);
+                            await formFillingReportCreator.SaveFormPropertiesAsync(form.OriginalFormId, properties);
                         }
                     }
 

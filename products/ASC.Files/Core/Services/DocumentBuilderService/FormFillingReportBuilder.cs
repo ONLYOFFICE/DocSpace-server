@@ -60,7 +60,9 @@ public class FormFillingReportBuilder(
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var reportSheets = await formFillingReportCreator.GetReportSheetsAsync(roomId, originalFormId);
+        // Failing here keeps the report already saved instead of replacing it with an empty one.
+        var reportSheets = await formFillingReportCreator.GetReportSheetsAsync(roomId, originalFormId)
+            ?? throw new InvalidOperationException($"The submissions of form {originalFormId} cannot be read from the search index");
 
         var tenantCulture = tenantManager.GetCurrentTenant().GetCulture();
         CultureInfo.CurrentCulture = tenantCulture;
