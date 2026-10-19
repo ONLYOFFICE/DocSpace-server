@@ -153,6 +153,7 @@ describe("PortalTextReader", () => {
     const start = calls.find((c) => c.url.endsWith("/fileops/bulkdownload"));
     expect(JSON.parse(String(start?.init?.body))).toEqual({
       fileConvertIds: [{ key: 77, value: ".txt" }],
+      returnSingleOperation: true,
     });
     expect(polls).toBe(2);
     const download = calls.find((c) => c.url.includes("filehandler.ashx"));
@@ -160,21 +161,11 @@ describe("PortalTextReader", () => {
     expect((download?.init?.headers as Record<string, string>)["accept"]).toBe("text/plain");
   }, 10_000);
 
-  it("shares one poll of the operations list between concurrent reads", async () => {
-    let polls = 0;
-    const { fetchMock } = fakeFetch([
-      settingsRoute,
-      {
-        match: (url, init) => url.endsWith("/files/fileops/bulkdownload") && init?.method === "PUT",
-        answer: function (this: unknown) {
-          return portalJson([operation(`op-${Math.random()}`)]);
-        },
-      },
-    ]);
-    // The bulkdownload answer above cannot know which file it is for; give
-    // each one a deterministic id by patching the mock per call instead.
+  it("starts the conversions one at a time, since the portal allows one download per user", async () => {
     const started: string[] = [];
-    fetchMock.mockImplementation(async (input: string | URL | Request, init?: RequestInit) => {
+    const finished = new Set<string>();
+    const startedWhileRunning: string[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
       if (url.endsWith("/files/settings")) {
         return portalJson(SETTINGS);
@@ -182,11 +173,17 @@ describe("PortalTextReader", () => {
       if (url.endsWith("/fileops/bulkdownload")) {
         const body = JSON.parse(String(init?.body)) as { fileConvertIds: { key: number }[] };
         const id = `op-${body.fileConvertIds[0]!.key}`;
+        if (started.some((s) => !finished.has(s))) {
+          startedWhileRunning.push(id);
+        }
         started.push(id);
         return portalJson([operation(id)]);
       }
       if (url.endsWith("/api/2.0/files/fileops")) {
-        polls += 1;
+        // Every operation started so far is finished by the next poll.
+        for (const id of started) {
+          finished.add(id);
+        }
         return portalJson(
           started.map((id) =>
             operation(id, { finished: true, url: `https://x/filehandler.ashx?op=${id}` }),
@@ -207,8 +204,97 @@ describe("PortalTextReader", () => {
     ]);
     expect(a).toBe("text of op-1");
     expect(b).toBe("text of op-2");
-    expect(polls).toBe(1);
+    expect(started).toEqual(["op-1", "op-2"]);
+    expect(startedWhileRunning).toEqual([]);
   }, 10_000);
+
+  it("retries the start while the user's download slot is busy", async () => {
+    let starts = 0;
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => {
+          starts += 1;
+          return starts < 3
+            ? new Response("", { status: 403, statusText: "Forbidden" })
+            : portalJson([
+                operation("op-1", { finished: true, url: "https://x/filehandler.ashx?a=1" }),
+              ]);
+        },
+      },
+      {
+        match: (url) => url.includes("filehandler.ashx"),
+        answer: () => textResponse("late but here"),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).resolves.toBe(
+      "late but here",
+    );
+    expect(starts).toBe(3);
+  }, 10_000);
+
+  it("fails a read that is refused even after the retries", async () => {
+    const { fetchMock, calls } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => new Response("", { status: 403, statusText: "Forbidden" }),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(
+      reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(calls.filter((c) => c.url.endsWith("/fileops/bulkdownload"))).toHaveLength(4);
+  }, 15_000);
+
+  it("survives a failed poll and reads the result on the next one", async () => {
+    let polls = 0;
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-1")]),
+      },
+      {
+        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        answer: () => {
+          polls += 1;
+          return polls === 1
+            ? new Response("", { status: 502, statusText: "Bad Gateway" })
+            : portalJson([
+                operation("op-1", { finished: true, url: "https://x/filehandler.ashx?a=1" }),
+              ]);
+        },
+      },
+      { match: (url) => url.includes("filehandler.ashx"), answer: () => textResponse("ok") },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).resolves.toBe(
+      "ok",
+    );
+    expect(polls).toBe(2);
+  }, 10_000);
+
+  it("reports an operation that is born with an error", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-1", { error: "Unsupported" })]),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).rejects.toThrow(
+      /conversion failed: Unsupported/,
+    );
+  });
 
   it("fails the read when the conversion reports an error", async () => {
     const { fetchMock } = fakeFetch([
@@ -268,5 +354,29 @@ describe("PortalTextReader", () => {
     await expect(
       reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" }),
     ).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe("PortalTextReader budget", () => {
+  beforeEach(() => vi.unstubAllGlobals());
+
+  it("gives up waiting for an operation when the read's own signal aborts", async () => {
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-slow")]),
+      },
+      {
+        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        answer: () => portalJson([operation("op-slow", { progress: 10 })]),
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const reader = new PortalTextReader(controller.signal);
+    const read = reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" });
+    setTimeout(() => controller.abort(new Error("budget")), 50);
+    await expect(read).rejects.toThrow(/budget/);
   });
 });

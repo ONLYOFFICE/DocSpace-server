@@ -58,7 +58,7 @@ function asIdList(value: unknown, name: string): string[] {
   if (!Array.isArray(value)) {
     badRequest(`${name} must be an array of ids`);
   }
-  return value.map((item) => {
+  const ids = value.map((item) => {
     if (typeof item === "number" && Number.isInteger(item)) {
       return String(item);
     }
@@ -67,6 +67,7 @@ function asIdList(value: unknown, name: string): string[] {
     }
     return badRequest(`${name} must contain non-empty string or integer ids`);
   });
+  return [...new Set(ids)];
 }
 
 function asInput(body: unknown): GenerateMetaInput {

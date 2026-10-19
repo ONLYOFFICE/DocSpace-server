@@ -84,7 +84,7 @@ describe("collectFiles", () => {
     expect(files).toHaveLength(MAX_FILES);
     expect(files.slice(0, 2).map((f) => f.id)).toEqual(["a", "f0"]);
     expect(portalFiles.listFolderFiles).toHaveBeenCalledTimes(1);
-    expect(portalFiles.listFolderFiles).toHaveBeenCalledWith("10", MAX_FILES + 1);
+    expect(portalFiles.listFolderFiles).toHaveBeenCalledWith("10", 100);
     // 22 distinct candidates, 20 taken, the last two reported.
     expect(skipped.map((s) => s.reason)).toEqual(["limit", "limit"]);
   });
@@ -140,6 +140,21 @@ describe("readDocuments", () => {
       ["img", "unsupported"],
       ["secret", "forbidden"],
     ]);
+  });
+});
+
+describe("readDocuments on a portal failure", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("relays an expired session or an outage instead of reporting every file unreadable", async () => {
+    readFileAsText.mockRejectedValue(new FakeDocspaceApiHttpError(401, "Unauthorized", "u"));
+    await expect(
+      readDocuments([file("a")], [], new AbortController().signal),
+    ).rejects.toMatchObject({ status: 401 });
+    readFileAsText.mockRejectedValue(new FakeDocspaceApiHttpError(503, "Unavailable", "u"));
+    await expect(
+      readDocuments([file("a")], [], new AbortController().signal),
+    ).rejects.toMatchObject({ status: 503 });
   });
 });
 

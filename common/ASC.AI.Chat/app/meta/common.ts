@@ -54,6 +54,8 @@ import type { PortalFile } from "./portalFiles.js";
 export const MAX_FILES = 20;
 /** Folders accepted per request. */
 export const MAX_FOLDERS = 20;
+/** Files listed per folder: the ones taken plus the ones reported as over the limit. */
+const FOLDER_PAGE = 100;
 /** Characters of one document handed to the model. */
 const MAX_CHARS_PER_FILE = 40_000;
 /** Characters of all documents together. */
@@ -221,8 +223,9 @@ export async function collectFiles(
 
   for (const folderId of dedupeIds(folderIds)) {
     // One page of the folder is enough: whatever lies past MAX_FILES is
-    // skipped anyway, and the page is already sorted newest first.
-    const listed = await listFolderFiles(folderId, MAX_FILES + 1);
+    // skipped anyway, and the page is already sorted newest first. The page
+    // is larger than the limit so the skipped files can be reported by name.
+    const listed = await listFolderFiles(folderId, FOLDER_PAGE);
     for (const file of listed) {
       take(file);
     }
@@ -257,6 +260,12 @@ export async function readDocuments(
           truncated: text.length > MAX_CHARS_PER_FILE,
         };
       } catch (err) {
+        // An expired session or a portal outage is the request's failure,
+        // not this file's: relay it instead of reporting every file as
+        // unreadable and answering 422.
+        if (err instanceof DocspaceApiHttpError && (err.status === 401 || err.status >= 500)) {
+          throw err;
+        }
         const reason = skipReasonOf(err);
         logger.warn(
           `meta: file ${file.id} "${file.title}" skipped (${reason}): ${

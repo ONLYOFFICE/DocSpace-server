@@ -186,6 +186,15 @@ describe("resolveValue", () => {
       value: { optionIds: ["t2"] },
     });
     expect(resolveValue(target(TAGS), ["Nope"])).toEqual({ ok: false, reason: "unknown_option" });
+    // A joined string is split, unless it is itself an option.
+    expect(resolveValue(target(TAGS), "Legal, Finance")).toEqual({
+      ok: true,
+      value: { optionIds: ["t1", "t2"] },
+    });
+    expect(resolveValue(target(TAGS), "legal;nope")).toEqual({
+      ok: true,
+      value: { optionIds: ["t1"] },
+    });
   });
 
   it("treats a custom field as text", () => {

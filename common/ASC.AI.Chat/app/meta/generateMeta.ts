@@ -197,5 +197,7 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
     return { fields, sources: toSources(documents), skipped };
   } finally {
     clearTimeout(timer);
+    // Stops the readers still polling when the request ends early.
+    controller.abort();
   }
 }

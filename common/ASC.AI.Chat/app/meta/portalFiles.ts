@@ -69,6 +69,10 @@ const CONVERSION_BUDGET_MS = 90_000;
 const POLL_INTERVAL_MS = 500;
 /** Polls an operation may be missing from the list before it counts as lost. */
 const MAX_POLL_MISSES = 3;
+/** Attempts to start a conversion while the user's download slot is busy. */
+const START_ATTEMPTS = 4;
+/** Pause between two such attempts. */
+const START_RETRY_MS = 1_500;
 
 export class UnsupportedFileError extends Error {
   constructor(
@@ -232,7 +236,14 @@ async function startConversion(
     const res = await fetch(url, {
       method: "PUT",
       headers: { ...getForwardedHeaders(), "content-type": "application/json" },
-      body: JSON.stringify({ fileConvertIds: [{ key: idForBody(file.id), value: target }] }),
+      // `returnSingleOperation`: answer with this operation only. Without it
+      // the portal lists every operation of the user and drops the finished
+      // ones from its queue as it does so, which would hand another file's
+      // result (or an unrelated archive download) to this reader.
+      body: JSON.stringify({
+        fileConvertIds: [{ key: idForBody(file.id), value: target }],
+        returnSingleOperation: true,
+      }),
       signal: timed,
     });
     if (!res.ok) {
@@ -265,20 +276,31 @@ class OperationWatcher {
 
   constructor(private readonly signal: AbortSignal) {}
 
-  wait(op: FileOperation): Promise<FileOperation> {
-    if (op.finished || op.error) {
+  /**
+   * Settles when the operation finishes. `signal` is the one read's own
+   * budget (derived from the reader's signal, so a request-level abort
+   * reaches it too); the poller itself runs on the reader's signal.
+   */
+  wait(op: FileOperation, signal: AbortSignal): Promise<FileOperation> {
+    if (op.error) {
+      return Promise.reject(new Error(`conversion failed: ${op.error}`));
+    }
+    if (op.finished) {
       return Promise.resolve(op);
+    }
+    if (signal.aborted) {
+      return Promise.reject(signal.reason ?? new Error("aborted"));
     }
     return new Promise<FileOperation>((resolve, reject) => {
       const onAbort = (): void => {
         this.waiters.delete(op.id);
-        reject(this.signal.reason ?? new Error("aborted"));
+        reject(signal.reason ?? new Error("aborted"));
       };
-      this.signal.addEventListener("abort", onAbort, { once: true });
+      signal.addEventListener("abort", onAbort, { once: true });
       const settle =
         <T>(fn: (v: T) => void) =>
         (v: T) => {
-          this.signal.removeEventListener("abort", onAbort);
+          signal.removeEventListener("abort", onAbort);
           this.waiters.delete(op.id);
           fn(v);
         };
@@ -301,7 +323,7 @@ class OperationWatcher {
     if (this.waiters.size === 0) {
       return;
     }
-    let operations: FileOperation[];
+    let operations: FileOperation[] | undefined;
     try {
       operations = envelopeList(
         await portalGet(`${proxyBaseUrl}/api/2.0/files/fileops`, this.signal),
@@ -310,13 +332,17 @@ class OperationWatcher {
         return op ? [op] : [];
       });
     } catch (err) {
-      for (const waiter of [...this.waiters.values()]) {
-        waiter.reject(err);
+      if (this.signal.aborted) {
+        return;
       }
-      return;
+      // A failed poll (a proxy hiccup, a transient 5xx) is one missed look
+      // at the list, not the end of every conversion in flight.
+      logger.warn(
+        `meta: polling file operations failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
     for (const [id, waiter] of [...this.waiters.entries()]) {
-      const found = operations.find((op) => op.id === id);
+      const found = operations?.find((op) => op.id === id);
       if (!found) {
         // The list holds the operations still running or not yet read; one
         // that is gone was finished and read by someone else (the portal UI
@@ -356,9 +382,39 @@ function throughProxy(downloadUrl: string): string {
  */
 export class PortalTextReader {
   private readonly watcher: OperationWatcher;
+  // The portal runs one download operation per user at a time: a second
+  // `bulkdownload` while one is running answers 403. The conversions of one
+  // reader therefore start one after another; only the result downloads
+  // overlap.
+  private conversionQueue: Promise<unknown> = Promise.resolve();
 
   constructor(private readonly signal: AbortSignal) {
     this.watcher = new OperationWatcher(signal);
+  }
+
+  private convert(file: PortalFile, target: string, signal: AbortSignal): Promise<FileOperation> {
+    const run = async (): Promise<FileOperation> => {
+      // A download the user started elsewhere (the UI's archive, say) holds
+      // the slot too; give it a few moments before reporting the file.
+      for (let attempt = 1; ; attempt += 1) {
+        try {
+          return await this.watcher.wait(await startConversion(file, target, signal), signal);
+        } catch (err) {
+          if (
+            !(err instanceof DocspaceApiHttpError) ||
+            err.status !== 403 ||
+            attempt >= START_ATTEMPTS ||
+            signal.aborted
+          ) {
+            throw err;
+          }
+          await new Promise((resolve) => setTimeout(resolve, START_RETRY_MS));
+        }
+      }
+    };
+    const turn = this.conversionQueue.then(run, run);
+    this.conversionQueue = turn.catch(() => undefined);
+    return turn;
   }
 
   /**
@@ -378,7 +434,7 @@ export class PortalTextReader {
     const { signal: timed, cancel } = withTimeout(this.signal, CONVERSION_BUDGET_MS);
     const started = Date.now();
     try {
-      const op = await this.watcher.wait(await startConversion(file, target, timed));
+      const op = await this.convert(file, target, timed);
       if (!op.url) {
         throw new Error(`conversion of file ${file.id} finished without a download URL`);
       }

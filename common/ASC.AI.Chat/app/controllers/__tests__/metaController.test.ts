@@ -145,6 +145,15 @@ describe("metaController.generate", () => {
     expect(primeSourceMeta).toHaveBeenCalledWith("10");
   });
 
+  it("deduplicates the ids before applying the limit", async () => {
+    generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
+    const res = await run(metaController.generate, {
+      files: [...Array.from({ length: 20 }, (_, i) => i + 1), "1", 2],
+    });
+    expect(res.statusCode).toBe(200);
+    expect(generateMeta.mock.calls[0]![0].files).toHaveLength(20);
+  });
+
   it("attributes a files-only request to its first file", async () => {
     generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
     await run(metaController.generate, { files: ["5"] });

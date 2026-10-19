@@ -311,7 +311,14 @@ export function resolveValue(target: Target, raw: unknown): Resolved {
         : { ok: false, reason: "unknown_option" };
     }
     case FieldType.MultiChoice: {
-      const list = Array.isArray(raw) ? raw : [raw];
+      // The prompt asks for an array; a model that answers "Draft, Final"
+      // instead is read the same way, unless the whole string is itself an
+      // option.
+      const list = Array.isArray(raw)
+        ? raw
+        : typeof raw === "string" && optionIdFor(field, raw) === undefined
+          ? raw.split(/[,;]/)
+          : [raw];
       const ids = [...new Set(list.map((item) => optionIdFor(field, item)))].filter(
         (id): id is string => id !== undefined,
       );
@@ -480,5 +487,7 @@ export async function fillMeta(input: FillMetaInput): Promise<FillMetaResult> {
     };
   } finally {
     clearTimeout(timer);
+    // Stops the readers still polling when the request ends early.
+    controller.abort();
   }
 }
