@@ -41,10 +41,9 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     // Prices are kept in Redis; the copy in process memory lives shorter, so a price key deleted in Redis
     // reaches every service within this time, without a restart.
     private static readonly TimeSpan _priceMemoryCacheDuration = TimeSpan.FromMinutes(5);
-    private const string ServiceCatalogPricesCacheKey = "accounting-service-catalog-prices";
     private const string ApprovedServiceStatus = "Approved";
     private const string DefaultCurrencyCode = "USD";
-    private const int ServiceCatalogPageSize = 100;
+    private const int ServicePageSize = 100;
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
@@ -194,53 +193,36 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     }
 
     /// <summary>
-    /// Returns the unit price of each named service in the currency of the service; a service that is not in the
-    /// catalog of approved services is left out. The whole catalog is loaded at once, so the call costs one request
-    /// per catalog page however many names are asked for.
+    /// Returns the unit price of each named service in the currency of the service, as service name to currency code
+    /// to price; a service that is not among the approved ones is left out. All the names go in one request (one per
+    /// page of the answer). Not cached here: the caller caches the price of every service on its own.
     /// </summary>
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(List<string> serviceNames)
     {
-        var catalog = await GetServiceCatalogPricesAsync();
+        EnsureConfigured();
 
         var result = new Dictionary<string, Dictionary<string, decimal>>();
 
-        foreach (var serviceName in serviceNames)
+        if (serviceNames.Count == 0)
         {
-            if (catalog.TryGetValue(serviceName, out var prices))
+            return result;
+        }
+
+        var requested = serviceNames.ToHashSet();
+
+        await foreach (var page in accountingApi.GetServicePages(ApprovedServiceStatus, requested, ServicePageSize).AsPages())
+        {
+            // An accounting service that does not filter by names yet answers with every approved service.
+            foreach (var service in (page.Collection ?? []).Where(s => requested.Contains(s.Name)))
             {
-                result[serviceName] = prices;
+                result[service.Name] = new Dictionary<string, decimal>
+                {
+                    { service.Currency?.Code ?? DefaultCurrencyCode, service.PriceValue }
+                };
             }
         }
 
         return result;
-    }
-
-    /// <summary>
-    /// The price of every approved service keyed by the service name, as currency code to unit price. The catalog is
-    /// not tenant-specific and is cached for all portals; fail-safe keeps the last loaded catalog while the
-    /// accounting service is unavailable.
-    /// </summary>
-    private async Task<Dictionary<string, Dictionary<string, decimal>>> GetServiceCatalogPricesAsync()
-    {
-        EnsureConfigured();
-
-        return await hybridCache.GetOrSetAsync<Dictionary<string, Dictionary<string, decimal>>>(ServiceCatalogPricesCacheKey, async (_, token) =>
-        {
-            var result = new Dictionary<string, Dictionary<string, decimal>>();
-
-            await foreach (var page in accountingApi.GetServicePages(ApprovedServiceStatus, ServiceCatalogPageSize).AsPages().WithCancellation(token))
-            {
-                foreach (var service in page.Collection ?? [])
-                {
-                    result[service.Name] = new Dictionary<string, decimal>
-                    {
-                        { service.Currency?.Code ?? DefaultCurrencyCode, service.PriceValue }
-                    };
-                }
-            }
-
-            return result;
-        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetMemoryCacheDuration(_priceMemoryCacheDuration).SetFailSafe(true));
     }
 
     private void EnsureConfigured()

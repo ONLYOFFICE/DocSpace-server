@@ -236,12 +236,12 @@ public class AccountingClientTests
     }
 
     [Fact]
-    public async Task GetProductPriceInfo_LoadsApprovedCatalogInOneRequest_AndLeavesUnknownServicesOut()
+    public async Task GetProductPriceInfo_SendsNamesInOneRequest_AndLeavesUnknownServicesOut()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 3,
-            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"), ("disk-storage-1-hour", 0.14m, "EUR"))));
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
+            ("backup", 10m, "USD"), ("disk-storage", 0.14m, "EUR"))));
 
-        var prices = await client.GetProductPriceInfoAsync(["backup", "disk-storage-1-hour", "unknown"]);
+        var prices = await client.GetProductPriceInfoAsync(["backup", "disk-storage", "unknown"]);
 
         handler.CallCount.Should().Be(1);
         handler.LastMethod.Should().Be(HttpMethod.Get);
@@ -251,27 +251,39 @@ public class AccountingClientTests
         query["status"].Should().Be("Approved");
         query["limit"].Should().Be("100");
         query["offset"].Should().Be("0");
+        QueryValues(handler.LastUri, "names").Should().BeEquivalentTo("backup", "disk-storage", "unknown");
 
-        prices.Keys.Should().BeEquivalentTo("backup", "disk-storage-1-hour");
+        prices.Keys.Should().BeEquivalentTo("backup", "disk-storage");
         prices["backup"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 10m });
-        prices["disk-storage-1-hour"].Should().Equal(new Dictionary<string, decimal> { ["EUR"] = 0.14m });
+        prices["disk-storage"].Should().Equal(new Dictionary<string, decimal> { ["EUR"] = 0.14m });
     }
 
     [Fact]
-    public async Task GetProductPriceInfo_SecondCall_IsServedFromCachedCatalog()
+    public async Task GetProductPriceInfo_ServiceIgnoringNamesFilter_ReturnsOnlyRequestedServices()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
-            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"))));
+        // An accounting service without the names filter answers with every approved service.
+        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 3,
+            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"), ("disk-storage", 0.14m, "USD"))));
 
-        await client.GetProductPriceInfoAsync(["backup"]);
         var prices = await client.GetProductPriceInfoAsync(["ai-tools"]);
 
-        handler.CallCount.Should().Be(1);
+        prices.Keys.Should().Equal("ai-tools");
         prices["ai-tools"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 0m });
     }
 
     [Fact]
-    public async Task GetProductPriceInfo_CatalogLargerThanPage_ReadsEveryPage()
+    public async Task GetProductPriceInfo_NoNames_SendsNoRequest()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 0)));
+
+        var prices = await client.GetProductPriceInfoAsync([]);
+
+        prices.Should().BeEmpty();
+        handler.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_AnswerLargerThanPage_ReadsEveryPage()
     {
         var offsets = new List<string>();
         var (client, _) = CreateClient(request =>
@@ -515,6 +527,16 @@ public class AccountingClientTests
         var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", timestamp, key))));
 
         return $"ASC {key}:{timestamp}:{hash}";
+    }
+
+    private static List<string> QueryValues(Uri uri, string name)
+    {
+        return uri.Query.TrimStart('?')
+            .Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Select(pair => pair.Split('=', 2))
+            .Where(pair => Uri.UnescapeDataString(pair[0]) == name)
+            .Select(pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1]) : "")
+            .ToList();
     }
 
     private static Dictionary<string, string> ParseQuery(Uri uri)
