@@ -291,8 +291,8 @@ public class VirtualRoomsInternalController(
     /// outcome, which stays empty while the job is running. Starting the job again while it is still running returns
     /// the same record instead of a second job, so a retry is safe; a finished job is replaced by the new one. One
     /// job is kept per room. A form whose data cannot be exported does not stop the others: it comes back in `forms`
-    /// with `success` false and its own `error`. When the portal has no external database configured the call fails
-    /// and nothing is queued.
+    /// with `success` false and its own `error`. When the portal has no external database configured the call is
+    /// refused with 400 and nothing is queued.
     /// </remarks>
     /// <summary>Start external DB sync</summary>
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
@@ -300,7 +300,7 @@ public class VirtualRoomsInternalController(
     [SwaggerResponse(200, "The synchronization job record to poll", typeof(ExternalDbSyncTaskDto))]
     [SwaggerResponse(403, "The room is not a form filling room, or the caller cannot edit it")]
     [SwaggerResponse(404, "No folder with this ID exists")]
-    [SwaggerResponse(500, "The portal has no external database configured")]
+    [SwaggerResponse(400, "The portal has no external database configured")]
     [HttpPost("{id}/externalDbSync")]
     public async Task<ExternalDbSyncTaskDto> StartExternalDbSync(RoomIdRequestDto<int> inDto)
     {

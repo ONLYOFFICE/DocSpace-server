@@ -44,9 +44,9 @@ public class ExternalDbSyncStartTests(
 {
     /// <remarks>
     /// Bug 84473: with no external database configured, <c>FileStorageService.StartExternalDbSyncAsync</c>
-    /// throws <c>BadHttpRequestException</c> ("Bad request.") and the endpoint answers 500. The
-    /// exception type is a client error, so the response should be a controlled 400. The endpoint's
-    /// own SwaggerResponse documents 500 for this case; the test asserts the corrected behaviour.
+    /// used to throw <c>BadHttpRequestException</c> ("Bad request."), which the API's exception handler does
+    /// not map, so the endpoint answered 500. It now refuses the start with 400 and says that the portal has
+    /// no external database configured.
     /// </remarks>
     [Fact]
     [Trait("Bug", "84473")]
