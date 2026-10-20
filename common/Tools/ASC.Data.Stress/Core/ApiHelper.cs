@@ -37,19 +37,33 @@ namespace ASC.Data.Stress.Core;
 
 public static class ApiHelper
 {
-    
-    public static async Task<Configuration> GetConfigurationAsync(string userName, string password)
+    /// <summary>The OpenResty router of the local Aspire stack (README: "OpenResty (reverse proxy) | 8092").</summary>
+    public const string DefaultBasePath = "http://localhost:8092";
+
+    public static async Task<Configuration> GetConfigurationAsync(string userName, string password, string basePath = DefaultBasePath)
     {
-        using var authorizationApi = new AuthenticationApi();
+        using var authorizationApi = new AuthenticationApi(new Configuration { BasePath = basePath });
         var response = (await authorizationApi.AuthenticateMeAsync(new AuthRequestDto(userName, password))).Response;
-        
+
+        return GetConfiguration(response.Token, basePath);
+    }
+
+    /// <summary>Configuration for a ready token: an API key or a token from <c>POST api/2.0/authentication</c>.</summary>
+    public static Configuration GetConfiguration(string token, string basePath = DefaultBasePath, TimeSpan? timeout = null)
+    {
         var configuration = new Configuration
         {
+            BasePath = basePath,
             DefaultHeaders =
             {
-                ["Authorization"] = $"Bearer {response.Token}"
+                ["Authorization"] = $"Bearer {token}"
             }
         };
+
+        if (timeout is not null)
+        {
+            configuration.Timeout = timeout.Value;
+        }
 
         return configuration;
     }
