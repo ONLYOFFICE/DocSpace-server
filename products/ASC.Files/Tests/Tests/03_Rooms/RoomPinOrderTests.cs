@@ -77,7 +77,8 @@ public class RoomPinOrderTests(
 
     private async Task<List<string>> GetOrderWhenIndexed(string marker, int expectedCount)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(15);
+        // at least 30 s: in a full parallel run the index lags well behind a single run
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {

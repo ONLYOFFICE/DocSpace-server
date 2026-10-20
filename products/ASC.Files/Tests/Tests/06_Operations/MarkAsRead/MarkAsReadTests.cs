@@ -127,7 +127,7 @@ public class MarkAsReadTests(
         var results = (await _filesOperationsApi.MarkAsReadAsync(
             new BaseBatchRequestDto(
                 folderIds: [new BaseBatchRequestDtoAllOfFolderIds(folder.Id)],
-                fileIds: [new BaseBatchRequestDtoAllOfFileIds(file.Id)]),
+                fileIds: [new BaseBatchRequestDtoAllOfFileIds(file.Id)]) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -157,7 +157,7 @@ public class MarkAsReadTests(
 
         // Act
         var results = (await _filesOperationsApi.MarkAsReadAsync(
-            new BaseBatchRequestDto(fileIds: []), TestContext.Current.CancellationToken)).Response;
+            new BaseBatchRequestDto(fileIds: []) { ReturnSingleOperation = true }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         results.Should().NotBeNull();

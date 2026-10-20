@@ -126,6 +126,7 @@ public class MoveBatchBugTests(
     {
         return new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
             ConflictResolveType = conflictResolveType,
             FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),
