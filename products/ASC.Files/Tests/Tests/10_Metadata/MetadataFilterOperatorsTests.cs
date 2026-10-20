@@ -84,9 +84,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.ResponseAsync(data.Condition(AmountField, "contains", "20"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(data.Condition(AmountField, "contains", "20")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "a substring has no meaning for a number");
+        exception.ErrorCode.Should().Be(400, "a substring has no meaning for a number");
     }
 
     #endregion
@@ -151,9 +152,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
         var data = await ArrangeAsync();
 
         // the bound of a one-sided operator comes in "value"; "from" and "to" belong to "range"
-        using var response = await data.ResponseAsync(new { fieldId = data.FieldId(AmountField), op = "gt", from = "200" });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(new MetadataFilterConditionRequest(fieldId: data.FieldId(AmountField), op: "gt", from: "200")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -162,9 +164,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
         var data = await ArrangeAsync();
 
         // 2^53: a 64-bit integer, but past what a JSON client reads exactly and past what a stored value may hold
-        using var response = await data.ResponseAsync(data.Condition(AmountField, "lt", "9007199254740992"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(data.Condition(AmountField, "lt", "9007199254740992")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -172,9 +175,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.ResponseAsync(new { fieldId = data.FieldId(AmountField), op = "gt" });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(new MetadataFilterConditionRequest(fieldId: data.FieldId(AmountField), op: "gt")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -183,9 +187,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
         var data = await ArrangeAsync();
 
         // "eq" with bounds used to be read as a range; the named operator fixes the form instead
-        using var response = await data.ResponseAsync(new { fieldId = data.FieldId(AmountField), op = "eq", from = "200" });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(new MetadataFilterConditionRequest(fieldId: data.FieldId(AmountField), op: "eq", from: "200")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -193,9 +198,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.ResponseAsync(new { fieldId = data.FieldId(AmountField), op = "range", value = "200" });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(new MetadataFilterConditionRequest(fieldId: data.FieldId(AmountField), op: "range", value: "200")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -203,9 +209,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.ResponseAsync(data.Condition(ClientField, "gt", "acme"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(data.Condition(ClientField, "gt", "acme")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "a string has no order to compare by");
+        exception.ErrorCode.Should().Be(400, "a string has no order to compare by");
     }
 
     #endregion
@@ -271,9 +278,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
         var data = await ArrangeAsync();
 
         // a "value" next to the bounds of a range used to be ignored; it is refused the way it is for a number
-        using var response = await data.ResponseAsync(new { fieldId = data.FieldId(SignedField), op = "range", from = "2026-06-01", value = "2026-06-30" });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(new MetadataFilterConditionRequest(fieldId: data.FieldId(SignedField), op: "range", value: "2026-06-30", from: "2026-06-01")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -281,9 +289,10 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.ResponseAsync(data.Condition(SignedField, "lt", "yesterday"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await data.ListAsync(data.Condition(SignedField, "lt", "yesterday")));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     #endregion
@@ -298,31 +307,30 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Guid.NewGuid().ToString()[..8];
 
-        var template = await api.CreateTemplateAsync("Operators " + suffix,
+        var template = (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto("Operators " + suffix, true,
         [
-            new MetadataFieldPayload { Name = ClientField, Type = 0 },
-            new MetadataFieldPayload { Name = AmountField, Type = 2 },
-            new MetadataFieldPayload { Name = SignedField, Type = 1 }
-        ], TestContext.Current.CancellationToken);
+            new MetadataFieldRequest(ClientField, MetadataFieldType.String),
+            new MetadataFieldRequest(AmountField, MetadataFieldType.Number),
+            new MetadataFieldRequest(SignedField, MetadataFieldType.Date)
+        ]), TestContext.Current.CancellationToken)).Response;
 
         var room = await CreateCustomRoom($"Operators {suffix}");
         var low = await CreateFolder($"Low {suffix}", room.Id);
         var mid = await CreateFolder($"Mid {suffix}", room.Id);
         var high = await CreateFolder($"High {suffix}", room.Id);
 
-        var data = new OperatorsData(api, template, room.Id) { LowId = low.Id, MidId = mid.Id, HighId = high.Id };
+        var data = new OperatorsData(_foldersApi, template, room.Id) { LowId = low.Id, MidId = mid.Id, HighId = high.Id };
 
         foreach (var folderId in new[] { low.Id, mid.Id, high.Id })
         {
-            await api.AssignFolderTemplatesAsync(folderId, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+            await _metadataApi.AssignFolderTemplatesAsync(folderId, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
         }
 
-        await api.SetFolderValuesAsync(low.Id, data.Values("ACME Corp", 100, new DateTime(2026, 6, 30, 14, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(mid.Id, data.Values("Globex", 200, new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(high.Id, data.Values("acme", 300, new DateTime(2026, 7, 15, 0, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(low.Id, data.Values("ACME Corp", 100, new DateTime(2026, 6, 30, 14, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(mid.Id, data.Values("Globex", 200, new DateTime(2026, 7, 1, 9, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(high.Id, data.Values("acme", 300, new DateTime(2026, 7, 15, 0, 0, 0, DateTimeKind.Utc)), TestContext.Current.CancellationToken);
 
         // the values reach the index with a small lag; a negative search polled before that lag is over would
         // pass for the wrong reason, so every test starts from a state where the written values are searchable
@@ -332,7 +340,7 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
         return data;
     }
 
-    private sealed class OperatorsData(MetadataApiClient api, MetadataTemplateResponse template, int roomId)
+    private sealed class OperatorsData(FoldersApi foldersApi, MetadataTemplateDto template, int roomId)
     {
         public int LowId { get; init; }
         public int MidId { get; init; }
@@ -343,43 +351,46 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
             return template.Field(name).Id;
         }
 
-        public object Condition(string fieldName, string op, string value)
+        public MetadataFilterConditionRequest Condition(string fieldName, string op, string value)
         {
-            return new { fieldId = FieldId(fieldName), op, value };
+            return new MetadataFilterConditionRequest(fieldId: FieldId(fieldName), op: op, value: value);
         }
 
-        public List<MetadataValuePayload> Values(string client, long amount, DateTime signed)
+        public SetMetadataValues Values(string client, long amount, DateTime signed)
         {
-            return
+            return new SetMetadataValues(
             [
-                new MetadataValuePayload { FieldId = FieldId(ClientField), StringValue = client },
-                new MetadataValuePayload { FieldId = FieldId(AmountField), NumberValue = amount },
-                new MetadataValuePayload { FieldId = FieldId(SignedField), DateValue = signed }
-            ];
+                new MetadataValueRequest(FieldId(ClientField), stringValue: client),
+                new MetadataValueRequest(FieldId(AmountField), numberValue: amount),
+                new MetadataValueRequest(FieldId(SignedField), dateValue: signed)
+            ]);
         }
 
-        public Task<HttpResponseMessage> ResponseAsync(object condition)
+        /// <summary>
+        /// Lists the room with the condition in the query once, without waiting for any result.
+        /// </summary>
+        public Task<FolderContentResponse> ListAsync(MetadataFilterConditionRequest condition)
         {
-            return api.GetFolderContentResponseAsync(roomId, template.Id, [condition], cancellationToken: TestContext.Current.CancellationToken);
+            return foldersApi.GetFolderContentWithMetadataAsync(roomId, template.Id, [condition], cancellationToken: TestContext.Current.CancellationToken);
         }
 
         /// <summary>
         /// Lists the room with the condition in the query, retrying until the expected folders are returned; the
         /// retry only absorbs the indexing lag, the last observed state is returned for the assertion.
         /// </summary>
-        public Task<FolderContentResponse> SearchAsync(object condition, int[] expected)
+        public Task<FolderContentResponse> SearchAsync(MetadataFilterConditionRequest condition, int[] expected)
         {
-            return PollAsync(() => api.GetFolderContentAsync(roomId, template.Id, [condition], cancellationToken: TestContext.Current.CancellationToken), expected);
+            return PollAsync(() => ListAsync(condition), expected);
         }
 
         /// <summary>
         /// The same condition through the typed search body.
         /// </summary>
-        public Task<FolderContentResponse> TypedSearchAsync(object condition, int[] expected)
+        public Task<FolderContentResponse> TypedSearchAsync(MetadataFilterConditionRequest condition, int[] expected)
         {
-            var body = new { metadataTemplateId = template.Id, metadataFilters = new[] { condition } };
+            var body = new FolderMetadataSearch(metadataTemplateId: template.Id, metadataFilters: [condition]);
 
-            return PollAsync(() => api.SearchFolderAsync(roomId, body, TestContext.Current.CancellationToken), expected);
+            return PollAsync(() => foldersApi.SearchFolderWithMetadataAsync(roomId, body, TestContext.Current.CancellationToken), expected);
         }
 
         private static async Task<FolderContentResponse> PollAsync(Func<Task<FolderContentResponse>> read, int[] expected)

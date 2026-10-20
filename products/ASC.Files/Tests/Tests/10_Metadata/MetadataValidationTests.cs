@@ -41,7 +41,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldPass_WhenStringFieldHasStringValue()
     {
-        var field = CreateField(MetadataFieldType.String);
+        var field = CreateField(CoreMetadataFieldType.String);
         var value = new MetadataValue { FieldId = 1, StringValue = "ACME Corp" };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -52,7 +52,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldThrow_WhenStringFieldHasNumberValue()
     {
-        var field = CreateField(MetadataFieldType.String);
+        var field = CreateField(CoreMetadataFieldType.String);
         var value = new MetadataValue { FieldId = 1, StringValue = "x", NumberValue = 42 };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -87,7 +87,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldNotChangeTheValue()
     {
-        var field = CreateField(MetadataFieldType.Date);
+        var field = CreateField(CoreMetadataFieldType.Date);
         var local = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Local);
         var value = new MetadataValue { FieldId = 1, DateValue = local };
 
@@ -99,7 +99,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldThrow_WhenDateFieldHasStringValue()
     {
-        var field = CreateField(MetadataFieldType.Date);
+        var field = CreateField(CoreMetadataFieldType.Date);
         var value = new MetadataValue { FieldId = 1, StringValue = "2026-01-15" };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -110,7 +110,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldPass_WhenNumberFieldHasNumberValue()
     {
-        var field = CreateField(MetadataFieldType.Number);
+        var field = CreateField(CoreMetadataFieldType.Number);
         var value = new MetadataValue { FieldId = 1, NumberValue = 42 };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -123,7 +123,7 @@ public class MetadataValidationTests
     [InlineData(-MetadataService.MaxNumberValue)]
     public void ValidateValue_ShouldPass_WhenNumberIsAtTheLimit(long number)
     {
-        var field = CreateField(MetadataFieldType.Number);
+        var field = CreateField(CoreMetadataFieldType.Number);
         var value = new MetadataValue { FieldId = 1, NumberValue = number };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -136,7 +136,7 @@ public class MetadataValidationTests
     [InlineData(-MetadataService.MaxNumberValue - 1)]
     public void ValidateValue_ShouldThrow_WhenNumberIsBeyondTheLimit(long number)
     {
-        var field = CreateField(MetadataFieldType.Number);
+        var field = CreateField(CoreMetadataFieldType.Number);
         var value = new MetadataValue { FieldId = 1, NumberValue = number };
 
         // a 64-bit integer the column could hold, but a JSON client that reads numbers as doubles would show it rounded
@@ -148,7 +148,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldThrow_WhenNumberFieldHasDateValue()
     {
-        var field = CreateField(MetadataFieldType.Number);
+        var field = CreateField(CoreMetadataFieldType.Number);
         var value = new MetadataValue { FieldId = 1, NumberValue = 1, DateValue = DateTime.UtcNow };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -159,7 +159,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldPass_WhenSingleChoiceHasOneKnownOption()
     {
-        var field = CreateChoiceField(MetadataFieldType.SingleChoice);
+        var field = CreateChoiceField(CoreMetadataFieldType.SingleChoice);
         var value = new MetadataValue { FieldId = 1, OptionIds = [_redOptionId] };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -170,7 +170,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldThrow_WhenSingleChoiceHasTwoOptions()
     {
-        var field = CreateChoiceField(MetadataFieldType.SingleChoice);
+        var field = CreateChoiceField(CoreMetadataFieldType.SingleChoice);
         var value = new MetadataValue { FieldId = 1, OptionIds = [_redOptionId, _blueOptionId] };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -181,7 +181,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldThrow_WhenChoiceOptionIsUnknown()
     {
-        var field = CreateChoiceField(MetadataFieldType.MultiChoice);
+        var field = CreateChoiceField(CoreMetadataFieldType.MultiChoice);
         var value = new MetadataValue { FieldId = 1, OptionIds = [Guid.NewGuid()] };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -192,7 +192,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldPass_WhenMultiChoiceHasSeveralKnownOptions()
     {
-        var field = CreateChoiceField(MetadataFieldType.MultiChoice);
+        var field = CreateChoiceField(CoreMetadataFieldType.MultiChoice);
         var value = new MetadataValue { FieldId = 1, OptionIds = [_redOptionId, _blueOptionId] };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -203,7 +203,7 @@ public class MetadataValidationTests
     [Fact]
     public void ValidateValue_ShouldPass_WhenValueIsEmpty()
     {
-        var field = CreateChoiceField(MetadataFieldType.SingleChoice);
+        var field = CreateChoiceField(CoreMetadataFieldType.SingleChoice);
         var value = new MetadataValue { FieldId = 1 };
 
         var act = () => MetadataService.ValidateValue(field, value);
@@ -239,12 +239,12 @@ public class MetadataValidationTests
         value.IsEmpty.Should().BeFalse();
     }
 
-    private static MetadataField CreateField(MetadataFieldType type)
+    private static MetadataField CreateField(CoreMetadataFieldType type)
     {
         return new MetadataField { Id = 1, TemplateId = 1, Name = "Field", Type = type };
     }
 
-    private static MetadataField CreateChoiceField(MetadataFieldType type)
+    private static MetadataField CreateChoiceField(CoreMetadataFieldType type)
     {
         return new MetadataField
         {
