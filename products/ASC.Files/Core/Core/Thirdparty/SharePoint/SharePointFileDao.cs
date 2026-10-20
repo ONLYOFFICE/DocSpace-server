@@ -392,7 +392,7 @@ internal class SharePointFileDao(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {

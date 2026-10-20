@@ -118,6 +118,33 @@ public class MetadataValidationTests
         act.Should().NotThrow();
     }
 
+    [Theory]
+    [InlineData(MetadataService.MaxNumberValue)]
+    [InlineData(-MetadataService.MaxNumberValue)]
+    public void ValidateValue_ShouldPass_WhenNumberIsAtTheLimit(long number)
+    {
+        var field = CreateField(MetadataFieldType.Number);
+        var value = new MetadataValue { FieldId = 1, NumberValue = number };
+
+        var act = () => MetadataService.ValidateValue(field, value);
+
+        act.Should().NotThrow();
+    }
+
+    [Theory]
+    [InlineData(MetadataService.MaxNumberValue + 1)]
+    [InlineData(-MetadataService.MaxNumberValue - 1)]
+    public void ValidateValue_ShouldThrow_WhenNumberIsBeyondTheLimit(long number)
+    {
+        var field = CreateField(MetadataFieldType.Number);
+        var value = new MetadataValue { FieldId = 1, NumberValue = number };
+
+        // a 64-bit integer the column could hold, but a JSON client that reads numbers as doubles would show it rounded
+        var act = () => MetadataService.ValidateValue(field, value);
+
+        act.Should().Throw<ArgumentException>();
+    }
+
     [Fact]
     public void ValidateValue_ShouldThrow_WhenNumberFieldHasDateValue()
     {

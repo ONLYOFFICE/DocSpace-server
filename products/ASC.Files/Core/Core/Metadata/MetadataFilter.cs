@@ -124,22 +124,25 @@ public class MetadataFilterConditionRequest
     /// <summary>
     /// The value of a single-valued condition: the whole or a part of a string field, the exact value of a number field,
     /// or the bound of a "gt", "gte", "lt" or "lte" condition on a number or a date field. A JSON number is accepted as
-    /// well as a string. A date given without a time ("2026-06-30") names the whole day (UTC).
+    /// well as a string. A number is a whole number of at most 2^53-1 in magnitude, the limit of a stored number value.
+    /// A date given without a time ("2026-06-30") names the whole day (UTC).
     /// </summary>
     /// <example>ACME</example>
     [JsonConverter(typeof(MetadataFilterValueConverter))]
     public string Value { get; set; }
 
     /// <summary>
-    /// The inclusive lower bound of a range. A date given without a time ("2026-06-01") is the start of that day (UTC).
+    /// The inclusive lower bound of a range. A number is a whole number of at most 2^53-1 in magnitude, the limit of a
+    /// stored number value. A date given without a time ("2026-06-01") is the start of that day (UTC).
     /// </summary>
     /// <example>2026-01-01</example>
     [JsonConverter(typeof(MetadataFilterValueConverter))]
     public string From { get; set; }
 
     /// <summary>
-    /// The inclusive upper bound of a range. A date given without a time ("2026-06-30") covers the whole day (UTC);
-    /// a value with a time is an instant and is taken as is.
+    /// The inclusive upper bound of a range. A number is a whole number of at most 2^53-1 in magnitude, the limit of a
+    /// stored number value. A date given without a time ("2026-06-30") covers the whole day (UTC); a value with a time
+    /// is an instant and is taken as is.
     /// </summary>
     /// <example>2026-06-30</example>
     [JsonConverter(typeof(MetadataFilterValueConverter))]
@@ -585,6 +588,13 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         if (!long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
         {
             throw new ArgumentException($@"Invalid number value in the condition for the field '{field.Name}'");
+        }
+
+        // no stored value lies beyond the write limit, and a client that reads numbers as doubles cannot even send such a
+        // bound exactly, so it is refused the way an over-long string condition is
+        if (result is > MetadataService.MaxNumberValue or < -MetadataService.MaxNumberValue)
+        {
+            throw new ArgumentException($@"The number in the condition for the field '{field.Name}' must be between -{MetadataService.MaxNumberValue} and {MetadataService.MaxNumberValue}");
         }
 
         return result;
