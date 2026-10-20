@@ -563,10 +563,10 @@ export type Req_aiExportTextToDocx = {
 export type Res_aiExportTextToDocx = { success: boolean };
 
 export type Req_aiMetaGenerate = {
-  /** Ids of the files to read, at most 20. */
-  files?: (string | number)[];
-  /** Ids of the folders whose top-level files to read, at most 20. */
-  folders?: (string | number)[];
+  /** The entry's table. */
+  kind: "file" | "folder";
+  /** The entry's integer id. */
+  id: string | number;
   /** What kind of metadata fields the caller is interested in; a hint for the model. */
   prompt?: string;
 };

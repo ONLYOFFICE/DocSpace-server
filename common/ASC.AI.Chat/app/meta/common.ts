@@ -32,8 +32,8 @@
 
 /**
  * Shared pieces of the metadata routes: the model profile, the document set
- * a request reads (files named directly or through folders, 20 at most,
- * each cut to a budget) and the report of what was left out.
+ * a request reads (one file, or the top-level files of one folder, 20 at
+ * most, each cut to a budget) and the report of what was left out.
  */
 
 import { ActionType, customSync, getErrorStatus } from "@onlyoffice/ai-chat/core";
@@ -50,10 +50,8 @@ import {
 } from "./portalFiles.js";
 import type { PortalFile } from "./portalFiles.js";
 
-/** Files read per request, after the folders are expanded. */
+/** Files read per request, after a folder is expanded. */
 export const MAX_FILES = 20;
-/** Folders accepted per request. */
-export const MAX_FOLDERS = 20;
 /** Files listed per folder: the ones taken plus the ones reported as over the limit. */
 const FOLDER_PAGE = 100;
 /** Characters of one document handed to the model. */

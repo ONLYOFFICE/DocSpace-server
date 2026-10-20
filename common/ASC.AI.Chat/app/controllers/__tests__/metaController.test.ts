@@ -31,7 +31,6 @@ const generateMeta = vi.fn();
 vi.mock("../../meta/generateMeta.js", () => ({
   generateMeta,
   MAX_FILES: 20,
-  MAX_FOLDERS: 20,
   NoContentError: class NoContentError extends Error {
     readonly status = 422;
     constructor(public readonly skipped: unknown[]) {
@@ -94,7 +93,7 @@ describe("metaController.generate", () => {
 
   it("answers the AI-access refusal before touching the body", async () => {
     assertAiAccess.mockRejectedValueOnce(new FakeAiServiceHttpError(403, "Forbidden"));
-    const res = await run(metaController.generate, { files: ["1"] });
+    const res = await run(metaController.generate, { kind: "file", id: 1 });
     expect(res.statusCode).toBe(403);
     expect(generateMeta).not.toHaveBeenCalled();
     expect(primeSourceMeta).not.toHaveBeenCalled();
@@ -107,7 +106,7 @@ describe("metaController.generate", () => {
       [504, "The model did not answer within the time budget"],
     ] as const) {
       generateMeta.mockRejectedValueOnce(new ModelCallError(status, message));
-      const res = await run(metaController.generate, { files: ["1"] });
+      const res = await run(metaController.generate, { kind: "file", id: 1 });
       expect(res.statusCode).toBe(status);
       expect(res.body).toEqual({ error: message });
     }
@@ -115,54 +114,44 @@ describe("metaController.generate", () => {
 
   it.each([
     [null, "body must be an object"],
-    [{}, "files or folders is required"],
-    [{ files: "1" }, "files must be an array of ids"],
-    [{ files: [""] }, "files must contain non-empty string or integer ids"],
-    [{ folders: [1.5] }, "folders must contain non-empty string or integer ids"],
-    [{ files: ["1"], prompt: 5 }, "prompt must be a string"],
-    [{ files: Array.from({ length: 21 }, (_, i) => i + 1) }, "files holds at most 20 ids"],
-    [{ folders: Array.from({ length: 21 }, (_, i) => `${i}`) }, "folders holds at most 20 ids"],
+    [{}, 'kind must be "file" or "folder"'],
+    [{ kind: "room", id: 1 }, 'kind must be "file" or "folder"'],
+    [{ kind: "file" }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: "" }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: "sbox-1" }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: [1, 2] }, "id must be the integer id of a file or folder"],
+    [{ kind: "file", id: 1, prompt: 5 }, "prompt must be a string"],
   ])("rejects %j with 400", async (body, message) => {
     const res = await run(metaController.generate, body);
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: message });
     expect(generateMeta).not.toHaveBeenCalled();
+    expect(primeSourceMeta).not.toHaveBeenCalled();
   });
 
-  it("normalizes the ids, trims the prompt, attributes the round and answers the result", async () => {
+  it("normalizes the entry, trims the prompt, attributes the round and answers the result", async () => {
     generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
     const res = await run(metaController.generate, {
-      files: [1, " 2 "],
-      folders: ["10"],
+      kind: "folder",
+      id: " 10 ",
       prompt: "  dates ",
     });
     expect(res.statusCode).toBe(200);
-    expect(generateMeta).toHaveBeenCalledWith({
-      files: ["1", "2"],
-      folders: ["10"],
-      prompt: "dates",
-    });
-    expect(primeSourceMeta).toHaveBeenCalledWith("10");
+    expect(generateMeta).toHaveBeenCalledWith({ kind: "folder", id: "10", prompt: "dates" });
+    expect(primeSourceMeta).toHaveBeenCalledWith("10", "folder");
   });
 
-  it("deduplicates the ids before applying the limit", async () => {
+  it("attributes a file request to the file", async () => {
     generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
-    const res = await run(metaController.generate, {
-      files: [...Array.from({ length: 20 }, (_, i) => i + 1), "1", 2],
-    });
-    expect(res.statusCode).toBe(200);
-    expect(generateMeta.mock.calls[0]![0].files).toHaveLength(20);
-  });
-
-  it("attributes a files-only request to its first file", async () => {
-    generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
-    await run(metaController.generate, { files: ["5"] });
+    await run(metaController.generate, { kind: "file", id: 5 });
+    expect(generateMeta).toHaveBeenCalledWith({ kind: "file", id: "5", prompt: undefined });
     expect(primeSourceMeta).toHaveBeenCalledWith("5", "file");
   });
 
   it("answers 422 with the skipped list when nothing could be read, and relays other statuses", async () => {
     generateMeta.mockRejectedValueOnce(new NoContentError([{ id: "1", reason: "unsupported" }]));
-    let res = await run(metaController.generate, { files: ["1"] });
+    let res = await run(metaController.generate, { kind: "file", id: 1 });
     expect(res.statusCode).toBe(422);
     expect(res.body).toEqual({
       error: "none readable",
@@ -170,16 +159,16 @@ describe("metaController.generate", () => {
     });
 
     generateMeta.mockRejectedValueOnce(new FakeDocspaceApiHttpError(404, "Not Found"));
-    res = await run(metaController.generate, { folders: ["9"] });
+    res = await run(metaController.generate, { kind: "folder", id: 9 });
     expect(res.statusCode).toBe(404);
 
     generateMeta.mockRejectedValueOnce(new NoProfileError());
-    res = await run(metaController.generate, { files: ["1"] });
+    res = await run(metaController.generate, { kind: "file", id: 1 });
     expect(res.statusCode).toBe(503);
     expect(res.body).toEqual({ error: "No model is configured" });
 
     generateMeta.mockRejectedValueOnce(new Error("secret internals"));
-    res = await run(metaController.generate, { files: ["1"] });
+    res = await run(metaController.generate, { kind: "file", id: 1 });
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({ error: "Internal server error" });
   });

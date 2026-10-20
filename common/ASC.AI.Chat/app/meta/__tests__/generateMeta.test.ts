@@ -29,6 +29,7 @@ vi.mock("../portalFiles.js", () => ({
 }));
 
 const { storage } = await import("../../storage/index.js");
+const { listFolderFiles } = await import("../portalFiles.js");
 const { generateMeta, NoContentError, NoProfileError, parseFields } =
   await import("../generateMeta.js");
 
@@ -74,15 +75,19 @@ describe("generateMeta", () => {
     readFileAsText.mockImplementation(async ({ id }) => `Contract ${id} with ACME, 2024-03-01.`);
   });
 
-  it("reads the files, runs the model once with the user's note as a hint and reports the fields", async () => {
+  it("reads the folder's files, runs the model once with the user's note as a hint and reports the fields", async () => {
+    vi.mocked(listFolderFiles).mockResolvedValueOnce([
+      { id: "1", title: "1.docx", ext: ".docx" },
+      { id: "2", title: "2.docx", ext: ".docx" },
+    ] as never);
     customSync.mockResolvedValue(
       assistantText(
         '{"fields":[{"name":"Counterparty","value":"ACME"},{"name":"Date","value":null}]}',
       ),
     );
     const result = await generateMeta({
-      files: ["1", "2"],
-      folders: [],
+      kind: "folder",
+      id: "7",
       prompt: "<b>dates</b> only",
     });
     expect(result.fields).toEqual([
@@ -107,19 +112,18 @@ describe("generateMeta", () => {
       "The user is interested in these kinds of metadata fields:\ndates only",
     );
     expect(content).not.toContain("<b>");
+    expect(content).toContain("folder that holds the 2 document(s)");
     expect(content).toContain("===== Document 1: 1.docx =====");
     expect(content).toContain("Contract 2 with ACME");
   });
 
   it("answers 503 when no profile is bound and 422 when nothing could be read", async () => {
     vi.mocked(storage.assignments.readByType).mockResolvedValue(null);
-    await expect(generateMeta({ files: ["1"], folders: [] })).rejects.toBeInstanceOf(
-      NoProfileError,
-    );
+    await expect(generateMeta({ kind: "file", id: "1" })).rejects.toBeInstanceOf(NoProfileError);
 
     vi.mocked(storage.assignments.readByType).mockResolvedValue("p1");
     readFileAsText.mockRejectedValue(new Error("boom"));
-    const failure = await generateMeta({ files: ["1"], folders: [] }).catch((e: unknown) => e);
+    const failure = await generateMeta({ kind: "file", id: "1" }).catch((e: unknown) => e);
     expect(failure).toBeInstanceOf(NoContentError);
     expect((failure as InstanceType<typeof NoContentError>).skipped).toEqual([
       { id: "1", title: "1.docx", reason: "failed" },
@@ -129,24 +133,24 @@ describe("generateMeta", () => {
 
   it("answers the model's failure as 502 and a throttled call as 429", async () => {
     customSync.mockRejectedValueOnce(new Error("invalid api key"));
-    await expect(generateMeta({ files: ["1"], folders: [] })).rejects.toMatchObject({
+    await expect(generateMeta({ kind: "file", id: "1" })).rejects.toMatchObject({
       status: 502,
     });
     customSync.mockRejectedValueOnce({ status: 429, message: "slow down" });
-    await expect(generateMeta({ files: ["1"], folders: [] })).rejects.toMatchObject({
+    await expect(generateMeta({ kind: "file", id: "1" })).rejects.toMatchObject({
       status: 429,
     });
   });
 
   it("answers 422 for a folder without files", async () => {
-    const failure = await generateMeta({ files: [], folders: ["7"] }).catch((e: unknown) => e);
+    const failure = await generateMeta({ kind: "folder", id: "7" }).catch((e: unknown) => e);
     expect(failure).toBeInstanceOf(NoContentError);
     expect((failure as Error).message).toBe("The selection holds no files");
   });
 
   it("answers an empty field list when the model does not follow the format", async () => {
     customSync.mockResolvedValue(assistantText("I cannot help with that."));
-    const result = await generateMeta({ files: ["1"], folders: [] });
+    const result = await generateMeta({ kind: "file", id: "1" });
     expect(result.fields).toEqual([]);
     expect(result.sources).toHaveLength(1);
   });

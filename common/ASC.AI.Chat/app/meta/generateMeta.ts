@@ -31,11 +31,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Metadata-field generation: read the selected files as text and ask the
- * `GenerateMeta` model which custom metadata fields describe them. One model
- * round, no tools — the files are read here, deterministically, so the
- * request has a fixed shape (at most {@link MAX_FILES} documents, each cut to
- * a budget) regardless of what the model would have chosen to look at.
+ * Metadata-field generation: read one entry as text - the file itself, or
+ * the top-level files of a folder - and ask the `GenerateMeta` model which
+ * custom metadata fields describe it. One model round, no tools — the files
+ * are read here, deterministically, so the request has a fixed shape (at
+ * most {@link MAX_FILES} documents, each cut to a budget) regardless of what
+ * the model would have chosen to look at.
  */
 
 import { markForwardHeadersToProvider } from "../requestContext.js";
@@ -59,14 +60,9 @@ import {
   totalChars,
 } from "./common.js";
 import type { Document, MetaSkipped, MetaSource } from "./common.js";
+import type { EntryKind } from "./portalMetadata.js";
 
-export {
-  MAX_FILES,
-  MAX_FOLDERS,
-  ModelCallError,
-  NoContentError,
-  NoProfileError,
-} from "./common.js";
+export { MAX_FILES, ModelCallError, NoContentError, NoProfileError } from "./common.js";
 /** Fields the answer carries at most — the portal holds 50 custom fields per entry. */
 const MAX_FIELDS = 50;
 /** A custom field name on the portal is at most 255 characters. */
@@ -85,8 +81,8 @@ export interface MetaField {
 }
 
 export interface GenerateMetaInput {
-  files: string[];
-  folders: string[];
+  kind: EntryKind;
+  id: string;
   prompt?: string;
 }
 
@@ -107,13 +103,19 @@ const SYSTEM_PROMPT = [
   'Reply with one JSON object only, no prose, no markdown, no code fences: {"fields":[{"name":"...","value":"..." or null}]}.',
 ].join("\n");
 
-function buildUserMessage(documents: Document[], prompt: string | undefined): string {
+function buildUserMessage(
+  kind: EntryKind,
+  documents: Document[],
+  prompt: string | undefined,
+): string {
   const parts: string[] = [];
   if (prompt) {
     parts.push(`The user is interested in these kinds of metadata fields:\n${prompt}\n`);
   }
   parts.push(
-    `There are ${documents.length} document(s). Propose the custom metadata fields for them.\n`,
+    kind === "file"
+      ? "Propose the custom metadata fields for the document below.\n"
+      : `Propose the custom metadata fields for the folder that holds the ${documents.length} document(s) below.\n`,
   );
   parts.push(formatDocuments(documents));
   return parts.join("\n");
@@ -168,7 +170,11 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
   }
 
   const skipped: MetaSkipped[] = [];
-  const files = await collectFiles(input.files, input.folders, skipped);
+  const files = await collectFiles(
+    input.kind === "file" ? [input.id] : [],
+    input.kind === "folder" ? [input.id] : [],
+    skipped,
+  );
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   try {
@@ -181,14 +187,14 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
     const prompt = input.prompt ? sanitizeInstruction(input.prompt).slice(0, MAX_PROMPT_CHARS) : "";
     const started = Date.now();
     logger.info(
-      `meta.generate: ${documents.length} document(s), ${totalChars(documents)} chars, ` +
+      `meta.generate: ${input.kind} ${input.id}, ${documents.length} document(s), ${totalChars(documents)} chars, ` +
         `profile "${profile.name}" (${profile.modelId})`,
     );
     const message = await runModel(
       {
         profile,
         systemPrompt: SYSTEM_PROMPT,
-        userMessage: buildUserMessage(documents, prompt || undefined),
+        userMessage: buildUserMessage(input.kind, documents, prompt || undefined),
       },
       controller.signal,
     );

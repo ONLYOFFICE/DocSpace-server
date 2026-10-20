@@ -36,8 +36,6 @@ import { isObject } from "../narrow.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import {
   generateMeta,
-  MAX_FILES,
-  MAX_FOLDERS,
   ModelCallError,
   NoContentError,
   NoProfileError,
@@ -51,51 +49,11 @@ function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
 }
 
-function asIdList(value: unknown, name: string): string[] {
-  if (value === undefined || value === null) {
-    return [];
-  }
-  if (!Array.isArray(value)) {
-    badRequest(`${name} must be an array of ids`);
-  }
-  const ids = value.map((item) => {
-    if (typeof item === "number" && Number.isInteger(item)) {
-      return String(item);
-    }
-    if (typeof item === "string" && item.trim()) {
-      return item.trim();
-    }
-    return badRequest(`${name} must contain non-empty string or integer ids`);
-  });
-  return [...new Set(ids)];
-}
-
-function asInput(body: unknown): GenerateMetaInput {
-  if (!isObject(body)) {
-    badRequest("body must be an object");
-  }
-  const files = asIdList(body["files"], "files");
-  const folders = asIdList(body["folders"], "folders");
-  const prompt = body["prompt"];
-  if (prompt !== undefined && prompt !== null && typeof prompt !== "string") {
-    badRequest("prompt must be a string");
-  }
-  if (files.length === 0 && folders.length === 0) {
-    badRequest("files or folders is required");
-  }
-  if (files.length > MAX_FILES) {
-    badRequest(`files holds at most ${MAX_FILES} ids`);
-  }
-  if (folders.length > MAX_FOLDERS) {
-    badRequest(`folders holds at most ${MAX_FOLDERS} ids`);
-  }
-  return { files, folders, prompt: typeof prompt === "string" ? prompt.trim() : undefined };
-}
-
-function asFillInput(body: unknown): FillMetaInput {
-  if (!isObject(body)) {
-    badRequest("body must be an object");
-  }
+// The entry both routes work on: one file or one folder, named by its table
+// and its integer id. Metadata lives on internal entries only (positive
+// integer ids); a third-party id has no metadata and the Files API would
+// answer 404 anyway.
+function asEntry(body: Record<string, unknown>): { kind: EntryKind; id: string } {
   const kind = body["kind"];
   if (kind !== "file" && kind !== "folder") {
     badRequest('kind must be "file" or "folder"');
@@ -107,16 +65,33 @@ function asFillInput(body: unknown): FillMetaInput {
       : typeof rawId === "string"
         ? rawId.trim()
         : "";
-  // Metadata lives on internal entries only (positive integer ids); a
-  // third-party id has no metadata to fill and the Files API would answer
-  // 404 anyway.
   if (!/^[1-9]\d*$/.test(id)) {
     badRequest("id must be the integer id of a file or folder");
   }
+  return { kind, id };
+}
+
+function asPrompt(body: Record<string, unknown>): string | undefined {
   const prompt = body["prompt"];
   if (prompt !== undefined && prompt !== null && typeof prompt !== "string") {
     badRequest("prompt must be a string");
   }
+  return typeof prompt === "string" ? prompt.trim() : undefined;
+}
+
+function asInput(body: unknown): GenerateMetaInput {
+  if (!isObject(body)) {
+    badRequest("body must be an object");
+  }
+  return { ...asEntry(body), prompt: asPrompt(body) };
+}
+
+function asFillInput(body: unknown): FillMetaInput {
+  if (!isObject(body)) {
+    badRequest("body must be an object");
+  }
+  const entry = asEntry(body);
+  const prompt = asPrompt(body);
   const overwrite = body["overwrite"];
   if (overwrite !== undefined && overwrite !== null && typeof overwrite !== "boolean") {
     badRequest("overwrite must be a boolean");
@@ -126,9 +101,8 @@ function asFillInput(body: unknown): FillMetaInput {
     badRequest("dryRun must be a boolean");
   }
   return {
-    kind: kind as EntryKind,
-    id,
-    prompt: typeof prompt === "string" ? prompt.trim() : undefined,
+    ...entry,
+    prompt,
     overwrite: overwrite === true,
     // Writing is opt-in: the user confirms the proposed values first.
     dryRun: dryRun !== false,
@@ -159,14 +133,7 @@ export const metaController = {
     // before any file of theirs is read.
     await assertAiAccess();
     const input = asInput(req.body);
-    // Attribute the model round to the first folder the request names (or
-    // its first file), the way every other model-bound route attributes its
-    // round to its scope.
-    if (input.folders[0] !== undefined) {
-      await primeSourceMeta(input.folders[0]);
-    } else if (input.files[0] !== undefined) {
-      await primeSourceMeta(input.files[0], "file");
-    }
+    await primeSourceMeta(input.id, input.kind);
     try {
       res.json(await generateMeta(input));
     } catch (err) {
