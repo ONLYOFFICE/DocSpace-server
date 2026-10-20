@@ -809,42 +809,72 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
     [UserMapping(Default = true)]
     public async Task<TenantQuota> MapDbQuotaToTenantQuota(DbQuota quota)
     {
-        var dto = Map(quota);
-        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = await Resolve(quota);
-        return dto;
+        if (quota == null)
+        {
+            return null;
+        }
+
+        return (await MapDbQuotaToTenantQuota([quota]))[0];
     }
 
+    /// <summary>
+    /// Maps the quotas and prices them for the current request: the prices of all the quotas are requested in one
+    /// call per payment kind (plan or wallet), and the region of the request is resolved once for the whole list.
+    /// </summary>
     public async Task<List<TenantQuota>> MapDbQuotaToTenantQuota(List<DbQuota> source)
     {
-        var result = new List<TenantQuota>(source.Count);
+        var result = source.Select(Map).ToList();
 
-        foreach (var quota in source)
+        var tenantManager = provider.GetService<TenantManager>();
+        var regionHelper = provider.GetService<RegionHelper>();
+
+        var prices = new Dictionary<bool, Dictionary<string, Dictionary<string, decimal>>>();
+
+        foreach (var group in source.Where(q => !string.IsNullOrEmpty(q.GetPaymentId())).GroupBy(q => q.Wallet))
         {
-            result.Add(await MapDbQuotaToTenantQuota(quota));
+            prices[group.Key] = await tenantManager.GetProductPriceInfoAsync(group.Select(q => q.GetPaymentId()).Distinct().ToList(), group.Key);
+        }
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        var currentRegion = defaultRegion;
+
+        if (prices.Count > 0)
+        {
+            // The region only comes out as non-default when some product has a price in its currency, which is why
+            // all the prices go in; it must never be null, or the region helper loads the whole quota list again.
+            var allPrices = prices
+                .SelectMany(kind => kind.Value.Select(price => (Key: $"{kind.Key}-{price.Key}", price.Value)))
+                .ToDictionary(price => price.Key, price => price.Value);
+
+            currentRegion = await regionHelper.GetCurrentRegionInfoAsync(allPrices);
+        }
+
+        for (var i = 0; i < source.Count; i++)
+        {
+            var quota = source[i];
+            var priceInfo = prices.GetValueOrDefault(quota.Wallet)?.GetValueOrDefault(quota.GetPaymentId() ?? string.Empty);
+
+            (result[i].Price, result[i].PriceCurrencySymbol, result[i].PriceISOCurrencySymbol) = Resolve(quota, priceInfo, currentRegion, defaultRegion);
         }
 
         return result;
     }
 
-    private async Task<(decimal, string, string)> Resolve(DbQuota source)
+    // A product priced in the currency of the request region gets that price; one without it falls back to the
+    // default region, as the region helper decides for a single product, and to the stored price after that.
+    private static (decimal, string, string) Resolve(DbQuota source, Dictionary<string, decimal> priceInfo, RegionInfo currentRegion, RegionInfo defaultRegion)
     {
-        var tenantManager = provider.GetService<TenantManager>();
-        var regionHelper = provider.GetService<RegionHelper>();
-
-        var productPaymentId = source.GetPaymentId();
-        var priceInfo = await tenantManager.GetProductPriceInfoAsync(productPaymentId, source.Wallet);
-
         if (priceInfo != null)
         {
-            var currentRegion = await regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } });
-
-            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
+            foreach (var region in new[] { currentRegion, defaultRegion })
             {
-                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
+                if (priceInfo.TryGetValue(region.ISOCurrencySymbol, out var price))
+                {
+                    return (price, region.CurrencySymbol, region.ISOCurrencySymbol);
+                }
             }
         }
 
-        var defaultRegion = regionHelper.GetDefaultRegionInfo();
         return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }
