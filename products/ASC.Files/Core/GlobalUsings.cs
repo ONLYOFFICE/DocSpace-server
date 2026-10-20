@@ -287,6 +287,7 @@ global using FileShare = ASC.Files.Core.Security.FileShare;
 global using FileType = ASC.Web.Core.Files.FileType;
 global using FormFieldsExtractor = ASC.Files.Core.Services.DocumentBuilderService.FormFieldsExtractor;
 global using FormFillingReportTask = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportTask;
+global using FormRecoveryTask = ASC.Files.Core.Services.DocumentBuilderService.FormRecoveryTask;
 global using HttpException = ASC.Common.Web.HttpException;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;

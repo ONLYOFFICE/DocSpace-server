@@ -55,4 +55,10 @@ internal static partial class FormRecoveryServiceLogger
 
     [LoggerMessage(LogLevel.Warning, "Form recovery: completed form {fileId} of form {formId} holds no form data, skipped")]
     public static partial void WarnRecoveryNoFormData(this ILogger<FormRecoveryService> logger, int fileId, int formId);
+
+    [LoggerMessage(LogLevel.Warning, "Form recovery: the search index could not be read, the new report of form {formId} gets no versions for the older versions of the form; delete the report and generate it again to build them")]
+    public static partial void WarnReportHistorySkipped(this ILogger<FormRecoveryTask> logger, int formId);
+
+    [LoggerMessage(LogLevel.Warning, "Form recovery: the report of form {formId} version {version} could not be built, the new report keeps the older versions before it; delete the report and generate it again to build them")]
+    public static partial void WarnReportHistoryStopped(this ILogger<FormRecoveryTask> logger, Exception exception, int formId, int version);
 }

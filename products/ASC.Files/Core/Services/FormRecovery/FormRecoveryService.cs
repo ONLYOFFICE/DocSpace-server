@@ -98,7 +98,7 @@ public class FormRecoveryService(
     }
 
     /// <summary>
-    /// The versions of the form with responses in the search index, oldest first; empty when the index cannot be read.
+    /// The versions of the form with responses in the search index, oldest first; null when the index cannot be read.
     /// </summary>
     public async Task<List<int>> GetVersionsWithResponsesAsync(int roomId, int originalFormId)
     {
@@ -115,7 +115,7 @@ public class FormRecoveryService(
                 .Where(s => s.OriginalFormVersion, version));
             if (!success)
             {
-                return [];
+                return null;
             }
 
             if (count > 0)

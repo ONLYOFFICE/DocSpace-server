@@ -148,11 +148,18 @@ public class FormRecoveryTask : DistributedTaskProgress
 
     // A new report file gets a version for each older version of the form with responses, oldest first, as a report kept
     // since the form was first filled has; the requested report of the current version comes last.
-    private async Task BuildReportHistoryAsync(IServiceProvider serviceProvider, FormRecoveryService recoveryService, ILogger logger)
+    // Only a new file can take them in order, since versions are added after the last one: a history that failed is built
+    // again by deleting the report and generating it anew, which the warnings say.
+    private async Task BuildReportHistoryAsync(IServiceProvider serviceProvider, FormRecoveryService recoveryService, ILogger<FormRecoveryTask> logger)
     {
-        var olderVersions = (await recoveryService.GetVersionsWithResponsesAsync(_reportData.RoomId, _reportData.OriginalFormId))
-            .Where(v => v < _reportData.OriginalFormVersion)
-            .ToList();
+        var versions = await recoveryService.GetVersionsWithResponsesAsync(_reportData.RoomId, _reportData.OriginalFormId);
+        if (versions == null)
+        {
+            logger.WarnReportHistorySkipped(_reportData.OriginalFormId);
+            return;
+        }
+
+        var olderVersions = versions.Where(v => v < _reportData.OriginalFormVersion).ToList();
         if (olderVersions.Count == 0)
         {
             return;
@@ -169,20 +176,16 @@ public class FormRecoveryTask : DistributedTaskProgress
 
             var version = olderVersions[i];
 
-            // Run here, one after another, since the versions of the file follow the order of the runs. The client follows
-            // only the requested report, so the progress of these only keeps the tasks alive in their queues.
-            var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
-            reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version, IsNewFile = isNewFile }, $"{Id}_v{version}");
-            reportTask.Publication = _ => HeartbeatAsync();
-            await reportTask.RunJob(CancellationToken);
+            // A failure of the builder is mostly a passing one, so a report is tried twice before the history stops.
+            var reportTask = await RunReportAsync(serviceProvider, version, isNewFile);
+            if (reportTask.Status != DistributedTaskStatus.Completed)
+            {
+                reportTask = await RunReportAsync(serviceProvider, version, isNewFile);
+            }
 
             if (reportTask.Status != DistributedTaskStatus.Completed)
             {
-                if (reportTask.Exception != null)
-                {
-                    logger.ErrorWithException(reportTask.Exception);
-                }
-
+                logger.WarnReportHistoryStopped(reportTask.Exception, _reportData.OriginalFormId, version);
                 break;
             }
 
@@ -191,6 +194,18 @@ public class FormRecoveryTask : DistributedTaskProgress
         }
 
         _reportData = _reportData with { IsNewFile = isNewFile };
+    }
+
+    // Run here, one after another, since the versions of the file follow the order of the runs. The client follows only the
+    // requested report, so the progress of these only keeps the tasks alive in their queues.
+    private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version, bool isNewFile)
+    {
+        var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
+        reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version, IsNewFile = isNewFile }, $"{Id}_v{version}");
+        reportTask.Publication = _ => HeartbeatAsync();
+        await reportTask.RunJob(CancellationToken);
+
+        return reportTask;
     }
 
     private Task ProgressAsync(double percentage)
