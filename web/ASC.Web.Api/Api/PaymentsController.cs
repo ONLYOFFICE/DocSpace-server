@@ -1573,21 +1573,20 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the portal's automatic wallet top-up settings: whether it is switched on, the balance that triggers
-    /// it, the balance it tops the wallet up to and the currency it charges in. Only a DocSpace administrator may
-    /// read it, no billing customer is needed, and the call is read-only. A portal that has never configured it gets
-    /// the defaults rather than an empty result, so `enabled` is the field that says whether anything happens at all.
-    /// Two of the values are kept by the portal itself and cannot be set through this API: `lowBalanceThreshold` is
-    /// the balance below which the portal warns its administrators by mail, and `lowBalanceNotified` says whether
-    /// that warning has already gone out for the current dip. Change the rest with
-    /// `POST api/2.0/portal/payment/topupsettings`.
+    /// Returns the price list of one wallet service as the accounting service keeps it: every price record with its
+    /// time unit, cost and resulting price, volume threshold, validity period, status and discount category. Take
+    /// the service name from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`. The caller must
+    /// be a DocSpace administrator, and the portal must have billing configured. The call is read-only and can be
+    /// repeated safely. By default the list also holds retired and not yet started records; `active=true` keeps only
+    /// the prices in force now. A service with no prices comes back as an empty list. Amounts are in the currency of
+    /// the service, which the records do not name. The list is cached for all portals for up to an hour, so a change
+    /// in the accounting service can take that long to appear. For the current price of every plan and wallet
+    /// service as the customer sees it, use `GET api/2.0/portal/payment/quotas`. An unknown service name fails with
+    /// 500, as does an unreachable accounting service.
     /// </remarks>
     /// <summary>
     /// Get the service prices from the accounting service
     /// </summary>
-    /// <remarks>
-    /// Returns the list of prices of the specified service from the accounting service.
-    /// </remarks>
     /// <path>api/2.0/portal/payment/accounting/prices/{serviceName}</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceDto>))]
