@@ -77,7 +77,9 @@ public class MoveBatchBugTests(
 
     /// <summary>
     /// Moving a file onto a same-named file with <c>Duplicate</c> must place it beside the existing
-    /// one under a numeric-suffixed name, as copy does. The bug leaves two entries with one title.
+    /// one under a numeric-suffixed name, as copy does. It used to leave two entries with one title: the
+    /// batched move skipped the conflict lookup for <c>Duplicate</c>, and the per-file move kept the title.
+    /// A conflicting file now always takes the per-file path, which gives it the first free title.
     /// </summary>
     [Fact]
     [Trait("Bug", "84437")]
@@ -124,6 +126,7 @@ public class MoveBatchBugTests(
     {
         return new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
             ConflictResolveType = conflictResolveType,
             FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),

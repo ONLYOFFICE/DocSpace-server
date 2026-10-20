@@ -161,6 +161,7 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         // the restore is a move out of the trash, back to where the file was
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(myDocumentsId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new BatchRequestDtoAllOfFileIds(file.Id)],
@@ -196,6 +197,7 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
 
         var results = (await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
@@ -252,6 +254,9 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
 
     private async Task DeleteAndWaitAsync(DeleteBatchRequestDto request)
     {
+        // only the started operation, so the wait follows it and not an older one listed first
+        request.ReturnSingleOperation = true;
+
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(request, TestContext.Current.CancellationToken)).Response;
 
         await WaitAsync(results);

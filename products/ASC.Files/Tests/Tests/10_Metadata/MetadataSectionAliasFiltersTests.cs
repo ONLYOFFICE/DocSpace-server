@@ -236,7 +236,8 @@ public class MetadataSectionAliasFiltersTests(AspireAppFixture fixture) : BaseTe
         {
             FolderIds = [new(data.FolderId)],
             FileIds = [new(data.MatchingFileId), new(data.BareFileId)],
-            Immediately = false
+            Immediately = false,
+            ReturnSingleOperation = true
         }, TestContext.Current.CancellationToken)).Response;
 
         if (results == null || results.Count == 0 || results.Any(r => !r.Finished))
