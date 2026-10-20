@@ -69,6 +69,10 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        String sampleDir = "samples" + File.separator + "docspace-api-sdk-swift-sample";
+        supportingFiles.add(new SupportingFile("sample_Package.swift.mustache", sampleDir, "Package.swift"));
+        supportingFiles.add(new SupportingFile("sample_main.mustache", sampleDir + File.separator + "Sources" + File.separator + "Sample", "main.swift"));
     }
 
     // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
@@ -249,9 +253,72 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         }
 
         String folderPath = apiFileFolder() + File.separator + tagParts.folderPart;
-        String filename = toApiFilename(tagParts.classPart) + suffix;
+        // SwiftPM names object files after the source file alone, so the same file name in two folders
+        // ("Files / Quota", "People / Quota") fails the build; such a name takes its folder as a prefix.
+        String classPart = isSharedClassPart(tagParts) ? tagParts.folderPart + tagParts.classPart : tagParts.classPart;
+        String filename = toApiFilename(classPart) + suffix;
 
         return folderPath + File.separator + filename;
+    }
+
+    private boolean isSharedClassPart(TagParts tagParts) {
+        return tagMap.values().stream()
+            .filter(t -> !t.folderPart.equals(tagParts.folderPart))
+            .anyMatch(t -> t.classPart.equalsIgnoreCase(tagParts.classPart));
+    }
+
+    // The document writes patterns for JavaScript; the base class wraps them in /.../ delimiters, which
+    // NSRegularExpression would read as literal slashes, and leaves \/ unescaped for the Swift string literal.
+    @Override
+    public String toRegularExpression(String pattern) {
+        if (pattern == null) {
+            return null;
+        }
+        return pattern.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    // A case named after a member every Swift type has (`X.Type`, `X.self`) cannot be declared or referenced.
+    private static final Set<String> TYPE_MEMBER_NAMES = new HashSet<>(Arrays.asList("Type", "Protocol", "self", "Self"));
+
+    @Override
+    protected void postProcessEnumVars(List<Map<String, Object>> enumVars) {
+        super.postProcessEnumVars(enumVars);
+        escapeTypeMemberNames(enumVars);
+    }
+
+    // x-enum-varnames are applied after postProcessEnumVars, so their names are checked once more here.
+    @Override
+    protected void updateEnumVarsWithExtensions(List<Map<String, Object>> enumVars, Map<String, Object> vendorExtensions, String dataType) {
+        super.updateEnumVarsWithExtensions(enumVars, vendorExtensions, dataType);
+        escapeTypeMemberNames(enumVars);
+    }
+
+    private void escapeTypeMemberNames(List<Map<String, Object>> enumVars) {
+        for (Map<String, Object> enumVar : enumVars) {
+            Object name = enumVar.get("name");
+            if (name instanceof String && TYPE_MEMBER_NAMES.contains(name)) {
+                enumVar.put("name", "_" + name);
+            }
+        }
+    }
+
+    // Swift6 only turns oneOf into an enum of alternatives; an anyOf schema came out as an empty struct
+    // that could not hold a value. For decoding and encoding the two are the same: the first type that fits.
+    @Override
+    public CodegenModel fromModel(String name, io.swagger.v3.oas.models.media.Schema model) {
+        CodegenModel codegenModel = super.fromModel(name, model);
+        if (codegenModel != null && codegenModel.oneOf.isEmpty() && !codegenModel.anyOf.isEmpty()
+            && codegenModel.vars.isEmpty()) {
+            codegenModel.oneOf.addAll(codegenModel.anyOf);
+            codegenModel.anyOf.clear();
+            codegenModel.vendorExtensions.put("x-is-one-of-interface", true);
+        }
+        // The document describes ApiDateTime as {utcTime, timeZoneOffset}, but the portal writes and reads it as
+        // one string ("2026-10-15T14:00:00.0000000+03:00"); modelApiDateTime.mustache decodes and encodes that.
+        if (codegenModel != null && codegenModel.classname != null && codegenModel.classname.endsWith("ApiDateTime")) {
+            codegenModel.vendorExtensions.put("x-is-api-date-time", true);
+        }
+        return codegenModel;
     }
 
     private String uniqueCaseInsensitiveString(String value, Map<String, String> seenValues) {

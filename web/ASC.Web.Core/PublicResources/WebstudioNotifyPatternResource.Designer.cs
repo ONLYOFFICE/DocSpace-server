@@ -3058,7 +3058,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You still have funds in your ${LetterLogoText} space (action needed by $BlockDateShort).
+        ///   Looks up a localized string similar to You still have funds in your ${LetterLogoText} space (action needed by $BlockDate).
         /// </summary>
         public static string subject_saas_owner_retention_wallet_warning {
             get {

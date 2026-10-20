@@ -355,6 +355,9 @@ internal class MetadataDao(
 
         await filesDbContext.SaveChangesAsync();
 
+        // the fields are part of the template: a field saved is the template modified
+        await filesDbContext.TouchMetadataTemplateByFieldAsync(tenantId, dbField.Id, userId, now);
+
         return ToField(dbField);
     }
 
@@ -400,6 +403,8 @@ internal class MetadataDao(
     public async Task DeleteFieldAsync(int fieldId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -409,6 +414,10 @@ internal class MetadataDao(
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
+
+            // the fields are part of the template: a field removed is the template modified; before the field row goes,
+            // the touch finds the template through it
+            await context.TouchMetadataTemplateByFieldAsync(tenantId, fieldId, userId, now);
 
             await context.MetadataValues
                 .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)

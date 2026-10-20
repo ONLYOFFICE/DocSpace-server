@@ -1096,6 +1096,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Opened By Document Builder Script: {0}.
+        /// </summary>
+        public static string FileOpenedByDocumentBuilder {
+            get {
+                return ResourceManager.GetString("FileOpenedByDocumentBuilder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Change: {0}.
         /// </summary>
         public static string FileOpenedForChange {

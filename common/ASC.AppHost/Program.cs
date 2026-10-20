@@ -83,6 +83,10 @@ switch (launchProfile)
             // Without it nothing persists them and every history endpoint - GET /files/file/{id}/log
             // and GET /files/folder/{id}/log - answers with an empty list whatever the test did.
             .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            // The backup API (schedule, history, start/restore requests) for ASC.Data.Backup.Tests, and
+            // the worker that receives the requested backups from the bus and writes the archives.
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddSocketIO()
             .AddIdentity();
 

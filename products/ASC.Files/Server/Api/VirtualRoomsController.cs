@@ -291,8 +291,8 @@ public class VirtualRoomsInternalController(
     /// outcome, which stays empty while the job is running. Starting the job again while it is still running returns
     /// the same record instead of a second job, so a retry is safe; a finished job is replaced by the new one. One
     /// job is kept per room. A form whose data cannot be exported does not stop the others: it comes back in `forms`
-    /// with `success` false and its own `error`. When the portal has no external database configured the call fails
-    /// and nothing is queued.
+    /// with `success` false and its own `error`. When the portal has no external database configured the call is
+    /// refused with 400 and nothing is queued.
     /// </remarks>
     /// <summary>Start external DB sync</summary>
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
@@ -300,7 +300,7 @@ public class VirtualRoomsInternalController(
     [SwaggerResponse(200, "The synchronization job record to poll", typeof(ExternalDbSyncTaskDto))]
     [SwaggerResponse(403, "The room is not a form filling room, or the caller cannot edit it")]
     [SwaggerResponse(404, "No folder with this ID exists")]
-    [SwaggerResponse(500, "The portal has no external database configured")]
+    [SwaggerResponse(400, "The portal has no external database configured")]
     [HttpPost("{id}/externalDbSync")]
     public async Task<ExternalDbSyncTaskDto> StartExternalDbSync(RoomIdRequestDto<int> inDto)
     {
@@ -1372,14 +1372,25 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Searches the rooms by metadata. The same filter the rooms listing takes in the "metadataTemplateId" and "metadataFilters"
-    /// query parameters, here as a typed request body for the clients that build the conditions as objects rather than as a JSON string.
+    /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
+    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
+    /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
+    /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
+    /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
+    /// section unfiltered. A caller sees only the rooms they created or were invited to, a DocSpace admin sees all of
+    /// them, so an empty page means nothing visible matched. The call changes nothing but the sort order: a `sortBy` value
+    /// is stored as the account's default order for later listings, and omitting it reuses the stored one. The rooms come
+    /// in `folders` while `files` stays empty, and `total` counts every match before `count` and `startIndex` page through
+    /// them. An unknown template or field, a field outside the named template, more than 20 conditions, an unrecognised
+    /// `sortBy` or a `count` out of range is refused with 400, a section the caller cannot read with 403. For the tag,
+    /// member, owner, storage, quota and privacy filters use `GET api/2.0/files/rooms`, which takes the same metadata
+    /// filter as a JSON string.
     /// </remarks>
     /// <summary>Search the rooms by metadata</summary>
     /// <path>api/2.0/files/rooms/search</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Returns the matching rooms of the section", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "Invalid metadata filter")]
+    [SwaggerResponse(400, "An unknown metadata template or field, a field outside the named template, more than 20 conditions, an unrecognised `sortBy` or a `count` out of range")]
     [SwaggerResponse(403, "You don't have enough permission to view the room content")]
     [HttpPost("rooms/search")]
     public async Task<FolderContentDto<int>> SearchRooms(RoomsMetadataSearchRequestDto inDto)

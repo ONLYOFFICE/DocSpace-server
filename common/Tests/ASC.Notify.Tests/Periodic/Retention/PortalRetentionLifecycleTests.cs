@@ -191,6 +191,34 @@ public class PortalRetentionLifecycleTests
     }
 
     [Fact]
+    public async Task RetentionLetter_GoesToAnAddressTheOwnerNeverConfirmed()
+    {
+        var stack = await LetterStackFixture.CurrentAsync();
+
+        using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
+        using var scope = await OpenScopeAsync(stack, portal.TenantId);
+
+        var services = scope.ServiceProvider;
+        var today = DateTime.UtcNow.Date;
+        var tenant = await services.GetRequiredService<TenantManager>().GetTenantAsync(portal.TenantId);
+        var owner = await services.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
+        var client = new RecordingNotifyClient();
+
+        // Idle for a month: the first warning is due.
+        await services.GetRequiredService<PortalRetentionJob>()
+            .ApplyAsync(PeriodicLetterContexts.Free(tenant, today, today.AddDays(-30)), today.AddYears(-1), client, _senderName);
+
+        var recipient = client.Sent.Should().ContainSingle().Which.Recipient.Should().BeAssignableTo<IDirectRecipient>().Subject;
+
+        recipient.CheckActivation.Should().BeFalse("the warning goes to the owner whether or not they confirmed their address");
+
+        // What the notify engine does with the recipient before it sends: the address survives it.
+        var filtered = await services.GetRequiredService<IRecipientProvider>().FilterRecipientAddressesAsync(recipient);
+
+        filtered.Addresses.Should().Equal(owner.Email);
+    }
+
+    [Fact]
     public async Task IdlePortal_IsBlocked_StopsAnswering_AndComesBackWithTheOwnersLink()
     {
         var stack = await LetterStackFixture.CurrentAsync();
