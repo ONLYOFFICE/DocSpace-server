@@ -429,7 +429,8 @@ public class MetadataValueRequest
     public string StringValue { get; set; }
 
     /// <summary>
-    /// The number value.
+    /// The number value: a whole number of at most 2^53-1 (9007199254740991) in magnitude, the largest integer a JSON
+    /// client reads exactly. A larger one is refused rather than stored and returned rounded.
     /// </summary>
     /// <example>150000</example>
     public long? NumberValue { get; set; }

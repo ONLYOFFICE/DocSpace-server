@@ -430,11 +430,12 @@ public class MetadataController(
     /// form filling only is refused. Every field must belong to a template the file carries, assigned with
     /// `PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from a cascading folder, and a field may be
     /// listed once. A value carries exactly the member of its type: `stringValue` for a text field of at most 8000
-    /// characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a choice field, a single option
-    /// for a single choice; an empty value clears the field. A date without a time zone offset is read as UTC. The write
+    /// characters, `numberValue` for a whole number of at most 2^53-1 in magnitude (the largest integer a JSON client
+    /// reads exactly), `dateValue` for a date, `optionIds` for a choice field, a single option for a single choice; an
+    /// empty value clears the field. A date without a time zone offset is read as UTC. The write
     /// finishes in the request, the file is re-indexed for the metadata filters at once. The custom text fields are not
     /// written here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer is the whole metadata of the
-    /// file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}` returns. A value of the wrong type,
+    /// file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}` returns. A value of the wrong type or beyond the number limit,
     /// a field of a template the file does not carry, a field listed twice or a custom field is answered with 400; a
     /// request with neither a session nor a link key with 401; a file the caller cannot edit with 403; a file or a field
     /// that does not exist with 404.
@@ -444,7 +445,7 @@ public class MetadataController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "The metadata of the file after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
-    [SwaggerResponse(400, "A value does not match the field type, a field is listed twice or is a custom field, or the field belongs to a template the file does not have")]
+    [SwaggerResponse(400, "A value does not match the field type or exceeds the number limit, a field is listed twice or is a custom field, or the field belongs to a template the file does not have")]
     [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The file or a field does not exist")]
@@ -462,11 +463,12 @@ public class MetadataController(
     /// room manager or a content creator); for a room that is its manager. Every field must belong to a template the
     /// folder carries, assigned with `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited from a
     /// cascading folder, and a field may be listed once. A value carries exactly the member of its type: `stringValue` for
-    /// a text field of at most 8000 characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a
-    /// choice field; an empty value clears the field. The write finishes in the request and touches the folder only: to
+    /// a text field of at most 8000 characters, `numberValue` for a whole number of at most 2^53-1 in magnitude (the
+    /// largest integer a JSON client reads exactly), `dateValue` for a date, `optionIds` for a choice field; an empty
+    /// value clears the field. The write finishes in the request and touches the folder only: to
     /// push the new values down a cascading folder run the cascade again with `Overwrite`. The custom text fields are written with
     /// `PUT api/2.0/files/metadata/folder/{folderId}/customFields`. The answer is the whole metadata of the folder after
-    /// the write. A value of the wrong type, a field listed twice, a custom field or a field of a template the folder
+    /// the write. A value of the wrong type or beyond the number limit, a field listed twice, a custom field or a field of a template the folder
     /// does not carry is answered with 400; a caller without the right to create in the folder with 403; a folder or a
     /// field that does not exist with 404.
     /// </remarks>
@@ -474,7 +476,7 @@ public class MetadataController(
     /// <path>api/2.0/files/metadata/folder/{folderId}/values</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "The metadata of the folder after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
-    [SwaggerResponse(400, "A value does not match the field type, a field is listed twice or is a custom field, or the field belongs to a template the folder does not have")]
+    [SwaggerResponse(400, "A value does not match the field type or exceeds the number limit, a field is listed twice or is a custom field, or the field belongs to a template the folder does not have")]
     [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "The folder or a field does not exist")]
     [HttpPut("metadata/folder/{folderId:int}/values")]
