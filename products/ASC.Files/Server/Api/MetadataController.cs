@@ -77,7 +77,7 @@ public class MetadataController(
     /// <summary>Create a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "New metadata template", typeof(MetadataTemplateDto))]
+    [SwaggerResponse(200, "The created template with its fields and the generated identifiers of their options", typeof(MetadataTemplateDto))]
     [SwaggerResponse(400, "An invalid template or field: a name in use, reserved or too long, an unknown field type, duplicate field names or wrong options")]
     [SwaggerResponse(403, "The caller is not a DocSpace admin")]
     [HttpPost("metadata/templates")]
@@ -99,8 +99,8 @@ public class MetadataController(
     /// <summary>Get a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Metadata template", typeof(MetadataTemplateDto))]
-    [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(200, "The template with its fields in display order and the options of its choice fields", typeof(MetadataTemplateDto))]
+    [SwaggerResponse(404, "No metadata template with this identifier exists on the portal")]
     [HttpGet("metadata/templates/{templateId:int}")]
     public async Task<MetadataTemplateDto> GetTemplate(MetadataTemplateIdRequestDto inDto)
     {
@@ -119,10 +119,10 @@ public class MetadataController(
     /// <summary>Update a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Updated metadata template", typeof(MetadataTemplateDto))]
+    [SwaggerResponse(200, "The whole template after the change, with its fields as they were", typeof(MetadataTemplateDto))]
     [SwaggerResponse(400, "A template with this name already exists, or the name is too long")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(404, "No metadata template with this identifier exists on the portal")]
     [HttpPut("metadata/templates/{templateId:int}")]
     public async Task<MetadataTemplateDto> UpdateTemplate(UpdateMetadataTemplateRequestDto inDto)
     {
@@ -142,9 +142,9 @@ public class MetadataController(
     /// <summary>Delete a metadata template</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "OK")]
+    [SwaggerResponse(200, "The template, its fields, its assignments and their values are deleted; the response carries no content")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(404, "No metadata template with this identifier exists on the portal, or it was already deleted")]
     [HttpDelete("metadata/templates/{templateId:int}")]
     public async Task DeleteTemplate(MetadataTemplateIdRequestDto inDto)
     {
@@ -163,10 +163,10 @@ public class MetadataController(
     /// <summary>Add a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "New metadata field", typeof(MetadataFieldDto))]
+    [SwaggerResponse(200, "The created field with the generated identifiers of its options", typeof(MetadataFieldDto))]
     [SwaggerResponse(400, "Invalid field: an empty, repeated or too long name, an unknown type, options on a non-choice field or a choice field without options")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(404, "No metadata template with this identifier exists on the portal")]
     [HttpPost("metadata/templates/{templateId:int}/fields")]
     public async Task<MetadataFieldDto> CreateField(CreateMetadataFieldRequestDto inDto)
     {
@@ -187,10 +187,10 @@ public class MetadataController(
     /// <summary>Update a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Updated metadata field", typeof(MetadataFieldDto))]
+    [SwaggerResponse(200, "The field after the change, with a generated identifier for every new option", typeof(MetadataFieldDto))]
     [SwaggerResponse(400, "Invalid field, a name another field of the template has, a type change on a field with values or the removal of an option in use")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Field not found")]
+    [SwaggerResponse(404, "The template does not exist, or it has no field with this identifier")]
     [HttpPut("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task<MetadataFieldDto> UpdateField(UpdateMetadataFieldRequestDto inDto)
     {
@@ -209,9 +209,9 @@ public class MetadataController(
     /// <summary>Delete a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "OK")]
+    [SwaggerResponse(200, "The field and every value written for it are deleted; the response carries no content")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Field not found")]
+    [SwaggerResponse(404, "The template does not exist, or it has no field with this identifier")]
     [HttpDelete("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task DeleteField(DeleteMetadataFieldRequestDto inDto)
     {
@@ -235,10 +235,10 @@ public class MetadataController(
     /// <path>api/2.0/files/metadata/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "File metadata", typeof(EntryMetadataDto))]
+    [SwaggerResponse(200, "The templates assigned to the file with their fields and values, and the custom fields of the file", typeof(EntryMetadataDto))]
     [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "File not found")]
+    [SwaggerResponse(404, "No file with this identifier exists")]
     [AllowAnonymous]
     [HttpGet("metadata/file/{fileId:int}")]
     public async Task<EntryMetadataDto> GetFileMetadata(FileIdRequestDto<int> inDto)
@@ -265,10 +265,10 @@ public class MetadataController(
     /// <path>api/2.0/files/metadata/folder/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Folder metadata", typeof(EntryMetadataDto))]
+    [SwaggerResponse(200, "The templates assigned to the folder with their fields, values and cascade state, and the custom fields of the folder", typeof(EntryMetadataDto))]
     [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Folder not found")]
+    [SwaggerResponse(404, "No folder or room with this identifier exists")]
     [AllowAnonymous]
     [HttpGet("metadata/folder/{folderId:int}")]
     public async Task<EntryMetadataDto> GetFolderMetadata(FolderIdRequestDto<int> inDto)
@@ -290,7 +290,7 @@ public class MetadataController(
     /// <summary>Assign templates to a file</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/templates</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "OK")]
+    [SwaggerResponse(200, "The templates are assigned to the file, the ones it already carried are skipped; the response carries no content")]
     [SwaggerResponse(400, "The request body cannot be read or has no `templateIds`")]
     [SwaggerResponse(403, "The caller cannot edit the file")]
     [SwaggerResponse(404, "The file or one of the templates does not exist")]
@@ -344,7 +344,7 @@ public class MetadataController(
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/progress</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when the folder has no cascade to report", typeof(MetadataOperationDto))]
-    [SwaggerResponse(404, "Folder not found")]
+    [SwaggerResponse(404, "No folder or room with this identifier exists")]
     [HttpGet("metadata/folder/{folderId:int}/templates/progress")]
     public async Task<MetadataOperationDto> GetCascadeProgress(FolderIdRequestDto<int> inDto)
     {
@@ -361,7 +361,7 @@ public class MetadataController(
     /// <summary>Unassign a template from a file</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "OK")]
+    [SwaggerResponse(200, "The template and the values of its fields are removed from the file; the response carries no content")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The file or the template does not exist")]
     [HttpDelete("metadata/file/{fileId:int}/templates/{templateId:int}")]
@@ -384,7 +384,7 @@ public class MetadataController(
     /// <summary>Unassign a template from a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "OK")]
+    [SwaggerResponse(200, "The template and its values are removed from the folder, and a cascade of it from this folder stops; the response carries no content")]
     [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "The folder or the template does not exist")]
     [HttpDelete("metadata/folder/{folderId:int}/templates/{templateId:int}")]
@@ -504,7 +504,7 @@ public class MetadataController(
     [SwaggerResponse(200, "The custom fields of the file with their values", typeof(List<CustomFieldValueDto>))]
     [SwaggerResponse(400, "Invalid custom fields or too many of them")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "File not found")]
+    [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpPut("metadata/file/{fileId:int}/customFields")]
     public async Task<List<CustomFieldValueDto>> SetFileCustomFields(SetFileCustomFieldsRequestDto<int> inDto)
     {
@@ -530,7 +530,7 @@ public class MetadataController(
     [SwaggerResponse(200, "The custom fields of the folder with their values", typeof(List<CustomFieldValueDto>))]
     [SwaggerResponse(400, "Invalid custom fields or too many of them")]
     [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
-    [SwaggerResponse(404, "Folder not found")]
+    [SwaggerResponse(404, "No folder or room with this identifier exists")]
     [HttpPut("metadata/folder/{folderId:int}/customFields")]
     public async Task<List<CustomFieldValueDto>> SetFolderCustomFields(SetFolderCustomFieldsRequestDto<int> inDto)
     {

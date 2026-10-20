@@ -48,7 +48,7 @@ public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionL
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
+        letter.Subject.Should().Contain(Day(BlockOn, scope), "the block is up to a year away, so the subject names the full date with its year");
 
         letter.Body.Should().Contain(Day(DueOn, scope))
             .And.Contain(Day(BlockOn, scope))
@@ -61,7 +61,7 @@ public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionL
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by {ShortDay(BlockOn, scope)})");
+        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by Monday, November 2, 2026)");
 
         letter.Body.Should().Contain("Your subscription has ended, but your space and funds are still here")
             .And.Contain("ended on <strong")
