@@ -333,19 +333,43 @@ export function totalChars(documents: Document[]): number {
 }
 
 // The model is told to answer with a bare object, but a code fence or a
-// sentence around it is common enough to tolerate: take the outermost braces.
+// sentence around it is common enough to tolerate: take the first balanced
+// object. Braces inside JSON strings are skipped, and a brace in prose after
+// the object does not move its end.
 export function parseJsonObject(text: string): Record<string, unknown> | undefined {
   const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) {
+  if (start < 0) {
     return undefined;
   }
-  try {
-    const parsed: unknown = JSON.parse(text.slice(start, end + 1));
-    return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : undefined;
-  } catch {
-    return undefined;
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i += 1) {
+    const char = text[i];
+    if (inString) {
+      if (char === "\\") {
+        i += 1;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+    } else if (char === "{") {
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          const parsed: unknown = JSON.parse(text.slice(start, i + 1));
+          return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+            ? (parsed as Record<string, unknown>)
+            : undefined;
+        } catch {
+          return undefined;
+        }
+      }
+    }
   }
+  return undefined;
 }

@@ -189,6 +189,14 @@ describe("formatDocuments and parseJsonObject", () => {
   it("takes the outermost object out of fences and prose, and rejects anything else", () => {
     expect(parseJsonObject('```json\n{"a":1}\n```')).toEqual({ a: 1 });
     expect(parseJsonObject('Here you go: {"a":{"b":[1,2]}} thanks')).toEqual({ a: { b: [1, 2] } });
+    expect(parseJsonObject('{"fields":[{"name":"A","value":"x"}]} Note: see {above}')).toEqual({
+      fields: [{ name: "A", value: "x" }],
+    });
+    expect(parseJsonObject('{"a":"brace } inside","b":"quote \\" inside"} trailing }')).toEqual({
+      a: "brace } inside",
+      b: 'quote " inside',
+    });
+    expect(parseJsonObject('{"a":1')).toBeUndefined();
     expect(parseJsonObject("[1,2]")).toBeUndefined();
     expect(parseJsonObject("{not json}")).toBeUndefined();
     expect(parseJsonObject("")).toBeUndefined();

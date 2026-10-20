@@ -701,8 +701,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiMetaGenerate: {
     "400":
       "`kind` is not `file` or `folder`, `id` is not an integer id, or `prompt` is not a string.",
-    "403": "The caller cannot open the folder.",
-    "404": "The folder does not exist.",
+    "403": "The caller cannot open the entry.",
+    "404": "The entry does not exist.",
     "422":
       "The folder holds no files, or the content could not be read as text; `skipped` says why for each file.",
     "429": "The model provider is rate-limiting requests.",

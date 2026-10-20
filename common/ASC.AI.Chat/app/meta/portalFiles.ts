@@ -357,6 +357,9 @@ class OperationWatcher {
         waiter.reject(new Error(`conversion failed: ${found.error}`));
       } else if (found.finished) {
         waiter.resolve(found);
+      } else {
+        // Seen again: only consecutive misses count as lost.
+        waiter.misses = 0;
       }
     }
     this.schedule();

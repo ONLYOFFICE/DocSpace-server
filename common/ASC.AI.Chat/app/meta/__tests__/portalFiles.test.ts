@@ -281,6 +281,43 @@ describe("PortalTextReader", () => {
     expect(polls).toBe(2);
   }, 10_000);
 
+  it("counts only consecutive misses, so an operation that flickers out of the list survives", async () => {
+    let polls = 0;
+    const { fetchMock } = fakeFetch([
+      settingsRoute,
+      {
+        match: (url) => url.endsWith("/fileops/bulkdownload"),
+        answer: () => portalJson([operation("op-1")]),
+      },
+      {
+        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        answer: () => {
+          polls += 1;
+          // Missing on polls 1, 3 and 5 (three misses, never consecutive),
+          // finished on poll 6.
+          if (polls % 2 === 1 && polls < 6) {
+            return portalJson([]);
+          }
+          return portalJson([
+            operation(
+              "op-1",
+              polls >= 6
+                ? { finished: true, url: "https://x/filehandler.ashx?a=1" }
+                : { progress: 40 },
+            ),
+          ]);
+        },
+      },
+      { match: (url) => url.includes("filehandler.ashx"), answer: () => textResponse("ok") },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+    const reader = new PortalTextReader(new AbortController().signal);
+    await expect(reader.readFileAsText({ id: "1", title: "a.docx", ext: ".docx" })).resolves.toBe(
+      "ok",
+    );
+    expect(polls).toBe(6);
+  }, 10_000);
+
   it("reports an operation that is born with an error", async () => {
     const { fetchMock } = fakeFetch([
       settingsRoute,

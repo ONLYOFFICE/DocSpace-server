@@ -29,6 +29,7 @@ vi.mock("../portalFiles.js", () => ({
 }));
 
 const { storage } = await import("../../storage/index.js");
+const portalFiles = await import("../portalFiles.js");
 const { listFolderFiles } = await import("../portalFiles.js");
 const { generateMeta, NoContentError, NoProfileError, parseFields } =
   await import("../generateMeta.js");
@@ -146,6 +147,16 @@ describe("generateMeta", () => {
     const failure = await generateMeta({ kind: "folder", id: "7" }).catch((e: unknown) => e);
     expect(failure).toBeInstanceOf(NoContentError);
     expect((failure as Error).message).toBe("The selection holds no files");
+  });
+
+  it("answers 404 and 403 for a single file the caller cannot open, like meta/fill does", async () => {
+    vi.mocked(portalFiles.getPortalFile).mockResolvedValueOnce(undefined);
+    await expect(generateMeta({ kind: "file", id: "9" })).rejects.toMatchObject({ status: 404 });
+    vi.mocked(portalFiles.getPortalFile).mockRejectedValueOnce(
+      new FakeDocspaceApiHttpError(403, "Forbidden", "u"),
+    );
+    await expect(generateMeta({ kind: "file", id: "9" })).rejects.toMatchObject({ status: 403 });
+    expect(customSync).not.toHaveBeenCalled();
   });
 
   it("answers an empty field list when the model does not follow the format", async () => {

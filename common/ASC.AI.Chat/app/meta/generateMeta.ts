@@ -175,6 +175,21 @@ export async function generateMeta(input: GenerateMetaInput): Promise<GenerateMe
     input.kind === "folder" ? [input.id] : [],
     skipped,
   );
+  // A single file the caller cannot open is the request's failure, answered
+  // the way a folder's is (and the way meta/fill answers), not a 422 about an
+  // unreadable selection.
+  if (input.kind === "file" && files.length === 0) {
+    const reason = skipped[0]?.reason;
+    if (reason === "not_found") {
+      throw Object.assign(new Error("The file does not exist"), { status: 404, expose: true });
+    }
+    if (reason === "forbidden") {
+      throw Object.assign(new Error("The caller cannot read the file"), {
+        status: 403,
+        expose: true,
+      });
+    }
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   try {
