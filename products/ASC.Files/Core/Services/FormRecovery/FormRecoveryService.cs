@@ -50,9 +50,6 @@ public class FormRecoveryService(
 {
     private const int LookupBatchSize = 1000;
 
-    // A run holds the report back until it ends, so the rest of a large loss is left for the next report.
-    private const int MaxSubmissionsPerRun = 100;
-
     // A file that fails this often is not read through the builder again until it gets a new version.
     private const int MaxRecoveryAttempts = 3;
 
@@ -81,13 +78,14 @@ public class FormRecoveryService(
     }
 
     /// <summary>
-    /// Best effort: a failure is logged, and the report is built from what the index holds.
+    /// Best effort: a failure is logged, and the report is built from what the index holds. The progress, the share of the
+    /// forms read from 0 to 1, is reported for every form, so that the caller can show it through a long run.
     /// </summary>
-    public async Task RecoverAsync(int roomId, int originalFormId, CancellationToken cancellationToken)
+    public async Task RecoverAsync(int roomId, int originalFormId, Func<double, Task> progress, CancellationToken cancellationToken)
     {
         try
         {
-            await RecoverFormAsync(roomId, originalFormId, cancellationToken);
+            await RecoverFormAsync(roomId, originalFormId, progress, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -99,7 +97,57 @@ public class FormRecoveryService(
         }
     }
 
-    private async Task RecoverFormAsync(int roomId, int originalFormId, CancellationToken cancellationToken)
+    /// <summary>
+    /// The versions of the form with responses in the search index, oldest first; empty when the index cannot be read.
+    /// </summary>
+    public async Task<List<int>> GetVersionsWithResponsesAsync(int roomId, int originalFormId)
+    {
+        var history = await daoFactory.GetFileDao<int>().GetFileHistoryAsync(originalFormId).Select(v => v.Version).ToListAsync();
+
+        await factoryIndexerForm.RefreshAsync();
+
+        var versions = new List<int>();
+        foreach (var version in history.Distinct().Order())
+        {
+            var (success, count) = await factoryIndexerForm.TryCountAsync(r => r
+                .Where(s => s.RoomId, roomId)
+                .Where(s => s.OriginalFormId, originalFormId)
+                .Where(s => s.OriginalFormVersion, version));
+            if (!success)
+            {
+                return [];
+            }
+
+            if (count > 0)
+            {
+                versions.Add(version);
+            }
+        }
+
+        return versions;
+    }
+
+    /// <summary>
+    /// Sets whether the next report of the form starts a new version of its file, as a change of the form does.
+    /// </summary>
+    public async Task SetReportVersionChangedAsync(int roomId, int originalFormId, bool changed)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, originalFormId)))
+        {
+            var properties = await fileDao.GetProperties(originalFormId);
+            if (properties?.FormFilling == null || properties.FormFilling.IsVersionChanged == changed)
+            {
+                return;
+            }
+
+            properties.FormFilling.IsVersionChanged = changed;
+            await fileDao.SaveProperties(originalFormId, properties);
+        }
+    }
+
+    private async Task RecoverFormAsync(int roomId, int originalFormId, Func<double, Task> progress, CancellationToken cancellationToken)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -118,7 +166,7 @@ public class FormRecoveryService(
             return;
         }
 
-        var orphans = await FindOrphansAsync(fileDao, doneFolder);
+        var orphans = await FindOrphansAsync(fileDao, doneFolder, originalFormId);
         if (orphans.Count == 0)
         {
             return;
@@ -132,9 +180,12 @@ public class FormRecoveryService(
             .ToList();
         var recoveredVersions = new HashSet<int>();
 
-        foreach (var orphan in orphans.Take(MaxSubmissionsPerRun))
+        for (var i = 0; i < orphans.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            await progress((double)i / orphans.Count);
+
+            var orphan = orphans[i];
 
             var (outcome, version) = (RecoveryOutcome.Failed, 0);
             try
@@ -176,8 +227,8 @@ public class FormRecoveryService(
     }
 
     // Empty when the index cannot be read, so that a failed query does not make every form look missing.
-    // A file that failed too often is left out until it gets a new version.
-    private async Task<List<File<int>>> FindOrphansAsync(IFileDao<int> fileDao, Folder<int> doneFolder)
+    // A file that failed too often is left out until it gets a new version, and so is a response of another form.
+    private async Task<List<File<int>>> FindOrphansAsync(IFileDao<int> fileDao, Folder<int> doneFolder, int originalFormId)
     {
         // A file put here by hand may lack the form category, so the extension decides.
         var completed = await fileDao.GetFilesAsync(doneFolder.Id, null, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false)
@@ -219,6 +270,11 @@ public class FormRecoveryService(
             orphans.AddRange(files.Where(f =>
             {
                 var formFilling = properties.GetValueOrDefault(f.Id)?.FormFilling;
+                if (formFilling is { OriginalFormId: not 0 } && formFilling.OriginalFormId != originalFormId)
+                {
+                    return false;
+                }
+
                 return formFilling?.RecoveryFailedVersion != f.Version || (formFilling.RecoveryFailedAttempts ?? 0) < MaxRecoveryAttempts;
             }));
         }
@@ -277,14 +333,19 @@ public class FormRecoveryService(
             return (RecoveryOutcome.Unrecoverable, 0);
         }
 
-        // A completed form does not record its version: the newest one with the same fields is taken, and a file matching
-        // none is skipped, since the report lays the values out by the columns of the version.
+        // A completed form does not record its version. A draft of an older version cannot be submitted, so the response is
+        // of the version current when it was sent: the newest one saved by then, tried first, since versions often share
+        // their fields. If its fields differ, the newest version with the same fields is taken, and a file matching none
+        // is skipped, since the report lays the values out by the columns of the version.
+        var currentOnSubmission = versions.LastOrDefault(v => v.File.ModifiedOn <= orphan.CreateOn);
+
         FormVersion version = null;
-        for (var i = versions.Count - 1; i >= 0 && version == null; i--)
+        foreach (var candidate in versions.AsEnumerable().Reverse().OrderByDescending(v => v == currentOnSubmission))
         {
-            if ((await GetVersionKeysAsync(versions[i], cancellationToken)).SetEquals(keys))
+            if ((await GetVersionKeysAsync(candidate, cancellationToken)).SetEquals(keys))
             {
-                version = versions[i];
+                version = candidate;
+                break;
             }
         }
 
