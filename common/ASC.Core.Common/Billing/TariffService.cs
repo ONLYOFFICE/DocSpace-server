@@ -74,6 +74,7 @@ public class TariffService(
     private const int MaxTopUpAttempts = 5;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan _productPriceCacheDuration = TimeSpan.FromHours(1);
+    private static readonly TimeSpan _productPriceMemoryCacheDuration = TimeSpan.FromMinutes(5);
 
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
@@ -763,7 +764,7 @@ public class TariffService(
 
                 foreach (var productId in ids)
                 {
-                    var cached = await hybridCache.TryGetAsync<Dictionary<string, decimal>>(GetProductPriceCacheKey(partnerId, wallet, productId));
+                    var cached = await hybridCache.TryGetAsync<Dictionary<string, decimal>>(GetProductPriceCacheKey(partnerId, wallet, productId), SetProductPriceCacheOptions);
                     if (cached.HasValue)
                     {
                         result.Add(productId, cached.Value);
@@ -785,7 +786,7 @@ public class TariffService(
                         var price = prices.GetValueOrDefault(productId) ?? [];
 
                         result.Add(productId, price);
-                        await hybridCache.SetAsync(GetProductPriceCacheKey(partnerId, wallet, productId), price, _productPriceCacheDuration);
+                        await hybridCache.SetAsync(GetProductPriceCacheKey(partnerId, wallet, productId), price, SetProductPriceCacheOptions);
                     }
                 }
 
@@ -833,6 +834,14 @@ public class TariffService(
         }
 
         return result;
+    }
+
+    // A price lives an hour in Redis but only minutes in process memory, so a price key deleted in Redis reaches
+    // every service without a restart. Reads pass the same options: a value read from Redis with the defaults
+    // would be copied into memory for the whole hour.
+    private static void SetProductPriceCacheOptions(FusionCacheEntryOptions options)
+    {
+        options.SetDuration(_productPriceCacheDuration).SetMemoryCacheDuration(_productPriceMemoryCacheDuration);
     }
 
     // Prices depend on the partner and the payment system, not on the portal: the key carries no tenant id,

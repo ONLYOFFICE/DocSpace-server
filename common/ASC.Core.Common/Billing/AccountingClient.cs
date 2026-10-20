@@ -36,7 +36,11 @@ namespace ASC.Core.Billing;
 [Scope]
 public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
-    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromHours(1);
+
+    // Prices are kept in Redis; the copy in process memory lives shorter, so a price key deleted in Redis
+    // reaches every service within this time, without a restart.
+    private static readonly TimeSpan _priceMemoryCacheDuration = TimeSpan.FromMinutes(5);
     private const string ServiceCatalogPricesCacheKey = "accounting-service-catalog-prices";
     private const string ApprovedServiceStatus = "Approved";
     private const string DefaultCurrencyCode = "USD";
@@ -181,7 +185,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             }
 
             return await accountingApi.GetServicePricesAsync(serviceInfo.Id, active);
-        }, opt => opt.SetDuration(_servicePricesCacheDuration));
+        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetMemoryCacheDuration(_priceMemoryCacheDuration));
     }
 
     private static string GetServicePricesCacheKey(string serviceName, bool active)
@@ -236,7 +240,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             }
 
             return result;
-        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetFailSafe(true));
+        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetMemoryCacheDuration(_priceMemoryCacheDuration).SetFailSafe(true));
     }
 
     private void EnsureConfigured()
