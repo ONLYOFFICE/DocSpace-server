@@ -1675,6 +1675,13 @@ public static class AccountingHttpClientExtension
             return new AccountingNotFoundException($"Accounting resource not found {content}");
         }
 
+        // A limit that does not exist is answered with 404 on a read but with 400 on an update or a deletion; both mean
+        // the same, and only this one 400 must not be confused with a threshold the accounting service rejects.
+        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest && IsServiceLimitNotFound(content))
+        {
+            return new AccountingNotFoundException($"Accounting resource not found {content}");
+        }
+
         // A charge or a reservation refused by a spending limit; a 403 without this title means our API client lacks
         // the access level, which stays a plain failure.
         if (response.StatusCode == HttpStatusCode.Forbidden && content.Contains(ServiceLimitExceededTitle, StringComparison.OrdinalIgnoreCase))
@@ -1738,6 +1745,14 @@ public static class AccountingHttpClientExtension
         return path != null &&
                (path.EndsWith("/serviceLimit", StringComparison.OrdinalIgnoreCase) ||
                 path.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsServiceLimitNotFound(string content)
+    {
+        var detail = GetProblemDetail(content);
+
+        return detail.StartsWith("Service limit", StringComparison.OrdinalIgnoreCase) &&
+               detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsCustomerNotFound(HttpStatusCode status, string content)

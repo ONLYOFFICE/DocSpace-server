@@ -405,6 +405,18 @@ public class AccountingClientServiceLimitTests
     }
 
     [Fact]
+    public async Task UpdateServiceLimit_UnknownId_ThrowsNotFound()
+    {
+        // A read of a missing limit answers 404, an update or a deletion 400 with this detail; both mean the same.
+        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+            """{"title":"Bad request","status":400,"detail":"Service limit '42' not found","instance":"/api/serviceLimit"}"""));
+
+        var act = async () => await client.UpdateServiceLimitAsync(42, 1m, null, null);
+
+        await act.Should().ThrowExactlyAsync<AccountingNotFoundException>();
+    }
+
+    [Fact]
     public async Task GetTotalServiceLimit_UnknownCustomer_ThrowsCustomerNotFoundWithoutRetry()
     {
         var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,

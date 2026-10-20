@@ -1906,11 +1906,21 @@ public class TariffService(
             return null;
         }
 
-        var updated = await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
-
-        await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
-
-        return updated;
+        try
+        {
+            return await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
+        }
+        catch (AccountingNotFoundException exception)
+        {
+            // Deleted by a concurrent request between the owner check and the update. A threshold the accounting service
+            // rejects is a mistake of the caller and is not caught here.
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+        finally
+        {
+            await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
+        }
     }
 
     public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
@@ -1949,10 +1959,9 @@ public class TariffService(
         {
             await accountingClient.DeleteServiceLimitAsync(id);
         }
-        catch (AccountingException exception) when (exception is AccountingBadRequestException or AccountingCustomerNotFoundException)
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
         {
-            // Deleted by a concurrent request between the owner check and the deletion: the accounting service answers
-            // a deletion of a limit it does not have with 400.
+            // Deleted by a concurrent request between the owner check and the deletion.
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             return null;
         }

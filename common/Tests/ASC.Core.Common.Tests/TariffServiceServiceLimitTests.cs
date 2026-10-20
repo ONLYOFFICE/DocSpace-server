@@ -55,6 +55,10 @@ public class TariffServiceServiceLimitTests
     private const string UserB = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
     private const string UserC = "16fd2706-8baf-433b-82eb-8c7fada847da";
 
+    // How the accounting service answers an update or a deletion of a limit it does not have.
+    private const string ServiceLimitNotFoundBody =
+        """{"title":"Bad request","status":400,"detail":"Service limit '42' not found","instance":"/api/serviceLimit"}""";
+
     [Fact]
     public async Task GetServiceLimit_LimitOfThisPortal_ReturnsIt()
     {
@@ -161,13 +165,43 @@ public class TariffServiceServiceLimitTests
         // The accounting service answers a deletion of a limit it does not have with 400, not 404.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => request.Method == HttpMethod.Delete
-                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Service limit 42 does not exist"}""")
+                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, 42);
 
         deleted.Should().BeNull();
         handler.CallCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task UpdateServiceLimit_AlreadyDeletedByAConcurrentRequest_ReturnsNull()
+    {
+        // The accounting service answers an update of a limit it does not have with 400, not 404.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Put
+                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
+                : ServiceLimitResponse(OwnAccountNumber));
+
+        var updated = await tariffService.UpdateServiceLimitAsync(TenantId, 42, 100m, null, null);
+
+        updated.Should().BeNull();
+        handler.CallCount.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task UpdateServiceLimit_RejectedThreshold_ThrowsBadRequest()
+    {
+        // A 400 that explains a mistake of the caller must reach the caller, not turn into "limit not found".
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Put
+                ? AccountingClientTests.Json(HttpStatusCode.BadRequest,
+                    """{"title":"Bad request","status":400,"detail":"Services of group 'ai-services' have different units, a quantity threshold can not be set"}""")
+                : ServiceLimitResponse(OwnAccountNumber));
+
+        var act = async () => await tariffService.UpdateServiceLimitAsync(TenantId, 42, null, 1000, null);
+
+        await act.Should().ThrowExactlyAsync<AccountingBadRequestException>();
     }
 
     [Fact]
