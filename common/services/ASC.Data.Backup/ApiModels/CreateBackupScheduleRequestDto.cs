@@ -62,8 +62,8 @@ public class CreateBackupScheduleRequestDto
     public int? BackupsStored { get; set; }
 
     /// <summary>
-    /// When the backup runs. It is required: a request without it fails rather than falling back to a
-    /// default.
+    /// When the backup runs. It is required: a request without it is rejected rather than falling back to
+    /// a default.
     /// </summary>
     /// <example>{"period": "EveryDay", "hour": 2}</example>
     public BackupCronRequest CronParams { get; set; }
@@ -97,9 +97,8 @@ public class BackupCronRequest
 
     /// <summary>
     /// The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the
-    /// day of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is
-    /// stored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent
-    /// without it fails.
+    /// day of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - a weekly or monthly
+    /// schedule sent without it is rejected.
     /// </summary>
     /// <example>1</example>
     public int? Day { get; set; }

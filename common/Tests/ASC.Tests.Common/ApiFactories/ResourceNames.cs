@@ -48,6 +48,8 @@ public static class ResourceNames
     public const string Files = "onlyoffice-files";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
+    public const string Backup = "onlyoffice-data-backup";
+    public const string BackupWorker = "onlyoffice-data-backup-worker";
 
     /// <summary>
     /// Audit-event persistence: Web.Studio hosts the only subscriber to

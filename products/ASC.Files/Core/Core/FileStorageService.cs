@@ -2689,7 +2689,8 @@ public class FileStorageService //: IFileStorageService
         var file = await GetFileAsync(fileId, -1);
         var result = new FileLinkDto { FileType = FileUtility.GetFileExtension(file.Title), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)) };
 
-        result.Token = documentServiceHelper.GetSignature(result);
+        // The document service reads the signed payload by its own field names (fileType, url), not by the JSON of the response
+        result.Token = documentServiceHelper.GetSignature(new { fileType = result.FileType, url = result.Url });
 
         return result;
     }
@@ -6284,7 +6285,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.StartSyncAsync(roomId)
-            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+            ?? throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
     }
 
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)

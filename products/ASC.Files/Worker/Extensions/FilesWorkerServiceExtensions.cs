@@ -91,6 +91,7 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<FileDuplicateOperation>(10);
         services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
+        services.RegisterQueue<FileBuilderOperation>(10, timeUntilUnregisterInSeconds: FileBuilderOperation.TimeUntilUnregisterInSeconds);
         services.RegisterQueue<FormFillingReportTask>();
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
@@ -153,6 +154,8 @@ public static class FilesWorkerServiceExtensions
                 BulkDownloadIntegrationEventHandler>(),
             eventBus.SubscribeAsync<MarkAsReadIntegrationEvent,
                 MarkAsReadIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FileBuilderIntegrationEvent,
+                FileBuilderIntegrationEventHandler>(),
             eventBus.SubscribeAsync<EmptyTrashIntegrationEvent,
                 EmptyTrashIntegrationEventHandler>(),
             eventBus.SubscribeAsync<FormFillingReportIntegrationEvent,

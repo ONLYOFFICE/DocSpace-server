@@ -351,7 +351,14 @@ public static class ServiceCollectionExtension
                         retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                     }
 
-                    return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, sp, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
+                    ushort prefetchCount = 10;
+
+                    if (!string.IsNullOrEmpty(cfg["core:eventBus:prefetchCount"]))
+                    {
+                        prefetchCount = ushort.Parse(cfg["core:eventBus:prefetchCount"]);
+                    }
+
+                    return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, sp, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount, prefetchCount);
                 });
             }
             else if (activeMqConfiguration != null)

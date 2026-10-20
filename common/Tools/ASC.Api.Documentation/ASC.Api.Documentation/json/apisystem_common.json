@@ -2666,10 +2666,11 @@
               "Transfering",
               "Restoring",
               "Migrating",
-              "Encryption"
+              "Encryption",
+              "Blocked"
             ],
             "type": "string",
-            "description": "[Active - Active, Suspended - Suspended, RemovePending - Remove pending, Transfering - Transfering, Restoring - Restoring, Migrating - Migrating, Encryption - Encryption]"
+            "description": "[Active - Active, Suspended - Suspended, RemovePending - Remove pending, Transfering - Transfering, Restoring - Restoring, Migrating - Migrating, Encryption - Encryption, Blocked - Blocked]"
           },
           {
             "examples": [
@@ -2682,10 +2683,11 @@
               3,
               4,
               5,
-              6
+              6,
+              7
             ],
             "type": "integer",
-            "description": "[0 - Active, 1 - Suspended, 2 - Remove pending, 3 - Transfering, 4 - Restoring, 5 - Migrating, 6 - Encryption]",
+            "description": "[0 - Active, 1 - Suspended, 2 - Remove pending, 3 - Transfering, 4 - Restoring, 5 - Migrating, 6 - Encryption, 7 - Blocked]",
             "x-enum-varnames": [
               "Active",
               "Suspended",
@@ -2693,7 +2695,8 @@
               "Transfering",
               "Restoring",
               "Migrating",
-              "Encryption"
+              "Encryption",
+              "Blocked"
             ]
           }
         ],

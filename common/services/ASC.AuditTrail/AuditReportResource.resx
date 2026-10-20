@@ -435,6 +435,9 @@
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Files [{0}]. Moved With Overwriting From Folder "{1}" To Folder: "{2}"</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>File Opened By Document Builder Script: {0}</value>
+  </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>File Opened For Change: {0}</value>
   </data>
