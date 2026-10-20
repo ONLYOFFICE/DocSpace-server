@@ -574,7 +574,8 @@ public class CustomFieldRequest
 public class SearchFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder or room to search in; take the id from a listing such as `GET api/2.0/files/@root`. A numeric id
+    /// addresses a folder of the portal, a string one a folder in a connected third-party storage.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
