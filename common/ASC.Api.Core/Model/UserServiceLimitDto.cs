@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Models;
 
 /// <summary>
 /// The spending limit on the AI services in force for one user: the user's personal limit, or else the limit for every
-/// user, together with what the user spent against it.
+/// user, together with what the user spent against it in the current period.
 /// </summary>
 public class UserServiceLimitDto
 {
@@ -60,40 +60,44 @@ public class UserServiceLimitDto
     public decimal? AmountValue { get; init; }
 
     /// <summary>
-    /// The currency `amountValue` is expressed in; null when the limit has no money threshold.
+    /// The money the AI services cost the user in the current period, in `currency`; 0 when nothing was spent yet,
+    /// including a user who has never used the AI services.
+    /// </summary>
+    /// <example>12.5</example>
+    public decimal AmountConsumed { get; init; }
+
+    /// <summary>
+    /// The currency `amountValue` and `amountConsumed` are expressed in; null when the limit has no money threshold.
     /// </summary>
     /// <example>USD</example>
     public string Currency { get; init; }
 
     /// <summary>
-    /// The largest quantity the AI services may consume for the user per period, in `serviceUnit`; null when the limit
-    /// has no quantity threshold.
-    /// </summary>
-    /// <example>1000</example>
-    public int? QuantityValue { get; init; }
-
-    /// <summary>
-    /// The unit `quantityValue` is expressed in; null when the limit has no quantity threshold.
-    /// </summary>
-    /// <example>request</example>
-    public string ServiceUnit { get; init; }
-
-    /// <summary>
-    /// The window the thresholds apply to. It resets at the start of the next day, week or month in UTC (a week on
+    /// The window the threshold applies to. It resets at the start of the next day, week or month in UTC (a week on
     /// Monday), not a fixed time after the first charge; a lifetime limit never resets.
     /// </summary>
     /// <example>Day</example>
     public ServiceLimitPeriod Period { get; init; }
 
     /// <summary>
-    /// What the user spent against the limit in the current period and what is left. Null when the user has not used
-    /// the AI services yet, so there is nothing counted against the limit.
+    /// The moment the current period ends and the spending starts over from zero, in UTC. Null for a lifetime limit,
+    /// which never resets, and for a user who has never used the AI services, whose period has not started.
     /// </summary>
-    public ServiceLimitUsageDto Usage { get; init; }
+    /// <example>2026-10-20T23:59:59.9999999Z</example>
+    public DateTime? PeriodEnd { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class UserServiceLimitDtoMapper
 {
+    [MapPropertyFromSource(nameof(UserServiceLimitDto.AmountConsumed), Use = nameof(GetAmountConsumed))]
+    [MapProperty(nameof(@ServiceLimit.Usage.PeriodEnd), nameof(UserServiceLimitDto.PeriodEnd))]
     public static partial UserServiceLimitDto ToUserServiceLimitDto(this ServiceLimit source);
+
+    // The limit for every user comes without usage for a user the accounting service has not met yet; a nested path
+    // to a non-nullable target would make the generated code throw there instead of reporting nothing spent.
+    private static decimal GetAmountConsumed(ServiceLimit source)
+    {
+        return source.Usage?.AmountConsumed ?? 0;
+    }
 }
