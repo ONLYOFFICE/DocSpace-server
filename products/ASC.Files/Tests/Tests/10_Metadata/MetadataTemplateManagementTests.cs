@@ -216,6 +216,69 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
         reloaded.Field("Status").Options.Select(o => o.Value).Should().BeEquivalentTo(["Draft", "Signed"]);
     }
 
+    [Fact]
+    public async Task ChangingAField_MovesTheModifiedDateOfTheTemplate()
+    {
+        var api = await ArrangeAsync();
+        var template = await api.CreateTemplateAsync("Touched " + Suffix(),
+            [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var modifiedOn = template.ModifiedOn;
+
+        // the fields are part of the template, so a field added, changed or removed used to leave the template's
+        // "last modified" where the last rename had put it
+        await NextSecondAsync();
+        var created = await api.CreateFieldAsync(template.Id, new MetadataFieldPayload { Name = "Amount", Type = NumberType }, TestContext.Current.CancellationToken);
+        modifiedOn = await AssertTemplateModifiedAfterAsync(api, template.Id, modifiedOn, "a field was added");
+
+        await NextSecondAsync();
+        await api.UpdateFieldAsync(template.Id, created.Id, new { name = "Amount USD" }, TestContext.Current.CancellationToken);
+        modifiedOn = await AssertTemplateModifiedAfterAsync(api, template.Id, modifiedOn, "a field was renamed");
+
+        await NextSecondAsync();
+        await api.DeleteFieldAsync(template.Id, created.Id, TestContext.Current.CancellationToken);
+        await AssertTemplateModifiedAfterAsync(api, template.Id, modifiedOn, "a field was removed");
+    }
+
+    [Fact]
+    public async Task SetValues_LeavesTheModifiedDateOfTheTemplate()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+        var template = await api.CreateTemplateAsync("Untouched " + suffix,
+            [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Untouched {suffix}");
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+
+        // read back rather than taken from the create response: the stored date has a precision of one second
+        var modifiedOn = (await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken)).ModifiedOn;
+
+        // a value is a change of the entry, not of the template
+        await NextSecondAsync();
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Client").Id, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+
+        var reloaded = await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        reloaded.ModifiedOn.Should().Be(modifiedOn);
+    }
+
+    /// <summary>
+    /// The modified date is stored with a precision of one second: a change made in the same second as the previous one
+    /// would not move it.
+    /// </summary>
+    private static Task NextSecondAsync()
+    {
+        return Task.Delay(TimeSpan.FromMilliseconds(1100), TestContext.Current.CancellationToken);
+    }
+
+    private async Task<DateTimeOffset> AssertTemplateModifiedAfterAsync(MetadataApiClient api, int templateId, DateTimeOffset previous, string because)
+    {
+        var reloaded = await api.GetTemplateAsync(templateId, TestContext.Current.CancellationToken);
+
+        reloaded.ModifiedOn.Should().BeAfter(previous, because);
+        reloaded.ModifiedBy!.Id.Should().Be(Owner.Id);
+
+        return reloaded.ModifiedOn;
+    }
+
     private async Task<MetadataApiClient> ArrangeAsync()
     {
         await _filesClient.Authenticate(Owner);

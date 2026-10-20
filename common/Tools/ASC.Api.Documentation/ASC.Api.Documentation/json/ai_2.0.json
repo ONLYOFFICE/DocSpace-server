@@ -417,6 +417,9 @@
               }
             }
           },
+          "404": {
+            "description": "The AI agent is not found"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -550,16 +553,16 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, or `chatSettings` is sent for a room that is not an AI agent"
+            "description": "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, or a tag name is empty"
           },
           "402": {
             "description": "The new logo or watermark image does not fit into the portal storage quota"
           },
           "403": {
-            "description": "The caller may not edit the agent, the agent does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded"
+            "description": "The caller may not edit the agent, the agent lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded"
           },
           "404": {
-            "description": "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists"
+            "description": "The AI agent is not found, or the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists"
           },
           "500": {
             "description": "`logo.width` or `logo.height` is larger than 2147483647"
@@ -1619,7 +1622,7 @@
           "AI / Settings"
         ],
         "summary": "Get the tool permission mode",
-        "description": "Returns how tool calls made by the model are approved for the current user. The stored mode applies to every\r\nchat of the user in the portal; while nothing is stored, the default mode is returned.",
+        "description": "Returns how tool calls made by the model are approved for the current user. The stored mode applies to every\r\nchat of the user in the portal; while nothing is stored, the default mode is returned. Available to DocSpace\r\nadmins, room admins and users; guests are refused.",
         "operationId": "getToolPermissionMode",
         "responses": {
           "200": {
@@ -1642,6 +1645,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "AI is disabled for the portal, or the caller is a guest"
           },
           "401": {
             "description": "Unauthorized",
@@ -1714,7 +1720,7 @@
           "AI / Settings"
         ],
         "summary": "Set the tool permission mode",
-        "description": "Stores how tool calls made by the model are approved for the current user. The mode applies to every chat of the\r\nuser in the portal and replaces the one stored before. A value outside the declared members is rejected rather\r\nthan coerced.",
+        "description": "Stores how tool calls made by the model are approved for the current user. The mode applies to every chat of the\r\nuser in the portal and replaces the one stored before. Available to DocSpace admins, room admins and users; guests\r\nare refused. A value outside the declared members is rejected rather than coerced.",
         "operationId": "setToolPermissionMode",
         "requestBody": {
           "description": "The tool permission mode parameters.",
@@ -1752,6 +1758,9 @@
           },
           "400": {
             "description": "The mode is not one of the declared members"
+          },
+          "403": {
+            "description": "AI is disabled for the portal, or the caller is a guest"
           },
           "401": {
             "description": "Unauthorized",
@@ -3091,6 +3100,17 @@
                   "format": "int32"
                 },
                 "description": "The IDs of the metadata templates assigned to the file entry."
+              },
+              "metadataMatches": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to.",
+                  "$ref": "#/components/schemas/MetadataMatchDto"
+                },
+                "description": "Where the search text of the listing was met in the metadata of the entry: one item per string value holding\r\nthe text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose\r\nmetadata contain it; an entry found by its title alone carries nothing here."
               }
             }
           }
@@ -3259,10 +3279,11 @@
               "MarkAsRead",
               "Import",
               "Convert",
-              "Duplicate"
+              "Duplicate",
+              "Build"
             ],
             "type": "string",
-            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]"
+            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate, Build - Build]"
           },
           {
             "examples": [
@@ -3276,10 +3297,11 @@
               4,
               5,
               6,
-              7
+              7,
+              8
             ],
             "type": "integer",
-            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate, 8 - Build]",
             "x-enum-varnames": [
               "Move",
               "Copy",
@@ -3288,7 +3310,8 @@
               "MarkAsRead",
               "Import",
               "Convert",
-              "Duplicate"
+              "Duplicate",
+              "Build"
             ]
           }
         ],
@@ -3528,7 +3551,6 @@
                 }
               ]
             ],
-            "type": "null",
             "description": "The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries\r\nthe identifier, the title and the folder and room types, and folders the caller cannot read are left out, so\r\nthe chain can be shorter than the real depth."
           },
           "startIndex": {
@@ -3629,7 +3651,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates and default templates sections always report 0, because the number is not collected for them.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -3637,7 +3659,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates\r\nsections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
                 "format": "int32"
               },
               "isShareable": {
@@ -4149,6 +4171,54 @@
           }
         },
         "description": "The part of an uploaded picture to use as the logo."
+      },
+      "MetadataMatchDto": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "examples": [
+              3
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The ID of the metadata template the matching field belongs to. Null for a custom field, which belongs to no\r\ntemplate the API shows.",
+            "format": "int32"
+          },
+          "fieldId": {
+            "examples": [
+              12
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The ID of the matching template field. Null for a custom field, which is addressed by its name alone.",
+            "format": "int32"
+          },
+          "fieldName": {
+            "examples": [
+              "Client"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name of the matching field: the template field or the custom field as it is shown in the entry metadata."
+          },
+          "value": {
+            "examples": [
+              "ACME Corporation"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The stored value that holds the searched text, as it was written, not only the matching part of it."
+          }
+        },
+        "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",

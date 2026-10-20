@@ -157,6 +157,17 @@ public class MetadataFilterOperatorsTests(AspireAppFixture fixture) : BaseTest(f
     }
 
     [Fact]
+    public async Task NumberBound_BeyondTheSafeInteger_ReturnsBadRequest()
+    {
+        var data = await ArrangeAsync();
+
+        // 2^53: a 64-bit integer, but past what a JSON client reads exactly and past what a stored value may hold
+        using var response = await data.ResponseAsync(data.Condition(AmountField, "lt", "9007199254740992"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task NumberBound_WithoutAValue_ReturnsBadRequest()
     {
         var data = await ArrangeAsync();

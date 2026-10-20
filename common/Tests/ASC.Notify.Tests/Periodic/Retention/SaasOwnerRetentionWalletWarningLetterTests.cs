@@ -46,7 +46,7 @@ public class SaasOwnerRetentionWalletWarningLetterTests : PortalRetentionLetterT
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
+        letter.Subject.Should().Contain(Day(BlockOn, scope), "the block is up to a year away, so the subject names the full date with its year");
 
         letter.Body.Should().Contain(Day(BlockOn, scope))
             .And.Contain(ShortDay(BlockOn, scope))
@@ -58,7 +58,7 @@ public class SaasOwnerRetentionWalletWarningLetterTests : PortalRetentionLetterT
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by {ShortDay(BlockOn, scope)})");
+        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by Monday, November 2, 2026)");
 
         letter.Body.Should().Contain("since anyone signed in to your")
             .And.Contain("there are still funds left in its")

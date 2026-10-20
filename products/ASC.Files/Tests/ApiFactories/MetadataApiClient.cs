@@ -821,6 +821,7 @@ public class MetadataTemplateResponse
     public bool Visible { get; init; }
     public MetadataUserResponse? CreateBy { get; init; }
     public MetadataUserResponse? ModifiedBy { get; init; }
+    public DateTimeOffset ModifiedOn { get; init; }
     public List<MetadataFieldResponse> Fields { get; init; } = [];
 
     public MetadataFieldResponse Field(string name)
