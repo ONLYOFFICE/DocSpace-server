@@ -110,12 +110,41 @@ public class UserWebhookDtoHelper(
             result.QuotaLimit = null;
             result.IsCustomQuota = null;
 
-            if (await userManager.IsUserAsync(subscriberId.Value) || await userManager.IsGuestAsync(subscriberId.Value))
+            if (await IsWithoutContactsAccessAsync(subscriberId))
             {
                 result.Groups = null;
                 result.Department = null;
+                result.ProfileUrl = null;
             }
         }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Whether the subscription owner is a User or a Guest: the readers the REST API shows neither the groups nor
+    /// the profile link of another user. The profile link is a people search by email (bug 81093), so it would
+    /// hand them an address they have no access to. A subscription without an owner is not restricted.
+    /// </summary>
+    public async Task<bool> IsWithoutContactsAccessAsync(Guid? subscriberId)
+    {
+        return subscriberId.HasValue && (await userManager.IsUserAsync(subscriberId.Value) || await userManager.IsGuestAsync(subscriberId.Value));
+    }
+
+    /// <summary>
+    /// The summary as a subscriber without contacts access may receive it: without the profile link, unless the
+    /// summary is the subscriber themselves. The summary is shared by every subscriber of the event, so it is
+    /// copied rather than changed.
+    /// </summary>
+    public static UserSummaryWebhookDto RestrictSummaryForSubscriber(UserSummaryWebhookDto summary, Guid subscriberId)
+    {
+        if (summary?.ProfileUrl == null || summary.Id == subscriberId)
+        {
+            return summary;
+        }
+
+        var result = summary.Clone();
+        result.ProfileUrl = null;
 
         return result;
     }

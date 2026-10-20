@@ -39,8 +39,6 @@ public interface IWebhookPublisher
 
     Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId);
 
-    Task PublishAsync<TSource, TPayload, TId>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source, Func<Task<TPayload>> payloadFactory, TId dataId);
-
     Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog);
 }
 

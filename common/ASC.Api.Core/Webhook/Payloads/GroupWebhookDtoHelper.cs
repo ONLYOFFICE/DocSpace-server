@@ -57,4 +57,22 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
 
         return result;
     }
+
+    /// <summary>
+    /// Cuts the payload for one subscription owner: a User or a Guest gets the manager without the profile link,
+    /// as the REST API shows it to them.
+    /// </summary>
+    public async Task<GroupWebhookDto> RestrictForSubscriberAsync(GroupWebhookDto payload, Guid? subscriberId)
+    {
+        if (payload.Manager == null || !await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId))
+        {
+            return payload;
+        }
+
+        var result = payload.Clone();
+
+        result.Manager = UserWebhookDtoHelper.RestrictSummaryForSubscriber(payload.Manager, subscriberId.Value);
+
+        return result;
+    }
 }

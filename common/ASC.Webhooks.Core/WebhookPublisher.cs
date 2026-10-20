@@ -118,23 +118,6 @@ public class WebhookPublisher(
         }
     }
 
-    public async Task PublishAsync<TSource, TPayload, TId>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source, Func<Task<TPayload>> payloadFactory, TId dataId)
-    {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, source);
-
-        if (webhookConfigs.Count == 0)
-        {
-            return;
-        }
-
-        var payload = await payloadFactory();
-
-        foreach (var config in webhookConfigs)
-        {
-            _ = await PublishAsync(trigger, config, payload, dataId);
-        }
-    }
-
     private async Task<DbWebhooksLog> PublishAsync<TPayload, TId>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, TPayload data, TId dataId)
     {
         var payload = new WebhookPayload<TPayload, TId>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);

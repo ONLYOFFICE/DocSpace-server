@@ -71,6 +71,52 @@ public class FileEntryWebhookDtoHelper(
         };
     }
 
+    /// <summary>
+    /// Cuts a payload built by <see cref="GetAsync{T}"/> for one subscription owner: a User or a Guest gets the
+    /// author and the last editor without the profile link, as the REST API shows them to them.
+    /// </summary>
+    public async Task<object> RestrictForSubscriberAsync<T>(object payload, Guid? subscriberId)
+    {
+        if (payload is not FileEntryWebhookDto<T> entry || !await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId))
+        {
+            return payload;
+        }
+
+        return RestrictForSubscriber(entry, subscriberId.Value);
+    }
+
+    /// <summary>
+    /// The form.submit counterpart of <see cref="RestrictForSubscriberAsync{T}(object, Guid?)"/>.
+    /// </summary>
+    public async Task<FormSubmitWebhookDto<T>> RestrictForSubscriberAsync<T>(FormSubmitWebhookDto<T> payload, Guid? subscriberId)
+    {
+        if (!await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId))
+        {
+            return payload;
+        }
+
+        return new FormSubmitWebhookDto<T>
+        {
+            OriginalForm = (FileWebhookDto<T>)RestrictForSubscriber(payload.OriginalForm, subscriberId.Value),
+            SubmittedForm = (FileWebhookDto<T>)RestrictForSubscriber(payload.SubmittedForm, subscriberId.Value)
+        };
+    }
+
+    private static FileEntryWebhookDto<T> RestrictForSubscriber<T>(FileEntryWebhookDto<T> entry, Guid subscriberId)
+    {
+        if (entry == null)
+        {
+            return null;
+        }
+
+        var result = entry.Clone();
+
+        result.CreatedBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(entry.CreatedBy, subscriberId);
+        result.UpdatedBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(entry.UpdatedBy, subscriberId);
+
+        return result;
+    }
+
     public async Task<FileWebhookDto<T>> GetFileAsync<T>(File<T> file)
     {
         var extension = FileUtility.GetFileExtension(file.Title);

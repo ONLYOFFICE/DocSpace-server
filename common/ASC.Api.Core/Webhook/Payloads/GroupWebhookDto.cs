@@ -90,6 +90,11 @@ public class GroupWebhookDto
     /// </summary>
     /// <example>0</example>
     public int MembersCount { get; set; }
+
+    internal GroupWebhookDto Clone()
+    {
+        return (GroupWebhookDto)MemberwiseClone();
+    }
 }
 
 /// <summary>

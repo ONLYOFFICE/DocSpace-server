@@ -55,6 +55,10 @@ public sealed class PortalClients : PortalClientsBase
     public UserStatusApi UserStatusApi { get; }
     public GroupApi GroupApi { get; }
 
+    // Files service — the file events the webhook payload tests publish
+    public HttpClient FilesHttpClient { get; }
+    public RawApiClient Files { get; }
+
     // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
     public HttpClient WebhookReceiverHttpClient { get; }
 
@@ -108,6 +112,9 @@ public sealed class PortalClients : PortalClientsBase
         ApiKeysApi = new ApiKeysApi(PeopleHttpClient, peopleConfig);
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+
+        FilesHttpClient = CreateClient(ResourceNames.Files);
+        Files = new RawApiClient(FilesHttpClient);
 
         WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 

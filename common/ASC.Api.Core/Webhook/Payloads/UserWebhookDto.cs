@@ -309,6 +309,11 @@ public class UserSummaryWebhookDto
     /// </summary>
     /// <example>https://example.com/profile/user123</example>
     public string ProfileUrl { get; set; }
+
+    internal UserSummaryWebhookDto Clone()
+    {
+        return (UserSummaryWebhookDto)MemberwiseClone();
+    }
 }
 
 /// <summary>

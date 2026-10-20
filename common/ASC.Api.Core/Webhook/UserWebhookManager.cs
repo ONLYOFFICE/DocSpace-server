@@ -97,7 +97,22 @@ public class UserWebhookManager(
 
         var payload = await groupWebhookDtoHelper.GetAsync(groupInfo);
 
-        return () => webhookPublisher.PublishAsync(trigger, webhookConfigs, payload, groupInfo.ID);
+        var publications = new List<Func<Task>>();
+
+        foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
+        {
+            var subscriberPayload = await groupWebhookDtoHelper.RestrictForSubscriberAsync(payload, subscriberConfigs.Key);
+
+            publications.Add(() => webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, groupInfo.ID));
+        }
+
+        return async () =>
+        {
+            foreach (var publish in publications)
+            {
+                await publish();
+            }
+        };
     }
 }
 

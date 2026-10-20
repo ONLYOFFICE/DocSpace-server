@@ -44,7 +44,9 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
         [
             ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization,
             // the webhook delivery tests: Web.Studio runs the sender, WireMock is the subscriber it sends to
-            ResourceNames.WebStudio, ResourceNames.WebhookReceiver
+            ResourceNames.WebStudio, ResourceNames.WebhookReceiver,
+            // the file events of the webhook payload tests
+            ResourceNames.Files
         ];
 
     protected override PortalClients CreateClients(PortalContext context)

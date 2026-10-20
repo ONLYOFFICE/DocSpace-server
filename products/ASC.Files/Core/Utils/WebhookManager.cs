@@ -59,7 +59,7 @@ public class WebhookManager(
 
         var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
 
-        await webhookPublisher.PublishAsync(trigger, webhookConfigs, payload, fileEntry.Id);
+        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync<T>);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
@@ -74,14 +74,51 @@ public class WebhookManager(
                 return;
             }
 
-            await webhookPublisher.PublishAsync(trigger, formChecker, formData, () => GetFormSubmitPayloadAsync(formData), formData.OriginalForm.Id);
+            var formConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, formChecker, formData);
+
+            if (formConfigs.Count == 0)
+            {
+                return;
+            }
+
+            var formPayload = await GetFormSubmitPayloadAsync(formData);
+
+            await PublishForSubscribersAsync(trigger, formConfigs, formPayload, formData.OriginalForm.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync);
             return;
         }
 
         var checker =  serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var pureFileEntry = await GetPureFileEntry(fileEntry) ?? fileEntry;
 
-        await webhookPublisher.PublishAsync(trigger, checker, pureFileEntry, () => fileEntryWebhookDtoHelper.GetAsync(pureFileEntry), pureFileEntry.Id);
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, pureFileEntry);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return;
+        }
+
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
+
+        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync<T>);
+    }
+
+    /// <summary>
+    /// The payload is built once per event, but what it may show depends on the subscription owner (the profile
+    /// links of the users in it), so each owner's subscriptions get the payload cut for that owner.
+    /// </summary>
+    private async Task PublishForSubscribersAsync<TPayload, TId>(
+        WebhookTrigger trigger,
+        IEnumerable<DbWebhooksConfig> webhookConfigs,
+        TPayload payload,
+        TId dataId,
+        Func<TPayload, Guid?, Task<TPayload>> restrictForSubscriber)
+    {
+        foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
+        {
+            var subscriberPayload = await restrictForSubscriber(payload, subscriberConfigs.Key);
+
+            await webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, dataId);
+        }
     }
 
     private async Task<FormSubmitWebhookDto<T>> GetFormSubmitPayloadAsync<T>(SubmittedFormData<T> formData)

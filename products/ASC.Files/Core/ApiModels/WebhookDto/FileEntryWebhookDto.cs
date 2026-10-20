@@ -164,4 +164,9 @@ public abstract class FileEntryWebhookDto<T>
     /// </summary>
     /// <example>1</example>
     public int Order { get; set; }
+
+    internal FileEntryWebhookDto<T> Clone()
+    {
+        return (FileEntryWebhookDto<T>)MemberwiseClone();
+    }
 }
