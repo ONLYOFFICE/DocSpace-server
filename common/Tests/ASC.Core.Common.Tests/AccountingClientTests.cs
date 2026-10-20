@@ -236,6 +236,64 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetProductPriceInfo_LoadsApprovedCatalogInOneRequest_AndLeavesUnknownServicesOut()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 3,
+            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"), ("disk-storage-1-hour", 0.14m, "EUR"))));
+
+        var prices = await client.GetProductPriceInfoAsync(["backup", "disk-storage-1-hour", "unknown"]);
+
+        handler.CallCount.Should().Be(1);
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/service");
+
+        var query = ParseQuery(handler.LastUri);
+        query["status"].Should().Be("Approved");
+        query["limit"].Should().Be("100");
+        query["offset"].Should().Be("0");
+
+        prices.Keys.Should().BeEquivalentTo("backup", "disk-storage-1-hour");
+        prices["backup"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 10m });
+        prices["disk-storage-1-hour"].Should().Equal(new Dictionary<string, decimal> { ["EUR"] = 0.14m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_SecondCall_IsServedFromCachedCatalog()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
+            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"))));
+
+        await client.GetProductPriceInfoAsync(["backup"]);
+        var prices = await client.GetProductPriceInfoAsync(["ai-tools"]);
+
+        handler.CallCount.Should().Be(1);
+        prices["ai-tools"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 0m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_CatalogLargerThanPage_ReadsEveryPage()
+    {
+        var offsets = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            var offset = ParseQuery(request.RequestUri!)["offset"];
+            offsets.Add(offset);
+
+            // 150 services: the first page holds 100 of them, the second the remaining 50.
+            var services = Enumerable.Range(int.Parse(offset), offset == "0" ? 100 : 50)
+                .Select(i => ($"service-{i}", (decimal)i, "USD"))
+                .ToArray();
+
+            return Json(HttpStatusCode.OK, ServicesPage(150, services));
+        });
+
+        var prices = await client.GetProductPriceInfoAsync(["service-0", "service-149"]);
+
+        offsets.Should().Equal("0", "100");
+        prices["service-149"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 149m });
+    }
+
+    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
@@ -433,6 +491,14 @@ public class AccountingClientTests
     private static string OperationsPage(int count, int totalQuantity)
     {
         return $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("""{"service":"backup"}""", count))}}],"totalQuantity":{{totalQuantity}}}""";
+    }
+
+    private static string ServicesPage(int totalQuantity, params (string Name, decimal Price, string Currency)[] services)
+    {
+        var items = services.Select(s =>
+            $$$"""{"name":"{{{s.Name}}}","priceValue":{{{s.Price.ToString(CultureInfo.InvariantCulture)}}},"currency":{"code":"{{{s.Currency}}}"}}""");
+
+        return $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""";
     }
 
     private static HttpResponseMessage Json(HttpStatusCode status, string json)

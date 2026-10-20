@@ -87,6 +87,15 @@ public interface IAccountingApi
     [Get("/service/{serviceName}/name")]
     Task<ServiceInfo> GetServiceInfoAsync(string serviceName);
 
+    /// <summary>
+    /// The service catalog with the unit price and the currency of every service, page by page; paging as in
+    /// <see cref="GetCustomerOperationPages"/>. <paramref name="status"/> filters by the approval status of the
+    /// service (Draft, Approved, Rejected), <paramref name="limit"/> is the page size.
+    /// </summary>
+    [Get("/service")]
+    [Paged(Items = nameof(ServiceReport.Collection), Total = nameof(ServiceReport.TotalQuantity))]
+    PagedEnumerable<ServiceReport, ServiceInfo> GetServicePages([Query] string status, [Query] int limit, [PageToken, AliasAs("offset")] int offset = 0);
+
     [Get("/price/service/{serviceId}")]
     Task<List<ServicePriceInfo>> GetServicePricesAsync(int serviceId, [Query] bool active);
 }

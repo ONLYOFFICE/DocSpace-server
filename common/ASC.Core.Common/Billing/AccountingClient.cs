@@ -37,6 +37,10 @@ namespace ASC.Core.Billing;
 public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
     private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
+    private const string ServiceCatalogPricesCacheKey = "accounting-service-catalog-prices";
+    private const string ApprovedServiceStatus = "Approved";
+    private const string DefaultCurrencyCode = "USD";
+    private const int ServiceCatalogPageSize = 100;
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
@@ -185,41 +189,54 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return $"accounting-service-prices-{serviceName}-{active}";
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
+    /// <summary>
+    /// Returns the unit price of each named service in the currency of the service; a service that is not in the
+    /// catalog of approved services is left out. The whole catalog is loaded at once, so the call costs one request
+    /// per catalog page however many names are asked for.
+    /// </summary>
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(List<string> serviceNames)
     {
-        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
-        var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+        var catalog = await GetServiceCatalogPricesAsync();
 
-        if (result != null)
+        var result = new Dictionary<string, Dictionary<string, decimal>>();
+
+        foreach (var serviceName in serviceNames)
         {
-            return result;
-        }
-
-        var currencies = await GetAllCurrenciesAsync();
-
-        var serviceInfos = await Task.WhenAll(serviceNames.Select(GetServiceInfoAsync));
-
-        result = [];
-        for (var i = 0; i < serviceNames.Count; i++)
-        {
-            var serviceInfo = serviceInfos[i];
-            if (serviceInfo == null)
+            if (catalog.TryGetValue(serviceName, out var prices))
             {
-                continue;
+                result[serviceName] = prices;
             }
-
-            var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
-            var currencyCode = currency?.Code ?? "USD";
-
-            result.Add(serviceNames[i], new Dictionary<string, decimal>
-            {
-                { currencyCode, serviceInfo.PriceValue }
-            });
         }
-
-        cache.Insert(key, result, DateTime.Now.AddDays(1));
 
         return result;
+    }
+
+    /// <summary>
+    /// The price of every approved service keyed by the service name, as currency code to unit price. The catalog is
+    /// not tenant-specific and is cached for all portals; fail-safe keeps the last loaded catalog while the
+    /// accounting service is unavailable.
+    /// </summary>
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> GetServiceCatalogPricesAsync()
+    {
+        EnsureConfigured();
+
+        return await hybridCache.GetOrSetAsync<Dictionary<string, Dictionary<string, decimal>>>(ServiceCatalogPricesCacheKey, async (_, token) =>
+        {
+            var result = new Dictionary<string, Dictionary<string, decimal>>();
+
+            await foreach (var page in accountingApi.GetServicePages(ApprovedServiceStatus, ServiceCatalogPageSize).AsPages().WithCancellation(token))
+            {
+                foreach (var service in page.Collection ?? [])
+                {
+                    result[service.Name] = new Dictionary<string, decimal>
+                    {
+                        { service.Currency?.Code ?? DefaultCurrencyCode, service.PriceValue }
+                    };
+                }
+            }
+
+            return result;
+        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetFailSafe(true));
     }
 
     private void EnsureConfigured()
@@ -633,6 +650,11 @@ public class ServiceInfo
     public int CurrencyId { get; init; }
 
     /// <summary>
+    /// The currency of the price value.
+    /// </summary>
+    public Currency Currency { get; init; }
+
+    /// <summary>
     /// The name.
     /// </summary>
     public string Name { get; init; }
@@ -920,6 +942,13 @@ public class CustomerServiceUsage : CurrencyTotalAmount
 /// Represents a paged report of customer service usage statistics.
 /// </summary>
 public class UsageReport : BaseReport<CustomerServiceUsage>
+{
+}
+
+/// <summary>
+/// Represents a page of the accounting service catalog.
+/// </summary>
+public class ServiceReport : BaseReport<ServiceInfo>
 {
 }
 
