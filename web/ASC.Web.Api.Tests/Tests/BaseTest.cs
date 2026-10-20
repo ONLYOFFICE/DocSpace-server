@@ -52,6 +52,10 @@ public class BaseTest(
     protected ApiKeysApi _apiKeysApi = null!;
     protected MigrationApi _migrationApi = null!;
 
+    protected UserStatusApi _userStatusApi = null!;
+    protected GroupApi _groupApi = null!;
+    protected HttpClient _webhookReceiverClient = null!;
+
     protected HttpClient _identityClient = null!;
     protected ClientManagementApi _clientManagementApi = null!;
     protected ClientQueryingApi _clientQueryingApi = null!;
@@ -106,6 +110,10 @@ public class BaseTest(
         _profilesApi = _clients.ProfilesApi;
         _apiKeysApi = _clients.ApiKeysApi;
         _migrationApi = _clients.MigrationApi;
+
+        _userStatusApi = _clients.UserStatusApi;
+        _groupApi = _clients.GroupApi;
+        _webhookReceiverClient = _clients.WebhookReceiverHttpClient;
 
         _identityClient = _clients.IdentityHttpClient;
         _clientManagementApi = _clients.ClientManagementApi;

@@ -41,7 +41,11 @@ namespace ASC.Web.Api.Tests.ApiFactories;
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
     protected override IEnumerable<string> Resources =>
-        [ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
+        [
+            ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization,
+            // the webhook delivery tests: Web.Studio runs the sender, WireMock is the subscriber it sends to
+            ResourceNames.WebStudio, ResourceNames.WebhookReceiver
+        ];
 
     protected override PortalClients CreateClients(PortalContext context)
     {

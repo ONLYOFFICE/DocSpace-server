@@ -59,6 +59,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+    private IResourceBuilder<ContainerResource>? WebhookReceiverResource { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
@@ -409,6 +410,25 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    /// <summary>
+    /// The receiver the webhook delivery tests subscribe to (WireMock). A test stubs the answer for a
+    /// path of its own through the admin API and reads back from the request journal what the portal
+    /// sent. Adding it also switches the services to the test webhook settings in
+    /// <see cref="AddBaseConfig{T}"/>: a blacklist the receiver passes and short retry intervals.
+    /// </summary>
+    public ConnectionStringManager AddWebhookReceiver()
+    {
+        WebhookReceiverResource = builder.AddContainer(Constants.WebhookReceiverContainer, "wiremock/wiremock", Constants.WireMockVersion)
+            .WithHttpEndpoint(port: Constants.WebhookReceiverPort, targetPort: 8080, name: "http", isProxied: false)
+            // published on that loopback alias rather than the default localhost (127.0.0.1), which the
+            // test blacklist keeps refusing
+            .WithEndpoint("http", e => e.TargetHost = Constants.WebhookReceiverHost)
+            .WithArgs("--disable-banner", "--max-request-journal-entries", "10000")
+            .WithHttpHealthCheck("/__admin/mappings");
+
+        return this;
+    }
+
     public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
@@ -651,6 +671,30 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
+        }
+
+        if (WebhookReceiverResource != null)
+        {
+            // UrlValidator's default blacklist with 127.0.0.0/8 narrowed to 127.0.0.1: the receiver is reached
+            // as Constants.WebhookReceiverHost, while localhost stays refused (bug 80980). Keep in sync
+            // with the default list. A non-empty list replaces the default as a whole.
+            string[] blacklist =
+            [
+                "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
+                "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
+            ];
+
+            for (var i = 0; i < blacklist.Length; i++)
+            {
+                resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
+            }
+
+            // Retries due within seconds rather than minutes to hours, so the tests can watch a delivery
+            // being retried and given up on: four attempts in all.
+            for (var i = 0; i < 3; i++)
+            {
+                resourceBuilder.WithEnvironment($"webhooks:retryIntervals:{i}", "00:00:03");
+            }
         }
 
         if (isDocker)

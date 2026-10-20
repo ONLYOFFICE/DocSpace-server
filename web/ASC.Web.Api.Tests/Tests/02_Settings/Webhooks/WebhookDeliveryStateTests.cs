@@ -1,0 +1,152 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
+
+/// <summary>
+/// What an attempt may write once it ends: only the delivery record it still holds the lease of, only the
+/// delivery bookkeeping of the subscription, and a disabled subscription only when it has really gone days
+/// without a success. The states behind these — a lease taken over, a subscription failing for days — are
+/// planted in the database, since no API call produces them on demand.
+/// </summary>
+[Trait("Category", "Settings")]
+public class WebhookDeliveryStateTests(
+    AspireAppFixture fixture)
+    : WebhookDeliveryTestBase(fixture)
+{
+    [Fact]
+    public async Task Attempt_LeaseTakenOverWhileSending_DoesNotOverwriteTheRecord()
+    {
+        // Arrange
+        var receiver = await CreateReceiverAsync(delayMilliseconds: 8_000);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        await receiver.WaitForDeliveriesAsync(1);
+        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+
+        // Act: while the attempt waits for its answer, the record passes to another sender
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET lease_id = @leaseId WHERE id = @id",
+            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
+
+        // Assert: the subscription records the success, which happens just before the record is written
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while ((await GetSubscriptionAsync(subscription.Id))?.LastSuccessOn is null && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+
+        await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+
+        var after = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+
+        after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
+        after.Delivery.Should().BeNull();
+        after.Attempts.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Attempt_SubscriptionEditedWhileSending_KeepsTheEdit()
+    {
+        // Arrange
+        var receiver = await CreateReceiverAsync(delayMilliseconds: 8_000);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        await receiver.WaitForDeliveriesAsync(1);
+        var newName = $"renamed-{Guid.NewGuid():N}";
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        await _webhooksApi.UpdateWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
+        {
+            Name = newName,
+            Uri = subscription.Uri,
+            SecretKey = subscription.SecretKey
+        }, TestContext.Current.CancellationToken);
+
+        // Assert
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        record!.Status.Should().Be(200);
+
+        var config = await GetSubscriptionAsync(subscription.Id);
+
+        config!.Name.Should().Be(newName, "the attempt writes only its own bookkeeping, not the subscription it read before the edit");
+        config.LastSuccessOn.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Attempt_FailsOnASubscriptionWithoutSuccessForDays_DisablesIt()
+    {
+        // Arrange: the subscription was created four days ago and has never been delivered to
+        var receiver = await CreateReceiverAsync(500);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
+            ("@id", subscription.Id));
+
+        // Act
+        await FireEventAsync();
+
+        // Assert
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+
+        record!.Attempts.Should().Be(1);
+        record.NextAttemptOn.Should().BeNull("a disabled subscription is not retried");
+
+        var config = await GetSubscriptionAsync(subscription.Id);
+        config!.Enabled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Attempt_FailsOnAnOldSubscriptionWithARecentSuccess_KeepsItEnabled()
+    {
+        // Arrange: four days old, but delivered to an hour ago
+        var receiver = await CreateReceiverAsync(500);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY, last_success_on = UTC_TIMESTAMP() - INTERVAL 1 HOUR WHERE id = @id",
+            ("@id", subscription.Id));
+
+        // Act
+        await FireEventAsync();
+
+        // Assert
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+
+        record!.NextAttemptOn.Should().NotBeNull("the failure is retried");
+
+        var config = await GetSubscriptionAsync(subscription.Id);
+        config!.Enabled.Should().BeTrue();
+    }
+}

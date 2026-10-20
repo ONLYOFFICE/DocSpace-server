@@ -34,25 +34,50 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
-/// Shared by the retry suites: a subscription that has really been delivered to once, so a retry has a
-/// delivery record with an outcome to reset.
+/// Shared by the suites that need a webhook really delivered: subscriptions pointed at a
+/// <see cref="WebhookReceiver"/>, events that publish to them, and polling of the delivery records.
 /// </summary>
 public abstract class WebhookDeliveryTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    private readonly AspireAppFixture _fixture = fixture;
+
     /// <summary>
-    /// Creates an enabled catch-all subscription as the owner and returns its id. The target is the same
-    /// <c>example.com</c> the other webhook suites use, so a delivery ends with whatever status it answers.
+    /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/>.
+    /// </summary>
+    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0)
+    {
+        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds);
+    }
+
+    /// <summary>
+    /// Creates an enabled subscription to <paramref name="receiver"/> as <paramref name="creator"/> (the
+    /// owner by default), for <paramref name="triggers"/> or every event. Leaves the Web.Api client
+    /// signed in as the creator.
+    /// </summary>
+    protected async Task<WebhookSubscription> CreateSubscriptionAsync(
+        WebhookReceiver receiver, WebhookTrigger? triggers = null, User? creator = null)
+    {
+        await _webApiClient.Authenticate(creator ?? Owner);
+
+        var dto = WebhooksTestData.CreateWebhookDto(enabled: true, triggers: triggers);
+        dto.Uri = receiver.TargetUri;
+
+        var config = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
+
+        return new WebhookSubscription(config.Response.Id, dto.Name, dto.Uri, dto.SecretKey);
+    }
+
+    /// <summary>
+    /// Creates an enabled catch-all subscription as the owner, to a receiver that answers 200, and
+    /// returns its id.
     /// </summary>
     protected async Task<int> CreateSubscriptionAsync()
     {
-        await _webApiClient.Authenticate(Owner);
+        var receiver = await CreateReceiverAsync();
 
-        var config = await _webhooksApi.CreateWebhookAsync(
-            WebhooksTestData.CreateWebhookDto(enabled: true), TestContext.Current.CancellationToken);
-
-        return config.Response.Id;
+        return (await CreateSubscriptionAsync(receiver)).Id;
     }
 
     /// <summary>
@@ -65,8 +90,7 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// Polls the delivery log of one subscription until it holds <paramref name="count"/> records that have
-    /// each been attempted (a non-zero status), and returns the last observed records either way. The sender
-    /// picks a due record up within seconds; the deadline is long because the target is on the internet.
+    /// each been attempted (a non-zero status), and returns the last observed records either way.
     /// </summary>
     protected async Task<List<WebhooksLogDto>> WaitForAttemptedDeliveriesAsync(int configId, int count = 1)
     {
@@ -124,4 +148,125 @@ public abstract class WebhookDeliveryTestBase(
 
         return attempted[0];
     }
+
+    /// <summary>
+    /// The delivery records of one subscription with the retry fields the SDK model does not carry yet
+    /// (<c>attempts</c>, <c>nextAttemptOn</c>), read as raw JSON as the owner.
+    /// </summary>
+    protected async Task<List<DeliveryRecord>> GetDeliveryRecordsAsync(int configId)
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        using var response = await _webApi.GetAsync(
+            $"api/2.0/settings/webhooks/log?configId={configId}", TestContext.Current.CancellationToken);
+
+        return await _webApi.ReadAsync<List<DeliveryRecord>>(response, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// Polls the delivery records of one subscription until there is one and it satisfies
+    /// <paramref name="until"/>, and returns the last observed record either way.
+    /// </summary>
+    protected async Task<DeliveryRecord?> WaitForRecordAsync(int configId, Func<DeliveryRecord, bool> until, int timeoutSeconds = 90)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+
+        while (true)
+        {
+            var record = (await GetDeliveryRecordsAsync(configId)).SingleOrDefault();
+
+            if (record is not null && until(record) || DateTime.UtcNow >= deadline)
+            {
+                return record;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Polls the delivery records of one subscription until one carries a payload that satisfies
+    /// <paramref name="match"/>, and returns that payload, or null when none did by the deadline. The record
+    /// holds the body as published until it is sent and as sent afterwards; the payload is the same in both.
+    /// </summary>
+    protected async Task<JsonElement?> WaitForPayloadAsync(int configId, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+
+        while (true)
+        {
+            var payloads = (await GetDeliveryRecordsAsync(configId)).Select(r => PayloadOf(r.RequestPayload));
+
+            foreach (var payload in payloads)
+            {
+                if (match(payload))
+                {
+                    return payload;
+                }
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return null;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>The subscription as the owner reads it, or null once it is gone.</summary>
+    protected async Task<WebhooksConfigDto?> GetSubscriptionAsync(int configId)
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+
+        return list.Response.SingleOrDefault(w => w.Configs.Id == configId)?.Configs;
+    }
+
+    /// <summary>The <c>payload</c> of a delivery body: the user, group or entry the event is about.</summary>
+    protected static JsonElement PayloadOf(string body)
+    {
+        using var document = JsonDocument.Parse(body);
+
+        return document.RootElement.GetProperty("payload").Clone();
+    }
+
+    /// <summary>
+    /// Writes to the stack's database directly, for the states no API call can produce on demand: a
+    /// subscription that has been failing for days, or a delivery record taken over by another sender.
+    /// </summary>
+    protected async Task ExecuteSqlAsync(string sql, params (string Name, object Value)[] parameters)
+    {
+        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = sql;
+
+        foreach (var (name, value) in parameters)
+        {
+            command.Parameters.AddWithValue(name, value);
+        }
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>The HMAC-SHA256 the portal signs a body with, as the hex string of the signature header.</summary>
+    protected static string Sign(string secretKey, string body)
+    {
+        return Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secretKey), Encoding.UTF8.GetBytes(body)));
+    }
+}
+
+public sealed record WebhookSubscription(int Id, string Name, string Uri, string SecretKey);
+
+/// <summary>A delivery record as <c>GET settings/webhooks/log</c> returns it, retry fields included.</summary>
+public sealed class DeliveryRecord
+{
+    public int Id { get; init; }
+    public int Status { get; init; }
+    public DateTime? Delivery { get; init; }
+    public int Attempts { get; init; }
+    public DateTime? NextAttemptOn { get; init; }
+    public string RequestPayload { get; init; } = "";
 }

@@ -94,4 +94,13 @@ public static class Constants
     public const string NextcloudVersion = "33-apache";
     public const string NextcloudUser = "docspace";
     public const string NextcloudPassword = "docspace-tests";
+
+    // The WireMock the webhook tests subscribe to: it answers deliveries the way a test stubs it and
+    // keeps a journal of what it received. The port is fixed and not proxied, and Docker publishes it
+    // on WebhookReceiverHost - a loopback alias the integration-test blacklist leaves open
+    // (ConnectionStringManager.AddBaseConfig) while 127.0.0.1 stays blocked.
+    public const string WebhookReceiverContainer = "webhook-receiver";
+    public const string WireMockVersion = "3.9.2";
+    public const int WebhookReceiverPort = 18089;
+    public const string WebhookReceiverHost = "127.0.0.2";
 }

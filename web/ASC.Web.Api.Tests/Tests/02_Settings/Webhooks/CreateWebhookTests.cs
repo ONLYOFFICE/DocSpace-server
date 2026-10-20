@@ -78,6 +78,29 @@ public class CreateWebhookTests(
         created.Response.Triggers.Should().Be(WebhookTrigger.FileCreated);
     }
 
+    /// <summary>
+    /// Both columns default to true in the database, and EF used to leave a false bool out of the INSERT,
+    /// so the default won: a subscription created without SSL to an http target was then disabled by its
+    /// first delivery ("HTTPS is required"). Read back from the list, not from the create response.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_Owner_WithSslAndEnabledOff_StoresBothOff()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = WebhooksTestData.CreateWebhookDto(enabled: false, ssl: false);
+
+        // Act
+        var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
+
+        // Assert
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+        var stored = list.Response.Should().ContainSingle(w => w.Configs.Id == created.Response.Id).Subject.Configs;
+
+        stored.Ssl.Should().BeFalse();
+        stored.Enabled.Should().BeFalse();
+    }
+
     [Fact]
     public async Task CreateWebhook_Anonymous_ThrowsUnauthorized()
     {

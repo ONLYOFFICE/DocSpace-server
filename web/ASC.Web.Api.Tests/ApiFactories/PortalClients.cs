@@ -51,6 +51,13 @@ public sealed class PortalClients : PortalClientsBase
     public ProfilesApi ProfilesApi { get; }
     public ApiKeysApi ApiKeysApi { get; }
 
+    // People service  the user and group events the webhook payload tests publish
+    public UserStatusApi UserStatusApi { get; }
+    public GroupApi GroupApi { get; }
+
+    // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
+    public HttpClient WebhookReceiverHttpClient { get; }
+
     // WebApi service
     public AuthenticationApi AuthenticationApi { get; }
     public CapabilitiesApi CapabilitiesApi { get; }
@@ -99,6 +106,10 @@ public sealed class PortalClients : PortalClientsBase
         // is served by the People service — so it rides the People client, not WebApi.
         PortalGuestsApi = new PortalGuestsApi(PeopleHttpClient, peopleConfig);
         ApiKeysApi = new ApiKeysApi(PeopleHttpClient, peopleConfig);
+        UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
+        GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+
+        WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 
         IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 

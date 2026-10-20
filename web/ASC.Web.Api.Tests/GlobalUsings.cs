@@ -45,10 +45,10 @@ global using ASC.Tests.Common.Data;
 global using ASC.Web.Api.Tests.ApiFactories;
 
 global using DocSpace.API.SDK.Api.Authentication;
+global using DocSpace.API.SDK.Api.Capabilities;
 // OAuth20 also declares AuthorizationApi and DiscoveryApi; the explicit aliases below win over
 // namespace imports, so the bare names keep resolving to the Settings/OAuth20 types as aliased.
 global using DocSpace.API.SDK.Api.OAuth20;
-global using DocSpace.API.SDK.Api.Capabilities;
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;
 global using DocSpace.API.SDK.Client;
@@ -64,6 +64,8 @@ global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
+// Not the whole Group namespace: its SearchApi would collide with the People one.
+global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 global using LoginHistoryApi = DocSpace.API.SDK.Api.Security.LoginHistoryApi;
 global using MigrationApi = DocSpace.API.SDK.Api.Migration.MigrationApi;
 global using OAuth2Api = DocSpace.API.SDK.Api.Security.OAuth2Api;

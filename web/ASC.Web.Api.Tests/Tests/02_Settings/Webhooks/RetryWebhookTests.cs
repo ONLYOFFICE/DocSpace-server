@@ -76,6 +76,46 @@ public class RetryWebhookTests(
     }
 
     [Fact]
+    public async Task RetryWebhook_DeliveredRecord_ResendsTheSameBodyAndSignature()
+    {
+        // Arrange
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+
+        // Act
+        await _webhooksApi.RetryWebhookAsync(record!.Id, TestContext.Current.CancellationToken);
+
+        // Assert: byte for byte, so a receiver that verifies the signature and drops a repeated event id
+        // recognises the retry as the event it already has
+        var deliveries = await receiver.WaitForDeliveriesAsync(2);
+
+        deliveries.Should().HaveCount(2);
+        deliveries[1].Body.Should().Be(deliveries[0].Body);
+        deliveries[1].Header("x-docspace-signature-256").Should().Be(deliveries[0].Header("x-docspace-signature-256"));
+        deliveries[1].Header("x-docspace-event-id").Should().Be(record.Id.ToString());
+    }
+
+    [Fact]
+    public async Task RetryWebhook_DeliveryBeingSent_ThrowsConflict()
+    {
+        // Arrange: a receiver slow enough to keep the attempt in flight while the retry is asked for
+        var receiver = await CreateReceiverAsync(delayMilliseconds: 15_000);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        await receiver.WaitForDeliveriesAsync(1);
+        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(409);
+    }
+
+    [Fact]
     public async Task RetryWebhook_UnknownId_ThrowsNotFound()
     {
         // Arrange

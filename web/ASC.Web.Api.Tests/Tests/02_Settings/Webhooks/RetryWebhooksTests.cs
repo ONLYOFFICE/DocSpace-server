@@ -94,6 +94,24 @@ public class RetryWebhooksTests(
     }
 
     [Fact]
+    public async Task RetryWebhooks_DeliveryBeingSent_IsSkippedInSilence()
+    {
+        // Arrange: a receiver slow enough to keep the attempt in flight while the retry is asked for
+        var receiver = await CreateReceiverAsync(delayMilliseconds: 15_000);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        await receiver.WaitForDeliveriesAsync(1);
+        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([record.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task RetryWebhooks_AnotherMembersSubscription_IsSkippedInSilence()
     {
         // Arrange
