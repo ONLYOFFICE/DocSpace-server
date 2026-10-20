@@ -32,9 +32,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // The document agent as one tool of the chat: `document_agent` hands a
-// request to the external agent, which creates office documents with
-// ONLYOFFICE Document Builder in a sandbox of its own, and brings the result
-// back as new files in the user's workspace. The workspace files and folders
+// request to the external agent, which creates and works on office documents
+// with ONLYOFFICE Document Builder in a sandbox of its own, and brings the
+// result back as new files in the user's workspace. The workspace files and folders
 // the request is about (the message's attachments, the ids the model names)
 // go as ids in the task's text; the agent reads their content itself through
 // the portal's MCP server, and the originals stay as they are. The agent runs
@@ -110,13 +110,15 @@ const RESERVED_SERVER_NAMES = new Set(["sandbox", "docbuilder"]);
 const TOOL: TMCPItem = {
   name: DOCUMENT_AGENT_TOOL_NAME,
   description:
-    "Delegate the creation of office documents (docx, xlsx, pptx, pdf) to the document agent, " +
-    "which works autonomously with ONLYOFFICE Document Builder and saves the resulting files " +
-    "into the workspace as new files. Use it when the user asks for a real file with content: " +
-    "a report, a letter, a spreadsheet with data and charts, a presentation, a filled template. " +
-    "The agent reads workspace content itself by id: the files attached to the current message " +
-    "are passed on automatically; name other files in `fileIds` and folders in `folderIds`. " +
-    "Existing files are never changed: an edit comes back as a new file. " +
+    "Hand a document task to the document agent, which works autonomously with ONLYOFFICE " +
+    "Document Builder in a sandbox of its own and saves the resulting files into the workspace " +
+    "as new files. Use it whenever the user wants a real file made or an existing file worked on: " +
+    "a report, a letter, a spreadsheet with data and charts, a presentation, a filled template, " +
+    "a translation, a redaction, a merge, a conversion, a fix of a file. " +
+    "The agent opens the files itself: never read a file for it and never put a file's content " +
+    "into `task`. The files attached to the current message go along automatically; every other " +
+    "file the request is about (named, selected or open) goes by id in `fileIds`, a whole folder " +
+    "in `folderIds`. Existing files are never changed: a result always comes back as a new file. " +
     "The call returns the agent's summary and the saved files with " +
     "`url`; when you mention a file, link it exactly as `[<title>](<url>)`, copying `url` " +
     "verbatim. The task may take several minutes.",
@@ -126,21 +128,26 @@ const TOOL: TMCPItem = {
       task: {
         type: "string",
         description:
-          "The complete request for the agent, in the user's language: what to produce or " +
-          "change, the content or data to use, the format, the file name. Include everything " +
-          "the agent needs; it cannot ask questions.",
+          "The user's request for the agent, in their own words and language, as close to " +
+          "verbatim as possible. Add only what the user said elsewhere in the conversation and the " +
+          "agent needs (the format, the file name, the language). Do not rephrase it into steps, " +
+          "do not add your own method, and do not paste any file content: the agent cannot ask " +
+          "questions, but it has its own procedures and reads the files itself.",
       },
       fileIds: {
         type: "array",
         items: { type: "string" },
         description:
-          "Ids of workspace files the agent should read, in addition to the message's " +
-          "attachments.",
+          "Ids of every workspace file the request is about, besides the message's attachments: " +
+          "the file the user named, selected or has open. A request about a file always carries " +
+          "the file's id here, never its text in `task`.",
       },
       folderIds: {
         type: "array",
         items: { type: "string" },
-        description: "Ids of workspace folders or rooms whose files the agent should read.",
+        description:
+          "Ids of workspace folders or rooms whose files the agent should read, only when the " +
+          "request is about a whole folder.",
       },
     },
     required: ["task"],
@@ -423,7 +430,7 @@ function withInputIds(task: string, fileIds: string[], folderIds: string[]): str
     return task;
   }
   const lines = [
-    "Workspace inputs, by id. To open or edit a file as it is, fetch it with " +
+    "The request's input files, by workspace id. To open or edit a file as it is, fetch it with " +
       `${DOCUMENT_AGENT_FILES_SERVER}_${GET_FILE_LINK_TOOL}: it lands in your sandbox as a file. ` +
       "docspace_download_file_as_text gives a file's text only; docspace_get_folder_content lists " +
       "a folder. Never change the originals: produce every result as a new file under " +
