@@ -781,12 +781,17 @@ public class TariffService(
 
                     foreach (var productId in missing)
                     {
-                        // A product the payment services have no price for is cached as empty too,
-                        // otherwise every request would ask for it again.
-                        var price = prices.GetValueOrDefault(productId) ?? [];
-
-                        result.Add(productId, price);
-                        await hybridCache.SetAsync(GetProductPriceCacheKey(partnerId, wallet, productId), price, SetProductPriceCacheOptions);
+                        if (prices.TryGetValue(productId, out var price))
+                        {
+                            result.Add(productId, price);
+                            await hybridCache.SetAsync(GetProductPriceCacheKey(partnerId, wallet, productId), price, SetProductPriceCacheOptions);
+                        }
+                        else
+                        {
+                            // The payment service of this product failed: it goes without a price this time and is
+                            // not cached, so the next request asks for it again.
+                            result.Add(productId, []);
+                        }
                     }
                 }
 
@@ -803,11 +808,12 @@ public class TariffService(
 
     // The payment services price a whole list in one request, so the products missing from the cache are asked
     // for together: numeric ids are billing products, the other wallet ids are accounting services.
+    // The answer holds every product of a service that answered; the products of a failed service are left out.
     private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestProductPricesAsync(string partnerId, bool wallet, List<string> productIds)
     {
         if (!wallet)
         {
-            return await billingClient.GetProductPriceInfoAsync(partnerId, false, productIds);
+            return await RequestServicePricesAsync(productIds, ids => billingClient.GetProductPriceInfoAsync(partnerId, false, ids));
         }
 
         var accountingServices = new List<string>();
@@ -825,8 +831,8 @@ public class TariffService(
             }
         }
 
-        var result = accountingServices.Count == 0 ? [] : await accountingClient.GetProductPriceInfoAsync(accountingServices);
-        var billingPrices = billingProducts.Count == 0 ? [] : await billingClient.GetProductPriceInfoAsync(partnerId, true, billingProducts);
+        var result = await RequestServicePricesAsync(accountingServices, accountingClient.GetProductPriceInfoAsync);
+        var billingPrices = await RequestServicePricesAsync(billingProducts, ids => billingClient.GetProductPriceInfoAsync(partnerId, true, ids));
 
         foreach (var (productId, prices) in billingPrices)
         {
@@ -834,6 +840,30 @@ public class TariffService(
         }
 
         return result;
+    }
+
+    // One payment service failing must not cost the products of the other one, or those already cached, their
+    // prices: the failure is logged and its products are left out of the answer.
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestServicePricesAsync(List<string> productIds, Func<List<string>, Task<Dictionary<string, Dictionary<string, decimal>>>> request)
+    {
+        if (productIds.Count == 0)
+        {
+            return [];
+        }
+
+        try
+        {
+            var prices = await request(productIds);
+
+            // A product the service has no price for is answered as empty, so it is cached too and not asked for again.
+            return productIds.ToDictionary(productId => productId, productId => prices.GetValueOrDefault(productId) ?? []);
+        }
+        catch (Exception error)
+        {
+            LogError(error);
+
+            return [];
+        }
     }
 
     // A price lives an hour in Redis but only minutes in process memory, so a price key deleted in Redis reaches
