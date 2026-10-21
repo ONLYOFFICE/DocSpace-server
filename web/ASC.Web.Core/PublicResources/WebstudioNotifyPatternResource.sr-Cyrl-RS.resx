@@ -758,6 +758,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Дуго те нисмо видели
+
+Већ неко време нико се није пријавио у твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Желели смо да ти се јавимо пре него што се било шта деси твојим документима и подешавањима.
+
+Да би све несметано радило за све, блокирамо бесплатне просторе који се дуже време не користе. Ево шта то значи за твој:
+
+*$BlockDate*: твој простор ће бити блокиран и нећеш моћи да се пријавиш.
+*$DeleteDate*: простор и сви његови подаци биће трајно обрисани.
+
+Добра вест: задржати га је лако. Само се пријави једном (рок: $BlockDateShort) и све ће остати тачно онако како је било.
+
+$OrangeButton
+
+Ако ти простор више није потребан, не мораш ништа да радиш. Само не заборави да преузмеш датотеке које желиш да задржиш (рок: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Деактивација портала "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1596,6 +1614,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваша лозинка је успешно промењена</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Твом ${LetterLogoText} простору недостајеш (рок за акцију: $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивација портала ${__VirtualRootHost}</value>

@@ -757,6 +757,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Dlouho jsme vás neviděli
+
+Už nějakou dobu se nikdo nepřihlásil do vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Chtěli jsme se vám ozvat dříve, než se s vašimi dokumenty a nastavením něco stane.
+
+Aby vše fungovalo hladce pro všechny, blokujeme bezplatné prostory, které se delší dobu nepoužívají. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna.
+
+Dobrá zpráva: zachovat ho je snadné. Stačí se do $BlockDateShort jednou přihlásit a vše zůstane přesně tak, jak jste to zanechali.
+
+$OrangeButton
+
+Pokud prostor už nepotřebujete, nemusíte nic dělat. Jen si do $BlockDateShort nezapomeňte stáhnout soubory, které si chcete ponechat.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivace "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
 
@@ -1588,6 +1606,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše heslo bylo úspěšně změněno</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivace ${__VirtualRootHost} portálu</value>

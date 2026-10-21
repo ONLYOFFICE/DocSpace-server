@@ -770,6 +770,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Đã lâu không gặp bạn
+
+Đã lâu rồi không có ai đăng nhập vào không gian ${LetterLogoText} của bạn, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Chúng tôi muốn liên hệ với bạn trước khi có điều gì xảy ra với tài liệu và cài đặt của bạn.
+
+Để mọi thứ vận hành trơn tru cho tất cả mọi người, chúng tôi chặn các không gian miễn phí không được sử dụng trong một thời gian. Đây là ý nghĩa của việc đó đối với không gian của bạn:
+
+*$BlockDate*: không gian của bạn sẽ bị chặn và bạn sẽ không thể đăng nhập.
+*$DeleteDate*: không gian và toàn bộ dữ liệu trong đó sẽ bị xóa vĩnh viễn.
+
+Tin vui là: giữ lại không gian rất dễ dàng. Chỉ cần đăng nhập một lần trước ngày $BlockDateShort, mọi thứ sẽ được giữ nguyên như khi bạn rời đi.
+
+$OrangeButton
+
+Nếu bạn không còn cần không gian này nữa, bạn không cần làm gì cả. Chỉ cần nhớ tải xuống các tệp bạn muốn giữ lại trước ngày $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dừng hoạt động cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1636,6 +1654,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Mật khẩu của bạn đã được thay đổi thành công</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Không gian ${LetterLogoText} của bạn đang nhớ bạn (cần hành động trước ngày $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Ngưng hoạt động Cổng ${__VirtualRootHost}</value>

@@ -770,6 +770,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.한동안 뵙지 못했네요
+
+한동안 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 에 로그인한 사람이 없습니다. 문서와 설정에 문제가 생기기 전에 미리 알려 드리고자 합니다.
+
+모든 사용자가 원활하게 이용할 수 있도록, 한동안 사용되지 않은 무료 공간은 차단하고 있습니다. 회원님의 공간에는 다음과 같이 적용됩니다:
+
+*$BlockDate*: 공간이 차단되며 로그인할 수 없게 됩니다.
+*$DeleteDate*: 공간과 모든 데이터가 영구적으로 삭제됩니다.
+
+좋은 소식은 공간을 유지하기가 쉽다는 것입니다. ${BlockDateShort} 전에 한 번만 로그인하시면 모든 것이 그대로 유지됩니다.
+
+$OrangeButton
+
+더 이상 공간이 필요하지 않다면 아무것도 하지 않으셔도 됩니다. 보관하려는 파일은 ${BlockDateShort} 전에 꼭 다운로드하세요.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>"${__VirtualRootPath}":"${__VirtualRootPath}" 포털 비활성화
 
@@ -1632,6 +1650,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>비밀번호가 성공적으로 변경되었습니다</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} 공간이 회원님을 기다리고 있습니다(${BlockDateShort}까지 조치 필요)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} 포털 비활성화</value>

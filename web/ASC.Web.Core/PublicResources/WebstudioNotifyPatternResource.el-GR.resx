@@ -770,6 +770,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Έχουμε καιρό να σας δούμε
+
+Έχει περάσει αρκετός καιρός από τότε που συνδέθηκε κάποιος στον χώρο σας στο ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Θέλαμε να επικοινωνήσουμε μαζί σας πριν συμβεί οτιδήποτε στα έγγραφα και τις ρυθμίσεις σας.
+
+Για να λειτουργούν όλα ομαλά για όλους, αποκλείουμε τους δωρεάν χώρους που δεν έχουν χρησιμοποιηθεί για κάποιο διάστημα. Δείτε τι σημαίνει αυτό για τον δικό σας:
+
+*$BlockDate*: ο χώρος σας θα αποκλειστεί και δεν θα μπορείτε να συνδεθείτε.
+*$DeleteDate*: ο χώρος και όλα τα δεδομένα του θα διαγραφούν οριστικά.
+
+Τα καλά νέα: η διατήρησή του είναι εύκολη. Απλώς συνδεθείτε μία φορά έως τις $BlockDateShort και όλα θα μείνουν ακριβώς όπως τα αφήσατε.
+
+$OrangeButton
+
+Αν δεν χρειάζεστε πλέον τον χώρο, δεν χρειάζεται να κάνετε τίποτα. Απλώς φροντίστε να κατεβάσετε τα αρχεία που θέλετε να κρατήσετε έως τις $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Απενεργοποίηση της πύλης "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1635,6 +1653,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ο κωδικός πρόσβασής σας άλλαξε με επιτυχία</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ο χώρος σας στο ${LetterLogoText} σας αναζητά (απαιτείται ενέργεια έως τις $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Απενεργοποίηση της πύλης ${__VirtualRootHost}</value>

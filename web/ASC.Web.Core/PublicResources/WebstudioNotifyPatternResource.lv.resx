@@ -770,6 +770,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Sen neesam jūs redzējuši
+
+Jau kādu laiku neviens nav pierakstījies jūsu ${LetterLogoText} telpā *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Vēlējāmies sazināties ar jums, pirms ar jūsu dokumentiem un iestatījumiem kaut kas notiek.
+
+Lai viss darbotos raiti ikvienam, mēs bloķējam bezmaksas telpas, kas kādu laiku nav izmantotas. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti.
+
+Labā ziņa: to saglabāt ir vienkārši. Pierakstieties vienreiz (termiņš: $BlockDateShort), un viss paliks tieši tā, kā to atstājāt.
+
+$OrangeButton
+
+Ja telpa jums vairs nav vajadzīga, jums nekas nav jādara. Tikai neaizmirstiet lejupielādēt failus, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Portāla "${__VirtualRootPath}":"${__VirtualRootPath}" deaktivizācija
 
@@ -1635,6 +1653,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Jūsu parole ir veiksmīgi nomainīta</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Portāla ${__VirtualRootHost} deaktivizācija</value>

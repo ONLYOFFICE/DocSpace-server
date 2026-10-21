@@ -758,6 +758,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Bir müddətdir sizi görmürük
+
+Bir müddətdir heç kim *"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizə daxil olmayıb. Sənədləriniz və parametrlərinizlə nəsə baş verməmişdən əvvəl sizinlə əlaqə saxlamaq istədik.
+
+Hər şeyin hamı üçün qüsursuz işləməsi üçün bir müddətdir istifadə olunmayan pulsuz sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları həmişəlik silinəcək.
+
+Yaxşı xəbər: onu saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək bir dəfə daxil olun və hər şey olduğu kimi qalacaq.
+
+$OrangeButton
+
+Sahəyə artıq ehtiyacınız yoxdursa, heç nə etməyinizə ehtiyac yoxdur. Sadəcə saxlamaq istədiyiniz faylları $BlockDateShort tarixinədək endirməyi unutmayın.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalını deaktiv edin:
 
@@ -1588,6 +1606,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parolunuz uğurla dəyişdirildi</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portalının deaktiv edilməsi</value>

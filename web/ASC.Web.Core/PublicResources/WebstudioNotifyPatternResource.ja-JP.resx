@@ -770,6 +770,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.しばらくお見かけしていません
+
+しばらくの間、${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* にどなたもサインインしていません。ドキュメントや設定に何かが起こる前に、ご連絡したいと思いました。
+
+すべての方に快適にご利用いただくため、しばらく使用されていない無料スペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが完全に削除されます。
+
+良いお知らせ：スペースの維持は簡単です。${BlockDateShort}までに一度サインインするだけで、すべてがそのままの状態で保たれます。
+
+$OrangeButton
+
+スペースが不要になった場合は、何もする必要はありません。保存しておきたいファイルは${BlockDateShort}までにダウンロードしてください。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの無効化
 
@@ -1579,6 +1597,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>パスワードが正常に変更されました</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost}ポータルの停止</value>

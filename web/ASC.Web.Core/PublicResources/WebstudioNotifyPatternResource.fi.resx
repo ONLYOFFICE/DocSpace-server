@@ -769,6 +769,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Emme ole nähneet sinua vähään aikaan
+
+Kukaan ei ole kirjautunut ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* vähään aikaan. Halusimme ottaa yhteyttä ennen kuin asiakirjoillesi ja asetuksillesi tapahtuu mitään.
+
+Jotta kaikki toimisi sujuvasti kaikille, estämme ilmaiset tilat, joita ei ole käytetty vähään aikaan. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi.
+
+Hyvä uutinen: tilan säilyttäminen on helppoa. Kirjaudu sisään kerran ennen $BlockDateShort, niin kaikki pysyy juuri sellaisena kuin jätit sen.
+
+$OrangeButton
+
+Jos et enää tarvitse tilaa, sinun ei tarvitse tehdä mitään. Muista vain ladata tiedostot, jotka haluat säilyttää, ennen $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portaalin deaktivointi
 
@@ -1633,6 +1651,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Salasanasi vaihdettiin onnistuneesti</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi kaipaa sinua (toimi ennen $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portaalin deaktivointi</value>

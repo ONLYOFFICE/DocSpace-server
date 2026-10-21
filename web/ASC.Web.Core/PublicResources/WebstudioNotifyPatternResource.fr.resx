@@ -757,6 +757,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Cela fait un moment que nous ne vous avons pas vu
+
+Personne ne s'est connecté à votre espace ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, depuis un certain temps. Nous voulions vous contacter avant qu'il n'arrive quoi que ce soit à vos documents et paramètres.
+
+Pour que tout fonctionne bien pour tout le monde, nous bloquons les espaces gratuits inutilisés depuis un certain temps. Voici ce que cela signifie pour le vôtre :
+
+*$BlockDate*: votre espace sera bloqué et vous ne pourrez plus vous connecter.
+*$DeleteDate*: l'espace et toutes ses données seront définitivement supprimés.
+
+La bonne nouvelle : le conserver est simple. Connectez-vous une seule fois avant le $BlockDateShort, et tout restera exactement comme vous l'avez laissé.
+
+$OrangeButton
+
+Si vous n'avez plus besoin de cet espace, vous n'avez rien à faire. Pensez simplement à télécharger les fichiers que vous souhaitez conserver avant le $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Désactivation du portail "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1597,6 +1615,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Votre mot de passe a été modifié avec succès</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Votre espace ${LetterLogoText} s'ennuie de vous (action requise avant le $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Désactivation du portail ${__VirtualRootHost}</value>
