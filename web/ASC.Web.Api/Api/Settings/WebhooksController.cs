@@ -285,16 +285,17 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Returns the delivery records of the portal webhooks, one record per attempt, carrying the trigger, the request
-    /// and response headers and bodies, the HTTP `status` the target answered and the `delivery` moment, the last two
-    /// staying empty while an attempt is still on its way. Records come newest first and are paged with `startIndex`
-    /// and `count`, at most 100 at a time, while the number of records matching the filter is reported as `total`
-    /// beside the response. Filters combine with AND: `deliveryFrom` and `deliveryTo` bound the delivery moment,
-    /// `hookUri` matches the subscription URL exactly, `configId` picks one subscription, `eventId` one single
+    /// Returns the delivery log of the portal webhooks, one record per event delivery, updated in place by every
+    /// attempt: the trigger, the request and response headers and bodies, the HTTP `status` the target answered on the
+    /// latest attempt, 0 while no answer has come back, and the `delivery` moment, empty until an attempt succeeds.
+    /// `attempts` counts the tries so far and `nextAttemptOn` is set while another one is due, so a record waiting for
+    /// a retry already carries the `status` of the attempt that failed. Records come newest first and are paged with
+    /// `startIndex` and `count`, at most 100 at a time, while the number of records matching the filter is reported as
+    /// `total` beside the response. Filters combine with AND: `deliveryFrom` and `deliveryTo` bound the delivery
+    /// moment, `hookUri` matches the subscription URL exactly, `configId` picks one subscription, `eventId` one single
     /// record, `groupStatus` keeps only the answered status classes it names with 0 meaning no status filter, and
-    /// `trigger` narrows to one event with 0 meaning all of them. `userId` filters by who created the subscription
-    /// rather than by who caused the event, and for a caller who is not a `DocSpaceAdmin` it is forced to the caller,
-    /// so a non-admin only ever sees deliveries of their own subscriptions. A `Guest` is refused. Nothing is written.
+    /// `trigger` narrows to one event with 0 meaning all of them. `userId` filters by who created the subscription, and
+    /// for a caller who is not a `DocSpaceAdmin` it is forced to the caller. A `Guest` is refused. Nothing is written.
     /// </remarks>
     /// <summary>
     /// Get the webhook delivery log
@@ -323,24 +324,17 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Sends one past webhook delivery again. The `id` in the path is that of a delivery record from
-    /// `GET api/2.0/settings/webhooks/log`, not of a subscription, and the payload kept in that record is sent once
-    /// more to the subscription it belongs to, byte for byte, so its signature stays valid. The work is
-    /// asynchronous: the record is put back in the queue at once and the response describes it with `status` and
-    /// `delivery` cleared, ready to be filled in by the new attempt. To learn the outcome, read
-    /// `GET api/2.0/settings/webhooks/log` with `eventId` set to that same identifier until `delivery` appears.
-    ///
-    /// The record keeps its identifier, which is what the receiver sees as `event.id` and in the
-    /// `x-docspace-event-id` header, so a retried delivery is recognisable as a duplicate of the original rather
-    /// than as a new event. The cost of that is history: the outcome of the previous attempt is cleared instead of
-    /// being kept beside the new one, so the log holds only the latest attempt of any given delivery.
-    ///
-    /// A `DocSpaceAdmin` may retry any delivery in the portal, anyone else only deliveries of the subscriptions
-    /// they created, and a `Guest` is refused. An `id` of 0 is rejected as an invalid request and an unknown one
-    /// gives 404. A delivery that is being sent at this very moment cannot be retried and gives 409: wait until
-    /// `GET api/2.0/settings/webhooks/log` shows the outcome of that attempt, then retry if it is still needed. The
-    /// operation is rate limited, so a burst of calls is answered with 429; to retry several records use
-    /// `PUT api/2.0/settings/webhook/retry`.
+    /// Sends one past webhook delivery again to the subscription it belongs to. The `id` in the path is that of a
+    /// delivery record from `GET api/2.0/settings/webhooks/log`, not of a subscription. A `DocSpaceAdmin` may retry any
+    /// delivery in the portal, anyone else only deliveries of the subscriptions they created, and a `Guest` is refused.
+    /// The work is asynchronous: the record is reset and queued at once, and the response shows it with `attempts` at 0
+    /// and `status`, `delivery` and the response cleared, as the log keeps only the latest attempt. The receiver gets
+    /// the same event again, with the same `event.id` and `x-docspace-event-id` header, in a body serialized and signed
+    /// anew. To learn the outcome, read the log with `eventId` set to that identifier until `nextAttemptOn` is empty:
+    /// `delivery` is then set on success and stays empty when the portal gave up, since a failed attempt goes back into
+    /// the automatic schedule of up to six more tries over about 18 hours. An `id` of 0 gives 400, an unknown one 404,
+    /// and a delivery being sent at this very moment 409, so retry once that attempt finishes. The operation is rate
+    /// limited with 429; for several records use `PUT api/2.0/settings/webhook/retry`.
     /// </remarks>
     /// <summary>
     /// Retry a webhook delivery
@@ -391,20 +385,18 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Sends a batch of past webhook deliveries again. `ids` holds the identifiers of delivery records from
-    /// `GET api/2.0/settings/webhooks/log`; each of them is put back in the queue for the subscription it belongs
-    /// to and sent once more, byte for byte, and the response lists those records with `status` and `delivery`
-    /// cleared. Records that do not exist, records being sent at this very moment, and records of another member's
-    /// subscription when the caller is not a `DocSpaceAdmin`, are skipped in silence instead of failing the call,
-    /// so a response shorter than `ids` is the only sign that something was left out: compare the counts rather
-    /// than assuming everything was queued. An empty `ids` list is accepted and queues nothing. Read the outcomes
-    /// from `GET api/2.0/settings/webhooks/log`, matching the returned identifiers with `eventId`.
-    ///
-    /// Each record keeps its identifier, so a retried delivery reaches the receiver as `event.id` of the original
-    /// event rather than as a new one, and the outcome of its previous attempt is cleared rather than kept beside
-    /// the new one. A `Guest` is refused. The operation is rate limited, so a burst of calls is answered with 429.
-    /// For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing, forbidden or in-flight
-    /// record instead of skipping it.
+    /// Sends a batch of past webhook deliveries again. `ids` holds identifiers of delivery records from `GET
+    /// api/2.0/settings/webhooks/log`; each is reset and queued for the subscription it belongs to, and the response
+    /// lists those records with `attempts` at 0 and `status` and `delivery` cleared. Records that do not exist, records
+    /// being sent at this very moment, and records of another member's subscription when the caller is not a
+    /// `DocSpaceAdmin`, are skipped in silence instead of failing the call, so compare the response with `ids` rather
+    /// than assuming everything was queued; an empty `ids` queues nothing. A `Guest` is refused. Each receiver gets the
+    /// same event again, with the same `event.id` and `x-docspace-event-id` header, in a body serialized and signed
+    /// anew. The work is asynchronous: read the log with `eventId` for each returned identifier until `nextAttemptOn`
+    /// is empty, then a set `delivery` means success and an empty one that the portal gave up, since a failed attempt
+    /// goes back into the automatic schedule of up to six more tries over about 18 hours. The operation is rate limited
+    /// with 429. For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing, forbidden or
+    /// in-flight record instead of skipping it.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries

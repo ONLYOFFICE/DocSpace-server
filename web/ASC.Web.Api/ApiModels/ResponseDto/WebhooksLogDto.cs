@@ -34,7 +34,8 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// One delivery attempt of a webhook: what was sent where, and what came back.
+/// One delivery of a webhook event, updated in place by every attempt: what was sent where, and what came back
+/// the last time.
 /// </summary>
 /// <example>
 /// {
@@ -55,30 +56,30 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class WebhooksLogDto
 {
     /// <summary>
-    /// The identifier of this attempt, which is what the `eventId` filter of
+    /// The identifier of this delivery, which is what the `eventId` filter of
     /// `GET api/2.0/settings/webhooks/log` picks one record by and what
-    /// `PUT api/2.0/settings/webhook/{id}/retry` re-sends. A retry produces a new record with a new identifier
-    /// and leaves this one as it is.
+    /// `PUT api/2.0/settings/webhook/{id}/retry` re-sends. Every attempt, a manual retry included, updates this same
+    /// record, and the receiver sees this identifier as `event.id` and in the `x-docspace-event-id` header.
     /// </summary>
     /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
-    /// The name of the subscription the attempt belongs to. It is the name as it stands now, so it follows a
+    /// The name of the subscription the delivery belongs to. It is the name as it stands now, so it follows a
     /// later rename of the subscription rather than recording what it was called at the time.
     /// </summary>
     /// <example>Room activity</example>
     public string ConfigName { get; set; }
 
     /// <summary>
-    /// The event that caused the attempt, as a single bit rather than a mask - a delivery is always for one
+    /// The event that caused the delivery, as a single bit rather than a mask - a delivery is always for one
     /// event, even though a subscription covers several.
     /// </summary>
     /// <example>128</example>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// When the attempt was queued, as a UTC instant - unlike the dates of the subscription itself, which come
+    /// When the event was queued for delivery, as a UTC instant - unlike the dates of the subscription itself, which come
     /// in the portal time zone. Records come back newest first by this moment.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
@@ -112,8 +113,8 @@ public class WebhooksLogDto
     public string RequestPayload { get; set; }
 
     /// <summary>
-    /// The headers the target answered with, serialised the same way as `requestHeaders`. It is empty while the
-    /// attempt is still on its way and on an attempt that never reached the target.
+    /// The headers the target answered with on the latest attempt, serialised the same way as `requestHeaders`. It
+    /// is empty until an attempt is answered, after a manual retry clears it, and when the target was not reached.
     /// </summary>
     /// <example>{"content-type":"application/json"}</example>
     public string ResponseHeaders { get; set; }
