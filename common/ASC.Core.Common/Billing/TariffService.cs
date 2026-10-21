@@ -1830,7 +1830,9 @@ public class TariffService(
     {
         var serviceLimits = await GetCachedParticipantServiceLimitsAsync(tenantId, groupName);
 
-        var serviceLimit = serviceLimits.FirstOrDefault(limit => Guid.TryParse(limit.Participant, out var participantId) && participantId == userId);
+        // The accounting service leaves switched-off limits out of this list; the check keeps a switched-off personal
+        // limit from hiding the limit for every user should one ever come back in it.
+        var serviceLimit = serviceLimits.FirstOrDefault(limit => limit.Enabled && Guid.TryParse(limit.Participant, out var participantId) && participantId == userId);
         if (serviceLimit != null)
         {
             return serviceLimit;

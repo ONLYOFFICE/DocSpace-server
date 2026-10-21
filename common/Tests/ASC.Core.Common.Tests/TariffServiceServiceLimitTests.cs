@@ -392,6 +392,18 @@ public class TariffServiceServiceLimitTests
     }
 
     [Fact]
+    public async Task GetCachedUserServiceLimit_PersonalLimitSwitchedOff_FallsBackToTheLimitForEveryUser()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request) ? GlobalLimitResponse(enabled: true) : ParticipantRows(Row(42, "Custom", UserA, enabled: false)));
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
+
+        serviceLimit.Id.Should().Be(43);
+        serviceLimit.Scope.Should().Be(ServiceLimitScope.Global);
+    }
+
+    [Fact]
     public async Task GetCachedUserServiceLimit_LimitForEveryUserSwitchedOff_ReturnsNull()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
@@ -486,9 +498,9 @@ public class TariffServiceServiceLimitTests
             $$"""{"id":43,"serviceGroupName":"ai-services","customerAccountNumber":{{OwnAccountNumber}},"scope":"Global","amountValue":50,"currency":"USD","period":"Day","enabled":{{(enabled ? "true" : "false")}}}""");
     }
 
-    private static string Row(int id, string scope, string participant)
+    private static string Row(int id, string scope, string participant, bool enabled = true)
     {
-        return $$$"""{"id":{{{id}}},"serviceGroupName":"ai-services","customerAccountNumber":{{{OwnAccountNumber}}},"scope":"{{{scope}}}","participant":"{{{participant}}}","amountValue":40,"currency":"USD","period":"Day","enabled":true,"usage":{"periodStart":"2026-10-18T00:00:00Z","periodEnd":"2026-10-18T23:59:59Z","amountConsumed":12.5,"amountAvailable":27.5,"quantityConsumed":0}}""";
+        return $$$"""{"id":{{{id}}},"serviceGroupName":"ai-services","customerAccountNumber":{{{OwnAccountNumber}}},"scope":"{{{scope}}}","participant":"{{{participant}}}","amountValue":40,"currency":"USD","period":"Day","enabled":{{{(enabled ? "true" : "false")}}},"usage":{"periodStart":"2026-10-18T00:00:00Z","periodEnd":"2026-10-18T23:59:59Z","amountConsumed":12.5,"amountAvailable":27.5,"quantityConsumed":0}}""";
     }
 
     // One page holding every row, so the paged read stops after it.
