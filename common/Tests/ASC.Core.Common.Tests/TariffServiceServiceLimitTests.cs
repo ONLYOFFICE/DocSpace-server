@@ -307,12 +307,15 @@ public class TariffServiceServiceLimitTests
         serviceLimits.Should().BeEmpty();
     }
 
-    [Fact]
-    public async Task GetCachedParticipantServiceLimits_AccountingFails_ReturnsEmptyInsteadOfThrowing()
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.NotFound)]
+    public async Task GetCachedParticipantServiceLimits_AccountingFails_ReturnsEmptyInsteadOfThrowing(HttpStatusCode status)
     {
-        // The user lists read these limits; an unreachable accounting service must not break them.
+        // The user lists read these limits; an unreachable accounting service, or one without the route, must not break
+        // them.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.InternalServerError, "boom"));
+            _ => AccountingClientTests.Json(status, "boom"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 

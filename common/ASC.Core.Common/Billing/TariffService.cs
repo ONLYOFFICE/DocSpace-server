@@ -1805,7 +1805,7 @@ public class TariffService(
 
                 return serviceLimits;
             }
-            catch (AccountingException exception) when (exception is AccountingCustomerNotFoundException or AccountingNotFoundException)
+            catch (AccountingCustomerNotFoundException exception)
             {
                 logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
                 return [];
@@ -1813,6 +1813,8 @@ public class TariffService(
             catch (Exception error) when (error is not OperationCanceledException)
             {
                 // Keep the failure for a short while only, so the lists come back as soon as the accounting service does.
+                // A 404 lands here too: a portal without limits gets an empty page, so a 404 means a route the accounting
+                // service does not have, which has to be logged as an error rather than cached as "no limits".
                 LogError(error, tenantId.ToString());
                 ctx.Options.Duration = _participantServiceLimitsFailureCacheDuration;
                 return [];
