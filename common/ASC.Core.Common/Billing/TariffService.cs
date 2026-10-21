@@ -1761,6 +1761,8 @@ public class TariffService(
         {
             return await accountingClient.GetParticipantServiceLimitsAsync(portalId, groupName, filter);
         }
+        // AccountingNotFoundException is left to fail on purpose: with no limits this route answers an empty page, so a
+        // 404 means a route the accounting service does not have, which must not be shown as "no limits".
         catch (AccountingCustomerNotFoundException exception)
         {
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
