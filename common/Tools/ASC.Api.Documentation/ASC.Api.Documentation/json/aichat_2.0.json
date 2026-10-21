@@ -57,7 +57,7 @@
     },
     {
       "name": "AI / Context",
-      "description": "Rooms connected to the chat as context and the skills of their .ai folder.",
+      "description": "Instructions rooms connected to the chat as context with their skills, and the Knowledge rooms the chat may search.",
       "x-displayName": "Context"
     },
     {
@@ -2076,6 +2076,57 @@
         ],
         "operationId": "aiContextGetContextFolders",
         "summary": "Get context folders",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/context/get-knowledge-folders": {
+      "get": {
+        "tags": [
+          "AI / Context"
+        ],
+        "operationId": "aiContextGetKnowledgeFolders",
+        "summary": "Get knowledge folders",
         "responses": {
           "200": {
             "description": "Success.",

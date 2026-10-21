@@ -35,6 +35,7 @@ import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import {
+    getKnowledgeRoomId,
     getResolvedFormId,
     setResolvedFormId,
     getResolvedAttachmentId,
@@ -107,14 +108,16 @@ export function withGeneratedFileUrl(value: unknown): unknown {
     return { ...value, [dataKey]: { ...data, url: fileEditorUrl(id) } };
 }
 
-// `ToolContext` on the C# side — `{ folderId, formId, attachmentId }`. `entityId`
-// is the opaque widget scope token; for room-bound chat it carries the room id.
+// `ToolContext` on the C# side — `{ folderId, formId, attachmentId, knowledgeRoomId }`.
+// `entityId` is the opaque widget scope token; for room-bound chat it carries the room id.
 // `attachmentId` keys the per-attachment analyze intent that gates the form-data tools.
+// `knowledgeRoomId` is the knowledge room the composer connected (0 = none).
 type ToolContextDto = {
     folderId: number;
     formId: number;
     attachmentId: string;
     formSubAgent: boolean;
+    knowledgeRoomId: number;
 };
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
@@ -208,19 +211,27 @@ async function toContext(
     formSubAgent = false,
 ): Promise<ToolContextDto> {
     const folderId = parseInt10(entityId, 0) ?? 0;
+    const knowledgeRoomId = getKnowledgeRoomId() ?? 0;
     if (attachmentId && attachmentId.length > 0) {
         const resolved = await resolveForm(attachmentId);
         if (resolved.formId > 0) {
             setResolvedFormId(resolved.formId);
             setResolvedAttachmentId(resolved.attachmentId);
         }
-        return { folderId, formId: resolved.formId, attachmentId: resolved.attachmentId, formSubAgent };
+        return {
+            folderId,
+            formId: resolved.formId,
+            attachmentId: resolved.attachmentId,
+            formSubAgent,
+            knowledgeRoomId,
+        };
     }
     return {
         folderId,
         formId: getResolvedFormId() ?? 0,
         attachmentId: getResolvedAttachmentId() ?? "",
         formSubAgent,
+        knowledgeRoomId,
     };
 }
 

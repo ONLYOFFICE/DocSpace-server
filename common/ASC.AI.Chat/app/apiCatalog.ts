@@ -100,7 +100,8 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
   {
     name: "context",
     tag: "Context",
-    description: "Rooms connected to the chat as context and the skills of their .ai folder.",
+    description:
+      "Instructions rooms connected to the chat as context with their skills, and the Knowledge rooms the chat may search.",
     routes: DEFAULT_CONTEXT_ROUTES,
   },
   {

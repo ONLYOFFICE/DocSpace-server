@@ -205,6 +205,20 @@ export function getCustomServerNames(): string[] {
   return als.getStore()?.customServerNames ?? [];
 }
 
+// The knowledge room the round searches (see RequestContext.knowledgeRoomId).
+// Taken off `actionArgs.knowledgeRoom` when the request comes in, read when
+// the tool context for `tools/list` and `tools/call` is built.
+export function setKnowledgeRoomId(roomId: number | undefined): void {
+  const store = als.getStore();
+  if (store) {
+    store.knowledgeRoomId = roomId;
+  }
+}
+
+export function getKnowledgeRoomId(): number | undefined {
+  return als.getStore()?.knowledgeRoomId;
+}
+
 // Per-request folder-info memoization store (see RequestContext). Undefined
 // outside a request context, where callers fall back to a direct fetch.
 export function getFolderInfoCache():

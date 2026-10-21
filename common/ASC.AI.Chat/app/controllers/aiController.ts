@@ -48,6 +48,7 @@ import {
   getCustomServerNames,
   getChatContextSnapshot,
   getSourceMeta,
+  setKnowledgeRoomId,
   setRoundAttachmentIds,
   setRoundProfileId,
 } from "../requestContext.js";
@@ -103,10 +104,26 @@ function withRequestSignal<T>(res: Response, body: T): T {
   // has stopped waiting. Create the object when missing so cancellation works
   // for every caller.
   const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  // The knowledge base the composer connected rides in `actionArgs`; the
+  // engine never reads it, the tool context does (every action handler
+  // passes through here, so the id is in place before `getTools`).
+  setKnowledgeRoomId(knowledgeRoomIdOf(actionArgs));
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
   };
+}
+
+// `actionArgs.knowledgeRoom.id` as the room id the .NET side expects, or
+// undefined when nothing is connected or the id is not a DocSpace room id.
+function knowledgeRoomIdOf(actionArgs: Record<string, unknown>): number | undefined {
+  const knowledgeRoom = actionArgs["knowledgeRoom"];
+  if (!isObject(knowledgeRoom)) {
+    return undefined;
+  }
+  const id = knowledgeRoom["id"];
+  const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
@@ -269,14 +286,29 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  // Always the folder/room the chat is invoked from (`entityId`), even when
-  // the round runs against an agent's context (`contextEntityId`): the
-  // location line must tell the model where the USER is — picking agent 10
-  // while browsing folder 2 keeps the location at 2. The agent's own scope
-  // reaches the model through the tools fragment and tool execution.
+  // The folder/room the chat is invoked from (`entityId`), even when the
+  // round runs against an agent's context (`contextEntityId`): the location
+  // line must tell the model where the USER is — picking agent 10 while
+  // browsing folder 2 keeps the location at 2. The agent's own scope reaches
+  // the model through the tools fragment and tool execution. A folder the
+  // user connected as context in the composer (`actionArgs.folderContext`)
+  // is the one exception: they picked it to work in, so it is the location.
   const entityId =
     typeof body["entityId"] === "string" ? body["entityId"] : undefined;
-  return appendActionPrompt(body, buildContextFragment(entityId));
+  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : undefined;
+  const folderContextId = actionArgs ? folderContextIdOf(actionArgs) : undefined;
+  return appendActionPrompt(body, buildContextFragment(folderContextId ?? entityId));
+}
+
+// `actionArgs.folderContext.id` as the location the model works in, or
+// `undefined` when no folder is connected or the id is not a string.
+function folderContextIdOf(actionArgs: Record<string, unknown>): string | undefined {
+  const folderContext = actionArgs["folderContext"];
+  if (!isObject(folderContext)) {
+    return undefined;
+  }
+  const id = folderContext["id"];
+  return typeof id === "string" && id.length > 0 ? id : undefined;
 }
 
 // Fold the picked agent's stored instruction (`chatSettings.prompt`, set on

@@ -45,7 +45,12 @@ import { HttpPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
 import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
 import { HttpWebSearchStorage } from "./webSearchStorage.js";
-import { getContextFolders, getRoomSkill, getRoomSkills } from "./roomSkills.js";
+import {
+  getContextFolders,
+  getKnowledgeFolders,
+  getRoomSkill,
+  getRoomSkills,
+} from "./roomSkills.js";
 
 export class HttpStorageAdapter implements StorageAdapter {
   public threads = new HttpThreadsStorage();
@@ -61,11 +66,16 @@ export class HttpStorageAdapter implements StorageAdapter {
   public attachments = new HttpAttachmentsStorage();
   public formAnalysis = new HttpFormAnalysisStorage();
 
-  // Rooms and skills for the chat's context: the rooms with a `.ai` folder
-  // the caller can read (one cloud entry — DocSpace is a single cloud, so
-  // `cloud` is not consulted) and the Markdown files of a room's folder.
+  // Rooms and skills for the chat's context: the Instructions rooms the
+  // caller can read (one cloud entry — DocSpace is a single cloud, so
+  // `cloud` is not consulted), the Markdown files of such a room, and the
+  // Knowledge rooms the chat may search.
   async getContextFolders(): Promise<ContextFolder[]> {
     return getContextFolders();
+  }
+
+  async getKnowledgeFolders(): Promise<ContextFolder[]> {
+    return getKnowledgeFolders();
   }
 
   async getRoomSkills(_cloud: string, roomId: string): Promise<RoomSkill[]> {

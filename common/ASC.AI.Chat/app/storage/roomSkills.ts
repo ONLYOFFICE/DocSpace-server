@@ -31,11 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The skills of a DocSpace room: the Markdown files of the `.ai` folder that
-// lies in the room's root. `GET api/2.0/files/rooms/{id}/ai` (added on the
-// server branch feature/ai-folder) lists that folder in the shape of any
-// other folder listing; a room without the folder answers 404, a caller who
-// cannot read the room 403 — both propagate as `DocspaceApiHttpError`.
+// The skills of a DocSpace room: the Markdown files in the root of an
+// Instructions room (`RoomType.InstructionsRoom`). `GET
+// api/2.0/files/rooms/{id}/ai` lists that root in the shape of any other
+// folder listing; a room of another type answers 404, a caller who cannot
+// read the room 403 — both propagate as `DocspaceApiHttpError`.
 //
 // A skill is an Agent Skills Markdown file: YAML frontmatter with `name` and
 // `description`, then the instructions. The widget reads the frontmatter of
@@ -62,7 +62,13 @@ import logger from "../log.js";
 /** `FilterType.FilesOnly` on the C# side — the listing skips subfolders. */
 const FILTER_FILES_ONLY = 1;
 
-/** Page size of the `.ai` listing; a room holds a handful of skills, not thousands. */
+/** `RoomType.InstructionsRoom` on the C# side — the rooms whose Markdown files are skills. */
+const INSTRUCTIONS_ROOM_TYPE = 10;
+
+/** `RoomType.KnowledgeRoom` on the C# side — the rooms whose files are a searchable knowledge base. */
+const KNOWLEDGE_ROOM_TYPE = 11;
+
+/** Page size of the skills listing; a room holds a handful of skills, not thousands. */
 const PAGE_SIZE = 100;
 
 /** Pages read at most — a runaway `total` must not turn into an endless loop. */
@@ -147,17 +153,18 @@ function parseRoomsPage(
 }
 
 /**
- * The rooms the caller can read whose `.ai` folder holds at least one skill
- * file, as one cloud entry — `GET api/2.0/files/rooms?withAiFolder=true`,
- * paged, then one look into each folder. The server already leaves out
- * rooms the caller may not see and third-party rooms (which cannot carry the
- * folder). Empty when there is none, so the widget shows no picker at all.
+ * The Instructions rooms the caller can read that hold at least one skill
+ * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
+ * one look into each room. The server already leaves out rooms the caller
+ * may not see. Empty when there is none, so the widget shows no picker at
+ * all.
  */
-export async function getContextFolders(): Promise<ContextFolder[]> {
+/** The rooms of one type the caller can read — `GET api/2.0/files/rooms?type=…`, paged. */
+async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]> {
   const rooms: ContextFolder["rooms"] = [];
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const params = new URLSearchParams({
-      withAiFolder: "true",
+      type: String(roomType),
       count: String(PAGE_SIZE),
       startIndex: String(page * PAGE_SIZE),
     });
@@ -171,7 +178,7 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
       }
       const parsed = parseRoomsPage(await res.json());
       if (!parsed) {
-        logger.warn(`getContextFolders -> unparseable response from ${url}`);
+        logger.warn(`listRoomsOfType(${roomType}) -> unparseable response from ${url}`);
         break;
       }
       rooms.push(...parsed.rooms);
@@ -182,9 +189,14 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
       cancel();
     }
   }
-  // A `.ai` folder with no skill file in it connects nothing, so such a
-  // room is not offered either. A room whose folder cannot be read is left
-  // out rather than failing the whole list.
+  return rooms;
+}
+
+export async function getContextFolders(): Promise<ContextFolder[]> {
+  const rooms = await listRoomsOfType(INSTRUCTIONS_ROOM_TYPE);
+  // An Instructions room with no skill file in it connects nothing, so such
+  // a room is not offered either. A room that cannot be read is left out
+  // rather than failing the whole list.
   const withSkills = await mapLimit(rooms, READ_CONCURRENCY, async (room) => {
     try {
       return (await listRoomSkillFiles(room.id)).length > 0 ? room : undefined;
@@ -200,10 +212,21 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
 }
 
 /**
- * Every Markdown file directly inside the room's `.ai` folder, in the
- * server's order. Throws `DocspaceApiHttpError` (404: no room or no `.ai`
- * folder; 403: the caller cannot read the room) like the other Files API
- * reads.
+ * The Knowledge rooms the caller can read, as one cloud entry — `GET
+ * api/2.0/files/rooms?type=11`, paged. The composer offers them as the
+ * chat's knowledge base; the connected one scopes the .NET knowledge search
+ * tool. Empty when there is none, so the widget shows no knowledge row.
+ */
+export async function getKnowledgeFolders(): Promise<ContextFolder[]> {
+  const rooms = await listRoomsOfType(KNOWLEDGE_ROOM_TYPE);
+  return rooms.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms }] : [];
+}
+
+/**
+ * Every Markdown file directly in the root of the Instructions room, in the
+ * server's order. Throws `DocspaceApiHttpError` (404: no such room, or not
+ * an Instructions room; 403: the caller cannot read the room) like the other
+ * Files API reads.
  */
 export async function listRoomSkillFiles(roomId: string): Promise<AiFolderFile[]> {
   const files: AiFolderFile[] = [];
@@ -528,13 +551,13 @@ export async function getRoomSkills(roomId: string): Promise<RoomSkill[]> {
 
 /**
  * The whole file of one skill — the widget reads it as text either way.
- * The id must name a Markdown file of this room's `.ai` folder: a file id
- * from elsewhere is answered as not found, whatever the caller may read.
+ * The id must name a Markdown file in the root of this Instructions room: a
+ * file id from elsewhere is answered as not found, whatever the caller may read.
  */
 export async function getRoomSkill(roomId: string, skillId: string): Promise<string> {
   const files = await listRoomSkillFiles(roomId);
   if (!files.some((file) => file.id === skillId)) {
-    throw Object.assign(new Error(`Skill ${skillId} is not in the .ai folder of room ${roomId}`), {
+    throw Object.assign(new Error(`Skill ${skillId} is not a skill of room ${roomId}`), {
       status: 404,
       expose: true,
     });

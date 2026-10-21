@@ -53,6 +53,10 @@ export interface RequestContext {
   // Names of the custom MCP servers resolved for this round's scope — see
   // setCustomServerNames in requestContext.ts.
   customServerNames?: string[];
+  // The knowledge room the composer connected for this round
+  // (`actionArgs.knowledgeRoom.id`); the .NET knowledge search tool is
+  // scoped to it — see setKnowledgeRoomId in requestContext.ts.
+  knowledgeRoomId?: number;
   // Entry ids of forms attached for analysis (per-file analyzeOnly); read by createMany.
   analyzeEntryIds?: string[];
   // In-flight `GET /files/folder/{id}` reads, keyed by folder id. A round
