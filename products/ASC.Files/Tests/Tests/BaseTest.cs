@@ -72,6 +72,7 @@ public class BaseTest(
     protected SharingApi _sharingApi = null!;
     protected PrivacyRoomApi _privacyRoomApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
+    protected MetadataApi _metadataApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
@@ -132,6 +133,7 @@ public class BaseTest(
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
         _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
+        _metadataApi = _clients.MetadataApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;

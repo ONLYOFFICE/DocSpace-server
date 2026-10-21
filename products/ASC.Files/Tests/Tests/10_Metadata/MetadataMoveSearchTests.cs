@@ -72,8 +72,8 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
         var myFile = await CreateFileInMy($"trashed-{Guid.NewGuid().ToString()[..8]}.docx", Owner);
         var myDocumentsId = await GetUserFolderIdAsync(Owner);
 
-        await data.Api.AssignFileTemplatesAsync(myFile.Id, [data.TemplateId], TestContext.Current.CancellationToken);
-        await data.Api.SetFileValuesAsync(myFile.Id, [data.Value("ACME")], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(myFile.Id, new AssignMetadataTemplates([data.TemplateId]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(myFile.Id, new SetMetadataValues([data.Value("ACME")]), TestContext.Current.CancellationToken);
 
         var before = await data.PollAsync(myDocumentsId, [myFile.Id]);
         before.FileIds().Should().Equal(myFile.Id);
@@ -96,8 +96,8 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         var data = await ArrangeAsync();
 
-        await data.Api.AssignFolderTemplatesAsync(data.RoomId, [data.TemplateId], cascade: true, TestContext.Current.CancellationToken);
-        await data.Api.SetFolderValuesAsync(data.RoomId, [data.Value("Inherited")], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(data.RoomId, new AssignMetadataTemplates([data.TemplateId], cascade: true), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(data.RoomId, new SetMetadataValues([data.Value("Inherited")]), TestContext.Current.CancellationToken);
 
         // a new file inherits the room's values inside the save transaction; the inherited values used to reach the
         // index only with the next full indexing pass, so the SQL fallback and the index disagreed for a minute
@@ -131,17 +131,17 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Guid.NewGuid().ToString()[..8];
 
-        var template = await api.CreateTemplateAsync("Move " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var template = (await _metadataApi.CreateTemplateAsync(
+            new CreateMetadataTemplateRequestDto("Move " + suffix, true, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]), TestContext.Current.CancellationToken)).Response;
 
         var room = await CreateCustomRoom($"Move {suffix}");
         var sourceFolder = await CreateFolder($"Source {suffix}", room.Id);
         var targetFolder = await CreateFolder($"Target {suffix}", room.Id);
         var file = await CreateFile($"moved-{suffix}.docx", sourceFolder.Id);
 
-        var data = new MoveSearchData(api, template)
+        var data = new MoveSearchData(_foldersApi, template)
         {
             RoomId = room.Id,
             SourceFolderId = sourceFolder.Id,
@@ -149,15 +149,14 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
             FileId = file.Id
         };
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [data.Value("ACME")], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(file.Id, new SetMetadataValues([data.Value("ACME")]), TestContext.Current.CancellationToken);
 
         return data;
     }
 
-    private sealed class MoveSearchData(MetadataApiClient api, MetadataTemplateResponse template)
+    private sealed class MoveSearchData(FoldersApi foldersApi, MetadataTemplateDto template)
     {
-        public MetadataApiClient Api { get; } = api;
         public int TemplateId { get; } = template.Id;
 
         public int RoomId { get; init; }
@@ -165,9 +164,9 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
         public int TargetFolderId { get; init; }
         public int FileId { get; init; }
 
-        public MetadataValuePayload Value(string value)
+        public MetadataValueRequest Value(string value)
         {
-            return new MetadataValuePayload { FieldId = template.Field(ClientField).Id, StringValue = value };
+            return new MetadataValueRequest(template.Field(ClientField).Id, stringValue: value);
         }
 
         /// <summary>
@@ -176,12 +175,12 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
         /// </summary>
         public async Task<FolderContentResponse> PollAsync(int folderId, int[] expectedFiles, string value = "ACME")
         {
-            var condition = new { fieldId = template.Field(ClientField).Id, value };
+            var condition = new MetadataFilterConditionRequest(fieldId: template.Field(ClientField).Id, value: value);
             var deadline = DateTime.UtcNow.AddSeconds(20);
 
             while (true)
             {
-                var content = await Api.GetFolderContentAsync(folderId, TemplateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
+                var content = await foldersApi.GetFolderContentWithMetadataAsync(folderId, TemplateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
 
                 if (content.FileIds().Order().SequenceEqual(expectedFiles.Order()) || DateTime.UtcNow > deadline)
                 {

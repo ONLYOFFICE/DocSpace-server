@@ -58,6 +58,7 @@ public class FileMoveConflictTests(
         // Seed a same-titled file already in the destination.
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -73,6 +74,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file2.Id)],
@@ -103,6 +105,7 @@ public class FileMoveConflictTests(
         var file1 = await CreateFile(fileTitle, myDocsFolderId);
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -118,6 +121,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Overwrite,
             FileIds = [new(file2.Id)],
@@ -144,6 +148,7 @@ public class FileMoveConflictTests(
         var file1 = await CreateFile(fileTitle, myDocsFolderId);
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -156,6 +161,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Duplicate,
             FileIds = [new(file2.Id)],
@@ -178,6 +184,7 @@ public class FileMoveConflictTests(
         // Act & Assert - an empty batch is accepted gracefully, mirroring copyBatchItems
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
@@ -198,6 +205,7 @@ public class FileMoveConflictTests(
         // Act & Assert - moving a file onto the folder it already lives in must not error out
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(room.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file.Id)],
