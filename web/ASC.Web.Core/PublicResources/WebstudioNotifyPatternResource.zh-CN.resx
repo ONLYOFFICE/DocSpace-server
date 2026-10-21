@@ -814,6 +814,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.您的空间即将被删除
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#else
+#if($FinalNotice == "True")
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，然后续订即可恢复工作。一切都将保持原样。
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，一切都将保持原样。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+如果您决定不再继续使用，也完全没问题。如果有想要保留的数据，请在 ${DeleteDateShort} 前解除空间锁定并进行备份。此后我们将无法恢复。
+#else
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前解除空间锁定并下载这些文件。此后我们将无法恢复。
+#end
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前联系我们的支持团队，我们将帮助您按原样恢复空间。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。此后我们将无法恢复。
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.好久不见
 
@@ -1729,6 +1770,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间已被锁定，但您的数据在 ${DeleteDateShort} 前都是安全的</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间即将被删除（删除日期：${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>保留您的 ${LetterLogoText} 空间的最后机会（删除日期：${DeleteDateShort}）</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>

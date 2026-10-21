@@ -793,6 +793,47 @@ Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Sahəniz tezliklə silinəcək
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz abunəliyi başa çatdığı üçün hələ də bloklanıb. Bu, dostcasına son xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz abunəliyi başa çatdığı üçün hələ də bloklanıb. Bu, dostcasına xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#end
+#else
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz bir müddətdir istifadə olunmadığı üçün hələ də bloklanıb. Bu, dostcasına son xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz bir müddətdir istifadə olunmadığı üçün hələ də bloklanıb. Bu, dostcasına xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın, sonra işə qayıtmaq üçün abunəliyinizi yeniləyin. Hər şey olduğu yerdə qalacaq.
+#else
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın və hər şey olduğu yerdə qalacaq.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz məlumatlar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onların ehtiyat nüsxəsini çıxarın. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#else
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onları endirin. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#end
+#else
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək dəstək komandamızla əlaqə saxlayın və sahənizi olduğu kimi geri qaytarmağınıza kömək edəcəyik.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, $DeleteDateShort tarixinədək bizə bildirin və onlara giriş əldə etməyinizə kömək edəcəyik. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Bir müddətdir sizi görmürük
 
@@ -1697,6 +1738,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} sahəniz bloklanıb, lakin məlumatlarınız $DeleteDateShort tarixinədək təhlükəsizdir</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz tezliklə silinəcək (silinmə tarixi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} sahənizi saxlamaq üçün son şans (silinmə tarixi: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>

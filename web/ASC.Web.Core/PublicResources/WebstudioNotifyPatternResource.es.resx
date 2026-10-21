@@ -792,6 +792,47 @@ Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera cons
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Su espacio se eliminará pronto
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#else
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort y, después, renovar su suscripción para volver al trabajo. Todo estará tal y como lo dejó.
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort, y todo estará tal y como lo dejó.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Si ha decidido seguir otro camino, no pasa nada. Si hay datos que quiera conservar, desbloquee su espacio y haga una copia de seguridad antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#else
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, desbloquee su espacio y descárguelos antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#end
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que ponerse en contacto con nuestro equipo de soporte antes del $DeleteDateShort, y le ayudaremos a recuperar su espacio tal y como lo dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, avísenos antes del $DeleteDateShort y le ayudaremos a acceder a ellos, ya que después no podremos recuperarlos.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Hace tiempo que no le vemos
 
@@ -1706,6 +1747,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Su espacio de ${LetterLogoText} está bloqueado, pero sus datos están a salvo hasta el $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} se eliminará pronto (eliminación: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Última oportunidad para conservar su espacio de ${LetterLogoText} (eliminación: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>

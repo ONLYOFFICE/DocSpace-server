@@ -805,6 +805,47 @@ Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglab
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Jūsu telpa drīzumā tiks dzēsta
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tās abonements ir beidzies. Šis ir draudzīgs pēdējais atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#else
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tās abonements ir beidzies. Šis ir draudzīgs atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tā kādu laiku nav izmantota. Šis ir draudzīgs pēdējais atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#else
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tā kādu laiku nav izmantota. Šis ir draudzīgs atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort) un pēc tam atjaunojiet abonementu, lai atsāktu darbu. Viss būs tieši tur, kur to atstājāt.
+#else
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort), un viss būs tieši tur, kur to atstājāt.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus datus, atbloķējiet telpu un izveidojiet to dublējumu (termiņš: $DeleteDateShort), jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#else
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, atbloķējiet telpu un lejupielādējiet tos (termiņš: $DeleteDateShort), jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#end
+#else
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši sazinieties ar mūsu atbalsta komandu (termiņš: $DeleteDateShort), un mēs palīdzēsim atgūt jūsu telpu tieši tādu, kādu to atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, paziņojiet mums (termiņš: $DeleteDateShort), un mēs palīdzēsim jums tiem piekļūt, jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Sen neesam jūs redzējuši
 
@@ -1744,6 +1785,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpa ir bloķēta, bet jūsu dati ir drošībā (termiņš: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa drīzumā tiks dzēsta (dzēšanas datums: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Pēdējā iespēja saglabāt jūsu ${LetterLogoText} telpu (dzēšanas datums: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>

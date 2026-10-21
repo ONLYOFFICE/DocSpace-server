@@ -805,6 +805,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.スペースはまもなく削除されます
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、サブスクリプションが終了したため、引き続きブロックされています。最後のお知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#else
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、サブスクリプションが終了したため、引き続きブロックされています。お知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#end
+#else
+#if($FinalNotice == "True")
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、しばらく使用されていないため、引き続きブロックされています。最後のお知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#else
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、しばらく使用されていないため、引き続きブロックされています。お知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除し、サブスクリプションを更新すれば、作業を再開できます。すべてがそのままの状態で残っています。
+#else
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除するだけで、すべてがそのままの状態で戻ります。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータがある場合は、${DeleteDateShort}までにスペースのブロックを解除してバックアップしてください。その後は復元できなくなります。
+#else
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにスペースのブロックを解除してダウンロードしてください。その後は復元できなくなります。
+#end
+#else
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにサポートチームにご連絡いただければ、スペースをそのままの状態で復元できるようお手伝いします。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにお知らせください。ファイルにアクセスできるようお手伝いします。その後は復元できなくなります。
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.しばらくお見かけしていません
 
@@ -1688,6 +1729,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} のスペースはブロックされましたが、データは${DeleteDateShort}まで安全に保管されます</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} のスペースはまもなく削除されます（削除日: ${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} のスペースを維持する最後のチャンスです（削除日: ${DeleteDateShort}）</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>

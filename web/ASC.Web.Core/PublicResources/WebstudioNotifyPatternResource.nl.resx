@@ -793,6 +793,47 @@ Hebt u besloten verder te gaan? Dat is helemaal prima. Wilt u bestanden bewaren,
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Uw ruimte wordt binnenkort verwijderd
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Uw ${LetterLogoText}-ruimte *"${__VirtualRootPath}":"${__VirtualRootPath}"* is nog steeds geblokkeerd omdat het abonnement is beëindigd. Dit is een vriendelijke laatste herinnering: op *$DeleteDate* worden de ruimte en al haar gegevens definitief verwijderd.
+#else
+Uw ${LetterLogoText}-ruimte *"${__VirtualRootPath}":"${__VirtualRootPath}"* is nog steeds geblokkeerd omdat het abonnement is beëindigd. Dit is een vriendelijke herinnering: op *$DeleteDate* worden de ruimte en al haar gegevens definitief verwijderd.
+#end
+#else
+#if($FinalNotice == "True")
+Uw ${LetterLogoText}-ruimte *"${__VirtualRootPath}":"${__VirtualRootPath}"* is nog steeds geblokkeerd omdat de ruimte een tijd niet is gebruikt. Dit is een vriendelijke laatste herinnering: op *$DeleteDate* worden de ruimte en al haar gegevens definitief verwijderd.
+#else
+Uw ${LetterLogoText}-ruimte *"${__VirtualRootPath}":"${__VirtualRootPath}"* is nog steeds geblokkeerd omdat de ruimte een tijd niet is gebruikt. Dit is een vriendelijke herinnering: op *$DeleteDate* worden de ruimte en al haar gegevens definitief verwijderd.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Wilt u de ruimte behouden, dan is er nog tijd. Deblokkeer uw ruimte vóór $DeleteDateShort en verleng daarna uw abonnement om weer aan de slag te gaan. Alles staat dan precies waar u het hebt achtergelaten.
+#else
+Wilt u de ruimte behouden, dan is er nog tijd. Deblokkeer uw ruimte vóór $DeleteDateShort, en alles staat precies waar u het hebt achtergelaten.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Hebt u besloten verder te gaan? Dat is helemaal prima. Wilt u gegevens bewaren, deblokkeer dan uw ruimte en maak vóór $DeleteDateShort een back-up, want daarna kunnen we ze niet meer herstellen.
+#else
+Hebt u besloten verder te gaan? Dat is helemaal prima. Wilt u bestanden bewaren, deblokkeer dan uw ruimte en download ze vóór $DeleteDateShort, want daarna kunnen we ze niet meer herstellen.
+#end
+#else
+Wilt u de ruimte behouden, dan is er nog tijd. Neem vóór $DeleteDateShort contact op met ons supportteam, en we helpen u uw ruimte terug te krijgen, precies zoals u die hebt achtergelaten.
+
+$OrangeButton
+
+Hebt u besloten verder te gaan? Dat is helemaal prima. Wilt u bestanden bewaren, laat het ons dan vóór $DeleteDateShort weten en we helpen u er toegang toe te krijgen, want daarna kunnen we ze niet meer herstellen.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.We hebben u al een tijdje niet gezien
 
@@ -1698,6 +1739,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Uw ${LetterLogoText}-ruimte is geblokkeerd, maar uw gegevens zijn veilig tot $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Uw ${LetterLogoText}-ruimte wordt binnenkort verwijderd (verwijdering op $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Laatste kans om uw ${LetterLogoText}-ruimte te behouden (verwijdering op $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Uw ${LetterLogoText}-ruimte mist u (actie vereist vóór $BlockDateShort)</value>

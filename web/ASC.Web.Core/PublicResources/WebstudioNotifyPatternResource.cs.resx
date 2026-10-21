@@ -792,6 +792,47 @@ Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete po
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Váš prostor bude brzy odstraněn
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože jeho předplatné skončilo. Toto je přátelská poslední připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#else
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože jeho předplatné skončilo. Toto je přátelská připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože se delší dobu nepoužíval. Toto je přátelská poslední připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#else
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože se delší dobu nepoužíval. Toto je přátelská připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Pokud si ho chcete ponechat, ještě je čas. Stačí do $DeleteDateShort odblokovat prostor a pak obnovit předplatné, abyste se mohli vrátit k práci. Vše bude přesně tam, kde jste to nechali.
+#else
+Pokud si ho chcete ponechat, ještě je čas. Stačí do $DeleteDateShort odblokovat prostor a vše bude přesně tam, kde jste to nechali.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaká data, odblokujte prostor a do $DeleteDateShort je zálohujte, protože potom je už nebudeme moci obnovit.
+#else
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, odblokujte prostor a do $DeleteDateShort si je stáhněte, protože potom je už nebudeme moci obnovit.
+#end
+#else
+Pokud si ho chcete ponechat, ještě je čas. Stačí se do $DeleteDateShort obrátit na náš tým podpory a pomůžeme vám prostor obnovit přesně v podobě, v jaké jste ho nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, dejte nám vědět do $DeleteDateShort a pomůžeme vám k nim získat přístup, protože potom je už nebudeme moci obnovit.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Dlouho jsme vás neviděli
 
@@ -1697,6 +1738,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Váš prostor ${LetterLogoText} je zablokován, ale data jsou v bezpečí do $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} bude brzy odstraněn (datum odstranění: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Poslední šance zachovat váš prostor ${LetterLogoText} (datum odstranění: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>

@@ -793,6 +793,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Твој простор ће ускоро бити обрисан
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"* је и даље блокиран јер је његова претплата истекла. Ово је пријатељски последњи подсетник: простор и сви његови подаци биће трајно обрисани овог дана: *$DeleteDate*.
+#else
+Твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"* је и даље блокиран јер је његова претплата истекла. Ово је пријатељски подсетник: простор и сви његови подаци биће трајно обрисани овог дана: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"* је и даље блокиран јер се дуже време не користи. Ово је пријатељски последњи подсетник: простор и сви његови подаци биће трајно обрисани овог дана: *$DeleteDate*.
+#else
+Твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"* је и даље блокиран јер се дуже време не користи. Ово је пријатељски подсетник: простор и сви његови подаци биће трајно обрисани овог дана: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Ако желиш да га задржиш, још има времена. Само деблокирај простор (рок: $DeleteDateShort), а затим обнови претплату и настави са радом. Све ће бити тачно тамо где је било.
+#else
+Ако желиш да га задржиш, још има времена. Само деблокирај простор (рок: $DeleteDateShort) и све ће бити тачно тамо где је било.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ако су ти се планови променили, то је сасвим у реду. Ако желиш да задржиш неке податке, деблокирај простор и направи резервну копију (рок: $DeleteDateShort), јер их након тога нећемо моћи да вратимо.
+#else
+Ако су ти се планови променили, то је сасвим у реду. Ако желиш да задржиш неке датотеке, деблокирај простор и преузми их (рок: $DeleteDateShort), јер их након тога нећемо моћи да вратимо.
+#end
+#else
+Ако желиш да га задржиш, још има времена. Само се обрати нашем тиму подршке (рок: $DeleteDateShort) и помоћи ћемо ти да вратиш простор тачно онакав какав је био.
+
+$OrangeButton
+
+Ако су ти се планови променили, то је сасвим у реду. Ако желиш да задржиш неке датотеке, јави нам (рок: $DeleteDateShort) и помоћи ћемо ти да им приступиш, јер их након тога нећемо моћи да вратимо.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Дуго те нисмо видели
 
@@ -1705,6 +1746,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Твој ${LetterLogoText} простор је блокиран, али подаци су безбедни (рок: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Твој ${LetterLogoText} простор ће ускоро бити обрисан (датум брисања: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Последња прилика да задржиш свој ${LetterLogoText} простор (датум брисања: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Твом ${LetterLogoText} простору недостајеш (рок за акцију: $BlockDateShort)</value>

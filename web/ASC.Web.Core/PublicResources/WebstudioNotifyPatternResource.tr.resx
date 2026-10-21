@@ -798,6 +798,47 @@ Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak isted
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Alanınız yakında silinecek
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, aboneliği sona erdiği için hâlâ engelli. Bu dostça bir son hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, aboneliği sona erdiği için hâlâ engelli. Bu dostça bir hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#end
+#else
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, bir süredir kullanılmadığı için hâlâ engelli. Bu dostça bir son hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, bir süredir kullanılmadığı için hâlâ engelli. Bu dostça bir hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce alanınızın engelini kaldırın, ardından işinize dönmek için aboneliğinizi yenileyin. Her şey bıraktığınız yerde olacak.
+#else
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce alanınızın engelini kaldırmanız yeterli; her şey bıraktığınız yerde olacak.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz veriler varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce yedekleyin. Bu tarihten sonra bunları kurtaramayacağız.
+#else
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce indirin. Bu tarihten sonra bunları kurtaramayacağız.
+#end
+#else
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce destek ekibimizle iletişime geçmeniz yeterli; alanınızı bıraktığınız gibi geri almanıza yardımcı olacağız.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa $DeleteDateShort tarihinden önce bize bildirin, bunlara erişmenize yardımcı olalım. Bu tarihten sonra bunları kurtaramayacağız.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Bir süredir sizi göremiyoruz
 
@@ -1738,6 +1779,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} alanınız engellendi, ancak verileriniz $DeleteDateShort tarihine kadar güvende</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} alanınız yakında silinecek (silinme tarihi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} alanınızı korumak için son şans (silinme tarihi: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>

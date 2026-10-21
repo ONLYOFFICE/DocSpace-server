@@ -792,6 +792,47 @@ Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Jeśli chcesz zacho
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Twoja przestrzeń zostanie wkrótce usunięta
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Twoja przestrzeń ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* jest nadal zablokowana, ponieważ jej subskrypcja wygasła. To ostatnie przyjazne przypomnienie: przestrzeń i wszystkie jej dane zostaną trwale usunięte w tym dniu: *$DeleteDate*.
+#else
+Twoja przestrzeń ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* jest nadal zablokowana, ponieważ jej subskrypcja wygasła. To przyjazne przypomnienie: przestrzeń i wszystkie jej dane zostaną trwale usunięte w tym dniu: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Twoja przestrzeń ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* jest nadal zablokowana, ponieważ od dłuższego czasu nie była używana. To ostatnie przyjazne przypomnienie: przestrzeń i wszystkie jej dane zostaną trwale usunięte w tym dniu: *$DeleteDate*.
+#else
+Twoja przestrzeń ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* jest nadal zablokowana, ponieważ od dłuższego czasu nie była używana. To przyjazne przypomnienie: przestrzeń i wszystkie jej dane zostaną trwale usunięte w tym dniu: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Jeśli chcesz ją zachować, wciąż jest na to czas. Wystarczy odblokować przestrzeń do $DeleteDateShort, a następnie odnowić subskrypcję, aby wrócić do pracy. Wszystko będzie dokładnie tam, gdzie było.
+#else
+Jeśli chcesz ją zachować, wciąż jest na to czas. Wystarczy odblokować przestrzeń do $DeleteDateShort, a wszystko będzie dokładnie tam, gdzie było.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Jeśli chcesz zachować jakieś dane, odblokuj przestrzeń i utwórz kopię zapasową do $DeleteDateShort, ponieważ potem nie będziemy mogli ich odzyskać.
+#else
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Jeśli chcesz zachować jakieś pliki, odblokuj przestrzeń i pobierz je do $DeleteDateShort, ponieważ potem nie będziemy mogli ich odzyskać.
+#end
+#else
+Jeśli chcesz ją zachować, wciąż jest na to czas. Wystarczy skontaktować się z naszym zespołem wsparcia do $DeleteDateShort, a pomożemy przywrócić przestrzeń dokładnie w takim stanie, w jakim była.
+
+$OrangeButton
+
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Jeśli chcesz zachować jakieś pliki, daj nam znać do $DeleteDateShort, a pomożemy uzyskać do nich dostęp, ponieważ potem nie będziemy mogli ich odzyskać.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Dawno Cię nie widzieliśmy
 
@@ -1697,6 +1738,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Twoja przestrzeń ${LetterLogoText} jest zablokowana, ale dane są bezpieczne do $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Twoja przestrzeń ${LetterLogoText} zostanie wkrótce usunięta (data usunięcia: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Ostatnia szansa, aby zachować przestrzeń ${LetterLogoText} (data usunięcia: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Twoja przestrzeń ${LetterLogoText} tęskni za Tobą (wymagane działanie do $BlockDateShort)</value>

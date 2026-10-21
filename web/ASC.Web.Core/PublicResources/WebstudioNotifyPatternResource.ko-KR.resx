@@ -805,6 +805,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.공간이 곧 삭제됩니다
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+구독이 종료되어 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 이용이 계속 차단되어 있습니다. 마지막 안내입니다: *$DeleteDate* 에 공간과 모든 데이터가 영구적으로 삭제됩니다.
+#else
+구독이 종료되어 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 이용이 계속 차단되어 있습니다. 안내입니다: *$DeleteDate* 에 공간과 모든 데이터가 영구적으로 삭제됩니다.
+#end
+#else
+#if($FinalNotice == "True")
+한동안 사용되지 않아 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 이용이 계속 차단되어 있습니다. 마지막 안내입니다: *$DeleteDate* 에 공간과 모든 데이터가 영구적으로 삭제됩니다.
+#else
+한동안 사용되지 않아 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 이용이 계속 차단되어 있습니다. 안내입니다: *$DeleteDate* 에 공간과 모든 데이터가 영구적으로 삭제됩니다.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+공간을 유지하고 싶으시다면 아직 시간이 있습니다. ${DeleteDateShort} 전에 공간 차단을 해제한 후 구독을 갱신하시면 다시 업무를 시작할 수 있습니다. 모든 것이 그대로 남아 있습니다.
+#else
+공간을 유지하고 싶으시다면 아직 시간이 있습니다. ${DeleteDateShort} 전에 공간 차단을 해제하시면 모든 것이 그대로 유지됩니다.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 데이터가 있다면 ${DeleteDateShort} 전에 공간 차단을 해제하고 백업하세요. 이후에는 복구할 수 없습니다.
+#else
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 파일이 있다면 ${DeleteDateShort} 전에 공간 차단을 해제하고 다운로드하세요. 이후에는 복구할 수 없습니다.
+#end
+#else
+공간을 유지하고 싶으시다면 아직 시간이 있습니다. ${DeleteDateShort} 전에 지원팀에 문의하시면 공간을 그대로 복구할 수 있도록 도와드리겠습니다.
+
+$OrangeButton
+
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 파일이 있다면 ${DeleteDateShort} 전에 알려 주세요. 파일에 액세스할 수 있도록 도와드리겠습니다. 이후에는 복구할 수 없습니다.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.한동안 뵙지 못했네요
 
@@ -1741,6 +1782,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} 공간이 차단되었지만 데이터는 ${DeleteDateShort}까지 안전하게 보관됩니다</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} 공간이 곧 삭제됩니다(삭제일: ${DeleteDateShort})</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} 공간을 유지할 마지막 기회입니다(삭제일: ${DeleteDateShort})</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} 공간이 회원님을 기다리고 있습니다(${BlockDateShort}까지 조치 필요)</value>

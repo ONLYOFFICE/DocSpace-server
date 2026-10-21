@@ -793,6 +793,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Ձեր տարածքը շուտով կջնջվի
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ դրա բաժանորդագրությունն ավարտվել է: Սա բարեկամական վերջին հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#else
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ դրա բաժանորդագրությունն ավարտվել է: Սա բարեկամական հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#end
+#else
+#if($FinalNotice == "True")
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ որոշ ժամանակ չի օգտագործվել: Սա բարեկամական վերջին հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#else
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ որոշ ժամանակ չի օգտագործվել: Սա բարեկամական հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, ապա երկարաձգեք բաժանորդագրությունը՝ աշխատանքին վերադառնալու համար: Ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#else
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, և ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան տվյալներ, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և պահուստավորեք դրանք մինչև $DeleteDateShort: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#else
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և ներբեռնեք դրանք մինչև $DeleteDateShort: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#end
+#else
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես կապվեք մեր աջակցման թիմի հետ մինչև $DeleteDateShort, և մենք կօգնենք վերականգնել ձեր տարածքը ճիշտ այնպես, ինչպես թողել եք:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, տեղեկացրեք մեզ մինչև $DeleteDateShort, և մենք կօգնենք ձեզ մուտք ստանալ դրանց: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Վաղուց ձեզ չենք տեսել
 
@@ -1703,6 +1744,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} տարածքն արգելափակված է, բայց ձեր տվյալներն ապահով են մինչև $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը շուտով կջնջվի (ջնջման ամսաթիվ՝ $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը պահպանելու վերջին հնարավորությունը (ջնջման ամսաթիվ՝ $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} տարածքը կարոտել է ձեզ (անհրաժեշտ է գործել մինչև $BlockDateShort)</value>

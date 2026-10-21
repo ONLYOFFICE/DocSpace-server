@@ -797,6 +797,47 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.سيتم حذف مساحتك قريبًا
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+لا تزال مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, محظورة لأن اشتراكها قد انتهى. هذا تذكير ودي أخير: في *$DeleteDate*, سيتم حذف المساحة وجميع بياناتها نهائيًا.
+#else
+لا تزال مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, محظورة لأن اشتراكها قد انتهى. هذا تذكير ودي: في *$DeleteDate*, سيتم حذف المساحة وجميع بياناتها نهائيًا.
+#end
+#else
+#if($FinalNotice == "True")
+لا تزال مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, محظورة لأنها لم تُستخدم منذ فترة. هذا تذكير ودي أخير: في *$DeleteDate*, سيتم حذف المساحة وجميع بياناتها نهائيًا.
+#else
+لا تزال مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, محظورة لأنها لم تُستخدم منذ فترة. هذا تذكير ودي: في *$DeleteDate*, سيتم حذف المساحة وجميع بياناتها نهائيًا.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+إذا كنت ترغب في الاحتفاظ بها، فلا يزال هناك وقت. ما عليك سوى إلغاء حظر مساحتك قبل $DeleteDateShort، ثم تجديد اشتراكك للعودة إلى العمل. سيكون كل شيء كما تركته تمامًا.
+#else
+إذا كنت ترغب في الاحتفاظ بها، فلا يزال هناك وقت. ما عليك سوى إلغاء حظر مساحتك قبل $DeleteDateShort، وسيكون كل شيء كما تركته تمامًا.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك بيانات تريد الاحتفاظ بها، فألغِ حظر مساحتك وانسخها احتياطيًا قبل $DeleteDateShort، لأننا لن نتمكن من استعادتها بعد ذلك.
+#else
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك ملفات تريد الاحتفاظ بها، فألغِ حظر مساحتك ونزّلها قبل $DeleteDateShort، لأننا لن نتمكن من استعادتها بعد ذلك.
+#end
+#else
+إذا كنت ترغب في الاحتفاظ بها، فلا يزال هناك وقت. ما عليك سوى التواصل مع فريق الدعم لدينا قبل $DeleteDateShort، وسنساعدك على استعادة مساحتك تمامًا كما تركتها.
+
+$OrangeButton
+
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك ملفات تريد الاحتفاظ بها، فأخبرنا قبل $DeleteDateShort وسنساعدك على الوصول إليها، لأننا لن نتمكن من استعادتها بعد ذلك.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.لم نرك منذ فترة
 
@@ -1710,6 +1751,12 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>تم حظر مساحتك على ${LetterLogoText}، لكن بياناتك في أمان حتى $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>سيتم حذف مساحتك على ${LetterLogoText} قريبًا (تاريخ الحذف: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>الفرصة الأخيرة للاحتفاظ بمساحتك على ${LetterLogoText} (تاريخ الحذف: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>مساحتك على ${LetterLogoText} تفتقدك (يلزم اتخاذ إجراء قبل $BlockDateShort)</value>
