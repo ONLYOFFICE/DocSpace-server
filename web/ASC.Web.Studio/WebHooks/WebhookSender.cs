@@ -126,7 +126,10 @@ public class WebhookSender(
             {
                 webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? webhookPayload.Event.CreateOn;
                 webhookPayload.Webhook.LastFailureContent = entry.ResponsePayload;
-                webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
+                // stored as UtcNow, but a datetime column reads back as Unspecified, which would go out without the Z
+                webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn is { } lastSuccessOn
+                    ? DateTime.SpecifyKind(lastSuccessOn, DateTimeKind.Utc)
+                    : null;
                 webhookPayload.Webhook.RetryCount = entry.Attempts;
                 webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
             }

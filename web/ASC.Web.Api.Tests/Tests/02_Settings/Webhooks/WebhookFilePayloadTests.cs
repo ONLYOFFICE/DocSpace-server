@@ -78,18 +78,15 @@ public class WebhookFilePayloadTests(
 
         await _filesClient.Authenticate(Owner);
 
-        using var created = await _files.PostAsync(
-            "api/2.0/files/rooms", new { title = $"room-{Guid.NewGuid():N}", roomType = "CustomRoom" }, cancellationToken);
-        var room = await _files.ReadAsync<JsonElement>(created, cancellationToken);
-        var roomId = room.GetProperty("id").GetInt32();
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
 
-        using var shared = await _files.PutAsync(
-            $"api/2.0/files/rooms/{roomId}/share",
-            new { invitations = new[] { new { id = member.Id, access = 2 } }, notify = false },
+        await _roomsApi.SetRoomSecurityAsync(
+            room.Id,
+            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.Read)], notify: false),
             cancellationToken);
-        shared.EnsureSuccessStatusCode();
 
-        return roomId;
+        return room.Id;
     }
 
     private async Task<string> CreateFileAsync(int roomId)
@@ -99,8 +96,7 @@ public class WebhookFilePayloadTests(
 
         await _filesClient.Authenticate(Owner);
 
-        using var response = await _files.PostAsync($"api/2.0/files/{roomId}/file", new { title }, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await _filesApi.CreateFileAsync(roomId, new CreateFileRequest(title), cancellationToken);
 
         return title;
     }

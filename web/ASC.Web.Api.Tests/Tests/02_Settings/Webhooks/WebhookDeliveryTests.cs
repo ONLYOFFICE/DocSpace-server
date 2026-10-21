@@ -202,6 +202,36 @@ public class WebhookDeliveryTests(
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(received);
     }
 
+    [Fact]
+    public async Task Delivery_RetryAfterAnEarlierSuccess_CarriesLastSuccessOnInUtc()
+    {
+        // Arrange: the first event is delivered at once, which records the success on the subscription
+        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 200, 500, 200);
+        var subscription = await CreateSubscriptionAsync(receiver);
+
+        await FireEventAsync();
+        (await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null)).Should().NotBeNull();
+
+        // Act: the second event fails once and is retried
+        await FireEventAsync();
+
+        // Assert
+        var deliveries = await receiver.WaitForDeliveriesAsync(3);
+
+        deliveries.Should().HaveCount(3);
+
+        using var retry = JsonDocument.Parse(deliveries[2].Body);
+        var webhook = retry.RootElement.GetProperty("webhook");
+
+        webhook.GetProperty("retryCount").GetInt32().Should().Be(1);
+
+        // a date-time without an offset is rejected by the Java, Kotlin and Go SDKs, which drops the whole delivery
+        var lastSuccessOn = webhook.GetProperty("lastSuccessOn").GetString();
+        lastSuccessOn.Should().EndWith("Z");
+        DateTimeOffset.Parse(lastSuccessOn!, CultureInfo.InvariantCulture).Should()
+            .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(5), "it is the time of the first delivery, in UTC");
+    }
+
     private static int RetryCountOf(string body)
     {
         using var document = JsonDocument.Parse(body);

@@ -263,6 +263,7 @@ in `samples/`:
 | Fixture | What it exercises |
 |---|---|
 | `file.created` | a real production delivery: integer ids, file fields beyond the shared entry part |
+| `file.created.retry` | the same delivery as its first retry: `webhook` carries `retryCount`, `retryOn`, `lastFailureOn`, `lastFailureContent` and `lastSuccessOn`, every date with its `Z` — the strict `date-time` parsers (Java, Kotlin, Go) reject the whole envelope without it |
 | `user.updated` | a user payload (`usedSpace`, `hasAvatar`, groups) on a subscription scoped to that user, so `webhook.target` carries a string id and a type |
 | `unknown.trigger` | a trigger family and target type this contract does not know, as after a server upgrade |
 

@@ -35,6 +35,7 @@ extern alias ASCPeople;
 extern alias ASCWebApi;
 
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
@@ -63,6 +64,7 @@ global using ApiKeysApi = DocSpace.API.SDK.Api.ApiKeys.ApiKeysApi;
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
+global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
 // Not the whole Group namespace: its SearchApi would collide with the People one.
 global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
@@ -74,6 +76,7 @@ global using PortalGuestsApi = DocSpace.API.SDK.Api.Portal.GuestsApi;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;
 global using PortalSettingsApi = DocSpace.API.SDK.Api.Portal.SettingsApi;
 global using PortalUsersApi = DocSpace.API.SDK.Api.Portal.UsersApi;
+global using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 global using SecurityAccessToDevToolsApi = DocSpace.API.SDK.Api.Security.AccessToDevToolsApi;
 global using SecurityBannersVisibilityApi = DocSpace.API.SDK.Api.Security.BannersVisibilityApi;
 global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
