@@ -1660,12 +1660,13 @@ public static class AccountingHttpClientExtension
         }
 
         var content = await response.Content.ReadAsStringAsync();
+        var detail = GetProblemDetail(content);
         var serviceLimitRequest = IsServiceLimitRequest(response.RequestMessage);
 
         // On the service limit paths a 400 "not found" may name something other than the customer - a service group the
         // accounting service does not have - and reporting that as a missing customer would hide the real reason.
         if (IsCustomerNotFound(response.StatusCode, content) &&
-            (!serviceLimitRequest || GetProblemDetail(content).StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
+            (!serviceLimitRequest || detail.StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
         {
             return new AccountingCustomerNotFoundException();
         }
@@ -1677,7 +1678,7 @@ public static class AccountingHttpClientExtension
 
         // A limit that does not exist is answered with 404 on a read but with 400 on an update or a deletion; both mean
         // the same, and only this one 400 must not be confused with a threshold the accounting service rejects.
-        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest && IsServiceLimitNotFound(content))
+        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest && IsServiceLimitNotFound(detail))
         {
             return new AccountingNotFoundException($"Accounting resource not found {content}");
         }
@@ -1686,12 +1687,12 @@ public static class AccountingHttpClientExtension
         // the access level, which stays a plain failure.
         if (response.StatusCode == HttpStatusCode.Forbidden && content.Contains(ServiceLimitExceededTitle, StringComparison.OrdinalIgnoreCase))
         {
-            return new AccountingServiceLimitExceededException(GetProblemDetail(content));
+            return new AccountingServiceLimitExceededException(detail);
         }
 
         if (response.StatusCode == HttpStatusCode.Conflict)
         {
-            return new AccountingConflictException(GetProblemDetail(content));
+            return new AccountingConflictException(detail);
         }
 
         // The service limit operations pass values the portal user chose, so their 400 explains a mistake of that user
@@ -1699,7 +1700,7 @@ public static class AccountingHttpClientExtension
         // accounting service (a missing service group). Elsewhere a 400 is our bug.
         if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest)
         {
-            return new AccountingBadRequestException(GetProblemDetail(content));
+            return new AccountingBadRequestException(detail);
         }
 
         return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
@@ -1747,10 +1748,8 @@ public static class AccountingHttpClientExtension
                 path.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static bool IsServiceLimitNotFound(string content)
+    private static bool IsServiceLimitNotFound(string detail)
     {
-        var detail = GetProblemDetail(content);
-
         return detail.StartsWith("Service limit", StringComparison.OrdinalIgnoreCase) &&
                detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
