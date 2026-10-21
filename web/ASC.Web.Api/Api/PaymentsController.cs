@@ -1641,17 +1641,18 @@ public class PaymentController(
     /// DocSpace administrator may read it, an installation without a billing service answers 403, and the call is
     /// read-only. The limit is checked in addition to the limits
     /// of the users, so a user can be stopped by it before reaching their own. The spending includes the expected cost
-    /// of AI operations still in progress. A portal with no billing customer or without such a limit answers 404;
-    /// create the limit with `POST api/2.0/portal/payment/servicelimit` and the scope `Total`.
+    /// of AI operations still in progress. When no such limit has been set, or it was deleted, the answer is 200 with a
+    /// null `response`; create the limit with `POST api/2.0/portal/payment/servicelimit` and the scope `Total`. A
+    /// switched-off limit is still returned, with `enabled` false. A portal with no billing customer answers 404.
     /// </remarks>
     /// <summary>
     /// Get the portal service limit
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/total</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The limit of the portal as a whole with its spending", typeof(ServiceLimitDto))]
+    [SwaggerResponse(200, "The limit of the portal as a whole with its spending, or null when no such limit is set", typeof(ServiceLimitDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The portal has no billing customer, or no limit is set for the portal as a whole")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
     [HttpGet("servicelimit/total")]
     public async Task<ServiceLimitDto> GetTotalServiceLimit()
     {
@@ -1659,25 +1660,26 @@ public class PaymentController(
 
         var serviceLimit = await tariffService.GetTotalServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices);
 
-        return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
+        return serviceLimit?.Map();
     }
 
     /// <remarks>
     /// Returns the spending limit on the AI services for every user - the same ceiling applied to each user separately,
     /// for any user without a personal limit in force. Only a DocSpace administrator may read it, an installation
     /// without a billing service answers 403, and the call is read-only. It comes without spending, since that is
-    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`. A portal
-    /// with no billing customer or without such a limit answers 404; create the limit with
-    /// `POST api/2.0/portal/payment/servicelimit` and the scope `Global`.
+    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`. When no
+    /// such limit has been set, or it was deleted, the answer is 200 with a null `response`; create the limit with
+    /// `POST api/2.0/portal/payment/servicelimit` and the scope `Global`. A switched-off limit is still returned, with
+    /// `enabled` false. A portal with no billing customer answers 404.
     /// </remarks>
     /// <summary>
     /// Get the service limit for every user
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/global</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The limit for every user", typeof(ServiceLimitDto))]
+    [SwaggerResponse(200, "The limit for every user, or null when no such limit is set", typeof(ServiceLimitDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The portal has no billing customer, or no limit is set for every user")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
     [HttpGet("servicelimit/global")]
     public async Task<ServiceLimitDto> GetGlobalServiceLimit()
     {
@@ -1685,7 +1687,7 @@ public class PaymentController(
 
         var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices);
 
-        return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
+        return serviceLimit?.Map();
     }
 
     /// <remarks>
