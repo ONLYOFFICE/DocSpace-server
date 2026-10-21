@@ -770,6 +770,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ваше пространство заблокировано, но пока ничего не потеряно
+
+#if($Unpaid == "True")
+Подписка на ваше пространство ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* закончилась, поэтому мы временно его заблокировали. Сейчас никто из вашей команды не может войти, но все ваши документы и настройки по-прежнему в безопасности.
+#else
+Вашим пространством ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* давно не пользовались, поэтому мы временно его заблокировали. Сейчас никто из вашей команды не может войти, но все ваши документы и настройки по-прежнему в безопасности.
+#end
+
+Мы будем хранить ваши данные до этой даты: *$DeleteDate*. После этого пространство и всё его содержимое будут безвозвратно удалены.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Хорошая новость: ещё не поздно. Просто разблокируйте пространство до $DeleteDateShort, а затем продлите подписку, чтобы вернуться к работе. Всё будет на своих местах.
+#else
+Хорошая новость: ещё не поздно. Просто разблокируйте пространство до $DeleteDateShort, и всё будет на своих местах.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Если вы решили двигаться дальше, это совершенно нормально. Если вы хотите сохранить какие-то данные, разблокируйте пространство и сделайте резервную копию до $DeleteDateShort.
+#else
+Если вы решили двигаться дальше, это совершенно нормально. Если вы хотите сохранить какие-то файлы, разблокируйте пространство и скачайте их до $DeleteDateShort.
+#end
+#else
+Хорошая новость: ещё не поздно. Просто свяжитесь с нашей службой поддержки до $DeleteDateShort, и мы поможем вернуть пространство в том виде, в каком вы его оставили.
+
+$OrangeButton
+
+Если вы решили двигаться дальше, это совершенно нормально. Если вы хотите сохранить какие-то файлы, сообщите нам до $DeleteDateShort, и мы поможем получить к ним доступ.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Давно вас не видели
 
@@ -1706,6 +1741,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успешно изменен</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ваше пространство ${LetterLogoText} заблокировано, но данные в безопасности до $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Ваше пространство ${LetterLogoText} скучает по вам (нужно действовать до $BlockDateShort)</value>

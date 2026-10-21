@@ -769,6 +769,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.O seu espaço está bloqueado, mas ainda nada se perdeu
+
+#if($Unpaid == "True")
+Como a subscrição do seu espaço ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, terminou, bloqueámo-lo por agora. Isto significa que ninguém da sua equipa pode iniciar sessão neste momento, mas todos os seus documentos e definições continuam seguros.
+#else
+Como o seu espaço ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, não é utilizado há algum tempo, bloqueámo-lo por agora. Isto significa que ninguém da sua equipa pode iniciar sessão neste momento, mas todos os seus documentos e definições continuam seguros.
+#end
+
+Os seus dados ficarão connosco até *$DeleteDate*. Depois disso, o espaço e todo o seu conteúdo serão eliminados permanentemente.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+A boa notícia: ainda vai a tempo. Basta desbloquear o seu espaço até $DeleteDateShort e depois renovar a subscrição para voltar ao trabalho. Tudo estará exatamente onde o deixou.
+#else
+A boa notícia: ainda vai a tempo. Basta desbloquear o seu espaço até $DeleteDateShort, e tudo estará exatamente onde o deixou.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Se decidiu seguir em frente, não há problema nenhum. Se houver dados que pretenda manter, desbloqueie o seu espaço e faça uma cópia de segurança até $DeleteDateShort.
+#else
+Se decidiu seguir em frente, não há problema nenhum. Se houver ficheiros que pretenda manter, desbloqueie o seu espaço e transfira-os até $DeleteDateShort.
+#end
+#else
+A boa notícia: ainda vai a tempo. Basta contactar a nossa equipa de suporte até $DeleteDateShort, e ajudamo-lo a recuperar o seu espaço exatamente como o deixou.
+
+$OrangeButton
+
+Se decidiu seguir em frente, não há problema nenhum. Se houver ficheiros que pretenda manter, avise-nos até $DeleteDateShort e ajudamo-lo a aceder-lhes.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Há algum tempo que não o vemos
 
@@ -1694,6 +1729,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>A sua senha foi alterada com sucesso</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>O seu espaço ${LetterLogoText} está bloqueado, mas os seus dados estão seguros até $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>O seu espaço ${LetterLogoText} tem saudades suas (ação necessária até $BlockDateShort)</value>

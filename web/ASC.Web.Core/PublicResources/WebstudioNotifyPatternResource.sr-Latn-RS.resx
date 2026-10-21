@@ -759,6 +759,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Tvoj prostor je blokiran, ali još ništa nije izgubljeno
+
+#if($Unpaid == "True")
+Pošto je pretplata za tvoj ${LetterLogoText} prostor *"${__VirtualRootPath}":"${__VirtualRootPath}"* istekla, privremeno smo ga blokirali. To znači da trenutno niko iz tvog tima ne može da se prijavi, ali svi tvoji dokumenti i podešavanja su i dalje bezbedni.
+#else
+Pošto se tvoj ${LetterLogoText} prostor *"${__VirtualRootPath}":"${__VirtualRootPath}"* duže vreme ne koristi, privremeno smo ga blokirali. To znači da trenutno niko iz tvog tima ne može da se prijavi, ali svi tvoji dokumenti i podešavanja su i dalje bezbedni.
+#end
+
+Tvoje podatke čuvamo do ovog datuma: *$DeleteDate*. Nakon toga, prostor i sav njegov sadržaj biće trajno obrisani.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Dobra vest: nije kasno. Samo deblokiraj prostor (rok: $DeleteDateShort), a zatim obnovi pretplatu i nastavi sa radom. Sve će biti tačno tamo gde je bilo.
+#else
+Dobra vest: nije kasno. Samo deblokiraj prostor (rok: $DeleteDateShort) i sve će biti tačno tamo gde je bilo.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ako su ti se planovi promenili, to je sasvim u redu. Ako želiš da zadržiš neke podatke, deblokiraj prostor i napravi rezervnu kopiju (rok: $DeleteDateShort).
+#else
+Ako su ti se planovi promenili, to je sasvim u redu. Ako želiš da zadržiš neke datoteke, deblokiraj prostor i preuzmi ih (rok: $DeleteDateShort).
+#end
+#else
+Dobra vest: nije kasno. Samo se obrati našem timu podrške (rok: $DeleteDateShort) i pomoći ćemo ti da vratiš prostor tačno onakav kakav je bio.
+
+$OrangeButton
+
+Ako su ti se planovi promenili, to je sasvim u redu. Ako želiš da zadržiš neke datoteke, javi nam (rok: $DeleteDateShort) i pomoći ćemo ti da im pristupiš.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Dugo te nismo videli
 
@@ -1670,6 +1705,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaša lozinka je uspešno promenjena</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Tvoj ${LetterLogoText} prostor je blokiran, ali podaci su bezbedni (rok: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Tvom ${LetterLogoText} prostoru nedostaješ (rok za akciju: $BlockDateShort)</value>

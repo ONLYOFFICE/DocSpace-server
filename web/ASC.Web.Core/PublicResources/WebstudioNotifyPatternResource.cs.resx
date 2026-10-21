@@ -757,6 +757,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Váš prostor je zablokován, ale zatím se nic neztratilo
+
+#if($Unpaid == "True")
+Protože předplatné vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* skončilo, prozatím jsme ho zablokovali. To znamená, že se teď nikdo z vašeho týmu nemůže přihlásit, ale všechny vaše dokumenty a nastavení jsou stále v bezpečí.
+#else
+Protože se váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* delší dobu nepoužíval, prozatím jsme ho zablokovali. To znamená, že se teď nikdo z vašeho týmu nemůže přihlásit, ale všechny vaše dokumenty a nastavení jsou stále v bezpečí.
+#end
+
+Vaše data u nás zůstanou do tohoto data: *$DeleteDate*. Poté budou prostor i veškerý jeho obsah trvale odstraněny.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Dobrá zpráva: ještě není pozdě. Stačí do $DeleteDateShort odblokovat prostor a pak obnovit předplatné, abyste se mohli vrátit k práci. Vše bude přesně tam, kde jste to nechali.
+#else
+Dobrá zpráva: ještě není pozdě. Stačí do $DeleteDateShort odblokovat prostor a vše bude přesně tam, kde jste to nechali.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaká data, odblokujte prostor a do $DeleteDateShort je zálohujte.
+#else
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, odblokujte prostor a do $DeleteDateShort si je stáhněte.
+#end
+#else
+Dobrá zpráva: ještě není pozdě. Stačí se do $DeleteDateShort obrátit na náš tým podpory a pomůžeme vám prostor obnovit přesně v podobě, v jaké jste ho nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, dejte nám vědět do $DeleteDateShort a pomůžeme vám k nim získat přístup.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Dlouho jsme vás neviděli
 
@@ -1659,6 +1694,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše heslo bylo úspěšně změněno</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} je zablokován, ale data jsou v bezpečí do $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>

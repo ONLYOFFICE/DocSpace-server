@@ -770,6 +770,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Jūsu telpa ir bloķēta, bet nekas vēl nav zaudēts
+
+#if($Unpaid == "True")
+Tā kā jūsu ${LetterLogoText} telpas *"${__VirtualRootPath}":"${__VirtualRootPath}"* abonements ir beidzies, mēs to pagaidām esam bloķējuši. Tas nozīmē, ka pašlaik neviens no jūsu komandas nevar pierakstīties, taču visi jūsu dokumenti un iestatījumi joprojām ir drošībā.
+#else
+Tā kā jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* kādu laiku nav izmantota, mēs to pagaidām esam bloķējuši. Tas nozīmē, ka pašlaik neviens no jūsu komandas nevar pierakstīties, taču visi jūsu dokumenti un iestatījumi joprojām ir drošībā.
+#end
+
+Mēs glabāsim jūsu datus līdz šim datumam: *$DeleteDate*. Pēc tam telpa un viss tās saturs tiks neatgriezeniski dzēsts.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Labā ziņa: vēl nav par vēlu. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort) un pēc tam atjaunojiet abonementu, lai atsāktu darbu. Viss būs tieši tur, kur to atstājāt.
+#else
+Labā ziņa: vēl nav par vēlu. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort), un viss būs tieši tur, kur to atstājāt.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus datus, atbloķējiet telpu un izveidojiet to dublējumu (termiņš: $DeleteDateShort).
+#else
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, atbloķējiet telpu un lejupielādējiet tos (termiņš: $DeleteDateShort).
+#end
+#else
+Labā ziņa: vēl nav par vēlu. Vienkārši sazinieties ar mūsu atbalsta komandu (termiņš: $DeleteDateShort), un mēs palīdzēsim atgūt jūsu telpu tieši tādu, kādu to atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, paziņojiet mums (termiņš: $DeleteDateShort), un mēs palīdzēsim jums tiem piekļūt.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Sen neesam jūs redzējuši
 
@@ -1706,6 +1741,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Jūsu parole ir veiksmīgi nomainīta</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa ir bloķēta, bet jūsu dati ir drošībā (termiņš: $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>

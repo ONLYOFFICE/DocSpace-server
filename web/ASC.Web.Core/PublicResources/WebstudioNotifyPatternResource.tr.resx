@@ -763,6 +763,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Alanınız engellendi, ancak henüz hiçbir şey kaybolmadı
+
+#if($Unpaid == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınızın aboneliği sona erdiği için alanı şimdilik engelledik. Bu, ekibinizden hiç kimsenin şu anda oturum açamayacağı anlamına geliyor, ancak tüm belgeleriniz ve ayarlarınız hâlâ güvende.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız bir süredir kullanılmadığı için alanı şimdilik engelledik. Bu, ekibinizden hiç kimsenin şu anda oturum açamayacağı anlamına geliyor, ancak tüm belgeleriniz ve ayarlarınız hâlâ güvende.
+#end
+
+Verileriniz *$DeleteDate* tarihine kadar bizde kalacak. Bu tarihten sonra alan ve içindeki her şey kalıcı olarak silinecek.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce alanınızın engelini kaldırın, ardından işinize dönmek için aboneliğinizi yenileyin. Her şey bıraktığınız yerde olacak.
+#else
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce alanınızın engelini kaldırmanız yeterli; her şey bıraktığınız yerde olacak.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz veriler varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce yedekleyin.
+#else
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce indirin.
+#end
+#else
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce destek ekibimizle iletişime geçmeniz yeterli; alanınızı bıraktığınız gibi geri almanıza yardımcı olacağız.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa $DeleteDateShort tarihinden önce bize bildirin, bunlara erişmenize yardımcı olalım.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Bir süredir sizi göremiyoruz
 
@@ -1700,6 +1735,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Şifreniz başarıyla değiştirildi</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText} alanınız engellendi, ancak verileriniz $DeleteDateShort tarihine kadar güvende</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>

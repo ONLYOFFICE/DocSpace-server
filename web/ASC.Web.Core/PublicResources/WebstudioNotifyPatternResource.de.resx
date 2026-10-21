@@ -757,6 +757,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ihr Arbeitsbereich ist gesperrt, aber noch ist nichts verloren
+
+#if($Unpaid == "True")
+Da das Abonnement Ihres ${LetterLogoText} Arbeitsbereichs *"${__VirtualRootPath}":"${__VirtualRootPath}"* abgelaufen ist, haben wir ihn vorerst gesperrt. Das bedeutet, dass sich derzeit niemand aus Ihrem Team anmelden kann, aber alle Ihre Dokumente und Einstellungen sind weiterhin sicher.
+#else
+Da Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* längere Zeit nicht genutzt wurde, haben wir ihn vorerst gesperrt. Das bedeutet, dass sich derzeit niemand aus Ihrem Team anmelden kann, aber alle Ihre Dokumente und Einstellungen sind weiterhin sicher.
+#end
+
+Ihre Daten bleiben bis *$DeleteDate* bei uns. Danach werden der Arbeitsbereich und alle seine Inhalte endgültig gelöscht.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Die gute Nachricht: Es ist noch nicht zu spät. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort und verlängern Sie dann Ihr Abonnement, um weiterzuarbeiten. Alles ist genau da, wo Sie es hinterlassen haben.
+#else
+Die gute Nachricht: Es ist noch nicht zu spät. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort, und alles ist genau da, wo Sie es hinterlassen haben.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Daten behalten möchten, entsperren Sie Ihren Arbeitsbereich und sichern Sie sie vor dem $DeleteDateShort.
+#else
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, entsperren Sie Ihren Arbeitsbereich und laden Sie sie vor dem $DeleteDateShort herunter.
+#end
+#else
+Die gute Nachricht: Es ist noch nicht zu spät. Wenden Sie sich einfach vor dem $DeleteDateShort an unser Support-Team, und wir helfen Ihnen, Ihren Arbeitsbereich genau so zurückzubekommen, wie Sie ihn hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, geben Sie uns vor dem $DeleteDateShort Bescheid, und wir helfen Ihnen, darauf zuzugreifen.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Wir haben Sie lange nicht gesehen
 
@@ -1668,6 +1703,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ihr Passwort wurde erfolgreich geändert</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich ist gesperrt, aber Ihre Daten sind bis zum $DeleteDateShort sicher</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>

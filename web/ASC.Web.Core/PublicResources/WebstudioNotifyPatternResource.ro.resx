@@ -758,6 +758,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Spațiul dvs. este blocat, dar încă nu s-a pierdut nimic
+
+#if($Unpaid == "True")
+Deoarece abonamentul spațiului dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, a expirat, l-am blocat deocamdată. Asta înseamnă că nimeni din echipa dvs. nu se poate conecta momentan, dar toate documentele și setările dvs. sunt încă în siguranță.
+#else
+Deoarece spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, nu a mai fost folosit de ceva vreme, l-am blocat deocamdată. Asta înseamnă că nimeni din echipa dvs. nu se poate conecta momentan, dar toate documentele și setările dvs. sunt încă în siguranță.
+#end
+
+Vă vom păstra datele până *$DeleteDate*. După aceea, spațiul și tot conținutul său vor fi șterse definitiv.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Vestea bună: nu este prea târziu. Deblocați spațiul până la $DeleteDateShort, apoi reînnoiți abonamentul pentru a vă relua activitatea. Totul va fi exact unde l-ați lăsat.
+#else
+Vestea bună: nu este prea târziu. Deblocați spațiul până la $DeleteDateShort și totul va fi exact unde l-ați lăsat.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există date pe care doriți să le păstrați, deblocați spațiul și faceți o copie de rezervă până la $DeleteDateShort.
+#else
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, deblocați spațiul și descărcați-le până la $DeleteDateShort.
+#end
+#else
+Vestea bună: nu este prea târziu. Contactați echipa noastră de asistență până la $DeleteDateShort și vă vom ajuta să vă recuperați spațiul exact așa cum l-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, anunțați-ne până la $DeleteDateShort și vă vom ajuta să le accesați.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Nu v-am mai văzut de ceva vreme
 
@@ -1669,6 +1704,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parola a fost schimbată cu succes</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} este blocat, dar datele dvs. sunt în siguranță până la $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Spațiul dvs. ${LetterLogoText} vă duce dorul (acțiune necesară până la $BlockDateShort)</value>

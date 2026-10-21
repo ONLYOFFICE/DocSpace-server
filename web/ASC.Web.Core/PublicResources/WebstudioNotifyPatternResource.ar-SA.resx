@@ -762,6 +762,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.تم حظر مساحتك، لكن لم يُفقد شيء بعد
+
+#if($Unpaid == "True")
+نظرًا لانتهاء اشتراك مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, فقد قمنا بحظرها مؤقتًا. هذا يعني أنه لا يمكن لأي شخص من فريقك تسجيل الدخول حاليًا، لكن جميع مستنداتك وإعداداتك لا تزال في أمان.
+#else
+نظرًا لعدم استخدام مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, منذ فترة، فقد قمنا بحظرها مؤقتًا. هذا يعني أنه لا يمكن لأي شخص من فريقك تسجيل الدخول حاليًا، لكن جميع مستنداتك وإعداداتك لا تزال في أمان.
+#end
+
+ستبقى بياناتك لدينا حتى *$DeleteDate*. بعد ذلك، سيتم حذف المساحة وكل ما فيها نهائيًا.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+الخبر السار: لم يفت الأوان بعد. ما عليك سوى إلغاء حظر مساحتك قبل $DeleteDateShort، ثم تجديد اشتراكك للعودة إلى العمل. سيكون كل شيء كما تركته تمامًا.
+#else
+الخبر السار: لم يفت الأوان بعد. ما عليك سوى إلغاء حظر مساحتك قبل $DeleteDateShort، وسيكون كل شيء كما تركته تمامًا.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك بيانات تريد الاحتفاظ بها، فألغِ حظر مساحتك وانسخها احتياطيًا قبل $DeleteDateShort.
+#else
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك ملفات تريد الاحتفاظ بها، فألغِ حظر مساحتك ونزّلها قبل $DeleteDateShort.
+#end
+#else
+الخبر السار: لم يفت الأوان بعد. ما عليك سوى التواصل مع فريق الدعم لدينا قبل $DeleteDateShort، وسنساعدك على استعادة مساحتك تمامًا كما تركتها.
+
+$OrangeButton
+
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك ملفات تريد الاحتفاظ بها، فأخبرنا قبل $DeleteDateShort وسنساعدك على الوصول إليها.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.لم نرك منذ فترة
 
@@ -1672,6 +1707,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>لقد تم تغيير كلمة المرور الخاصة بك بنجاح</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>تم حظر مساحتك على ${LetterLogoText}، لكن بياناتك في أمان حتى $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>مساحتك على ${LetterLogoText} تفتقدك (يلزم اتخاذ إجراء قبل $BlockDateShort)</value>

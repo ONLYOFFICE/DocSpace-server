@@ -770,6 +770,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ваш простір заблоковано, але поки нічого не втрачено
+
+#if($Unpaid == "True")
+Підписка на ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* закінчилася, тому ми тимчасово його заблокували. Зараз ніхто з вашої команди не може увійти, але всі ваші документи та налаштування досі в безпеці.
+#else
+Вашим простором ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* давно не користувалися, тому ми тимчасово його заблокували. Зараз ніхто з вашої команди не може увійти, але всі ваші документи та налаштування досі в безпеці.
+#end
+
+Ми зберігатимемо ваші дані до цієї дати: *$DeleteDate*. Після цього простір і весь його вміст буде остаточно видалено.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Гарна новина: ще не пізно. Просто розблокуйте простір до $DeleteDateShort, а потім продовжте підписку, щоб повернутися до роботи. Усе буде на своїх місцях.
+#else
+Гарна новина: ще не пізно. Просто розблокуйте простір до $DeleteDateShort, і все буде на своїх місцях.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь дані, розблокуйте простір і створіть резервну копію до $DeleteDateShort.
+#else
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, розблокуйте простір і завантажте їх до $DeleteDateShort.
+#end
+#else
+Гарна новина: ще не пізно. Просто зв'яжіться з нашою службою підтримки до $DeleteDateShort, і ми допоможемо повернути простір у тому вигляді, в якому ви його залишили.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, повідомте нам до $DeleteDateShort, і ми допоможемо отримати до них доступ.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Давно вас не бачили
 
@@ -1707,6 +1742,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успішно змінено</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} заблоковано, але дані в безпеці до $DeleteDateShort</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Ваш простір ${LetterLogoText} сумує за вами (потрібно діяти до $BlockDateShort)</value>

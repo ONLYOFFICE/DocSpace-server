@@ -769,6 +769,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Tilasi on estetty, mutta mitään ei ole vielä menetetty
+
+#if($Unpaid == "True")
+Koska ${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* tilaus on päättynyt, olemme toistaiseksi estäneet sen. Tämä tarkoittaa, että kukaan tiimistäsi ei voi tällä hetkellä kirjautua sisään, mutta kaikki asiakirjasi ja asetuksesi ovat yhä turvassa.
+#else
+Koska ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* ei ole käytetty vähään aikaan, olemme toistaiseksi estäneet sen. Tämä tarkoittaa, että kukaan tiimistäsi ei voi tällä hetkellä kirjautua sisään, mutta kaikki asiakirjasi ja asetuksesi ovat yhä turvassa.
+#end
+
+Säilytämme tietojasi tähän päivään asti: *$DeleteDate*. Sen jälkeen tila ja kaikki sen sisältö poistetaan pysyvästi.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Hyvä uutinen: vielä ei ole liian myöhäistä. Poista tilasi esto ennen $DeleteDateShort ja uusi sitten tilauksesi, niin voit jatkaa työskentelyä. Kaikki on juuri siellä, mihin sen jätit.
+#else
+Hyvä uutinen: vielä ei ole liian myöhäistä. Poista tilasi esto ennen $DeleteDateShort, niin kaikki on juuri siellä, mihin sen jätit.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tietoja, poista tilasi esto ja varmuuskopioi ne ennen $DeleteDateShort.
+#else
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, poista tilasi esto ja lataa ne ennen $DeleteDateShort.
+#end
+#else
+Hyvä uutinen: vielä ei ole liian myöhäistä. Ota yhteyttä tukitiimiimme ennen $DeleteDateShort, niin autamme sinua palauttamaan tilasi juuri sellaisena kuin jätit sen.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, ilmoita meille ennen $DeleteDateShort, niin autamme sinua pääsemään niihin käsiksi.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Emme ole nähneet sinua vähään aikaan
 
@@ -1704,6 +1739,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Salasanasi vaihdettiin onnistuneesti</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi on estetty, mutta tietosi ovat turvassa $DeleteDateShort asti</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText}-tilasi kaipaa sinua (toimi ennen $BlockDateShort)</value>

@@ -758,6 +758,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Sahəniz bloklanıb, lakin hələ heç nə itirilməyib
+
+#if($Unpaid == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizin abunəliyi başa çatdığı üçün onu hələlik blokladıq. Bu o deməkdir ki, hazırda komandanızdan heç kim daxil ola bilməz, lakin bütün sənədləriniz və parametrləriniz hələ də təhlükəsizdir.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizdən bir müddətdir istifadə olunmadığı üçün onu hələlik blokladıq. Bu o deməkdir ki, hazırda komandanızdan heç kim daxil ola bilməz, lakin bütün sənədləriniz və parametrləriniz hələ də təhlükəsizdir.
+#end
+
+Məlumatlarınız *$DeleteDate* tarixinədək bizdə qalacaq. Bundan sonra sahə və içindəki hər şey həmişəlik silinəcək.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın, sonra işə qayıtmaq üçün abunəliyinizi yeniləyin. Hər şey olduğu yerdə qalacaq.
+#else
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın və hər şey olduğu yerdə qalacaq.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz məlumatlar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onların ehtiyat nüsxəsini çıxarın.
+#else
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onları endirin.
+#end
+#else
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək dəstək komandamızla əlaqə saxlayın və sahənizi olduğu kimi geri qaytarmağınıza kömək edəcəyik.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, $DeleteDateShort tarixinədək bizə bildirin və onlara giriş əldə etməyinizə kömək edəcəyik.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.Bir müddətdir sizi görmürük
 
@@ -1659,6 +1694,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parolunuz uğurla dəyişdirildi</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz bloklanıb, lakin məlumatlarınız $DeleteDateShort tarixinədək təhlükəsizdir</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
