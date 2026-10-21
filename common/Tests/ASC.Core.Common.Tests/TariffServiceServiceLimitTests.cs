@@ -323,6 +323,29 @@ public class TariffServiceServiceLimitTests
     }
 
     [Fact]
+    public async Task GetCachedParticipantServiceLimits_AccountingHangs_ReturnsEmptyWithinTheTimeoutAndDoesNotWaitAgain()
+    {
+        // Every page of users and every sign-in reads these limits, so a hanging accounting service must not stall them,
+        // nor make each following request wait for it once more.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new DelayedContent("""{"collection":[],"totalQuantity":0}""", TimeSpan.FromSeconds(30)) });
+
+        var started = DateTime.UtcNow;
+        var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+        var firstTook = DateTime.UtcNow - started;
+
+        started = DateTime.UtcNow;
+        var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+        var secondTook = DateTime.UtcNow - started;
+
+        first.Should().BeEmpty();
+        firstTook.Should().BeLessThan(TimeSpan.FromSeconds(10));
+        second.Should().BeEmpty();
+        secondTook.Should().BeLessThan(TimeSpan.FromSeconds(1));
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
     public async Task SetParticipantServiceLimits_DropsTheCache_SoTheNextReadSeesTheChange()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
@@ -480,6 +503,22 @@ public class TariffServiceServiceLimitTests
             tenantExtraConfig: null!);
 
         return (tariffService, handler);
+    }
+
+    // A body that takes its time to arrive: the client waits for it asynchronously, as it does for a hanging service.
+    private sealed class DelayedContent(string json, TimeSpan delay) : HttpContent
+    {
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+        {
+            await Task.Delay(delay);
+            await stream.WriteAsync(Encoding.UTF8.GetBytes(json));
+        }
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = -1;
+            return false;
+        }
     }
 
     private static HttpResponseMessage ParticipantLimitsPage(params string[] participants)

@@ -75,6 +75,12 @@ public class TariffService(
 
     private static readonly TimeSpan _participantServiceLimitsCacheDuration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _participantServiceLimitsFailureCacheDuration = TimeSpan.FromMinutes(1);
+    // The user lists wait this long for the limits before they are shown with the last ones known, and at most the hard
+    // timeout when none are known yet; the read then finishes in the background and fills the cache.
+    private static readonly TimeSpan _serviceLimitsFactorySoftTimeout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _serviceLimitsFactoryHardTimeout = TimeSpan.FromSeconds(3);
+    // How long the last limits known stay usable while the accounting service cannot be reached.
+    private static readonly TimeSpan _serviceLimitsFailSafeMaxDuration = TimeSpan.FromHours(1);
     private const int ParticipantServiceLimitsPageSize = 100;
     private const int ParticipantServiceLimitsDefaultPageSize = 25;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
@@ -1783,8 +1789,9 @@ public class TariffService(
     /// minutes. It backs per-user lists, which would otherwise ask the accounting service once per user. The service
     /// limit operations of this class drop the cache, but a change made outside the portal, and the spending, show up
     /// only when the cache expires. A user the accounting service has not met yet is not in it. Keyed by the user ID, so
-    /// a list of users looks each one up instead of scanning the whole set; a switched-off limit is left out. Empty when
-    /// the accounting service is not configured, the portal is not its customer, or it cannot be reached.
+    /// a list of users looks each one up instead of scanning the whole set; a switched-off limit is left out. While the
+    /// accounting service is slow or cannot be reached, the last list known is used. Empty when the accounting service is
+    /// not configured, the portal is not its customer, or it cannot be reached and no list is known yet.
     /// </summary>
     public async Task<Dictionary<Guid, ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
@@ -1793,7 +1800,7 @@ public class TariffService(
             return [];
         }
 
-        return await hybridCache.GetOrSetAsync<Dictionary<Guid, ServiceLimit>>(GetParticipantServiceLimitsCacheKey(tenantId, groupName), async (ctx, token) =>
+        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, ServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName), async token =>
         {
             try
             {
@@ -1821,16 +1828,7 @@ public class TariffService(
                 logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
                 return [];
             }
-            catch (Exception error) when (error is not OperationCanceledException)
-            {
-                // Keep the failure for a short while only, so the lists come back as soon as the accounting service does.
-                // A 404 lands here too: a portal without limits gets an empty page, so a 404 means a route the accounting
-                // service does not have, which has to be logged as an error rather than cached as "no limits".
-                LogError(error, tenantId.ToString());
-                ctx.Options.Duration = _participantServiceLimitsFailureCacheDuration;
-                return [];
-            }
-        }, opt => opt.SetDuration(_participantServiceLimitsCacheDuration));
+        }, []);
     }
 
     /// <summary>
@@ -1861,24 +1859,32 @@ public class TariffService(
             return null;
         }
 
-        return await hybridCache.GetOrSetAsync<ServiceLimit>(GetGlobalServiceLimitCacheKey(tenantId, groupName), async (ctx, _) =>
+        // A portal the accounting service does not know, or one without the limit, gets null from the read itself.
+        return await GetOrSetServiceLimitsAsync<ServiceLimit>(tenantId, GetGlobalServiceLimitCacheKey(tenantId, groupName),
+            _ => GetGlobalServiceLimitAsync(tenantId, groupName), null);
+    }
+
+    // The caches behind the user lists, which every page of users and every sign-in reads, so a slow or unreachable
+    // accounting service must neither fail nor stall them. A read that fails or runs past the timeouts falls back to the
+    // last value known; with none known yet, the lists get the fallback, kept for a minute so that every request does
+    // not wait again. A 404 lands here too: a portal without limits gets an empty page, so a 404 means a route the
+    // accounting service does not have, which has to be logged as an error rather than cached as "no limits".
+    private async Task<T> GetOrSetServiceLimitsAsync<T>(int tenantId, string cacheKey, Func<CancellationToken, Task<T>> factory, T fallback)
+    {
+        try
         {
-            try
-            {
-                return await GetGlobalServiceLimitAsync(tenantId, groupName);
-            }
-            catch (AccountingCustomerNotFoundException exception)
-            {
-                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
-                return null;
-            }
-            catch (Exception error) when (error is not OperationCanceledException)
-            {
-                LogError(error, tenantId.ToString());
-                ctx.Options.Duration = _participantServiceLimitsFailureCacheDuration;
-                return null;
-            }
-        }, opt => opt.SetDuration(_participantServiceLimitsCacheDuration));
+            return await hybridCache.GetOrSetAsync<T>(cacheKey, async (_, token) => await factory(token), opt => opt
+                .SetDuration(_participantServiceLimitsCacheDuration)
+                .SetFailSafe(true, _serviceLimitsFailSafeMaxDuration, _participantServiceLimitsFailureCacheDuration)
+                .SetFactoryTimeouts(_serviceLimitsFactorySoftTimeout, _serviceLimitsFactoryHardTimeout));
+        }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            LogError(error, tenantId.ToString());
+            await hybridCache.SetAsync(cacheKey, fallback, _participantServiceLimitsFailureCacheDuration);
+
+            return fallback;
+        }
     }
 
     internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName)
