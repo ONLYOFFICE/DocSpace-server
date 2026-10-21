@@ -160,13 +160,6 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return configuration.Value.Currencies;
     }
 
-    public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.GetServiceInfoAsync(serviceName);
-    }
-
     /// <summary>
     /// Returns the prices of the service. The accounting service addresses prices by service ID, so the name is
     /// resolved first; the result is not tenant-specific and is cached for all portals.

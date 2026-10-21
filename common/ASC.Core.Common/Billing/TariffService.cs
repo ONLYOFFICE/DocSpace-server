@@ -762,12 +762,22 @@ public class TariffService(
                 var result = new Dictionary<string, Dictionary<string, decimal>>(ids.Count);
                 var missing = new List<string>();
 
-                foreach (var productId in ids)
+                // Every product is a key of its own, and a key missing from process memory is a Redis round trip,
+                // so the keys are read, and later written, all at once rather than one after another.
+                var cached = await Task.WhenAll(ids.Select(async productId =>
                 {
-                    var cached = await hybridCache.TryGetAsync<Dictionary<string, decimal>>(GetProductPriceCacheKey(partnerId, wallet, productId), SetProductPriceCacheOptions);
-                    if (cached.HasValue)
+                    var key = GetProductPriceCacheKey(partnerId, wallet, productId);
+                    var price = await hybridCache.TryGetAsync<Dictionary<string, decimal>>(key,
+                        SetProductPriceCacheOptions);
+
+                    return (ProductId: productId, Price: price);
+                }));
+
+                foreach (var (productId, price) in cached)
+                {
+                    if (price.HasValue)
                     {
-                        result.Add(productId, cached.Value);
+                        result.Add(productId, price.Value);
                     }
                     else
                     {
@@ -778,13 +788,15 @@ public class TariffService(
                 if (missing.Count > 0)
                 {
                     var prices = await RequestProductPricesAsync(partnerId, wallet, missing);
+                    var writes = new List<Task>(missing.Count);
 
                     foreach (var productId in missing)
                     {
                         if (prices.TryGetValue(productId, out var price))
                         {
                             result.Add(productId, price);
-                            await hybridCache.SetAsync(GetProductPriceCacheKey(partnerId, wallet, productId), price, SetProductPriceCacheOptions);
+                            var key = GetProductPriceCacheKey(partnerId, wallet, productId);
+                            writes.Add(hybridCache.SetAsync(key, price, SetProductPriceCacheOptions).AsTask());
                         }
                         else
                         {
@@ -793,6 +805,8 @@ public class TariffService(
                             result.Add(productId, []);
                         }
                     }
+
+                    await Task.WhenAll(writes);
                 }
 
                 return result;

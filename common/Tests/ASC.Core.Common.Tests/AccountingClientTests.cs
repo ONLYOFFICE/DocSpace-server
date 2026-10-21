@@ -341,7 +341,7 @@ public class AccountingClientTests
         // Refit.ApiRequestException to the callers.
         var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
 
-        var act = async () => await client.GetServiceInfoAsync("backup");
+        var act = async () => await client.GetAllCurrenciesAsync();
 
         (await act.Should().ThrowExactlyAsync<AccountingException>())
             .WithInnerException<HttpRequestException>();
@@ -349,9 +349,9 @@ public class AccountingClientTests
     [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "[]"));
 
-        await client.GetServiceInfoAsync("backup");
+        await client.GetAllCurrenciesAsync();
 
         handler.LastAuthorization.Should().NotBeNull();
 

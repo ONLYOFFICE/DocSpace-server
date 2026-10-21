@@ -862,7 +862,7 @@ public partial class TenantQuotaMapper(IServiceProvider provider)
 
     // A product priced in the currency of the request region gets that price; one without it falls back to the
     // default region, as the region helper decides for a single product, and to the stored price after that.
-    private static (decimal, string, string) Resolve(DbQuota source, Dictionary<string, decimal> priceInfo, RegionInfo currentRegion, RegionInfo defaultRegion)
+    internal static (decimal, string, string) Resolve(DbQuota source, Dictionary<string, decimal> priceInfo, RegionInfo currentRegion, RegionInfo defaultRegion)
     {
         if (priceInfo != null)
         {
