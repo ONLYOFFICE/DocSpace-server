@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Підтвердити закриття облікового запису</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Зв'язатися з підтримкою</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Деактивувати портал</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Приєднатися до кімнати</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Зберегти мій простір</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Зберегти простір і кошти</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Залишити відгук</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Встановити пароль</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Поділитися відгуком</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Запустити безкоштовну пробну версію</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Розблокувати мій простір</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Підвищити</value>

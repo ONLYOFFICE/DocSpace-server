@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Xác nhận chấm dứt tài khoản</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Liên hệ bộ phận hỗ trợ</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Vô hiệu hóa cổng thông tin</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Tham gia phòng</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Giữ không gian của tôi</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Giữ không gian và số dư của tôi</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Để Lại Phản Hồi</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Đặt mật khẩu</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Chia sẻ phản hồi của tôi</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Bắt đầu dùng thử miễn phí</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Bỏ chặn không gian của tôi</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Nâng cấp</value>

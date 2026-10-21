@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>تأكيد إغلاق الحساب</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>اتصل بالدعم</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>تعطيل البوابة</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>انضم الى الغرفة</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>احتفظ بمساحتي</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>احتفظ بمساحتي وأموالي</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>اترك تعليق</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>إعداد كلمة المرور</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>شارك ملاحظاتي</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>بدء الفترة التجريبية</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>ألغِ حظر مساحتي</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>ترقية</value>

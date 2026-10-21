@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Потврди терминацију налога</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Контактирај подршку</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Деактивирај портал</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Придружи се просторији</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Задржи мој простор</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Задржи мој простор и средства</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Остави повратне информације</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Подесите лозинку</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Подели своје мишљење</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Започни бесплатни пробни период</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Деблокирај мој простор</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Надогради</value>

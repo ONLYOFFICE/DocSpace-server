@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Vahvista tilin lopettaminen</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Ota yhteyttä tukeen</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivoi portaali</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Liity huoneeseen</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Säilytä tilani</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Säilytä tilani ja varani</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Jätä palautetta</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Aseta salasana</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Anna palautetta</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Aloita ilmainen kokeilu</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Poista tilani esto</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Päivitä</value>

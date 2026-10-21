@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Επιβεβαίωση τερματισμού λογαριασμού</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Επικοινωνία με την υποστήριξη</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Απενεργοποίηση πύλης</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Συμμετοχή στο δωμάτιο</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Διατήρηση του χώρου μου</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Διατήρηση του χώρου και των χρημάτων μου</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Αφήστε σχόλια</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Ρύθμιση κωδικού πρόσβασης</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Αποστολή σχολίων</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Έναρξη δωρεάν δοκιμής</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Άρση αποκλεισμού του χώρου μου</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Αναβάθμιση</value>

@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>确认账户终止</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>联系支持团队</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>停用门户</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>加入房间</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>保留我的空间</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>保留我的空间和资金</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>留下反馈</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>设置密码</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>分享我的反馈</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>开始免费试用</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>解除空间锁定</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>升级</value>

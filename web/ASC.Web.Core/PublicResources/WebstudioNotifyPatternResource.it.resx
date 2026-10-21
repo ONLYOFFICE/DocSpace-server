@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Conferma chiusura account</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Contatta l'assistenza</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Disattiva Portale</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Unisciti alla stanza</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Mantieni il mio spazio</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Mantieni il mio spazio e i fondi</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Esprimi una valutazione</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Imposta password</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Condividi il mio feedback</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Inizia il periodo di prova gratuita</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Sblocca il mio spazio</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Aggiornamento</value>

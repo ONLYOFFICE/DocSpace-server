@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>계정 해지 확인</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>지원팀에 문의</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>포털 비활성화</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>룸에 참여하기</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>내 공간 유지</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>내 공간과 잔액 유지</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>피드백 남기기</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>비밀번호 설정</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>피드백 보내기</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>무료 평가판 시작</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>내 공간 차단 해제</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>업그레이드</value>

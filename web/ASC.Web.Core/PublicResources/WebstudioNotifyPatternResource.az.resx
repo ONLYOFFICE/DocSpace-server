@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Hesabın dayandırılmasını təsdiq edin</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Dəstək xidməti ilə əlaqə saxlayın</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portalı Deaktiv Edin</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Otağa qoşulun</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Sahəmi saxlayın</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Sahəmi və vəsaitlərimi saxlayın</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Fikrinizi bildirin</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Şifrə təyin edin</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Rəyimi bildirin</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Ödənişsiz sınağa başlayın</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Sahəmin blokunu açın</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Təkmilləşdirin</value>

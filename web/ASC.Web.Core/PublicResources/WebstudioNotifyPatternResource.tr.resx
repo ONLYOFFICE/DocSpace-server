@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Hesabın sonlandırılmasını onayla</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Destek ekibiyle iletişime geç</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portalı Devre Dışı Bırak</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Odaya katıl</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Alanımı koru</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Alanımı ve bakiyemi koru</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Geribildirim Bırak</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Şifre ayarla</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Geri bildirimimi paylaş</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Ücretsiz denemeyi başlat</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Alanımın engelini kaldır</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Yükseltme</value>

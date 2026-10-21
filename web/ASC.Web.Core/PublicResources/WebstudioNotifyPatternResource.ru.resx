@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Подтвердить удаление аккаунта</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Связаться с поддержкой</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Деактивировать портал</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Присоединиться к комнате</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Сохранить моё пространство</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Сохранить пространство и средства</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Оставить отзыв</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Установить пароль</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Поделиться отзывом</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Попробовать бесплатно</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Разблокировать моё пространство</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Обновить</value>

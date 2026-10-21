@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Löschung des Kontos bestätigen</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Support kontaktieren</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portal deaktivieren</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Raum beitreten</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Meinen Arbeitsbereich behalten</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Arbeitsbereich und Guthaben behalten</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Kommentare hinterlassen</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Passwort festlegen</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Feedback geben</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Kostenlos testen</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Meinen Arbeitsbereich entsperren</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Aktualisieren</value>

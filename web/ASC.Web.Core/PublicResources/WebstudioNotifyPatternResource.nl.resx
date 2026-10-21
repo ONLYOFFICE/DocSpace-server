@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Accountbeëindiging bevestigen</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Neem contact op met support</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portaal deactiveren</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Neem deel aan kamer</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Behoud mijn ruimte</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Behoud mijn ruimte en tegoed</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Laat feedback achter</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Wachtwoord instellen</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Deel mijn feedback</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Start gratis proefperiode</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Deblokkeer mijn ruimte</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Upgrade</value>

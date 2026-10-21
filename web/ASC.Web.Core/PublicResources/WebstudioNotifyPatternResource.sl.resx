@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Potrdite ukinitev računa</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Obrnite se na podporo</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivirajte portal</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Pridruži se sobi</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Ohranite moj prostor</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Ohranite moj prostor in sredstva</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Pustite povratne informacije</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastavi geslo</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Delite svoje mnenje</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Začnite brezplačni preizkus</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Odblokirajte moj prostor</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Nadgradnja</value>

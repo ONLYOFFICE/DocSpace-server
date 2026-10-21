@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Potvrďte zrušenie účtu</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Kontaktovať podporu</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivovať portál</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Pripojiť sa k miestnosti</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Zachovať môj priestor</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Zachovať môj priestor a prostriedky</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Zanechať spätnú väzbu</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastaviť heslo</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Zdieľať spätnú väzbu</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Vyskúšať skúšobnú verziu zadarmo</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Odblokovať môj priestor</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Aktualizovať</value>
