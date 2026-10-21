@@ -823,11 +823,13 @@ public class TariffService(
     // The payment services price a whole list in one request, so the products missing from the cache are asked
     // for together: numeric ids are billing products, the other wallet ids are accounting services.
     // The answer holds every product of a service that answered; the products of a failed service are left out.
-    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestProductPricesAsync(string partnerId, bool wallet, List<string> productIds)
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestProductPricesAsync(string partnerId,
+        bool wallet, List<string> productIds)
     {
         if (!wallet)
         {
-            return await RequestServicePricesAsync(productIds, ids => billingClient.GetProductPriceInfoAsync(partnerId, false, ids));
+            return await RequestServicePricesAsync(productIds,
+                ids => billingClient.GetProductPriceInfoAsync(partnerId, false, ids));
         }
 
         var accountingServices = new List<string>();
@@ -845,8 +847,15 @@ public class TariffService(
             }
         }
 
-        var result = await RequestServicePricesAsync(accountingServices, accountingClient.GetProductPriceInfoAsync);
-        var billingPrices = await RequestServicePricesAsync(billingProducts, ids => billingClient.GetProductPriceInfoAsync(partnerId, true, ids));
+        // The two services do not depend on each other, so they are asked at the same time.
+        var accountingTask = RequestServicePricesAsync(accountingServices, accountingClient.GetProductPriceInfoAsync);
+        var billingTask = RequestServicePricesAsync(billingProducts,
+            ids => billingClient.GetProductPriceInfoAsync(partnerId, true, ids));
+
+        await Task.WhenAll(accountingTask, billingTask);
+
+        var result = await accountingTask;
+        var billingPrices = await billingTask;
 
         foreach (var (productId, prices) in billingPrices)
         {
@@ -858,7 +867,8 @@ public class TariffService(
 
     // One payment service failing must not cost the products of the other one, or those already cached, their
     // prices: the failure is logged and its products are left out of the answer.
-    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestServicePricesAsync(List<string> productIds, Func<List<string>, Task<Dictionary<string, Dictionary<string, decimal>>>> request)
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestServicePricesAsync(
+        List<string> productIds, Func<List<string>, Task<Dictionary<string, Dictionary<string, decimal>>>> request)
     {
         if (productIds.Count == 0)
         {
