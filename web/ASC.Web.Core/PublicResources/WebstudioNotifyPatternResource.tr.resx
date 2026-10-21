@@ -763,6 +763,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı veri saklama politikası nedeniyle engellendi: kullanılmıyordu ya da aboneliği yenilenmedi. Hangisi olduğunu aşağıdaki kategori gösteriyor.
+
+*Portal:* ${PortalUrl}
+*Sahip:* ${UserName} ${UserEmail}
+*Kategori:* ${Category}
+*Silinme tarihi:* ${DeleteDate}
+
+Engeli kaldırılmazsa portal ve tüm verileri bu tarihte silinecek.
+
+Sahip portalın korunmasını isterse portalı bu tarihten önce yeniden etkinleştirin.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Alanınız engellendi, ancak henüz hiçbir şey kaybolmadı
 
@@ -795,6 +807,27 @@ $OrangeButton
 
 Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa $DeleteDateShort tarihinden önce bize bildirin, bunlara erişmenize yardımcı olalım.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Alanınız silindi
+
+#if($Unpaid == "True")
+Aboneliği sona eren ve yenilenmeyen *$PortalName* adlı ${LetterLogoText} alanınızı tüm verileriyle birlikte "Gizlilik Politikamızda":"$URL1" açıklandığı şekilde sildik.
+#else
+Uzun süredir kullanılmayan *$PortalName* adlı ${LetterLogoText} alanınızı tüm verileriyle birlikte "Gizlilik Politikamızda":"$URL1" açıklandığı şekilde sildik.
+#end
+
+#if($Unpaid == "True")
+Bizimle çalıştığınız için teşekkür ederiz. Kullanmayı neden bıraktığınızı gerçekten merak ediyoruz: bir şey işinize yaramadı mı, daha uygun bir çözüm mü buldunuz, yoksa artık ihtiyacınız mı kalmadı? Yalnızca bir dakikanızı alır ve her yanıt kendimizi geliştirmemize yardımcı olur.
+#else
+${LetterLogoText} ürününü denediğiniz için teşekkür ederiz. Kullanmayı neden bıraktığınızı gerçekten merak ediyoruz: bir şey işinize yaramadı mı, daha uygun bir çözüm mü buldunuz, yoksa artık ihtiyacınız mı kalmadı? Yalnızca bir dakikanızı alır ve her yanıt kendimizi geliştirmemize yardımcı olur.
+#end
+
+$OrangeButton
+
+Bir gün geri dönmek isterseniz sizi her zaman bekleriz. İstediğiniz zaman "yeni bir alan oluşturabilirsiniz":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1777,8 +1810,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Şifreniz başarıyla değiştirildi</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı veri saklama politikası nedeniyle engellendi</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} alanınız engellendi, ancak verileriniz $DeleteDateShort tarihine kadar güvende</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} alanınız silindi</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>${LetterLogoText} alanınız yakında silinecek (silinme tarihi: $DeleteDateShort)</value>

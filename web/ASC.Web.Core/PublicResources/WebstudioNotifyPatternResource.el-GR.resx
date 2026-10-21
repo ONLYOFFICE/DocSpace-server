@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Η πύλη ${PortalUrl} αποκλείστηκε από την πολιτική διατήρησης δεδομένων: δεν χρησιμοποιούνταν ή η συνδρομή της δεν ανανεώθηκε. Ποια από τις δύο περιπτώσεις ισχύει δείχνει η παρακάτω κατηγορία.
+
+*Πύλη:* ${PortalUrl}
+*Κάτοχος:* ${UserName} ${UserEmail}
+*Κατηγορία:* ${Category}
+*Ημερομηνία διαγραφής:* ${DeleteDate}
+
+Αν δεν αρθεί ο αποκλεισμός, η πύλη και όλα τα δεδομένα της θα διαγραφούν σε αυτή την ημερομηνία.
+
+Αν ο κάτοχος ζητήσει να διατηρηθεί, ενεργοποιήστε ξανά την πύλη πριν από αυτή την ημερομηνία.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Ο χώρος σας αποκλείστηκε, αλλά τίποτα δεν έχει χαθεί ακόμα
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 Αν αποφασίσατε να προχωρήσετε σε κάτι άλλο, δεν υπάρχει κανένα πρόβλημα. Αν υπάρχουν αρχεία που θέλετε να κρατήσετε, ενημερώστε μας έως τις $DeleteDateShort και θα σας βοηθήσουμε να αποκτήσετε πρόσβαση σε αυτά.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ο χώρος σας διαγράφηκε
+
+#if($Unpaid == "True")
+Επειδή η συνδρομή του χώρου σας στο ${LetterLogoText}, *$PortalName*, έληξε και δεν ανανεώθηκε, τον διαγράψαμε μαζί με όλα τα δεδομένα του, όπως περιγράφεται στην "Πολιτική απορρήτου":"$URL1" μας.
+#else
+Επειδή ο χώρος σας στο ${LetterLogoText}, *$PortalName*, δεν είχε χρησιμοποιηθεί για μεγάλο διάστημα, τον διαγράψαμε μαζί με όλα τα δεδομένα του, όπως περιγράφεται στην "Πολιτική απορρήτου":"$URL1" μας.
+#end
+
+#if($Unpaid == "True")
+Σας ευχαριστούμε που συνεργαστήκατε μαζί μας. Θα θέλαμε πολύ να μάθουμε γιατί σταματήσατε να το χρησιμοποιείτε: κάτι δεν λειτούργησε, βρήκατε μια καλύτερη λύση ή απλώς δεν το χρειαζόσασταν πια; Χρειάζεται μόνο ένα λεπτό και κάθε απάντηση μας βοηθά να βελτιωνόμαστε.
+#else
+Σας ευχαριστούμε που δοκιμάσατε το ${LetterLogoText}. Θα θέλαμε πολύ να μάθουμε γιατί σταματήσατε να το χρησιμοποιείτε: κάτι δεν λειτούργησε, βρήκατε μια καλύτερη λύση ή απλώς δεν το χρειαζόσασταν πια; Χρειάζεται μόνο ένα λεπτό και κάθε απάντηση μας βοηθά να βελτιωνόμαστε.
+#end
+
+$OrangeButton
+
+Αν θελήσετε ποτέ να επιστρέψετε, είστε πάντα ευπρόσδεκτοι. Μπορείτε να "δημιουργήσετε έναν νέο χώρο":"$URL2" οποιαδήποτε στιγμή.
 
 $TrulyYours</value>
   </data>
@@ -1783,8 +1816,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ο κωδικός πρόσβασής σας άλλαξε με επιτυχία</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Η πύλη ${PortalUrl} αποκλείστηκε από την πολιτική διατήρησης δεδομένων</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Ο χώρος σας στο ${LetterLogoText} αποκλείστηκε, αλλά τα δεδομένα σας είναι ασφαλή έως τις $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ο χώρος σας στο ${LetterLogoText} διαγράφηκε</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Ο χώρος σας στο ${LetterLogoText} θα διαγραφεί σύντομα (διαγραφή στις $DeleteDateShort)</value>

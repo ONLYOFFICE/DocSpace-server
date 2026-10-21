@@ -758,6 +758,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Het portaal ${PortalUrl} is geblokkeerd door het bewaarbeleid: het werd niet gebruikt of het abonnement is niet verlengd. De categorie hieronder geeft aan welke van de twee.
+
+*Portaal:* ${PortalUrl}
+*Eigenaar:* ${UserName} ${UserEmail}
+*Categorie:* ${Category}
+*Verwijderdatum:* ${DeleteDate}
+
+Als het niet wordt gedeblokkeerd, worden het portaal en al zijn gegevens op die datum verwijderd.
+
+Als de eigenaar vraagt het te behouden, maak het portaal dan vóór die datum weer actief.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Uw ruimte is geblokkeerd, maar er is nog niets verloren
 
@@ -790,6 +802,27 @@ $OrangeButton
 
 Hebt u besloten verder te gaan? Dat is helemaal prima. Wilt u bestanden bewaren, laat het ons dan vóór $DeleteDateShort weten en we helpen u er toegang toe te krijgen.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Uw ruimte is verwijderd
+
+#if($Unpaid == "True")
+Omdat het abonnement van uw ${LetterLogoText}-ruimte *$PortalName* is beëindigd en niet is verlengd, hebben we de ruimte met al haar gegevens verwijderd, zoals beschreven in ons "Privacybeleid":"$URL1".
+#else
+Omdat uw ${LetterLogoText}-ruimte *$PortalName* lange tijd niet is gebruikt, hebben we de ruimte met al haar gegevens verwijderd, zoals beschreven in ons "Privacybeleid":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Bedankt dat u met ons hebt gewerkt. We horen graag waarom u ermee bent gestopt: werkte er iets niet, hebt u iets beters gevonden of had u het gewoon niet meer nodig? Het kost maar een minuut, en elk antwoord helpt ons beter te worden.
+#else
+Bedankt dat u ${LetterLogoText} hebt geprobeerd. We horen graag waarom u ermee bent gestopt: werkte er iets niet, hebt u iets beters gevonden of had u het gewoon niet meer nodig? Het kost maar een minuut, en elk antwoord helpt ons beter te worden.
+#end
+
+$OrangeButton
+
+Wilt u ooit terugkomen, dan bent u altijd welkom. U kunt op elk moment "een nieuwe ruimte aanmaken":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1737,8 +1770,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Uw wachtwoord is succesvol gewijzigd</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Het portaal ${PortalUrl} is geblokkeerd door het bewaarbeleid</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Uw ${LetterLogoText}-ruimte is geblokkeerd, maar uw gegevens zijn veilig tot $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Uw ${LetterLogoText}-ruimte is verwijderd</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Uw ${LetterLogoText}-ruimte wordt binnenkort verwijderd (verwijdering op $DeleteDateShort)</value>

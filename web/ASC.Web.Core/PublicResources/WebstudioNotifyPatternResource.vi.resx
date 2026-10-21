@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Cổng ${PortalUrl} đã bị chặn theo chính sách lưu giữ dữ liệu: cổng không được sử dụng hoặc gói đăng ký không được gia hạn; danh mục bên dưới cho biết trường hợp nào.
+
+*Cổng:* ${PortalUrl}
+*Chủ sở hữu:* ${UserName} ${UserEmail}
+*Danh mục:* ${Category}
+*Ngày xóa:* ${DeleteDate}
+
+Nếu không được bỏ chặn, cổng và toàn bộ dữ liệu sẽ bị xóa vào ngày đó.
+
+Nếu chủ sở hữu yêu cầu giữ lại, hãy kích hoạt lại cổng trước ngày đó.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Không gian của bạn đã bị chặn, nhưng chưa có gì bị mất
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 Nếu bạn đã quyết định chuyển sang hướng khác, điều đó hoàn toàn bình thường. Nếu có tệp bạn muốn giữ lại, hãy cho chúng tôi biết trước ngày $DeleteDateShort và chúng tôi sẽ giúp bạn truy cập chúng.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Không gian của bạn đã bị xóa
+
+#if($Unpaid == "True")
+Vì gói đăng ký cho không gian ${LetterLogoText} của bạn, *$PortalName*, đã kết thúc và không được gia hạn, chúng tôi đã xóa không gian này cùng toàn bộ dữ liệu, như được mô tả trong "Chính sách quyền riêng tư":"$URL1" của chúng tôi.
+#else
+Vì không gian ${LetterLogoText} của bạn, *$PortalName*, đã lâu không được sử dụng, chúng tôi đã xóa không gian này cùng toàn bộ dữ liệu, như được mô tả trong "Chính sách quyền riêng tư":"$URL1" của chúng tôi.
+#end
+
+#if($Unpaid == "True")
+Cảm ơn bạn đã làm việc cùng chúng tôi. Chúng tôi rất muốn biết lý do bạn ngừng sử dụng: có điều gì không phù hợp, bạn đã tìm được giải pháp tốt hơn, hay đơn giản là không còn cần đến nữa? Chỉ mất một phút, và mỗi câu trả lời đều giúp chúng tôi cải thiện.
+#else
+Cảm ơn bạn đã dùng thử ${LetterLogoText}. Chúng tôi rất muốn biết lý do bạn ngừng sử dụng: có điều gì không phù hợp, bạn đã tìm được giải pháp tốt hơn, hay đơn giản là không còn cần đến nữa? Chỉ mất một phút, và mỗi câu trả lời đều giúp chúng tôi cải thiện.
+#end
+
+$OrangeButton
+
+Nếu một ngày nào đó bạn muốn quay lại, chúng tôi luôn chào đón. Bạn có thể "tạo không gian mới":"$URL2" bất cứ lúc nào.
 
 $TrulyYours</value>
   </data>
@@ -1784,8 +1817,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Mật khẩu của bạn đã được thay đổi thành công</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Cổng ${PortalUrl} đã bị chặn theo chính sách lưu giữ dữ liệu</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Không gian ${LetterLogoText} của bạn đã bị chặn, nhưng dữ liệu vẫn an toàn đến ngày $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Không gian ${LetterLogoText} của bạn đã bị xóa</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Không gian ${LetterLogoText} của bạn sắp bị xóa (ngày xóa: $DeleteDateShort)</value>

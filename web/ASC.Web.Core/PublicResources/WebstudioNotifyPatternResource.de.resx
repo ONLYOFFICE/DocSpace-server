@@ -757,6 +757,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Das Portal ${PortalUrl} wurde durch die Aufbewahrungsrichtlinie gesperrt: Es wurde nicht genutzt oder sein Abonnement wurde nicht verlängert – welcher Fall vorliegt, zeigt die Kategorie unten.
+
+*Portal:* ${PortalUrl}
+*Besitzer:* ${UserName} ${UserEmail}
+*Kategorie:* ${Category}
+*Löschdatum:* ${DeleteDate}
+
+Wird es nicht entsperrt, werden das Portal und alle seine Daten an diesem Tag gelöscht.
+
+Wenn der Besitzer darum bittet, es zu behalten, aktivieren Sie das Portal vor diesem Datum wieder.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Ihr Arbeitsbereich ist gesperrt, aber noch ist nichts verloren
 
@@ -789,6 +801,27 @@ $OrangeButton
 
 Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, geben Sie uns vor dem $DeleteDateShort Bescheid, und wir helfen Ihnen, darauf zuzugreifen.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ihr Arbeitsbereich wurde gelöscht
+
+#if($Unpaid == "True")
+Da das Abonnement Ihres ${LetterLogoText} Arbeitsbereichs *$PortalName* abgelaufen ist und nicht verlängert wurde, haben wir ihn jetzt mit allen seinen Daten gelöscht, wie in unserer "Datenschutzerklärung":"$URL1" beschrieben.
+#else
+Da Ihr ${LetterLogoText} Arbeitsbereich *$PortalName* lange Zeit nicht genutzt wurde, haben wir ihn jetzt mit allen seinen Daten gelöscht, wie in unserer "Datenschutzerklärung":"$URL1" beschrieben.
+#end
+
+#if($Unpaid == "True")
+Vielen Dank, dass Sie mit uns gearbeitet haben. Wir würden sehr gern wissen, warum Sie es nicht mehr nutzen: Hat etwas nicht funktioniert, haben Sie eine besser passende Lösung gefunden oder brauchten Sie es einfach nicht mehr? Es dauert nur eine Minute, und jede Antwort hilft uns, besser zu werden.
+#else
+Vielen Dank, dass Sie ${LetterLogoText} ausprobiert haben. Wir würden sehr gern wissen, warum Sie es nicht mehr nutzen: Hat etwas nicht funktioniert, haben Sie eine besser passende Lösung gefunden oder brauchten Sie es einfach nicht mehr? Es dauert nur eine Minute, und jede Antwort hilft uns, besser zu werden.
+#end
+
+$OrangeButton
+
+Wenn Sie irgendwann zurückkommen möchten, sind Sie jederzeit willkommen. Sie können jederzeit "einen neuen Arbeitsbereich erstellen":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1745,8 +1778,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ihr Passwort wurde erfolgreich geändert</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Das Portal ${PortalUrl} wurde durch die Aufbewahrungsrichtlinie gesperrt</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Ihr ${LetterLogoText} Arbeitsbereich ist gesperrt, aber Ihre Daten sind bis zum $DeleteDateShort sicher</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich wurde gelöscht</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Ihr ${LetterLogoText} Arbeitsbereich wird bald gelöscht (Löschung am $DeleteDateShort)</value>

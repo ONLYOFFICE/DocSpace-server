@@ -762,6 +762,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>تم حظر البوابة ${PortalUrl} بموجب سياسة الاحتفاظ بالبيانات: إما أنها لم تُستخدم، أو لم يتم تجديد اشتراكها. تُبيّن الفئة أدناه أي الحالتين.
+
+*البوابة:* ${PortalUrl}
+*المالك:* ${UserName} ${UserEmail}
+*الفئة:* ${Category}
+*تاريخ الحذف:* ${DeleteDate}
+
+ما لم يتم إلغاء حظرها، سيتم حذف البوابة وجميع بياناتها في ذلك التاريخ.
+
+إذا طلب المالك الاحتفاظ بها، فأعد تفعيل البوابة قبل ذلك التاريخ.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.تم حظر مساحتك، لكن لم يُفقد شيء بعد
 
@@ -794,6 +806,27 @@ $OrangeButton
 
 إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. إذا كانت هناك ملفات تريد الاحتفاظ بها، فأخبرنا قبل $DeleteDateShort وسنساعدك على الوصول إليها.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.تم حذف مساحتك
+
+#if($Unpaid == "True")
+نظرًا لانتهاء اشتراك مساحتك على ${LetterLogoText}، *$PortalName*, وعدم تجديده، قمنا الآن بحذفها مع جميع بياناتها، كما هو موضح في "سياسة الخصوصية":"$URL1" الخاصة بنا.
+#else
+نظرًا لعدم استخدام مساحتك على ${LetterLogoText}، *$PortalName*, لفترة طويلة، قمنا الآن بحذفها مع جميع بياناتها، كما هو موضح في "سياسة الخصوصية":"$URL1" الخاصة بنا.
+#end
+
+#if($Unpaid == "True")
+شكرًا لعملك معنا. نود حقًا أن نعرف سبب توقفك عن استخدامها: هل لم يعمل شيء ما كما ينبغي، أم وجدت حلًا أنسب، أم أنك ببساطة لم تعد بحاجة إليها؟ لن يستغرق الأمر سوى دقيقة، وكل إجابة تساعدنا على التحسن.
+#else
+شكرًا لتجربتك ${LetterLogoText}. نود حقًا أن نعرف سبب توقفك عن استخدامها: هل لم يعمل شيء ما كما ينبغي، أم وجدت حلًا أنسب، أم أنك ببساطة لم تعد بحاجة إليها؟ لن يستغرق الأمر سوى دقيقة، وكل إجابة تساعدنا على التحسن.
+#end
+
+$OrangeButton
+
+إذا رغبت في العودة يومًا ما، فمرحبًا بك دائمًا. يمكنك "إنشاء مساحة جديدة":"$URL2" في أي وقت.
 
 $TrulyYours</value>
   </data>
@@ -1749,8 +1782,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>لقد تم تغيير كلمة المرور الخاصة بك بنجاح</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>تم حظر البوابة ${PortalUrl} بموجب سياسة الاحتفاظ بالبيانات</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>تم حظر مساحتك على ${LetterLogoText}، لكن بياناتك في أمان حتى $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>تم حذف مساحتك على ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>سيتم حذف مساحتك على ${LetterLogoText} قريبًا (تاريخ الحذف: $DeleteDateShort)</value>

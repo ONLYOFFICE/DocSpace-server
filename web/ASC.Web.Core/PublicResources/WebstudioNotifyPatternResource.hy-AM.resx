@@ -758,6 +758,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} պորտալն արգելափակվել է տվյալների պահպանման քաղաքականությամբ. այն չի օգտագործվել, կամ դրա բաժանորդագրությունը չի երկարաձգվել: Թե որ դեպքն է, ցույց է տալիս ստորև նշված կատեգորիան:
+
+*Պորտալ:* ${PortalUrl}
+*Սեփականատեր:* ${UserName} ${UserEmail}
+*Կատեգորիա:* ${Category}
+*Ջնջման ամսաթիվ:* ${DeleteDate}
+
+Եթե այն չապաարգելափակվի, պորտալը և դրա բոլոր տվյալները կջնջվեն այդ օրը:
+
+Եթե սեփականատերը խնդրի պահպանել այն, նորից ակտիվացրեք պորտալը մինչև այդ ամսաթիվը:</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Ձեր տարածքն արգելափակված է, բայց դեռ ոչինչ կորած չէ
 
@@ -790,6 +802,27 @@ $OrangeButton
 
 Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, տեղեկացրեք մեզ մինչև $DeleteDateShort, և մենք կօգնենք ձեզ մուտք ստանալ դրանց:
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ձեր տարածքը ջնջվել է
+
+#if($Unpaid == "True")
+Քանի որ ձեր ${LetterLogoText} տարածքի՝ *$PortalName*, բաժանորդագրությունն ավարտվել էր և չէր երկարաձգվել, մեր "Գաղտնիության քաղաքականության":"$URL1" համաձայն՝ մենք այն ջնջել ենք դրա բոլոր տվյալների հետ միասին:
+#else
+Քանի որ ձեր ${LetterLogoText} տարածքը՝ *$PortalName*, երկար ժամանակ չէր օգտագործվել, մեր "Գաղտնիության քաղաքականության":"$URL1" համաձայն՝ մենք այն ջնջել ենք դրա բոլոր տվյալների հետ միասին:
+#end
+
+#if($Unpaid == "True")
+Շնորհակալություն մեզ հետ աշխատելու համար: Մենք շատ կցանկանայինք իմանալ, թե ինչու դադարեցիք այն օգտագործել. ինչ-որ բան չէր աշխատում, գտաք ավելի հարմար լուծում, թե պարզապես այլևս դրա կարիքը չունեիք: Սա ընդամենը մեկ րոպե կխլի, և յուրաքանչյուր պատասխան օգնում է մեզ կատարելագործվել:
+#else
+Շնորհակալություն ${LetterLogoText}-ը փորձելու համար: Մենք շատ կցանկանայինք իմանալ, թե ինչու դադարեցիք այն օգտագործել. ինչ-որ բան չէր աշխատում, գտաք ավելի հարմար լուծում, թե պարզապես այլևս դրա կարիքը չունեիք: Սա ընդամենը մեկ րոպե կխլի, և յուրաքանչյուր պատասխան օգնում է մեզ կատարելագործվել:
+#end
+
+$OrangeButton
+
+Եթե երբևէ ցանկանաք վերադառնալ, միշտ սպասված եք: Կարող եք "նոր տարածք ստեղծել":"$URL2" ցանկացած ժամանակ:
 
 $TrulyYours</value>
   </data>
@@ -1742,8 +1775,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ձեր գաղտնաբառը հաջողությամբ փոխվել է</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} պորտալն արգելափակվել է տվյալների պահպանման քաղաքականությամբ</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} տարածքն արգելափակված է, բայց ձեր տվյալներն ապահով են մինչև $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը ջնջվել է</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} տարածքը շուտով կջնջվի (ջնջման ամսաթիվ՝ $DeleteDateShort)</value>

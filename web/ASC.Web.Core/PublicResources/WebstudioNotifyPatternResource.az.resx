@@ -758,6 +758,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı məlumatların saxlanması siyasətinə əsasən bloklanıb: ondan istifadə olunmayıb və ya abunəliyi yenilənməyib. Hansı hal olduğunu aşağıdakı kateqoriya göstərir.
+
+*Portal:* ${PortalUrl}
+*Sahib:* ${UserName} ${UserEmail}
+*Kateqoriya:* ${Category}
+*Silinmə tarixi:* ${DeleteDate}
+
+Bloku açılmasa, portal və onun bütün məlumatları həmin tarixdə silinəcək.
+
+Sahib onu saxlamağı xahiş etsə, portalı həmin tarixdən əvvəl yenidən aktivləşdirin.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Sahəniz bloklanıb, lakin hələ heç nə itirilməyib
 
@@ -790,6 +802,27 @@ $OrangeButton
 
 Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, $DeleteDateShort tarixinədək bizə bildirin və onlara giriş əldə etməyinizə kömək edəcəyik.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Sahəniz silinib
+
+#if($Unpaid == "True")
+Abunəliyi başa çatmış və yenilənməmiş *$PortalName* ${LetterLogoText} sahənizi bütün məlumatları ilə birlikdə "Məxfilik Siyasətimizdə":"$URL1" təsvir olunduğu kimi sildik.
+#else
+Uzun müddətdir istifadə olunmayan *$PortalName* ${LetterLogoText} sahənizi bütün məlumatları ilə birlikdə "Məxfilik Siyasətimizdə":"$URL1" təsvir olunduğu kimi sildik.
+#end
+
+#if($Unpaid == "True")
+Bizimlə işlədiyiniz üçün təşəkkür edirik. Ondan istifadəni niyə dayandırdığınızı bilmək çox istərdik: nəsə işləmədi, daha uyğun həll tapdınız, yoxsa sadəcə artıq ehtiyacınız qalmadı? Bu, cəmi bir dəqiqə çəkir və hər cavab bizə inkişaf etməyə kömək edir.
+#else
+${LetterLogoText} xidmətini sınadığınız üçün təşəkkür edirik. Ondan istifadəni niyə dayandırdığınızı bilmək çox istərdik: nəsə işləmədi, daha uyğun həll tapdınız, yoxsa sadəcə artıq ehtiyacınız qalmadı? Bu, cəmi bir dəqiqə çəkir və hər cavab bizə inkişaf etməyə kömək edir.
+#end
+
+$OrangeButton
+
+Nə vaxtsa qayıtmaq istəsəniz, sizi həmişə gözləyirik. İstənilən vaxt "yeni sahə yarada bilərsiniz":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1736,8 +1769,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parolunuz uğurla dəyişdirildi</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı məlumatların saxlanması siyasətinə əsasən bloklanıb</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} sahəniz bloklanıb, lakin məlumatlarınız $DeleteDateShort tarixinədək təhlükəsizdir</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz silinib</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>${LetterLogoText} sahəniz tezliklə silinəcək (silinmə tarixi: $DeleteDateShort)</value>

@@ -769,6 +769,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portaali ${PortalUrl} on estetty tietojen säilytyskäytännön perusteella: sitä ei käytetty tai sen tilausta ei uusittu. Alla oleva luokka kertoo, kummasta on kyse.
+
+*Portaali:* ${PortalUrl}
+*Omistaja:* ${UserName} ${UserEmail}
+*Luokka:* ${Category}
+*Poistopäivä:* ${DeleteDate}
+
+Ellei estoa poisteta, portaali ja kaikki sen tiedot poistetaan tuona päivänä.
+
+Jos omistaja pyytää säilyttämään sen, aktivoi portaali uudelleen ennen tätä päivää.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Tilasi on estetty, mutta mitään ei ole vielä menetetty
 
@@ -801,6 +813,27 @@ $OrangeButton
 
 Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, ilmoita meille ennen $DeleteDateShort, niin autamme sinua pääsemään niihin käsiksi.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Tilasi on poistettu
+
+#if($Unpaid == "True")
+Koska ${LetterLogoText}-tilasi *$PortalName* tilaus päättyi eikä sitä uusittu, olemme nyt poistaneet tilan ja kaikki sen tiedot "tietosuojakäytäntömme":"$URL1" mukaisesti.
+#else
+Koska ${LetterLogoText}-tilaasi *$PortalName* ei ole käytetty pitkään aikaan, olemme nyt poistaneet tilan ja kaikki sen tiedot "tietosuojakäytäntömme":"$URL1" mukaisesti.
+#end
+
+#if($Unpaid == "True")
+Kiitos, että työskentelit kanssamme. Haluaisimme kovasti tietää, miksi lopetit sen käytön: toimiko jokin huonosti, löysitkö paremmin sopivan ratkaisun vai etkö vain enää tarvinnut sitä? Se vie vain minuutin, ja jokainen vastaus auttaa meitä kehittymään.
+#else
+Kiitos, että kokeilit ${LetterLogoText}-palvelua. Haluaisimme kovasti tietää, miksi lopetit sen käytön: toimiko jokin huonosti, löysitkö paremmin sopivan ratkaisun vai etkö vain enää tarvinnut sitä? Se vie vain minuutin, ja jokainen vastaus auttaa meitä kehittymään.
+#end
+
+$OrangeButton
+
+Jos haluat joskus palata, olet aina tervetullut. Voit "luoda uuden tilan":"$URL2" milloin tahansa.
 
 $TrulyYours</value>
   </data>
@@ -1781,8 +1814,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Salasanasi vaihdettiin onnistuneesti</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portaali ${PortalUrl} on estetty tietojen säilytyskäytännön perusteella</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText}-tilasi on estetty, mutta tietosi ovat turvassa $DeleteDateShort asti</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi on poistettu</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>${LetterLogoText}-tilasi poistetaan pian (poistopäivä: $DeleteDateShort)</value>

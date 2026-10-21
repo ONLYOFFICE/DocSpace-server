@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portāls ${PortalUrl} ir bloķēts saskaņā ar datu glabāšanas politiku: tas netika izmantots vai tā abonements netika atjaunots. Kurš no gadījumiem, norāda tālāk esošā kategorija.
+
+*Portāls:* ${PortalUrl}
+*Īpašnieks:* ${UserName} ${UserEmail}
+*Kategorija:* ${Category}
+*Dzēšanas datums:* ${DeleteDate}
+
+Ja portāls netiks atbloķēts, tas un visi tā dati šajā datumā tiks dzēsti.
+
+Ja īpašnieks lūdz to saglabāt, aktivizējiet portālu atkārtoti pirms šī datuma.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Jūsu telpa ir bloķēta, bet nekas vēl nav zaudēts
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, paziņojiet mums (termiņš: $DeleteDateShort), un mēs palīdzēsim jums tiem piekļūt.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Jūsu telpa ir dzēsta
+
+#if($Unpaid == "True")
+Tā kā jūsu ${LetterLogoText} telpas *$PortalName* abonements beidzās un netika atjaunots, mēs to esam dzēsuši kopā ar visiem tās datiem, kā aprakstīts mūsu "Privātuma politikā":"$URL1".
+#else
+Tā kā jūsu ${LetterLogoText} telpa *$PortalName* ilgu laiku netika izmantota, mēs to esam dzēsuši kopā ar visiem tās datiem, kā aprakstīts mūsu "Privātuma politikā":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Paldies, ka strādājāt ar mums. Mēs ļoti vēlētos uzzināt, kāpēc pārtraucāt to izmantot: vai kaut kas nedarbojās, vai atradāt piemērotāku risinājumu, vai arī tas jums vienkārši vairs nebija vajadzīgs? Tas aizņems tikai minūti, un katra atbilde palīdz mums pilnveidoties.
+#else
+Paldies, ka izmēģinājāt ${LetterLogoText}. Mēs ļoti vēlētos uzzināt, kāpēc pārtraucāt to izmantot: vai kaut kas nedarbojās, vai atradāt piemērotāku risinājumu, vai arī tas jums vienkārši vairs nebija vajadzīgs? Tas aizņems tikai minūti, un katra atbilde palīdz mums pilnveidoties.
+#end
+
+$OrangeButton
+
+Ja kādreiz vēlēsieties atgriezties, jūs vienmēr esat gaidīti. Jūs jebkurā laikā varat "izveidot jaunu telpu":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1783,8 +1816,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Jūsu parole ir veiksmīgi nomainīta</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portāls ${PortalUrl} ir bloķēts saskaņā ar datu glabāšanas politiku</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpa ir bloķēta, bet jūsu dati ir drošībā (termiņš: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa ir dzēsta</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpa drīzumā tiks dzēsta (dzēšanas datums: $DeleteDateShort)</value>

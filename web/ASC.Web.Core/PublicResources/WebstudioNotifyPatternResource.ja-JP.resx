@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>ポータル ${PortalUrl} はデータ保持ポリシーによりブロックされました。使用されていなかったか、サブスクリプションが更新されなかったためです。どちらに該当するかは、以下のカテゴリで確認できます。
+
+*ポータル:* ${PortalUrl}
+*所有者:* ${UserName} ${UserEmail}
+*カテゴリ:* ${Category}
+*削除日:* ${DeleteDate}
+
+ブロックが解除されない場合、ポータルとそのすべてのデータはこの日に削除されます。
+
+所有者から維持の依頼があった場合は、この日より前にポータルを再度有効にしてください。</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.スペースはブロックされましたが、まだ何も失われていません
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにお知らせください。ファイルにアクセスできるようお手伝いします。
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.スペースは削除されました
+
+#if($Unpaid == "True")
+${LetterLogoText} のスペース *$PortalName* のサブスクリプションが終了し、更新されなかったため、 "プライバシーポリシー":"$URL1" に従い、スペースをすべてのデータとともに削除しました。
+#else
+${LetterLogoText} のスペース *$PortalName* が長期間使用されていなかったため、 "プライバシーポリシー":"$URL1" に従い、スペースをすべてのデータとともに削除しました。
+#end
+
+#if($Unpaid == "True")
+これまでご利用いただき、ありがとうございました。ご利用をやめられた理由をぜひお聞かせください。うまく機能しなかった点があったのか、より適したサービスが見つかったのか、それとも単に必要なくなったのか。回答は1分ほどで終わり、いただいたご意見はすべてサービスの改善に役立てられます。
+#else
+${LetterLogoText} をお試しいただき、ありがとうございました。ご利用をやめられた理由をぜひお聞かせください。うまく機能しなかった点があったのか、より適したサービスが見つかったのか、それとも単に必要なくなったのか。回答は1分ほどで終わり、いただいたご意見はすべてサービスの改善に役立てられます。
+#end
+
+$OrangeButton
+
+またいつでもお戻りください。いつでも "新しいスペースを作成":"$URL2" できます。
 
 $TrulyYours</value>
   </data>
@@ -1727,8 +1760,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>パスワードが正常に変更されました</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>ポータル ${PortalUrl} はデータ保持ポリシーによりブロックされました</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>${LetterLogoText} のスペースはブロックされましたが、データは${DeleteDateShort}まで安全に保管されます</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} のスペースは削除されました</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>${LetterLogoText} のスペースはまもなく削除されます（削除日: ${DeleteDateShort}）</value>

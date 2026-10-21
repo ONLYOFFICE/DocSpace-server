@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portal ${PortalUrl} je bil blokiran v skladu s pravilnikom o hrambi podatkov: ni bil v uporabi ali njegova naročnina ni bila podaljšana. Za kateri primer gre, pove spodnja kategorija.
+
+*Portal:* ${PortalUrl}
+*Lastnik:* ${UserName} ${UserEmail}
+*Kategorija:* ${Category}
+*Datum izbrisa:* ${DeleteDate}
+
+Če ne bo odblokiran, bodo portal in vsi njegovi podatki na ta dan izbrisani.
+
+Če lastnik prosi, da ga ohranite, portal pred tem datumom znova aktivirajte.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Vaš prostor je blokiran, a ničesar še ni izgubljenega
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne datoteke, nam to sporočite (rok: $DeleteDateShort) in pomagali vam bomo do njih dostopati.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Vaš prostor je bil izbrisan
+
+#if($Unpaid == "True")
+Ker je naročnina za vaš prostor ${LetterLogoText} *$PortalName* potekla in ni bila podaljšana, smo ga zdaj izbrisali skupaj z vsemi podatki, kot je opisano v našem "pravilniku o zasebnosti":"$URL1".
+#else
+Ker vašega prostora ${LetterLogoText} *$PortalName* dolgo nihče ni uporabljal, smo ga zdaj izbrisali skupaj z vsemi podatki, kot je opisano v našem "pravilniku o zasebnosti":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Hvala, ker ste delali z nami. Zelo radi bi izvedeli, zakaj ste ga prenehali uporabljati: ali kaj ni delovalo, ste našli boljšo rešitev ali ga preprosto niste več potrebovali? Vzame le minuto, vsak odgovor pa nam pomaga, da postajamo boljši.
+#else
+Hvala, ker ste preizkusili ${LetterLogoText}. Zelo radi bi izvedeli, zakaj ste ga prenehali uporabljati: ali kaj ni delovalo, ste našli boljšo rešitev ali ga preprosto niste več potrebovali? Vzame le minuto, vsak odgovor pa nam pomaga, da postajamo boljši.
+#end
+
+$OrangeButton
+
+Če se boste kdaj želeli vrniti, ste vedno dobrodošli. Kadar koli lahko "ustvarite nov prostor":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1783,8 +1816,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše geslo je bilo uspešno spremenjeno</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portal ${PortalUrl} je bil blokiran v skladu s pravilnikom o hrambi podatkov</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Vaš prostor ${LetterLogoText} je blokiran, vaši podatki pa so varni (rok: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} je bil izbrisan</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Vaš prostor ${LetterLogoText} bo kmalu izbrisan (datum izbrisa: $DeleteDateShort)</value>

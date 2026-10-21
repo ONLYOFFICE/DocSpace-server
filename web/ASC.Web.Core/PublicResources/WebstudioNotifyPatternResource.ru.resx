@@ -770,6 +770,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Портал ${PortalUrl} заблокирован политикой хранения данных: им не пользовались или его подписка не была продлена. Что именно, показывает категория ниже.
+
+*Портал:* ${PortalUrl}
+*Владелец:* ${UserName} ${UserEmail}
+*Категория:* ${Category}
+*Дата удаления:* ${DeleteDate}
+
+Если портал не разблокировать, в этот день он будет удалён вместе со всеми данными.
+
+Если владелец попросит его сохранить, сделайте портал снова активным до этой даты.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Ваше пространство заблокировано, но пока ничего не потеряно
 
@@ -802,6 +814,27 @@ $OrangeButton
 
 Если вы решили двигаться дальше, это совершенно нормально. Если вы хотите сохранить какие-то файлы, сообщите нам до $DeleteDateShort, и мы поможем получить к ним доступ.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ваше пространство удалено
+
+#if($Unpaid == "True")
+Подписка на ваше пространство ${LetterLogoText} *$PortalName* закончилась и не была продлена, поэтому мы удалили его вместе со всеми данными, как описано в нашей "Политике конфиденциальности":"$URL1".
+#else
+Вашим пространством ${LetterLogoText} *$PortalName* долгое время не пользовались, поэтому мы удалили его вместе со всеми данными, как описано в нашей "Политике конфиденциальности":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Спасибо, что работали с нами. Нам бы очень хотелось узнать, почему вы перестали им пользоваться: что-то не сработало, вы нашли более подходящее решение или оно вам просто больше не нужно. Это займёт всего минуту, и каждый ответ помогает нам становиться лучше.
+#else
+Спасибо, что попробовали ${LetterLogoText}. Нам бы очень хотелось узнать, почему вы перестали им пользоваться: что-то не сработало, вы нашли более подходящее решение или оно вам просто больше не нужно. Это займёт всего минуту, и каждый ответ помогает нам становиться лучше.
+#end
+
+$OrangeButton
+
+Если когда-нибудь захотите вернуться, мы всегда вам рады. Вы можете "создать новое пространство":"$URL2" в любое время.
 
 $TrulyYours</value>
   </data>
@@ -1783,8 +1816,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успешно изменен</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Портал ${PortalUrl} заблокирован политикой хранения данных</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Ваше пространство ${LetterLogoText} заблокировано, но данные в безопасности до $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ваше пространство ${LetterLogoText} удалено</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Ваше пространство ${LetterLogoText} скоро будет удалено (дата удаления: $DeleteDateShort)</value>

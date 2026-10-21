@@ -757,6 +757,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portál ${PortalUrl} byl zablokován zásadami uchovávání dat: nepoužíval se nebo nebylo obnoveno jeho předplatné. O který případ jde, ukazuje kategorie níže.
+
+*Portál:* ${PortalUrl}
+*Vlastník:* ${UserName} ${UserEmail}
+*Kategorie:* ${Category}
+*Datum odstranění:* ${DeleteDate}
+
+Pokud nebude odblokován, portál a všechna jeho data budou v tento den odstraněny.
+
+Pokud vlastník požádá o jeho zachování, znovu portál aktivujte před tímto datem.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Váš prostor je zablokován, ale zatím se nic neztratilo
 
@@ -789,6 +801,27 @@ $OrangeButton
 
 Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, dejte nám vědět do $DeleteDateShort a pomůžeme vám k nim získat přístup.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Váš prostor byl odstraněn
+
+#if($Unpaid == "True")
+Protože předplatné vašeho prostoru ${LetterLogoText} *$PortalName* skončilo a nebylo obnoveno, odstranili jsme ho nyní i se všemi daty, jak je popsáno v našich "Zásadách ochrany osobních údajů":"$URL1".
+#else
+Protože se váš prostor ${LetterLogoText} *$PortalName* dlouho nepoužíval, odstranili jsme ho nyní i se všemi daty, jak je popsáno v našich "Zásadách ochrany osobních údajů":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Děkujeme, že jste s námi pracovali. Moc rádi bychom věděli, proč jste ho přestali používat: něco vám nefungovalo, našli jste vhodnější řešení, nebo jste ho prostě už nepotřebovali? Zabere to jen minutu a každá odpověď nám pomáhá se zlepšovat.
+#else
+Děkujeme, že jste ${LetterLogoText} vyzkoušeli. Moc rádi bychom věděli, proč jste ho přestali používat: něco vám nefungovalo, našli jste vhodnější řešení, nebo jste ho prostě už nepotřebovali? Zabere to jen minutu a každá odpověď nám pomáhá se zlepšovat.
+#end
+
+$OrangeButton
+
+Pokud se budete chtít někdy vrátit, jste vždy vítáni. Kdykoli si můžete "vytvořit nový prostor":"$URL2".
 
 $TrulyYours</value>
   </data>
@@ -1736,8 +1769,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše heslo bylo úspěšně změněno</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portál ${PortalUrl} byl zablokován zásadami uchovávání dat</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Váš prostor ${LetterLogoText} je zablokován, ale data jsou v bezpečí do $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} byl odstraněn</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Váš prostor ${LetterLogoText} bude brzy odstraněn (datum odstranění: $DeleteDateShort)</value>

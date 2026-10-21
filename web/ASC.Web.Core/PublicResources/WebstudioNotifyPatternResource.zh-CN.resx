@@ -779,6 +779,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定：该门户未被使用，或其订阅未续订，具体情况见下方类别。
+
+*门户:* ${PortalUrl}
+*所有者:* ${UserName} ${UserEmail}
+*类别:* ${Category}
+*删除日期:* ${DeleteDate}
+
+除非解除锁定，否则该门户及其所有数据将在该日期被删除。
+
+如果所有者要求保留，请在该日期前重新激活门户。</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.您的空间已被锁定，但目前没有任何数据丢失
 
@@ -811,6 +823,27 @@ $OrangeButton
 
 如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.您的空间已被删除
+
+#if($Unpaid == "True")
+由于您的 ${LetterLogoText} 空间 *$PortalName* 的订阅已结束且未续订，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#else
+由于您的 ${LetterLogoText} 空间 *$PortalName* 已长时间未被使用，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#end
+
+#if($Unpaid == "True")
+感谢您一直以来的使用。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#else
+感谢您试用 ${LetterLogoText}。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#end
+
+$OrangeButton
+
+如果您将来想回来，我们随时欢迎。您可以随时 "创建新空间":"$URL2" 。
 
 $TrulyYours</value>
   </data>
@@ -1768,8 +1801,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>您的密码已成功更改</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间已被锁定，但您的数据在 ${DeleteDateShort} 前都是安全的</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间已被删除</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间即将被删除（删除日期：${DeleteDateShort}）</value>

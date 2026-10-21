@@ -760,6 +760,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portali ${PortalUrl} u bllokua nga politika e ruajtjes së të dhënave: nuk përdorej ose abonimi i tij nuk u rinovua. Cili rast është, e tregon kategoria më poshtë.
+
+*Portali:* ${PortalUrl}
+*Pronari:* ${UserName} ${UserEmail}
+*Kategoria:* ${Category}
+*Data e fshirjes:* ${DeleteDate}
+
+Nëse nuk zhbllokohet, portali dhe të gjitha të dhënat e tij do të fshihen në atë datë.
+
+Nëse pronari kërkon ta mbajë, riaktivizojeni portalin para asaj date.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Hapësira juaj është bllokuar, por ende nuk ka humbur asgjë
 
@@ -792,6 +804,27 @@ $OrangeButton
 
 Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka skedarë që dëshironi t'i mbani, na njoftoni para datës $DeleteDateShort dhe do t'ju ndihmojmë të keni qasje në to.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Hapësira juaj është fshirë
+
+#if($Unpaid == "True")
+Meqë abonimi i hapësirës suaj ${LetterLogoText} *$PortalName* përfundoi dhe nuk u rinovua, tani e kemi fshirë së bashku me të gjitha të dhënat e saj, siç përshkruhet në "Politikën e privatësisë":"$URL1" tonë.
+#else
+Meqë hapësira juaj ${LetterLogoText} *$PortalName* nuk është përdorur për një kohë të gjatë, tani e kemi fshirë së bashku me të gjitha të dhënat e saj, siç përshkruhet në "Politikën e privatësisë":"$URL1" tonë.
+#end
+
+#if($Unpaid == "True")
+Faleminderit që punuat me ne. Do të donim shumë të dinim pse ndaluat ta përdorni: diçka nuk funksionoi, gjetët një zgjidhje më të përshtatshme apo thjesht nuk ju duhej më? Duhet vetëm një minutë dhe çdo përgjigje na ndihmon të përmirësohemi.
+#else
+Faleminderit që provuat ${LetterLogoText}. Do të donim shumë të dinim pse ndaluat ta përdorni: diçka nuk funksionoi, gjetët një zgjidhje më të përshtatshme apo thjesht nuk ju duhej më? Duhet vetëm një minutë dhe çdo përgjigje na ndihmon të përmirësohemi.
+#end
+
+$OrangeButton
+
+Nëse ndonjëherë dëshironi të ktheheni, jeni gjithmonë të mirëpritur. Mund të "krijoni një hapësirë të re":"$URL2" në çdo kohë.
 
 $TrulyYours</value>
   </data>
@@ -1741,8 +1774,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Fjalëkalimi juaj u ndryshua me sukses</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portali ${PortalUrl} u bllokua nga politika e ruajtjes së të dhënave</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Hapësira juaj ${LetterLogoText} është bllokuar, por të dhënat tuaja janë të sigurta deri më $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} është fshirë</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>Hapësira juaj ${LetterLogoText} do të fshihet së shpejti (data e fshirjes: $DeleteDateShort)</value>

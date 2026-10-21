@@ -769,6 +769,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>O portal ${PortalUrl} foi bloqueado pela política de retenção de dados: não estava a ser utilizado ou a sua subscrição não foi renovada; a categoria abaixo indica qual dos casos.
+
+*Portal:* ${PortalUrl}
+*Proprietário:* ${UserName} ${UserEmail}
+*Categoria:* ${Category}
+*Data de eliminação:* ${DeleteDate}
+
+Se não for desbloqueado, o portal e todos os seus dados serão eliminados nessa data.
+
+Se o proprietário pedir para o manter, reative o portal antes dessa data.</value>
+  </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.O seu espaço está bloqueado, mas ainda nada se perdeu
 
@@ -801,6 +813,27 @@ $OrangeButton
 
 Se decidiu seguir em frente, não há problema nenhum. Se houver ficheiros que pretenda manter, avise-nos até $DeleteDateShort e ajudamo-lo a aceder-lhes.
 #end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.O seu espaço foi eliminado
+
+#if($Unpaid == "True")
+Como a subscrição do seu espaço ${LetterLogoText}, *$PortalName*, terminou e não foi renovada, eliminámo-lo com todos os seus dados, tal como descrito na nossa "Política de Privacidade":"$URL1".
+#else
+Como o seu espaço ${LetterLogoText}, *$PortalName*, não era utilizado há muito tempo, eliminámo-lo com todos os seus dados, tal como descrito na nossa "Política de Privacidade":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Obrigado por trabalhar connosco. Gostaríamos muito de saber porque deixou de o utilizar: algo não funcionou, encontrou uma opção mais adequada ou simplesmente já não precisava dele? Demora apenas um minuto, e cada resposta ajuda-nos a melhorar.
+#else
+Obrigado por experimentar o ${LetterLogoText}. Gostaríamos muito de saber porque deixou de o utilizar: algo não funcionou, encontrou uma opção mais adequada ou simplesmente já não precisava dele? Demora apenas um minuto, e cada resposta ajuda-nos a melhorar.
+#end
+
+$OrangeButton
+
+Se um dia quiser voltar, as nossas portas estão sempre abertas. Pode "criar um novo espaço":"$URL2" a qualquer momento.
 
 $TrulyYours</value>
   </data>
@@ -1771,8 +1804,14 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>A sua senha foi alterada com sucesso</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>O portal ${PortalUrl} foi bloqueado pela política de retenção de dados</value>
+  </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>O seu espaço ${LetterLogoText} está bloqueado, mas os seus dados estão seguros até $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>O seu espaço ${LetterLogoText} foi eliminado</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>O seu espaço ${LetterLogoText} será eliminado em breve (eliminação a $DeleteDateShort)</value>
