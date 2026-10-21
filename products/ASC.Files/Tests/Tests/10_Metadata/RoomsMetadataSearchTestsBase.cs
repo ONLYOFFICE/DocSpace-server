@@ -43,8 +43,8 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 /// </remarks>
 public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    protected const int SearchAreaArchive = 1;
-    protected const int CustomRoomType = 5;
+    protected const SearchArea SearchAreaArchive = SearchArea.Archive;
+    protected const RoomType CustomRoomType = RoomType.CustomRoom;
 
     protected const string ClientField = "Client";
     protected const string SignedField = "Signed";
@@ -61,38 +61,28 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Guid.NewGuid().ToString()[..8];
 
-        var template = await api.CreateTemplateAsync("Contracts " + suffix,
+        var template = await CreateTemplateAsync("Contracts " + suffix,
         [
-            new MetadataFieldPayload { Name = ClientField, Type = 0 },
-            new MetadataFieldPayload { Name = SignedField, Type = 1 },
-            new MetadataFieldPayload { Name = AmountField, Type = 2 },
-            new MetadataFieldPayload
-            {
-                Name = StatusField,
-                Type = 3,
-                Options = [new MetadataFieldOptionPayload { Value = "Draft" }, new MetadataFieldOptionPayload { Value = "Signed" }]
-            },
-            new MetadataFieldPayload
-            {
-                Name = TagsField,
-                Type = 4,
-                Options =
-                [
-                    new MetadataFieldOptionPayload { Value = "Legal" },
-                    new MetadataFieldOptionPayload { Value = "Finance" },
-                    new MetadataFieldOptionPayload { Value = "Urgent" }
-                ]
-            }
-        ], TestContext.Current.CancellationToken);
+            new MetadataFieldRequest(ClientField, MetadataFieldType.String),
+            new MetadataFieldRequest(SignedField, MetadataFieldType.Date),
+            new MetadataFieldRequest(AmountField, MetadataFieldType.Number),
+            new MetadataFieldRequest(StatusField, MetadataFieldType.SingleChoice,
+                [new MetadataFieldOptionRequest(value: "Draft"), new MetadataFieldOptionRequest(value: "Signed")]),
+            new MetadataFieldRequest(TagsField, MetadataFieldType.MultiChoice,
+            [
+                new MetadataFieldOptionRequest(value: "Legal"),
+                new MetadataFieldOptionRequest(value: "Finance"),
+                new MetadataFieldOptionRequest(value: "Urgent")
+            ])
+        ]);
 
         var matching = await CreateCustomRoom($"Matching {suffix}");
         var partial = await CreateCustomRoom($"Partial {suffix}");
         var bare = await CreateCustomRoom($"Bare {suffix}");
 
-        var data = new MetadataSearchData(api, template)
+        var data = new MetadataSearchData(_roomsApi, template)
         {
             MatchingRoomId = matching.Id,
             PartialRoomId = partial.Id,
@@ -102,30 +92,26 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
 
         foreach (var roomId in new[] { matching.Id, partial.Id })
         {
-            await api.AssignFolderTemplatesAsync(roomId, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+            await _metadataApi.AssignFolderTemplatesAsync(roomId, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
         }
 
-        await api.SetFolderValuesAsync(matching.Id,
+        await _metadataApi.SetFolderValuesAsync(matching.Id, new SetMetadataValues(
         [
-            new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = "ACME" },
-            new MetadataValuePayload { FieldId = data.FieldId(SignedField), DateValue = _matchingDate },
-            new MetadataValuePayload { FieldId = data.FieldId(AmountField), NumberValue = 150 },
-            new MetadataValuePayload { FieldId = data.FieldId(StatusField), OptionIds = [data.OptionId(StatusField, "Signed")] },
-            new MetadataValuePayload
-            {
-                FieldId = data.FieldId(TagsField),
-                OptionIds = [data.OptionId(TagsField, "Legal"), data.OptionId(TagsField, "Finance")]
-            }
-        ], TestContext.Current.CancellationToken);
+            new MetadataValueRequest(data.FieldId(ClientField), stringValue: "ACME"),
+            new MetadataValueRequest(data.FieldId(SignedField), dateValue: _matchingDate),
+            new MetadataValueRequest(data.FieldId(AmountField), numberValue: 150),
+            new MetadataValueRequest(data.FieldId(StatusField), optionIds: [data.OptionId(StatusField, "Signed")]),
+            new MetadataValueRequest(data.FieldId(TagsField), optionIds: [data.OptionId(TagsField, "Legal"), data.OptionId(TagsField, "Finance")])
+        ]), TestContext.Current.CancellationToken);
 
-        await api.SetFolderValuesAsync(partial.Id,
+        await _metadataApi.SetFolderValuesAsync(partial.Id, new SetMetadataValues(
         [
-            new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = "Globex" },
-            new MetadataValuePayload { FieldId = data.FieldId(SignedField), DateValue = _otherDate },
-            new MetadataValuePayload { FieldId = data.FieldId(AmountField), NumberValue = 900 },
-            new MetadataValuePayload { FieldId = data.FieldId(StatusField), OptionIds = [data.OptionId(StatusField, "Draft")] },
-            new MetadataValuePayload { FieldId = data.FieldId(TagsField), OptionIds = [data.OptionId(TagsField, "Urgent")] }
-        ], TestContext.Current.CancellationToken);
+            new MetadataValueRequest(data.FieldId(ClientField), stringValue: "Globex"),
+            new MetadataValueRequest(data.FieldId(SignedField), dateValue: _otherDate),
+            new MetadataValueRequest(data.FieldId(AmountField), numberValue: 900),
+            new MetadataValueRequest(data.FieldId(StatusField), optionIds: [data.OptionId(StatusField, "Draft")]),
+            new MetadataValueRequest(data.FieldId(TagsField), optionIds: [data.OptionId(TagsField, "Urgent")])
+        ]), TestContext.Current.CancellationToken);
 
         // the values reach the index with a small lag; a negative search polled before that lag is over would
         // pass for the wrong reason, so every test starts from a state where the written values are searchable
@@ -135,12 +121,16 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
         return data;
     }
 
+    protected async Task<MetadataTemplateDto> CreateTemplateAsync(string name, List<MetadataFieldRequest> fields, bool visible = true)
+    {
+        return (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto(name, visible, fields), TestContext.Current.CancellationToken)).Response;
+    }
+
     /// <summary>
     /// The arranged template and rooms plus the condition builders and the polling request helper.
     /// </summary>
-    protected sealed class MetadataSearchData(MetadataApiClient api, MetadataTemplateResponse template)
+    protected sealed class MetadataSearchData(RoomsApi roomsApi, MetadataTemplateDto template)
     {
-        public MetadataApiClient Api { get; } = api;
         public int TemplateId { get; } = template.Id;
 
         public int MatchingRoomId { get; init; }
@@ -158,49 +148,43 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
             return template.Field(fieldName).Option(optionValue);
         }
 
-        public object Eq(string fieldName, string value)
+        public MetadataFilterConditionRequest Eq(string fieldName, string value)
         {
-            return new { fieldId = FieldId(fieldName), op = "eq", value };
+            return new MetadataFilterConditionRequest(fieldId: FieldId(fieldName), op: "eq", value: value);
         }
 
-        public object Range(string fieldName, long? from, long? to)
+        public MetadataFilterConditionRequest Range(string fieldName, long? from, long? to)
         {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "range",
-                from = from?.ToString(CultureInfo.InvariantCulture),
-                to = to?.ToString(CultureInfo.InvariantCulture)
-            };
+            return new MetadataFilterConditionRequest(
+                fieldId: FieldId(fieldName),
+                op: "range",
+                from: from?.ToString(CultureInfo.InvariantCulture)!,
+                to: to?.ToString(CultureInfo.InvariantCulture)!);
         }
 
-        public object DateRange(string fieldName, DateTime from, DateTime to)
+        public MetadataFilterConditionRequest DateRange(string fieldName, DateTime from, DateTime to)
         {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "range",
-                from = from.ToString("O", CultureInfo.InvariantCulture),
-                to = to.ToString("O", CultureInfo.InvariantCulture)
-            };
+            return new MetadataFilterConditionRequest(
+                fieldId: FieldId(fieldName),
+                op: "range",
+                from: from.ToString("O", CultureInfo.InvariantCulture),
+                to: to.ToString("O", CultureInfo.InvariantCulture));
         }
 
-        public object In(string fieldName, params string[] optionValues)
+        public MetadataFilterConditionRequest In(string fieldName, params string[] optionValues)
         {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "in",
-                optionIds = optionValues.Select(v => OptionId(fieldName, v)).ToList()
-            };
+            return new MetadataFilterConditionRequest(
+                fieldId: FieldId(fieldName),
+                op: "in",
+                optionIds: optionValues.Select(v => OptionId(fieldName, v)).ToList());
         }
 
-        public Task<RoomsContentResponse> SearchAsync(object condition, int[] expected, string? filterValue = null, int? searchArea = null, int? roomType = null, TimeSpan? timeout = null)
+        public Task<RoomsContentResponse> SearchAsync(MetadataFilterConditionRequest condition, int[] expected, string? filterValue = null, SearchArea? searchArea = null, RoomType? roomType = null, TimeSpan? timeout = null)
         {
             return PollAsync([condition], expected, filterValue, searchArea, roomType, timeout);
         }
 
-        public Task<RoomsContentResponse> SearchAsync(object[] conditions, int[] expected, string? filterValue = null, int? searchArea = null, int? roomType = null, TimeSpan? timeout = null)
+        public Task<RoomsContentResponse> SearchAsync(MetadataFilterConditionRequest[] conditions, int[] expected, string? filterValue = null, SearchArea? searchArea = null, RoomType? roomType = null, TimeSpan? timeout = null)
         {
             return PollAsync(conditions, expected, filterValue, searchArea, roomType, timeout);
         }
@@ -216,12 +200,12 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
         /// <summary>
         /// Requests the unfiltered rooms listing, retrying until the condition holds.
         /// </summary>
-        public Task<RoomsContentResponse> ListAsync(Func<RoomsContentResponse, bool> until, int? searchArea = null, TimeSpan? timeout = null)
+        public Task<RoomsContentResponse> ListAsync(Func<RoomsContentResponse, bool> until, SearchArea? searchArea = null, TimeSpan? timeout = null)
         {
             return PollAsync(until, conditions: null, filterValue: null, searchArea, roomType: null, timeout);
         }
 
-        private Task<RoomsContentResponse> PollAsync(object[]? conditions, int[] expected, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
+        private Task<RoomsContentResponse> PollAsync(MetadataFilterConditionRequest[]? conditions, int[] expected, string? filterValue, SearchArea? searchArea, RoomType? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
         {
             return PollAsync(r => r.RoomIds().Order().SequenceEqual(expected.Order()), conditions, filterValue, searchArea, roomType, timeout, includeHiddenMetadata);
         }
@@ -230,20 +214,20 @@ public abstract class RoomsMetadataSearchTestsBase(AspireAppFixture fixture) : B
         /// Requests the rooms listing, retrying until the condition holds.
         /// The metadata values are indexed right after they are written, the retry only absorbs the indexing lag.
         /// </summary>
-        private async Task<RoomsContentResponse> PollAsync(Func<RoomsContentResponse, bool> until, object[]? conditions, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
+        private async Task<RoomsContentResponse> PollAsync(Func<RoomsContentResponse, bool> until, MetadataFilterConditionRequest[]? conditions, string? filterValue, SearchArea? searchArea, RoomType? roomType, TimeSpan? timeout, bool? includeHiddenMetadata = null)
         {
             using var deadline = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
 
             while (true)
             {
-                var rooms = await Api.GetRoomsAsync(
-                    conditions == null ? null : TemplateId,
-                    conditions,
-                    filterValue,
-                    searchArea,
-                    roomType,
-                    TestContext.Current.CancellationToken,
-                    includeHiddenMetadata);
+                var rooms = await roomsApi.GetRoomsWithMetadataAsync(
+                    metadataTemplateId: conditions == null ? null : TemplateId,
+                    metadataFilters: conditions,
+                    filterValue: filterValue,
+                    searchArea: searchArea,
+                    type: roomType.HasValue ? new List<RoomType> { roomType.Value } : null,
+                    includeHiddenMetadata: includeHiddenMetadata,
+                    cancellationToken: TestContext.Current.CancellationToken);
 
                 if (until(rooms) || deadline.IsCancellationRequested)
                 {

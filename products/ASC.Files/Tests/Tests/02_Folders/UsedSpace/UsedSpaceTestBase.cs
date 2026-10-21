@@ -167,7 +167,8 @@ public abstract class UsedSpaceTestBase(
             {
                 FolderIds = [new(folderId)],
                 FileIds = [new(fileId)],
-                Immediately = immediately
+                Immediately = immediately,
+                ReturnSingleOperation = true
             },
             TestContext.Current.CancellationToken)).Response;
 

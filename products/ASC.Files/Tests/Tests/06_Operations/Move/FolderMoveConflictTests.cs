@@ -63,6 +63,7 @@ public class FolderMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destParent.Id),
             ConflictResolveType = FileConflictResolveType.Duplicate,
             FileIds = [],
