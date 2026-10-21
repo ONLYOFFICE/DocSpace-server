@@ -44,30 +44,29 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task SetCustomFields_SetsSeveralFieldsAtOnce_AndReturnsThem()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Custom {suffix}");
 
-        var set = await api.SetFolderCustomFieldsAsync(room.Id,
-            [new CustomFieldPayload("Project code", "A-42"), new CustomFieldPayload("Client", "ACME")],
-            TestContext.Current.CancellationToken);
+        var set = await SetFolderCustomFieldsAsync(room.Id,
+            [new CustomFieldRequest("Project code", "A-42"), new CustomFieldRequest("Client", "ACME")]);
 
         set.Should().BeEquivalentTo([new { Name = "Project code", Value = "A-42" }, new { Name = "Client", Value = "ACME" }]);
 
-        var stored = await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken);
+        var stored = await GetFolderCustomFieldsAsync(room.Id);
         stored.Should().BeEquivalentTo(set);
     }
 
     [Fact]
     public async Task SetCustomFields_WithTheSameNameInAnotherCase_ReusesTheField()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Reuse {suffix}");
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
-        await api.SetFolderCustomFieldAsync(room.Id, "Reference", "R-1", TestContext.Current.CancellationToken);
-        var onFile = await api.SetFileCustomFieldAsync(file.Id, "reference", "R-2", TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, "Reference", "R-1");
+        var onFile = await SetFileCustomFieldAsync(file.Id, "reference", "R-2");
 
         // the field is found by its name regardless of the case, so the file shows the name the field was created with
         onFile.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Name = "Reference", Value = "R-2" });
@@ -76,15 +75,14 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task SetCustomFields_LeavesTheFieldsNotListedAlone()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Partial {suffix}");
 
-        await api.SetFolderCustomFieldsAsync(room.Id,
-            [new CustomFieldPayload("Project code", "A-42"), new CustomFieldPayload("Client", "ACME")],
-            TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldsAsync(room.Id,
+            [new CustomFieldRequest("Project code", "A-42"), new CustomFieldRequest("Client", "ACME")]);
 
-        var after = await api.SetFolderCustomFieldAsync(room.Id, "Client", "Globex", TestContext.Current.CancellationToken);
+        var after = await SetFolderCustomFieldAsync(room.Id, "Client", "Globex");
 
         after.Should().BeEquivalentTo([new { Name = "Project code", Value = "A-42" }, new { Name = "Client", Value = "Globex" }]);
     }
@@ -92,49 +90,49 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task SetCustomFields_WithANullValue_RemovesTheFieldFromThisEntryOnly()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Remove {suffix}");
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
-        await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
-        await api.SetFileCustomFieldAsync(file.Id, "Project code", "B-7", TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, "Project code", "A-42");
+        await SetFileCustomFieldAsync(file.Id, "Project code", "B-7");
 
-        var after = await api.SetFileCustomFieldAsync(file.Id, "Project code", null, TestContext.Current.CancellationToken);
+        var after = await SetFileCustomFieldAsync(file.Id, "Project code", null);
 
         after.Should().BeEmpty();
-        (await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken))
+        (await GetFolderCustomFieldsAsync(room.Id))
             .Should().ContainSingle().Which.Should().BeEquivalentTo(new { Name = "Project code", Value = "A-42" }, "the other entry keeps the field");
     }
 
     [Fact]
     public async Task SetCustomFields_RenamesAFieldOnTheEntry_ByRemovingAndAdding()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Rename {suffix}");
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
-        await api.SetFolderCustomFieldAsync(room.Id, "Client", "ACME", TestContext.Current.CancellationToken);
-        await api.SetFileCustomFieldAsync(file.Id, "Client", "Globex", TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, "Client", "ACME");
+        await SetFileCustomFieldAsync(file.Id, "Client", "Globex");
 
-        var renamed = await api.SetFileCustomFieldsAsync(file.Id,
-            [new CustomFieldPayload("Client", null), new CustomFieldPayload("Customer", "Globex")],
-            TestContext.Current.CancellationToken);
+        var renamed = (await _metadataApi.SetFileCustomFieldsAsync(file.Id,
+            new SetCustomFields([new CustomFieldRequest("Client", null!), new CustomFieldRequest("Customer", "Globex")]),
+            TestContext.Current.CancellationToken)).Response;
 
         renamed.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Name = "Customer", Value = "Globex" });
-        (await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken))
+        (await GetFolderCustomFieldsAsync(room.Id))
             .Should().ContainSingle().Which.Name.Should().Be("Client", "a rename on one entry is not a rename of the tenant's field");
     }
 
     [Fact]
     public async Task SetCustomFields_RemovingAFieldTheEntryDoesNotHold_IsANoOp()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"NoOp {suffix}");
 
-        var result = await api.SetFolderCustomFieldAsync(room.Id, $"Never set {suffix}", null, TestContext.Current.CancellationToken);
+        var result = await SetFolderCustomFieldAsync(room.Id, $"Never set {suffix}", null);
 
         result.Should().BeEmpty();
     }
@@ -142,73 +140,76 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task SetCustomFields_WithAnEmptyName_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom($"Empty {Suffix()}");
 
-        using var response = await api.SetFolderCustomFieldsResponseAsync(room.Id, [new CustomFieldPayload("  ", "A-42")], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await SetFolderCustomFieldsAsync(room.Id, [new CustomFieldRequest("  ", "A-42")]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task SetCustomFields_WithTheSameNameTwice_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom($"Twice {Suffix()}");
 
-        using var response = await api.SetFolderCustomFieldsResponseAsync(room.Id,
-            [new CustomFieldPayload("Client", "ACME"), new CustomFieldPayload("client", "Globex")],
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await SetFolderCustomFieldsAsync(room.Id,
+                [new CustomFieldRequest("Client", "ACME"), new CustomFieldRequest("client", "Globex")]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name is the key of the field, so it cannot be listed twice");
+        exception.ErrorCode.Should().Be(400, "the name is the key of the field, so it cannot be listed twice");
     }
 
     [Fact]
     public async Task SetCustomFields_BeyondTheLimit_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Limit {suffix}");
 
-        var tooMany = Enumerable.Range(1, 51).Select(i => new CustomFieldPayload($"Field {i} {suffix}", "x")).ToList();
+        var tooMany = Enumerable.Range(1, 51).Select(i => new CustomFieldRequest($"Field {i} {suffix}", "x")).ToList();
 
-        using var response = await api.SetFolderCustomFieldsResponseAsync(room.Id, tooMany, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await SetFolderCustomFieldsAsync(room.Id, tooMany));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken)).Should().BeEmpty("a refused request writes nothing");
+        exception.ErrorCode.Should().Be(400);
+        (await GetFolderCustomFieldsAsync(room.Id)).Should().BeEmpty("a refused request writes nothing");
     }
 
     [Fact]
     public async Task EntryMetadata_ReturnsTheCustomFieldsApartFromTheTemplates()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Contracts " + suffix, [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Contracts " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var room = await CreateCustomRoom($"Apart {suffix}");
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Client").Id, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await api.SetFolderCustomFieldAsync(room.Id, "Client", "Globex", TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(room.Id,
+            new SetMetadataValues([new MetadataValueRequest(template.Field("Client").Id, stringValue: "ACME")]), TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, "Client", "Globex");
 
-        var templates = await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken);
+        var templates = (await _metadataApi.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken)).Response.Templates;
         templates.Should().ContainSingle().Which.Id.Should().Be(template.Id, "the hidden template of the custom fields must not appear among the templates");
-        templates.Single().Field("Client").Value!.StringValue.Should().Be("ACME", "a custom field with the same name as a template field is a different field");
+        templates.Single().Field("Client").Value.StringValue.Should().Be("ACME", "a custom field with the same name as a template field is a different field");
 
-        var customFields = await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken);
+        var customFields = await GetFolderCustomFieldsAsync(room.Id);
         customFields.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Name = "Client", Value = "Globex" });
     }
 
     [Fact]
     public async Task Templates_DoNotIncludeTheTemplateOfTheCustomFields()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Hidden {suffix}");
 
-        await api.SetFolderCustomFieldAsync(room.Id, $"Project code {suffix}", "A-42", TestContext.Current.CancellationToken);
-        var template = await api.CreateTemplateAsync("Visible " + suffix, [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, $"Project code {suffix}", "A-42");
+        var template = await CreateTemplateAsync("Visible " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
 
-        var templates = await api.GetTemplatesAsync(TestContext.Current.CancellationToken);
+        var templates = (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         templates.Select(t => t.Id).Should().Equal(new[] { template.Id }, "only the user templates are listed");
         templates.SelectMany(t => t.Fields).Should().NotContain(f => f.Name == $"Project code {suffix}");
@@ -217,29 +218,31 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task CreateTemplate_NamedSystem_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom($"Named {Suffix()}");
 
         // the hidden template is called "System": the name is unique per tenant, so it is reserved once the custom fields exist
-        await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
-        using var response = await api.CreateTemplateResponseAsync("System", [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, "Project code", "A-42");
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync("System", [new MetadataFieldRequest("Client", MetadataFieldType.String)]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name belongs to the hidden template");
+        exception.ErrorCode.Should().Be(400, "the name belongs to the hidden template");
     }
 
     [Fact]
     public async Task CreateTemplate_NamedSystem_BeforeAnyCustomField_ReturnsBadRequest_AndCustomFieldsStillWork()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom($"Reserved {Suffix()}");
 
         // the name is reserved before the hidden template exists: taken first by a user template, it would make the
         // first custom field write of the tenant fail on the unique name for good
-        using var response = await api.CreateTemplateResponseAsync("system", [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync("system", [new MetadataFieldRequest("Client", MetadataFieldType.String)]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name is reserved for the hidden template");
+        exception.ErrorCode.Should().Be(400, "the name is reserved for the hidden template");
 
-        var fields = await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
+        var fields = await SetFolderCustomFieldAsync(room.Id, "Project code", "A-42");
 
         fields.Should().ContainSingle(f => f.Name == "Project code" && f.Value == "A-42");
     }
@@ -247,7 +250,7 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task CustomFields_CanBeSetByAnEditor_OnTheFilesTheyEdit_ButNotOnTheFolderOrTheRoom()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Rights {suffix}");
         var folder = await CreateFolder($"Sub {suffix}", room.Id);
@@ -264,32 +267,34 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await _filesClient.Authenticate(member);
 
-        var onFile = await api.SetFileCustomFieldAsync(file.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
+        var onFile = await SetFileCustomFieldAsync(file.Id, "Project code", "A-42");
         onFile.Should().ContainSingle().Which.Value.Should().Be("A-42", "an editing member may set custom fields on the files they can edit");
 
-        using var onRoom = await api.SetFolderCustomFieldsResponseAsync(room.Id, [new CustomFieldPayload("Project code", "A-42")], TestContext.Current.CancellationToken);
-        onRoom.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the room itself is edited by its manager only");
+        var onRoom = await Assert.ThrowsAsync<ApiException>(
+            async () => await SetFolderCustomFieldsAsync(room.Id, [new CustomFieldRequest("Project code", "A-42")]));
+        onRoom.ErrorCode.Should().Be(403, "the room itself is edited by its manager only");
 
-        using var onFolder = await api.SetFolderCustomFieldsResponseAsync(folder.Id, [new CustomFieldPayload("Project code", "A-42")], TestContext.Current.CancellationToken);
-        onFolder.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the fields of a folder follow the right to create in it, which the editing role lacks");
+        var onFolder = await Assert.ThrowsAsync<ApiException>(
+            async () => await SetFolderCustomFieldsAsync(folder.Id, [new CustomFieldRequest("Project code", "A-42")]));
+        onFolder.ErrorCode.Should().Be(403, "the fields of a folder follow the right to create in it, which the editing role lacks");
     }
 
     [Fact]
     public async Task Rooms_FilteredByCustomFieldName_ReturnTheMatchingRoom()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var field = $"Client {suffix}";
         var matching = await CreateCustomRoom($"Match {suffix}");
         var other = await CreateCustomRoom($"Other {suffix}");
 
-        await api.SetFolderCustomFieldAsync(matching.Id, field, "ACME", TestContext.Current.CancellationToken);
-        await api.SetFolderCustomFieldAsync(other.Id, field, "Globex", TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(matching.Id, field, "ACME");
+        await SetFolderCustomFieldAsync(other.Id, field, "Globex");
 
         // the custom fields have no identifier outside, so the condition names the field instead of the fieldId
-        var condition = new { name = field, op = "eq", value = "ACME" };
+        var condition = new MetadataFilterConditionRequest(name: field, op: "eq", value: "ACME");
 
-        var rooms = await PollRoomsAsync(api, condition, matching.Id);
+        var rooms = await PollRoomsAsync(condition, matching.Id);
 
         rooms.RoomIds().Should().Contain(matching.Id);
         rooms.RoomIds().Should().NotContain(other.Id);
@@ -298,30 +303,31 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task Rooms_FilteredByTheNameOfADroppedCustomField_ReturnBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
         var field = $"Ephemeral {suffix}";
         var room = await CreateCustomRoom($"Dropped {suffix}");
 
-        await api.SetFolderCustomFieldAsync(room.Id, field, "x", TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, field, "x");
 
-        using var whileHeld = await api.GetRoomsResponseAsync(metadataFilters: [new { name = field, op = "eq", value = "x" }], cancellationToken: TestContext.Current.CancellationToken);
-        whileHeld.StatusCode.Should().Be(HttpStatusCode.OK, "the field exists while an entry holds a value for it");
+        // the field exists while an entry holds a value for it: the listing is answered
+        await _roomsApi.GetRoomsWithMetadataAsync(metadataFilters: [new MetadataFilterConditionRequest(name: field, op: "eq", value: "x")], cancellationToken: TestContext.Current.CancellationToken);
 
-        await api.SetFolderCustomFieldAsync(room.Id, field, null, TestContext.Current.CancellationToken);
+        await SetFolderCustomFieldAsync(room.Id, field, null);
 
         // the last value is gone, so the field is dropped from the dictionary and is unknown to the filter
-        using var afterDrop = await api.GetRoomsResponseAsync(metadataFilters: [new { name = field, op = "eq", value = "x" }], cancellationToken: TestContext.Current.CancellationToken);
-        afterDrop.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var afterDrop = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(metadataFilters: [new MetadataFilterConditionRequest(name: field, op: "eq", value: "x")], cancellationToken: TestContext.Current.CancellationToken));
+        afterDrop.ErrorCode.Should().Be(400);
     }
 
-    private static async Task<RoomsContentResponse> PollRoomsAsync(MetadataApiClient api, object condition, int expectedRoomId)
+    private async Task<RoomsContentResponse> PollRoomsAsync(MetadataFilterConditionRequest condition, int expectedRoomId)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            var rooms = await api.GetRoomsAsync(metadataFilters: [condition], cancellationToken: TestContext.Current.CancellationToken);
+            var rooms = await _roomsApi.GetRoomsWithMetadataAsync(metadataFilters: [condition], cancellationToken: TestContext.Current.CancellationToken);
 
             if (rooms.RoomIds().Contains(expectedRoomId) || DateTime.UtcNow > deadline)
             {
@@ -332,11 +338,30 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
         }
     }
 
-    private async Task<MetadataApiClient> ArrangeAsync()
+    private async Task<MetadataTemplateDto> CreateTemplateAsync(string name, List<MetadataFieldRequest> fields, bool visible = true)
     {
-        await _filesClient.Authenticate(Owner);
+        return (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto(name, visible, fields), TestContext.Current.CancellationToken)).Response;
+    }
 
-        return new MetadataApiClient(_filesClient);
+    // a null value removes the field: the SDK annotates CustomFieldRequest.value as non-nullable, but it is sent as "value":null
+    private async Task<List<CustomFieldValueDto>> SetFolderCustomFieldsAsync(int folderId, List<CustomFieldRequest> fields)
+    {
+        return (await _metadataApi.SetFolderCustomFieldsAsync(folderId, new SetCustomFields(fields), TestContext.Current.CancellationToken)).Response;
+    }
+
+    private Task<List<CustomFieldValueDto>> SetFolderCustomFieldAsync(int folderId, string name, string? value)
+    {
+        return SetFolderCustomFieldsAsync(folderId, [new CustomFieldRequest(name, value!)]);
+    }
+
+    private async Task<List<CustomFieldValueDto>> SetFileCustomFieldAsync(int fileId, string name, string? value)
+    {
+        return (await _metadataApi.SetFileCustomFieldsAsync(fileId, new SetCustomFields([new CustomFieldRequest(name, value!)]), TestContext.Current.CancellationToken)).Response;
+    }
+
+    private async Task<List<CustomFieldValueDto>> GetFolderCustomFieldsAsync(int folderId)
+    {
+        return (await _metadataApi.GetFolderMetadataAsync(folderId, TestContext.Current.CancellationToken)).Response.CustomFields;
     }
 
     private static string Suffix()

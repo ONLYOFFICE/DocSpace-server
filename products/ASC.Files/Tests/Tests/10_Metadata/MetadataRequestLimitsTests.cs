@@ -41,8 +41,6 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 [Trait("Category", "Metadata")]
 public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const int StringType = 0;
-
     #region Typed search paging
 
     [Theory]
@@ -51,24 +49,36 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [InlineData(-1)]
     public async Task SearchFolder_WithACountOutOfRange_ReturnsBadRequest(int count)
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Paging " + Suffix());
 
         // the body used to carry no range: a negative count dropped the limit and returned the whole subtree
-        using var response = await api.SearchFolderResponseAsync(room.Id, new { count }, TestContext.Current.CancellationToken);
+        if (count == 0)
+        {
+            // raw: FolderMetadataSearch.Count is an int with EmitDefaultValue = false, so the SDK leaves a zero count out of the body
+            using var response = await new RawApiClient(_filesClient).PostAsync($"api/2.0/files/{room.Id}/search", new { count }, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+            return;
+        }
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(room.Id, new FolderMetadataSearch(count: count), TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task SearchFolder_WithANegativeStartIndex_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Offset " + Suffix());
 
-        using var response = await api.SearchFolderResponseAsync(room.Id, new { startIndex = -1 }, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(room.Id, new FolderMetadataSearch(startIndex: -1), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Theory]
@@ -76,30 +86,32 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [InlineData(-1)]
     public async Task SearchRooms_WithACountOutOfRange_ReturnsBadRequest(int count)
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
 
-        using var response = await api.SearchRoomsResponseAsync(new { count }, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.SearchRoomsWithMetadataAsync(new RoomsMetadataSearchRequestDto(count: count), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task SearchFolder_WithTooManyConditions_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Conditions " + suffix, [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Conditions " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var fieldId = template.Field("Client").Id;
         var room = await CreateCustomRoom($"Conditions {suffix}");
 
         var conditions = Enumerable.Range(0, MetadataFilterHelper.MaxConditions + 1)
-            .Select(i => (object)new { fieldId, op = "eq", value = $"v{i}" })
-            .ToArray();
+            .Select(i => new MetadataFilterConditionRequest(fieldId: fieldId, op: "eq", value: $"v{i}"))
+            .ToList();
 
         // every condition is a nested query in the index and an EXISTS in SQL: the list is capped
-        using var response = await api.SearchFolderResponseAsync(room.Id, new { metadataTemplateId = template.Id, metadataFilters = conditions }, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(room.Id, new FolderMetadataSearch(template.Id, conditions), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     #endregion
@@ -109,11 +121,12 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [Fact]
     public async Task SetValues_WithANullList_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Null values " + Suffix());
 
         // "values" is declared required, which only makes the key mandatory: an explicit null used to be a server error
-        using var response = await api.SetFolderValuesResponseAsync(room.Id, new { values = (object?)null }, TestContext.Current.CancellationToken);
+        // raw: SetMetadataValues throws ArgumentNullException client-side for a null list, so the SDK cannot send it
+        using var response = await new RawApiClient(_filesClient).PutRawAsync($"api/2.0/files/metadata/folder/{room.Id}/values", """{"values":null}""", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -121,10 +134,11 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [Fact]
     public async Task SetCustomFields_WithANullList_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Null fields " + Suffix());
 
-        using var response = await api.SetFolderCustomFieldsResponseAsync(room.Id, new { fields = (object?)null }, TestContext.Current.CancellationToken);
+        // raw: SetCustomFields throws ArgumentNullException client-side for a null list, so the SDK cannot send it
+        using var response = await new RawApiClient(_filesClient).PutRawAsync($"api/2.0/files/metadata/folder/{room.Id}/customFields", """{"fields":null}""", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -136,95 +150,103 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [Fact]
     public async Task CreateTemplate_WithAFieldTypeOutsideTheEnum_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
 
         // the serializer accepts any integer for the enum; such a field used to be stored and to accept any value
-        using var response = await api.CreateTemplateResponseAsync("Type " + Suffix(), [new MetadataFieldPayload { Name = "Odd", Type = 99 }], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync("Type " + Suffix(), [new MetadataFieldRequest("Odd", (MetadataFieldType)99)]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task CreateTemplate_WithATooLongName_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var name = new string('n', MetadataService.MaxNameLength + 1);
 
-        using var response = await api.CreateTemplateResponseAsync(name, [], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync(name, []));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name column is varchar(255), the database used to answer with a server error");
+        exception.ErrorCode.Should().Be(400, "the name column is varchar(255), the database used to answer with a server error");
     }
 
     [Fact]
     public async Task CreateTemplate_WithATooLongFieldName_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var fieldName = new string('f', MetadataService.MaxNameLength + 1);
 
-        using var response = await api.CreateTemplateResponseAsync("Field name " + Suffix(), [new MetadataFieldPayload { Name = fieldName, Type = StringType }], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync("Field name " + Suffix(), [new MetadataFieldRequest(fieldName, MetadataFieldType.String)]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task CreateTemplate_WithTwoFieldsOfTheSameName_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
 
-        using var response = await api.CreateTemplateResponseAsync("Twice " + Suffix(),
-            [new MetadataFieldPayload { Name = "Client", Type = StringType }, new MetadataFieldPayload { Name = "client", Type = StringType }],
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync("Twice " + Suffix(),
+                [new MetadataFieldRequest("Client", MetadataFieldType.String), new MetadataFieldRequest("client", MetadataFieldType.String)]));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the fields of a template are told apart by name, whatever the case");
+        exception.ErrorCode.Should().Be(400, "the fields of a template are told apart by name, whatever the case");
     }
 
     [Fact]
     public async Task CreateField_WithTheNameOfAnExistingField_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
-        var template = await api.CreateTemplateAsync("Existing " + Suffix(), [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        await _filesClient.Authenticate(Owner);
+        var template = await CreateTemplateAsync("Existing " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
 
-        using var response = await api.CreateFieldResponseAsync(template.Id, new MetadataFieldPayload { Name = "CLIENT", Type = StringType }, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.CreateFieldAsync(template.Id, new MetadataFieldRequest("CLIENT", MetadataFieldType.String), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task CreateField_AddsTheFieldToTheTemplate()
     {
-        var api = await ArrangeAsync();
-        var template = await api.CreateTemplateAsync("Grow " + Suffix(), [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        await _filesClient.Authenticate(Owner);
+        var template = await CreateTemplateAsync("Grow " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
 
-        var field = await api.CreateFieldAsync(template.Id, new MetadataFieldPayload { Name = "Department", Type = StringType }, TestContext.Current.CancellationToken);
+        var field = (await _metadataApi.CreateFieldAsync(template.Id, new MetadataFieldRequest("Department", MetadataFieldType.String), TestContext.Current.CancellationToken)).Response;
 
         field.Name.Should().Be("Department");
 
-        var reloaded = await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        var reloaded = (await _metadataApi.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken)).Response;
         reloaded.Fields.Select(f => f.Name).Should().BeEquivalentTo(["Client", "Department"]);
     }
 
     [Fact]
     public async Task DeleteTemplate_RemovesItFromTheEntriesAndTheList()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Gone " + suffix, [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Gone " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var room = await CreateCustomRoom($"Gone {suffix}");
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Client").Id, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(room.Id,
+            new SetMetadataValues([new MetadataValueRequest(template.Field("Client").Id, stringValue: "ACME")]), TestContext.Current.CancellationToken);
 
-        await api.DeleteTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        await _metadataApi.DeleteTemplateAsync(template.Id, TestContext.Current.CancellationToken);
 
-        (await api.GetTemplatesAsync(TestContext.Current.CancellationToken)).Should().NotContain(t => t.Id == template.Id);
-        (await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken)).Should().NotContain(t => t.Id == template.Id, "the links and the values go with the template");
+        (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Should().NotContain(t => t.Id == template.Id);
+        (await _metadataApi.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken)).Response.Templates
+            .Should().NotContain(t => t.Id == template.Id, "the links and the values go with the template");
 
-        using var reread = await api.GetTemplateResponseAsync(template.Id, TestContext.Current.CancellationToken);
-        reread.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var reread = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken));
+        reread.ErrorCode.Should().Be(404);
 
         // the filter by the deleted template is refused, the same way an unknown one is
-        using var search = await api.SearchFolderResponseAsync(room.Id, new { metadataTemplateId = template.Id }, TestContext.Current.CancellationToken);
-        search.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var search = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(room.Id, new FolderMetadataSearch(metadataTemplateId: template.Id), TestContext.Current.CancellationToken));
+        search.ErrorCode.Should().Be(400);
     }
 
     #endregion
@@ -234,24 +256,24 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [Fact]
     public async Task GetEntryInfo_CarriesTheAssignedTemplates_LikeTheListing()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Info " + suffix, [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Info " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var room = await CreateCustomRoom($"Info {suffix}");
         var folder = await CreateFolder($"Sub {suffix}", room.Id);
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
         // a client re-reads a single row by the info endpoints after a socket event: without the templates the row
         // would lose in the listing what the page had shown
-        (await api.GetFileInfoAsync(file.Id, TestContext.Current.CancellationToken)).AssignedMetadataTemplates.Should().BeNullOrEmpty();
+        (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.AssignedMetadataTemplates.Should().BeNullOrEmpty();
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
 
-        (await api.GetFileInfoAsync(file.Id, TestContext.Current.CancellationToken)).AssignedMetadataTemplates.Should().Equal(template.Id);
-        (await api.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken)).AssignedMetadataTemplates.Should().Equal(template.Id);
+        (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.AssignedMetadataTemplates.Should().Equal(template.Id);
+        (await _foldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken)).Response.AssignedMetadataTemplates.Should().Equal(template.Id);
 
-        var listed = await api.GetFolderContentAsync(room.Id, withSubFolders: false, cancellationToken: TestContext.Current.CancellationToken);
+        var listed = await _foldersApi.GetFolderContentWithMetadataAsync(room.Id, withSubFolders: false, cancellationToken: TestContext.Current.CancellationToken);
         listed.Files.Single(f => f.Id == file.Id).AssignedMetadataTemplates.Should().Equal([template.Id], "the info endpoint and the listing agree");
         listed.Folders.Single(f => f.Id == folder.Id).AssignedMetadataTemplates.Should().Equal(template.Id);
     }
@@ -263,53 +285,56 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
     [Fact]
     public async Task SetValues_WithATooLongString_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Long " + suffix, [new MetadataFieldPayload { Name = "Notes", Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Long " + suffix, [new MetadataFieldRequest("Notes", MetadataFieldType.String)]);
         var room = await CreateCustomRoom($"Long {suffix}");
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
 
         var value = new string('v', MetadataService.MaxStringValueLength + 1);
 
         // the value column is unbounded, but the index stores the value as a keyword term with a 32 KB cap: a longer
         // value used to be stored and to silently drop the entry's document from the index
-        using var response = await api.SetFolderValuesResponseAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Notes").Id, StringValue = value }], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.SetFolderValuesAsync(room.Id,
+                new SetMetadataValues([new MetadataValueRequest(template.Field("Notes").Id, stringValue: value)]), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task SetCustomFields_WithATooLongValue_ReturnsBadRequest()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Long custom " + Suffix());
 
         var value = new string('v', MetadataService.MaxStringValueLength + 1);
 
-        using var response = await api.SetFolderCustomFieldsResponseAsync(room.Id, [new CustomFieldPayload("Notes", value)], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.SetFolderCustomFieldsAsync(room.Id, new SetCustomFields([new CustomFieldRequest("Notes", value)]), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task SetValues_WithTheLongestAllowedString_IsStoredAndFound()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Longest " + suffix, [new MetadataFieldPayload { Name = "Notes", Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Longest " + suffix, [new MetadataFieldRequest("Notes", MetadataFieldType.String)]);
         var fieldId = template.Field("Notes").Id;
         var room = await CreateCustomRoom($"Longest {suffix}");
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
 
         var value = new string('v', MetadataService.MaxStringValueLength);
 
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = value }], TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(file.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: value)]), TestContext.Current.CancellationToken);
 
-        var stored = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
-        stored.Single(t => t.Id == template.Id).Field("Notes").Value!.StringValue.Should().Be(value);
+        var stored = (await _metadataApi.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken)).Response.Templates;
+        stored.Single(t => t.Id == template.Id).Field("Notes").Value.StringValue.Should().Be(value);
 
         // the limit is set so the index accepts the value: the file must be found by it, not only stored
         var deadline = DateTime.UtcNow.AddSeconds(15);
@@ -317,7 +342,8 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
 
         while (true)
         {
-            content = await api.SearchFolderAsync(room.Id, new { metadataTemplateId = template.Id, metadataFilters = new object[] { new { fieldId, op = "eq", value } } }, TestContext.Current.CancellationToken);
+            content = await _foldersApi.SearchFolderWithMetadataAsync(room.Id,
+                new FolderMetadataSearch(template.Id, [new MetadataFilterConditionRequest(fieldId: fieldId, op: "eq", value: value)]), TestContext.Current.CancellationToken);
 
             if (content.FileIds().Contains(file.Id) || DateTime.UtcNow > deadline)
             {
@@ -332,11 +358,9 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
 
     #endregion
 
-    private async Task<MetadataApiClient> ArrangeAsync()
+    private async Task<MetadataTemplateDto> CreateTemplateAsync(string name, List<MetadataFieldRequest> fields, bool visible = true)
     {
-        await _filesClient.Authenticate(Owner);
-
-        return new MetadataApiClient(_filesClient);
+        return (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto(name, visible, fields), TestContext.Current.CancellationToken)).Response;
     }
 
     private static string Suffix()

@@ -1171,11 +1171,11 @@ internal class FolderDao(
         }
     }
 
-    public async Task<TTo> MoveFolderAsync<TTo>(int folderId, TTo toFolderId, CancellationToken? cancellationToken)
+    public async Task<TTo> MoveFolderAsync<TTo>(int folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFolderAsync(folderId, tId, cancellationToken));
+            return IdConverter.Convert<TTo>(await MoveFolderCoreAsync(folderId, tId, newTitle));
         }
 
         if (toFolderId is string tsId)
@@ -1186,9 +1186,19 @@ internal class FolderDao(
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFolderAsync(int folderId, int toFolderId, CancellationToken? cancellationToken)
+    public Task<int> MoveFolderAsync(int folderId, int toFolderId, CancellationToken? cancellationToken)
+    {
+        return MoveFolderCoreAsync(folderId, toFolderId, null);
+    }
+
+    /// <summary>
+    /// Moves the folder; a non-null <paramref name="newTitle"/> is stored in the same update, so the folder
+    /// arrives under it instead of being renamed afterwards.
+    /// </summary>
+    private async Task<int> MoveFolderCoreAsync(int folderId, int toFolderId, string newTitle)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var title = newTitle == null ? null : Global.ReplaceInvalidCharsAndTruncate(newTitle);
         var currentAccount = _authContext.CurrentAccount.ID;
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -1200,7 +1210,7 @@ internal class FolderDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
             var folder = await GetFolderAsync(folderId);
-            await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, toFolderId, folder.Title);
+            await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, toFolderId, title ?? folder.Title);
             var oldParentId = folder.ParentId;
             movedFolderHasContent = folder.FoldersCount > 0 || folder.FilesCount > 0;
 
@@ -1232,9 +1242,9 @@ internal class FolderDao(
             }
 
             var trashId = await trashIdTask;
-            var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folderId, toFolderId, folder.Title, folder.FolderType);
+            var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folderId, toFolderId, title ?? folder.Title, folder.FolderType);
 
-            await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount);
+            await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount, title);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
@@ -1344,11 +1354,12 @@ internal class FolderDao(
             await metadataIndexHelper.IndexEntriesAsync(FileEntryType.Folder, [folderId]);
         }
 
-        // the worker refreshes the search document of the folder: the ancestor chain stored in it is stale after the move
+        // the worker refreshes the search document of the folder: the ancestor chain stored in it is stale after
+        // the move, and so is the title when the folder arrived under a new one
         await eventBus.PublishAsync(new FolderIndexIntegrationEvent(currentAccount, tenantId)
         {
             FolderId = folderId,
-            Action = FolderIndexAction.UpdateFolders
+            Action = title == null ? FolderIndexAction.UpdateFolders : FolderIndexAction.Index
         });
 
         // the moved folder itself is stamped inline in the transaction above; its content is

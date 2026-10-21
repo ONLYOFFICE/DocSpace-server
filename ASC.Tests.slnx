@@ -23,6 +23,7 @@
   <Project Path="common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
   <Project Path="common/services/ASC.ApiSystem/ASC.ApiSystem.csproj" />
   <Project Path="common/services/ASC.AuditTrail/ASC.AuditTrail.csproj" />
+  <Project Path="common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj" />
   <Project Path="common/services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
   <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
