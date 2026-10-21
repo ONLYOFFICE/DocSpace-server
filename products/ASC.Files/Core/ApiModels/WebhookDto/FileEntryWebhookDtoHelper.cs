@@ -119,92 +119,36 @@ public class FileEntryWebhookDtoHelper(
 
     public async Task<FileWebhookDto<T>> GetFileAsync<T>(File<T> file)
     {
-        var extension = FileUtility.GetFileExtension(file.Title);
+        var result = file.MapToFileWebhookDto();
 
-        var result = new FileWebhookDto<T>
-        {
-            ParentId = file.ParentId,
-            Version = file.Version,
-            VersionGroup = file.VersionGroup,
-            ContentLength = file.ContentLength,
-            FileExst = extension,
-            FileType = FileUtility.GetFileTypeByExtention(extension),
-            Comment = file.Comment,
-            Encrypted = file.Encrypted.NullIfDefault(),
-            Locked = file.Locked.NullIfDefault(),
-            LockedBy = file.LockedBy,
-            IsForm = file.IsPdf.NullIfDefault(),
-            CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault(),
-            CustomFilterEnabledBy = file.CustomFilterEnabledBy,
-            LastOpened = file.LastOpened,
-            VectorizationStatus = file.VectorizationStatus,
-            ViewUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)),
-            WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version))
-        };
+        result.ViewUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id));
+        result.WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version));
 
-        await FillCommonAsync(result, file);
+        await FillAuthorsAsync(result, file);
 
         return result;
     }
 
     public async Task<FolderWebhookDto<T>> GetFolderAsync<T>(Folder<T> folder)
     {
-        var result = new FolderWebhookDto<T>
-        {
-            ParentId = folder.ParentId,
-            FilesCount = folder.FilesCount,
-            FoldersCount = folder.FoldersCount,
-            Type = folder.FolderType,
-            IsShareable = folder.Shareable.NullIfDefault()
-        };
+        var result = folder.MapToFolderWebhookDto();
 
-        await FillCommonAsync(result, folder);
+        await FillAuthorsAsync(result, folder);
 
         return result;
     }
 
     public async Task<RoomWebhookDto<T>> GetRoomAsync<T>(Folder<T> room)
     {
-        var result = new RoomWebhookDto<T>
-        {
-            ParentId = room.ParentId,
-            FilesCount = room.FilesCount,
-            FoldersCount = room.FoldersCount,
-            Type = room.FolderType,
-            RoomType = DocSpaceHelper.MapToRoomType(room.FolderType),
-            Private = room.SettingsPrivate,
-            Indexing = room.SettingsIndexing,
-            DenyDownload = room.SettingsDenyDownload,
-            Pinned = room.Pinned,
-            Color = room.SettingsColor,
-            Cover = room.SettingsCover,
-            UsedSpace = room.Counter,
-            QuotaLimit = room.SettingsQuota > -2 ? room.SettingsQuota : null
-        };
+        var result = room.MapToRoomWebhookDto();
 
-        await FillCommonAsync(result, room);
+        await FillAuthorsAsync(result, room);
 
         return result;
     }
 
-    private async Task FillCommonAsync<T>(FileEntryWebhookDto<T> result, FileEntry<T> entry)
+    private async Task FillAuthorsAsync<T>(FileEntryWebhookDto<T> result, FileEntry<T> entry)
     {
-        result.Id = entry.Id;
-        result.RootFolderId = entry.RootId;
-        result.Title = entry.Title;
-        result.Created = entry.CreateOn;
-        result.Updated = entry.ModifiedOn < entry.CreateOn ? entry.CreateOn : entry.ModifiedOn;
-        result.RootFolderType = entry.RootFolderType;
-        result.ParentRoomType = entry.ParentRoomType;
-        result.OriginId = entry.OriginId;
-        result.OriginRoomId = entry.OriginRoomId;
-        result.OriginTitle = entry.OriginTitle;
-        result.OriginRoomTitle = entry.OriginRoomTitle;
-        result.ProviderItem = entry.ProviderEntry.NullIfDefault();
-        result.ProviderKey = entry.ProviderKey;
-        result.ProviderId = entry.ProviderId.NullIfDefault();
-        result.Order = entry.Order;
-
         result.CreatedBy = await userWebhookDtoHelper.GetSummaryAsync(entry.CreateBy);
         result.UpdatedBy = entry.ModifiedBy == entry.CreateBy
             ? result.CreatedBy

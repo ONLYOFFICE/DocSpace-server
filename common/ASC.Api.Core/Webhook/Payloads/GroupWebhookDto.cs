@@ -131,9 +131,10 @@ public class GroupSummaryWebhookDto
 /// The flat part of a group.* webhook payload. The system flag, the member count and the manager need services
 /// and are filled in by <see cref="GroupWebhookDtoHelper"/>.
 /// </summary>
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class GroupWebhookDtoMapper
 {
+    [MapProperty(nameof(ASC.Core.Users.GroupInfo.ID), nameof(GroupWebhookDto.Id))]
     [MapProperty(nameof(ASC.Core.Users.GroupInfo.CategoryID), nameof(GroupWebhookDto.Category))]
     [MapProperty(nameof(ASC.Core.Users.GroupInfo.Parent), nameof(GroupWebhookDto.Parent), Use = nameof(GetParentId))]
     [MapProperty(nameof(ASC.Core.Users.GroupInfo.Sid), nameof(GroupWebhookDto.IsLDAP), Use = nameof(GetIsLDAP))]

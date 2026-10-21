@@ -170,3 +170,163 @@ public abstract class FileEntryWebhookDto<T>
         return (FileEntryWebhookDto<T>)MemberwiseClone();
     }
 }
+
+/// <summary>
+/// The flat part of a file.*, folder.*, room.*, agent.* or form.* webhook payload. The links and the author and
+/// last editor need services and are filled in by <see cref="FileEntryWebhookDtoHelper"/>.
+/// </summary>
+/// <remarks>
+/// Mapperly cannot generate an open generic mapping, and IncludeMappingConfiguration does not carry over from
+/// File&lt;int&gt; to File&lt;string&gt;, so each payload is declared for both entry ID types with the same
+/// configuration, and the public generic method dispatches to them. Keep the two lists of a pair identical.
+/// The converters are not defaults: Mapperly would otherwise run every string through GetFileExst and every
+/// long through GetQuotaLimit.
+/// </remarks>
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class FileEntryWebhookDtoMapper
+{
+    public static FileWebhookDto<T> MapToFileWebhookDto<T>(this File<T> source)
+    {
+        return source switch
+        {
+            File<int> file => (FileWebhookDto<T>)(object)MapFileInt(file),
+            File<string> file => (FileWebhookDto<T>)(object)MapFileString(file),
+            _ => null
+        };
+    }
+
+    public static FolderWebhookDto<T> MapToFolderWebhookDto<T>(this Folder<T> source)
+    {
+        return source switch
+        {
+            Folder<int> folder => (FolderWebhookDto<T>)(object)MapFolderInt(folder),
+            Folder<string> folder => (FolderWebhookDto<T>)(object)MapFolderString(folder),
+            _ => null
+        };
+    }
+
+    public static RoomWebhookDto<T> MapToRoomWebhookDto<T>(this Folder<T> source)
+    {
+        return source switch
+        {
+            Folder<int> room => (RoomWebhookDto<T>)(object)MapRoomInt(room),
+            Folder<string> room => (RoomWebhookDto<T>)(object)MapRoomString(room),
+            _ => null
+        };
+    }
+
+    [MapProperty(nameof(File<int>.RootId), nameof(FileWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(File<int>.CreateOn), nameof(FileWebhookDto<int>.Created))]
+    [MapProperty(nameof(File<int>.ProviderEntry), nameof(FileWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.ProviderId), nameof(FileWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(FileWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(File<int>.Title), nameof(FileWebhookDto<int>.FileExst), Use = nameof(GetFileExst))]
+    [MapProperty(nameof(File<int>.Title), nameof(FileWebhookDto<int>.FileType), Use = nameof(GetFileType))]
+    [MapProperty(nameof(File<int>.Encrypted), nameof(FileWebhookDto<int>.Encrypted), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.Locked), nameof(FileWebhookDto<int>.Locked), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.IsPdf), nameof(FileWebhookDto<int>.IsForm), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.CustomFilterEnabled), nameof(FileWebhookDto<int>.CustomFilterEnabled), Use = nameof(NullIfFalse))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.UpdatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ViewUrl))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.WebUrl))]
+    private static partial FileWebhookDto<int> MapFileInt(File<int> source);
+
+    [MapProperty(nameof(File<int>.RootId), nameof(FileWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(File<int>.CreateOn), nameof(FileWebhookDto<int>.Created))]
+    [MapProperty(nameof(File<int>.ProviderEntry), nameof(FileWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.ProviderId), nameof(FileWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(FileWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(File<int>.Title), nameof(FileWebhookDto<int>.FileExst), Use = nameof(GetFileExst))]
+    [MapProperty(nameof(File<int>.Title), nameof(FileWebhookDto<int>.FileType), Use = nameof(GetFileType))]
+    [MapProperty(nameof(File<int>.Encrypted), nameof(FileWebhookDto<int>.Encrypted), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.Locked), nameof(FileWebhookDto<int>.Locked), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.IsPdf), nameof(FileWebhookDto<int>.IsForm), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(File<int>.CustomFilterEnabled), nameof(FileWebhookDto<int>.CustomFilterEnabled), Use = nameof(NullIfFalse))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.UpdatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ViewUrl))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.WebUrl))]
+    private static partial FileWebhookDto<string> MapFileString(File<string> source);
+
+    [MapProperty(nameof(Folder<int>.RootId), nameof(FolderWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(Folder<int>.CreateOn), nameof(FolderWebhookDto<int>.Created))]
+    [MapProperty(nameof(Folder<int>.ProviderEntry), nameof(FolderWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(Folder<int>.ProviderId), nameof(FolderWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(FolderWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(FolderWebhookDto<int>.Type))]
+    [MapProperty(nameof(Folder<int>.Shareable), nameof(FolderWebhookDto<int>.IsShareable), Use = nameof(NullIfFalse))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.UpdatedBy))]
+    private static partial FolderWebhookDto<int> MapFolderInt(Folder<int> source);
+
+    [MapProperty(nameof(Folder<int>.RootId), nameof(FolderWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(Folder<int>.CreateOn), nameof(FolderWebhookDto<int>.Created))]
+    [MapProperty(nameof(Folder<int>.ProviderEntry), nameof(FolderWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(Folder<int>.ProviderId), nameof(FolderWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(FolderWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(FolderWebhookDto<int>.Type))]
+    [MapProperty(nameof(Folder<int>.Shareable), nameof(FolderWebhookDto<int>.IsShareable), Use = nameof(NullIfFalse))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.UpdatedBy))]
+    private static partial FolderWebhookDto<string> MapFolderString(Folder<string> source);
+
+    [MapProperty(nameof(Folder<int>.RootId), nameof(RoomWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(Folder<int>.CreateOn), nameof(RoomWebhookDto<int>.Created))]
+    [MapProperty(nameof(Folder<int>.ProviderEntry), nameof(RoomWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(Folder<int>.ProviderId), nameof(RoomWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(RoomWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(RoomWebhookDto<int>.Type))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(RoomWebhookDto<int>.RoomType), Use = nameof(GetRoomType))]
+    [MapProperty(nameof(Folder<int>.SettingsPrivate), nameof(RoomWebhookDto<int>.Private))]
+    [MapProperty(nameof(Folder<int>.SettingsIndexing), nameof(RoomWebhookDto<int>.Indexing))]
+    [MapProperty(nameof(Folder<int>.SettingsDenyDownload), nameof(RoomWebhookDto<int>.DenyDownload))]
+    [MapProperty(nameof(Folder<int>.SettingsColor), nameof(RoomWebhookDto<int>.Color))]
+    [MapProperty(nameof(Folder<int>.SettingsCover), nameof(RoomWebhookDto<int>.Cover))]
+    [MapProperty(nameof(Folder<int>.Counter), nameof(RoomWebhookDto<int>.UsedSpace))]
+    [MapProperty(nameof(Folder<int>.SettingsQuota), nameof(RoomWebhookDto<int>.QuotaLimit), Use = nameof(GetQuotaLimit))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.UpdatedBy))]
+    private static partial RoomWebhookDto<int> MapRoomInt(Folder<int> source);
+
+    [MapProperty(nameof(Folder<int>.RootId), nameof(RoomWebhookDto<int>.RootFolderId))]
+    [MapProperty(nameof(Folder<int>.CreateOn), nameof(RoomWebhookDto<int>.Created))]
+    [MapProperty(nameof(Folder<int>.ProviderEntry), nameof(RoomWebhookDto<int>.ProviderItem), Use = nameof(NullIfFalse))]
+    [MapProperty(nameof(Folder<int>.ProviderId), nameof(RoomWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
+    [MapPropertyFromSource(nameof(RoomWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(RoomWebhookDto<int>.Type))]
+    [MapProperty(nameof(Folder<int>.FolderType), nameof(RoomWebhookDto<int>.RoomType), Use = nameof(GetRoomType))]
+    [MapProperty(nameof(Folder<int>.SettingsPrivate), nameof(RoomWebhookDto<int>.Private))]
+    [MapProperty(nameof(Folder<int>.SettingsIndexing), nameof(RoomWebhookDto<int>.Indexing))]
+    [MapProperty(nameof(Folder<int>.SettingsDenyDownload), nameof(RoomWebhookDto<int>.DenyDownload))]
+    [MapProperty(nameof(Folder<int>.SettingsColor), nameof(RoomWebhookDto<int>.Color))]
+    [MapProperty(nameof(Folder<int>.SettingsCover), nameof(RoomWebhookDto<int>.Cover))]
+    [MapProperty(nameof(Folder<int>.Counter), nameof(RoomWebhookDto<int>.UsedSpace))]
+    [MapProperty(nameof(Folder<int>.SettingsQuota), nameof(RoomWebhookDto<int>.QuotaLimit), Use = nameof(GetQuotaLimit))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.UpdatedBy))]
+    private static partial RoomWebhookDto<string> MapRoomString(Folder<string> source);
+
+    private static DateTime GetUpdated(FileEntry source) => source.ModifiedOn < source.CreateOn ? source.CreateOn : source.ModifiedOn;
+
+    [UserMapping(Default = false)]
+    private static bool? NullIfFalse(bool value) => value.NullIfDefault();
+
+    [UserMapping(Default = false)]
+    private static int? NullIfZero(int value) => value.NullIfDefault();
+
+    [UserMapping(Default = false)]
+    private static string GetFileExst(string title) => FileUtility.GetFileExtension(title);
+
+    [UserMapping(Default = false)]
+    private static FileType GetFileType(string title) => FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(title));
+
+    [UserMapping(Default = false)]
+    private static RoomType? GetRoomType(FolderType folderType) => DocSpaceHelper.MapToRoomType(folderType);
+
+    /// <summary>
+    /// A room quota below -1 means the room has no quota of its own.
+    /// </summary>
+    [UserMapping(Default = false)]
+    private static long? GetQuotaLimit(long quota) => quota > -2 ? quota : null;
+}
