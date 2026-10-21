@@ -806,6 +806,41 @@ Nếu bạn đã quyết định chuyển sang hướng khác, điều đó hoà
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Gói đăng ký của bạn đã kết thúc, nhưng không gian và số dư của bạn vẫn còn đây
+
+Gói đăng ký ${LetterLogoText} của bạn cho *"${__VirtualRootPath}":"${__VirtualRootPath}"* đã kết thúc vào *$DueDate*. Cảm ơn bạn đã làm việc cùng chúng tôi. Ví của bạn vẫn còn số dư ("kiểm tra số dư":"$URL1"), và chúng tôi không muốn bạn mất số tiền đó mà không biết.
+
+Để mọi thứ vận hành trơn tru, chúng tôi chặn các không gian có gói đăng ký đã kết thúc. Đây là ý nghĩa của việc đó đối với không gian của bạn:
+
+*$BlockDate*: không gian của bạn sẽ bị chặn và bạn sẽ không thể đăng nhập.
+*$DeleteDate*: không gian và toàn bộ dữ liệu trong đó sẽ bị xóa vĩnh viễn, cùng với số dư trong Ví của bạn.
+
+Tin vui là: giữ lại cả hai rất dễ dàng. Chỉ cần gia hạn gói đăng ký trước ngày $BlockDateShort, tài liệu, cài đặt và số dư của bạn sẽ được giữ nguyên như cũ. Số dư trong Ví thậm chí có thể chi trả một phần chi phí.
+
+$OrangeButton
+
+Nếu bạn đã quyết định chuyển sang hướng khác, điều đó hoàn toàn bình thường. Chỉ cần nhớ sao lưu mọi dữ liệu bạn muốn giữ lại trước ngày $BlockDateShort.
+#else
+h1.Không gian của bạn vẫn còn số dư đang chờ bạn
+
+Đã lâu rồi không có ai đăng nhập vào không gian ${LetterLogoText} của bạn, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, nhưng "Ví":"$URL1" của không gian vẫn còn số dư. Chúng tôi không muốn bạn mất số tiền đó mà không biết.
+
+Để mọi thứ vận hành trơn tru, chúng tôi chặn các không gian không hoạt động. Đây là ý nghĩa của việc đó đối với không gian của bạn:
+
+*$BlockDate*: không gian của bạn sẽ bị chặn và bạn sẽ không thể đăng nhập.
+*$DeleteDate*: không gian và toàn bộ dữ liệu trong đó sẽ bị xóa vĩnh viễn, cùng với số dư trong Ví của bạn.
+
+Tin vui là: giữ lại cả hai rất dễ dàng. Chỉ cần đăng nhập một lần trước ngày $BlockDateShort, tài liệu, cài đặt và số dư của bạn sẽ được giữ nguyên như cũ.
+
+$OrangeButton
+
+Nếu bạn đã quyết định chuyển sang hướng khác, điều đó hoàn toàn bình thường. Chỉ cần nhớ tải xuống các tệp bạn muốn giữ lại trước ngày $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dừng hoạt động cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1678,6 +1713,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Không gian ${LetterLogoText} của bạn đang nhớ bạn (cần hành động trước ngày $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Bạn vẫn còn số dư trong không gian ${LetterLogoText} của mình (cần hành động trước $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Ngưng hoạt động Cổng ${__VirtualRootHost}</value>

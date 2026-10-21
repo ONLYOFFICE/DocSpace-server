@@ -793,6 +793,41 @@ Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDa
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Vaše předplatné skončilo, ale váš prostor i prostředky tu stále jsou
+
+Datum konce vašeho předplatného ${LetterLogoText} pro *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Děkujeme, že jste s námi pracovali. Ve vaší peněžence stále zbývají prostředky ("zkontrolovat zůstatek":"$URL1") a nechtěli jsme, abyste o ně přišli, aniž byste o tom věděli.
+
+Aby vše fungovalo hladce, blokujeme prostory, kterým skončilo předplatné. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna spolu s prostředky ve vaší peněžence.
+
+Dobrá zpráva: zachovat obojí je snadné. Stačí do $BlockDateShort obnovit předplatné a vaše dokumenty, nastavení i prostředky zůstanou přesně tam, kde jste je nechali. Zůstatek peněženky může dokonce pokrýt část ceny.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDateShort nezapomeňte zálohovat data, která si chcete ponechat.
+#else
+h1.Ve vašem prostoru na vás stále čekají prostředky
+
+Už nějakou dobu se nikdo nepřihlásil do vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ale v jeho "peněžence":"$URL1" stále zbývají prostředky. Nechtěli jsme, abyste o ně přišli, aniž byste o tom věděli.
+
+Aby vše fungovalo hladce, blokujeme neaktivní prostory. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna spolu s prostředky ve vaší peněžence.
+
+Dobrá zpráva: zachovat obojí je snadné. Stačí se do $BlockDateShort jednou přihlásit a vaše dokumenty, nastavení i prostředky zůstanou přesně tam, kde jste je nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDateShort nezapomeňte stáhnout soubory, které si chcete ponechat.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivace "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
 
@@ -1630,6 +1665,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Ve vašem prostoru ${LetterLogoText} jsou stále prostředky (termín: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivace ${__VirtualRootHost} portálu</value>

@@ -794,6 +794,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Твоја претплата је истекла, али твој простор и средства су још ту
+
+Датум истека твоје ${LetterLogoText} претплате за *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Хвала на сарадњи. У твом новчанику још има средстава ("провери стање":"$URL1") и нисмо желели да их изгубиш а да не знаш.
+
+Да би све несметано радило, блокирамо просторе којима је истекла претплата. Ево шта то значи за твој:
+
+*$BlockDate*: твој простор ће бити блокиран и нећеш моћи да се пријавиш.
+*$DeleteDate*: простор и сви његови подаци биће трајно обрисани заједно са средствима у твом новчанику.
+
+Добра вест: задржати и једно и друго је лако. Само обнови претплату (рок: $BlockDateShort) и твоји документи, подешавања и средства остаће тачно тамо где су били. Стање новчаника може чак да покрије део трошкова.
+
+$OrangeButton
+
+Ако су ти се планови променили, то је сасвим у реду. Само не заборави да направиш резервну копију података које желиш да задржиш (рок: $BlockDateShort).
+#else
+h1.У твом простору те још чекају средства
+
+Већ неко време нико се није пријавио у твој ${LetterLogoText} простор *"${__VirtualRootPath}":"${__VirtualRootPath}"*, али у његовом "новчанику":"$URL1" још има средстава. Нисмо желели да их изгубиш а да не знаш.
+
+Да би све несметано радило, блокирамо неактивне просторе. Ево шта то значи за твој:
+
+*$BlockDate*: твој простор ће бити блокиран и нећеш моћи да се пријавиш.
+*$DeleteDate*: простор и сви његови подаци биће трајно обрисани заједно са средствима у твом новчанику.
+
+Добра вест: задржати и једно и друго је лако. Само се пријави једном (рок: $BlockDateShort) и твоји документи, подешавања и средства остаће тачно тамо где су били.
+
+$OrangeButton
+
+Ако су ти се планови променили, то је сасвим у реду. Само не заборави да преузмеш датотеке које желиш да задржиш (рок: $BlockDateShort).
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Деактивација портала "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1638,6 +1673,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Твом ${LetterLogoText} простору недостајеш (рок за акцију: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>У твом ${LetterLogoText} простору још има средстава (рок: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивација портала ${__VirtualRootHost}</value>

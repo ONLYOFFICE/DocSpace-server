@@ -805,6 +805,41 @@ Se decidiu seguir em frente, não há problema nenhum. Lembre-se apenas de fazer
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.A sua subscrição terminou, mas o seu espaço e os seus fundos continuam aqui
+
+A sua subscrição do ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* terminou em *$DueDate*. Obrigado por trabalhar connosco. Ainda há fundos na sua Carteira ("consulte o seu saldo":"$URL1") e não queríamos que os perdesse sem saber.
+
+Para que tudo funcione bem, bloqueamos os espaços cuja subscrição terminou. Eis o que isso significa para o seu:
+
+*$BlockDate*: o seu espaço será bloqueado e não poderá iniciar sessão.
+*$DeleteDate*: o espaço e todos os seus dados serão eliminados permanentemente, juntamente com os fundos da sua Carteira.
+
+A boa notícia: manter ambos é fácil. Basta renovar a sua subscrição até $BlockDateShort, e os seus documentos, definições e fundos ficarão exatamente onde os deixou. O saldo da sua Carteira pode até cobrir parte do valor.
+
+$OrangeButton
+
+Se decidiu seguir em frente, não há problema nenhum. Lembre-se apenas de fazer uma cópia de segurança dos dados que pretende manter até $BlockDateShort.
+#else
+h1.O seu espaço ainda tem fundos à sua espera
+
+Já há algum tempo que ninguém inicia sessão no seu espaço ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, mas ainda há fundos na sua "Carteira":"$URL1". Não queríamos que os perdesse sem saber.
+
+Para que tudo funcione bem, bloqueamos os espaços inativos. Eis o que isso significa para o seu:
+
+*$BlockDate*: o seu espaço será bloqueado e não poderá iniciar sessão.
+*$DeleteDate*: o espaço e todos os seus dados serão eliminados permanentemente, juntamente com os fundos da sua Carteira.
+
+A boa notícia: manter ambos é fácil. Basta iniciar sessão uma vez até $BlockDateShort, e os seus documentos, definições e fundos ficarão exatamente onde os deixou.
+
+$OrangeButton
+
+Se decidiu seguir em frente, não há problema nenhum. Lembre-se apenas de transferir os ficheiros que pretende manter até $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Desativação do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1665,6 +1700,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>O seu espaço ${LetterLogoText} tem saudades suas (ação necessária até $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Ainda tem fundos no seu espaço ${LetterLogoText} (ação necessária até $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Desativação do portal ${__VirtualRootHost} portal</value>

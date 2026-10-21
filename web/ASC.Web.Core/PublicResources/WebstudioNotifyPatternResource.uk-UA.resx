@@ -806,6 +806,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Підписка закінчилася, але ваш простір і кошти все ще тут
+
+Ваша підписка ${LetterLogoText} для *"${__VirtualRootPath}":"${__VirtualRootPath}"* закінчилася *$DueDate*. Дякуємо, що працювали з нами. У вашому гаманці ще залишилися кошти ("перевірити баланс":"$URL1"), і ми не хотіли, щоб ви втратили їх, не знаючи про це.
+
+Щоб усе працювало стабільно, ми блокуємо простори після закінчення підписки. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено разом із коштами в гаманці.
+
+Гарна новина: зберегти і те, і інше легко. Просто продовжте підписку до $BlockDateShort, і ваші документи, налаштування та кошти залишаться на своїх місцях. Баланс гаманця може навіть покрити частину вартості.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Лише не забудьте до $BlockDateShort створити резервну копію даних, які хочете зберегти.
+#else
+h1.У вашому просторі ще залишилися кошти
+
+Уже деякий час ніхто не входив у ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, але в його "гаманці":"$URL1" ще залишилися кошти. Ми не хотіли, щоб ви втратили їх, не знаючи про це.
+
+Щоб усе працювало стабільно, ми блокуємо неактивні простори. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено разом із коштами в гаманці.
+
+Гарна новина: зберегти і те, і інше легко. Просто увійдіть хоча б раз до $BlockDateShort, і ваші документи, налаштування та кошти залишаться на своїх місцях.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Лише не забудьте до $BlockDateShort завантажити файли, які хочете зберегти.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Деактивація порталу "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1678,6 +1713,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Ваш простір ${LetterLogoText} сумує за вами (потрібно діяти до $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>У вашому просторі ${LetterLogoText} залишилися кошти (термін: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивація ${__VirtualRootHost} порталу</value>

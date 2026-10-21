@@ -793,6 +793,41 @@ Si vous avez décidé de passer à autre chose, c'est tout à fait compréhensib
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Votre abonnement a pris fin, mais votre espace et vos fonds sont toujours là
+
+Votre abonnement ${LetterLogoText} pour *"${__VirtualRootPath}":"${__VirtualRootPath}"* a pris fin le *$DueDate*. Merci d'avoir travaillé avec nous. Il reste des fonds dans votre portefeuille ("vérifier votre solde":"$URL1"), et nous ne voulions pas que vous les perdiez sans le savoir.
+
+Pour que tout fonctionne bien, nous bloquons les espaces dont l'abonnement a pris fin. Voici ce que cela signifie pour le vôtre :
+
+*$BlockDate*: votre espace sera bloqué et vous ne pourrez plus vous connecter.
+*$DeleteDate*: l'espace et toutes ses données seront définitivement supprimés, ainsi que les fonds de votre portefeuille.
+
+La bonne nouvelle : conserver les deux est simple. Renouvelez simplement votre abonnement avant le $BlockDateShort, et vos documents, vos paramètres et vos fonds resteront exactement là où vous les avez laissés. Le solde de votre portefeuille peut même en couvrir une partie.
+
+$OrangeButton
+
+Si vous avez décidé de passer à autre chose, c'est tout à fait compréhensible. Pensez simplement à sauvegarder les données que vous souhaitez conserver avant le $BlockDateShort.
+#else
+h1.Des fonds vous attendent encore dans votre espace
+
+Personne ne s'est connecté à votre espace ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, depuis un certain temps, mais il reste des fonds dans son "portefeuille":"$URL1". Nous ne voulions pas que vous les perdiez sans le savoir.
+
+Pour que tout fonctionne bien, nous bloquons les espaces inactifs. Voici ce que cela signifie pour le vôtre :
+
+*$BlockDate*: votre espace sera bloqué et vous ne pourrez plus vous connecter.
+*$DeleteDate*: l'espace et toutes ses données seront définitivement supprimés, ainsi que les fonds de votre portefeuille.
+
+La bonne nouvelle : conserver les deux est simple. Connectez-vous une seule fois avant le $BlockDateShort, et vos documents, vos paramètres et vos fonds resteront exactement là où vous les avez laissés.
+
+$OrangeButton
+
+Si vous avez décidé de passer à autre chose, c'est tout à fait compréhensible. Pensez simplement à télécharger les fichiers que vous souhaitez conserver avant le $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Désactivation du portail "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1639,6 +1674,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Votre espace ${LetterLogoText} s'ennuie de vous (action requise avant le $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Il vous reste des fonds dans votre espace ${LetterLogoText} (action requise avant le $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Désactivation du portail ${__VirtualRootHost}</value>

@@ -794,6 +794,41 @@ Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați 
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Abonamentul dvs. a expirat, dar spațiul și fondurile dvs. sunt încă aici
+
+Abonamentul dvs. ${LetterLogoText} pentru *"${__VirtualRootPath}":"${__VirtualRootPath}"* a expirat pe *$DueDate*. Vă mulțumim că ați lucrat cu noi. Mai aveți fonduri în Portofel ("verificați soldul":"$URL1") și nu am vrut să le pierdeți fără să știți.
+
+Pentru ca totul să funcționeze bine, blocăm spațiile al căror abonament a expirat. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv, împreună cu fondurile din Portofel.
+
+Vestea bună: păstrarea ambelor este simplă. Reînnoiți abonamentul până la $BlockDateShort, iar documentele, setările și fondurile dvs. vor rămâne exact unde le-ați lăsat. Soldul Portofelului poate acoperi chiar o parte din cost.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați doar să faceți o copie de rezervă a datelor pe care doriți să le păstrați până la $BlockDateShort.
+#else
+h1.Spațiul dvs. mai are fonduri care vă așteaptă
+
+A trecut ceva timp de când nimeni nu s-a mai conectat la spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, dar în "Portofelul":"$URL1" său mai există fonduri. Nu am vrut să le pierdeți fără să știți.
+
+Pentru ca totul să funcționeze bine, blocăm spațiile inactive. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv, împreună cu fondurile din Portofel.
+
+Vestea bună: păstrarea ambelor este simplă. Conectați-vă o singură dată până la $BlockDateShort, iar documentele, setările și fondurile dvs. vor rămâne exact unde le-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați doar să descărcați fișierele pe care doriți să le păstrați până la $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dezactivarea portalului "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1640,6 +1675,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Spațiul dvs. ${LetterLogoText} vă duce dorul (acțiune necesară până la $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Mai aveți fonduri în spațiul dvs. ${LetterLogoText} (acțiune necesară până $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Dezactivarea portalului ${__VirtualRootHost}</value>

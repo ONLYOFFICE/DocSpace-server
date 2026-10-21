@@ -793,6 +793,41 @@ Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnu
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Ihr Abonnement ist abgelaufen, aber Ihr Arbeitsbereich und Ihr Guthaben sind noch da
+
+Ihr ${LetterLogoText} Abonnement für *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist am *$DueDate* abgelaufen. Vielen Dank, dass Sie mit uns gearbeitet haben. In Ihrer Wallet ist noch Guthaben vorhanden ("Guthaben prüfen":"$URL1"), und wir wollten nicht, dass Sie es verlieren, ohne davon zu wissen.
+
+Damit alles reibungslos läuft, sperren wir Arbeitsbereiche, deren Abonnement abgelaufen ist. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden zusammen mit dem Guthaben in Ihrer Wallet endgültig gelöscht.
+
+Die gute Nachricht: Beides zu behalten ist ganz einfach. Verlängern Sie einfach Ihr Abonnement vor dem $BlockDateShort, und Ihre Dokumente, Einstellungen und Ihr Guthaben bleiben genau da, wo Sie sie hinterlassen haben. Ihr Wallet-Guthaben kann sogar einen Teil davon abdecken.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Daten zu sichern, die Sie behalten möchten.
+#else
+h1.In Ihrem Arbeitsbereich wartet noch Guthaben auf Sie
+
+Seit einiger Zeit hat sich niemand mehr bei Ihrem ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* angemeldet, aber in seiner "Wallet":"$URL1" ist noch Guthaben vorhanden. Wir wollten nicht, dass Sie es verlieren, ohne davon zu wissen.
+
+Damit alles reibungslos läuft, sperren wir inaktive Arbeitsbereiche. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden zusammen mit dem Guthaben in Ihrer Wallet endgültig gelöscht.
+
+Die gute Nachricht: Beides zu behalten ist ganz einfach. Melden Sie sich vor dem $BlockDateShort einmal an, und Ihre Dokumente, Einstellungen und Ihr Guthaben bleiben genau da, wo Sie sie hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Dateien herunterzuladen, die Sie behalten möchten.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivierung des Portals "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1639,6 +1674,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>In Ihrem ${LetterLogoText} Arbeitsbereich ist noch Guthaben vorhanden (Handlungsbedarf bis $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivierung des Portals ${__VirtualRootHost}</value>

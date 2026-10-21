@@ -796,6 +796,41 @@ Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thje
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Abonimi juaj ka përfunduar, por hapësira dhe fondet tuaja janë ende këtu
+
+Abonimi juaj ${LetterLogoText} për *"${__VirtualRootPath}":"${__VirtualRootPath}"* përfundoi më *$DueDate*. Faleminderit që punuat me ne. Në portofolin tuaj ka ende fonde ("kontrolloni balancën":"$URL1") dhe nuk donim t'i humbisnit pa e ditur.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat, abonimi i të cilave ka përfunduar. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë, së bashku me fondet në portofolin tuaj.
+
+Lajmi i mirë: t'i mbani të dyja është e lehtë. Thjesht rinovoni abonimin para datës $BlockDateShort dhe dokumentet, cilësimet dhe fondet tuaja do të mbeten pikërisht aty ku i latë. Balanca e portofolit mund të mbulojë edhe një pjesë të kostos.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të bëni kopje rezervë të të dhënave që dëshironi të mbani para datës $BlockDateShort.
+#else
+h1.Në hapësirën tuaj ju presin ende fonde
+
+Ka kaluar pak kohë që kur dikush është identifikuar për herë të fundit në hapësirën tuaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, por në "portofolin":"$URL1" e saj ka ende fonde. Nuk donim t'i humbisnit pa e ditur.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat joaktive. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë, së bashku me fondet në portofolin tuaj.
+
+Lajmi i mirë: t'i mbani të dyja është e lehtë. Thjesht identifikohuni një herë para datës $BlockDateShort dhe dokumentet, cilësimet dhe fondet tuaja do të mbeten pikërisht aty ku i latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të shkarkoni skedarët që dëshironi të mbani para datës $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Çaktivizimi i portalit "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
@@ -1635,6 +1670,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Hapësira juaj ${LetterLogoText} ju ka marrë mallin (veprim i nevojshëm para datës $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Keni ende fonde në hapësirën tuaj ${LetterLogoText} (afati: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Çaktivizimi i portalit ${__VirtualRootHost} portal</value>

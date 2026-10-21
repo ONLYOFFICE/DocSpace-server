@@ -805,6 +805,41 @@ Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain varmuus
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Tilauksesi on päättynyt, mutta tilasi ja varasi ovat yhä täällä
+
+Tilan *"${__VirtualRootPath}":"${__VirtualRootPath}"* ${LetterLogoText}-tilaus päättyi (*$DueDate*). Kiitos, että työskentelit kanssamme. Lompakossasi on yhä varoja ("tarkista saldo":"$URL1"), emmekä halunneet, että menetät ne tietämättäsi.
+
+Jotta kaikki toimisi sujuvasti, estämme tilat, joiden tilaus on päättynyt. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi yhdessä lompakkosi varojen kanssa.
+
+Hyvä uutinen: molempien säilyttäminen on helppoa. Uusi tilauksesi ennen $BlockDateShort, niin asiakirjasi, asetuksesi ja varasi pysyvät juuri siellä, mihin ne jätit. Lompakkosi saldo voi jopa kattaa osan siitä.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain varmuuskopioida tiedot, jotka haluat säilyttää, ennen $BlockDateShort.
+#else
+h1.Tilassasi odottaa yhä varoja
+
+Kukaan ei ole kirjautunut ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* vähään aikaan, mutta sen "lompakossa":"$URL1" on yhä varoja. Emme halunneet, että menetät ne tietämättäsi.
+
+Jotta kaikki toimisi sujuvasti, estämme passiiviset tilat. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi yhdessä lompakkosi varojen kanssa.
+
+Hyvä uutinen: molempien säilyttäminen on helppoa. Kirjaudu sisään kerran ennen $BlockDateShort, niin asiakirjasi, asetuksesi ja varasi pysyvät juuri siellä, mihin ne jätit.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain ladata tiedostot, jotka haluat säilyttää, ennen $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portaalin deaktivointi
 
@@ -1675,6 +1710,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText}-tilasi kaipaa sinua (toimi ennen $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText}-tilassasi on yhä varoja (määräaika: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portaalin deaktivointi</value>

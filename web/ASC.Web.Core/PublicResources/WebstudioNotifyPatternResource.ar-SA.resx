@@ -798,6 +798,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.انتهى اشتراكك، لكن مساحتك وأموالك لا تزال هنا
+
+انتهى اشتراكك في ${LetterLogoText} للمساحة *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"* بتاريخ *$DueDate*. شكرًا لعملك معنا. لا تزال هناك أموال في محفظتك ("تحقق من رصيدك":"$URL1")، ولم نرد أن تفقدها دون علمك.
+
+لكي يعمل كل شيء بسلاسة، نقوم بحظر المساحات التي انتهى اشتراكها. إليك ما يعنيه ذلك لمساحتك:
+
+*$BlockDate*: سيتم حظر مساحتك، ولن تتمكن من تسجيل الدخول.
+*$DeleteDate*: سيتم حذف المساحة وجميع بياناتها نهائيًا، مع الأموال الموجودة في محفظتك.
+
+الخبر السار: الاحتفاظ بكليهما سهل. ما عليك سوى تجديد اشتراكك قبل $BlockDateShort، وستبقى مستنداتك وإعداداتك وأموالك تمامًا حيث تركتها. بل قد يغطي رصيد محفظتك جزءًا من التكلفة.
+
+$OrangeButton
+
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. فقط تذكّر نسخ أي بيانات تريد الاحتفاظ بها احتياطيًا قبل $BlockDateShort.
+#else
+h1.لا تزال هناك أموال تنتظرك في مساحتك
+
+مرّ بعض الوقت منذ أن سجّل أي شخص الدخول إلى مساحتك على ${LetterLogoText}، *"{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"*, لكن لا تزال هناك أموال في "محفظتها":"$URL1". لم نرد أن تفقدها دون علمك.
+
+لكي يعمل كل شيء بسلاسة، نقوم بحظر المساحات غير النشطة. إليك ما يعنيه ذلك لمساحتك:
+
+*$BlockDate*: سيتم حظر مساحتك، ولن تتمكن من تسجيل الدخول.
+*$DeleteDate*: سيتم حذف المساحة وجميع بياناتها نهائيًا، مع الأموال الموجودة في محفظتك.
+
+الخبر السار: الاحتفاظ بكليهما سهل. ما عليك سوى تسجيل الدخول مرة واحدة قبل $BlockDateShort، وستبقى مستنداتك وإعداداتك وأموالك تمامًا حيث تركتها.
+
+$OrangeButton
+
+إذا قررت المضي قدمًا، فلا بأس في ذلك على الإطلاق. فقط تذكّر تنزيل أي ملفات تريد الاحتفاظ بها قبل $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.إلغاء تنشيط بوابة "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1643,6 +1678,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>مساحتك على ${LetterLogoText} تفتقدك (يلزم اتخاذ إجراء قبل $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>لا تزال لديك أموال في مساحتك على ${LetterLogoText} (يلزم اتخاذ إجراء قبل $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>إلغاء تنشيط بوابة ${__VirtualRootHost}</value>

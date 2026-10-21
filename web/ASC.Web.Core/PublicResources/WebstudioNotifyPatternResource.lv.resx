@@ -806,6 +806,41 @@ Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Jūsu abonements ir beidzies, bet jūsu telpa un līdzekļi joprojām ir šeit
+
+Jūsu ${LetterLogoText} abonements telpai *"${__VirtualRootPath}":"${__VirtualRootPath}"* beidzās (*$DueDate*). Paldies, ka strādājāt ar mums. Jūsu makā joprojām ir līdzekļi ("pārbaudīt atlikumu":"$URL1"), un mēs nevēlējāmies, lai jūs tos zaudētu, par to nezinot.
+
+Lai viss darbotos raiti, mēs bloķējam telpas, kuru abonements ir beidzies. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti kopā ar līdzekļiem jūsu makā.
+
+Labā ziņa: saglabāt abus ir vienkārši. Vienkārši atjaunojiet abonementu (termiņš: $BlockDateShort), un jūsu dokumenti, iestatījumi un līdzekļi paliks tieši tur, kur tos atstājāt. Maka atlikums var pat segt daļu no maksas.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet izveidot dublējumu datiem, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+#else
+h1.Jūsu telpā jūs joprojām gaida līdzekļi
+
+Jau kādu laiku neviens nav pierakstījies jūsu ${LetterLogoText} telpā *"${__VirtualRootPath}":"${__VirtualRootPath}"*, taču tās "makā":"$URL1" joprojām ir līdzekļi. Mēs nevēlējāmies, lai jūs tos zaudētu, par to nezinot.
+
+Lai viss darbotos raiti, mēs bloķējam neaktīvās telpas. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti kopā ar līdzekļiem jūsu makā.
+
+Labā ziņa: saglabāt abus ir vienkārši. Pierakstieties vienreiz (termiņš: $BlockDateShort), un jūsu dokumenti, iestatījumi un līdzekļi paliks tieši tur, kur tos atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet lejupielādēt failus, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Portāla "${__VirtualRootPath}":"${__VirtualRootPath}" deaktivizācija
 
@@ -1677,6 +1712,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpā joprojām ir līdzekļi (rīcības termiņš: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Portāla ${__VirtualRootHost} deaktivizācija</value>

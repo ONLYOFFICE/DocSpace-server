@@ -793,6 +793,41 @@ Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia d
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Su suscripción ha finalizado, pero su espacio y sus fondos siguen aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Todavía quedan fondos en su Monedero ("consulte su saldo":"$URL1"), y no queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó. El saldo de su Monedero incluso puede cubrir parte del importe.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+#else
+h1.Su espacio todavía tiene fondos esperándole
+
+Hace tiempo que nadie inicia sesión en su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, pero todavía quedan fondos en su "Monedero":"$URL1". No queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios inactivos. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que iniciar sesión una vez antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde descargar los archivos que quiera conservar antes del $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivación del Portal "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
@@ -1639,6 +1674,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Todavía tiene fondos en su espacio de ${LetterLogoText} (acción necesaria antes del $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Desactivación del portal ${__VirtualRootHost}</value>

@@ -793,6 +793,41 @@ Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Pamiętaj tylko, ab
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Twoja subskrypcja wygasła, ale Twoja przestrzeń i środki wciąż tu są
+
+Data wygaśnięcia Twojej subskrypcji ${LetterLogoText} dla *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Dziękujemy za współpracę z nami. W Twoim portfelu wciąż są środki ("sprawdź saldo":"$URL1"), a nie chcieliśmy, żeby przepadły bez Twojej wiedzy.
+
+Aby wszystko działało sprawnie, blokujemy przestrzenie po wygaśnięciu subskrypcji. Oto co to oznacza dla Twojej:
+
+*$BlockDate*: Twoja przestrzeń zostanie zablokowana i nie będzie można się zalogować.
+*$DeleteDate*: przestrzeń i wszystkie jej dane zostaną trwale usunięte razem ze środkami w Twoim portfelu.
+
+Dobra wiadomość: zachowanie jednego i drugiego jest proste. Wystarczy odnowić subskrypcję do $BlockDateShort, a Twoje dokumenty, ustawienia i środki pozostaną dokładnie tam, gdzie były. Saldo portfela może nawet pokryć część kosztów.
+
+$OrangeButton
+
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Pamiętaj tylko, aby do $BlockDateShort utworzyć kopię zapasową danych, które chcesz zachować.
+#else
+h1.W Twojej przestrzeni wciąż czekają na Ciebie środki
+
+Od jakiegoś czasu nikt nie logował się do Twojej przestrzeni ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ale w jej "portfelu":"$URL1" wciąż są środki. Nie chcieliśmy, żeby przepadły bez Twojej wiedzy.
+
+Aby wszystko działało sprawnie, blokujemy nieaktywne przestrzenie. Oto co to oznacza dla Twojej:
+
+*$BlockDate*: Twoja przestrzeń zostanie zablokowana i nie będzie można się zalogować.
+*$DeleteDate*: przestrzeń i wszystkie jej dane zostaną trwale usunięte razem ze środkami w Twoim portfelu.
+
+Dobra wiadomość: zachowanie jednego i drugiego jest proste. Wystarczy zalogować się raz do $BlockDateShort, a Twoje dokumenty, ustawienia i środki pozostaną dokładnie tam, gdzie były.
+
+$OrangeButton
+
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Pamiętaj tylko, aby do $BlockDateShort pobrać pliki, które chcesz zachować.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Doaktywacja portalu "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1630,6 +1665,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Twoja przestrzeń ${LetterLogoText} tęskni za Tobą (wymagane działanie do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>W Twojej przestrzeni ${LetterLogoText} wciąż są środki (termin: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Dezaktywacja portalu ${__VirtualRootHost}</value>

@@ -799,6 +799,41 @@ Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca sakl
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Aboneliğiniz sona erdi ama alanınız ve bakiyeniz hâlâ burada
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* için ${LetterLogoText} aboneliğiniz *$DueDate* tarihinde sona erdi. Bizimle çalıştığınız için teşekkür ederiz. Cüzdanınızda hâlâ bakiye var ("bakiyenizi kontrol edin":"$URL1") ve bundan habersiz kaybetmenizi istemedik.
+
+Her şeyin sorunsuz çalışması için aboneliği sona eren alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri, cüzdanınızdaki bakiyeyle birlikte kalıcı olarak silinecek.
+
+İyi haber: ikisini de korumak çok kolay. $BlockDateShort tarihinden önce aboneliğinizi yenilemeniz yeterli; belgeleriniz, ayarlarınız ve bakiyeniz bıraktığınız yerde kalacak. Cüzdan bakiyeniz bunun bir kısmını bile karşılayabilir.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz verileri $BlockDateShort tarihinden önce yedeklemeyi unutmayın.
+#else
+h1.Alanınızda sizi bekleyen bakiye var
+
+Bir süredir kimse *"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınızda oturum açmadı, ancak alanın "cüzdanında":"$URL1" hâlâ bakiye var. Bundan habersiz kaybetmenizi istemedik.
+
+Her şeyin sorunsuz çalışması için etkin olmayan alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri, cüzdanınızdaki bakiyeyle birlikte kalıcı olarak silinecek.
+
+İyi haber: ikisini de korumak çok kolay. $BlockDateShort tarihinden önce bir kez oturum açmanız yeterli; belgeleriniz, ayarlarınız ve bakiyeniz bıraktığınız yerde kalacak.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz dosyaları $BlockDateShort tarihinden önce indirmeyi unutmayın.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı devre dışı bırakma
 
@@ -1671,6 +1706,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} alanınızda hâlâ bakiye var ($BlockDate tarihine kadar işlem yapmanız gerekiyor)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portal deaktivasyonu</value>

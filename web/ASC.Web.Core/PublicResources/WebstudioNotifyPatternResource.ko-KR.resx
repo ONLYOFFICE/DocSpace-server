@@ -806,6 +806,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.구독은 종료되었지만 공간과 잔액은 그대로 남아 있습니다
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 ${LetterLogoText} 구독이 *$DueDate* 에 종료되었습니다. 그동안 함께해 주셔서 감사합니다. 지갑에 아직 잔액이 남아 있습니다( "잔액 확인":"$URL1" ). 모르는 사이에 잔액을 잃지 않도록 미리 알려 드립니다.
+
+원활한 운영을 위해 구독이 종료된 공간은 차단하고 있습니다. 회원님의 공간에는 다음과 같이 적용됩니다:
+
+*$BlockDate*: 공간이 차단되며 로그인할 수 없게 됩니다.
+*$DeleteDate*: 공간과 모든 데이터가 지갑의 잔액과 함께 영구적으로 삭제됩니다.
+
+좋은 소식은 둘 다 쉽게 유지할 수 있다는 것입니다. ${BlockDateShort} 전에 구독을 갱신하시면 문서, 설정, 잔액이 모두 그대로 유지됩니다. 지갑 잔액으로 비용의 일부를 충당할 수도 있습니다.
+
+$OrangeButton
+
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 데이터는 ${BlockDateShort} 전에 꼭 백업하세요.
+#else
+h1.공간에 아직 잔액이 남아 있습니다
+
+한동안 ${LetterLogoText} 공간 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 에 로그인한 사람이 없지만, 공간의 "지갑":"$URL1" 에는 아직 잔액이 남아 있습니다. 모르는 사이에 잔액을 잃지 않도록 미리 알려 드립니다.
+
+원활한 운영을 위해 사용하지 않는 공간은 차단하고 있습니다. 회원님의 공간에는 다음과 같이 적용됩니다:
+
+*$BlockDate*: 공간이 차단되며 로그인할 수 없게 됩니다.
+*$DeleteDate*: 공간과 모든 데이터가 지갑의 잔액과 함께 영구적으로 삭제됩니다.
+
+좋은 소식은 둘 다 쉽게 유지할 수 있다는 것입니다. ${BlockDateShort} 전에 한 번만 로그인하시면 문서, 설정, 잔액이 모두 그대로 유지됩니다.
+
+$OrangeButton
+
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 파일은 ${BlockDateShort} 전에 꼭 다운로드하세요.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>"${__VirtualRootPath}":"${__VirtualRootPath}" 포털 비활성화
 
@@ -1674,6 +1709,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} 공간이 회원님을 기다리고 있습니다(${BlockDateShort}까지 조치 필요)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} 공간에 아직 잔액이 남아 있습니다($BlockDate까지 조치 필요)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} 포털 비활성화</value>

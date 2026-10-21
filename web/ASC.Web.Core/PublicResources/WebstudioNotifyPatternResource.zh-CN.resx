@@ -815,6 +815,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.您的订阅已结束，但您的空间和资金仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。您的钱包中仍有资金（ "查看余额":"$URL1" ），我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前续订，您的文档、设置和资金都将保持原样。您的钱包余额甚至可以抵扣部分费用。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+#else
+h1.您的空间中仍有资金等待着您
+
+已经有一段时间没有人登录您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 了，但其 "钱包":"$URL1" 中仍有资金。我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定不活跃的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前登录一次，您的文档、设置和资金都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前下载您想保留的文件。
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户停用
 
@@ -1662,6 +1697,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间中仍有资金（请在 $BlockDate 前采取行动）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>禁用${__VirtualRootHost}门户</value>

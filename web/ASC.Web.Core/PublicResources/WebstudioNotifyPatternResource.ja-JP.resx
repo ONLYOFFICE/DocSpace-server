@@ -806,6 +806,41 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.サブスクリプションは終了しましたが、スペースと残高はまだ残っています
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* の ${LetterLogoText} サブスクリプションは *$DueDate* に終了しました。これまでご利用いただき、ありがとうございました。ウォレットにはまだ残高があります（ "残高を確認":"$URL1" ）。知らないうちに失われることがないよう、お知らせします。
+
+快適にご利用いただくため、サブスクリプションが終了したスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが、ウォレットの残高とともに完全に削除されます。
+
+良いお知らせ：どちらも簡単に維持できます。${BlockDateShort}までにサブスクリプションを更新するだけで、ドキュメント、設定、残高はそのまま保たれます。ウォレットの残高で費用の一部をまかなえる場合もあります。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータは${BlockDateShort}までに必ずバックアップしてください。
+#else
+h1.スペースに残高が残っています
+
+しばらくの間、${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* にどなたもサインインしていませんが、その "ウォレット":"$URL1" にはまだ残高があります。知らないうちに失われることがないよう、お知らせします。
+
+快適にご利用いただくため、使用されていないスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが、ウォレットの残高とともに完全に削除されます。
+
+良いお知らせ：どちらも簡単に維持できます。${BlockDateShort}までに一度サインインするだけで、ドキュメント、設定、残高はそのまま保たれます。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルは${BlockDateShort}までに必ずダウンロードしてください。
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの無効化
 
@@ -1621,6 +1656,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースに残高が残っています（$BlockDateまでに対応が必要です）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost}ポータルの停止</value>

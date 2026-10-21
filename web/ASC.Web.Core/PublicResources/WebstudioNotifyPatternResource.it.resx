@@ -793,6 +793,41 @@ Se hai deciso di passare ad altro, va benissimo. Ricordati solo di eseguire il b
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Il tuo abbonamento è scaduto, ma il tuo spazio e i tuoi fondi sono ancora qui
+
+Il tuo abbonamento ${LetterLogoText} per *"${__VirtualRootPath}":"${__VirtualRootPath}"* è scaduto *$DueDate*. Grazie per aver lavorato con noi. Nel tuo Portafoglio ci sono ancora dei fondi ("controlla il saldo":"$URL1") e non volevamo che li perdessi senza saperlo.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi il cui abbonamento è scaduto. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente, insieme ai fondi del tuo Portafoglio.
+
+La buona notizia: mantenere entrambi è facile. Basta rinnovare l'abbonamento entro il $BlockDateShort e i tuoi documenti, le impostazioni e i fondi resteranno esattamente dove li hai lasciati. Il saldo del Portafoglio potrebbe persino coprirne una parte.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di eseguire il backup dei dati che vuoi conservare entro il $BlockDateShort.
+#else
+h1.Nel tuo spazio ci sono ancora fondi che ti aspettano
+
+È da un po' di tempo che nessuno accede al tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ma nel suo "Portafoglio":"$URL1" ci sono ancora dei fondi. Non volevamo che li perdessi senza saperlo.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi inattivi. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente, insieme ai fondi del tuo Portafoglio.
+
+La buona notizia: mantenere entrambi è facile. Basta accedere una volta entro il $BlockDateShort e i tuoi documenti, le impostazioni e i fondi resteranno esattamente dove li hai lasciati.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di scaricare i file che vuoi conservare entro il $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Disattivazione del portale "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1639,6 +1674,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Il tuo spazio ${LetterLogoText} sente la tua mancanza (azione richiesta entro il $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Hai ancora fondi nel tuo spazio ${LetterLogoText} (azione richiesta entro $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Disattivazione del portale ${__VirtualRootHost}</value>

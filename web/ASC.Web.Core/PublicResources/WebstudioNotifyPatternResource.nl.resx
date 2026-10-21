@@ -794,6 +794,41 @@ Hebt u besloten verder te gaan? Dat is helemaal prima. Vergeet alleen niet om v�
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Uw abonnement is beëindigd, maar uw ruimte en tegoed zijn er nog
+
+Uw ${LetterLogoText}-abonnement voor *"${__VirtualRootPath}":"${__VirtualRootPath}"* is op *$DueDate* beëindigd. Bedankt dat u met ons hebt gewerkt. Er staat nog tegoed in uw Wallet ("bekijk uw saldo":"$URL1"), en we wilden niet dat u het kwijtraakt zonder het te weten.
+
+Om alles soepel te laten verlopen, blokkeren we ruimtes waarvan het abonnement is beëindigd. Dit is wat dat voor uw ruimte betekent:
+
+*$BlockDate*: uw ruimte wordt geblokkeerd en u kunt niet meer inloggen.
+*$DeleteDate*: de ruimte en al haar gegevens worden definitief verwijderd, samen met het tegoed in uw Wallet.
+
+Het goede nieuws: beide behouden is eenvoudig. Verleng uw abonnement vóór $BlockDateShort, en uw documenten, instellingen en tegoed blijven precies waar u ze hebt achtergelaten. Uw Wallet-saldo kan zelfs een deel ervan dekken.
+
+$OrangeButton
+
+Hebt u besloten verder te gaan? Dat is helemaal prima. Vergeet alleen niet om vóór $BlockDateShort een back-up te maken van alle gegevens die u wilt bewaren.
+#else
+h1.Er wacht nog tegoed op u in uw ruimte
+
+Er heeft al een tijdje niemand ingelogd op uw ${LetterLogoText}-ruimte *"${__VirtualRootPath}":"${__VirtualRootPath}"*, maar in de "Wallet":"$URL1" staat nog tegoed. We wilden niet dat u het kwijtraakt zonder het te weten.
+
+Om alles soepel te laten verlopen, blokkeren we inactieve ruimtes. Dit is wat dat voor uw ruimte betekent:
+
+*$BlockDate*: uw ruimte wordt geblokkeerd en u kunt niet meer inloggen.
+*$DeleteDate*: de ruimte en al haar gegevens worden definitief verwijderd, samen met het tegoed in uw Wallet.
+
+Het goede nieuws: beide behouden is eenvoudig. Log vóór $BlockDateShort één keer in, en uw documenten, instellingen en tegoed blijven precies waar u ze hebt achtergelaten.
+
+$OrangeButton
+
+Hebt u besloten verder te gaan? Dat is helemaal prima. Vergeet alleen niet om vóór $BlockDateShort alle bestanden te downloaden die u wilt bewaren.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivatie van het "${__VirtualRootPath}":"${__VirtualRootPath}" portaal
 
@@ -1631,6 +1666,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Uw ${LetterLogoText}-ruimte mist u (actie vereist vóór $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>U hebt nog tegoed in uw ${LetterLogoText}-ruimte (actie vereist vóór $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deactiveren van het ${__VirtualRootHost} portaal</value>
