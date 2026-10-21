@@ -286,8 +286,8 @@ public class TariffServiceServiceLimitTests
         var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
         var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
-        first.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
-        second.Select(limit => limit.Participant).Should().Equal(UserA, UserB, UserC);
+        first.Keys.Should().BeEquivalentTo([Guid.Parse(UserA), Guid.Parse(UserB), Guid.Parse(UserC)]);
+        second.Keys.Should().BeEquivalentTo(first.Keys);
         handler.CallCount.Should().Be(2);
 
         requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants"));
