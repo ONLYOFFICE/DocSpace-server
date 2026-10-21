@@ -43,12 +43,28 @@ internal static partial class FormFillingReportCreatorLogger
     public static partial void ErrorGapSyncUpsertFailed(
         this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, string tableName);
 
+    [LoggerMessage(LogLevel.Warning, "Gap sync: batch upsert into table {TableName} failed, writing the rows one by one")]
+    public static partial void WarnGapSyncBatchFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
+
     [LoggerMessage(LogLevel.Warning, "Forms DB: table {TableName} is not restored, {Count} submissions exceed the search index query limit")]
     public static partial void WarnTableRestoreTooLarge(
         this ILogger<FormFillingReportCreator> logger, string tableName, long count);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to record the use of table {TableName}")]
     public static partial void WarnBuiltinDbTouchFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to add the missing submissions to table {TableName}")]
+    public static partial void WarnTableGapFillFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Forms DB: failed to rebuild the spreadsheet report of form {FormId} after an answer about its renamed fields")]
+    public static partial void WarnFormReportRebuildFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId);
+
+    [LoggerMessage(LogLevel.Warning, "Forms DB: the database is unavailable, the search index decides without table {TableName}")]
+    public static partial void WarnFormsDbUnavailable(
         this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
 
     [LoggerMessage(LogLevel.Warning, "Forms DB: failed to compare the fields of form {FormId} version {Version} with the previous version")]

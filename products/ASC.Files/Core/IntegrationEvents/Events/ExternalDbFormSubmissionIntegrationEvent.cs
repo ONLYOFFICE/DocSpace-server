@@ -46,7 +46,8 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
         int roomId,
         int fileId,
         int resultFormNumber,
-        string formsDataUrl)
+        string formsDataUrl,
+        string baseUri)
         : base(createBy, tenantId)
     {
         OriginalFormId = originalFormId;
@@ -55,6 +56,7 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
         FileId = fileId;
         ResultFormNumber = resultFormNumber;
         FormsDataUrl = formsDataUrl;
+        BaseUri = baseUri;
     }
 
     [ProtoMember(1)]
@@ -74,4 +76,7 @@ public record ExternalDbFormSubmissionIntegrationEvent : IntegrationEvent
 
     [ProtoMember(6)]
     public string FormsDataUrl { get; set; }
+
+    [ProtoMember(7)]
+    public string BaseUri { get; set; }
 }

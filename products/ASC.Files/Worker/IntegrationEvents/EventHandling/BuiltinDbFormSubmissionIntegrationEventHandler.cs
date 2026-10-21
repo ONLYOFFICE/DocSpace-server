@@ -37,6 +37,7 @@ namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 public class BuiltinDbFormSubmissionIntegrationEventHandler(
     ILogger<BuiltinDbFormSubmissionIntegrationEventHandler> logger,
     TenantManager tenantManager,
+    CommonLinkUtility commonLinkUtility,
     FormFillingReportCreator formFillingReportCreator)
     : IIntegrationEventHandler<BuiltinDbFormSubmissionIntegrationEvent>
 {
@@ -50,6 +51,11 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
 
             try
             {
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
                 await formFillingReportCreator.ExportToBuiltinDbAsync(

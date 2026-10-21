@@ -1209,7 +1209,8 @@ public abstract class FilesController<T>(
     /// reported them, keep their meaning. True keeps the submissions of the version together with the earlier ones, on
     /// one sheet of the spreadsheet report and in one table of the forms database the room writes to: the columns of
     /// that table are renamed, and submissions the version already has are copied there in the background, so the
-    /// analysis may show them apart for a short while. The built-in database then drops the table of the version, while
+    /// analysis may show them apart for a short while; the spreadsheet report shows them together at once and is rebuilt,
+    /// also while the database is unreachable. The built-in database then drops the table of the version, while
     /// an external database keeps it as it was. When the copy is not possible at the moment, as while the search index
     /// is unavailable, it is retried with the next submission of the version or the next start or save of the form; the
     /// answer is kept and not asked again. False leaves the version a table and a sheet of its own. The answer is

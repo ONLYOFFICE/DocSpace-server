@@ -50,8 +50,14 @@ public class FormFillingReportCreator(
     CoreBaseSettings coreBaseSettings,
     IDistributedLockProvider distributedLockProvider,
     FormFieldsExtractor formFieldsExtractor,
-    CommonLinkUtility commonLinkUtility)
+    CommonLinkUtility commonLinkUtility,
+    IFusionCacheProvider cacheProvider)
 {
+    private static readonly TimeSpan _tableGapsCheckInterval = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _tableGapsAttemptDuration = TimeSpan.FromDays(1);
+
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     private static readonly TimeSpan _fieldsReadTimeout = TimeSpan.FromSeconds(10);
 
     private static readonly HashSet<string> _checkboxOffStates =
@@ -94,7 +100,7 @@ public class FormFillingReportCreator(
 
         await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
             authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
-            roomId, fileId, resultFormNumber, formsDataUrl));
+            roomId, fileId, resultFormNumber, formsDataUrl, commonLinkUtility.ServerRootPath));
     }
 
     // Unlike the external database, the built-in one ignores the room's send-to-database setting. Without a database the
@@ -103,7 +109,7 @@ public class FormFillingReportCreator(
     {
         await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
             authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
-            roomId, fileId, resultFormNumber, formsDataUrl));
+            roomId, fileId, resultFormNumber, formsDataUrl, commonLinkUtility.ServerRootPath));
 
         // The first submission makes the form's responses analysable.
         if (resultFormNumber == 1 && GetBuiltinDb() != null)
@@ -220,6 +226,7 @@ public class FormFillingReportCreator(
             await TouchBuiltinDbTableAsync(tableName);
             if (await builtinFormsDatabaseClient.TableExistsAsync(tableName))
             {
+                await FillBuiltinDbTableGapsAsync(originalFormId, originalFormVersion, tableVersion, tableName, roomId, formFilling);
                 return tableName;
             }
 
@@ -237,6 +244,46 @@ public class FormFillingReportCreator(
 
         return null;
     }
+
+    // Submissions whose export failed are added from the index, at most once in a few minutes per table. Best effort.
+    private async Task FillBuiltinDbTableGapsAsync(int originalFormId, int originalFormVersion, int tableVersion, string tableName, int roomId, FormFillingProperties<int> formFilling)
+    {
+        try
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            await _cache.GetOrSetAsync<bool>(GetTableGapsCacheKey(tenantId, tableName), async (_, _) =>
+            {
+                var (missing, counts) = await CountMissingRowsAsync(builtinFormsDatabaseClient, tableName, originalFormId, GetTableVersions(formFilling, tableVersion), roomId);
+                var attemptKey = GetTableGapsAttemptCacheKey(tenantId, tableName);
+                if (missing != true || (await _cache.TryGetAsync<string>(attemptKey)).GetValueOrDefault() == counts)
+                {
+                    return true;
+                }
+
+                // Rows the index holds but that cannot be built stay missing; they are not tried again until the counts change.
+                await _cache.SetAsync(attemptKey, counts, _tableGapsAttemptDuration);
+
+                await using (await AcquireTableLockAsync(tableName))
+                {
+                    formFilling = await GetFormFillingAsync(originalFormId);
+                    if (GetTableVersion(formFilling, originalFormVersion) == tableVersion)
+                    {
+                        await FillTableGapsLockedAsync(builtinFormsDatabaseClient, tableName, originalFormId, originalFormVersion, tableVersion, roomId, formFilling);
+                    }
+                }
+
+                return true;
+            }, _tableGapsCheckInterval);
+        }
+        catch (Exception e)
+        {
+            logger.WarnTableGapFillFailed(e, tableName);
+        }
+    }
+
+    public static string GetTableGapsCacheKey(int tenantId, string tableName) => tenantId + "formsdbgaps" + tableName;
+
+    public static string GetTableGapsAttemptCacheKey(int tenantId, string tableName) => tenantId + "formsdbgapsattempt" + tableName;
 
     // Under the table lock. A built-in table is marked as used before the existence check, so the idle-table cleanup
     // cannot drop it in between.
@@ -432,12 +479,13 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// Records the answer about the renamed fields of a form version. A confirmed version is moved into the shared table
-    /// with its first submission, or in the background when it has submissions already. Only an open question takes an
-    /// answer.
+    /// with its first submission, or in the background when it has submissions already; the spreadsheet report shows the
+    /// answer at once. Only an open question takes an answer.
     /// </summary>
     public async Task AnswerFieldRenamesAsync(int originalFormId, int version, bool confirm)
     {
-        await UpdateVersionStateAsync(originalFormId, null, async (_, state) =>
+        var hasData = false;
+        var formFilling = await UpdateVersionStateAsync(originalFormId, null, async (_, state) =>
         {
             var link = state.PendingVersionLinks?.Find(p => p.Version == version && IsOpenQuestion(p));
             if (link == null)
@@ -452,13 +500,32 @@ public class FormFillingReportCreator(
             }
 
             link.Confirmed = true;
-            if (await HasDataAsync(await GetFormsDbAsync(state.RoomId), originalFormId, version, state.RoomId))
+            hasData = await HasDataAsync(await GetFormsDbAsync(state.RoomId), originalFormId, version, state.RoomId);
+            if (hasData)
             {
                 await PublishVersionCheckAsync(originalFormId);
             }
 
             return true;
         });
+
+        if (!hasData)
+        {
+            return;
+        }
+
+        // Best effort: the answer is saved, and the next submission rebuilds the report anyway.
+        try
+        {
+            if (await daoFactory.GetFolderDao<int>().GetFolderAsync(formFilling.RoomId) is { SettingsSaveFormAsXLSX: true })
+            {
+                await exportToXLSX.UpdateXlsxReport(formFilling.RoomId, originalFormId, version, isNewFile: false);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormReportRebuildFailed(e, originalFormId);
+        }
     }
 
     // Every change of the state is made from properties read under the version lock; the clients learn of changed questions.
@@ -475,6 +542,7 @@ public class FormFillingReportCreator(
             }
 
             var questions = GetOpenQuestionVersions(state);
+            var decided = GetDecidedVersions(state);
             if (!await change(form, state))
             {
                 return state;
@@ -485,6 +553,12 @@ public class FormFillingReportCreator(
             if (!questions.SequenceEqual(GetOpenQuestionVersions(state)))
             {
                 await socketManager.UpdateFileAsync(form);
+            }
+
+            // The report showed a decided version with the shared ones; the database refused it, so it gets its sheet back.
+            if (decided.Exists(v => state.VersionLinks?.Exists(l => l.Version == v) != true && !GetDecidedVersions(state).Contains(v)))
+            {
+                await RequestReportRebuildAsync(state.RoomId, form);
             }
 
             return state;
@@ -508,6 +582,28 @@ public class FormFillingReportCreator(
     }
 
     private static bool IsOpenQuestion(FormVersionLink link) => link.Renames?.Count > 0 && link.Confirmed == null;
+
+    private static List<int> GetDecidedVersions(FormFillingProperties<int> formFilling)
+    {
+        return (formFilling?.PendingVersionLinks ?? []).Where(p => !IsOpenQuestion(p)).Select(p => p.Version).ToList();
+    }
+
+    // Best effort, on behalf of the form owner: the next submission rebuilds the report anyway.
+    private async Task RequestReportRebuildAsync(int roomId, File<int> form)
+    {
+        try
+        {
+            if (await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId) is { SettingsSaveFormAsXLSX: true })
+            {
+                await eventBus.PublishAsync(new FormFillingReportIntegrationEvent(
+                    form.CreateBy, tenantManager.GetCurrentTenantId(), roomId, form.Id, form.Version, commonLinkUtility.ServerRootPath));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormReportRebuildFailed(e, form.Id);
+        }
+    }
 
     private static List<int> GetOpenQuestionVersions(FormFillingProperties<int> formFilling)
     {
@@ -664,7 +760,7 @@ public class FormFillingReportCreator(
         {
             // A version linked or with a table of its own keeps its decision and its open question.
             if (state.VersionLinks?.Any(l => l.Version == form.Version) == true
-                || db != null && await db.TableExistsAsync(GetTableName(form.Id, form.Version)))
+                || await TableExistsOrUnknownAsync(db, GetTableName(form.Id, form.Version)))
             {
                 MarkChecked(state, form);
                 return true;
@@ -726,7 +822,7 @@ public class FormFillingReportCreator(
     // Data of the version: its own table, or submissions in the index. An unreadable index counts as data.
     private async Task<bool> HasDataAsync(ExternalDatabaseClient db, int originalFormId, int version, int roomId)
     {
-        if (db != null && await db.TableExistsAsync(GetTableName(originalFormId, version)))
+        if (await TableExistsOrUnknownAsync(db, GetTableName(originalFormId, version)))
         {
             return true;
         }
@@ -734,6 +830,25 @@ public class FormFillingReportCreator(
         var (success, count) = await CountSubmissionsAsync(originalFormId, version, roomId);
 
         return !success || count > 0;
+    }
+
+    // An unreachable database leaves the decision to the search index, as when there is none.
+    private async Task<bool> TableExistsOrUnknownAsync(ExternalDatabaseClient db, string tableName)
+    {
+        if (db == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            return await db.TableExistsAsync(tableName);
+        }
+        catch (Exception e) when (e is DbException or TimeoutException)
+        {
+            logger.WarnFormsDbUnavailable(e, tableName);
+            return false;
+        }
     }
 
     private Task<(bool Success, long Count)> CountSubmissionsAsync(int originalFormId, int version, int roomId)
@@ -1093,74 +1208,11 @@ public class FormFillingReportCreator(
         var formFilling = await GetFormFillingAsync(originalFormId);
         var tableVersion = GetTableVersion(formFilling, originalFormVersion);
         var tableName = GetTableName(originalFormId, tableVersion);
-        var versions = GetTableVersions(formFilling, tableVersion);
-        var exported = false;
-        var hadFailure = false;
 
+        bool success, exported;
         await using (await AcquireTableLockAsync(tableName))
         {
-            var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
-
-            await factoryIndexerForm.RefreshAsync();
-            var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
-                r.Where(s => s.RoomId, roomId)
-                 .Where(s => s.OriginalFormId, originalFormId)
-                 .In(s => s.OriginalFormVersion, versions));
-
-            if (!osCountSuccess)
-            {
-                return false;
-            }
-
-            if (osCount <= dbCount)
-            {
-                return true;
-            }
-
-            var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
-
-            var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
-                r.Where(s => s.RoomId, roomId)
-                 .Where(s => s.OriginalFormId, originalFormId)
-                 .In(s => s.OriginalFormVersion, versions)
-                 .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
-
-            if (!success)
-            {
-                return false;
-            }
-
-            var missing = allSubmissions.Where(item => !existingIds.Contains(item.Id)).ToList();
-            if (missing.Count == 0)
-            {
-                return true;
-            }
-
-            var (columns, rows, incomplete) = await BuildTableRowsAsync(
-                originalFormId, formFilling, missing.Select(item => item.OriginalFormVersion).Distinct(), missing, tableName);
-            hadFailure = incomplete;
-
-            // An existing table gets the columns a version added; a conflicting one leaves the rows out.
-            if (rows.Count > 0
-                && await externalDatabaseClient.AlterTableAsync(tableName, [], columns.Values) == FormTableChange.Conflict)
-            {
-                logger.WarnTableColumnConflict(tableName, originalFormVersion);
-                return false;
-            }
-
-            foreach (var (id, row) in rows)
-            {
-                try
-                {
-                    await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columns.Values, row, keyColumn: "form_id");
-                    exported = true;
-                }
-                catch (Exception ex)
-                {
-                    logger.ErrorGapSyncUpsertFailed(ex, id, tableName);
-                    hadFailure = true;
-                }
-            }
+            (success, exported) = await FillTableGapsLockedAsync(externalDatabaseClient, tableName, originalFormId, originalFormVersion, tableVersion, roomId, formFilling);
         }
 
         // The gap sync can be the first to create the table (e.g. from the sync button), so record it here too.
@@ -1169,7 +1221,101 @@ public class FormFillingReportCreator(
             await SetExternalDbTableNameAsync(originalFormId, tableName);
         }
 
-        return !hadFailure;
+        return success;
+    }
+
+    // Under the table lock. Returns whether every missing row was written and whether any was.
+    private async Task<(bool Success, bool Exported)> FillTableGapsLockedAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int originalFormVersion, int tableVersion, int roomId, FormFillingProperties<int> formFilling)
+    {
+        var versions = GetTableVersions(formFilling, tableVersion);
+
+        await factoryIndexerForm.RefreshAsync();
+        var hasMissing = await HasMissingRowsAsync(db, tableName, originalFormId, versions, roomId);
+        if (hasMissing != true)
+        {
+            return (hasMissing == false, false);
+        }
+
+        var existingIds = await db.GetExistingFormIdsAsync(tableName);
+
+        var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .In(s => s.OriginalFormVersion, versions)
+             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
+
+        if (!success)
+        {
+            return (false, false);
+        }
+
+        var missing = allSubmissions.Where(item => !existingIds.Contains(item.Id)).ToList();
+        if (missing.Count == 0)
+        {
+            return (true, false);
+        }
+
+        var (columns, rows, incomplete) = await BuildTableRowsAsync(
+            originalFormId, formFilling, missing.Select(item => item.OriginalFormVersion).Distinct(), missing, tableName);
+        var hadFailure = incomplete;
+        var exported = false;
+
+        // An existing table gets the columns a version added; a conflicting one leaves the rows out.
+        if (rows.Count > 0
+            && await db.AlterTableAsync(tableName, [], columns.Values) == FormTableChange.Conflict)
+        {
+            logger.WarnTableColumnConflict(tableName, originalFormVersion);
+            return (false, false);
+        }
+
+        if (rows.Count == 0)
+        {
+            return (!hadFailure, false);
+        }
+
+        try
+        {
+            await db.CreateTableAndUpsertAsync(tableName, columns.Values, rows.Select(r => r.Row).ToList(), keyColumn: "form_id");
+            return (!hadFailure, true);
+        }
+        catch (Exception e)
+        {
+            // A batch fails as a whole; row by row the rows that fit still go in and the others are named.
+            logger.WarnGapSyncBatchFailed(e, tableName);
+        }
+
+        foreach (var (id, row) in rows)
+        {
+            try
+            {
+                await db.CreateTableAndUpsertAsync(tableName, columns.Values, row, keyColumn: "form_id");
+                exported = true;
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorGapSyncUpsertFailed(ex, id, tableName);
+                hadFailure = true;
+            }
+        }
+
+        return (!hadFailure, exported);
+    }
+
+    private async Task<bool?> HasMissingRowsAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int[] versions, int roomId)
+    {
+        return (await CountMissingRowsAsync(db, tableName, originalFormId, versions, roomId)).Missing;
+    }
+
+    // Missing is null when the index cannot be counted; the counts tell one attempt from the next.
+    private async Task<(bool? Missing, string Counts)> CountMissingRowsAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int[] versions, int roomId)
+    {
+        var dbCount = await db.GetTableCountAsync(tableName);
+        var (success, osCount) = await factoryIndexerForm.TryCountAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .In(s => s.OriginalFormVersion, versions));
+
+        return (success ? osCount > dbCount : null, $"{dbCount}:{osCount}");
     }
 
     private async Task<List<FormMetadata>> GetExportMetadataAsync(int originalFormId, int originalFormVersion, IReadOnlyCollection<DbFormsItemDataSearch> submissions)
@@ -1277,7 +1423,7 @@ public class FormFillingReportCreator(
             logger.WarnFormReportTruncated(originalFormId, result.Count);
         }
 
-        var formFilling = await GetFormFillingAsync(originalFormId);
+        var formFilling = WithDecidedLinks(await GetFormFillingAsync(originalFormId));
 
         return SortByFormNumber(result)
             .GroupBy(s => GetTableVersion(formFilling, s.OriginalFormVersion))
@@ -1287,6 +1433,38 @@ public class FormFillingReportCreator(
                 (version, key) => MapToLatestKey(formFilling, version, key)))
             .OrderByDescending(sheet => sheet.Versions[^1])
             .ToList();
+    }
+
+    // The links as the user decided them: a decision waiting for the first submission of its version or for the database
+    // already groups the report, which reads the index alone.
+    private static FormFillingProperties<int> WithDecidedLinks(FormFillingProperties<int> formFilling)
+    {
+        var decided = formFilling?.PendingVersionLinks?.Where(p => !IsOpenQuestion(p)).OrderBy(p => p.Version).ToList();
+        if (decided is not { Count: > 0 })
+        {
+            return formFilling;
+        }
+
+        var links = new FormFillingProperties<int>
+        {
+            VersionLinks = (formFilling.VersionLinks ?? [])
+                .Select(l => new FormVersionLink { Version = l.Version, TableVersion = l.TableVersion, Renames = l.Renames })
+                .ToList()
+        };
+
+        foreach (var link in decided)
+        {
+            var tableVersion = GetTableVersion(links, link.TableVersion);
+            foreach (var continued in links.VersionLinks.Where(l => l.TableVersion == link.Version))
+            {
+                continued.TableVersion = tableVersion;
+            }
+
+            links.VersionLinks.RemoveAll(l => l.Version == link.Version);
+            links.VersionLinks.Add(new FormVersionLink { Version = link.Version, TableVersion = tableVersion, Renames = link.Renames });
+        }
+
+        return links;
     }
 
     // A field key of the version under its name in the latest version linked to the same table.

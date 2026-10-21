@@ -37,6 +37,7 @@ namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 public class ExternalDbFormSubmissionIntegrationEventHandler(
     ILogger<ExternalDbFormSubmissionIntegrationEventHandler> logger,
     TenantManager tenantManager,
+    CommonLinkUtility commonLinkUtility,
     FormFillingReportCreator formFillingReportCreator)
     : IIntegrationEventHandler<ExternalDbFormSubmissionIntegrationEvent>
 {
@@ -50,6 +51,11 @@ public class ExternalDbFormSubmissionIntegrationEventHandler(
 
             try
             {
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
                 // No new submission when sent by the sync button — only the gap sync below runs.
