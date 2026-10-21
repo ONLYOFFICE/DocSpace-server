@@ -105,7 +105,9 @@ internal class SharePointFileDao(
             return AsyncEnumerable.Empty<File<string>>();
         }
 
-        var files = GetFilesAsync(fileIds);
+        // SharePoint answers with null for a file it no longer has; such an id must drop out here,
+        // before the predicates below read its fields.
+        var files = GetFilesAsync(fileIds).Where(x => x != null);
 
         //Filter
         if (subjectID != Guid.Empty)
@@ -390,7 +392,7 @@ internal class SharePointFileDao(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {

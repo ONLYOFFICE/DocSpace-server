@@ -67,11 +67,13 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
+global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolderRequest;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 global using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
@@ -80,11 +82,14 @@ global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
+global using HashHelper = ASC.FederatedLogin.Helpers.HashHelper;
+global using InstanceCrypto = ASC.Security.Cryptography.InstanceCrypto;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
 global using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
 global using MetadataField = ASC.Files.Core.MetadataField;
 global using MetadataFieldOption = ASC.Files.Core.MetadataFieldOption;
-global using MetadataFieldType = ASC.Files.Core.MetadataFieldType;
+global using MetadataFieldType = DocSpace.API.SDK.Model.MetadataFieldType;
 global using MetadataFilterCondition = ASC.Files.Core.MetadataFilterCondition;
 global using MetadataFilterHelper = ASC.Files.Core.MetadataFilterHelper;
 global using MetadataSearchQuery = ASC.Web.Files.Core.Search.MetadataSearchQuery;

@@ -127,6 +127,12 @@ export type AiReasoningLevel = "off" | "low" | "medium" | "high" | "max";
 
 /** How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all. */
 export type AiChatToolPermissionMode = "ask" | "auto" | "allow";
+/**
+ * Which disabled tool list a read or write addresses: the caller's own
+ * (`user`, what an absent value means) or the one an administrator keeps for
+ * everyone (`tenant`), which every user's reads fold in.
+ */
+export type AiChatToolPrefsScope = "user" | "tenant";
 
 export type AiActionArgs = {
   /** Extra tools offered to the model for this request. */
@@ -511,6 +517,8 @@ export type Req_aiToolsSetDisabled = {
   /** Tool names to disable. */
   toolNames: string[];
   entityId?: string;
+  /** The list the write lands in; omitted means the caller's own. */
+  scope?: AiChatToolPrefsScope;
 };
 export type Res_aiToolsGetDisabled = Record<string, string[]>;
 export type Res_aiToolsIsToolDisabled = boolean;

@@ -40,7 +40,7 @@ namespace ASC.Web.Studio.Core.Notify;
 /// It exists so that twenty-five predicates do not each go fetch the tariff and the quota for
 /// themselves: those lookups are cached, but not free, and they would be multiplied by every portal in
 /// the installation. <see cref="LastActivity"/> stays lazy for the same reason in reverse — the audit
-/// and login queries behind it are real database work that only the inactivity letters ever need.
+/// and login queries behind it are real database work that only the retention policy ever needs.
 /// </summary>
 public sealed record PeriodicLetterContext
 {
@@ -72,74 +72,24 @@ public sealed record PeriodicLetterContext
     public required bool DefaultRebranding { get; init; }
 
     /// <summary>
-    /// The day the installation started counting towards deleting unused portals. Warnings are silent
-    /// before it, so an upgrade does not mail every idle portal at once on the first night.
+    /// The last time anyone did anything on the portal — its last audit event and its last successful
+    /// login, each falling back to the creation date. Two database queries, so it is resolved on first use
+    /// and only when the retention policy asks.
     /// </summary>
-    public required DateTime UnusedPortalNotifyFrom { get; init; }
+    public required Lazy<Task<PortalActivity>> LastActivity { get; init; }
 
-    /// <summary>
-    /// The last time anyone did anything on the portal — the later of the last audit event and the last
-    /// successful login, falling back to the creation date. Two database queries, so it is resolved on
-    /// first use and only for the letters that ask.
-    /// </summary>
-    public required Lazy<Task<DateTime>> LastActivity { get; init; }
-
-    public Task<DateTime> GetLastActivityDateAsync()
+    public Task<PortalActivity> GetLastActivityAsync()
     {
         return LastActivity.Value;
     }
-
-    /// <summary>
-    /// True when <see cref="NowDate"/>, shifted by <paramref name="offsetDays"/>, is the monthly
-    /// anniversary of the portal's creation. The day is clamped to the length of the month, so a portal
-    /// created on the 29th-31st still gets its check in February and in the 30-day months instead of
-    /// silently skipping them — the inactivity warnings are one-month-wide windows, and a skipped month
-    /// means a warning is never sent at all.
-    /// </summary>
-    public bool IsCreationAnniversary(int offsetDays = 0)
-    {
-        var date = NowDate.AddDays(offsetDays);
-
-        return date.Day == Math.Min(CreatedDate.Day, DateTime.DaysInMonth(date.Year, date.Month));
-    }
-
-    /// <summary>
-    /// Why this portal has run out of chances today, or null when it has not: a free one left idle for
-    /// six months and a week, or a paid one whose tariff lapsed that long ago.
-    /// </summary>
-    /// <remarks>
-    /// This is not a letter, which is why it does not live among them - deleting a portal is
-    /// <see cref="StudioPeriodicNotify"/>'s own job. It is a predicate over this context all the same,
-    /// and it is the most destructive one there is, so it is kept where it can be asked in a test
-    /// instead of only through the deletion it triggers.
-    /// </remarks>
-    public async Task<AbandonedPortalReason?> GetAbandonedReasonAsync()
-    {
-        if (Quota.Free)
-        {
-            // The check runs a week after the anniversary the last warning was sent on.
-            if (NowDate < UnusedPortalNotifyFrom.AddDays(7) || !IsCreationAnniversary(-7))
-            {
-                return null;
-            }
-
-            var lastActivity = await GetLastActivityDateAsync();
-
-            return lastActivity.AddMonths(6).AddDays(7) <= NowDate ? AbandonedPortalReason.Inactive : null;
-        }
-
-        return Tariff.State == TariffState.NotPaid && DueDateIsNotMax && DueDate.AddMonths(6).AddDays(7) <= NowDate
-            ? AbandonedPortalReason.Unpaid
-            : null;
-    }
 }
 
-/// <summary>What a portal ran out of before it is deleted. Only the wording of the log line differs.</summary>
-public enum AbandonedPortalReason
+/// <summary>
+/// The last signs of life of a portal, by day. Both are kept apart because only the login history is
+/// purged by the portal's audit settings, so only the last login can go missing later.
+/// </summary>
+public readonly record struct PortalActivity(DateTime LastEventOn, DateTime LastLoginOn)
 {
-    /// <summary>A free portal nobody has touched for six months and a week.</summary>
-    Inactive,
-
-    /// <summary>A portal whose paid tariff lapsed six months and a week ago.</summary>
-    Unpaid
+    /// <summary>The later of the two.</summary>
+    public DateTime LastOn => LastEventOn > LastLoginOn ? LastEventOn : LastLoginOn;
 }

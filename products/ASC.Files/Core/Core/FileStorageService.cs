@@ -1321,9 +1321,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
-
-        return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        return await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
@@ -1352,6 +1350,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder is null)
+        {
+            return null;
+        }
+
         var isRoom = folder.IsRoom;
 
         // The per-entity quota is a portal feature: refuse to set or reset one while it is off.
@@ -1433,9 +1436,12 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var folder = await folderDao.GetFolderAsync(folderId);
+
+        // Missing room, same as in SetPinnedStatusAsync: 404, not the 403 the mapping of
+        // InvalidOperationException produced.
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var isRoom = folder.IsRoom;
@@ -2683,7 +2689,8 @@ public class FileStorageService //: IFileStorageService
         var file = await GetFileAsync(fileId, -1);
         var result = new FileLinkDto { FileType = FileUtility.GetFileExtension(file.Title), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)) };
 
-        result.Token = documentServiceHelper.GetSignature(result);
+        // The document service reads the signed payload by its own field names (fileType, url), not by the JSON of the response
+        result.Token = documentServiceHelper.GetSignature(new { fileType = result.FileType, url = result.Url });
 
         return result;
     }
@@ -4544,11 +4551,9 @@ public class FileStorageService //: IFileStorageService
                 return;
             }
 
-            // A caller who merely opened the entry through an external link may take it out of
-            // their own list; a directly shared member or a stranger has nothing to remove here.
-            var hasDirectShare = await fileSecurity.GetPureSharesAsync(entry, [authContext.CurrentAccount.ID]).AnyAsync();
-
-            if (hasDirectShare || !await fileSecurity.CanReadAsync(entry))
+            // Anyone who can read the entry (a directly shared member or a visitor through an
+            // external link) may take it out of their own list; a stranger has nothing to remove.
+            if (!await fileSecurity.CanReadAsync(entry))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -6280,7 +6285,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.StartSyncAsync(roomId)
-            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+            ?? throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
     }
 
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)

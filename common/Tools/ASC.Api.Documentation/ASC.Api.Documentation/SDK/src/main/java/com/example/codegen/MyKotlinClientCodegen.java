@@ -47,6 +47,13 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
     private Snippets snippets;
 
+    /**
+     * Models whose name ends with `ApiDateTime`. The spec describes them as an object
+     * ({utcTime, timeZoneOffset}), but the server sends a plain ISO-8601 string, so
+     * Serializer.kt registers ApiDateTimeAdapterFactory for exactly these classes.
+     */
+    private final Set<String> apiDateTimeModels = new TreeSet<>();
+
     public MyKotlinClientCodegen() {
         super();
         this.templateDir = "templates/kotlin";
@@ -267,6 +274,9 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
         for (ModelMap mo : objs.getModels()) {
             CodegenModel model = mo.getModel();
+            if (model.classname != null && model.classname.endsWith("ApiDateTime")) {
+                apiDateTimeModels.add(model.classname);
+            }
 
             for (CodegenProperty prop : model.vars) {
                 normalizeEnumBackingType(prop);
@@ -319,6 +329,13 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
         }
 
         objs.put("customApis", customApis);
+
+        List<Map<String, Object>> apiDateTimeEntries = new ArrayList<>();
+        for (String classname : apiDateTimeModels) {
+            apiDateTimeEntries.add(Map.of("classname", classname));
+        }
+        objs.put("hasApiDateTime", !apiDateTimeEntries.isEmpty());
+        objs.put("apiDateTimeModels", apiDateTimeEntries);
 
         objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
         objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");

@@ -85,6 +85,8 @@ public class WebPluginManager(
     private const string PluginCssFileName = "plugin.css";
     private const string AssetsFolderName = "assets";
 
+    private static readonly JsonSerializerOptions _configJsonOptions = new() { PropertyNameCaseInsensitive = true };
+
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     private void DemandWebPlugins(bool upload = false, bool delete = false)
@@ -112,6 +114,19 @@ public class WebPluginManager(
     private static string GetCacheKey(int tenantId)
     {
         return $"{StorageModuleName}:{tenantId}";
+    }
+
+    // The name is also the plugin folder in the storage, so it must never carry a path
+    private static bool IsValidName(string name)
+    {
+        return !string.IsNullOrEmpty(name) && Regex.IsMatch(name, @"^[a-z0-9_.-]+$") && !name.StartsWith('.');
+    }
+
+    // The cache holds the plugin manifests read from the storage, not the enabled state and the settings of a portal,
+    // so it is reset only when the storage changes
+    private ValueTask ResetWebPluginsCacheAsync(int tenantId)
+    {
+        return _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetWebPluginsTag(tenantId));
     }
 
     private static async Task<string> GetPluginUrlTemplateAsync(IDataStore storage)
@@ -174,6 +189,8 @@ public class WebPluginManager(
 
             await CopyPluginFromTempToStore(webPlugin, tempPath, storage);
 
+            await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId);
+
             webPlugin.System = system;
 
             var urlTemplate = await GetPluginUrlTemplateAsync(storage);
@@ -189,7 +206,7 @@ public class WebPluginManager(
 
             var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name);
 
-            webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, existingSettings);
+            webPlugin = await UpdateWebPluginAsync(webPlugin, true, existingSettings);
 
             return webPlugin;
         }
@@ -208,9 +225,7 @@ public class WebPluginManager(
 
     private async Task ValidatePlugin(WebPlugin webPlugin, int tenantId, bool system)
     {
-        var nameRegex = new Regex(@"^[a-z0-9_.-]+$");
-
-        if (string.IsNullOrEmpty(webPlugin.Name) || !nameRegex.IsMatch(webPlugin.Name) || webPlugin.Name.StartsWith('.'))
+        if (!IsValidName(webPlugin.Name))
         {
             throw new Exception(Resource.ErrorWebPluginName);
         }
@@ -293,7 +308,7 @@ public class WebPluginManager(
                         webPlugin.Enabled = false;
                         webPlugin.Settings = null;
 
-                        await UpdateWebPluginAsync(tenantId, webPlugin, false, null);
+                        await UpdateWebPluginAsync(webPlugin, false, null);
                     }
                 }
             }
@@ -353,18 +368,7 @@ public class WebPluginManager(
         {
             try
             {
-                await using var readStream = await storage.GetReadStreamAsync(path);
-
-                using var reader = new StreamReader(readStream);
-
-                var configContent = await reader.ReadToEndAsync();
-
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                var webPlugin = JsonSerializer.Deserialize<WebPlugin>(configContent, options);
+                var webPlugin = await ReadWebPluginConfigAsync(storage, path);
 
                 webPlugin.System = system;
 
@@ -388,6 +392,84 @@ public class WebPluginManager(
         return webPlugins;
     }
 
+    private static async Task<WebPlugin> ReadWebPluginConfigAsync(IDataStore storage, string path)
+    {
+        await using var readStream = await storage.GetReadStreamAsync(path);
+
+        using var reader = new StreamReader(readStream);
+
+        var configContent = await reader.ReadToEndAsync();
+
+        return JsonSerializer.Deserialize<WebPlugin>(configContent, _configJsonOptions);
+    }
+
+    // For plugin files replaced in the storage bypassing the upload: the cached list is reset only when the version
+    // in the cache differs from the manifest in the storage, so the call cannot be used to flush the cache at will
+    public async Task<WebPlugin> RefreshWebPluginAsync(int tenantId, string name)
+    {
+        DemandWebPlugins();
+
+        name = name?.ToLowerInvariant();
+
+        if (!IsValidName(name))
+        {
+            throw new ItemNotFoundException(Resource.ErrorWebPluginNotFound);
+        }
+
+        var refreshed = false;
+
+        foreach (var pluginsTenantId in (int[])[Tenant.DefaultTenant, tenantId])
+        {
+            if (await IsCachedWebPluginOutdatedAsync(pluginsTenantId, name))
+            {
+                await ResetWebPluginsCacheAsync(pluginsTenantId);
+
+                refreshed = true;
+            }
+        }
+
+        var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
+
+        if (refreshed)
+        {
+            await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, webPlugin.Enabled);
+        }
+
+        return webPlugin;
+    }
+
+    private async Task<bool> IsCachedWebPluginOutdatedAsync(int tenantId, string name)
+    {
+        var cachedWebPlugin = (await GetWebPluginsFromCacheAsync(tenantId))
+            .Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+
+        var storage = await GetPluginStorageAsync(tenantId);
+
+        var path = Path.Combine(name, ConfigFileName);
+
+        WebPlugin storedWebPlugin = null;
+
+        if (await storage.IsFileAsync(path))
+        {
+            try
+            {
+                storedWebPlugin = await ReadWebPluginConfigAsync(storage, path);
+            }
+            catch (Exception e)
+            {
+                // a broken manifest is skipped by the list as well
+                log.ErrorWithException(e);
+            }
+        }
+
+        if (cachedWebPlugin is null || storedWebPlugin is null)
+        {
+            return cachedWebPlugin is not null || storedWebPlugin is not null;
+        }
+
+        return !string.Equals(cachedWebPlugin.Version, storedWebPlugin.Version, StringComparison.Ordinal);
+    }
+
     public async Task<WebPlugin> GetWebPluginByNameAsync(int tenantId, string name)
     {
         var webPlugins = await GetWebPluginsAsync(tenantId);
@@ -401,7 +483,7 @@ public class WebPluginManager(
     {
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 
-        return await UpdateWebPluginAsync(tenantId, webPlugin, enabled, settings);
+        return await UpdateWebPluginAsync(webPlugin, enabled, settings);
     }
 
     private async Task<string> GetWebPluginSettingsAsync(string name)
@@ -425,7 +507,7 @@ public class WebPluginManager(
         return null;
     }
 
-    private async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, WebPlugin webPlugin, bool enabled, string settings)
+    private async Task<WebPlugin> UpdateWebPluginAsync(WebPlugin webPlugin, bool enabled, string settings)
     {
         var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
@@ -453,10 +535,6 @@ public class WebPluginManager(
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
 
-        var tag = CacheExtention.GetWebPluginsTag(webPlugin.System ? Tenant.DefaultTenant : tenantId);
-
-        await _cache.RemoveByTagAndNotifyAsync(tag);
-
         await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
 
         return webPlugin;
@@ -482,7 +560,9 @@ public class WebPluginManager(
 
         await storage.DeleteDirectoryAsync(webPlugin.Name);
 
-        await UpdateWebPluginAsync(tenantId, webPlugin, false, null);
+        await ResetWebPluginsCacheAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
+
+        await UpdateWebPluginAsync(webPlugin, false, null);
 
         return webPlugin;
     }

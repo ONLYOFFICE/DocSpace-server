@@ -56,7 +56,7 @@ public class BulkDownloadPermissionsTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -86,7 +86,7 @@ public class BulkDownloadPermissionsTests(
         // Act
         await _filesClient.Authenticate(roomAdmin);
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -115,7 +115,7 @@ public class BulkDownloadPermissionsTests(
         // Act
         await _filesClient.Authenticate(user);
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -144,7 +144,7 @@ public class BulkDownloadPermissionsTests(
         // Act
         await _filesClient.Authenticate(user);
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -173,7 +173,7 @@ public class BulkDownloadPermissionsTests(
         // Act
         await _filesClient.Authenticate(guest);
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -204,7 +204,7 @@ public class BulkDownloadPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -226,7 +226,7 @@ public class BulkDownloadPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);

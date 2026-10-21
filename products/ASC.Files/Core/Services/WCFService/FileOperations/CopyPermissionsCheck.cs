@@ -224,6 +224,18 @@ public class PermissionCheckStarter<T, TTo>(
         if (0 < folders.Count)
         {
             var firstFolder = await _folderDao.GetFolderAsync(folders[0]);
+
+            if (firstFolder == null)
+            {
+                errorMsg = FilesCommonResource.ErrorMessage_FolderNotFound;
+                if (check)
+                {
+                    throw new ItemNotFoundException(errorMsg);
+                }
+
+                return errorMsg;
+            }
+
             isRoom = firstFolder.IsRoom;
 
             if (copy && !await security.CanCopyAsync(firstFolder))

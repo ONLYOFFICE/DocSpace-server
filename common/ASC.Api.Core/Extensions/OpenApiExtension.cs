@@ -288,8 +288,6 @@ public static class OpenApiExtension
                 Description = "OpenID Connect authentication"
             });
 
-            var xmlDocs = new List<XPathDocument>();
-
             string xmlPath = null;
             var assemblyLocation = entryAssembly.Location;
             if (!string.IsNullOrEmpty(assemblyLocation))
@@ -303,7 +301,6 @@ public static class OpenApiExtension
                         var doc = new XPathDocument(xmlPath);
 
                         c.IncludeXmlComments(() => doc);
-                        xmlDocs.Add(doc);
                     }
                 }
             }
@@ -319,12 +316,8 @@ public static class OpenApiExtension
                     var doc = new XPathDocument(xmlPathOther);
 
                     c.IncludeXmlComments(() => doc);
-                    xmlDocs.Add(doc);
                 }
             }
-
-            // Must stay after every IncludeXmlComments call - see the filter's own remarks.
-            c.SchemaFilter<XmlCommentsMemberDescriptionSchemaFilter>(xmlDocs);
         });
     }
 
@@ -372,6 +365,11 @@ public static class OpenApiExtension
                     options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
                     options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
                     options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
+                    // The concrete types behind a polymorphic schema. x-thirdparty-variant stays hidden: Scalar renders
+                    // it as a raw tree of the whole twin operation; the other x- keys are for the SDK generator only.
+                    options.WithShowExtensions("x-derived-types");
+                    // Several request bodies have more than the 12 properties Scalar shows before "show more".
+                    options.WithMaxVisibleRequestBodyProperties(0);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
@@ -454,8 +452,9 @@ public static class OpenApiExtension
             }
             else
             {
+                // An action may declare its own 401 through [SwaggerResponse]; its text is more precise than this one.
                 operation.Responses ??= new OpenApiResponses();
-                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
+                operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
             }
 
             //if(authorizeAttribute.Any())
@@ -486,86 +485,6 @@ public static class OpenApiExtension
         }
     }
 
-
-    /// <summary>
-    /// Puts the summary of a documented property or field back after Swashbuckle's own XML filters have run.
-    /// </summary>
-    /// <remarks>
-    /// For every property `XmlCommentsSchemaFilter` writes the summary of the property's *type* into the
-    /// property schema first and the summary of the property itself second, and one such filter is registered
-    /// per XML file. So when the type is documented in a file included later than the file that documents the
-    /// property, the type's text silently replaces the property's own. Which file comes first depends on
-    /// assembly load order, so the same property can end up described one way in one service document and
-    /// another way in the next - and two documents that disagree about a shared schema cannot be joined into
-    /// the API reference. Registered after every IncludeXmlComments call, this filter restores the member text.
-    /// A property with no summary of its own is left alone: falling back to the type's text is intended.
-    /// </remarks>
-    private class XmlCommentsMemberDescriptionSchemaFilter : ISchemaFilter
-    {
-        private readonly Dictionary<string, string> _memberSummaries = new(StringComparer.Ordinal);
-        private readonly Dictionary<(string Type, string Parameter), string> _recordParameterSummaries = new();
-
-        public XmlCommentsMemberDescriptionSchemaFilter(IReadOnlyList<XPathDocument> xmlDocs)
-        {
-            foreach (var xmlDoc in xmlDocs)
-            {
-                foreach (var member in xmlDoc.CreateNavigator().Select("/doc/members/member").Cast<XPathNavigator>())
-                {
-                    var name = member.GetAttribute("name", string.Empty);
-
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        continue;
-                    }
-
-                    // "P:Ns.Type.Property" and "F:Ns.Type.Field" carry the member summary, "T:Ns.Type" the
-                    // `<param>` tags of a record's primary constructor. Everything else is of no interest here.
-                    if (name[0] is 'P' or 'F')
-                    {
-                        var summary = member.SelectSingleNode("summary");
-
-                        if (summary != null)
-                        {
-                            _memberSummaries[name] = XmlCommentsTextHelper.Humanize(summary.InnerXml);
-                        }
-                    }
-                    else if (name[0] == 'T')
-                    {
-                        foreach (var parameter in member.Select("param").Cast<XPathNavigator>())
-                        {
-                            var parameterName = parameter.GetAttribute("name", string.Empty);
-
-                            if (!string.IsNullOrEmpty(parameterName))
-                            {
-                                _recordParameterSummaries[(name, parameterName)] = XmlCommentsTextHelper.Humanize(parameter.Value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (context.MemberInfo is not { DeclaringType: not null } memberInfo)
-            {
-                return;
-            }
-
-            // Same precedence as Swashbuckle: a record's `<param>` first, the member's own summary on top of it.
-            var declaringType = XmlCommentsNodeNameHelper.GetMemberNameForType(memberInfo.DeclaringType);
-
-            if (_recordParameterSummaries.TryGetValue((declaringType, memberInfo.Name), out var parameterSummary))
-            {
-                schema.Description = parameterSummary;
-            }
-
-            if (_memberSummaries.TryGetValue(XmlCommentsNodeNameHelper.GetMemberNameForFieldOrProperty(memberInfo), out var memberSummary))
-            {
-                schema.Description = memberSummary;
-            }
-        }
-    }
 
     /// <summary>
     /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it

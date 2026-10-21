@@ -40,6 +40,7 @@ import {
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
 import { asyncHandler } from "./_helpers.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 // DocSpace tools for the document editor's AI plugin.
 //
@@ -112,7 +113,7 @@ export const editorToolsController = {
   call: asyncHandler(async (req, res) => {
     markForwardHeadersToProvider();
     const body = isObject(req.body) ? req.body : {};
-    const name = typeof body["name"] === "string" ? body["name"] : "";
+    const name = typeof body["name"] === "string" ? body["name"].trim() : "";
     const args = isObject(body["arguments"])
       ? (body["arguments"] as Record<string, unknown>)
       : {};
@@ -120,6 +121,24 @@ export const editorToolsController = {
       typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 
     if (!name || EXCLUDED_TOOLS.has(name)) {
+      res.status(400).json({ error: "Unknown tool name" });
+      return;
+    }
+    // The system tools run against the MCP server with the caller's own
+    // credentials and never pass through the AI service, so with AI switched
+    // off a folder still got created and a file deleted (Bugs 84390, 84391).
+    await assertAiAccess(entityId);
+
+    // A name no adapter owns fell through to the last one, whose "tool not
+    // available" came back as a 200 tool result — right for a chat round,
+    // where the model must read the failure, wrong for this REST route,
+    // which documents a 400 (Bug 84394). The name is matched exactly
+    // against what `list` would offer, surrounding whitespace aside.
+    const offered = await adapter.getTools(entityId, { attachmentId: [] });
+    const known = Object.values(offered).some((items) =>
+      items.some((item) => item.name === name && !EXCLUDED_TOOLS.has(item.name)),
+    );
+    if (!known) {
       res.status(400).json({ error: "Unknown tool name" });
       return;
     }

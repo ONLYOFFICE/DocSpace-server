@@ -43,30 +43,27 @@ public class RoomUpdateValidationTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    [Fact]
-    public async Task UpdateRoom_IdZero_Forbidden()
+    /// <summary>
+    /// BUG 84476: an id that resolves to no room answered 403, the permission error, instead of
+    /// 404 - the same defect class as bugs 81550 (archive) and 81850 / 81862 (pin, reorder). The
+    /// update threw InvalidOperationException for a missing folder, which the middleware maps to
+    /// 403; it now reports the room as missing. 0 and -1 resolve to nothing just like 999999999.
+    /// </summary>
+    [Trait("Bug", "84476")]
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(999999999)]
+    public async Task UpdateRoom_NonExistentId_NotFound(int id)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _roomsApi.UpdateRoomAsync(0, new UpdateRoomRequest("x"), TestContext.Current.CancellationToken));
+            async () => await _roomsApi.UpdateRoomAsync(id, new UpdateRoomRequest("Does Not Exist"), TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403);
-    }
-
-    [Fact]
-    public async Task UpdateRoom_IdNegative_Forbidden()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _roomsApi.UpdateRoomAsync(-1, new UpdateRoomRequest("x"), TestContext.Current.CancellationToken));
-
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(404);
     }
 
     /// <summary>
@@ -112,7 +109,7 @@ public class RoomUpdateValidationTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.UpdateRoomAsync(room.Id, new UpdateRoomRequest("Resurrect"), TestContext.Current.CancellationToken));
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(404);
 
         var list = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Folders.Should().NotContain(f => f.Title == "Autotest Deleted Room");

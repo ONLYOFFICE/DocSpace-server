@@ -42,7 +42,6 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 [Trait("Category", "Metadata")]
 public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const int StringType = 0;
     private const string ClientField = "Client";
 
     [Fact]
@@ -53,10 +52,10 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await UseLinkAsync(token, async () =>
         {
-            var file = await data.Api.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken);
+            var file = await GetFileTemplatesAsync(data.FileId);
             file.Should().ContainSingle(t => t.Id == data.TemplateId).Which.Field(ClientField).Value!.StringValue.Should().Be("File", "the link grants reading the file, and its metadata with it");
 
-            var folder = await data.Api.GetFolderMetadataAsync(data.FolderId, TestContext.Current.CancellationToken);
+            var folder = (await _metadataApi.GetFolderMetadataAsync(data.FolderId, TestContext.Current.CancellationToken)).Response.Templates;
             folder.Should().ContainSingle(t => t.Id == data.TemplateId).Which.Field(ClientField).Value!.StringValue.Should().Be("Folder", "the folder below the room is read through the same link");
         });
     }
@@ -68,11 +67,13 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await _filesClient.Authenticate(null);
 
-        using var file = await data.Api.GetFileMetadataResponseAsync(data.FileId, TestContext.Current.CancellationToken);
-        file.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "a stranger is told to authenticate, not that the file is forbidden or missing");
+        var file = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken));
+        file.ErrorCode.Should().Be(401, "a stranger is told to authenticate, not that the file is forbidden or missing");
 
-        using var folder = await data.Api.GetFolderMetadataResponseAsync(data.FolderId, TestContext.Current.CancellationToken);
-        folder.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var folder = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFolderMetadataAsync(data.FolderId, TestContext.Current.CancellationToken));
+        folder.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -84,9 +85,10 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await UseLinkAsync(token, async () =>
         {
-            using var response = await data.Api.GetFileMetadataResponseAsync(data.FileId, TestContext.Current.CancellationToken);
+            var exception = await Assert.ThrowsAsync<ApiException>(
+                async () => await _metadataApi.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken));
 
-            response.StatusCode.Should().Be(HttpStatusCode.Forbidden, "a link opens its own room only");
+            exception.ErrorCode.Should().Be(403, "a link opens its own room only");
         });
     }
 
@@ -98,15 +100,15 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await UseLinkAsync(token, async () =>
         {
-            await data.Api.SetFileValuesAsync(data.FileId, [new MetadataValuePayload { FieldId = data.FieldId, StringValue = "Changed" }], TestContext.Current.CancellationToken);
+            await _metadataApi.SetFileValuesAsync(data.FileId, Value(data.FieldId, "Changed"), TestContext.Current.CancellationToken);
 
-            var written = await data.Api.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken);
+            var written = await GetFileTemplatesAsync(data.FileId);
             written.Should().ContainSingle(t => t.Id == data.TemplateId).Which.Field(ClientField).Value!.StringValue.Should().Be("Changed", "the link that lets the caller edit the document lets them fill its card");
         });
 
         await _filesClient.Authenticate(Owner);
 
-        var metadata = await data.Api.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken);
+        var metadata = await GetFileTemplatesAsync(data.FileId);
         metadata.Should().ContainSingle(t => t.Id == data.TemplateId).Which.Field(ClientField).Value!.StringValue.Should().Be("Changed", "the value written through the link is the value of the file");
     }
 
@@ -118,14 +120,15 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await UseLinkAsync(token, async () =>
         {
-            using var response = await data.Api.SetFileValuesResponseAsync(data.FileId, [new MetadataValuePayload { FieldId = data.FieldId, StringValue = "Changed" }], TestContext.Current.CancellationToken);
+            var exception = await Assert.ThrowsAsync<ApiException>(
+                async () => await _metadataApi.SetFileValuesAsync(data.FileId, Value(data.FieldId, "Changed"), TestContext.Current.CancellationToken));
 
-            response.StatusCode.Should().Be(HttpStatusCode.Forbidden, "a viewing link reads the card and does not fill it");
+            exception.ErrorCode.Should().Be(403, "a viewing link reads the card and does not fill it");
         });
 
         await _filesClient.Authenticate(Owner);
 
-        var metadata = await data.Api.GetFileMetadataAsync(data.FileId, TestContext.Current.CancellationToken);
+        var metadata = await GetFileTemplatesAsync(data.FileId);
         metadata.Should().ContainSingle(t => t.Id == data.TemplateId).Which.Field(ClientField).Value!.StringValue.Should().Be("File", "the refused write changed nothing");
     }
 
@@ -136,9 +139,10 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await _filesClient.Authenticate(null);
 
-        using var response = await data.Api.SetFileValuesResponseAsync(data.FileId, [new MetadataValuePayload { FieldId = data.FieldId, StringValue = "Changed" }], TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.SetFileValuesAsync(data.FileId, Value(data.FieldId, "Changed"), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]
@@ -152,14 +156,17 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
             // the folder values, the assignments and the custom fields are not open to the anonymous callers: a folder
             // value is inherited by the files others put there later, an assignment needs the portal dictionary, and a
             // custom field name is created for the whole portal
-            using var folderValues = await data.Api.SetFolderValuesResponseAsync(data.FolderId, [new MetadataValuePayload { FieldId = data.FieldId, StringValue = "Changed" }], TestContext.Current.CancellationToken);
-            folderValues.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            var folderValues = await Assert.ThrowsAsync<ApiException>(
+                async () => await _metadataApi.SetFolderValuesAsync(data.FolderId, Value(data.FieldId, "Changed"), TestContext.Current.CancellationToken));
+            folderValues.ErrorCode.Should().Be(401);
 
-            using var unassigned = await data.Api.UnassignFileTemplateResponseAsync(data.FileId, data.TemplateId, TestContext.Current.CancellationToken);
-            unassigned.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            var unassigned = await Assert.ThrowsAsync<ApiException>(
+                async () => await _metadataApi.UnassignFileTemplateAsync(data.FileId, data.TemplateId, TestContext.Current.CancellationToken));
+            unassigned.ErrorCode.Should().Be(401);
 
-            using var customFields = await data.Api.SetFileCustomFieldsResponseAsync(data.FileId, [new CustomFieldPayload("Note", "Changed")], TestContext.Current.CancellationToken);
-            customFields.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            var customFields = await Assert.ThrowsAsync<ApiException>(
+                async () => await _metadataApi.SetFileCustomFieldsAsync(data.FileId, new SetCustomFields([new CustomFieldRequest("Note", "Changed")]), TestContext.Current.CancellationToken));
+            customFields.ErrorCode.Should().Be(401);
         });
     }
 
@@ -169,23 +176,34 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Guid.NewGuid().ToString()[..8];
 
-        var template = await api.CreateTemplateAsync("Link " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
+        var template = (await _metadataApi.CreateTemplateAsync(
+            new CreateMetadataTemplateRequestDto("Link " + suffix, true, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]),
+            TestContext.Current.CancellationToken)).Response;
         var fieldId = template.Field(ClientField).Id;
 
         var room = await CreateCustomRoom($"Link {suffix}");
         var folder = await CreateFolder($"Folder {suffix}", room.Id);
         var file = await CreateFile($"doc-{suffix}.docx", folder.Id);
 
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(folder.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "Folder" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(folder.Id, Value(fieldId, "Folder"), TestContext.Current.CancellationToken);
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "File" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(file.Id, Value(fieldId, "File"), TestContext.Current.CancellationToken);
 
-        return new LinkData(api, template.Id, fieldId, room.Id, folder.Id, file.Id, suffix);
+        return new LinkData(template.Id, fieldId, room.Id, folder.Id, file.Id, suffix);
+    }
+
+    private static SetMetadataValues Value(int fieldId, string value)
+    {
+        return new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: value)]);
+    }
+
+    private async Task<List<EntryTemplateDto>> GetFileTemplatesAsync(int fileId)
+    {
+        return (await _metadataApi.GetFileMetadataAsync(fileId, TestContext.Current.CancellationToken)).Response.Templates;
     }
 
     /// <summary>
@@ -225,7 +243,7 @@ public class MetadataExternalLinkTests(AspireAppFixture fixture) : BaseTest(fixt
         }
     }
 
-    private sealed record LinkData(MetadataApiClient Api, int TemplateId, int FieldId, int RoomId, int FolderId, int FileId, string Suffix);
+    private sealed record LinkData(int TemplateId, int FieldId, int RoomId, int FolderId, int FileId, string Suffix);
 
     #endregion
 }

@@ -35,7 +35,7 @@ the base.
 ## The SDK is the source of truth for signatures
 
 Tests call the API through the generated `DocSpace.API.SDK` (pinned in
-`Directory.Packages.props`, currently 3.7.0). **Read its source from the repo, never guess a
+`Directory.Packages.props`, currently 4.0.0). **Read its source from the repo, never guess a
 signature and never dig through the NuGet cache.** Paths are relative to the repo root
 (`server/`):
 

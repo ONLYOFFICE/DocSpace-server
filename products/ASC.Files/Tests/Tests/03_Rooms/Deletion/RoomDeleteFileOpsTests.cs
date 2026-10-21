@@ -52,7 +52,7 @@ public class RoomDeleteFileOpsTests(
 
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(
-            new DuplicateRequestDto { FolderIds = [new(room.Id)] },
+            new DuplicateRequestDto { ReturnSingleOperation = true, FolderIds = [new(room.Id)] },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Exists(r => !r.Finished))
@@ -77,7 +77,7 @@ public class RoomDeleteFileOpsTests(
 
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(
-            new DuplicateRequestDto { FolderIds = [new(room.Id)] },
+            new DuplicateRequestDto { ReturnSingleOperation = true, FolderIds = [new(room.Id)] },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Exists(r => !r.Finished))
@@ -113,7 +113,7 @@ public class RoomDeleteFileOpsTests(
 
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(
-            new DuplicateRequestDto { FolderIds = [new(room.Id)] },
+            new DuplicateRequestDto { ReturnSingleOperation = true, FolderIds = [new(room.Id)] },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Exists(r => !r.Finished))
@@ -129,7 +129,7 @@ public class RoomDeleteFileOpsTests(
         var duplicateId = await FindRoomId("Autotest Admin Room With File For Owner Duplicate", room.Id);
         duplicateId.Should().NotBeNull();
 
-        var info = (await _foldersApi.GetFolderInfoAsync(duplicateId.Value, TestContext.Current.CancellationToken)).Response;
+        var info = (await _foldersApi.GetFolderInfoAsync(duplicateId!.Value, TestContext.Current.CancellationToken)).Response;
         info.FilesCount.Should().Be(1);
     }
 

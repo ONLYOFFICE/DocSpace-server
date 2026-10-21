@@ -54,6 +54,14 @@
       ],
       "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
     },
+    "AiChatToolPrefsScope": {
+      "type": "string",
+      "enum": [
+        "user",
+        "tenant"
+      ],
+      "description": "Which disabled tool list a read or write addresses: the caller's own (`user`, what an absent value means) or the one an administrator keeps for everyone (`tenant`), which every user's reads fold in."
+    },
     "AiActionArgs": {
       "type": "object",
       "properties": {
@@ -935,13 +943,18 @@
           "enum": [
             "key",
             "url",
-            "name"
+            "name",
+            "text"
           ],
           "description": "The rejected field."
         },
         "message": {
           "type": "string",
           "description": "The human-readable reason the field was rejected."
+        },
+        "code": {
+          "$ref": "#/components/schemas/AiErrorCode",
+          "description": "Optional: producers that know the reason set it (the prompts engine does)."
         }
       },
       "required": [
@@ -950,6 +963,16 @@
       ],
       "additionalProperties": false,
       "description": "A field-scoped validation error: which form field was rejected, and why."
+    },
+    "AiErrorCode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "conflict",
+        "not_found",
+        "invalid"
+      ],
+      "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
     },
     "AiBulkAssignmentResult": {
       "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
@@ -5472,6 +5495,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AiChatToolPrefsScope",
+            "description": "The list the write lands in; omitted means the caller's own."
           }
         },
         "required": [

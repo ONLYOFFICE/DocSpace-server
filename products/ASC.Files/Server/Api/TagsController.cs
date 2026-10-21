@@ -249,28 +249,29 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Removes the listed entries from the Recent section of the calling account, the history of opened files that
     /// `GET api/2.0/files/recent` returns. Nothing is deleted from storage and no other member's history is touched;
     /// access to the entries is not checked at all, so a file the caller can no longer read can still be cleared from
-    /// their own history. Only numeric file ids are honoured, so a file on a connected third-party account cannot be
-    /// cleared this way, and folder ids are accepted but change nothing because the section lists files only. The
-    /// answer carries no body and reports nothing about how many entries were found: an empty request and an id that
-    /// was never in the section are accepted alike. Repeating the call is safe, but an entry returns the next time
-    /// the file is opened or `POST api/2.0/files/file/{fileId}/recent` is called for it. To hide the whole section
-    /// instead, call `PUT api/2.0/files/displayrecent`.
+    /// their own history. A file on a connected third-party account is cleared by its string id too, but only while
+    /// the storage can still find it: the entry of a file removed from the storage stays in the history. Folder ids
+    /// are accepted but change nothing because the section lists files only. The answer carries no body and reports
+    /// nothing about how many entries were found: an empty request and an id that was never in the section are
+    /// accepted alike. Repeating the call is safe, but an entry returns the next time the file is opened or
+    /// `POST api/2.0/files/file/{fileId}/recent` is called for it. To hide the whole section instead, call
+    /// `PUT api/2.0/files/displayrecent`.
     /// </remarks>
     /// <summary>Delete recent files</summary>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Empty answer: the listed entries no longer appear in the Recent section")]
-    [SwaggerResponse(400, "The request body cannot be read, or a third-party folder identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(404, "A third-party folder identifier names a storage type the portal does not know")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer, or a third-party folder identifier carries a storage account number beyond the 32-bit range")]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party file or folder identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(404, "A third-party file or folder identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer, or a third-party file or folder identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecent(BaseBatchRequestDto inDto)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
-        var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
+        var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
         var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds);
-        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, []);
+        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, fileStringIds);
 
         await Task.WhenAll(t1, t2);
 

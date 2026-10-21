@@ -49,9 +49,16 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The id of this test's own portal.</summary>
+    protected int TenantId => _clients.TenantId;
+
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
+    protected HttpClient _studioClient = null!;
 
     protected FoldersApi _foldersApi = null!;
     protected FilesApi _filesApi = null!;
@@ -65,6 +72,7 @@ public class BaseTest(
     protected SharingApi _sharingApi = null!;
     protected PrivacyRoomApi _privacyRoomApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
+    protected MetadataApi _metadataApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
@@ -111,6 +119,7 @@ public class BaseTest(
         _filesClient = _clients.FilesHttpClient;
         _peopleClient = _clients.PeopleHttpClient;
         _webApiClient = _clients.WebApiHttpClient;
+        _studioClient = _clients.StudioHttpClient;
 
         _foldersApi = _clients.FoldersApi;
         _filesApi = _clients.FilesApi;
@@ -124,6 +133,7 @@ public class BaseTest(
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
         _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
+        _metadataApi = _clients.MetadataApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;

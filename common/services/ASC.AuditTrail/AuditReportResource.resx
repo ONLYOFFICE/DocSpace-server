@@ -435,6 +435,9 @@
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Files [{0}]. Moved With Overwriting From Folder "{1}" To Folder: "{2}"</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>File Opened By Document Builder Script: {0}</value>
+  </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>File Opened For Change: {0}</value>
   </data>
@@ -761,6 +764,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal Deactivated</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal blocked by the retention policy</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal unblocked</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal Deleted</value>
