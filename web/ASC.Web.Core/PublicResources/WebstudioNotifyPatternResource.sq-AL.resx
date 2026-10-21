@@ -778,6 +778,24 @@ Nëse nuk ju duhet më hapësira, nuk keni nevojë të bëni asgjë. Thjesht sig
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Abonimi juaj ka përfunduar, por hapësira juaj është ende këtu
+
+Abonimi juaj ${LetterLogoText} për *"${__VirtualRootPath}":"${__VirtualRootPath}"* përfundoi më *$DueDate*. Faleminderit që punuat me ne. Shpresojmë që ${LetterLogoText} t'jua ketë lehtësuar pak punën.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat, abonimi i të cilave ka përfunduar. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë.
+
+Lajmi i mirë: ta mbani është e lehtë. Thjesht rinovoni abonimin para datës $BlockDateShort dhe dokumentet, cilësimet dhe ekipi juaj do të mbeten pikërisht aty ku i latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të bëni kopje rezervë të të dhënave që dëshironi të mbani para datës $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Çaktivizimi i portalit "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
@@ -1613,6 +1631,9 @@ $TrulyYours</value>
     <value>Fjalëkalimi juaj u ndryshua me sukses</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} ju ka marrë mallin (veprim i nevojshëm para datës $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Hapësira juaj ${LetterLogoText} ju ka marrë mallin (veprim i nevojshëm para datës $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

@@ -788,6 +788,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Vaša naročnina je potekla, vaš prostor pa je še vedno tukaj
+
+Datum izteka vaše naročnine ${LetterLogoText} za *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Hvala, ker ste delali z nami. Upamo, da vam je ${LetterLogoText} vsaj malo olajšal delo.
+
+Da bi vse nemoteno delovalo, blokiramo prostore, ki jim je potekla naročnina. Za vaš prostor to pomeni naslednje:
+
+*$BlockDate*: vaš prostor bo blokiran in prijava ne bo več mogoča.
+*$DeleteDate*: prostor in vsi njegovi podatki bodo trajno izbrisani.
+
+Dobra novica: ohraniti ga je preprosto. Samo podaljšajte naročnino (rok: $BlockDateShort) in vaši dokumenti, nastavitve in ekipa bodo ostali natanko tam, kjer ste jih pustili.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Le naredite varnostno kopijo podatkov, ki jih želite obdržati (rok: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivacija portala "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1655,6 +1673,9 @@ $TrulyYours</value>
     <value>Vaše geslo je bilo uspešno spremenjeno</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} vas pogreša (rok za ukrepanje: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Vaš prostor ${LetterLogoText} vas pogreša (rok za ukrepanje: $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

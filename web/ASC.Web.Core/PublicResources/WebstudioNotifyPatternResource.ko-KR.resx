@@ -788,6 +788,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.구독은 종료되었지만 공간은 그대로 남아 있습니다
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* 의 ${LetterLogoText} 구독이 *$DueDate* 에 종료되었습니다. 그동안 함께해 주셔서 감사합니다. ${LetterLogoText} 덕분에 업무가 조금이나마 편해지셨기를 바랍니다.
+
+원활한 운영을 위해 구독이 종료된 공간은 차단하고 있습니다. 회원님의 공간에는 다음과 같이 적용됩니다:
+
+*$BlockDate*: 공간이 차단되며 로그인할 수 없게 됩니다.
+*$DeleteDate*: 공간과 모든 데이터가 영구적으로 삭제됩니다.
+
+좋은 소식은 공간을 유지하기가 쉽다는 것입니다. ${BlockDateShort} 전에 구독을 갱신하시면 문서, 설정, 팀이 모두 그대로 유지됩니다.
+
+$OrangeButton
+
+다른 선택을 하셨더라도 괜찮습니다. 보관하려는 데이터는 ${BlockDateShort} 전에 꼭 백업하세요.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>"${__VirtualRootPath}":"${__VirtualRootPath}" 포털 비활성화
 
@@ -1652,6 +1670,9 @@ $TrulyYours</value>
     <value>비밀번호가 성공적으로 변경되었습니다</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} 공간이 회원님을 기다리고 있습니다(${BlockDateShort}까지 조치 필요)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} 공간이 회원님을 기다리고 있습니다(${BlockDateShort}까지 조치 필요)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

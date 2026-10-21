@@ -776,6 +776,24 @@ Sahəyə artıq ehtiyacınız yoxdursa, heç nə etməyinizə ehtiyac yoxdur. Sa
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Abunəliyiniz başa çatıb, lakin sahəniz hələ də buradadır
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* üçün ${LetterLogoText} abunəliyiniz *$DueDate* tarixində başa çatıb. Bizimlə işlədiyiniz üçün təşəkkür edirik. Ümid edirik ki, ${LetterLogoText} işinizi bir az asanlaşdırdı.
+
+Hər şeyin qüsursuz işləməsi üçün abunəliyi başa çatmış sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları həmişəlik silinəcək.
+
+Yaxşı xəbər: onu saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək abunəliyinizi yeniləyin və sənədləriniz, parametrləriniz və komandanız olduğu yerdə qalacaq.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Sadəcə saxlamaq istədiyiniz məlumatların ehtiyat nüsxəsini $BlockDateShort tarixinədək çıxarmağı unutmayın.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalını deaktiv edin:
 
@@ -1608,6 +1626,9 @@ $TrulyYours</value>
     <value>Parolunuz uğurla dəyişdirildi</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

@@ -781,6 +781,24 @@ Alana artık ihtiyacınız yoksa hiçbir şey yapmanıza gerek yok. Yalnızca sa
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Aboneliğiniz sona erdi ama alanınız hâlâ burada
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* için ${LetterLogoText} aboneliğiniz *$DueDate* tarihinde sona erdi. Bizimle çalıştığınız için teşekkür ederiz. ${LetterLogoText} ile işinizin biraz kolaylaştığını umuyoruz.
+
+Her şeyin sorunsuz çalışması için aboneliği sona eren alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri kalıcı olarak silinecek.
+
+İyi haber: alanınızı korumak çok kolay. $BlockDateShort tarihinden önce aboneliğinizi yenilemeniz yeterli; belgeleriniz, ayarlarınız ve ekibiniz bıraktığınız yerde kalacak.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz verileri $BlockDateShort tarihinden önce yedeklemeyi unutmayın.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı devre dışı bırakma
 
@@ -1649,6 +1667,9 @@ $TrulyYours</value>
     <value>Şifreniz başarıyla değiştirildi</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

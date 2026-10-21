@@ -788,6 +788,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.サブスクリプションは終了しましたが、スペースはまだ残っています
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* の ${LetterLogoText} サブスクリプションは *$DueDate* に終了しました。これまでご利用いただき、ありがとうございました。${LetterLogoText} がお仕事を少しでも楽にできていれば幸いです。
+
+快適にご利用いただくため、サブスクリプションが終了したスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが完全に削除されます。
+
+良いお知らせ：スペースの維持は簡単です。${BlockDateShort}までにサブスクリプションを更新するだけで、ドキュメント、設定、チームはそのまま保たれます。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータは${BlockDateShort}までに必ずバックアップしてください。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ポータルの無効化
 
@@ -1599,6 +1617,9 @@ $TrulyYours</value>
     <value>パスワードが正常に変更されました</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

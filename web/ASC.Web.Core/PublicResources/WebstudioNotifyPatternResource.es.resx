@@ -775,6 +775,24 @@ Si ya no necesita el espacio, no tiene que hacer nada. Solo asegúrese de descar
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Su suscripción ha finalizado, pero su espacio sigue aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Esperamos que ${LetterLogoText} le haya facilitado un poco el trabajo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente.
+
+La buena noticia: conservarlo es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y equipo seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivación del Portal "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
@@ -1617,6 +1635,9 @@ $TrulyYours</value>
     <value>Su contraseña se ha cambiado correctamente</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

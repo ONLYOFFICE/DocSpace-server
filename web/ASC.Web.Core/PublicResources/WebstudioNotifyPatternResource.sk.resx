@@ -788,6 +788,24 @@ Ak priestor už nepotrebujete, nemusíte nič robiť. Len si do $BlockDateShort 
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Vaše predplatné skončilo, ale váš priestor tu stále je
+
+Dátum skončenia vášho predplatného ${LetterLogoText} pre *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Ďakujeme, že ste s nami pracovali. Dúfame, že vám ${LetterLogoText} prácu aspoň trochu uľahčil.
+
+Aby všetko fungovalo hladko, blokujeme priestory, ktorým skončilo predplatné. Pre ten váš to znamená:
+
+*$BlockDate*: váš priestor bude zablokovaný a nebudete sa môcť prihlásiť.
+*$DeleteDate*: priestor a všetky jeho údaje budú natrvalo odstránené.
+
+Dobrá správa: zachovať ho je jednoduché. Stačí do $BlockDateShort obnoviť predplatné a vaše dokumenty, nastavenia aj tím zostanú presne tam, kde ste ich nechali.
+
+$OrangeButton
+
+Ak ste sa rozhodli ísť ďalej, je to úplne v poriadku. Len si do $BlockDateShort nezabudnite zálohovať údaje, ktoré si chcete ponechať.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivácia "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
 
@@ -1655,6 +1673,9 @@ $TrulyYours</value>
     <value>Vaše heslo bolo úspešne zmenené</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Vášmu priestoru ${LetterLogoText} chýbate (je potrebné konať do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Vášmu priestoru ${LetterLogoText} chýbate (je potrebné konať do $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

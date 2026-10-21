@@ -788,6 +788,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Η συνδρομή σας έληξε, αλλά ο χώρος σας είναι ακόμα εδώ
+
+Ημερομηνία λήξης της συνδρομής σας στο ${LetterLogoText} για τον χώρο *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Σας ευχαριστούμε που συνεργαστήκατε μαζί μας. Ελπίζουμε το ${LetterLogoText} να έκανε τη δουλειά σας λίγο πιο εύκολη.
+
+Για να λειτουργούν όλα ομαλά, αποκλείουμε τους χώρους των οποίων η συνδρομή έχει λήξει. Δείτε τι σημαίνει αυτό για τον δικό σας:
+
+*$BlockDate*: ο χώρος σας θα αποκλειστεί και δεν θα μπορείτε να συνδεθείτε.
+*$DeleteDate*: ο χώρος και όλα τα δεδομένα του θα διαγραφούν οριστικά.
+
+Τα καλά νέα: η διατήρησή του είναι εύκολη. Απλώς ανανεώστε τη συνδρομή σας έως τις $BlockDateShort και τα έγγραφα, οι ρυθμίσεις και η ομάδα σας θα μείνουν ακριβώς εκεί που τα αφήσατε.
+
+$OrangeButton
+
+Αν αποφασίσατε να προχωρήσετε σε κάτι άλλο, δεν υπάρχει κανένα πρόβλημα. Απλώς θυμηθείτε να δημιουργήσετε αντίγραφα ασφαλείας των δεδομένων που θέλετε να κρατήσετε έως τις $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Απενεργοποίηση της πύλης "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1655,6 +1673,9 @@ $TrulyYours</value>
     <value>Ο κωδικός πρόσβασής σας άλλαξε με επιτυχία</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ο χώρος σας στο ${LetterLogoText} σας αναζητά (απαιτείται ενέργεια έως τις $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Ο χώρος σας στο ${LetterLogoText} σας αναζητά (απαιτείται ενέργεια έως τις $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

@@ -797,6 +797,24 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.您的订阅已结束，但您的空间仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。希望 ${LetterLogoText} 让您的工作更轻松了一些。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将被永久删除。
+
+好消息是：保留空间很简单。只需在 ${BlockDateShort} 前续订，您的文档、设置和团队都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户停用
 
@@ -1640,6 +1658,9 @@ $TrulyYours</value>
     <value>您的密码已成功更改</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

@@ -775,6 +775,24 @@ Wenn Sie den Arbeitsbereich nicht mehr benötigen, müssen Sie nichts tun. Laden
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Ihr Abonnement ist abgelaufen, aber Ihr Arbeitsbereich ist noch da
+
+Ihr ${LetterLogoText} Abonnement für *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist am *$DueDate* abgelaufen. Vielen Dank, dass Sie mit uns gearbeitet haben. Wir hoffen, ${LetterLogoText} hat Ihnen die Arbeit ein wenig erleichtert.
+
+Damit alles reibungslos läuft, sperren wir Arbeitsbereiche, deren Abonnement abgelaufen ist. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden endgültig gelöscht.
+
+Die gute Nachricht: Ihn zu behalten ist ganz einfach. Verlängern Sie einfach Ihr Abonnement vor dem $BlockDateShort, und Ihre Dokumente, Einstellungen und Ihr Team bleiben genau da, wo Sie sie hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Daten zu sichern, die Sie behalten möchten.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivierung des Portals "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1617,6 +1635,9 @@ $TrulyYours</value>
     <value>Ihr Passwort wurde erfolgreich geändert</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

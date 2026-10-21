@@ -777,6 +777,24 @@ Ako ti prostor više nije potreban, ne moraš ništa da radiš. Samo ne zaboravi
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Tvoja pretplata je istekla, ali tvoj prostor je još tu
+
+Datum isteka tvoje ${LetterLogoText} pretplate za *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Hvala na saradnji. Nadamo se da ti je ${LetterLogoText} bar malo olakšao posao.
+
+Da bi sve nesmetano radilo, blokiramo prostore kojima je istekla pretplata. Evo šta to znači za tvoj:
+
+*$BlockDate*: tvoj prostor će biti blokiran i nećeš moći da se prijaviš.
+*$DeleteDate*: prostor i svi njegovi podaci biće trajno obrisani.
+
+Dobra vest: zadržati ga je lako. Samo obnovi pretplatu (rok: $BlockDateShort) i tvoji dokumenti, podešavanja i tim ostaće tačno tamo gde su bili.
+
+$OrangeButton
+
+Ako su ti se planovi promenili, to je sasvim u redu. Samo ne zaboravi da napraviš rezervnu kopiju podataka koje želiš da zadržiš (rok: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivacija portala "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1619,6 +1637,9 @@ $TrulyYours</value>
     <value>Vaša lozinka je uspešno promenjena</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Tvom ${LetterLogoText} prostoru nedostaješ (rok za akciju: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Tvom ${LetterLogoText} prostoru nedostaješ (rok za akciju: $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

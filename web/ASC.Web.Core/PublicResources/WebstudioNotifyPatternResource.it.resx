@@ -775,6 +775,24 @@ Se lo spazio non ti serve più, non devi fare nulla. Ricordati solo di scaricare
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Il tuo abbonamento è scaduto, ma il tuo spazio è ancora qui
+
+Il tuo abbonamento ${LetterLogoText} per *"${__VirtualRootPath}":"${__VirtualRootPath}"* è scaduto *$DueDate*. Grazie per aver lavorato con noi. Speriamo che ${LetterLogoText} ti abbia reso il lavoro un po' più semplice.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi il cui abbonamento è scaduto. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+
+La buona notizia: mantenerlo è facile. Basta rinnovare l'abbonamento entro il $BlockDateShort e i tuoi documenti, le impostazioni e il team resteranno esattamente dove li hai lasciati.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di eseguire il backup dei dati che vuoi conservare entro il $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Disattivazione del portale "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1617,6 +1635,9 @@ $TrulyYours</value>
     <value>La tua password è stata cambiata con successo</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} sente la tua mancanza (azione richiesta entro il $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Il tuo spazio ${LetterLogoText} sente la tua mancanza (azione richiesta entro il $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">

@@ -775,6 +775,24 @@ Jeśli przestrzeń nie jest Ci już potrzebna, nie musisz nic robić. Pamiętaj 
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Twoja subskrypcja wygasła, ale Twoja przestrzeń wciąż tu jest
+
+Data wygaśnięcia Twojej subskrypcji ${LetterLogoText} dla *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Dziękujemy za współpracę z nami. Mamy nadzieję, że ${LetterLogoText} choć trochę ułatwił Ci pracę.
+
+Aby wszystko działało sprawnie, blokujemy przestrzenie po wygaśnięciu subskrypcji. Oto co to oznacza dla Twojej:
+
+*$BlockDate*: Twoja przestrzeń zostanie zablokowana i nie będzie można się zalogować.
+*$DeleteDate*: przestrzeń i wszystkie jej dane zostaną trwale usunięte.
+
+Dobra wiadomość: zachowanie jej jest proste. Wystarczy odnowić subskrypcję do $BlockDateShort, a Twoje dokumenty, ustawienia i zespół pozostaną dokładnie tam, gdzie były.
+
+$OrangeButton
+
+Jeśli Twoje plany się zmieniły, to zupełnie w porządku. Pamiętaj tylko, aby do $BlockDateShort utworzyć kopię zapasową danych, które chcesz zachować.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Doaktywacja portalu "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1608,6 +1626,9 @@ $TrulyYours</value>
     <value>Twoje hasło zostało pomyślnie zmienione</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Twoja przestrzeń ${LetterLogoText} tęskni za Tobą (wymagane działanie do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>Twoja przestrzeń ${LetterLogoText} tęskni za Tobą (wymagane działanie do $BlockDateShort)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
