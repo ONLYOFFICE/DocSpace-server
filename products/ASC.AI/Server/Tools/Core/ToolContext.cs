@@ -44,12 +44,20 @@ public class ToolContext
     /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
     /// only, and never for the main chat agent.</summary>
     public bool FormSubAgent { get; init; }
+
+    /// <summary>The knowledge room the composer connected for the round (0 = none): the knowledge search
+    /// tool searches it instead of the folder the chat is opened from.</summary>
+    public int KnowledgeRoomId { get; init; }
 }
 
 public class ResolvedToolContext
 {
     public IFolder? Folder { get; init; }
     public FileEntry? Form { get; init; }
+
+    /// <summary>The connected knowledge room, resolved with the caller's rights; null when none was sent,
+    /// it does not exist, or it is not a knowledge room.</summary>
+    public Folder<int>? KnowledgeRoom { get; init; }
 
     /// <summary>
     /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side

@@ -105,7 +105,9 @@ public class FileSecurity(
                 { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.None] }
             }.ToFrozenDictionary()
         },
-        { FolderType.AiRoom, _defaultFileShareDictionary }
+        { FolderType.AiRoom, _defaultFileShareDictionary },
+        { FolderType.InstructionsRoom, _defaultFileShareDictionary },
+        { FolderType.KnowledgeRoom, _defaultFileShareDictionary }
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> _linkCountRoomSettingsAccesses =
@@ -152,7 +154,9 @@ public class FileSecurity(
             }.ToFrozenDictionary()
         },
         { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() },
-        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() }
+        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.InstructionsRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
+        { FolderType.KnowledgeRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() }
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
@@ -230,6 +234,24 @@ public class FileSecurity(
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.Group, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.InstructionsRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.KnowledgeRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -1099,6 +1121,8 @@ public class FileSecurity(
             FolderType.PublicRoom => FileShare.ContentCreator,
             FolderType.VirtualDataRoom => FileShare.ContentCreator,
             FolderType.AiRoom => FileShare.ContentCreator,
+            FolderType.InstructionsRoom => FileShare.ContentCreator,
+            FolderType.KnowledgeRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }

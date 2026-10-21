@@ -133,15 +133,17 @@ public class VectorizationTask : DistributedTaskProgress
             }
 
             var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
-            if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
+            if (!parents.Exists(x => x.FolderType.IsKnowledgeStorage()))
             {
-                throw new InvalidOperationException("File is not in knowledge folder");
+                throw new InvalidOperationException("File is not in a knowledge folder or a knowledge room");
             }
 
-            var agent = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
+            // The chunks are scoped by the room that owns the knowledge base: the AI agent for its
+            // knowledge folder, or the knowledge room itself.
+            var agent = parents.FirstOrDefault(x => x.FolderType is FolderType.AiRoom or FolderType.KnowledgeRoom);
             if (agent == null)
             {
-                throw new InvalidOperationException("File is not in ai room");
+                throw new InvalidOperationException("File is not in an ai room or a knowledge room");
             }
 
             await collection.EnsureCollectionExistsAsync(CancellationToken);

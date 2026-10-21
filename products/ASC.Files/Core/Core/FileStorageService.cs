@@ -1306,12 +1306,16 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<Folder<int>> GetRoomAiFolderAsync(int roomId)
+    /// <summary>
+    /// The folder whose Markdown files are the AI chat skills of a room: the root of an Instructions room.
+    /// Any other room has no skills folder and is answered as not found.
+    /// </summary>
+    public async Task<Folder<int>> GetRoomSkillsFolderAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
-        if (room is not { IsRoom: true })
+        if (room is not { IsRoom: true, FolderType: FolderType.InstructionsRoom })
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
@@ -1321,9 +1325,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
-
-        return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        return room;
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)

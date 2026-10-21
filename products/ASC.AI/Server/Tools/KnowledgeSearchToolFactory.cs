@@ -122,19 +122,30 @@ public class KnowledgeSearchToolFactory(
             return ToolBundle.Empty;
         }
 
-        if (context.Folder is not Folder<int> { IsAgent: true } agent ||
+        // The knowledge base is owned by an AI agent (its knowledge folder) or by a knowledge
+        // room (every file in the room); both scope the chunks by their own id. A knowledge room
+        // connected in the composer wins over the folder the chat is opened from.
+        var owner = context.KnowledgeRoom
+                    ?? (context.Folder is Folder<int> { IsAgent: true } or Folder<int> { FolderType: FolderType.KnowledgeRoom }
+                        ? context.Folder as Folder<int>
+                        : null);
+
+        if (owner is not { } agent ||
             !await aiAccessibility.IsVectorizationEnabledAsync() ||
             !await fileSecurity.CanUseAiAsync(agent))
         {
             return ToolBundle.Empty;
         }
 
-        var folderDao = daoFactory.GetFolderDao<int>();
-
-        var knowledge = await folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
-        if (knowledge is null || knowledge.FilesCount == 0)
+        if (agent.IsAgent)
         {
-            return ToolBundle.Empty;
+            var folderDao = daoFactory.GetFolderDao<int>();
+
+            var knowledge = await folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
+            if (knowledge is null || knowledge.FilesCount == 0)
+            {
+                return ToolBundle.Empty;
+            }
         }
 
         return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(agent))]);

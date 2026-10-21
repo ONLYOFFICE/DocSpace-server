@@ -122,8 +122,9 @@ public class ToolService(
     {
         var folderTask = ResolveFolderAsync(context.FolderId);
         var formTask = ResolveFormAsync(context.FormId);
+        var knowledgeRoomTask = ResolveKnowledgeRoomAsync(context.KnowledgeRoomId);
 
-        await Task.WhenAll(folderTask, formTask);
+        await Task.WhenAll(folderTask, formTask, knowledgeRoomTask);
 
         // Form-data tools run only inside a launched analysis, kept per attachment to isolate conversations.
         var analyze = Guid.TryParse(context.AttachmentId, out var attachmentId)
@@ -133,6 +134,7 @@ public class ToolService(
         {
             Folder = await folderTask,
             Form = await formTask,
+            KnowledgeRoom = await knowledgeRoomTask,
             Analyze = analyze,
             FormSubAgent = context.FormSubAgent
         };
@@ -157,6 +159,20 @@ public class ToolService(
             default:
                 return null;
         }
+    }
+
+    private async Task<Folder<int>?> ResolveKnowledgeRoomAsync(int roomId)
+    {
+        if (roomId <= 0)
+        {
+            return null;
+        }
+
+        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId);
+
+        return room is { FolderType: FolderType.KnowledgeRoom }
+            ? await fileSecurity.SetSecurity(new[] { room }.ToAsyncEnumerable()).FirstAsync() as Folder<int>
+            : null;
     }
 
     private async Task<File<int>?> ResolveFormAsync(int formId)

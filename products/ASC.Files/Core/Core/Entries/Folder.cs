@@ -131,7 +131,13 @@ public enum FolderType
     Forms = 36,
 
     [Description("Ai")]
-    Ai = 37
+    Ai = 37,
+
+    [Description("Instructions room")]
+    InstructionsRoom = 38,
+
+    [Description("Knowledge room")]
+    KnowledgeRoom = 39
 }
 
 /// <summary>

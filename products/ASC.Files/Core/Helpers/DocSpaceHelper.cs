@@ -42,7 +42,9 @@ public static class DocSpaceHelper
         FolderType.FillingFormsRoom,
         FolderType.PublicRoom,
         FolderType.VirtualDataRoom,
-        FolderType.AiRoom
+        FolderType.AiRoom,
+        FolderType.InstructionsRoom,
+        FolderType.KnowledgeRoom
     ];
 
     extension(FolderType folderType)
@@ -56,6 +58,28 @@ public static class DocSpaceHelper
         {
             return folderType == FolderType.AiRoom;
         }
+
+        /// <summary>
+        /// A folder whose files are vectorized for knowledge search: the agent's knowledge folder
+        /// or a knowledge room (the whole room is the knowledge base, subfolders included).
+        /// </summary>
+        public bool IsKnowledgeStorage()
+        {
+            return folderType is FolderType.Knowledge or FolderType.KnowledgeRoom;
+        }
+    }
+
+    /// <summary>
+    /// True when a file placed directly in <paramref name="folderType"/> inside a room of
+    /// <paramref name="roomType"/> belongs to a knowledge base and must be vectorized.
+    /// </summary>
+    public static bool IsKnowledgeScope(FolderType folderType, FolderType roomType)
+    {
+        return folderType.IsKnowledgeStorage() || roomType == FolderType.KnowledgeRoom;
+    }
+
+    extension(FolderType folderType)
+    {
 
         /// <summary>
         /// A section root the whole portal shares (created without a user, see <c>FolderDao.GetFolderID*</c>):
@@ -101,6 +125,8 @@ public static class DocSpaceHelper
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
             FolderType.AiRoom => RoomType.AiRoom,
+            FolderType.InstructionsRoom => RoomType.InstructionsRoom,
+            FolderType.KnowledgeRoom => RoomType.KnowledgeRoom,
             _ => null
         };
     }
@@ -115,6 +141,8 @@ public static class DocSpaceHelper
             RoomType.PublicRoom => FolderType.PublicRoom,
             RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
             RoomType.AiRoom => FolderType.AiRoom,
+            RoomType.InstructionsRoom => FolderType.InstructionsRoom,
+            RoomType.KnowledgeRoom => FolderType.KnowledgeRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
@@ -150,6 +178,8 @@ public static class DocSpaceHelper
             FilterType.PublicRooms => FolderType.PublicRoom,
             FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             FilterType.AiRooms => FolderType.AiRoom,
+            FilterType.InstructionsRooms => FolderType.InstructionsRoom,
+            FilterType.KnowledgeRooms => FolderType.KnowledgeRoom,
             _ => null
         };
     }

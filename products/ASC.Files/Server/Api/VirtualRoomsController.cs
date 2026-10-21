@@ -116,24 +116,25 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as
-    /// `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with
-    /// `GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot
-    /// is refused, and a room that does not exist or holds no .ai folder is answered as not found.
+    /// Returns one page of the root contents of an Instructions room, whose Markdown files are the skills of the AI
+    /// chat, in the same shape as `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that provide
+    /// skills are listed with `GET api/2.0/files/rooms?withAiFolder=true` (or `type=10`). Any member who can read the
+    /// room may call it; somebody who cannot is refused, and a room that does not exist or is not an Instructions room
+    /// is answered as not found.
     /// </remarks>
-    /// <summary>Get the .ai folder of a room</summary>
+    /// <summary>Get the skills folder of an Instructions room</summary>
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "One page of the Instructions room root, with the room itself and the chain of its parents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
-    [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
+    [SwaggerResponse(404, "The room does not exist or is not an Instructions room")]
     [HttpGet("{id}/ai")]
     public async Task<FolderContentDto<int>> GetRoomAiFolder(GetRoomAiFolderRequestDto inDto)
     {
-        var aiFolder = await _fileStorageService.GetRoomAiFolderAsync(inDto.Id);
+        var skillsFolder = await _fileStorageService.GetRoomSkillsFolderAsync(inDto.Id);
 
-        return await folderContentDtoHelper.GetAsync(aiFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(skillsFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <remarks>

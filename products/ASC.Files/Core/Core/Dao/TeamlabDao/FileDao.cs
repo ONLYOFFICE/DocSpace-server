@@ -312,7 +312,7 @@ internal class FileDao(
             q = q.Take(count);
         }
 
-        var attachVectorizationStatus = parentType is FolderType.Knowledge;
+        var attachVectorizationStatus = parentType.IsKnowledgeStorage();
 
         var result = withShared
             ? FromQueryWithShared(filesDbContext, q, attachVectorizationStatus)
@@ -512,7 +512,12 @@ internal class FileDao(
             throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
         }
 
-        var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        var (roomId, _, roomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        // A knowledge room vectorizes every supported file it holds, new versions included;
+        // unsupported or oversized files stay in the room as ordinary files.
+        var inKnowledgeRoom = roomType == FolderType.KnowledgeRoom &&
+                              vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) &&
+                              file.ContentLength <= vectorizationGlobalSettings.MaxContentLength;
         UserInfo user = null;
         string quotaLockKey;
         TenantEntityQuotaSettings roomQuotaSettings = null;
@@ -635,7 +640,7 @@ internal class FileDao(
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
 
-                        if (isNew && currentFolder is { FolderType: FolderType.Knowledge })
+                        if ((isNew && currentFolder is { FolderType: FolderType.Knowledge }) || inKnowledgeRoom)
                         {
                             needVectorization = true;
                             file.VectorizationStatus = VectorizationStatus.InProgress;
@@ -1281,8 +1286,8 @@ internal class FileDao(
         var fileContentLength = file.ContentLength;
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        var (fromRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-        var (toRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+        var (fromRoomId, _, fromRoomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+        var (toRoomId, _, toRoomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
 
         var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
@@ -1292,8 +1297,13 @@ internal class FileDao(
         var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
-        var needDeleteVectors = fromFolder.FolderType is FolderType.Knowledge;
-        var needVectorization = toFolder.FolderType is FolderType.Knowledge;
+        var needVectorization = toFolder.FolderType is FolderType.Knowledge ||
+                                (toRoomType == FolderType.KnowledgeRoom &&
+                                 vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) &&
+                                 fileContentLength <= vectorizationGlobalSettings.MaxContentLength);
+        // Re-vectorization replaces the chunks by file id, so the old vectors are dropped only
+        // when the file leaves every knowledge base.
+        var needDeleteVectors = DocSpaceHelper.IsKnowledgeScope(fromFolder.FolderType, fromRoomType) && !needVectorization;
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
@@ -3306,7 +3316,7 @@ internal class FileDao(
                 Location.Room =>
                     query.Where(x => x.Tag == documentsTagType &&
                          filesDbContext.Folders
-                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
+                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom || f.FolderType == FolderType.InstructionsRoom || f.FolderType == FolderType.KnowledgeRoom))
                          .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>

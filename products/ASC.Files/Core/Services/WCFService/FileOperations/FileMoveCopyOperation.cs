@@ -701,7 +701,8 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         if (!copy && typeof(T) == typeof(int) && toFolder.Id is int &&
             !toFolder.ProviderEntry &&
             toFolder.RootFolderType is not (FolderType.TRASH or FolderType.Archive or FolderType.Privacy) &&
-            toFolder.FolderType is not FolderType.Knowledge)
+            !toFolder.FolderType.IsKnowledgeStorage() &&
+            !toParentFolders.Any(f => f.FolderType == FolderType.KnowledgeRoom))
         {
             fileIdsToProcess = await MoveFileBatchAsync(scope, fileIds, toFolder, toParentFolders, needToMark, sb, GetParentFolderAsync, checkPermissions);
         }
@@ -1121,11 +1122,22 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
             if (parent == null ||
                 parent.RootFolderType is FolderType.TRASH ||
-                parent.FolderType is FolderType.Knowledge ||
+                parent.FolderType.IsKnowledgeStorage() ||
                 parent.RootCreateBy != toFolder.RootCreateBy)
             {
                 fallback.Add(fileId);
                 continue;
+            }
+
+            // Leaving a knowledge room drops the file's vectors, which only the per-file move does.
+            if (parent.RootFolderType == FolderType.VirtualRooms)
+            {
+                var (_, _, parentRoomType) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(parent);
+                if (parentRoomType == FolderType.KnowledgeRoom)
+                {
+                    fallback.Add(fileId);
+                    continue;
+                }
             }
 
             if (!parentRoomCache.TryGetValue(parent.Id, out var fromRoomId))
