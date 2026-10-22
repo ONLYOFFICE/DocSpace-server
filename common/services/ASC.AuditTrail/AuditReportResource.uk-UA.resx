@@ -244,19 +244,19 @@
     <value>Звіт про клієнтські операції завантажено</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Створено ліміт витрат на послугу: {0}, {1}</value>
+    <value>Створено ліміт витрат на службу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Змінено ліміт витрат на послугу: {0}, {1}</value>
+    <value>Оновлено ліміт витрат на службу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Видалено ліміт витрат на послугу: {0}, {1}</value>
+    <value>Видалено ліміт витрат на службу: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Встановлено ліміти витрат на послугу для користувачів: {0}</value>
+    <value>Встановлено персональні ліміти витрат на службу: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Вимкнено ліміти витрат на послугу для всіх користувачів: {0}</value>
+    <value>Вимкнено персональні ліміти витрат на службу: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Підписку клієнта оновлено: {0}</value>

@@ -253,10 +253,10 @@
     <value>Ograničenje potrošnje za uslugu je izbrisano: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Ograničenja potrošnje za uslugu su postavljena za korisnike: {0}</value>
+    <value>Lična ograničenja potrošnje za uslugu su postavljena: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Ograničenja potrošnje za uslugu su onemogućena za sve korisnike: {0}</value>
+    <value>Lična ograničenja potrošnje za uslugu su onemogućena: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Pretplata korisnika je ažurirana: {0}</value>

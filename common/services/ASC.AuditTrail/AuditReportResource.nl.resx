@@ -244,19 +244,19 @@
     <value>Klantactiviteitenverslag gedownload</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>Uitgavenlimiet voor dienst aangemaakt: {0}, {1}</value>
+    <value>Uitgavenlimiet voor service aangemaakt: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>Uitgavenlimiet voor dienst bijgewerkt: {0}, {1}</value>
+    <value>Uitgavenlimiet voor service bijgewerkt: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>Uitgavenlimiet voor dienst verwijderd: {0}, {1}</value>
+    <value>Uitgavenlimiet voor service verwijderd: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Uitgavenlimieten voor dienst ingesteld voor gebruikers: {0}</value>
+    <value>Persoonlijke uitgavenlimieten voor service ingesteld: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Uitgavenlimieten voor dienst uitgeschakeld voor alle gebruikers: {0}</value>
+    <value>Persoonlijke uitgavenlimieten voor service uitgeschakeld: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Klantabonnement bijgewerkt: {0}</value>

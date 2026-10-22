@@ -247,10 +247,10 @@
     <value>Kufiri i shpenzimeve për shërbimin u fshi: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Kufijtë e shpenzimeve për shërbimin u vendosën për përdoruesit: {0}</value>
+    <value>Kufijtë personalë të shpenzimeve për shërbimin u vendosën: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Kufijtë e shpenzimeve për shërbimin u çaktivizuan për të gjithë përdoruesit: {0}</value>
+    <value>Kufijtë personalë të shpenzimeve për shërbimin u çaktivizuan: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abonimi i klientit është përditësua: {0}</value>

@@ -247,10 +247,10 @@
     <value>Limit výdajů na službu odstraněn: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Limity výdajů na službu nastaveny pro uživatele: {0}</value>
+    <value>Osobní limity výdajů na službu nastaveny: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Limity výdajů na službu vypnuty pro všechny uživatele: {0}</value>
+    <value>Osobní limity výdajů na službu vypnuty: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Předplatné zákazníka aktualizováno: {0}</value>

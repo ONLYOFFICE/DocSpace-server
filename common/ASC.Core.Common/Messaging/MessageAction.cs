@@ -1065,19 +1065,19 @@ public enum MessageAction
     [Description("Portal unblocked")]
     PortalUnblocked = 6111,
 
-    [Description("Customer service limit created")]
+    [Description("Service spending limit created")]
     CustomerServiceLimitCreated = 6112,
 
-    [Description("Customer service limit updated")]
+    [Description("Service spending limit updated")]
     CustomerServiceLimitUpdated = 6113,
 
-    [Description("Customer service limits set for users")]
+    [Description("Personal service spending limits set")]
     CustomerServiceLimitsSet = 6114,
 
-    [Description("Customer service limits of users disabled")]
+    [Description("Personal service spending limits disabled")]
     CustomerServiceLimitsDisabled = 6115,
 
-    [Description("Customer service limit deleted")]
+    [Description("Service spending limit deleted")]
     CustomerServiceLimitDeleted = 6116,
 
     #endregion

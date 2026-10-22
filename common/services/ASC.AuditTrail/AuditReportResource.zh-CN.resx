@@ -244,19 +244,19 @@
     <value>客户操作报告已下载</value>
   </data>
   <data name="CustomerServiceLimitCreated" xml:space="preserve">
-    <value>已创建服务支出限额: {0}, {1}</value>
+    <value>服务支出限额已创建: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
-    <value>已更新服务支出限额: {0}, {1}</value>
+    <value>服务支出限额已更新: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitDeleted" xml:space="preserve">
-    <value>已删除服务支出限额: {0}, {1}</value>
+    <value>服务支出限额已删除: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>已为用户设置服务支出限额: {0}</value>
+    <value>服务个人支出限额已设置: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>已停用所有用户的服务支出限额: {0}</value>
+    <value>服务个人支出限额已停用: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>客户订阅已更新: {0}</value>

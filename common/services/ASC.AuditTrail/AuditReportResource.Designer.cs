@@ -538,7 +538,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Customer service limit created: {0}, {1}.
+        ///   Looks up a localized string similar to Service spending limit created: {0}, {1}.
         /// </summary>
         public static string CustomerServiceLimitCreated {
             get {
@@ -547,7 +547,7 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Customer service limit deleted: {0}, {1}.
+        ///   Looks up a localized string similar to Service spending limit deleted: {0}, {1}.
         /// </summary>
         public static string CustomerServiceLimitDeleted {
             get {
@@ -556,7 +556,7 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Customer service limits of all users disabled: {0}.
+        ///   Looks up a localized string similar to Personal service spending limits disabled: {0}.
         /// </summary>
         public static string CustomerServiceLimitsDisabled {
             get {
@@ -565,7 +565,7 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Customer service limits set for users: {0}.
+        ///   Looks up a localized string similar to Personal service spending limits set: {0}.
         /// </summary>
         public static string CustomerServiceLimitsSet {
             get {
@@ -574,7 +574,7 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Customer service limit updated: {0}, {1}.
+        ///   Looks up a localized string similar to Service spending limit updated: {0}, {1}.
         /// </summary>
         public static string CustomerServiceLimitUpdated {
             get {

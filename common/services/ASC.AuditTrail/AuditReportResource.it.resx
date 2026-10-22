@@ -253,10 +253,10 @@
     <value>Limite di spesa del servizio eliminato: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Limiti di spesa del servizio impostati per gli utenti: {0}</value>
+    <value>Limiti di spesa personali del servizio impostati: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Limiti di spesa del servizio disattivati per tutti gli utenti: {0}</value>
+    <value>Limiti di spesa personali del servizio disattivati: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abbonamento cliente aggiornato: {0}</value>

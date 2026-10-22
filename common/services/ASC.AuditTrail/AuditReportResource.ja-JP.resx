@@ -247,10 +247,10 @@
     <value>サービスの支出上限が削除されました: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>ユーザーのサービス支出上限が設定されました: {0}</value>
+    <value>サービスの個人別支出上限が設定されました: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>全ユーザーのサービス支出上限が無効になりました: {0}</value>
+    <value>サービスの個人別支出上限が無効になりました: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>顧客サブスクリプションが更新されました: {0}</value>

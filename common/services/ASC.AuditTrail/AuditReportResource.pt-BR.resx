@@ -253,10 +253,10 @@
     <value>Limite de gastos do serviço excluído: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Limites de gastos do serviço definidos para usuários: {0}</value>
+    <value>Limites de gastos pessoais do serviço definidos: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Limites de gastos do serviço desativados para todos os usuários: {0}</value>
+    <value>Limites de gastos pessoais do serviço desativados: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Assinatura do cliente atualizada: {0}</value>

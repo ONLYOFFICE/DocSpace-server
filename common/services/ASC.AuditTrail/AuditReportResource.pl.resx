@@ -253,10 +253,10 @@
     <value>Limit wydatków na usługę został usunięty: {0}, {1}</value>
   </data>
   <data name="CustomerServiceLimitsSet" xml:space="preserve">
-    <value>Limity wydatków na usługę zostały ustawione dla użytkowników: {0}</value>
+    <value>Osobiste limity wydatków na usługę zostały ustawione: {0}</value>
   </data>
   <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
-    <value>Limity wydatków na usługę zostały wyłączone dla wszystkich użytkowników: {0}</value>
+    <value>Osobiste limity wydatków na usługę zostały wyłączone: {0}</value>
   </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Subskrypcja klienta została zaktualizowana: {0}</value>
