@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Models;
 
 /// <summary>
 /// The spending limit on the AI services in force for one user: the user's personal limit, or else the limit for every
-/// user, together with what the user spent against it in the current period.
+/// user, together with the money the user spent against it in the current period.
 /// </summary>
 public class UserServiceLimitDto
 {
@@ -53,8 +53,8 @@ public class UserServiceLimitDto
     public ServiceLimitScope Scope { get; init; }
 
     /// <summary>
-    /// The most money the AI services may cost the user per period, in `currency`; null when the limit has no money
-    /// threshold.
+    /// The most money the AI services may cost the user per period, in `currency`. It is the only threshold a limit on
+    /// the AI services has: their services count in different units, so a threshold on a quantity is refused for them.
     /// </summary>
     /// <example>40</example>
     public decimal? AmountValue { get; init; }
