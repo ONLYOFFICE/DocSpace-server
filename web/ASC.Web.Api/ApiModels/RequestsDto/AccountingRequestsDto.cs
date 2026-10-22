@@ -417,9 +417,9 @@ public static class ServiceLimitConstraints
 }
 
 /// <summary>
-/// The parameters that select one service limit of the portal.
+/// The parameters that select one service limit of the portal, for reading or deleting it.
 /// </summary>
-public class ServiceLimitRequestDto
+public class ServiceLimitIdRequestDto
 {
     /// <summary>
     /// The ID of the service limit, as returned in `id` by the operation that created it or by the reads of limits.
@@ -433,7 +433,7 @@ public class ServiceLimitRequestDto
 /// <summary>
 /// How the list of the limits in force for the portal users is paged and sorted.
 /// </summary>
-public class ParticipantServiceLimitsRequestDto
+public class GetParticipantServiceLimitsRequestDto
 {
     /// <summary>
     /// The number of limits to skip before the first one returned. Counted after the ordering is applied, and starts

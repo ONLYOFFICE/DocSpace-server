@@ -1626,7 +1626,7 @@ public class PaymentController(
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
     [HttpGet("servicelimit/{id:int}")]
-    public async Task<ServiceLimitDto> GetServiceLimit(ServiceLimitRequestDto inDto)
+    public async Task<ServiceLimitDto> GetServiceLimit(ServiceLimitIdRequestDto inDto)
     {
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
@@ -1710,7 +1710,7 @@ public class PaymentController(
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer")]
     [HttpGet("servicelimit/participants")]
-    public async Task<ServiceLimitReportDto> GetParticipantServiceLimits(ParticipantServiceLimitsRequestDto inDto)
+    public async Task<ServiceLimitReportDto> GetParticipantServiceLimits(GetParticipantServiceLimitsRequestDto inDto)
     {
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
@@ -1944,7 +1944,7 @@ public class PaymentController(
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
     [HttpDelete("servicelimit/{id:int}")]
-    public async Task DeleteServiceLimit(ServiceLimitRequestDto inDto)
+    public async Task DeleteServiceLimit(ServiceLimitIdRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
