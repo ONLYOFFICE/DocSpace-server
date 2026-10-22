@@ -40,7 +40,6 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 [Trait("Category", "Metadata")]
 public class MetadataAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const int StringType = 0;
     private const string ClientField = "Client";
     private const string DepartmentField = "Department";
 
@@ -50,23 +49,24 @@ public class MetadataAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
         await _filesClient.Authenticate(Owner);
         // the audit trail is read through the Web.Api client, which carries its own credentials
         await _webApiClient.Authenticate(Owner);
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Guid.NewGuid().ToString()[..8];
         var templateName = "Audited " + suffix;
         var renamed = templateName + " renamed";
         var roomTitle = $"Audited {suffix}";
 
-        var template = await api.CreateTemplateAsync(templateName, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
-        var department = await api.CreateFieldAsync(template.Id, new MetadataFieldPayload { Name = DepartmentField, Type = StringType }, TestContext.Current.CancellationToken);
-        await api.UpdateTemplateAsync(template.Id, new { name = renamed }, TestContext.Current.CancellationToken);
+        var template = (await _metadataApi.CreateTemplateAsync(
+            new CreateMetadataTemplateRequestDto(templateName, true, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]), TestContext.Current.CancellationToken)).Response;
+        var department = (await _metadataApi.CreateFieldAsync(template.Id, new MetadataFieldRequest(DepartmentField, MetadataFieldType.String), TestContext.Current.CancellationToken)).Response;
+        await _metadataApi.UpdateTemplateAsync(template.Id, new UpdateMetadataTemplate(renamed), TestContext.Current.CancellationToken);
 
         var room = await CreateCustomRoom(roomTitle);
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field(ClientField).Id, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await api.UnassignFolderTemplateAsync(room.Id, template.Id, TestContext.Current.CancellationToken);
-        await api.DeleteFieldAsync(template.Id, department.Id, TestContext.Current.CancellationToken);
-        await api.DeleteTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(room.Id,
+            new SetMetadataValues([new MetadataValueRequest(template.Field(ClientField).Id, stringValue: "ACME")]), TestContext.Current.CancellationToken);
+        await _metadataApi.UnassignFolderTemplateAsync(room.Id, template.Id, TestContext.Current.CancellationToken);
+        await _metadataApi.DeleteFieldAsync(template.Id, department.Id, TestContext.Current.CancellationToken);
+        await _metadataApi.DeleteTemplateAsync(template.Id, TestContext.Current.CancellationToken);
 
         // the events are written by the audit service behind the message bus, after the requests return
         // the events are asserted by their text alone: the generated MessageAction of the SDK predates the metadata actions

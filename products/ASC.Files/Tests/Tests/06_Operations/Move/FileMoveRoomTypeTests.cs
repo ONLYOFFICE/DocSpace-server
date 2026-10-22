@@ -99,6 +99,7 @@ public class FileMoveRoomTypeTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(room.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -123,6 +124,7 @@ public class FileMoveRoomTypeTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],

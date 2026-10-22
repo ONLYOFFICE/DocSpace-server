@@ -723,6 +723,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal ist deaktiviert</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal durch die Aufbewahrungsrichtlinie gesperrt</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal entsperrt</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Das Portal ist gelöscht</value>
   </data>

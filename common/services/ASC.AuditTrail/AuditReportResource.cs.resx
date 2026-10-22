@@ -717,6 +717,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portál byl deaktivován</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portál byl zablokován zásadami uchovávání dat</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portál byl odblokován</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portál odstraněn</value>
   </data>

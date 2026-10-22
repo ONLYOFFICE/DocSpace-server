@@ -47,7 +47,7 @@ public abstract class EmptyTrashTestBase(
     protected async Task DeleteFileToTrashAsync(int fileId)
     {
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(fileId)], Immediately = false },
+            new DeleteBatchRequestDto { FileIds = [new(fileId)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
@@ -64,7 +64,7 @@ public abstract class EmptyTrashTestBase(
     protected async Task DeleteFolderToTrashAsync(int folderId)
     {
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FolderIds = [new(folderId)], Immediately = false },
+            new DeleteBatchRequestDto { FolderIds = [new(folderId)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
@@ -113,15 +113,17 @@ public abstract class EmptyTrashTestBase(
     /// <summary>
     /// Empties the Trash of the currently authenticated user and waits for the operation to finish.
     /// The started operation(s) are returned as last observed, per the same "may already be pruned"
-    /// caveat as every other batch operation endpoint.
+    /// caveat as every other batch operation endpoint. Unless the caller asks otherwise, only the
+    /// started operation is returned (<c>single</c>), so the wait follows that operation and not an
+    /// older one of the same user that happens to be listed first.
     /// </summary>
     protected async Task<List<FileOperationDto>> EmptyTrashAndWaitAsync(bool? single = null)
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(single, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single ?? true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id) ?? [];
         }
 
         results.Should().NotContain(operation => !operation.Finished || !string.IsNullOrEmpty(operation.Error));

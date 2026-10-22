@@ -726,6 +726,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>포털이 비활성화되었습니다</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>데이터 보존 정책에 따라 포털이 차단되었습니다</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>포털 차단이 해제되었습니다</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>포털이 삭제되었습니다</value>
   </data>

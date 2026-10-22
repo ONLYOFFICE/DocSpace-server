@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Conferma chiusura account</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Contatta l'assistenza</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Disattiva Portale</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Unisciti alla stanza</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Mantieni il mio spazio</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Mantieni il mio spazio e i fondi</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Esprimi una valutazione</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Imposta password</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Condividi il mio feedback</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Inizia il periodo di prova gratuita</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Sblocca il mio spazio</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Aggiornamento</value>
@@ -739,6 +754,186 @@ Browser: *$Browser*
 Se questa azione è stata effettuata da te, non sono necessari ulteriori passaggi. Se invece questa modifica ti sembra sospetta o non è stata autorizzata, reimposta immediatamente la tua password e disabilita l'accesso a ${LetterLogoText} per questo dispositivo.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Il portale ${PortalUrl} è stato bloccato dalla politica di conservazione dei dati: non veniva utilizzato oppure il suo abbonamento non è stato rinnovato; la categoria qui sotto indica quale dei due casi.
+
+*Portale:* ${PortalUrl}
+*Proprietario:* ${UserName} ${UserEmail}
+*Categoria:* ${Category}
+*Data di eliminazione:* ${DeleteDate}
+
+Se non viene sbloccato, il portale e tutti i suoi dati verranno eliminati in quella data.
+
+Se il proprietario chiede di mantenerlo, riattiva il portale prima di quella data.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Il tuo spazio è bloccato, ma non è ancora perso nulla
+
+#if($Unpaid == "True")
+Poiché l'abbonamento del tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, è scaduto, per ora lo abbiamo bloccato. Questo significa che al momento nessuno del tuo team può accedere, ma tutti i tuoi documenti e le impostazioni sono ancora al sicuro.
+#else
+Poiché il tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, non viene utilizzato da tempo, per ora lo abbiamo bloccato. Questo significa che al momento nessuno del tuo team può accedere, ma tutti i tuoi documenti e le impostazioni sono ancora al sicuro.
+#end
+
+Conserveremo i tuoi dati fino a *$DeleteDate*. Dopodiché, lo spazio e tutto il suo contenuto verranno eliminati definitivamente.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+La buona notizia: non è troppo tardi. Basta sbloccare il tuo spazio entro il $DeleteDateShort e poi rinnovare l'abbonamento per tornare al lavoro. Tutto sarà esattamente dove l'hai lasciato.
+#else
+La buona notizia: non è troppo tardi. Basta sbloccare il tuo spazio entro il $DeleteDateShort e tutto sarà esattamente dove l'hai lasciato.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Se hai deciso di passare ad altro, va benissimo. Se ci sono dati che vuoi conservare, sblocca il tuo spazio ed eseguine il backup entro il $DeleteDateShort.
+#else
+Se hai deciso di passare ad altro, va benissimo. Se ci sono file che vuoi conservare, sblocca il tuo spazio e scaricali entro il $DeleteDateShort.
+#end
+#else
+La buona notizia: non è troppo tardi. Basta contattare il nostro team di assistenza entro il $DeleteDateShort e ti aiuteremo a recuperare il tuo spazio, esattamente come l'hai lasciato.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Se ci sono file che vuoi conservare, faccelo sapere entro il $DeleteDateShort e ti aiuteremo ad accedervi.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Il tuo spazio è stato eliminato
+
+#if($Unpaid == "True")
+Poiché l'abbonamento del tuo spazio ${LetterLogoText}, *$PortalName*, è scaduto e non è stato rinnovato, lo abbiamo eliminato insieme a tutti i suoi dati, come descritto nella nostra "Informativa sulla privacy":"$URL1".
+#else
+Poiché il tuo spazio ${LetterLogoText}, *$PortalName*, non veniva utilizzato da molto tempo, lo abbiamo eliminato insieme a tutti i suoi dati, come descritto nella nostra "Informativa sulla privacy":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Grazie per aver lavorato con noi. Ci piacerebbe davvero sapere perché hai smesso di usarlo: qualcosa non ha funzionato, hai trovato una soluzione più adatta o semplicemente non ti serviva più? Ci vuole solo un minuto e ogni risposta ci aiuta a migliorare.
+#else
+Grazie per aver provato ${LetterLogoText}. Ci piacerebbe davvero sapere perché hai smesso di usarlo: qualcosa non ha funzionato, hai trovato una soluzione più adatta o semplicemente non ti serviva più? Ci vuole solo un minuto e ogni risposta ci aiuta a migliorare.
+#end
+
+$OrangeButton
+
+Se un giorno vorrai tornare, le nostre porte sono sempre aperte. Puoi "creare un nuovo spazio":"$URL2" in qualsiasi momento.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Il tuo spazio verrà eliminato a breve
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Il tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, è ancora bloccato perché il suo abbonamento è scaduto. Questo è un ultimo cordiale promemoria: *$DeleteDate* lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+#else
+Il tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, è ancora bloccato perché il suo abbonamento è scaduto. Questo è un cordiale promemoria: *$DeleteDate* lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+#end
+#else
+#if($FinalNotice == "True")
+Il tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, è ancora bloccato perché non viene utilizzato da tempo. Questo è un ultimo cordiale promemoria: *$DeleteDate* lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+#else
+Il tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, è ancora bloccato perché non viene utilizzato da tempo. Questo è un cordiale promemoria: *$DeleteDate* lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Se vuoi mantenerlo, c'è ancora tempo. Basta sbloccare il tuo spazio entro il $DeleteDateShort e poi rinnovare l'abbonamento per tornare al lavoro. Tutto sarà esattamente dove l'hai lasciato.
+#else
+Se vuoi mantenerlo, c'è ancora tempo. Basta sbloccare il tuo spazio entro il $DeleteDateShort e tutto sarà esattamente dove l'hai lasciato.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Se hai deciso di passare ad altro, va benissimo. Se ci sono dati che vuoi conservare, sblocca il tuo spazio ed eseguine il backup entro il $DeleteDateShort, perché dopo non potremo più recuperarli.
+#else
+Se hai deciso di passare ad altro, va benissimo. Se ci sono file che vuoi conservare, sblocca il tuo spazio e scaricali entro il $DeleteDateShort, perché dopo non potremo più recuperarli.
+#end
+#else
+Se vuoi mantenerlo, c'è ancora tempo. Basta contattare il nostro team di assistenza entro il $DeleteDateShort e ti aiuteremo a recuperare il tuo spazio, esattamente come l'hai lasciato.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Se ci sono file che vuoi conservare, faccelo sapere entro il $DeleteDateShort e ti aiuteremo ad accedervi, perché dopo non potremo più recuperarli.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.È da un po' che non ti vediamo
+
+È da un po' di tempo che nessuno accede al tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Volevamo contattarti prima che succeda qualcosa ai tuoi documenti e alle tue impostazioni.
+
+Per far funzionare tutto al meglio per tutti, blocchiamo gli spazi gratuiti inutilizzati da tempo. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+
+La buona notizia: mantenerlo è facile. Basta accedere una volta entro il $BlockDateShort e tutto resterà esattamente come l'hai lasciato.
+
+$OrangeButton
+
+Se lo spazio non ti serve più, non devi fare nulla. Ricordati solo di scaricare i file che vuoi conservare entro il $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Il tuo abbonamento è scaduto, ma il tuo spazio è ancora qui
+
+Il tuo abbonamento ${LetterLogoText} per *"${__VirtualRootPath}":"${__VirtualRootPath}"* è scaduto *$DueDate*. Grazie per aver lavorato con noi. Speriamo che ${LetterLogoText} ti abbia reso il lavoro un po' più semplice.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi il cui abbonamento è scaduto. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente.
+
+La buona notizia: mantenerlo è facile. Basta rinnovare l'abbonamento entro il $BlockDateShort e i tuoi documenti, le impostazioni e il team resteranno esattamente dove li hai lasciati.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di eseguire il backup dei dati che vuoi conservare entro il $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Il tuo abbonamento è scaduto, ma il tuo spazio e i tuoi fondi sono ancora qui
+
+Il tuo abbonamento ${LetterLogoText} per *"${__VirtualRootPath}":"${__VirtualRootPath}"* è scaduto *$DueDate*. Grazie per aver lavorato con noi. Nel tuo Portafoglio ci sono ancora dei fondi ("controlla il saldo":"$URL1") e non volevamo che li perdessi senza saperlo.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi il cui abbonamento è scaduto. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente, insieme ai fondi del tuo Portafoglio.
+
+La buona notizia: mantenere entrambi è facile. Basta rinnovare l'abbonamento entro il $BlockDateShort e i tuoi documenti, le impostazioni e i fondi resteranno esattamente dove li hai lasciati. Il saldo del Portafoglio potrebbe persino coprirne una parte.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di eseguire il backup dei dati che vuoi conservare entro il $BlockDateShort.
+#else
+h1.Nel tuo spazio ci sono ancora fondi che ti aspettano
+
+È da un po' di tempo che nessuno accede al tuo spazio ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ma nel suo "Portafoglio":"$URL1" ci sono ancora dei fondi. Non volevamo che li perdessi senza saperlo.
+
+Per far funzionare tutto al meglio, blocchiamo gli spazi inattivi. Ecco cosa significa per il tuo:
+
+*$BlockDate*: il tuo spazio verrà bloccato e non potrai più accedere.
+*$DeleteDate*: lo spazio e tutti i suoi dati verranno eliminati definitivamente, insieme ai fondi del tuo Portafoglio.
+
+La buona notizia: mantenere entrambi è facile. Basta accedere una volta entro il $BlockDateShort e i tuoi documenti, le impostazioni e i fondi resteranno esattamente dove li hai lasciati.
+
+$OrangeButton
+
+Se hai deciso di passare ad altro, va benissimo. Ricordati solo di scaricare i file che vuoi conservare entro il $BlockDateShort.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1582,6 +1777,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>La tua password è stata cambiata con successo</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Il portale ${PortalUrl} è stato bloccato dalla politica di conservazione dei dati</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} è bloccato, ma i tuoi dati sono al sicuro fino al $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} è stato eliminato</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} verrà eliminato a breve (eliminazione: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Ultima occasione per mantenere il tuo spazio ${LetterLogoText} (eliminazione: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} sente la tua mancanza (azione richiesta entro il $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Il tuo spazio ${LetterLogoText} sente la tua mancanza (azione richiesta entro il $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Hai ancora fondi nel tuo spazio ${LetterLogoText} (azione richiesta entro $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Disattivazione del portale ${__VirtualRootHost}</value>
