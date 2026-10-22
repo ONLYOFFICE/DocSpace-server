@@ -563,8 +563,8 @@ export type Req_aiExportTextToDocx = {
 export type Res_aiExportTextToDocx = { success: boolean };
 
 export type Req_aiMetaGenerate = {
-  /** The entry's table. */
-  kind: "file" | "folder";
+  /** The entry's table. Only `file` for now: a folder or a room answers 400. */
+  kind: "file";
   /** The entry's integer id. */
   id: string | number;
   /** What kind of metadata fields the caller is interested in; a hint for the model. */
@@ -594,8 +594,8 @@ export type Res_aiMetaGenerate = {
 };
 
 export type Req_aiMetaFill = {
-  /** The entry's table. */
-  kind: "file" | "folder";
+  /** The entry's table. Only `file` for now: a folder or a room answers 400. */
+  kind: "file";
   /** The entry's integer id. */
   id: string | number;
   /** What to pay attention to; a hint for the model. */

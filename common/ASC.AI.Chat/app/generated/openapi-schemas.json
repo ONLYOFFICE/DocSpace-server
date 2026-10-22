@@ -5818,11 +5818,8 @@
         "properties": {
           "kind": {
             "type": "string",
-            "enum": [
-              "file",
-              "folder"
-            ],
-            "description": "The entry's table."
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
           },
           "id": {
             "type": [
@@ -5941,11 +5938,8 @@
         "properties": {
           "kind": {
             "type": "string",
-            "enum": [
-              "file",
-              "folder"
-            ],
-            "description": "The entry's table."
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
           },
           "id": {
             "type": [
