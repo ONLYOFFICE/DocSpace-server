@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Konfirmoni mbylljen e llogarisë</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Kontaktoni mbështetjen</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Çaktivizoni portalin</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Bashkohuni në dhomë</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Mbani hapësirën time</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Mbani hapësirën dhe fondet e mia</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Lërini kontaktet</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Vendosni fjalëkalimin</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Ndani mendimin tim</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Filloni provën falas</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Zhbllokoni hapësirën time</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Përmirësoni</value>
@@ -742,6 +757,186 @@ Shfletuesi: *$Browser*
 Nëse ky veprim është bërë nga ju — nuk kërkohen hapa të mëtejshëm. Nëse ky ndryshim duket i dyshimtë ose nuk është autorizuar nga ju, ju lutemi rivendosni menjëherë fjalëkalimin tuaj dhe çaktivizoni qasjen në ${LetterLogoText} për këtë pajisje.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portali ${PortalUrl} u bllokua nga politika e ruajtjes së të dhënave: nuk përdorej ose abonimi i tij nuk u rinovua. Cili rast është, e tregon kategoria më poshtë.
+
+*Portali:* ${PortalUrl}
+*Pronari:* ${UserName} ${UserEmail}
+*Kategoria:* ${Category}
+*Data e fshirjes:* ${DeleteDate}
+
+Nëse nuk zhbllokohet, portali dhe të gjitha të dhënat e tij do të fshihen në atë datë.
+
+Nëse pronari kërkon ta mbajë, riaktivizojeni portalin para asaj date.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Hapësira juaj është bllokuar, por ende nuk ka humbur asgjë
+
+#if($Unpaid == "True")
+Meqë abonimi i hapësirës suaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* ka përfunduar, e kemi bllokuar përkohësisht. Kjo do të thotë që aktualisht askush nga ekipi juaj nuk mund të identifikohet, por të gjitha dokumentet dhe cilësimet tuaja janë ende të sigurta.
+#else
+Meqë hapësira juaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* nuk është përdorur prej kohësh, e kemi bllokuar përkohësisht. Kjo do të thotë që aktualisht askush nga ekipi juaj nuk mund të identifikohet, por të gjitha dokumentet dhe cilësimet tuaja janë ende të sigurta.
+#end
+
+Të dhënat tuaja do të qëndrojnë te ne deri në këtë datë: *$DeleteDate*. Pas kësaj, hapësira dhe gjithë përmbajtja e saj do të fshihen përgjithmonë.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Lajmi i mirë: nuk është vonë. Thjesht zhbllokoni hapësirën para datës $DeleteDateShort, pastaj rinovoni abonimin për t'iu rikthyer punës. Gjithçka do të jetë pikërisht aty ku e latë.
+#else
+Lajmi i mirë: nuk është vonë. Thjesht zhbllokoni hapësirën para datës $DeleteDateShort dhe gjithçka do të jetë pikërisht aty ku e latë.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka të dhëna që dëshironi t'i mbani, zhbllokoni hapësirën dhe bëni kopje rezervë para datës $DeleteDateShort.
+#else
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka skedarë që dëshironi t'i mbani, zhbllokoni hapësirën dhe shkarkojini para datës $DeleteDateShort.
+#end
+#else
+Lajmi i mirë: nuk është vonë. Thjesht kontaktoni ekipin tonë të mbështetjes para datës $DeleteDateShort dhe do t'ju ndihmojmë ta rikuperoni hapësirën ashtu siç e latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka skedarë që dëshironi t'i mbani, na njoftoni para datës $DeleteDateShort dhe do t'ju ndihmojmë të keni qasje në to.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Hapësira juaj është fshirë
+
+#if($Unpaid == "True")
+Meqë abonimi i hapësirës suaj ${LetterLogoText} *$PortalName* përfundoi dhe nuk u rinovua, tani e kemi fshirë së bashku me të gjitha të dhënat e saj, siç përshkruhet në "Politikën e privatësisë":"$URL1" tonë.
+#else
+Meqë hapësira juaj ${LetterLogoText} *$PortalName* nuk është përdorur për një kohë të gjatë, tani e kemi fshirë së bashku me të gjitha të dhënat e saj, siç përshkruhet në "Politikën e privatësisë":"$URL1" tonë.
+#end
+
+#if($Unpaid == "True")
+Faleminderit që punuat me ne. Do të donim shumë të dinim pse ndaluat ta përdorni: diçka nuk funksionoi, gjetët një zgjidhje më të përshtatshme apo thjesht nuk ju duhej më? Duhet vetëm një minutë dhe çdo përgjigje na ndihmon të përmirësohemi.
+#else
+Faleminderit që provuat ${LetterLogoText}. Do të donim shumë të dinim pse ndaluat ta përdorni: diçka nuk funksionoi, gjetët një zgjidhje më të përshtatshme apo thjesht nuk ju duhej më? Duhet vetëm një minutë dhe çdo përgjigje na ndihmon të përmirësohemi.
+#end
+
+$OrangeButton
+
+Nëse ndonjëherë dëshironi të ktheheni, jeni gjithmonë të mirëpritur. Mund të "krijoni një hapësirë të re":"$URL2" në çdo kohë.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Hapësira juaj do të fshihet së shpejti
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Hapësira juaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* është ende e bllokuar, sepse abonimi i saj ka përfunduar. Kjo është një kujtesë miqësore e fundit: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë në këtë datë: *$DeleteDate*.
+#else
+Hapësira juaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* është ende e bllokuar, sepse abonimi i saj ka përfunduar. Kjo është një kujtesë miqësore: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë në këtë datë: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Hapësira juaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* është ende e bllokuar, sepse nuk është përdorur prej kohësh. Kjo është një kujtesë miqësore e fundit: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë në këtë datë: *$DeleteDate*.
+#else
+Hapësira juaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* është ende e bllokuar, sepse nuk është përdorur prej kohësh. Kjo është një kujtesë miqësore: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë në këtë datë: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Nëse dëshironi ta mbani, ka ende kohë. Thjesht zhbllokoni hapësirën para datës $DeleteDateShort, pastaj rinovoni abonimin për t'iu rikthyer punës. Gjithçka do të jetë pikërisht aty ku e latë.
+#else
+Nëse dëshironi ta mbani, ka ende kohë. Thjesht zhbllokoni hapësirën para datës $DeleteDateShort dhe gjithçka do të jetë pikërisht aty ku e latë.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka të dhëna që dëshironi t'i mbani, zhbllokoni hapësirën dhe bëni kopje rezervë para datës $DeleteDateShort, sepse pas kësaj nuk do të mund t'i rikuperojmë.
+#else
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka skedarë që dëshironi t'i mbani, zhbllokoni hapësirën dhe shkarkojini para datës $DeleteDateShort, sepse pas kësaj nuk do të mund t'i rikuperojmë.
+#end
+#else
+Nëse dëshironi ta mbani, ka ende kohë. Thjesht kontaktoni ekipin tonë të mbështetjes para datës $DeleteDateShort dhe do t'ju ndihmojmë ta rikuperoni hapësirën ashtu siç e latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Nëse ka skedarë që dëshironi t'i mbani, na njoftoni para datës $DeleteDateShort dhe do t'ju ndihmojmë të keni qasje në to, sepse pas kësaj nuk do të mund t'i rikuperojmë.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Nuk ju kemi parë prej kohësh
+
+Ka kaluar pak kohë që kur dikush është identifikuar për herë të fundit në hapësirën tuaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Donim t'ju kontaktonim përpara se t'u ndodhë diçka dokumenteve dhe cilësimeve tuaja.
+
+Që gjithçka të funksionojë mirë për të gjithë, ne bllokojmë hapësirat falas që nuk janë përdorur prej kohësh. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë.
+
+Lajmi i mirë: ta mbani është e lehtë. Thjesht identifikohuni një herë para datës $BlockDateShort dhe gjithçka do të mbetet ashtu siç e latë.
+
+$OrangeButton
+
+Nëse nuk ju duhet më hapësira, nuk keni nevojë të bëni asgjë. Thjesht sigurohuni që të shkarkoni skedarët që dëshironi të mbani para datës $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Abonimi juaj ka përfunduar, por hapësira juaj është ende këtu
+
+Abonimi juaj ${LetterLogoText} për *"${__VirtualRootPath}":"${__VirtualRootPath}"* përfundoi më *$DueDate*. Faleminderit që punuat me ne. Shpresojmë që ${LetterLogoText} t'jua ketë lehtësuar pak punën.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat, abonimi i të cilave ka përfunduar. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë.
+
+Lajmi i mirë: ta mbani është e lehtë. Thjesht rinovoni abonimin para datës $BlockDateShort dhe dokumentet, cilësimet dhe ekipi juaj do të mbeten pikërisht aty ku i latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të bëni kopje rezervë të të dhënave që dëshironi të mbani para datës $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Abonimi juaj ka përfunduar, por hapësira dhe fondet tuaja janë ende këtu
+
+Abonimi juaj ${LetterLogoText} për *"${__VirtualRootPath}":"${__VirtualRootPath}"* përfundoi më *$DueDate*. Faleminderit që punuat me ne. Në portofolin tuaj ka ende fonde ("kontrolloni balancën":"$URL1") dhe nuk donim t'i humbisnit pa e ditur.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat, abonimi i të cilave ka përfunduar. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë, së bashku me fondet në portofolin tuaj.
+
+Lajmi i mirë: t'i mbani të dyja është e lehtë. Thjesht rinovoni abonimin para datës $BlockDateShort dhe dokumentet, cilësimet dhe fondet tuaja do të mbeten pikërisht aty ku i latë. Balanca e portofolit mund të mbulojë edhe një pjesë të kostos.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të bëni kopje rezervë të të dhënave që dëshironi të mbani para datës $BlockDateShort.
+#else
+h1.Në hapësirën tuaj ju presin ende fonde
+
+Ka kaluar pak kohë që kur dikush është identifikuar për herë të fundit në hapësirën tuaj ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, por në "portofolin":"$URL1" e saj ka ende fonde. Nuk donim t'i humbisnit pa e ditur.
+
+Që gjithçka të funksionojë mirë, ne bllokojmë hapësirat joaktive. Ja çfarë do të thotë kjo për hapësirën tuaj:
+
+*$BlockDate*: hapësira juaj do të bllokohet dhe nuk do të mund të identifikoheni.
+*$DeleteDate*: hapësira dhe të gjitha të dhënat e saj do të fshihen përgjithmonë, së bashku me fondet në portofolin tuaj.
+
+Lajmi i mirë: t'i mbani të dyja është e lehtë. Thjesht identifikohuni një herë para datës $BlockDateShort dhe dokumentet, cilësimet dhe fondet tuaja do të mbeten pikërisht aty ku i latë.
+
+$OrangeButton
+
+Nëse keni vendosur të vazhdoni më tej, është krejtësisht në rregull. Thjesht mos harroni të shkarkoni skedarët që dëshironi të mbani para datës $BlockDateShort.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1578,6 +1773,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Fjalëkalimi juaj u ndryshua me sukses</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portali ${PortalUrl} u bllokua nga politika e ruajtjes së të dhënave</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} është bllokuar, por të dhënat tuaja janë të sigurta deri më $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} është fshirë</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} do të fshihet së shpejti (data e fshirjes: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Shansi i fundit për të mbajtur hapësirën tuaj ${LetterLogoText} (data e fshirjes: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} ju ka marrë mallin (veprim i nevojshëm para datës $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Hapësira juaj ${LetterLogoText} ju ka marrë mallin (veprim i nevojshëm para datës $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Keni ende fonde në hapësirën tuaj ${LetterLogoText} (afati: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Çaktivizimi i portalit ${__VirtualRootHost} portal</value>

@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Vahvista tilin lopettaminen</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Ota yhteyttä tukeen</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivoi portaali</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Liity huoneeseen</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Säilytä tilani</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Säilytä tilani ja varani</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Jätä palautetta</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Aseta salasana</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Anna palautetta</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Aloita ilmainen kokeilu</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Poista tilani esto</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Päivitä</value>
@@ -751,6 +766,186 @@ Selain: *$Browser*
 Jos teit tämän toimenpiteen itse, lisätoimenpiteitä ei tarvita. Jos tämä muutos näyttää epäilyttävältä tai et ole valtuuttanut sitä, palauta salasanasi välittömästi ja poista ${LetterLogoText}n käyttöoikeus tältä laitteelta.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portaali ${PortalUrl} on estetty tietojen säilytyskäytännön perusteella: sitä ei käytetty tai sen tilausta ei uusittu. Alla oleva luokka kertoo, kummasta on kyse.
+
+*Portaali:* ${PortalUrl}
+*Omistaja:* ${UserName} ${UserEmail}
+*Luokka:* ${Category}
+*Poistopäivä:* ${DeleteDate}
+
+Ellei estoa poisteta, portaali ja kaikki sen tiedot poistetaan tuona päivänä.
+
+Jos omistaja pyytää säilyttämään sen, aktivoi portaali uudelleen ennen tätä päivää.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Tilasi on estetty, mutta mitään ei ole vielä menetetty
+
+#if($Unpaid == "True")
+Koska ${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* tilaus on päättynyt, olemme toistaiseksi estäneet sen. Tämä tarkoittaa, että kukaan tiimistäsi ei voi tällä hetkellä kirjautua sisään, mutta kaikki asiakirjasi ja asetuksesi ovat yhä turvassa.
+#else
+Koska ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* ei ole käytetty vähään aikaan, olemme toistaiseksi estäneet sen. Tämä tarkoittaa, että kukaan tiimistäsi ei voi tällä hetkellä kirjautua sisään, mutta kaikki asiakirjasi ja asetuksesi ovat yhä turvassa.
+#end
+
+Säilytämme tietojasi tähän päivään asti: *$DeleteDate*. Sen jälkeen tila ja kaikki sen sisältö poistetaan pysyvästi.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Hyvä uutinen: vielä ei ole liian myöhäistä. Poista tilasi esto ennen $DeleteDateShort ja uusi sitten tilauksesi, niin voit jatkaa työskentelyä. Kaikki on juuri siellä, mihin sen jätit.
+#else
+Hyvä uutinen: vielä ei ole liian myöhäistä. Poista tilasi esto ennen $DeleteDateShort, niin kaikki on juuri siellä, mihin sen jätit.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tietoja, poista tilasi esto ja varmuuskopioi ne ennen $DeleteDateShort.
+#else
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, poista tilasi esto ja lataa ne ennen $DeleteDateShort.
+#end
+#else
+Hyvä uutinen: vielä ei ole liian myöhäistä. Ota yhteyttä tukitiimiimme ennen $DeleteDateShort, niin autamme sinua palauttamaan tilasi juuri sellaisena kuin jätit sen.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, ilmoita meille ennen $DeleteDateShort, niin autamme sinua pääsemään niihin käsiksi.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Tilasi on poistettu
+
+#if($Unpaid == "True")
+Koska ${LetterLogoText}-tilasi *$PortalName* tilaus päättyi eikä sitä uusittu, olemme nyt poistaneet tilan ja kaikki sen tiedot "tietosuojakäytäntömme":"$URL1" mukaisesti.
+#else
+Koska ${LetterLogoText}-tilaasi *$PortalName* ei ole käytetty pitkään aikaan, olemme nyt poistaneet tilan ja kaikki sen tiedot "tietosuojakäytäntömme":"$URL1" mukaisesti.
+#end
+
+#if($Unpaid == "True")
+Kiitos, että työskentelit kanssamme. Haluaisimme kovasti tietää, miksi lopetit sen käytön: toimiko jokin huonosti, löysitkö paremmin sopivan ratkaisun vai etkö vain enää tarvinnut sitä? Se vie vain minuutin, ja jokainen vastaus auttaa meitä kehittymään.
+#else
+Kiitos, että kokeilit ${LetterLogoText}-palvelua. Haluaisimme kovasti tietää, miksi lopetit sen käytön: toimiko jokin huonosti, löysitkö paremmin sopivan ratkaisun vai etkö vain enää tarvinnut sitä? Se vie vain minuutin, ja jokainen vastaus auttaa meitä kehittymään.
+#end
+
+$OrangeButton
+
+Jos haluat joskus palata, olet aina tervetullut. Voit "luoda uuden tilan":"$URL2" milloin tahansa.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Tilasi poistetaan pian
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* on yhä estetty, koska sen tilaus on päättynyt. Tämä on ystävällinen viimeinen muistutus: tila ja kaikki sen tiedot poistetaan pysyvästi tänä päivänä: *$DeleteDate*.
+#else
+${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* on yhä estetty, koska sen tilaus on päättynyt. Tämä on ystävällinen muistutus: tila ja kaikki sen tiedot poistetaan pysyvästi tänä päivänä: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* on yhä estetty, koska sitä ei ole käytetty vähään aikaan. Tämä on ystävällinen viimeinen muistutus: tila ja kaikki sen tiedot poistetaan pysyvästi tänä päivänä: *$DeleteDate*.
+#else
+${LetterLogoText}-tilasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* on yhä estetty, koska sitä ei ole käytetty vähään aikaan. Tämä on ystävällinen muistutus: tila ja kaikki sen tiedot poistetaan pysyvästi tänä päivänä: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Jos haluat säilyttää sen, aikaa on vielä. Poista tilasi esto ennen $DeleteDateShort ja uusi sitten tilauksesi, niin voit jatkaa työskentelyä. Kaikki on juuri siellä, mihin sen jätit.
+#else
+Jos haluat säilyttää sen, aikaa on vielä. Poista tilasi esto ennen $DeleteDateShort, niin kaikki on juuri siellä, mihin sen jätit.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tietoja, poista tilasi esto ja varmuuskopioi ne ennen $DeleteDateShort, sillä emme pysty palauttamaan niitä sen jälkeen.
+#else
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, poista tilasi esto ja lataa ne ennen $DeleteDateShort, sillä emme pysty palauttamaan niitä sen jälkeen.
+#end
+#else
+Jos haluat säilyttää sen, aikaa on vielä. Ota yhteyttä tukitiimiimme ennen $DeleteDateShort, niin autamme sinua palauttamaan tilasi juuri sellaisena kuin jätit sen.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Jos haluat säilyttää tiedostoja, ilmoita meille ennen $DeleteDateShort, niin autamme sinua pääsemään niihin käsiksi, sillä emme pysty palauttamaan niitä sen jälkeen.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Emme ole nähneet sinua vähään aikaan
+
+Kukaan ei ole kirjautunut ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* vähään aikaan. Halusimme ottaa yhteyttä ennen kuin asiakirjoillesi ja asetuksillesi tapahtuu mitään.
+
+Jotta kaikki toimisi sujuvasti kaikille, estämme ilmaiset tilat, joita ei ole käytetty vähään aikaan. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi.
+
+Hyvä uutinen: tilan säilyttäminen on helppoa. Kirjaudu sisään kerran ennen $BlockDateShort, niin kaikki pysyy juuri sellaisena kuin jätit sen.
+
+$OrangeButton
+
+Jos et enää tarvitse tilaa, sinun ei tarvitse tehdä mitään. Muista vain ladata tiedostot, jotka haluat säilyttää, ennen $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Tilauksesi on päättynyt, mutta tilasi on yhä täällä
+
+Tilan *"${__VirtualRootPath}":"${__VirtualRootPath}"* ${LetterLogoText}-tilaus päättyi (*$DueDate*). Kiitos, että työskentelit kanssamme. Toivomme, että ${LetterLogoText} helpotti työtäsi edes hieman.
+
+Jotta kaikki toimisi sujuvasti, estämme tilat, joiden tilaus on päättynyt. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi.
+
+Hyvä uutinen: tilan säilyttäminen on helppoa. Uusi tilauksesi ennen $BlockDateShort, niin asiakirjasi, asetuksesi ja tiimisi pysyvät juuri siellä, mihin ne jätit.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain varmuuskopioida tiedot, jotka haluat säilyttää, ennen $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Tilauksesi on päättynyt, mutta tilasi ja varasi ovat yhä täällä
+
+Tilan *"${__VirtualRootPath}":"${__VirtualRootPath}"* ${LetterLogoText}-tilaus päättyi (*$DueDate*). Kiitos, että työskentelit kanssamme. Lompakossasi on yhä varoja ("tarkista saldo":"$URL1"), emmekä halunneet, että menetät ne tietämättäsi.
+
+Jotta kaikki toimisi sujuvasti, estämme tilat, joiden tilaus on päättynyt. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi yhdessä lompakkosi varojen kanssa.
+
+Hyvä uutinen: molempien säilyttäminen on helppoa. Uusi tilauksesi ennen $BlockDateShort, niin asiakirjasi, asetuksesi ja varasi pysyvät juuri siellä, mihin ne jätit. Lompakkosi saldo voi jopa kattaa osan siitä.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain varmuuskopioida tiedot, jotka haluat säilyttää, ennen $BlockDateShort.
+#else
+h1.Tilassasi odottaa yhä varoja
+
+Kukaan ei ole kirjautunut ${LetterLogoText}-tilaasi *"${__VirtualRootPath}":"${__VirtualRootPath}"* vähään aikaan, mutta sen "lompakossa":"$URL1" on yhä varoja. Emme halunneet, että menetät ne tietämättäsi.
+
+Jotta kaikki toimisi sujuvasti, estämme passiiviset tilat. Tilallesi tämä tarkoittaa seuraavaa:
+
+*$BlockDate*: tilasi estetään, etkä voi enää kirjautua sisään.
+*$DeleteDate*: tila ja kaikki sen tiedot poistetaan pysyvästi yhdessä lompakkosi varojen kanssa.
+
+Hyvä uutinen: molempien säilyttäminen on helppoa. Kirjaudu sisään kerran ennen $BlockDateShort, niin asiakirjasi, asetuksesi ja varasi pysyvät juuri siellä, mihin ne jätit.
+
+$OrangeButton
+
+Jos olet päättänyt siirtyä eteenpäin, se on täysin ok. Muista vain ladata tiedostot, jotka haluat säilyttää, ennen $BlockDateShort.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1618,6 +1813,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Salasanasi vaihdettiin onnistuneesti</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portaali ${PortalUrl} on estetty tietojen säilytyskäytännön perusteella</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi on estetty, mutta tietosi ovat turvassa $DeleteDateShort asti</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi on poistettu</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi poistetaan pian (poistopäivä: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Viimeinen mahdollisuus säilyttää ${LetterLogoText}-tilasi (poistopäivä: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi kaipaa sinua (toimi ennen $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>${LetterLogoText}-tilasi kaipaa sinua (toimi ennen $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText}-tilassasi on yhä varoja (määräaika: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portaalin deaktivointi</value>

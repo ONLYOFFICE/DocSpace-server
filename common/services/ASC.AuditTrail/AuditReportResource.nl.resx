@@ -723,6 +723,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portaal Gedeactiveerd</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portaal geblokkeerd door het bewaarbeleid</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portaal gedeblokkeerd</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portaal Verwijderd</value>
   </data>

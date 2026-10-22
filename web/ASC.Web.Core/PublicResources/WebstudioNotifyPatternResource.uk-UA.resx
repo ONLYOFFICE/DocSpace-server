@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Підтвердити закриття облікового запису</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Зв'язатися з підтримкою</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Деактивувати портал</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Приєднатися до кімнати</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Зберегти мій простір</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Зберегти простір і кошти</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Залишити відгук</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Встановити пароль</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Поділитися відгуком</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Запустити безкоштовну пробну версію</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Розблокувати мій простір</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Підвищити</value>
@@ -752,6 +767,186 @@ IP: *$IP*
 Якщо цю дію виконали ви, подальші кроки не потрібні. Якщо ця зміна виглядає підозрілою або не була авторизована вами, негайно скиньте пароль і вимкніть доступ до ${LetterLogoText} для цього пристрою.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Портал ${PortalUrl} заблоковано політикою зберігання даних: ним не користувалися або його підписку не було продовжено. Що саме, показує категорія нижче.
+
+*Портал:* ${PortalUrl}
+*Власник:* ${UserName} ${UserEmail}
+*Категорія:* ${Category}
+*Дата видалення:* ${DeleteDate}
+
+Якщо портал не розблокувати, цього дня його буде видалено разом з усіма даними.
+
+Якщо власник попросить його зберегти, зробіть портал знову активним до цієї дати.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ваш простір заблоковано, але поки нічого не втрачено
+
+#if($Unpaid == "True")
+Підписка на ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* закінчилася, тому ми тимчасово його заблокували. Зараз ніхто з вашої команди не може увійти, але всі ваші документи та налаштування досі в безпеці.
+#else
+Вашим простором ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* давно не користувалися, тому ми тимчасово його заблокували. Зараз ніхто з вашої команди не може увійти, але всі ваші документи та налаштування досі в безпеці.
+#end
+
+Ми зберігатимемо ваші дані до цієї дати: *$DeleteDate*. Після цього простір і весь його вміст буде остаточно видалено.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Гарна новина: ще не пізно. Просто розблокуйте простір до $DeleteDateShort, а потім продовжте підписку, щоб повернутися до роботи. Усе буде на своїх місцях.
+#else
+Гарна новина: ще не пізно. Просто розблокуйте простір до $DeleteDateShort, і все буде на своїх місцях.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь дані, розблокуйте простір і створіть резервну копію до $DeleteDateShort.
+#else
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, розблокуйте простір і завантажте їх до $DeleteDateShort.
+#end
+#else
+Гарна новина: ще не пізно. Просто зв'яжіться з нашою службою підтримки до $DeleteDateShort, і ми допоможемо повернути простір у тому вигляді, в якому ви його залишили.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, повідомте нам до $DeleteDateShort, і ми допоможемо отримати до них доступ.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ваш простір видалено
+
+#if($Unpaid == "True")
+Підписка на ваш простір ${LetterLogoText} *$PortalName* закінчилася і не була продовжена, тому ми видалили його разом з усіма даними, як описано в нашій "Політиці конфіденційності":"$URL1".
+#else
+Вашим простором ${LetterLogoText} *$PortalName* довго не користувалися, тому ми видалили його разом з усіма даними, як описано в нашій "Політиці конфіденційності":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Дякуємо, що працювали з нами. Нам дуже хотілося б дізнатися, чому ви перестали ним користуватися: щось не спрацювало, ви знайшли кращий варіант чи він вам просто більше не потрібен. Це займе лише хвилину, і кожна відповідь допомагає нам ставати кращими.
+#else
+Дякуємо, що спробували ${LetterLogoText}. Нам дуже хотілося б дізнатися, чому ви перестали ним користуватися: щось не спрацювало, ви знайшли кращий варіант чи він вам просто більше не потрібен. Це займе лише хвилину, і кожна відповідь допомагає нам ставати кращими.
+#end
+
+$OrangeButton
+
+Якщо колись захочете повернутися, ми завжди вам раді. Ви можете "створити новий простір":"$URL2" будь-коли.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Ваш простір скоро буде видалено
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* досі заблоковано, оскільки його підписка закінчилася. Це останнє дружнє нагадування: простір і всі його дані буде остаточно видалено цього дня: *$DeleteDate*.
+#else
+Ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* досі заблоковано, оскільки його підписка закінчилася. Це дружнє нагадування: простір і всі його дані буде остаточно видалено цього дня: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* досі заблоковано, оскільки ним давно не користувалися. Це останнє дружнє нагадування: простір і всі його дані буде остаточно видалено цього дня: *$DeleteDate*.
+#else
+Ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* досі заблоковано, оскільки ним давно не користувалися. Це дружнє нагадування: простір і всі його дані буде остаточно видалено цього дня: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Якщо ви хочете його зберегти, час ще є. Просто розблокуйте простір до $DeleteDateShort, а потім продовжте підписку, щоб повернутися до роботи. Усе буде на своїх місцях.
+#else
+Якщо ви хочете його зберегти, час ще є. Просто розблокуйте простір до $DeleteDateShort, і все буде на своїх місцях.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь дані, розблокуйте простір і створіть резервну копію до $DeleteDateShort, оскільки після цього ми не зможемо їх відновити.
+#else
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, розблокуйте простір і завантажте їх до $DeleteDateShort, оскільки після цього ми не зможемо їх відновити.
+#end
+#else
+Якщо ви хочете його зберегти, час ще є. Просто зв'яжіться з нашою службою підтримки до $DeleteDateShort, і ми допоможемо повернути простір у тому вигляді, в якому ви його залишили.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Якщо ви хочете зберегти якісь файли, повідомте нам до $DeleteDateShort, і ми допоможемо отримати до них доступ, оскільки після цього ми не зможемо їх відновити.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Давно вас не бачили
+
+Уже деякий час ніхто не входив у ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Ми хотіли зв'язатися з вами, перш ніж щось станеться з вашими документами та налаштуваннями.
+
+Щоб усе працювало стабільно для всіх, ми блокуємо безкоштовні простори, якими давно не користуються. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено.
+
+Гарна новина: зберегти його легко. Просто увійдіть хоча б раз до $BlockDateShort, і все залишиться саме таким, як було.
+
+$OrangeButton
+
+Якщо простір вам більше не потрібен, нічого робити не треба. Лише не забудьте до $BlockDateShort завантажити файли, які хочете зберегти.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Підписка закінчилася, але ваш простір усе ще тут
+
+Ваша підписка ${LetterLogoText} для *"${__VirtualRootPath}":"${__VirtualRootPath}"* закінчилася *$DueDate*. Дякуємо, що працювали з нами. Сподіваємося, ${LetterLogoText} зробив вашу роботу трохи простішою.
+
+Щоб усе працювало стабільно, ми блокуємо простори після закінчення підписки. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено.
+
+Гарна новина: зберегти його легко. Просто продовжте підписку до $BlockDateShort, і ваші документи, налаштування та команда залишаться на своїх місцях.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Лише не забудьте до $BlockDateShort створити резервну копію даних, які хочете зберегти.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Підписка закінчилася, але ваш простір і кошти все ще тут
+
+Ваша підписка ${LetterLogoText} для *"${__VirtualRootPath}":"${__VirtualRootPath}"* закінчилася *$DueDate*. Дякуємо, що працювали з нами. У вашому гаманці ще залишилися кошти ("перевірити баланс":"$URL1"), і ми не хотіли, щоб ви втратили їх, не знаючи про це.
+
+Щоб усе працювало стабільно, ми блокуємо простори після закінчення підписки. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено разом із коштами в гаманці.
+
+Гарна новина: зберегти і те, і інше легко. Просто продовжте підписку до $BlockDateShort, і ваші документи, налаштування та кошти залишаться на своїх місцях. Баланс гаманця може навіть покрити частину вартості.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Лише не забудьте до $BlockDateShort створити резервну копію даних, які хочете зберегти.
+#else
+h1.У вашому просторі ще залишилися кошти
+
+Уже деякий час ніхто не входив у ваш простір ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, але в його "гаманці":"$URL1" ще залишилися кошти. Ми не хотіли, щоб ви втратили їх, не знаючи про це.
+
+Щоб усе працювало стабільно, ми блокуємо неактивні простори. Ось що це означає для вашого:
+
+*$BlockDate*: ваш простір буде заблоковано, і ви не зможете увійти.
+*$DeleteDate*: простір і всі його дані буде остаточно видалено разом із коштами в гаманці.
+
+Гарна новина: зберегти і те, і інше легко. Просто увійдіть хоча б раз до $BlockDateShort, і ваші документи, налаштування та кошти залишаться на своїх місцях.
+
+$OrangeButton
+
+Якщо ви вирішили рухатися далі, це цілком нормально. Лише не забудьте до $BlockDateShort завантажити файли, які хочете зберегти.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1621,6 +1816,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ваш пароль успішно змінено</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Портал ${PortalUrl} заблоковано політикою зберігання даних</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} заблоковано, але дані в безпеці до $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} видалено</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} скоро буде видалено (дата видалення: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Останній шанс зберегти простір ${LetterLogoText} (дата видалення: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} сумує за вами (потрібно діяти до $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Ваш простір ${LetterLogoText} сумує за вами (потрібно діяти до $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>У вашому просторі ${LetterLogoText} залишилися кошти (термін: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Деактивація ${__VirtualRootHost} порталу</value>
