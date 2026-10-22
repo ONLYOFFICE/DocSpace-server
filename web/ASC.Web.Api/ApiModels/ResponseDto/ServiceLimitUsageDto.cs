@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Models;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// What has been spent against a spending limit in its current period, and what is left.
@@ -76,4 +76,10 @@ public class ServiceLimitUsageDto
     /// </summary>
     /// <example>750</example>
     public int? QuantityAvailable { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class ServiceLimitUsageDtoMapper
+{
+    public static partial ServiceLimitUsageDto Map(this ServiceLimitUsage source);
 }

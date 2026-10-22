@@ -179,11 +179,10 @@ public class ServiceLimitReportDto
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[UseStaticMapper(typeof(ServiceLimitUsageDtoMapper))]
 public static partial class ServiceLimitDtoMapper
 {
     public static partial ServiceLimitDto Map(this ServiceLimit source);
 
     public static partial ServiceLimitReportDto Map(this ServiceLimitReport source);
-
-    public static partial ServiceLimitUsageDto Map(this ServiceLimitUsage source);
 }
