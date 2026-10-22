@@ -1725,12 +1725,6 @@ public abstract class PortalRetentionNotifyAction(
     protected sealed override bool OffersUnsubscribe => false;
 
     /// <summary>
-    /// The block and the deletion follow these letters whether they are read or not, so they go to the address the owner
-    /// signed up with even if it was never confirmed: for many owners of a portal left unused it never was.
-    /// </summary>
-    protected sealed override bool RequiresConfirmedAddress => false;
-
-    /// <summary>
     /// Whether the portal's paid tariff lapsed. Such a portal is counted from the end of its subscription,
     /// not from its last activity, and comes back unpaid, so its letters speak of the subscription.
     /// </summary>
@@ -2501,13 +2495,6 @@ public abstract class BasePeriodicNotifyAction(
     protected virtual bool OffersUnsubscribe => true;
 
     /// <summary>
-    /// Whether the letter goes only to an address its owner has confirmed. The notify engine drops the address of a user
-    /// who never activated it; a letter the recipient must get whatever they did with their account goes to the
-    /// address on record instead.
-    /// </summary>
-    protected virtual bool RequiresConfirmedAddress => true;
-
-    /// <summary>
     /// The tags this letter needs on top of <see cref="BuildCommonTagsAsync"/> — its buttons, links and
     /// images. Only the tags its own pattern references: an unused tag is dead weight, and a missing one
     /// leaves a raw <c>$URL1</c> in front of the reader.
@@ -2535,24 +2522,8 @@ public abstract class BasePeriodicNotifyAction(
 
             Tags = await BuildTagsAsync(context, user, culture);
 
-            await client.SendNoticeToAsync(this, RecipientOf(user), senderName);
+            await client.SendNoticeToAsync(this, user, senderName);
         }
-    }
-
-    /// <summary>
-    /// The user as the notify engine sees them. A user carries the activation check with them, which drops an address
-    /// never confirmed; a letter that does not require a confirmed address goes to the same address without it.
-    /// </summary>
-    private IRecipient RecipientOf(UserInfo user)
-    {
-        if (RequiresConfirmedAddress)
-        {
-            return user;
-        }
-
-        IDirectRecipient recipient = user;
-
-        return new DirectRecipient(recipient.ID, recipient.Name, recipient.Addresses, checkActivation: false);
     }
 
     /// <summary>

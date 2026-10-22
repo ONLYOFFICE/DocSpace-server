@@ -723,6 +723,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal deaktiviran</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal blokiran politikom čuvanja podataka</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal deblokiran</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal obrisan</value>
   </data>
