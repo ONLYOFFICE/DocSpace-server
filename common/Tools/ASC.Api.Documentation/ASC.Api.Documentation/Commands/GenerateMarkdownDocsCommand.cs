@@ -374,6 +374,18 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 throw new Exception($"The example tab at {tab.Path} needs a 'value', a 'label' and a 'generator'");
             }
 
+            // The value goes into a file name and the page URL, and both go into a quoted MDX
+            // attribute, where a quote would end the attribute and break every page.
+            if (!IsTabKey(value))
+            {
+                throw new Exception($"The example tab at {tab.Path} has the value '{value}': use letters, digits, '-' and '_' only");
+            }
+
+            if (label.Contains('"'))
+            {
+                throw new Exception($"The example tab at {tab.Path} has a double quote in its label '{label}'");
+            }
+
             // The value names the snippet file a tab is read from, so two tabs sharing one would
             // print the same examples twice under different labels.
             if (tabs.Exists(existing => string.Equals(existing.Tab.Value, value, StringComparison.OrdinalIgnoreCase)))
@@ -384,8 +396,19 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             tabs.Add(new ExampleSource(new ExampleTabs.Tab(value, label), generator));
         }
 
-        return new ExampleSettings(section["groupId"] ?? "api-example", tabs);
+        var groupId = section["groupId"] ?? "api-example";
+
+        // The group id is a URL parameter and a quoted MDX attribute too.
+        if (!IsTabKey(groupId))
+        {
+            throw new Exception($"The example tabs have the group id '{groupId}': use letters, digits, '-' and '_' only");
+        }
+
+        return new ExampleSettings(groupId, tabs);
     }
+
+    private static bool IsTabKey(string key) =>
+        key.Length > 0 && key.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
 
     /// <summary>
     /// Runs the generator of every tab's language over the whole API in its snippet mode, and reads

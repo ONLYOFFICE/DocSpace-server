@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 public class MySwift6ClientCodegen extends Swift6ClientCodegen {
@@ -128,7 +129,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
      */
     private void attachSnippets(OperationsMap objs, List<ModelMap> allModels) {
         if (snippets == null) {
-            snippets = new Snippets(openAPI, allModels);
+            // The template names the cases of a oneOf with this, so the snippet names them the same way.
+            snippets = new Snippets(openAPI, allModels, this::transformArrayTypeName);
         }
 
         String apiClass = String.valueOf(objs.getOperations().get("x-classname"));
@@ -415,10 +417,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
      * The body is the minimal one, as for C# (see {@link MyCSharpClientCodegen}): a model gets its
      * required fields only, as labelled arguments of its initializer in the order it declares them,
      * with the values the document states for them. Every optional parameter of a call and every
-     * optional field of a model has a default in the SDK, so it is left out.
-     * <p>
-     * The snippets are written by the names the SDK is generated with, but not compiled against it:
-     * the SDK does not build as it stands.
+     * optional field of a model has a default in the SDK, so it is left out. A oneOf or anyOf is an
+     * enum of the SDK with a case for each variant, and takes the case of the variant its example fits.
      */
     private static final class Snippets {
 
@@ -462,12 +462,16 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         private final OpenAPI openAPI;
         private final Map<String, CodegenModel> models;
 
+        /** The name of a variant's type as its case carries it: [Item] gives ArrayOfItem. */
+        private final UnaryOperator<String> caseName;
+
         /** Values the document states no example for, as "operationId: name", for the run's log. */
         private final List<String> placeholders = new ArrayList<>();
 
-        Snippets(OpenAPI openAPI, List<ModelMap> allModels) {
+        Snippets(OpenAPI openAPI, List<ModelMap> allModels, UnaryOperator<String> caseName) {
             this.openAPI = openAPI;
             this.models = CallSnippets.models(allModels);
+            this.caseName = caseName;
         }
 
         List<String> placeholders() {
@@ -478,6 +482,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             List<String> arguments = new ArrayList<>();
             String body = null;
             String bodyType = null;
+            String firstPart = firstPart(operation);
 
             for (CodegenParameter parameter : operation.allParams) {
                 String where = operation.operationIdOriginal + ": " + parameter.baseName;
@@ -490,7 +495,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
                     continue;
                 }
 
-                if (!parameter.required && !parameter.isFile && !parameter.isBinary) {
+                boolean part = parameter.isFormParam && parameter.baseName.equals(firstPart);
+                if (!parameter.required && !parameter.isFile && !parameter.isBinary && !part) {
                     continue;
                 }
 
@@ -530,6 +536,25 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             if (foundation(call, body, bodyType)) {
                 operation.vendorExtensions.put(FOUNDATION, true);
             }
+        }
+
+        /**
+         * The form field a multipart call is given although it is optional, or null. The SDK unwraps the
+         * parts it is given and stops on none, so a form whose every field is optional gets its first
+         * one - as for Kotlin (see {@link MyKotlinClientCodegen}).
+         */
+        private static String firstPart(CodegenOperation operation) {
+            if (!operation.isMultipart || operation.formParams == null || operation.formParams.isEmpty()) {
+                return null;
+            }
+
+            for (CodegenParameter parameter : operation.formParams) {
+                if (parameter.required || parameter.isFile || parameter.isBinary) {
+                    return null;
+                }
+            }
+
+            return operation.formParams.get(0).baseName;
         }
 
         /**
@@ -590,7 +615,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
                 return CallSnippets.quote(CallSnippets.unquote(String.valueOf(member.get("value"))));
             }
 
-            if (model == null || model.isEnum) {
+            if (model == null || model.isEnum || isOneOf(model)) {
                 return value(shape, example, "body", where, 0);
             }
 
@@ -624,10 +649,6 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             List<String> fields = new ArrayList<>();
 
             if (model.allVars == null || model.allVars.isEmpty()) {
-                if (CallSnippets.isComposed(model)) {
-                    // The SDK makes a oneOf or anyOf a struct with no field to hold one of its variants.
-                    placeholders.add(where);
-                }
                 return fields;
             }
 
@@ -699,7 +720,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
 
             CodegenModel model = model(shape);
             if (model != null) {
-                return construct(model, where, depth);
+                return isOneOf(model) ? oneOf(model, example, name, where, depth) : construct(model, where, depth);
             }
 
             return scalar(shape.dataType, shape.isDate, example, name, where);
@@ -781,7 +802,105 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
                 return enumValue(shape, example, where);
             }
 
-            return construct(model, where, depth);
+            return isOneOf(model) ? oneOf(model, example, name, where, depth) : construct(model, where, depth);
+        }
+
+        /** Whether the SDK makes the model an enum of its variants: a oneOf, or an anyOf with no fields of its own. */
+        private static boolean isOneOf(CodegenModel model) {
+            return Boolean.TRUE.equals(model.vendorExtensions.get("x-is-one-of-interface"))
+                    && model.oneOf != null && !model.oneOf.isEmpty();
+        }
+
+        /**
+         * A oneOf or anyOf: the case of the variant the example fits, or else of the first one, holding
+         * the variant's value - `CopyAsRequestDestFolderId.typeInt(1)`.
+         */
+        private String oneOf(CodegenModel model, Object example, String name, String where, int depth) {
+            List<String> variants = new ArrayList<>(model.oneOf);
+
+            // A variant that is a model can lead back here, so at the depth the models are built to
+            // only a variant that is not one ends the chain, and the place is left to the reader. A
+            // oneOf of models alone cannot be built there.
+            boolean stopped = depth + 1 >= MAX_DEPTH;
+            if (stopped) {
+                variants.removeIf(this::isStructure);
+                if (variants.isEmpty()) {
+                    placeholders.add(where);
+                    return model.classname + "()";
+                }
+                example = null;
+            }
+
+            String chosen = null;
+            for (String variant : variants) {
+                if (fits(variant, example)) {
+                    chosen = variant;
+                    break;
+                }
+            }
+
+            if (chosen == null) {
+                chosen = variants.get(0);
+                example = null;
+            }
+
+            int logged = placeholders.size();
+            String value = typed(chosen, example, name, where, depth + 1);
+            if (stopped && placeholders.size() == logged) {
+                placeholders.add(where);
+            }
+
+            return model.classname + ".type" + caseName.apply(chosen) + "(" + value + ")";
+        }
+
+        /** Whether a variant is a model other than an enum: a struct, or a oneOf of its own. */
+        private boolean isStructure(String type) {
+            CodegenModel model = models.get(plainType(type));
+            return model != null && !model.isEnum;
+        }
+
+        private boolean fits(String type, Object example) {
+            if (example == null) {
+                return false;
+            }
+
+            String plain = plainType(type);
+            if (valueType(plain) != null) {
+                return example instanceof Map;
+            }
+
+            if (plain.startsWith("[") || plain.startsWith("Set<")) {
+                return example instanceof List;
+            }
+
+            switch (plain) {
+                case "String":
+                case "Date":
+                case "UUID":
+                case "URL":
+                    return example instanceof String;
+                case "Int":
+                case "Int32":
+                case "Int64":
+                    return example instanceof Integer || example instanceof Long;
+                case "Double":
+                case "Float":
+                case "Decimal":
+                    return example instanceof Number;
+                case "Bool":
+                    return example instanceof Boolean;
+                case "JSONValue":
+                    return true;
+                default:
+                    CodegenModel model = models.get(plain);
+                    if (model == null) {
+                        return false;
+                    }
+
+                    // An enum fits only an example that names one of its members; any other is left to
+                    // a variant beside it, such as a string.
+                    return model.isEnum ? CallSnippets.member(model.allowableValues, example) != null : example instanceof Map;
+            }
         }
 
         /** A file, read by the SDK from the path it is given. */

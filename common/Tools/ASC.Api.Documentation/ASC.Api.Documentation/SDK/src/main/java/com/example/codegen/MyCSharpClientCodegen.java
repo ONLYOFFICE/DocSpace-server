@@ -1100,6 +1100,11 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             if (isString(shape)) {
                 return CallSnippets.quote(CallSnippets.placeholderName(name));
             }
+            // A value of any type is an Object in the SDK, and a model refuses a required one left
+            // null: an empty dictionary stands in, as for a free-form object.
+            if (shape.isAnyType) {
+                return "new Dictionary<string, object>()";
+            }
 
             return "default";
         }
@@ -1151,6 +1156,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             boolean isArray;
             boolean isMap;
             boolean isFreeFormObject;
+            boolean isAnyType;
             boolean isModel;
             boolean isFile;
             Integer minItems;
@@ -1180,6 +1186,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isArray = parameter.isArray;
                 shape.isMap = parameter.isMap;
                 shape.isFreeFormObject = parameter.isFreeFormObject;
+                shape.isAnyType = parameter.isAnyType;
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
                 shape.minItems = parameter.minItems;
@@ -1209,6 +1216,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isArray = property.isArray;
                 shape.isMap = property.isMap;
                 shape.isFreeFormObject = property.isFreeFormObject;
+                shape.isAnyType = property.isAnyType;
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
                 shape.minItems = property.minItems;

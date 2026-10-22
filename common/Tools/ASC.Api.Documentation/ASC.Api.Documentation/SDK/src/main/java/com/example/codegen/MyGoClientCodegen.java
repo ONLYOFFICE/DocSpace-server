@@ -600,8 +600,8 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for",
                 "func", "go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select",
                 "struct", "switch", "type", "var", "nil", "true", "false", "any", "error", "string",
-                "main", "cfg", "client", "ctx", "body", "result", "err", "file",
-                "context", "fmt", "log", "os", "time"));
+                "main", "cfg", "client", "ctx", "body", "result", "err", "file", "out",
+                "context", "json", "fmt", "log", "os", "time"));
 
         private final OpenAPI openAPI;
         private final String sdk;
@@ -639,6 +639,9 @@ public class MyGoClientCodegen extends GoClientCodegen {
             imports.add("context");
             imports.add("log");
             if (operation.returnType != null) {
+                // The models hold their fields behind pointers and have no String method, so
+                // the result is printed as the JSON the SDK writes for it.
+                imports.add("encoding/json");
                 imports.add("fmt");
             }
             opensFile = false;

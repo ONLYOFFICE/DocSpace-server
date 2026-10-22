@@ -53,7 +53,12 @@ func main() {
 	}
 {{#returnType}}
 
-	fmt.Println(result)
+	out, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(out))
 {{/returnType}}
 }
 ```
