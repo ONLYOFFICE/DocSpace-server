@@ -10691,7 +10691,8 @@
           "ImageGeneration",
           "OCR",
           "Vision",
-          "FormAnalysis"
+          "FormAnalysis",
+          "GenerateMeta"
         ],
         "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
@@ -11125,7 +11126,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced.",
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
             "examples": [
               {
                 "role": "assistant",
@@ -11160,8 +11161,7 @@
         "required": [
           "threadId",
           "messageId",
-          "idx",
-          "message"
+          "idx"
         ],
         "additionalProperties": false,
         "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
@@ -14815,7 +14815,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
@@ -14832,7 +14832,6 @@
         },
         "required": [
           "idx",
-          "message",
           "messageId",
           "result",
           "threadId"

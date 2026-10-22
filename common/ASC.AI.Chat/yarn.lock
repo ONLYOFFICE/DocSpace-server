@@ -507,9 +507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.3.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 1.0.3
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.3.tgz#onlyoffice-ai-chat-1.0.3.tgz::hash=63dc85&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-20261022.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 1.0.2-20261022
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-20261022.tgz#onlyoffice-ai-chat-1.0.2-20261022.tgz::hash=467d9f&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -544,6 +544,7 @@ __metadata:
     rehype-katex: ^7.0.1
     remark-gfm: ^4.0.1
     remark-math: ^6.0.0
+    shiki: ^3.11.0
     tailwind-merge: ^3.3.1
     zustand: ^5.0.7
   peerDependenciesMeta:
@@ -601,11 +602,13 @@ __metadata:
       optional: true
     remark-math:
       optional: true
+    shiki:
+      optional: true
     tailwind-merge:
       optional: true
     zustand:
       optional: true
-  checksum: 10/31635dfeef9c179f438f914fb4891d55b01cf827171b033e4731d00d00f630ca7cfc0469a8da1820fbdc97732c531f943d00a7e45bdb54cef11a88c93d40d83c
+  checksum: 10/a3605e03d5cf7c3a0a3c791ddc8873e3d1c651e143f31c2d0de68d7ac4911fd4364dae84e1e40b8b809bba4cfa243a674b26c37bf36402d1e0fa639bd6c48a22
   languageName: node
   linkType: hard
 
@@ -1406,7 +1409,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.3.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-20261022.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"
