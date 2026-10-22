@@ -1673,7 +1673,7 @@ public class PaymentController(
     /// `enabled` false. A portal with no billing customer answers 404.
     /// </remarks>
     /// <summary>
-    /// Get the service limit for every user
+    /// Get the global service limit
     /// </summary>
     /// <path>api/2.0/portal/payment/servicelimit/global</path>
     [Tags("Portal / Payment")]
@@ -1697,8 +1697,8 @@ public class PaymentController(
     /// is read-only; a portal with no limits gets an empty page. A user's own limit wins over the one for every user: an item with the scope `Custom` is a
     /// personal limit, one with `Global` the limit for every user, its ID repeated for each user it applies to.
     /// Switched-off limits are not listed, and a user who has not used the AI services yet may be missing. `offset`
-    /// and `limit` page through the result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer
-    /// repeats them next to `totalQuantity`, `totalPage` and `currentPage`.
+    /// and `limit` page through the result and default to 0 and 25, `orderBy` and `orderType` sort it - by default the
+    /// newest limits come first - and the answer repeats them next to `totalQuantity`, `totalPage` and `currentPage`.
     /// </remarks>
     /// <summary>
     /// Get the user service limits

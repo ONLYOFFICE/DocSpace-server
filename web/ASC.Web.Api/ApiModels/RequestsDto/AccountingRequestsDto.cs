@@ -436,8 +436,7 @@ public class ServiceLimitIdRequestDto
 public class GetParticipantServiceLimitsRequestDto
 {
     /// <summary>
-    /// The number of limits to skip before the first one returned. Counted after the ordering is applied, and starts
-    /// at 0 when omitted.
+    /// The number of limits to skip before the first one returned, counted in the sort order of the list.
     /// </summary>
     /// <example>0</example>
     [Range(0, int.MaxValue)]
@@ -445,8 +444,7 @@ public class GetParticipantServiceLimitsRequestDto
     public int? Offset { get; init; }
 
     /// <summary>
-    /// The maximum number of limits returned in one page. Defaults to 25 when omitted; the answer echoes the window
-    /// back next to `totalQuantity`, `totalPage` and `currentPage`.
+    /// The largest number of limits one page holds.
     /// </summary>
     /// <example>25</example>
     [Range(1, ApiContext.MaxCount)]
@@ -454,7 +452,7 @@ public class GetParticipantServiceLimitsRequestDto
     public int? Limit { get; init; }
 
     /// <summary>
-    /// The field the limits are sorted by. The accounting service sorts by the creation date when this is omitted.
+    /// The field the list is sorted by: the user a limit applies to, or the moment it was created.
     /// </summary>
     /// <example>Created</example>
     [EnumDataType(typeof(ServiceLimitOrderBy))]
@@ -462,8 +460,7 @@ public class GetParticipantServiceLimitsRequestDto
     public ServiceLimitOrderBy? OrderBy { get; init; }
 
     /// <summary>
-    /// The direction the field named in `orderBy` is sorted in. Newest first is what the accounting service does by
-    /// default, so leaving this out sorts the same way as asking for descending explicitly.
+    /// The direction the field named in `orderBy` is sorted in.
     /// </summary>
     /// <example>Descending</example>
     [EnumDataType(typeof(OperationOrderType))]

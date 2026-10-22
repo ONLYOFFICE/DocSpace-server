@@ -69,7 +69,7 @@ public class ServiceLimitDto
     /// user read on its own.
     /// </summary>
     /// <example>3f2504e0-4f89-11d3-9a0c-0305e82c3301</example>
-    public string Participant { get; init; }
+    public Guid? UserId { get; init; }
 
     /// <summary>
     /// The most money the AI services may cost per period, in `currency`; null when the limit has no money threshold.
@@ -144,7 +144,7 @@ public class ServiceLimitReportDto
     /// <summary>
     /// The limits of this page, one per user; empty when no limit applies to any user or the page is past the end.
     /// </summary>
-    /// <example>[{"id": 42, "serviceGroupName": "ai-services", "customerAccountNumber": 12345, "scope": "Custom", "participant": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "usageFrom": null, "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z", "usage": {"periodStart": "2026-10-18T00:00:00Z", "periodEnd": "2026-10-18T23:59:59Z", "amountConsumed": 12.5, "amountAvailable": 27.5, "quantityConsumed": 0, "quantityAvailable": null}}]</example>
+    /// <example>[{"id": 42, "serviceGroupName": "ai-services", "customerAccountNumber": 12345, "scope": "Custom", "userId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "usageFrom": null, "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z", "usage": {"periodStart": "2026-10-18T00:00:00Z", "periodEnd": "2026-10-18T23:59:59Z", "amountConsumed": 12.5, "amountAvailable": 27.5, "quantityConsumed": 0, "quantityAvailable": null}}]</example>
     public List<ServiceLimitDto> Collection { get; init; }
 
     /// <summary>
@@ -182,7 +182,14 @@ public class ServiceLimitReportDto
 [UseStaticMapper(typeof(ServiceLimitUsageDtoMapper))]
 public static partial class ServiceLimitDtoMapper
 {
+    [MapProperty(nameof(ServiceLimit.Participant), nameof(ServiceLimitDto.UserId), Use = nameof(ToUserId))]
     public static partial ServiceLimitDto Map(this ServiceLimit source);
 
     public static partial ServiceLimitReportDto Map(this ServiceLimitReport source);
+
+    // The portal names the participant of a limit by the user ID; the accounting service keeps it as text.
+    private static Guid? ToUserId(string participant)
+    {
+        return Guid.TryParse(participant, out var userId) ? userId : null;
+    }
 }
