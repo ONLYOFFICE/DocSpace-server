@@ -1816,7 +1816,8 @@ public class TariffService(
     /// only when the cache expires. A user the accounting service has not met yet is not in it. Keyed by the user ID, so
     /// a list of users looks each one up instead of scanning the whole set; a switched-off limit is left out. While the
     /// accounting service is slow or cannot be reached, the last list known is used. Empty when the accounting service is
-    /// not configured, the portal is not its customer, or it cannot be reached and no list is known yet.
+    /// not configured or the portal is not its customer; null when the list cannot be read and none is known yet, since
+    /// an empty list would claim that no user has a personal limit.
     /// </summary>
     public async Task<Dictionary<Guid, ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
@@ -1853,18 +1854,24 @@ public class TariffService(
                 logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
                 return [];
             }
-        }, []);
+        }, null);
     }
 
     /// <summary>
     /// The limit in force for the user on the service group: the user's personal limit, or else the one for every user,
     /// both from the caches of <see cref="GetCachedParticipantServiceLimitsAsync"/>. The personal limit and the one for
     /// every user found in the list of the users come with the user's spending; the one for every user applied to a
-    /// user the accounting service has not met yet comes without it. Null when no limit applies to the user.
+    /// user the accounting service has not met yet comes without it. Null when no limit applies to the user, and when
+    /// the list of the users cannot be read: the user may have a personal limit then, so the one for every user is not
+    /// shown in its place.
     /// </summary>
     public async Task<ServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
     {
         var serviceLimits = await GetCachedParticipantServiceLimitsAsync(tenantId, groupName);
+        if (serviceLimits == null)
+        {
+            return null;
+        }
 
         if (serviceLimits.TryGetValue(userId, out var serviceLimit))
         {

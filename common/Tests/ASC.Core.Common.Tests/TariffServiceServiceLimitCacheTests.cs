@@ -80,20 +80,35 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     [Theory]
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.NotFound)]
-    public async Task GetCachedParticipantServiceLimits_AccountingFails_ReturnsEmptyInsteadOfThrowing(HttpStatusCode status)
+    public async Task GetCachedParticipantServiceLimits_AccountingFails_ReturnsNullInsteadOfThrowing(HttpStatusCode status)
     {
         // The user lists read these limits; an unreachable accounting service, or one without the route, must not break
-        // them.
+        // them. Null says the list is unknown - an empty one would claim no user has a personal limit.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             _ => AccountingClientTests.Json(status, "boom"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
-        serviceLimits.Should().BeEmpty();
+        serviceLimits.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetCachedParticipantServiceLimits_AccountingHangs_ReturnsEmptyWithinTheTimeoutAndDoesNotWaitAgain()
+    public async Task GetCachedUserServiceLimit_ListOfTheUsersFails_ReturnsNullRatherThanTheLimitForEveryUser()
+    {
+        // The user may have a personal limit the failed list would have shown; the limit for every user must not take
+        // its place.
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request)
+                ? GlobalLimitResponse(enabled: true)
+                : AccountingClientTests.Json(HttpStatusCode.InternalServerError, "boom"));
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
+
+        serviceLimit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetCachedParticipantServiceLimits_AccountingHangs_ReturnsNullWithinTheTimeoutAndDoesNotWaitAgain()
     {
         // Every page of users and every sign-in reads these limits, so a hanging accounting service must not stall them,
         // nor make each following request wait for it once more.
@@ -108,9 +123,9 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         var second = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
         var secondTook = DateTime.UtcNow - started;
 
-        first.Should().BeEmpty();
+        first.Should().BeNull();
         firstTook.Should().BeLessThan(TimeSpan.FromSeconds(10));
-        second.Should().BeEmpty();
+        second.Should().BeNull();
         secondTook.Should().BeLessThan(TimeSpan.FromSeconds(1));
         handler.CallCount.Should().Be(1);
     }
