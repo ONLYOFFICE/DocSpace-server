@@ -1614,7 +1614,7 @@ public class PaymentController(
     /// currency and unit, the period and whether it is in force, but without its spending: that comes with
     /// `GET api/2.0/portal/payment/servicelimit/total` for the portal and with
     /// `GET api/2.0/portal/payment/servicelimit/participants` for each user. A portal with no billing customer, and an
-    /// ID that does not exist or belongs to another portal, answer 404.
+    /// ID that does not exist, belongs to another portal or is not a limit on the AI services, answer 404.
     /// </remarks>
     /// <summary>
     /// Get a service limit
@@ -1624,13 +1624,13 @@ public class PaymentController(
     [SwaggerResponse(200, "The service limit with its scope, thresholds, period and state", typeof(ServiceLimitDto))]
     [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
     [HttpGet("servicelimit/{id:int}")]
     public async Task<ServiceLimitDto> GetServiceLimit(ServiceLimitIdRequestDto inDto)
     {
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        var serviceLimit = await tariffService.GetServiceLimitAsync(tenantId, inDto.Id);
+        var serviceLimit = await tariffService.GetServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id);
 
         return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
     }
@@ -1797,8 +1797,8 @@ public class PaymentController(
     /// `POST api/2.0/portal/payment/servicelimit`, which is also the way to change its scope, user or period. A
     /// switched-off limit stops restricting the AI services at once. The call is mutating and idempotent, it is written
     /// to the portal audit trail, and a new threshold applies from the very next operation; lowering it below what was
-    /// already spent blocks the AI services until the period ends. An ID that does not exist or belongs to another
-    /// portal answers 404.
+    /// already spent blocks the AI services until the period ends. An ID that does not exist, belongs to another portal
+    /// or is not a limit on the AI services answers 404.
     /// </remarks>
     /// <summary>
     /// Update a service limit
@@ -1808,7 +1808,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimitDto))]
     [SwaggerResponse(400, "The ID is zero or negative, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
     [HttpPut("servicelimit")]
     public async Task<ServiceLimitDto> UpdateServiceLimit(UpdateServiceLimitRequestDto inDto)
     {
@@ -1818,7 +1818,7 @@ public class PaymentController(
 
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled)
+        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled)
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
@@ -1931,8 +1931,8 @@ public class PaymentController(
     /// destructive and cannot be undone: unlike switching a limit off with `PUT api/2.0/portal/payment/servicelimit`,
     /// which keeps its settings, a deleted limit is gone, and a new one has to be created with
     /// `POST api/2.0/portal/payment/servicelimit`. Deleting a personal limit lets the limit for every user apply to
-    /// that user. It is written to the portal audit trail. An ID that does not exist or belongs to another portal
-    /// answers 404, which is also what a repeated deletion of the same limit gets.
+    /// that user. It is written to the portal audit trail. An ID that does not exist, belongs to another portal or is
+    /// not a limit on the AI services answers 404, which is also what a repeated deletion of the same limit gets.
     /// </remarks>
     /// <summary>
     /// Delete a service limit
@@ -1942,7 +1942,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The service limit has been deleted; the response carries no content")]
     [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
     [HttpDelete("servicelimit/{id:int}")]
     public async Task DeleteServiceLimit(ServiceLimitIdRequestDto inDto)
     {
@@ -1952,7 +1952,7 @@ public class PaymentController(
 
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        var serviceLimit = await tariffService.DeleteServiceLimitAsync(tenantId, inDto.Id)
+        var serviceLimit = await tariffService.DeleteServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id)
             ?? throw new ItemNotFoundException("Service limit could not be found");
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);

@@ -1685,10 +1685,11 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Returns the service limit only when it belongs to the tenant: the accounting service addresses a limit by its
-    /// global ID, so the owner is checked against the account number of the tenant's customer.
+    /// Returns the service limit only when it is a limit on the service group and belongs to the tenant: the accounting
+    /// service addresses a limit by its global ID, so the owner is checked against the account number of the tenant's
+    /// customer, and a limit the customer has on another group is left to the operations of that group.
     /// </summary>
-    public async Task<ServiceLimit> GetServiceLimitAsync(int tenantId, int id)
+    public async Task<ServiceLimit> GetServiceLimitAsync(int tenantId, string groupName, int id)
     {
         ServiceLimit serviceLimit;
         try
@@ -1701,7 +1702,7 @@ public class TariffService(
             return null;
         }
 
-        if (serviceLimit == null)
+        if (serviceLimit == null || !string.Equals(serviceLimit.ServiceGroupName, groupName, StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
@@ -1946,11 +1947,12 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Updates the service limit only when it belongs to the tenant; returns null otherwise.
+    /// Updates the service limit only when it is a limit on the service group and belongs to the tenant; returns null
+    /// otherwise.
     /// </summary>
-    public async Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, int id, decimal? amountValue, int? quantityValue, bool? enabled)
+    public async Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, string groupName, int id, decimal? amountValue, int? quantityValue, bool? enabled)
     {
-        var serviceLimit = await GetServiceLimitAsync(tenantId, id);
+        var serviceLimit = await GetServiceLimitAsync(tenantId, groupName, id);
         if (serviceLimit == null)
         {
             return null;
@@ -1994,12 +1996,12 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Deletes the service limit only when it belongs to the tenant, and returns the limit as it was before the
-    /// deletion; returns null when there is no such limit of the tenant.
+    /// Deletes the service limit only when it is a limit on the service group and belongs to the tenant, and returns
+    /// the limit as it was before the deletion; returns null when there is no such limit of the tenant.
     /// </summary>
-    public async Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, int id)
+    public async Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, string groupName, int id)
     {
-        var serviceLimit = await GetServiceLimitAsync(tenantId, id);
+        var serviceLimit = await GetServiceLimitAsync(tenantId, groupName, id);
         if (serviceLimit == null)
         {
             return null;
