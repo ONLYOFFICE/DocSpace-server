@@ -651,6 +651,23 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:form-suggested-questions", { attachmentId, questions });
   }
 
+  // Events pushed by integration plugins (PluginSocketEvent, forwarded by ASC.Web.Studio).
+  // tenantId is the one the sender was checked against. A plugin only reaches its own namespace:
+  // rooms "{tenantId}-plugin-{room}" (clients subscribe to "plugin-{room}") and events "plugin:{event}",
+  // so it can neither post into the product's rooms nor imitate the product's "s:*" events.
+  const pluginName = /^[A-Za-z0-9_.:-]{1,128}$/;
+
+  function pluginEvent({ tenantId, room, event, message } = {}) {
+    if (!Number.isInteger(tenantId) || tenantId <= 0 || !pluginName.test(room ?? "") || !pluginName.test(event ?? "")) {
+      logger.warn(`plugin event skipped: tenantId=${tenantId}, room=${room}, event=${event}`);
+      return;
+    }
+
+    const target = `${tenantId}-plugin-${room}`;
+    logger.info(`plugin event plugin:${event} in room ${target}`);
+    filesIO.to(target).emit(`plugin:${event}`, { message });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -702,6 +719,7 @@ module.exports = (io) => {
     changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings,
-    formSuggestedQuestions
+    formSuggestedQuestions,
+    pluginEvent
   };
 };
