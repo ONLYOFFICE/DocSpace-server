@@ -826,6 +826,15 @@ public class TariffService(
         return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
 
+    /// <summary>
+    /// The address of the hosted invoice page for the payment behind a top-up. Not cached, and failures are not
+    /// caught: the caller tells a payment the billing service cannot find from a service that did not answer.
+    /// </summary>
+    public async Task<string> GetInvoiceLinkAsync(int tenantId, string paymentRef)
+    {
+        return await billingClient.GetInvoiceLinkAsync(await coreSettings.GetKeyAsync(tenantId), paymentRef);
+    }
+
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
@@ -1656,6 +1665,48 @@ public class TariffService(
         {
             yield return page;
         }
+    }
+
+    public async Task<DepositReport> GetCustomerDepositsAsync(int tenantId, DepositFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerDepositsAsync(portalId, filter);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The balance top-up of the portal with the given operation ID, or null when the portal has none with it. The
+    /// accounting service looks top-ups up by filter only, so the pages are walked until the ID turns up. Failures
+    /// are not caught: a lookup that could not finish must not be taken for a missing top-up.
+    /// </summary>
+    public async Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, CancellationToken cancellationToken = default)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        var filter = new DepositFilter { Limit = 100 };
+
+        await foreach (var deposit in accountingClient.GetCustomerDepositPages(portalId, filter).WithCancellation(cancellationToken))
+        {
+            if (deposit.Id == depositId)
+            {
+                return deposit;
+            }
+        }
+
+        return null;
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
