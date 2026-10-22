@@ -46,8 +46,7 @@ public class EveryoneShareListTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
-    // Constants.GroupEveryone.ID of ASC.Core.Common
-    private static readonly Guid _everyoneId = new("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e");
+    private static readonly Guid _everyoneId = CoreConstants.GroupEveryone.ID;
 
     [Fact]
     public async Task GetFileSecurityInfo_SharedWithEveryone_ListsEveryoneAsSystemGroup()
@@ -76,36 +75,21 @@ public class EveryoneShareListTests(
     }
 
     [Fact]
-    public async Task GetFileSecurityInfo_EveryoneGroupAndUser_AllListed()
+    public async Task GetFileSecurityInfo_EveryoneGroupAndUser_ListedInShareOrder()
     {
-        var user = await InviteContact(EmployeeType.User);
-        var group = (await _groupApi.AddGroupAsync(
-            new GroupRequestDto([user.Id], Owner.Id, $"Autotest Everyone Mix {Guid.NewGuid():N}"),
-            TestContext.Current.CancellationToken)).Response;
+        var (fileId, groupId, userId) = await CreateFileSharedWithEveryoneGroupAndUser("Autotest Everyone Mixed.docx");
 
-        await _filesClient.Authenticate(Owner);
-        var file = await CreateFileInMy("Autotest Everyone Mixed.docx", Owner);
-        await _sharingApi.SetFileSecurityInfoAsync(
-            file.Id,
-            new SecurityInfoSimpleRequestDto
-            {
-                Share =
-                [
-                    new() { ShareTo = _everyoneId, Access = FileShare.Read },
-                    new() { ShareTo = group.Id, Access = FileShare.Read },
-                    new() { ShareTo = user.Id, Access = FileShare.ReadWrite }
-                ],
-                Notify = false
-            },
-            TestContext.Current.CancellationToken);
+        var entries = (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        var entries = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        FindEveryone(entries).Should().NotBeNull();
-        entries.Should().Contain(e => e.SharedToGroup != null && e.SharedToGroup.Id == group.Id);
-        entries.Should().Contain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
-        entries.Should().Contain(e => e.IsOwner);
+        // owner first; groups before users, groups by name ("Autotest..." before "Everyone"), the user last
         entries.Should().HaveCount(4);
+        entries[0].IsOwner.Should().BeTrue();
+        entries[1].SharedToGroup.Should().NotBeNull();
+        entries[1].SharedToGroup.Id.Should().Be(groupId, "the portal group sorts before Everyone by name");
+        entries[2].SharedToGroup.Should().NotBeNull();
+        entries[2].SharedToGroup.Id.Should().Be(_everyoneId);
+        entries[3].SharedToUser.Should().NotBeNull();
+        entries[3].SharedToUser.Id.Should().Be(userId);
     }
 
     [Fact]
@@ -120,17 +104,23 @@ public class EveryoneShareListTests(
     }
 
     [Fact]
-    public async Task GetFileSecurityInfo_SharedWithEveryone_SecondPageHoldsEveryone()
+    public async Task GetFileSecurityInfo_PagedOneByOne_PagesJoinIntoTheFullList()
     {
-        var file = await CreateFileInMy("Autotest Everyone Paging.docx", Owner);
-        await ShareFile(file.Id, _everyoneId, FileShare.Read);
+        var (fileId, _, _) = await CreateFileSharedWithEveryoneGroupAndUser("Autotest Everyone Paging.docx");
 
-        var firstPage = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, count: 1, startIndex: 0, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var secondPage = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, count: 1, startIndex: 1, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var full = (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var paged = new List<FileShareDto>();
 
-        firstPage.Should().ContainSingle(e => e.IsOwner);
-        secondPage.Should().ContainSingle();
-        FindEveryone(secondPage).Should().NotBeNull();
+        // startIndex 2 and 3 reach past the owner entry added outside the DAO, so the DAO has to skip rows
+        for (var startIndex = 0; startIndex < full.Count; startIndex++)
+        {
+            var page = (await _sharingApi.GetFileSecurityInfoAsync(fileId, count: 1, startIndex: startIndex, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            page.Should().ContainSingle("page {0} holds one entry", startIndex);
+            paged.Add(page[0]);
+        }
+
+        full.Should().HaveCount(4);
+        paged.Select(Key).Should().Equal(full.Select(Key));
     }
 
     [Fact]
@@ -160,23 +150,62 @@ public class EveryoneShareListTests(
         everyone.SharedToGroup.IsSystem.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task GetFileSecurityInfo_ReadInParallel_EveryResponseIsTheSame()
+    {
+        var (fileId, _, _) = await CreateFileSharedWithEveryoneGroupAndUser("Autotest Everyone Parallel.docx");
+
+        var lists = await Task.WhenAll(Enumerable.Range(0, 5).Select(async _ =>
+            (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response));
+
+        lists.Should().OnlyContain(l => l.Count == 4);
+        lists.Select(l => string.Join("|", l.Select(Key))).Distinct().Should().ContainSingle();
+    }
+
+    private async Task<(int FileId, Guid GroupId, Guid UserId)> CreateFileSharedWithEveryoneGroupAndUser(string title)
+    {
+        var user = await InviteContact(EmployeeType.User);
+        var group = (await _groupApi.AddGroupAsync(
+            new GroupRequestDto([user.Id], Owner.Id, $"Autotest Everyone Mix {Guid.NewGuid():N}"),
+            TestContext.Current.CancellationToken)).Response;
+
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy(title, Owner);
+        await _sharingApi.SetFileSecurityInfoAsync(
+            file.Id,
+            new SecurityInfoSimpleRequestDto
+            {
+                Share =
+                [
+                    new() { ShareTo = _everyoneId, Access = FileShare.Read },
+                    new() { ShareTo = group.Id, Access = FileShare.Read },
+                    new() { ShareTo = user.Id, Access = FileShare.ReadWrite }
+                ],
+                Notify = false
+            },
+            TestContext.Current.CancellationToken);
+
+        return (file.Id, group.Id, user.Id);
+    }
+
+    private static string Key(FileShareDto entry)
+    {
+        return entry.IsOwner ? "owner" : $"{entry.SharedToGroup?.Id}{entry.SharedToUser?.Id}";
+    }
+
     private static FileShareDto? FindEveryone(IEnumerable<FileShareDto> entries)
     {
         return entries.FirstOrDefault(e => e.SharedToGroup != null && e.SharedToGroup.Id == _everyoneId);
     }
 
     /// <summary>
-    /// Reads the <c>total</c> of a share list from the raw JSON: <c>FileShareArrayWrapper</c> in the
-    /// SDK has no <c>Total</c> property, so the typed call cannot see it.
+    /// Reads the <c>total</c> of a share list from the raw envelope: <c>FileShareArrayWrapper</c> in
+    /// the SDK has no <c>Total</c> property, so the typed call cannot see it.
     /// </summary>
-    private async Task<int> ReadShareTotal(string path)
+    private async Task<long?> ReadShareTotal(string path)
     {
         using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        response.IsSuccessStatusCode.Should().BeTrue(body);
 
-        using var json = JsonDocument.Parse(body);
-
-        return json.RootElement.GetProperty("total").GetInt32();
+        return (await new RawApiClient(_filesClient).ReadEnvelopeAsync<JsonElement>(response, TestContext.Current.CancellationToken)).Total;
     }
 }

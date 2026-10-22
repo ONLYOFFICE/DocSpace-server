@@ -37,13 +37,13 @@ namespace ASC.People.Tests.Tests._14_GroupSearch;
 /// The "Everyone" system group in <c>GET /api/2.0/group/file/{id}</c> and
 /// <c>GET /api/2.0/group/folder/{id}</c>. Everyone has no row in <c>core_group</c>, yet the
 /// share dialog has to offer it next to the portal's own groups: it is always listed, flagged as a
-/// system group, marked shared exactly when the entry is shared with it, found by name and hidden
-/// by <c>excludeShared</c> once shared.
+/// system group, marked shared exactly when the entry is shared with it - directly or through a
+/// parent folder - found by name, hidden by <c>excludeShared</c> once shared, and counted in
+/// <c>count</c>, which comes from a separate count query.
 /// </summary>
 public class GroupEveryoneSharedTests(AspireAppFixture fixture) : GroupSearchTestBase(fixture)
 {
-    // Constants.GroupEveryone.ID of ASC.Core.Common
-    private static readonly Guid _everyoneId = new("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e");
+    private static readonly Guid _everyoneId = CoreConstants.GroupEveryone.ID;
 
     [Fact]
     public async Task GetGroupsWithFilesShared_SharedWithEveryone_EveryoneIsSharedSystemGroup()
@@ -63,9 +63,10 @@ public class GroupEveryoneSharedTests(AspireAppFixture fixture) : GroupSearchTes
     {
         var fileId = await CreateFileInMyDocumentsAsync();
 
-        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var wrapper = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Single(g => g.Id == _everyoneId).Shared.Should().NotBe(true);
+        wrapper.Response.Single(g => g.Id == _everyoneId).Shared.Should().NotBe(true);
+        wrapper.Count.Should().Be(1, "Everyone is the only group of a fresh portal");
     }
 
     [Fact]
@@ -84,29 +85,31 @@ public class GroupEveryoneSharedTests(AspireAppFixture fixture) : GroupSearchTes
     }
 
     [Fact]
-    public async Task GetGroupsWithFilesShared_SearchByEveryoneName_FindsEveryone()
+    public async Task GetGroupsWithFilesShared_SearchByEveryoneName_FindsAndCountsEveryone()
     {
         var fileId = await CreateFileInMyDocumentsAsync();
         await CreateGroupAsync();
         await ShareFileWithGroupAsync(fileId, _everyoneId, FileShare.Read);
 
-        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, filterValue: "Every", cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var wrapper = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, filterValue: "Every", cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Should().ContainSingle(g => g.Id == _everyoneId);
-        result.Should().OnlyContain(g => g.Id == _everyoneId);
+        wrapper.Response.Should().ContainSingle(g => g.Id == _everyoneId);
+        wrapper.Response.Should().OnlyContain(g => g.Id == _everyoneId);
+        wrapper.Count.Should().Be(1);
     }
 
     [Fact]
-    public async Task GetGroupsWithFilesShared_ExcludeShared_HidesEveryoneOnceShared()
+    public async Task GetGroupsWithFilesShared_ExcludeShared_HidesAndDoesNotCountEveryoneOnceShared()
     {
         var fileId = await CreateFileInMyDocumentsAsync();
         var group = await CreateGroupAsync();
         await ShareFileWithGroupAsync(fileId, _everyoneId, FileShare.Read);
 
-        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, excludeShared: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var wrapper = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, excludeShared: true, cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Should().NotContain(g => g.Id == _everyoneId);
-        result.Should().Contain(g => g.Id == group.Id);
+        wrapper.Response.Should().NotContain(g => g.Id == _everyoneId);
+        wrapper.Response.Should().Contain(g => g.Id == group.Id);
+        wrapper.Count.Should().Be(1, "only the portal group is left");
     }
 
     [Fact]
@@ -128,12 +131,49 @@ public class GroupEveryoneSharedTests(AspireAppFixture fixture) : GroupSearchTes
         await CreateGroupAsync();
         await CreateGroupAsync();
 
-        var all = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var firstPage = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, count: 2, startIndex: 0, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var secondPage = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, count: 2, startIndex: 2, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var all = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken);
+        var firstPage = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, count: 2, startIndex: 0, cancellationToken: TestContext.Current.CancellationToken);
+        var secondPage = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, count: 2, startIndex: 2, cancellationToken: TestContext.Current.CancellationToken);
 
-        all.Should().HaveCount(3, "two portal groups plus Everyone");
-        firstPage.Concat(secondPage).Select(g => g.Id).Should().BeEquivalentTo(all.Select(g => g.Id));
+        all.Response.Should().HaveCount(3, "two portal groups plus Everyone");
+        all.Count.Should().Be(3);
+        firstPage.Count.Should().Be(2);
+        secondPage.Count.Should().Be(1);
+        firstPage.Response.Concat(secondPage.Response).Select(g => g.Id).Should().Equal(all.Response.Select(g => g.Id));
+    }
+
+    [Fact]
+    public async Task GetGroupsWithFilesShared_EveryoneOnParentFolder_EveryoneIsShared()
+    {
+        var fileId = await CreateFileInFolderSharedWithEveryoneAsync();
+
+        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        result.Single(g => g.Id == _everyoneId).Shared.Should().Be(true, "the parent folder shares the file with Everyone");
+    }
+
+    [Fact]
+    public async Task GetGroupsWithFilesShared_EveryoneOnParentFolder_SearchByNameStillMarksShared()
+    {
+        var fileId = await CreateFileInFolderSharedWithEveryoneAsync();
+
+        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, filterValue: "Every", cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        result.Should().ContainSingle(g => g.Id == _everyoneId)
+            .Which.Shared.Should().Be(true);
+    }
+
+    [Fact]
+    public async Task GetGroupsWithFilesShared_EveryoneOnParentFolder_ExcludeSharedHidesEveryone()
+    {
+        var fileId = await CreateFileInFolderSharedWithEveryoneAsync();
+        var group = await CreateGroupAsync();
+
+        var wrapper = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, excludeShared: true, cancellationToken: TestContext.Current.CancellationToken);
+
+        wrapper.Response.Should().NotContain(g => g.Id == _everyoneId);
+        wrapper.Response.Should().Contain(g => g.Id == group.Id);
+        wrapper.Count.Should().Be(1);
     }
 
     [Fact]
@@ -147,5 +187,46 @@ public class GroupEveryoneSharedTests(AspireAppFixture fixture) : GroupSearchTes
         var everyone = result.Single(g => g.Id == _everyoneId);
         everyone.Shared.Should().Be(true);
         everyone.IsSystem.Should().Be(true);
+    }
+
+    [Fact]
+    public async Task SharesAndGroupsOfEveryoneShare_ReadInParallel_EveryResponseIsTheSame()
+    {
+        var fileId = await CreateFileInMyDocumentsAsync();
+        var group = await CreateGroupAsync();
+        await _sharingApi.SetFileSecurityInfoAsync(
+            fileId,
+            new SecurityInfoSimpleRequestDto(
+                [new FileShareParams(_everyoneId, FileShare.Read), new FileShareParams(group.Id, FileShare.Read)],
+                notify: false),
+            TestContext.Current.CancellationToken);
+
+        var shareLists = Enumerable.Range(0, 5).Select(async _ =>
+            string.Join("|", (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response
+                .Select(e => $"{e.SharedToGroup?.Id}{e.SharedToUser?.Id}:{e.Access}")));
+        var groupLists = Enumerable.Range(0, 5).Select(async _ =>
+            string.Join("|", (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response
+                .Select(g => $"{g.Id}:{g.Shared}")));
+
+        var shares = await Task.WhenAll(shareLists);
+        var groups = await Task.WhenAll(groupLists);
+
+        shares.Distinct().Should().ContainSingle();
+        shares[0].Should().Contain(_everyoneId.ToString()).And.Contain(group.Id.ToString());
+        groups.Distinct().Should().ContainSingle();
+        groups[0].Should().Contain($"{_everyoneId}:True");
+    }
+
+    private async Task<int> CreateFileInFolderSharedWithEveryoneAsync()
+    {
+        var folderId = await CreateFolderInMyDocumentsAsync();
+        await ShareFolderWithGroupAsync(folderId, _everyoneId, FileShare.Read);
+
+        var file = await _filesApi.CreateFileAsync(
+            folderId,
+            new CreateFileRequest("Autotest Inherited " + Guid.NewGuid().ToString()[..8]),
+            TestContext.Current.CancellationToken);
+
+        return file.Response.Id;
     }
 }

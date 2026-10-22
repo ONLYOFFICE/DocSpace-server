@@ -637,6 +637,7 @@ internal abstract class SecurityBaseDao<T>(
     /// The share records of groups with the group name. The system group Everyone has no row in
     /// <c>core_group</c>, so its records are matched by subject and named from the constant.
     /// </summary>
+    // Not precompiled on purpose: composed per filterType on top of GetPureSharesQuery, whose source can be FromSqlRaw
     private static IQueryable<SecurityOrderRecord> GetGroupShareRecords(IQueryable<DbFilesSecurity> q, FilesDbContext filesDbContext, int order)
     {
         var everyoneId = Constants.GroupEveryone.ID;
@@ -657,6 +658,7 @@ internal abstract class SecurityBaseDao<T>(
     /// The portal's groups plus the system group Everyone. Everyone has no row in <c>core_group</c>,
     /// so it is added as one constant row per tenant, taken from <c>tenants_tenants</c>.
     /// </summary>
+    // Not precompiled on purpose: the base of GetGroupsWithSharedQuery, which adds an optional name filter and one of two share joins
     private static IQueryable<DbGroup> GetGroupsWithEveryone(int tenantId, FilesDbContext filesDbContext)
     {
         var everyoneId = Constants.GroupEveryone.ID;
@@ -688,7 +690,7 @@ internal abstract class SecurityBaseDao<T>(
                 ParentId = null,
                 Sid = null,
                 Removed = false,
-                LastModified = DateTime.MinValue
+                LastModified = t.CreationDateTime
             });
 
         return groups.Concat(everyone);

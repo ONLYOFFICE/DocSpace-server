@@ -37,7 +37,9 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Sharing;
 /// <c>GET /files/rooms/{id}/share</c> with an explicit <c>filterType</c>, a <c>filterValue</c> and
 /// paging: the user, group and user-or-group branches of the share query, the text search over
 /// user and group names, and the <c>total</c> of the list. The other suites only call the endpoint
-/// with its defaults.
+/// with its defaults. A regular room is never shared with the "Everyone" system group, a public room
+/// template is (<c>public: true</c> grants Everyone read access), so the Everyone cases of the group
+/// branch run on a template.
 /// </summary>
 [Trait("Category", "Rooms")]
 public class RoomShareFilterTests(
@@ -94,7 +96,8 @@ public class RoomShareFilterTests(
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         info.Should().ContainSingle();
-        info[0].SharedToGroup?.Id.Should().Be(groupId);
+        info[0].SharedToGroup.Should().NotBeNull();
+        info[0].SharedToGroup.Id.Should().Be(groupId);
     }
 
     [Fact]
@@ -141,7 +144,8 @@ public class RoomShareFilterTests(
 
         // the owner (room manager) sorts first, the group second, the invited user last
         page.Should().ContainSingle();
-        page[0].SharedToGroup?.Id.Should().Be(groupId);
+        page[0].SharedToGroup.Should().NotBeNull();
+        page[0].SharedToGroup.Id.Should().Be(groupId);
         total.Should().Be(3);
     }
 
@@ -153,6 +157,42 @@ public class RoomShareFilterTests(
         var total = await ReadShareTotal(room.Id, "filterType=Group");
 
         total.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetRoomSecurityInfo_PublicTemplate_FilterGroupListsEveryone()
+    {
+        var templateId = await CreateTemplate("Autotest Filter Everyone Template", isPublic: true);
+
+        var info = (await _roomsApi.GetRoomSecurityInfoAsync(templateId, ShareFilterType.Group, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        info.Should().ContainSingle(s => s.SharedToGroup != null && s.SharedToGroup.Id == CoreConstants.GroupEveryone.ID);
+    }
+
+    [Fact]
+    public async Task GetRoomSecurityInfo_PublicTemplate_SearchByEveryoneNameFindsEveryone()
+    {
+        var templateId = await CreateTemplate("Autotest Filter Everyone Search", isPublic: true);
+
+        var info = (await _roomsApi.GetRoomSecurityInfoAsync(
+            templateId,
+            ShareFilterType.UserOrGroup,
+            filterValue: "Every",
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        info.Should().ContainSingle();
+        info[0].SharedToGroup.Should().NotBeNull();
+        info[0].SharedToGroup.Id.Should().Be(CoreConstants.GroupEveryone.ID);
+    }
+
+    [Fact]
+    public async Task GetRoomSecurityInfo_PublicTemplate_TotalCountsEveryone()
+    {
+        var templateId = await CreateTemplate("Autotest Filter Everyone Total", isPublic: true);
+
+        var total = await ReadShareTotal(templateId, "filterType=Group");
+
+        total.Should().Be(1, "Everyone is the only group of a public template");
     }
 
     private async Task<(FolderDto Room, User User, Guid GroupId)> CreateRoomWithUserAndGroup(string title)
@@ -180,17 +220,13 @@ public class RoomShareFilterTests(
     }
 
     /// <summary>
-    /// Reads the <c>total</c> of the room share list from the raw JSON: <c>FileShareArrayWrapper</c>
+    /// Reads the <c>total</c> of the room share list from the raw envelope: <c>FileShareArrayWrapper</c>
     /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
     /// </summary>
-    private async Task<int> ReadShareTotal(int roomId, string query)
+    private async Task<long?> ReadShareTotal(int roomId, string query)
     {
         using var response = await _filesClient.GetAsync($"api/2.0/files/rooms/{roomId}/share?{query}", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        response.IsSuccessStatusCode.Should().BeTrue(body);
 
-        using var json = JsonDocument.Parse(body);
-
-        return json.RootElement.GetProperty("total").GetInt32();
+        return (await new RawApiClient(_filesClient).ReadEnvelopeAsync<JsonElement>(response, TestContext.Current.CancellationToken)).Total;
     }
 }
