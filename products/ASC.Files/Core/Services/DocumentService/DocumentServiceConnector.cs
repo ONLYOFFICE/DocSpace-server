@@ -273,6 +273,11 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task<string> GetVersionAsync()
     {
+        return (await GetVersionsAsync()).Version;
+    }
+
+    public async Task<DocServiceVersions> GetVersionsAsync()
+    {
         logger.DebugDocServiceRequestVersion();
         try
         {
@@ -296,7 +301,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
             if (commandResponse.Error == ErrorTypes.NoError)
             {
-                return version;
+                var aiToolsVersion = string.IsNullOrEmpty(commandResponse.AiToolsVersion) ? null : commandResponse.AiToolsVersion;
+                return new DocServiceVersions(version, aiToolsVersion);
             }
 
             logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
@@ -306,7 +312,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             logger.ErrorDocServiceCommandError(e);
         }
 
-        return "4.1.5.1";
+        return new DocServiceVersions("4.1.5.1", null);
     }
 
     public async Task CheckDocServiceUrlAsync()
@@ -555,3 +561,10 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         return new Exception(error, ex);
     }
 }
+
+/// <summary>
+/// The versions reported by the ONLYOFFICE Docs "version" command.
+/// </summary>
+/// <param name="Version">The ONLYOFFICE Docs version.</param>
+/// <param name="AiToolsVersion">The AI tools version, null when the AI tools are disabled or the editors do not report it.</param>
+public record DocServiceVersions(string Version, string AiToolsVersion);
