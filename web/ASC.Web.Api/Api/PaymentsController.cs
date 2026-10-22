@@ -1786,7 +1786,7 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, inDto.Scope, participantName);
 
-        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, participantName);
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, inDto.Scope, participantName);
 
         return serviceLimit.Map();
     }
@@ -1826,7 +1826,7 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
 
-        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Participant);
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Scope, serviceLimit.Participant);
 
         return serviceLimit.Map();
     }
@@ -1883,7 +1883,11 @@ public class PaymentController(
         // The explicit type argument picks the list overload; with a List<Guid> the compiler takes the single-value one.
         messageService.Send(MessageAction.CustomerServiceLimitsSet, MessageTarget.Create<Guid>(userIds), ServiceLimitGroups.AiServices);
 
-        await quotaSocketManager.ChangeServiceLimitsAsync(ServiceLimitGroups.AiServices, userIds: userIds);
+        // The users who got the limit, and the administrators, who see it in the list of the users.
+        var recipients = await GetAdministratorIdsAsync();
+        recipients.UnionWith(userIds);
+
+        await quotaSocketManager.ChangeServiceLimitsAsync(ServiceLimitGroups.AiServices, userIds: recipients);
 
         return count;
     }
@@ -1958,16 +1962,36 @@ public class PaymentController(
 
         await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
 
-        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Participant);
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Scope, serviceLimit.Participant);
     }
 
-    // A limit of one user concerns that user alone, so only they are told; a limit of the portal as a whole or for every
-    // user concerns everyone. The event only asks the clients to re-read, so it carries no thresholds.
-    private async Task NotifyServiceLimitChangeAsync(string serviceGroupName, int id, string participantName)
+    // The event goes to whoever may read the limit: the limit for every user to every user, as each reads it as their own
+    // limit; the limit of the portal as a whole to the administrators only; a personal limit to its user and to the
+    // administrators, who see it in the list of the users. The event only asks the clients to re-read, so it carries no
+    // thresholds.
+    private async Task NotifyServiceLimitChangeAsync(string serviceGroupName, int id, ServiceLimitScope scope, string participantName)
     {
-        var userIds = Guid.TryParse(participantName, out var userId) ? new[] { userId } : null;
+        if (scope == ServiceLimitScope.Global)
+        {
+            await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id);
+            return;
+        }
+
+        var userIds = await GetAdministratorIdsAsync();
+        if (Guid.TryParse(participantName, out var userId))
+        {
+            userIds.Add(userId);
+        }
 
         await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id, userIds);
+    }
+
+    // The owner is a member of the administrators group too.
+    private async Task<HashSet<Guid>> GetAdministratorIdsAsync()
+    {
+        var administrators = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+
+        return administrators.Select(administrator => administrator.Id).ToHashSet();
     }
 
     // The audit record names the service group and, as its second parameter, the scope of the limit - for a personal
