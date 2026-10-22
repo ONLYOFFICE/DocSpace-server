@@ -11,7 +11,7 @@ import com.squareup.moshi.ToJson
  * third-party provider. Both occur on the same portal.
  *
  * Hand-written because the Kotlin generator renders the contract's `oneOf[integer, string]` as an empty
- * class that drops the value. `../generate.sh` maps the `EntryId` schema onto this type.
+ * class that drops the value. The generator maps the `EntryId` schema onto this type (`--schema-mappings`).
  */
 class EntryId private constructor(
     /** The id as it was on the wire: a [Long] or a [String]. */

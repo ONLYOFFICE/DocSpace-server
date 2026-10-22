@@ -6,8 +6,8 @@ Logs a DocSpace webhook delivery to the console.
     python log_webhook.py <body> <secret> <sig>
 
 Python has no src/ runtime yet, so signature checking and the trigger ->
-payload mapping live here. ../generate.sh runs this over every fixture in
-../../samples after each generation.
+payload mapping live here. Regeneration (the generate-webhook-sdk skill) runs
+this over every fixture in ../../samples after each generation.
 """
 
 import hashlib

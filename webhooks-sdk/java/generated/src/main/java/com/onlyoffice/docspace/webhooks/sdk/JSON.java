@@ -1,7 +1,7 @@
 package com.onlyoffice.docspace.webhooks.sdk;
 
 // Trigger -> payload dispatch, generated from docspace-webhooks.yaml by
-// tools/gen-trigger-map.py. Do not edit; rerun ./generate.sh instead.
+// tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead.
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

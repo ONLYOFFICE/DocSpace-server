@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Trigger -> payload dispatch, generated from docspace-webhooks.yaml by
- * tools/gen-trigger-map.py. Do not edit; rerun ./generate.sh instead.
+ * tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead.
  */
 import {
     FilePayload,

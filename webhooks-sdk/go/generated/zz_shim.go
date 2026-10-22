@@ -1,7 +1,7 @@
 package docspace_webhooks_sdk
 
 // Minimal stand-ins for the generator's utils.go, which models-only output does
-// not emit. Copied into generated/ by ../generate.sh after every regeneration.
+// not emit. Copied into generated/ after every regeneration.
 //
 // Generating the supporting files instead would pull in a whole HTTP API client
 // (client.go, configuration.go, response.go, auth) for a package that only ever

@@ -83,7 +83,7 @@
             <goals><goal>add-source</goal></goals>
             <configuration>
               <sources>
-                <!-- Contract models; wiped and rewritten by ../generate.sh -->
+                <!-- Contract models; wiped and rewritten on every regeneration -->
                 <source>generated/src/main/java</source>
               </sources>
             </configuration>

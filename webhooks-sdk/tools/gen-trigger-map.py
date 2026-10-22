@@ -5,7 +5,7 @@ x-docspace-trigger-payloads block of the webhook contract.
 
 This table is never hand-maintained: 37 triggers across 9 languages is exactly
 the kind of list that silently rots. Adding a trigger to WebhookTrigger.cs and
-the contract is enough -- rerunning generate.sh carries it everywhere.
+the contract is enough -- regenerating carries it everywhere.
 
     python gen-trigger-map.py --lang typescript --spec <yaml> --out <file>
 """
@@ -20,7 +20,7 @@ except ImportError:
 
 HEADER = (
     "Trigger -> payload dispatch, generated from docspace-webhooks.yaml by\n"
-    "tools/gen-trigger-map.py. Do not edit; rerun ./generate.sh instead."
+    "tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead."
 )
 
 
@@ -270,7 +270,8 @@ def main():
     ap.add_argument("--spec", required=True)
     ap.add_argument("--out", required=True)
     # Package names are passed in rather than hardcoded: they have to track the
-    # additional-properties in generate.sh, and those follow the API SDK naming.
+    # additional-properties in targets.conf (the generate-webhook-sdk skill), and
+    # those follow the API SDK naming.
     ap.add_argument("--package", default="")
     ap.add_argument("--model-package", dest="model_package", default="")
     # Relative path from the emitted file to the per-model docs.

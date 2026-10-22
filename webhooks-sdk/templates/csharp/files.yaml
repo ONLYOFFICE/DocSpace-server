@@ -1,7 +1,7 @@
 # Extra supporting files for the C# SDK.
 #
 # openapi-generator can only be told about custom output files through a config
-# file -- there is no command-line equivalent -- so generate.sh passes this with
+# file -- there is no command-line equivalent -- so regeneration passes this with
 # -c whenever templates/<lang>/files.yaml exists. Everything else stays on the
 # command line alongside the other languages.
 #

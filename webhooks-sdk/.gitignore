@@ -12,7 +12,7 @@
 # =============================================================================
 
 # --- generator ---------------------------------------------------------------
-# Per-run logs that generate.sh writes into each generated/ tree.
+# Per-run logs that regeneration writes into each generated/ tree.
 .generate.log
 .verify.log
 

@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0")
     ],
     targets: [
-        // Contract models; wiped and rewritten by ../generate.sh
+        // Contract models; wiped and rewritten on every regeneration
         .target(
             name: "DocSpaceWebhooksSDK",
             path: "generated/Sources/DocSpaceWebhooksSDK"

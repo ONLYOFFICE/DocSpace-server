@@ -84,7 +84,7 @@
             <configuration>
               <sourceDirs>
                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                <!-- Contract models; wiped and rewritten by ../generate.sh -->
+                <!-- Contract models; wiped and rewritten on every regeneration -->
                 <sourceDir>${project.basedir}/generated/src/main/kotlin</sourceDir>
               </sourceDirs>
             </configuration>

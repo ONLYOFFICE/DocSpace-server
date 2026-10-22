@@ -5,7 +5,7 @@ import java.util.Objects;
 
 /**
  * Stand-in for the generator's oneOf base class. {@code EntryId} is the only
- * subclass in this contract. Copied into generated/ by ../generate.sh.
+ * subclass in this contract. Copied into generated/ on every regeneration.
  *
  * <p>Its discriminator works by trying each branch's adapter in turn, so the
  * only members the subclass needs are the actual-instance accessors and the

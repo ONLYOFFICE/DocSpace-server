@@ -8,7 +8,6 @@ payload to the right type.
 
 ```
 webhooks-sdk/
-├── generate.sh          regenerates every language from the contract
 ├── openapitools.json    pins the generator (7.25.0) for reproducible output
 ├── samples/             shared fixture: a real delivery, its signature, its key
 ├── tools/
@@ -81,7 +80,7 @@ documentation; the other eight get a single self-contained README:
 The two use different mechanisms, for a reason:
 
 **`RECEIVING.md` is native.** openapi-generator takes extra output files only
-from a config file — there is no command-line equivalent — so `generate.sh`
+from a config file — there is no command-line equivalent — so regeneration
 passes `-c templates/<lang>/files.yaml` whenever that file exists. Two traps,
 both hit while wiring this up:
 
@@ -110,7 +109,7 @@ it has nothing to render and is not used here.
 `generated/triggers.ts` is derived from the contract's
 `x-docspace-trigger-payloads` block, never hand-written: 37 triggers × 9
 languages is exactly the list that rots silently. Add a trigger to
-`WebhookTrigger.cs` and the contract, rerun `./generate.sh`, and it propagates.
+`WebhookTrigger.cs` and the contract, regenerate, and it propagates.
 
 Nine targets: `csharp go java kotlin php python ruby swift typescript`.
 
@@ -149,19 +148,22 @@ either shows up in the same review as the contract change it implies.
 
 ## Regenerating
 
-```bash
-./generate.sh              # all languages
-./generate.sh python go    # a subset
-VERIFY=0 ./generate.sh     # generate only
-```
+Regeneration is driven by the `generate-webhook-sdk` Claude Code skill
+([`.claude/skills/generate-webhook-sdk/`](../.claude/skills/generate-webhook-sdk/SKILL.md)),
+not by a script: ask it to regenerate all languages or a subset, with or without
+the verification below. It runs the same steps in bash or PowerShell on any OS.
+Its `SKILL.md` lists every step as a plain command, so a regeneration can also be
+done by hand from there. The generator flags of each language, and why each one is
+there, are in [`targets.conf`](../.claude/skills/generate-webhook-sdk/targets.conf)
+next to it.
 
-Needs `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`) and a
-JDK. Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
+Needs `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), a
+JDK and `python` (for the trigger tables). Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
 touched.
 
 After generating, each language is built and its sample is run over every
 fixture in `samples/` (see *Samples*); the outcome is in
-`<lang>/generated/.verify.log`, and any failure makes the script exit non-zero.
+`<lang>/generated/.verify.log`, and any failure fails the run.
 A clean generation proves nothing on its own: every SDK here once generated
 without a warning and still failed to compile or to parse a real delivery.
 
@@ -183,7 +185,7 @@ The tool's own rule against calling `openapi-generator-cli` directly exists beca
 its API commands do post-generation work (build a `.nupkg`, run `npm pack`). A
 models-only webhook generation has none of that, and is not a command the tool
 offers. If webhook SDKs ever need packaging and publishing, the right move is to add
-first-class commands to that tool — not to wire packaging into this script.
+first-class commands to that tool — not to wire packaging into the webhook regeneration.
 
 ## The payloads are webhook-owned DTOs
 
@@ -257,7 +259,7 @@ Kotlin needs no local `kotlinc`: the compiler comes down as a Maven artifact.
 The pinned Kotlin (2.4.21) builds on JDK 17 through 25; 2.0.x fails on JDK 25
 while parsing the runtime version string.
 
-`generate.sh` runs every sample after generating, over **every** signed fixture
+Regeneration runs every sample after generating, over **every** signed fixture
 in `samples/`:
 
 | Fixture | What it exercises |
@@ -268,7 +270,7 @@ in `samples/`:
 | `unknown.trigger` | a trigger family and target type this contract does not know, as after a server upgrade |
 
 A language whose toolchain is missing is reported as `NOT VERIFIED` at the end
-rather than passed; `VERIFY=0 ./generate.sh` skips the check. Ruby and Swift
+rather than passed; a generate-only run skips the check. Ruby and Swift
 have no toolchain on the machine this was last run on and were checked in the
 `ruby:3.4-slim` and `swift:6.1` images instead. Kotlin was also checked on
 `maven:3-eclipse-temurin-25`.
@@ -285,7 +287,7 @@ where the generators differ most. This is worth knowing before trusting an id:
 | Quality | Languages | Behaviour |
 |---|---|---|
 | Correct | Swift, Go, Ruby, TypeScript, C#, Java, Python | Value preserved — Swift's enum with associated values is the cleanest |
-| Mapped | PHP, Kotlin | The generator renders an empty class that drops the value, so `generate.sh` maps the schema away from it |
+| Mapped | PHP, Kotlin | The generator renders an empty class that drops the value, so the generator is told to map the schema away from it |
 
 PHP maps `EntryId` to `mixed`, so `getId()` returns the `int` or `string` as it
 arrived. Kotlin maps it to the hand-written `onlyoffice.docspace.webhooks.sdk.EntryId`
@@ -300,7 +302,7 @@ signature check is exercised for real rather than skipped.
 ### Per-language shims
 
 Models-only output does not compile anywhere without help. What each target
-needed, all of it applied automatically by `generate.sh`:
+needed, all of it applied automatically on regeneration:
 
 | Language | Needed |
 |---|---|

@@ -8,8 +8,8 @@
 #
 # Ruby has no src/ runtime yet, so signature checking lives here.
 #
-# ../generate.sh runs this over every fixture in ../../samples after each
-# generation.
+# Regeneration (the generate-webhook-sdk skill) runs this over every fixture
+# in ../../samples after each generation.
 
 require 'json'
 require 'openssl'

@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Contract models + trigger table, emitted by ../../../generate.sh.
+    <!-- Contract models + trigger table, emitted by the generate-webhook-sdk skill.
          Never edited by hand; wiped and rewritten on every regeneration. -->
     <Compile Include="../../generated/src/DocSpace.Webhooks.SDK/**/*.cs"
              LinkBase="Generated" />

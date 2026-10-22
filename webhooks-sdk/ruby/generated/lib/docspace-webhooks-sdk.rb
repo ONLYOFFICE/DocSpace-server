@@ -3,7 +3,7 @@
 # Entry point of the webhook payload models. Models-only output: the stock
 # entry point would also load api_client (and with it typhoeus) and
 # configuration, none of which a receiver uses - a webhook is parsed, never
-# requested. Overrides the generator's gem.mustache; see ../../generate.sh.
+# requested. Overrides the generator's gem.mustache.
 
 require 'docspace-webhooks-sdk/api_model_base'
 require 'docspace-webhooks-sdk/version'
