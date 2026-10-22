@@ -67,10 +67,14 @@ public abstract class TariffServiceServiceLimitTestBase
         await hybridCache.SetAsync(TariffService.GetAccountingBalanceCacheKey(TenantId), balance, TimeSpan.FromMinutes(5),
             token: TestContext.Current.CancellationToken);
 
-        // The portal is a billing customer unless a test says otherwise; an empty customer is what TariffService caches
-        // for a portal that is not one.
-        await hybridCache.SetAsync(TariffService.GetBillingCustomerCacheKey(TenantId), customerInfo ?? new CustomerInfo { PortalId = $"{PaymentRegion}{TenantId}" },
-            TimeSpan.FromMinutes(5), token: TestContext.Current.CancellationToken);
+        // Nothing about the billing customer is cached unless a test says so; an empty customer is what TariffService
+        // caches for a portal that is not one. The billing client and the distributed lock are null, so a test fails at
+        // once should the lists of users ever ask the billing service.
+        if (customerInfo != null)
+        {
+            await hybridCache.SetAsync(TariffService.GetBillingCustomerCacheKey(TenantId), customerInfo, TimeSpan.FromMinutes(5),
+                token: TestContext.Current.CancellationToken);
+        }
 
         // A SaaS portal unknown to the tenant service gets the portal ID "<payment region><tenant ID>".
         var configuration = new ConfigurationBuilder()

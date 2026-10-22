@@ -211,6 +211,20 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     }
 
     [Fact]
+    public async Task GetCachedUserServiceLimit_CustomerNotCachedYet_ReadsTheLimitsWithoutAskingTheBillingService()
+    {
+        // Every sign-in builds this field, and the billing service has no short timeout: with nothing cached about the
+        // customer, the limits are read as usual instead. The billing client of the fixture is null, so a call to it fails.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsGlobalRequest(request) ? GlobalLimitResponse(enabled: true) : ParticipantRows(Row(42, "Custom", UserA)));
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
+
+        serviceLimit.Id.Should().Be(42);
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetCachedUserServiceLimit_UserUnderTheLimitForEveryUser_ReturnsThatRowWithTheUsage()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },

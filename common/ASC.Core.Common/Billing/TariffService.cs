@@ -1873,9 +1873,17 @@ public class TariffService(
     /// </summary>
     public async Task<UserServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
     {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
         // A portal that is not a billing customer cannot have limits - the limit operations refuse it - so the lists of
-        // its users do not ask the accounting service at all.
-        if (!accountingClient.Configured || await GetCustomerInfoAsync(tenantId) == null)
+        // its users do not ask the accounting service for it. Only what is cached decides: the billing service has no
+        // short timeout, and every list of users and every sign-in would wait for it. With nothing cached, the limits
+        // are read as usual, with the timeouts and fallbacks of their own caches.
+        var customerInfo = await GetFromCache<CustomerInfo>(GetBillingCustomerCacheKey(tenantId));
+        if (customerInfo != null && customerInfo.IsDefault())
         {
             return null;
         }
