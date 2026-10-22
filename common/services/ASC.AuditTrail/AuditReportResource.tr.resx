@@ -747,6 +747,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Porta Deaktive Edildi</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal veri saklama politikası nedeniyle engellendi</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portalın engeli kaldırıldı</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal Silindi</value>
   </data>

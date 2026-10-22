@@ -738,6 +738,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portalul a fost dezactivat</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portalul a fost blocat de politica de păstrare a datelor</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portalul a fost deblocat</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portalul a fost șters</value>
   </data>

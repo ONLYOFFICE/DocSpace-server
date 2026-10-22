@@ -732,6 +732,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portali u çaktivizua</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portali u bllokua nga politika e ruajtjes së të dhënave</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portali u zhbllokua</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portali u fshi</value>
   </data>

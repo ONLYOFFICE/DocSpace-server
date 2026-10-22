@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Potrdite ukinitev računa</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Obrnite se na podporo</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivirajte portal</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Pridruži se sobi</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Ohranite moj prostor</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Ohranite moj prostor in sredstva</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Pustite povratne informacije</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastavi geslo</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Delite svoje mnenje</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Začnite brezplačni preizkus</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Odblokirajte moj prostor</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Nadgradnja</value>
@@ -752,6 +767,186 @@ Brskalnik: *$Browser*
 Če ste to dejanje izvedli sami, nadaljnji koraki niso potrebni. Če se vam zdi ta sprememba sumljiva ali je niste odobrili, takoj ponastavite geslo in onemogočite dostop do ${LetterLogoText} za to napravo.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portal ${PortalUrl} je bil blokiran v skladu s pravilnikom o hrambi podatkov: ni bil v uporabi ali njegova naročnina ni bila podaljšana. Za kateri primer gre, pove spodnja kategorija.
+
+*Portal:* ${PortalUrl}
+*Lastnik:* ${UserName} ${UserEmail}
+*Kategorija:* ${Category}
+*Datum izbrisa:* ${DeleteDate}
+
+Če ne bo odblokiran, bodo portal in vsi njegovi podatki na ta dan izbrisani.
+
+Če lastnik prosi, da ga ohranite, portal pred tem datumom znova aktivirajte.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Vaš prostor je blokiran, a ničesar še ni izgubljenega
+
+#if($Unpaid == "True")
+Ker je naročnina za vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* potekla, smo ga začasno blokirali. To pomeni, da se trenutno nihče iz vaše ekipe ne more prijaviti, vsi vaši dokumenti in nastavitve pa so še vedno varni.
+#else
+Ker vašega prostora ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* nekaj časa nihče ni uporabljal, smo ga začasno blokirali. To pomeni, da se trenutno nihče iz vaše ekipe ne more prijaviti, vsi vaši dokumenti in nastavitve pa so še vedno varni.
+#end
+
+Vaše podatke bomo hranili do tega datuma: *$DeleteDate*. Nato bodo prostor in vsa njegova vsebina trajno izbrisani.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Dobra novica: še ni prepozno. Samo odblokirajte prostor (rok: $DeleteDateShort) in nato podaljšajte naročnino, da se vrnete k delu. Vse bo natanko tam, kjer ste pustili.
+#else
+Dobra novica: še ni prepozno. Samo odblokirajte prostor (rok: $DeleteDateShort) in vse bo natanko tam, kjer ste pustili.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne podatke, odblokirajte prostor in naredite varnostno kopijo (rok: $DeleteDateShort).
+#else
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne datoteke, odblokirajte prostor in jih prenesite (rok: $DeleteDateShort).
+#end
+#else
+Dobra novica: še ni prepozno. Samo obrnite se na našo ekipo za podporo (rok: $DeleteDateShort) in pomagali vam bomo povrniti prostor natanko takšen, kot ste ga pustili.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne datoteke, nam to sporočite (rok: $DeleteDateShort) in pomagali vam bomo do njih dostopati.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Vaš prostor je bil izbrisan
+
+#if($Unpaid == "True")
+Ker je naročnina za vaš prostor ${LetterLogoText} *$PortalName* potekla in ni bila podaljšana, smo ga zdaj izbrisali skupaj z vsemi podatki, kot je opisano v našem "pravilniku o zasebnosti":"$URL1".
+#else
+Ker vašega prostora ${LetterLogoText} *$PortalName* dolgo nihče ni uporabljal, smo ga zdaj izbrisali skupaj z vsemi podatki, kot je opisano v našem "pravilniku o zasebnosti":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Hvala, ker ste delali z nami. Zelo radi bi izvedeli, zakaj ste ga prenehali uporabljati: ali kaj ni delovalo, ste našli boljšo rešitev ali ga preprosto niste več potrebovali? Vzame le minuto, vsak odgovor pa nam pomaga, da postajamo boljši.
+#else
+Hvala, ker ste preizkusili ${LetterLogoText}. Zelo radi bi izvedeli, zakaj ste ga prenehali uporabljati: ali kaj ni delovalo, ste našli boljšo rešitev ali ga preprosto niste več potrebovali? Vzame le minuto, vsak odgovor pa nam pomaga, da postajamo boljši.
+#end
+
+$OrangeButton
+
+Če se boste kdaj želeli vrniti, ste vedno dobrodošli. Kadar koli lahko "ustvarite nov prostor":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Vaš prostor bo kmalu izbrisan
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je še vedno blokiran, ker je njegova naročnina potekla. To je prijazen zadnji opomnik: prostor in vsi njegovi podatki bodo trajno izbrisani na ta dan: *$DeleteDate*.
+#else
+Vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je še vedno blokiran, ker je njegova naročnina potekla. To je prijazen opomnik: prostor in vsi njegovi podatki bodo trajno izbrisani na ta dan: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je še vedno blokiran, ker ga nekaj časa nihče ni uporabljal. To je prijazen zadnji opomnik: prostor in vsi njegovi podatki bodo trajno izbrisani na ta dan: *$DeleteDate*.
+#else
+Vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je še vedno blokiran, ker ga nekaj časa nihče ni uporabljal. To je prijazen opomnik: prostor in vsi njegovi podatki bodo trajno izbrisani na ta dan: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Če ga želite ohraniti, je še čas. Samo odblokirajte prostor (rok: $DeleteDateShort) in nato podaljšajte naročnino, da se vrnete k delu. Vse bo natanko tam, kjer ste pustili.
+#else
+Če ga želite ohraniti, je še čas. Samo odblokirajte prostor (rok: $DeleteDateShort) in vse bo natanko tam, kjer ste pustili.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne podatke, odblokirajte prostor in naredite varnostno kopijo (rok: $DeleteDateShort), saj jih pozneje ne bomo mogli obnoviti.
+#else
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne datoteke, odblokirajte prostor in jih prenesite (rok: $DeleteDateShort), saj jih pozneje ne bomo mogli obnoviti.
+#end
+#else
+Če ga želite ohraniti, je še čas. Samo obrnite se na našo ekipo za podporo (rok: $DeleteDateShort) in pomagali vam bomo povrniti prostor natanko takšen, kot ste ga pustili.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Če želite obdržati kakšne datoteke, nam to sporočite (rok: $DeleteDateShort) in pomagali vam bomo do njih dostopati, saj jih pozneje ne bomo mogli obnoviti.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Že nekaj časa vas nismo videli
+
+Že nekaj časa se ni nihče prijavil v vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Želeli smo vam pisati, preden se karkoli zgodi z vašimi dokumenti in nastavitvami.
+
+Da bi vse nemoteno delovalo za vse, blokiramo brezplačne prostore, ki jih nekaj časa nihče ne uporablja. Za vaš prostor to pomeni naslednje:
+
+*$BlockDate*: vaš prostor bo blokiran in prijava ne bo več mogoča.
+*$DeleteDate*: prostor in vsi njegovi podatki bodo trajno izbrisani.
+
+Dobra novica: ohraniti ga je preprosto. Samo enkrat se prijavite (rok: $BlockDateShort) in vse bo ostalo natanko tako, kot ste pustili.
+
+$OrangeButton
+
+Če prostora ne potrebujete več, vam ni treba storiti ničesar. Le prenesite datoteke, ki jih želite obdržati (rok: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Vaša naročnina je potekla, vaš prostor pa je še vedno tukaj
+
+Datum izteka vaše naročnine ${LetterLogoText} za *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Hvala, ker ste delali z nami. Upamo, da vam je ${LetterLogoText} vsaj malo olajšal delo.
+
+Da bi vse nemoteno delovalo, blokiramo prostore, ki jim je potekla naročnina. Za vaš prostor to pomeni naslednje:
+
+*$BlockDate*: vaš prostor bo blokiran in prijava ne bo več mogoča.
+*$DeleteDate*: prostor in vsi njegovi podatki bodo trajno izbrisani.
+
+Dobra novica: ohraniti ga je preprosto. Samo podaljšajte naročnino (rok: $BlockDateShort) in vaši dokumenti, nastavitve in ekipa bodo ostali natanko tam, kjer ste jih pustili.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Le naredite varnostno kopijo podatkov, ki jih želite obdržati (rok: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Vaša naročnina je potekla, vaš prostor in sredstva pa so še vedno tukaj
+
+Datum izteka vaše naročnine ${LetterLogoText} za *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Hvala, ker ste delali z nami. V vaši denarnici so še sredstva ("preverite stanje":"$URL1") in nismo želeli, da bi jih izgubili, ne da bi vedeli.
+
+Da bi vse nemoteno delovalo, blokiramo prostore, ki jim je potekla naročnina. Za vaš prostor to pomeni naslednje:
+
+*$BlockDate*: vaš prostor bo blokiran in prijava ne bo več mogoča.
+*$DeleteDate*: prostor in vsi njegovi podatki bodo trajno izbrisani skupaj s sredstvi v vaši denarnici.
+
+Dobra novica: ohraniti oboje je preprosto. Samo podaljšajte naročnino (rok: $BlockDateShort) in vaši dokumenti, nastavitve in sredstva bodo ostali natanko tam, kjer ste jih pustili. Stanje v denarnici lahko celo pokrije del stroškov.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Le naredite varnostno kopijo podatkov, ki jih želite obdržati (rok: $BlockDateShort).
+#else
+h1.V vašem prostoru vas še čakajo sredstva
+
+Že nekaj časa se ni nihče prijavil v vaš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, v njegovi "denarnici":"$URL1" pa so še sredstva. Nismo želeli, da bi jih izgubili, ne da bi vedeli.
+
+Da bi vse nemoteno delovalo, blokiramo neaktivne prostore. Za vaš prostor to pomeni naslednje:
+
+*$BlockDate*: vaš prostor bo blokiran in prijava ne bo več mogoča.
+*$DeleteDate*: prostor in vsi njegovi podatki bodo trajno izbrisani skupaj s sredstvi v vaši denarnici.
+
+Dobra novica: ohraniti oboje je preprosto. Samo enkrat se prijavite (rok: $BlockDateShort) in vaši dokumenti, nastavitve in sredstva bodo ostali natanko tam, kjer ste jih pustili.
+
+$OrangeButton
+
+Če ste se odločili za drugo pot, je to povsem v redu. Le prenesite datoteke, ki jih želite obdržati (rok: $BlockDateShort).
+#end
 
 $TrulyYours</value>
   </data>
@@ -1620,6 +1815,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše geslo je bilo uspešno spremenjeno</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portal ${PortalUrl} je bil blokiran v skladu s pravilnikom o hrambi podatkov</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} je blokiran, vaši podatki pa so varni (rok: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} je bil izbrisan</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} bo kmalu izbrisan (datum izbrisa: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Zadnja priložnost, da ohranite svoj prostor ${LetterLogoText} (datum izbrisa: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} vas pogreša (rok za ukrepanje: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Vaš prostor ${LetterLogoText} vas pogreša (rok za ukrepanje: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>V vašem prostoru ${LetterLogoText} so še sredstva (rok: $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivacija portala ${__VirtualRootHost}</value>

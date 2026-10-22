@@ -747,6 +747,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Cổng đã ngưng hoạt động</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Cổng đã bị chặn theo chính sách lưu giữ dữ liệu</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Cổng đã được bỏ chặn</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Cổng đã được xóa</value>
   </data>

@@ -747,6 +747,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Sivusto poistettu käytöstä tilapäisesti</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portaali estetty tietojen säilytyskäytännön perusteella</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portaalin esto poistettu</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Sivusto poistettu käytöstä pysyvästi</value>
   </data>
