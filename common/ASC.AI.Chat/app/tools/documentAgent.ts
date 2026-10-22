@@ -354,9 +354,15 @@ const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 // placeholder and the session is what authenticates: the caller's auth
 // cookie goes along, that one cookie only (the portal API reads the session
 // from it, the key stays a harmless bearer), or, for a caller that sent a
-// header instead, that header in place of the key. The round's source goes
-// along too, so the agent's requests are billed to the same entry as the
-// chat's own.
+// header instead, that header in place of the key. With it go the two
+// forwarded headers that name the portal the caller came through (see
+// tenantHeaders): the agent reaches the gateway by the AI service's own
+// address, whose host names no tenant, so without them the session has no
+// tenant to be checked against and the gateway answers 401. Nothing else of
+// the caller's headers goes: the agent is an external service, and what it
+// gets is the session and the tenant, no more. The round's source goes along
+// too, so the agent's requests are billed to the same entry as the chat's
+// own.
 function modelSettings(
   profile: Profile,
   config: DocumentAgentConfig,
@@ -385,13 +391,33 @@ function modelSettings(
     const cookie = sessionCookie();
     const authorization = getForwardedHeaders()["authorization"];
     if (cookie) {
-      model.headers = { ...model.headers, cookie };
+      model.headers = { ...model.headers, cookie, ...tenantHeaders() };
     } else if (authorization) {
       delete model.apiKey;
-      model.headers = { ...model.headers, authorization };
+      model.headers = { ...model.headers, authorization, ...tenantHeaders() };
     }
   }
   return model;
+}
+
+// The headers the portal reads the tenant from when a request comes in by
+// an address that is not the portal's own: the AI service resolves the
+// tenant by host (alias plus base domain) and trusts the forwarded headers
+// from the deployment's network, so the host the browser used and its
+// scheme go along as `X-Forwarded-Host` and `X-Forwarded-Proto`, the way the
+// router set them on the request this service is serving (the plain `Host`
+// is the fallback, though the request context drops it as hop-by-hop). Only
+// those two, and only when set: without a value there is nothing to
+// forward, and the portal's own address (a local run, where the host is the
+// tenant's alias) needs none.
+function tenantHeaders(): Record<string, string> {
+  const forwarded = getForwardedHeaders();
+  const host = forwarded["x-forwarded-host"] || forwarded["host"];
+  const proto = forwarded["x-forwarded-proto"];
+  return {
+    ...(host ? { "x-forwarded-host": host } : {}),
+    ...(proto ? { "x-forwarded-proto": proto } : {}),
+  };
 }
 
 function reasoningOf(profile: Profile): DocumentAgentSettings["model"]["reasoning"] {
@@ -515,13 +541,18 @@ async function collectServers(
   return out;
 }
 
-/** What the agent presents to this service's own routes: the shared token and the user's session. */
+// What the agent presents to this service's own routes: the shared token,
+// the user's session and the tenant headers. The routes admit the agent by
+// the token, then call the portal's Files API as the user with the headers
+// the agent sent (see documentAgentFiles.ts), so the tenant must be named
+// there as it is on the model's requests (see tenantHeaders).
 function ownServerHeaders(config: DocumentAgentConfig): Record<string, string> {
   const session = sessionCookie();
   const authorization = getForwardedHeaders()["authorization"];
   return {
     [DOCUMENT_AGENT_TOKEN_HEADER]: config.token,
     ...(session ? { cookie: session } : authorization ? { authorization } : {}),
+    ...tenantHeaders(),
   };
 }
 
