@@ -282,7 +282,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     /// <remarks>
     /// These cannot travel as `--additional-properties`. openapi-generator-cli is an npm shim
     /// that re-spawns java through a shell, and a value containing spaces arrives there split
-    /// into separate arguments - "ONLYOFFICE DocSpace Files API" fails the run outright.
+    /// into separate arguments - "ONLYOFFICE Apps Files API" fails the run outright.
     /// </remarks>
     private static async Task ApplyPresentationAsync(
         OpenapiSplitter.SplitDocument document,
@@ -350,7 +350,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             section["operationsDirectory"] ?? "operations",
             ReadBundleDirectory(section),
             section["siteUrl"],
-            section["indexTitle"] ?? "ONLYOFFICE DocSpace API",
+            section["indexTitle"] ?? "ONLYOFFICE Apps API",
             titles,
             ReadExampleSettings(section.GetSection("examples")));
     }

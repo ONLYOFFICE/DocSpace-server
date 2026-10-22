@@ -102,7 +102,7 @@ internal static class MarkdownBundle
         index.Append("# ").AppendLine(title);
         index.AppendLine();
         index.AppendLine(
-            "> The ONLYOFFICE DocSpace HTTP API. Every page of the reference is available as Markdown at its own address, with `.md` appended.");
+            "> The ONLYOFFICE Apps HTTP API. Every page of the reference is available as Markdown at its own address, with `.md` appended.");
         index.AppendLine();
 
         index.AppendLine("## Sections");
