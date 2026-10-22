@@ -116,6 +116,18 @@ public class AccountingClientServiceLimitErrorTests
     }
 
     [Fact]
+    public async Task Conflict_OutsideTheServiceLimits_StaysAPlainFailure()
+    {
+        // Only a service limit operation passes a 409 on to the caller; elsewhere it stays a failure of ours, as it was.
+        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Conflict,
+            """{"title":"Conflict","status":409,"detail":"Session with this reference is already open"}"""));
+
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "ai-tools", "ref", 1, 10);
+
+        await act.Should().ThrowExactlyAsync<AccountingException>();
+    }
+
+    [Fact]
     public async Task CreateServiceLimit_UnknownServiceGroup_ThrowsBadRequestNotCustomerNotFound()
     {
         // The accounting service answers a missing service group with 400 "... not found" as well; the portal does have

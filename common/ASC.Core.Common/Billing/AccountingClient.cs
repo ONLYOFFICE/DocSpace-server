@@ -1690,7 +1690,8 @@ public static class AccountingHttpClientExtension
             return new AccountingServiceLimitExceededException(detail);
         }
 
-        if (response.StatusCode == HttpStatusCode.Conflict)
+        // A second limit of the same scope, or for the same user; elsewhere a 409 stays a plain failure, as before.
+        if (response.StatusCode == HttpStatusCode.Conflict && serviceLimitRequest)
         {
             return new AccountingConflictException(detail);
         }

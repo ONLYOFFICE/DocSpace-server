@@ -108,15 +108,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 withStackTrace = false;
                 break;
-            // The portal is not a customer of the accounting service yet, so what was asked of it does not exist there.
-            case AccountingCustomerNotFoundException e:
-                status = HttpStatusCode.NotFound;
-                message = e.Message;
-                withStackTrace = false;
-                break;
             // A service limit the accounting service refuses to create or change because of the values the caller chose
             // (a second limit of the same scope, a quantity threshold for services with different units): the caller is
-            // told the reason, without a stack trace.
+            // told the reason, without a stack trace. The accounting client raises these two for the service limit
+            // routes only, so the answers of the other accounting operations stay as they were.
             case AccountingConflictException e:
                 status = HttpStatusCode.Conflict;
                 message = e.Message;
