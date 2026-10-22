@@ -471,7 +471,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {

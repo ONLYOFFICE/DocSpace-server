@@ -678,6 +678,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>ポータルが非能動化された</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>データ保持ポリシーによりポータルがブロックされました</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>ポータルのブロックが解除されました</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>ポータルが削除された</value>
   </data>

@@ -461,7 +461,7 @@ internal class ProviderFileDao(
         return await fileDao.GetAvailableTitleAsync(requestTitle, selector.ConvertId(parentFolderId));
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {

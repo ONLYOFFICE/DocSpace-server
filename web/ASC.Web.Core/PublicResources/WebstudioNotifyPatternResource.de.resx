@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Löschung des Kontos bestätigen</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Support kontaktieren</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portal deaktivieren</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Raum beitreten</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Meinen Arbeitsbereich behalten</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Arbeitsbereich und Guthaben behalten</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Kommentare hinterlassen</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Passwort festlegen</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Feedback geben</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Kostenlos testen</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Meinen Arbeitsbereich entsperren</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Aktualisieren</value>
@@ -739,6 +754,186 @@ Browser: *$Browser*
 Wenn diese Aktion von Ihnen durchgeführt wurde, sind keine weiteren Schritte erforderlich. Sollte diese Änderung verdächtig erscheinen oder nicht von Ihnen autorisiert sein, setzen Sie bitte umgehend Ihr Passwort zurück und deaktivieren Sie den Zugriff auf ${LetterLogoText} für dieses Gerät.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Das Portal ${PortalUrl} wurde durch die Aufbewahrungsrichtlinie gesperrt: Es wurde nicht genutzt oder sein Abonnement wurde nicht verlängert – welcher Fall vorliegt, zeigt die Kategorie unten.
+
+*Portal:* ${PortalUrl}
+*Besitzer:* ${UserName} ${UserEmail}
+*Kategorie:* ${Category}
+*Löschdatum:* ${DeleteDate}
+
+Wird es nicht entsperrt, werden das Portal und alle seine Daten an diesem Tag gelöscht.
+
+Wenn der Besitzer darum bittet, es zu behalten, aktivieren Sie das Portal vor diesem Datum wieder.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ihr Arbeitsbereich ist gesperrt, aber noch ist nichts verloren
+
+#if($Unpaid == "True")
+Da das Abonnement Ihres ${LetterLogoText} Arbeitsbereichs *"${__VirtualRootPath}":"${__VirtualRootPath}"* abgelaufen ist, haben wir ihn vorerst gesperrt. Das bedeutet, dass sich derzeit niemand aus Ihrem Team anmelden kann, aber alle Ihre Dokumente und Einstellungen sind weiterhin sicher.
+#else
+Da Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* längere Zeit nicht genutzt wurde, haben wir ihn vorerst gesperrt. Das bedeutet, dass sich derzeit niemand aus Ihrem Team anmelden kann, aber alle Ihre Dokumente und Einstellungen sind weiterhin sicher.
+#end
+
+Ihre Daten bleiben bis *$DeleteDate* bei uns. Danach werden der Arbeitsbereich und alle seine Inhalte endgültig gelöscht.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Die gute Nachricht: Es ist noch nicht zu spät. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort und verlängern Sie dann Ihr Abonnement, um weiterzuarbeiten. Alles ist genau da, wo Sie es hinterlassen haben.
+#else
+Die gute Nachricht: Es ist noch nicht zu spät. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort, und alles ist genau da, wo Sie es hinterlassen haben.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Daten behalten möchten, entsperren Sie Ihren Arbeitsbereich und sichern Sie sie vor dem $DeleteDateShort.
+#else
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, entsperren Sie Ihren Arbeitsbereich und laden Sie sie vor dem $DeleteDateShort herunter.
+#end
+#else
+Die gute Nachricht: Es ist noch nicht zu spät. Wenden Sie sich einfach vor dem $DeleteDateShort an unser Support-Team, und wir helfen Ihnen, Ihren Arbeitsbereich genau so zurückzubekommen, wie Sie ihn hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, geben Sie uns vor dem $DeleteDateShort Bescheid, und wir helfen Ihnen, darauf zuzugreifen.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ihr Arbeitsbereich wurde gelöscht
+
+#if($Unpaid == "True")
+Da das Abonnement Ihres ${LetterLogoText} Arbeitsbereichs *$PortalName* abgelaufen ist und nicht verlängert wurde, haben wir ihn jetzt mit allen seinen Daten gelöscht, wie in unserer "Datenschutzerklärung":"$URL1" beschrieben.
+#else
+Da Ihr ${LetterLogoText} Arbeitsbereich *$PortalName* lange Zeit nicht genutzt wurde, haben wir ihn jetzt mit allen seinen Daten gelöscht, wie in unserer "Datenschutzerklärung":"$URL1" beschrieben.
+#end
+
+#if($Unpaid == "True")
+Vielen Dank, dass Sie mit uns gearbeitet haben. Wir würden sehr gern wissen, warum Sie es nicht mehr nutzen: Hat etwas nicht funktioniert, haben Sie eine besser passende Lösung gefunden oder brauchten Sie es einfach nicht mehr? Es dauert nur eine Minute, und jede Antwort hilft uns, besser zu werden.
+#else
+Vielen Dank, dass Sie ${LetterLogoText} ausprobiert haben. Wir würden sehr gern wissen, warum Sie es nicht mehr nutzen: Hat etwas nicht funktioniert, haben Sie eine besser passende Lösung gefunden oder brauchten Sie es einfach nicht mehr? Es dauert nur eine Minute, und jede Antwort hilft uns, besser zu werden.
+#end
+
+$OrangeButton
+
+Wenn Sie irgendwann zurückkommen möchten, sind Sie jederzeit willkommen. Sie können jederzeit "einen neuen Arbeitsbereich erstellen":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Ihr Arbeitsbereich wird bald gelöscht
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist weiterhin gesperrt, da sein Abonnement abgelaufen ist. Dies ist eine freundliche letzte Erinnerung: Am *$DeleteDate* werden der Arbeitsbereich und alle seine Daten endgültig gelöscht.
+#else
+Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist weiterhin gesperrt, da sein Abonnement abgelaufen ist. Dies ist eine freundliche Erinnerung: Am *$DeleteDate* werden der Arbeitsbereich und alle seine Daten endgültig gelöscht.
+#end
+#else
+#if($FinalNotice == "True")
+Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist weiterhin gesperrt, da er längere Zeit nicht genutzt wurde. Dies ist eine freundliche letzte Erinnerung: Am *$DeleteDate* werden der Arbeitsbereich und alle seine Daten endgültig gelöscht.
+#else
+Ihr ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist weiterhin gesperrt, da er längere Zeit nicht genutzt wurde. Dies ist eine freundliche Erinnerung: Am *$DeleteDate* werden der Arbeitsbereich und alle seine Daten endgültig gelöscht.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Wenn Sie ihn behalten möchten, ist noch Zeit. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort und verlängern Sie dann Ihr Abonnement, um weiterzuarbeiten. Alles ist genau da, wo Sie es hinterlassen haben.
+#else
+Wenn Sie ihn behalten möchten, ist noch Zeit. Entsperren Sie Ihren Arbeitsbereich einfach vor dem $DeleteDateShort, und alles ist genau da, wo Sie es hinterlassen haben.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Daten behalten möchten, entsperren Sie Ihren Arbeitsbereich und sichern Sie sie vor dem $DeleteDateShort, da wir sie danach nicht mehr wiederherstellen können.
+#else
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, entsperren Sie Ihren Arbeitsbereich und laden Sie sie vor dem $DeleteDateShort herunter, da wir sie danach nicht mehr wiederherstellen können.
+#end
+#else
+Wenn Sie ihn behalten möchten, ist noch Zeit. Wenden Sie sich einfach vor dem $DeleteDateShort an unser Support-Team, und wir helfen Ihnen, Ihren Arbeitsbereich genau so zurückzubekommen, wie Sie ihn hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Wenn Sie Dateien behalten möchten, geben Sie uns vor dem $DeleteDateShort Bescheid, und wir helfen Ihnen, darauf zuzugreifen, da wir sie danach nicht mehr wiederherstellen können.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Wir haben Sie lange nicht gesehen
+
+Seit einiger Zeit hat sich niemand mehr bei Ihrem ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* angemeldet. Wir wollten uns melden, bevor mit Ihren Dokumenten und Einstellungen etwas passiert.
+
+Damit für alle alles reibungslos läuft, sperren wir kostenlose Arbeitsbereiche, die längere Zeit nicht genutzt wurden. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden endgültig gelöscht.
+
+Die gute Nachricht: Ihn zu behalten ist ganz einfach. Melden Sie sich vor dem $BlockDateShort einmal an, und alles bleibt genau so, wie Sie es hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie den Arbeitsbereich nicht mehr benötigen, müssen Sie nichts tun. Laden Sie nur vor dem $BlockDateShort alle Dateien herunter, die Sie behalten möchten.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Ihr Abonnement ist abgelaufen, aber Ihr Arbeitsbereich ist noch da
+
+Ihr ${LetterLogoText} Abonnement für *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist am *$DueDate* abgelaufen. Vielen Dank, dass Sie mit uns gearbeitet haben. Wir hoffen, ${LetterLogoText} hat Ihnen die Arbeit ein wenig erleichtert.
+
+Damit alles reibungslos läuft, sperren wir Arbeitsbereiche, deren Abonnement abgelaufen ist. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden endgültig gelöscht.
+
+Die gute Nachricht: Ihn zu behalten ist ganz einfach. Verlängern Sie einfach Ihr Abonnement vor dem $BlockDateShort, und Ihre Dokumente, Einstellungen und Ihr Team bleiben genau da, wo Sie sie hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Daten zu sichern, die Sie behalten möchten.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Ihr Abonnement ist abgelaufen, aber Ihr Arbeitsbereich und Ihr Guthaben sind noch da
+
+Ihr ${LetterLogoText} Abonnement für *"${__VirtualRootPath}":"${__VirtualRootPath}"* ist am *$DueDate* abgelaufen. Vielen Dank, dass Sie mit uns gearbeitet haben. In Ihrer Wallet ist noch Guthaben vorhanden ("Guthaben prüfen":"$URL1"), und wir wollten nicht, dass Sie es verlieren, ohne davon zu wissen.
+
+Damit alles reibungslos läuft, sperren wir Arbeitsbereiche, deren Abonnement abgelaufen ist. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden zusammen mit dem Guthaben in Ihrer Wallet endgültig gelöscht.
+
+Die gute Nachricht: Beides zu behalten ist ganz einfach. Verlängern Sie einfach Ihr Abonnement vor dem $BlockDateShort, und Ihre Dokumente, Einstellungen und Ihr Guthaben bleiben genau da, wo Sie sie hinterlassen haben. Ihr Wallet-Guthaben kann sogar einen Teil davon abdecken.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Daten zu sichern, die Sie behalten möchten.
+#else
+h1.In Ihrem Arbeitsbereich wartet noch Guthaben auf Sie
+
+Seit einiger Zeit hat sich niemand mehr bei Ihrem ${LetterLogoText} Arbeitsbereich *"${__VirtualRootPath}":"${__VirtualRootPath}"* angemeldet, aber in seiner "Wallet":"$URL1" ist noch Guthaben vorhanden. Wir wollten nicht, dass Sie es verlieren, ohne davon zu wissen.
+
+Damit alles reibungslos läuft, sperren wir inaktive Arbeitsbereiche. Was das für Ihren Arbeitsbereich bedeutet:
+
+*$BlockDate*: Ihr Arbeitsbereich wird gesperrt, und Sie können sich nicht mehr anmelden.
+*$DeleteDate*: Der Arbeitsbereich und alle seine Daten werden zusammen mit dem Guthaben in Ihrer Wallet endgültig gelöscht.
+
+Die gute Nachricht: Beides zu behalten ist ganz einfach. Melden Sie sich vor dem $BlockDateShort einmal an, und Ihre Dokumente, Einstellungen und Ihr Guthaben bleiben genau da, wo Sie sie hinterlassen haben.
+
+$OrangeButton
+
+Wenn Sie sich für einen anderen Weg entschieden haben, ist das völlig in Ordnung. Denken Sie nur daran, vor dem $BlockDateShort alle Dateien herunterzuladen, die Sie behalten möchten.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1582,6 +1777,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ihr Passwort wurde erfolgreich geändert</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Das Portal ${PortalUrl} wurde durch die Aufbewahrungsrichtlinie gesperrt</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich ist gesperrt, aber Ihre Daten sind bis zum $DeleteDateShort sicher</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich wurde gelöscht</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich wird bald gelöscht (Löschung am $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Letzte Chance, Ihren ${LetterLogoText} Arbeitsbereich zu behalten (Löschung am $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Ihr ${LetterLogoText} Arbeitsbereich vermisst Sie (Handlungsbedarf bis zum $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>In Ihrem ${LetterLogoText} Arbeitsbereich ist noch Guthaben vorhanden (Handlungsbedarf bis $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivierung des Portals ${__VirtualRootHost}</value>

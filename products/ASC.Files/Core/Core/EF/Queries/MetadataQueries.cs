@@ -159,6 +159,22 @@ public partial class FilesDbContext
                 .SetProperty(r => r.CascadeConflict, MetadataConflictResolveType.Skip));
     }
 
+    /// <summary>
+    /// Marks the template of the field as modified: the fields are part of the template, so a field added, changed or
+    /// removed is a change of the template. Addressed by the field, so a delete can touch the template before the field row
+    /// goes. The hidden system template of the custom fields is left alone: its fields come and go with every write of the
+    /// custom fields. Not precompiled on purpose: an <c>ExecuteUpdate</c> inside <c>EF.CompileAsyncQuery</c> fails to
+    /// translate (see <see cref="ConvertMetadataCascadeLinksToDirectAsync"/>).
+    /// </summary>
+    public Task<int> TouchMetadataTemplateByFieldAsync(int tenantId, int fieldId, Guid userId, DateTime now)
+    {
+        return MetadataTemplates
+            .Where(t => t.TenantId == tenantId && !t.IsSystem && MetadataFields.Any(f => f.TenantId == tenantId && f.Id == fieldId && f.TemplateId == t.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(t => t.ModifiedBy, userId)
+                .SetProperty(t => t.ModifiedOn, now));
+    }
+
     [PreCompileQuery]
     public Task<int> DeleteMetadataValuesByFieldsAsync(int tenantId, int entryId, FileEntryType entryType, IEnumerable<int> fieldIds)
     {

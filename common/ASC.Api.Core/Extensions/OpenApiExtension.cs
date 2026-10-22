@@ -452,8 +452,9 @@ public static class OpenApiExtension
             }
             else
             {
+                // An action may declare its own 401 through [SwaggerResponse]; its text is more precise than this one.
                 operation.Responses ??= new OpenApiResponses();
-                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
+                operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
             }
 
             //if(authorizeAttribute.Any())

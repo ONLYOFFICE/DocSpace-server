@@ -69,6 +69,13 @@ public class MetadataService(
     public const int MaxStringValueLength = 8000;
 
     /// <summary>
+    /// The largest magnitude of a number value: Number.MAX_SAFE_INTEGER, the largest integer a JSON client that reads
+    /// numbers as IEEE 754 doubles (a browser, Node) represents exactly. The column is a 64-bit integer and could hold
+    /// more, but a larger value would come back rounded on such a client and be written back rounded by its next save.
+    /// </summary>
+    public const long MaxNumberValue = (1L << 53) - 1;
+
+    /// <summary>
     /// The assignment of a template is a check-then-insert on the link table; two concurrent assignments of the same
     /// template to the same entry (a double click) would otherwise collide on the primary key instead of being idempotent.
     /// </summary>
@@ -790,6 +797,11 @@ public class MetadataService(
                 if (value.NumberValue == null || !string.IsNullOrEmpty(value.StringValue) || value.DateValue != null || value.OptionIds is { Count: > 0 })
                 {
                     throw new ArgumentException($@"The field '{field.Name}' accepts a number value only", nameof(value));
+                }
+
+                if (value.NumberValue is > MaxNumberValue or < -MaxNumberValue)
+                {
+                    throw new ArgumentException($@"The value of the field '{field.Name}' must be between -{MaxNumberValue} and {MaxNumberValue}", nameof(value));
                 }
 
                 break;

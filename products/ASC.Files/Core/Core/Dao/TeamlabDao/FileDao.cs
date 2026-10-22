@@ -1251,11 +1251,11 @@ internal class FileDao(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks, newTitle));
         }
 
         if (toFolderId is string tsId)
@@ -1266,8 +1266,19 @@ internal class FileDao(
         throw new NotImplementedException();
     }
 
-    public async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
+    public Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
+        return MoveFileAsync(fileId, toFolderId, deleteLinks, null);
+    }
+
+    /// <summary>
+    /// Moves the file; a non-null <paramref name="newTitle"/> is stored on the current version in the same
+    /// update, so the file arrives under it instead of being renamed afterwards.
+    /// </summary>
+    private async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks, string newTitle)
+    {
+        var title = newTitle == null ? null : Global.ReplaceInvalidCharsAndTruncate(newTitle);
+
         if (fileId == 0)
         {
             return 0;
@@ -1385,7 +1396,9 @@ internal class FileDao(
                 }
                 else
                 {
-                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                    await q.ExecuteUpdateAsync(f => f
+                        .SetProperty(p => p.ParentId, toFolderId)
+                        .SetProperty(p => p.Title, p => title != null && p.CurrentVersion ? title : p.Title));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
@@ -1527,6 +1540,15 @@ internal class FileDao(
                 FileId = fileId,
                 Action = FileIndexAction.UpdateFolders
             });
+
+            if (title != null)
+            {
+                await eventBus.PublishAsync(new FileIndexIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+                {
+                    FileId = fileId,
+                    Action = FileIndexAction.UpdateInfo
+                });
+            }
 
             if (needDeleteVectors)
             {

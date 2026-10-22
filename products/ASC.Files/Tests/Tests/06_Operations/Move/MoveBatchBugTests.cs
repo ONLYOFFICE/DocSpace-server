@@ -41,9 +41,10 @@ public class MoveBatchBugTests(
     : BaseTest(fixture)
 {
     /// <summary>
-    /// An unknown folder id in <c>folderIds</c> hits an unhandled NullReferenceException and the
-    /// endpoint answers 500 instead of 404. The control call with an unknown fileId shows the
-    /// destination itself is accepted.
+    /// An unknown folder id in <c>folderIds</c> used to hit an unhandled NullReferenceException in the
+    /// general permission check of a move/copy, and the endpoint answered 500. That check now refuses an
+    /// unknown first folder with 404, as it already did for an unknown first file. The control call with
+    /// an unknown fileId shows the destination itself is accepted.
     /// </summary>
     [Fact]
     [Trait("Bug", "84436")]
@@ -76,7 +77,9 @@ public class MoveBatchBugTests(
 
     /// <summary>
     /// Moving a file onto a same-named file with <c>Duplicate</c> must place it beside the existing
-    /// one under a numeric-suffixed name, as copy does. The bug leaves two entries with one title.
+    /// one under a numeric-suffixed name, as copy does. It used to leave two entries with one title: the
+    /// batched move skipped the conflict lookup for <c>Duplicate</c>, and the per-file move kept the title.
+    /// A conflicting file now always takes the per-file path, which gives it the first free title.
     /// </summary>
     [Fact]
     [Trait("Bug", "84437")]
@@ -123,6 +126,7 @@ public class MoveBatchBugTests(
     {
         return new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
             ConflictResolveType = conflictResolveType,
             FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),

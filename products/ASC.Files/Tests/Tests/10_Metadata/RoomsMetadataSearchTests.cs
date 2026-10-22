@@ -47,7 +47,7 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        var rooms = await data.Api.GetRoomsAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var rooms = await _roomsApi.GetRoomsWithMetadataAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         rooms.RoomIds().Should().Contain([data.MatchingRoomId, data.PartialRoomId, data.BareRoomId]);
     }
@@ -74,7 +74,7 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         // metadata document, so the free text search must find the room by that value and not by its title
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
 
-        await data.Api.SetFolderCustomFieldAsync(data.MatchingRoomId, "Reference", marker, TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderCustomFieldsAsync(data.MatchingRoomId, new SetCustomFields([new CustomFieldRequest("Reference", marker)]), TestContext.Current.CancellationToken);
 
         var rooms = await data.SearchByTextAsync(marker, expected: [data.MatchingRoomId]);
 
@@ -95,7 +95,8 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         // the string values of the template fields take part in the free text search too, and the page names the field
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
 
-        await data.Api.SetFolderValuesAsync(data.MatchingRoomId, [new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = marker }], TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(data.MatchingRoomId,
+            new SetMetadataValues([new MetadataValueRequest(data.FieldId(ClientField), stringValue: marker)]), TestContext.Current.CancellationToken);
 
         var rooms = await data.SearchByTextAsync(marker, expected: [data.MatchingRoomId]);
 
@@ -114,11 +115,12 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         var data = await ArrangeAsync();
 
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
-        var hidden = await data.Api.CreateTemplateAsync("Hidden " + Guid.NewGuid().ToString()[..8],
-            [new MetadataFieldPayload { Name = "Reference", Type = 0 }], TestContext.Current.CancellationToken, visible: false);
+        var hidden = await CreateTemplateAsync("Hidden " + Guid.NewGuid().ToString()[..8],
+            [new MetadataFieldRequest("Reference", MetadataFieldType.String)], visible: false);
 
-        await data.Api.AssignFolderTemplatesAsync(data.BareRoomId, [hidden.Id], cascade: false, TestContext.Current.CancellationToken);
-        await data.Api.SetFolderValuesAsync(data.BareRoomId, [new MetadataValuePayload { FieldId = hidden.Field("Reference").Id, StringValue = marker }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(data.BareRoomId, new AssignMetadataTemplates([hidden.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(data.BareRoomId,
+            new SetMetadataValues([new MetadataValueRequest(hidden.Field("Reference").Id, stringValue: marker)]), TestContext.Current.CancellationToken);
 
         // the presence is seen first, with the hidden templates asked for, so the absence below is not the indexing lag
         var included = await data.SearchByTextAsync(marker, expected: [data.BareRoomId], includeHiddenMetadata: true);
@@ -187,8 +189,8 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        await data.Api.SetFolderValuesAsync(data.MatchingRoomId,
-            [new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = null }],
+        await _metadataApi.SetFolderValuesAsync(data.MatchingRoomId,
+            new SetMetadataValues([new MetadataValueRequest(data.FieldId(ClientField))]),
             TestContext.Current.CancellationToken);
 
         var byClient = await data.SearchAsync(data.Eq(ClientField, "ACME"), expected: []);
@@ -204,12 +206,13 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.Api.GetRoomsResponseAsync(
-            metadataTemplateId: data.TemplateId,
-            rawMetadataFilters: "definitely-not-json",
-            cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(
+                metadataTemplateId: data.TemplateId,
+                rawMetadataFilters: "definitely-not-json",
+                cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -217,12 +220,13 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        using var response = await data.Api.GetRoomsResponseAsync(
-            metadataTemplateId: data.TemplateId,
-            metadataFilters: [new { fieldId = int.MaxValue, op = "eq", value = "ACME" }],
-            cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(
+                metadataTemplateId: data.TemplateId,
+                metadataFilters: [new MetadataFilterConditionRequest(fieldId: int.MaxValue, op: "eq", value: "ACME")],
+                cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -231,12 +235,13 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         var data = await ArrangeAsync();
 
         // the operator used to be ignored: an unknown one ran as an exact match and returned nothing, without a hint why
-        using var response = await data.Api.GetRoomsResponseAsync(
-            metadataTemplateId: data.TemplateId,
-            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "startswith", value = "ACM" }],
-            cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(
+                metadataTemplateId: data.TemplateId,
+                metadataFilters: [new MetadataFilterConditionRequest(fieldId: data.FieldId(ClientField), op: "startswith", value: "ACM")],
+                cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -246,12 +251,13 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
 
         // "range" belongs to the number and date fields, a string field takes "eq" only; the value is complete on
         // purpose, so the operator is the only thing wrong with the request
-        using var response = await data.Api.GetRoomsResponseAsync(
-            metadataTemplateId: data.TemplateId,
-            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "range", value = "ACME" }],
-            cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(
+                metadataTemplateId: data.TemplateId,
+                metadataFilters: [new MetadataFilterConditionRequest(fieldId: data.FieldId(ClientField), op: "range", value: "ACME")],
+                cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -259,17 +265,17 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         var data = await ArrangeAsync();
 
-        var otherTemplate = await data.Api.CreateTemplateAsync(
+        var otherTemplate = await CreateTemplateAsync(
             "Other " + Guid.NewGuid().ToString()[..8],
-            [new MetadataFieldPayload { Name = "Owner", Type = 0 }],
-            TestContext.Current.CancellationToken);
+            [new MetadataFieldRequest("Owner", MetadataFieldType.String)]);
 
-        using var response = await data.Api.GetRoomsResponseAsync(
-            metadataTemplateId: data.TemplateId,
-            metadataFilters: [new { fieldId = otherTemplate.Field("Owner").Id, op = "eq", value = "someone" }],
-            cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(
+                metadataTemplateId: data.TemplateId,
+                metadataFilters: [new MetadataFilterConditionRequest(fieldId: otherTemplate.Field("Owner").Id, op: "eq", value: "someone")],
+                cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
 
@@ -279,7 +285,7 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         var data = await ArrangeAsync();
 
         // the template id without conditions used to be read for validation only, so the listing came back unfiltered
-        var rooms = await data.Api.GetRoomsAsync(data.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
+        var rooms = await _roomsApi.GetRoomsWithMetadataAsync(data.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
 
         rooms.RoomIds().Should().BeEquivalentTo(new[] { data.MatchingRoomId, data.PartialRoomId }, "both rooms carry the template, the bare one does not");
     }
@@ -289,9 +295,10 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
     {
         await ArrangeAsync();
 
-        using var response = await new MetadataApiClient(_filesClient).GetRoomsResponseAsync(metadataTemplateId: int.MaxValue, cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsWithMetadataAsync(metadataTemplateId: int.MaxValue, cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     #endregion

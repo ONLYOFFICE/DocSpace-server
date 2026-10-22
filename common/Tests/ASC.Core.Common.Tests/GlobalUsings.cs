@@ -33,6 +33,7 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
@@ -65,4 +66,7 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Polly;
 global using Polly.Retry;
 
+global using ZiggyCreatures.Caching.Fusion;
+
+global using DbQuota = ASC.Core.Common.EF.DbQuota;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

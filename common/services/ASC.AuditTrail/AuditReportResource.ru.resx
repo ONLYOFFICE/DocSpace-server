@@ -738,6 +738,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Деактивирован портал</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Портал заблокирован политикой хранения данных</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Портал разблокирован</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Удален портал</value>
   </data>

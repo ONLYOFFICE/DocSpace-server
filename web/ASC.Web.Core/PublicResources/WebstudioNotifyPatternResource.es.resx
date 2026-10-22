@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Confirme terminación de la cuenta</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Contactar con soporte</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Desactivar portal</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Unirse a la sala</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Conservar mi espacio</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Conservar mi espacio y mis fondos</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Deje comentarios</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Establecer contraseña</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Compartir mi opinión</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Empezar prueba gratis</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Desbloquear mi espacio</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Actualizar</value>
@@ -739,6 +754,186 @@ Navegador: *$Browser*
 Si esta acción fue realizada por usted, no se requieren más pasos. Si este cambio parece sospechoso o no ha sido autorizado por usted, restablezca su contraseña inmediatamente y deshabilite el acceso a ${LetterLogoText} para este dispositivo.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>El portal ${PortalUrl} ha sido bloqueado por la política de retención de datos: no se utilizaba o su suscripción no se renovó; la categoría de abajo indica cuál de los dos casos.
+
+*Portal:* ${PortalUrl}
+*Propietario:* ${UserName} ${UserEmail}
+*Categoría:* ${Category}
+*Fecha de eliminación:* ${DeleteDate}
+
+Si no se desbloquea, el portal y todos sus datos se eliminarán en esa fecha.
+
+Si el propietario pide conservarlo, vuelva a activar el portal antes de esa fecha.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Su espacio está bloqueado, pero todavía no se ha perdido nada
+
+#if($Unpaid == "True")
+Como la suscripción de su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ha finalizado, lo hemos bloqueado por ahora. Esto significa que nadie de su equipo puede iniciar sesión en este momento, pero todos sus documentos y ajustes siguen a salvo.
+#else
+Como su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, lleva tiempo sin usarse, lo hemos bloqueado por ahora. Esto significa que nadie de su equipo puede iniciar sesión en este momento, pero todos sus documentos y ajustes siguen a salvo.
+#end
+
+Conservaremos sus datos hasta el *$DeleteDate*. Después, el espacio y todo su contenido se eliminarán de forma permanente.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+La buena noticia: todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort y, después, renovar su suscripción para volver al trabajo. Todo estará tal y como lo dejó.
+#else
+La buena noticia: todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort, y todo estará tal y como lo dejó.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Si ha decidido seguir otro camino, no pasa nada. Si hay datos que quiera conservar, desbloquee su espacio y haga una copia de seguridad antes del $DeleteDateShort.
+#else
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, desbloquee su espacio y descárguelos antes del $DeleteDateShort.
+#end
+#else
+La buena noticia: todavía está a tiempo. Solo tiene que ponerse en contacto con nuestro equipo de soporte antes del $DeleteDateShort, y le ayudaremos a recuperar su espacio tal y como lo dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, avísenos antes del $DeleteDateShort y le ayudaremos a acceder a ellos.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Su espacio se ha eliminado
+
+#if($Unpaid == "True")
+Como la suscripción de su espacio de ${LetterLogoText}, *$PortalName*, finalizó y no se renovó, lo hemos eliminado junto con todos sus datos, tal y como se describe en nuestra "Política de privacidad":"$URL1".
+#else
+Como su espacio de ${LetterLogoText}, *$PortalName*, llevaba mucho tiempo sin usarse, lo hemos eliminado junto con todos sus datos, tal y como se describe en nuestra "Política de privacidad":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Gracias por trabajar con nosotros. Nos encantaría saber por qué dejó de usarlo: si algo no le funcionó, si encontró una opción mejor o si simplemente ya no lo necesitaba. Solo le llevará un minuto, y cada respuesta nos ayuda a mejorar.
+#else
+Gracias por probar ${LetterLogoText}. Nos encantaría saber por qué dejó de usarlo: si algo no le funcionó, si encontró una opción mejor o si simplemente ya no lo necesitaba. Solo le llevará un minuto, y cada respuesta nos ayuda a mejorar.
+#end
+
+$OrangeButton
+
+Si algún día quiere volver, nuestras puertas siempre estarán abiertas. Puede "crear un nuevo espacio":"$URL2" en cualquier momento.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Su espacio se eliminará pronto
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#else
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort y, después, renovar su suscripción para volver al trabajo. Todo estará tal y como lo dejó.
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort, y todo estará tal y como lo dejó.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Si ha decidido seguir otro camino, no pasa nada. Si hay datos que quiera conservar, desbloquee su espacio y haga una copia de seguridad antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#else
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, desbloquee su espacio y descárguelos antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#end
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que ponerse en contacto con nuestro equipo de soporte antes del $DeleteDateShort, y le ayudaremos a recuperar su espacio tal y como lo dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, avísenos antes del $DeleteDateShort y le ayudaremos a acceder a ellos, ya que después no podremos recuperarlos.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Hace tiempo que no le vemos
+
+Hace tiempo que nadie inicia sesión en su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Queríamos ponernos en contacto con usted antes de que les pase algo a sus documentos y ajustes.
+
+Para que todo funcione bien para todos, bloqueamos los espacios gratuitos que llevan tiempo sin usarse. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente.
+
+La buena noticia: conservarlo es fácil. Solo tiene que iniciar sesión una vez antes del $BlockDateShort, y todo quedará tal y como lo dejó.
+
+$OrangeButton
+
+Si ya no necesita el espacio, no tiene que hacer nada. Solo asegúrese de descargar los archivos que quiera conservar antes del $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Su suscripción ha finalizado, pero su espacio sigue aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Esperamos que ${LetterLogoText} le haya facilitado un poco el trabajo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente.
+
+La buena noticia: conservarlo es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y equipo seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Su suscripción ha finalizado, pero su espacio y sus fondos siguen aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Todavía quedan fondos en su Monedero ("consulte su saldo":"$URL1"), y no queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó. El saldo de su Monedero incluso puede cubrir parte del importe.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+#else
+h1.Su espacio todavía tiene fondos esperándole
+
+Hace tiempo que nadie inicia sesión en su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, pero todavía quedan fondos en su "Monedero":"$URL1". No queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios inactivos. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que iniciar sesión una vez antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde descargar los archivos que quiera conservar antes del $BlockDateShort.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1582,6 +1777,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Su contraseña se ha cambiado correctamente</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>El portal ${PortalUrl} ha sido bloqueado por la política de retención de datos</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} está bloqueado, pero sus datos están a salvo hasta el $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} se ha eliminado</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} se eliminará pronto (eliminación: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Última oportunidad para conservar su espacio de ${LetterLogoText} (eliminación: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Todavía tiene fondos en su espacio de ${LetterLogoText} (acción necesaria antes del $BlockDate)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Desactivación del portal ${__VirtualRootHost}</value>

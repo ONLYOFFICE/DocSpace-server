@@ -6285,7 +6285,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.StartSyncAsync(roomId)
-            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+            ?? throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
     }
 
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)

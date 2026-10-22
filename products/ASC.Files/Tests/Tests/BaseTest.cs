@@ -72,6 +72,7 @@ public class BaseTest(
     protected SharingApi _sharingApi = null!;
     protected PrivacyRoomApi _privacyRoomApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
+    protected MetadataApi _metadataApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
@@ -132,6 +133,7 @@ public class BaseTest(
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
         _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
+        _metadataApi = _clients.MetadataApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
@@ -180,6 +182,16 @@ public class BaseTest(
     protected async Task<ThirdPartyFileDto> GetFile(string fileId)
     {
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
+    /// Reads the <c>total</c> of a share list (<c>api/2.0/files/file/{id}/share</c>,
+    /// <c>api/2.0/files/rooms/{id}/share?...</c>) from the raw envelope: <c>FileShareArrayWrapper</c>
+    /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
+    /// </summary>
+    protected Task<long?> ReadShareTotal(string path)
+    {
+        return new RawApiClient(_filesClient).GetTotalAsync(path, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> GetShareFolderIdAsync(User user)

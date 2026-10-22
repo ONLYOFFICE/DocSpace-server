@@ -147,8 +147,8 @@ public class FolderCopyTests(
                 copyParams,
                 TestContext.Current.CancellationToken));
 
-        // Assert
-        exception.ErrorCode.Should().Be(500);
+        // Assert: an unknown folder is not found (it answered 500 before bug 84435 was fixed)
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
