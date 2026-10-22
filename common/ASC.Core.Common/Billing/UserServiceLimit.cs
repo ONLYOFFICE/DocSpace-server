@@ -70,7 +70,7 @@ public class UserServiceLimit
     public decimal AmountConsumed { get; init; }
 
     /// <summary>
-    /// The end of the current period, in UTC; null for a lifetime limit and when nothing is counted for the user yet.
+    /// The end of the current period, in UTC; null for a lifetime limit.
     /// </summary>
     public DateTime? PeriodEnd { get; init; }
 }
@@ -79,8 +79,15 @@ public class UserServiceLimit
 public static partial class UserServiceLimitMapper
 {
     [MapPropertyFromSource(nameof(UserServiceLimit.AmountConsumed), Use = nameof(GetAmountConsumed))]
-    [MapProperty(nameof(@ServiceLimit.Usage.PeriodEnd), nameof(UserServiceLimit.PeriodEnd))]
+    [MapPropertyFromSource(nameof(UserServiceLimit.PeriodEnd), Use = nameof(GetPeriodEnd))]
     public static partial UserServiceLimit ToUserServiceLimit(this ServiceLimit source);
+
+    // Without spending - the limit for every user applied to a user the accounting service has not counted yet - the
+    // end of the period is worked out the way the accounting service sets it.
+    private static DateTime? GetPeriodEnd(ServiceLimit source)
+    {
+        return source.Usage != null ? source.Usage.PeriodEnd : source.Period.GetCurrentPeriodEnd(DateTime.UtcNow);
+    }
 
     // The limit for every user comes without spending for a user the accounting service has not met yet; a nested path
     // to a non-nullable target would make the generated code throw there instead of reporting nothing spent.

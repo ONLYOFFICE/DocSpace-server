@@ -81,7 +81,7 @@ public class UserServiceLimitDto
 
     /// <summary>
     /// The moment the current period ends and the spending starts over from zero, in UTC. Null for a lifetime limit,
-    /// which never resets, and for a user who has never used the AI services, whose period has not started.
+    /// which never resets.
     /// </summary>
     /// <example>2026-10-20T23:59:59.9999999Z</example>
     public DateTime? PeriodEnd { get; init; }

@@ -104,6 +104,14 @@ public class ServiceLimitDto
     public ServiceLimitPeriod Period { get; init; }
 
     /// <summary>
+    /// The last moment of the current period, in UTC, after which the spending starts over from zero; null for a
+    /// lifetime limit, which never resets. Filled for every limit, the limit for every user included, whose spending is
+    /// counted per user.
+    /// </summary>
+    /// <example>2026-10-22T23:59:59.9999999Z</example>
+    public DateTime? PeriodEnd { get; init; }
+
+    /// <summary>
     /// The moment a lifetime limit counts from, in UTC; null for the other periods.
     /// </summary>
     /// <example>2026-10-01T09:12:00Z</example>
@@ -144,7 +152,7 @@ public class ServiceLimitReportDto
     /// <summary>
     /// The limits of this page, one per user; empty when no limit applies to any user or the page is past the end.
     /// </summary>
-    /// <example>[{"id": 42, "serviceGroupName": "ai-services", "customerAccountNumber": 12345, "scope": "Custom", "userId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "usageFrom": null, "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z", "usage": {"periodStart": "2026-10-18T00:00:00Z", "periodEnd": "2026-10-18T23:59:59Z", "amountConsumed": 12.5, "amountAvailable": 27.5, "quantityConsumed": 0, "quantityAvailable": null}}]</example>
+    /// <example>[{"id": 42, "serviceGroupName": "ai-services", "customerAccountNumber": 12345, "scope": "Custom", "userId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301", "amountValue": 40, "currency": "USD", "quantityValue": null, "serviceUnit": null, "period": "Day", "periodEnd": "2026-10-18T23:59:59Z", "usageFrom": null, "enabled": true, "created": "2026-09-01T10:30:00Z", "modified": "2026-09-15T08:00:00Z", "usage": {"periodStart": "2026-10-18T00:00:00Z", "periodEnd": "2026-10-18T23:59:59Z", "amountConsumed": 12.5, "amountAvailable": 27.5, "quantityConsumed": 0, "quantityAvailable": null}}]</example>
     public List<ServiceLimitDto> Collection { get; init; }
 
     /// <summary>
@@ -183,9 +191,17 @@ public class ServiceLimitReportDto
 public static partial class ServiceLimitDtoMapper
 {
     [MapProperty(nameof(ServiceLimit.Participant), nameof(ServiceLimitDto.UserId), Use = nameof(ToUserId))]
+    [MapPropertyFromSource(nameof(ServiceLimitDto.PeriodEnd), Use = nameof(GetPeriodEnd))]
     public static partial ServiceLimitDto Map(this ServiceLimit source);
 
     public static partial ServiceLimitReportDto Map(this ServiceLimitReport source);
+
+    // The end the accounting service reports with the spending, or, where it reports no spending, the same end worked
+    // out from the period.
+    private static DateTime? GetPeriodEnd(ServiceLimit source)
+    {
+        return source.Usage != null ? source.Usage.PeriodEnd : source.Period.GetCurrentPeriodEnd(DateTime.UtcNow);
+    }
 
     // The portal names the participant of a limit by the user ID; the accounting service keeps it as text.
     private static Guid? ToUserId(string participant)

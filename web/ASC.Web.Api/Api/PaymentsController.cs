@@ -1667,7 +1667,8 @@ public class PaymentController(
     /// Returns the spending limit on the AI services for every user - the same ceiling applied to each user separately,
     /// for any user without a personal limit in force. Only a DocSpace administrator may read it, an installation
     /// without a billing service answers 403, and the call is read-only. It comes without spending, since that is
-    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`. When no
+    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`; `periodEnd`
+    /// still says when the current period ends for everyone. When no
     /// such limit has been set, or it was deleted, the answer is 200 with a null `response`; create the limit with
     /// `POST api/2.0/portal/payment/servicelimit` and the scope `Global`. A switched-off limit is still returned, with
     /// `enabled` false. A portal with no billing customer answers 404.

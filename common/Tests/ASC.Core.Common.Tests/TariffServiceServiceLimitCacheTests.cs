@@ -260,7 +260,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         first.Id.Should().Be(43);
         first.Scope.Should().Be(ServiceLimitScope.Global);
         first.AmountConsumed.Should().Be(0);
-        first.PeriodEnd.Should().BeNull();
+        first.PeriodEnd.Should().Be(ServiceLimitPeriod.Day.GetCurrentPeriodEnd(DateTime.UtcNow));
         second.Id.Should().Be(43);
         globalRequests.Should().Be(1);
     }
