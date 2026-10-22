@@ -59,13 +59,18 @@ public abstract class TariffServiceServiceLimitTestBase
         """{"title":"Bad request","status":400,"detail":"Service limit '42' not found","instance":"/api/serviceLimit"}""";
 
     private protected static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
-        Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder)
+        Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder, CustomerInfo? customerInfo = null)
     {
         var (accountingClient, handler) = AccountingClientTests.CreateClient(responder);
 
         var hybridCache = new FusionCache(new FusionCacheOptions());
         await hybridCache.SetAsync(TariffService.GetAccountingBalanceCacheKey(TenantId), balance, TimeSpan.FromMinutes(5),
             token: TestContext.Current.CancellationToken);
+
+        // The portal is a billing customer unless a test says otherwise; an empty customer is what TariffService caches
+        // for a portal that is not one.
+        await hybridCache.SetAsync(TariffService.GetBillingCustomerCacheKey(TenantId), customerInfo ?? new CustomerInfo { PortalId = $"{PaymentRegion}{TenantId}" },
+            TimeSpan.FromMinutes(5), token: TestContext.Current.CancellationToken);
 
         // A SaaS portal unknown to the tenant service gets the portal ID "<payment region><tenant ID>".
         var configuration = new ConfigurationBuilder()

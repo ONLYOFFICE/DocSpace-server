@@ -90,14 +90,5 @@ public class UserServiceLimitDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class UserServiceLimitDtoMapper
 {
-    [MapPropertyFromSource(nameof(UserServiceLimitDto.AmountConsumed), Use = nameof(GetAmountConsumed))]
-    [MapProperty(nameof(@ServiceLimit.Usage.PeriodEnd), nameof(UserServiceLimitDto.PeriodEnd))]
-    public static partial UserServiceLimitDto ToUserServiceLimitDto(this ServiceLimit source);
-
-    // The limit for every user comes without usage for a user the accounting service has not met yet; a nested path
-    // to a non-nullable target would make the generated code throw there instead of reporting nothing spent.
-    private static decimal GetAmountConsumed(ServiceLimit source)
-    {
-        return source.Usage?.AmountConsumed ?? 0;
-    }
+    public static partial UserServiceLimitDto ToUserServiceLimitDto(this UserServiceLimit source);
 }

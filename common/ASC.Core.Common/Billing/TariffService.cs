@@ -1817,12 +1817,13 @@ public class TariffService(
     /// minutes. It backs per-user lists, which would otherwise ask the accounting service once per user. The service
     /// limit operations of this class drop the cache, but a change made outside the portal, and the spending, show up
     /// only when the cache expires. A user the accounting service has not met yet is not in it. Keyed by the user ID, so
-    /// a list of users looks each one up instead of scanning the whole set; a switched-off limit is left out. While the
+    /// a list of users looks each one up instead of scanning the whole set, and holding only what the lists show, since
+    /// the whole set goes to the distributed cache; a switched-off limit is left out. While the
     /// accounting service is slow or cannot be reached, the last list known is used. Empty when the accounting service is
     /// not configured or the portal is not its customer; null when the list cannot be read and none is known yet, since
     /// an empty list would claim that no user has a personal limit.
     /// </summary>
-    public async Task<Dictionary<Guid, ServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName)
+    public async Task<Dictionary<Guid, UserServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
         if (!accountingClient.Configured)
         {
@@ -1831,14 +1832,14 @@ public class TariffService(
 
         var version = await GetServiceLimitsCacheVersionAsync(tenantId, groupName);
 
-        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, ServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName, version), async token =>
+        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, UserServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName, version), async token =>
         {
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
                 var filter = new ServiceLimitFilter { Limit = ParticipantServiceLimitsPageSize, IncludeUsage = true };
 
-                var serviceLimits = new Dictionary<Guid, ServiceLimit>();
+                var serviceLimits = new Dictionary<Guid, UserServiceLimit>();
                 await foreach (var page in accountingClient.GetParticipantServiceLimitPages(portalId, groupName, filter).AsPages().WithCancellation(token))
                 {
                     // The accounting service leaves switched-off limits out of this list; the check keeps a switched-off
@@ -1847,7 +1848,7 @@ public class TariffService(
                     {
                         if (serviceLimit.Enabled && Guid.TryParse(serviceLimit.Participant, out var userId))
                         {
-                            serviceLimits.TryAdd(userId, serviceLimit);
+                            serviceLimits.TryAdd(userId, serviceLimit.ToUserServiceLimit());
                         }
                     }
                 }
@@ -1870,8 +1871,15 @@ public class TariffService(
     /// the list of the users cannot be read: the user may have a personal limit then, so the one for every user is not
     /// shown in its place.
     /// </summary>
-    public async Task<ServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
+    public async Task<UserServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
     {
+        // A portal that is not a billing customer cannot have limits - the limit operations refuse it - so the lists of
+        // its users do not ask the accounting service at all.
+        if (!accountingClient.Configured || await GetCustomerInfoAsync(tenantId) == null)
+        {
+            return null;
+        }
+
         var serviceLimits = await GetCachedParticipantServiceLimitsAsync(tenantId, groupName);
         if (serviceLimits == null)
         {
@@ -1885,7 +1893,7 @@ public class TariffService(
 
         var globalServiceLimit = await GetCachedGlobalServiceLimitAsync(tenantId, groupName);
 
-        return globalServiceLimit is { Enabled: true } ? globalServiceLimit : null;
+        return globalServiceLimit is { Enabled: true } ? globalServiceLimit.ToUserServiceLimit() : null;
     }
 
     // The limit for every user, cached like the list of the users: a user missing from that list falls back to it.
@@ -1928,7 +1936,7 @@ public class TariffService(
 
     internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName, string version)
     {
-        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:users";
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:userlimits";
     }
 
     internal static string GetGlobalServiceLimitCacheKey(int tenantId, string groupName, string version)

@@ -193,8 +193,21 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         serviceLimit.Id.Should().Be(42);
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Custom);
-        serviceLimit.Usage.AmountConsumed.Should().Be(12.5m);
+        serviceLimit.AmountConsumed.Should().Be(12.5m);
+        serviceLimit.PeriodEnd.Should().Be(new DateTime(2026, 10, 18, 23, 59, 59, DateTimeKind.Utc));
         handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetCachedUserServiceLimit_PortalNotABillingCustomer_ReturnsNullWithoutAskingTheAccountingService()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => ParticipantRows(Row(42, "Custom", UserA)), new CustomerInfo());
+
+        var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
+
+        serviceLimit.Should().BeNull();
+        handler.CallCount.Should().Be(0);
     }
 
     [Fact]
@@ -207,7 +220,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         serviceLimit.Id.Should().Be(43);
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Global);
-        serviceLimit.Usage.Should().NotBeNull();
+        serviceLimit.AmountConsumed.Should().Be(12.5m);
     }
 
     [Fact]
@@ -232,7 +245,8 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
 
         first.Id.Should().Be(43);
         first.Scope.Should().Be(ServiceLimitScope.Global);
-        first.Usage.Should().BeNull();
+        first.AmountConsumed.Should().Be(0);
+        first.PeriodEnd.Should().BeNull();
         second.Id.Should().Be(43);
         globalRequests.Should().Be(1);
     }
