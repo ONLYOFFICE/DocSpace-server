@@ -81,6 +81,8 @@ public class TariffService(
     private static readonly TimeSpan _serviceLimitsFactoryHardTimeout = TimeSpan.FromSeconds(3);
     // How long the last limits known stay usable while the accounting service cannot be reached.
     private static readonly TimeSpan _serviceLimitsFailSafeMaxDuration = TimeSpan.FromHours(1);
+    // Outlives every entry of a version; when it expires anyway, the next read simply starts a new one.
+    private static readonly TimeSpan _serviceLimitsCacheVersionDuration = TimeSpan.FromDays(1);
     private const int ParticipantServiceLimitsPageSize = 100;
     private const int ParticipantServiceLimitsDefaultPageSize = 25;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
@@ -1827,7 +1829,9 @@ public class TariffService(
             return [];
         }
 
-        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, ServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName), async token =>
+        var version = await GetServiceLimitsCacheVersionAsync(tenantId, groupName);
+
+        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, ServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName, version), async token =>
         {
             try
             {
@@ -1893,7 +1897,9 @@ public class TariffService(
         }
 
         // A portal the accounting service does not know, or one without the limit, gets null from the read itself.
-        return await GetOrSetServiceLimitsAsync<ServiceLimit>(tenantId, GetGlobalServiceLimitCacheKey(tenantId, groupName),
+        var version = await GetServiceLimitsCacheVersionAsync(tenantId, groupName);
+
+        return await GetOrSetServiceLimitsAsync<ServiceLimit>(tenantId, GetGlobalServiceLimitCacheKey(tenantId, groupName, version),
             _ => GetGlobalServiceLimitAsync(tenantId, groupName), null);
     }
 
@@ -1920,20 +1926,33 @@ public class TariffService(
         }
     }
 
-    internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName)
+    internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName, string version)
     {
-        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:users";
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:users";
     }
 
-    internal static string GetGlobalServiceLimitCacheKey(int tenantId, string groupName)
+    internal static string GetGlobalServiceLimitCacheKey(int tenantId, string groupName, string version)
     {
-        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:global";
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:global";
+    }
+
+    internal static string GetServiceLimitsCacheVersionKey(int tenantId, string groupName)
+    {
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:version";
+    }
+
+    // A change of the limits starts a new version of their caches instead of removing the entries. A read that began
+    // before the change and ends after it - a timed-out one completes in the background - stores the old limits under
+    // the old version, which nobody reads any more; with the entries removed it would put them back for minutes.
+    private async Task<string> GetServiceLimitsCacheVersionAsync(int tenantId, string groupName)
+    {
+        return await hybridCache.GetOrSetAsync<string>(GetServiceLimitsCacheVersionKey(tenantId, groupName),
+            (_, _) => Task.FromResult(Guid.NewGuid().ToString("N")), opt => opt.SetDuration(_serviceLimitsCacheVersionDuration));
     }
 
     private async Task ClearServiceLimitsCacheAsync(int tenantId, string groupName)
     {
-        await hybridCache.RemoveAsync(GetParticipantServiceLimitsCacheKey(tenantId, groupName));
-        await hybridCache.RemoveAsync(GetGlobalServiceLimitCacheKey(tenantId, groupName));
+        await hybridCache.SetAsync(GetServiceLimitsCacheVersionKey(tenantId, groupName), Guid.NewGuid().ToString("N"), _serviceLimitsCacheVersionDuration);
     }
 
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)

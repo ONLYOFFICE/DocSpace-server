@@ -131,6 +131,41 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     }
 
     [Fact]
+    public async Task CreateServiceLimit_ReadInFlightDuringTheChange_DoesNotBringTheOldListBack()
+    {
+        // A read that began before the change and ends after it must not leave the list from before the change in the
+        // cache: the clients asked to re-read would get the old limits again for minutes.
+        var listReads = 0;
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request =>
+            {
+                if (request.Method == HttpMethod.Post)
+                {
+                    return ServiceLimitResponse(OwnAccountNumber);
+                }
+
+                return Interlocked.Increment(ref listReads) == 1
+                    ? new HttpResponseMessage(HttpStatusCode.OK) { Content = new DelayedContent($"{{\"collection\":[{Row(42, "Custom", UserA)}],\"totalQuantity\":1}}", TimeSpan.FromSeconds(1)) }
+                    : ParticipantRows(Row(43, "Custom", UserB));
+            });
+
+        var readBeforeTheChange = tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (handler.CallCount == 0 && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20, TestContext.Current.CancellationToken);
+        }
+
+        await tariffService.CreateServiceLimitAsync(TenantId, "ai-services", ServiceLimitScope.Custom, UserB, 40m, null, ServiceLimitPeriod.Day);
+        var before = await readBeforeTheChange;
+        var after = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
+
+        before.Keys.Should().BeEquivalentTo([Guid.Parse(UserA)]);
+        after.Keys.Should().BeEquivalentTo([Guid.Parse(UserB)]);
+    }
+
+    [Fact]
     public async Task SetParticipantServiceLimits_DropsTheCache_SoTheNextReadSeesTheChange()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
