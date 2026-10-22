@@ -238,7 +238,7 @@
     <value>Contactar o suporte</value>
   </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
-    <value>Desativar Portal</value>
+    <value>Desativar portal</value>
   </data>
   <data name="ButtonDeletePortal" xml:space="preserve">
     <value>Eliminar Portal</value>
@@ -271,7 +271,7 @@
     <value>Manter o meu espaço e os meus fundos</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
-    <value>Deixe Feedback</value>
+    <value>Deixe feedback</value>
   </data>
   <data name="ButtonLogIn" xml:space="preserve">
     <value>Iniciar sessão no ${LetterLogoText}</value>
@@ -304,7 +304,7 @@
     <value>Partilhar a minha opinião</value>
   </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
-    <value>Iniciar um Período de Avaliação</value>
+    <value>Iniciar um período de avaliação</value>
   </data>
   <data name="ButtonUnblockPortal" xml:space="preserve">
     <value>Desbloquear o meu espaço</value>
@@ -571,7 +571,7 @@ Para poder usar todos os recursos disponíveis no momento da compra por um *per�
 
 $OrangeButton
 
-Você também está convidado a entrar em contato diretamente com seu gerente de vendas dedicado para a atualização da licença. 
+Você também está convidado a entrar em contato diretamente com seu gerente de vendas dedicado para a atualização da licença.
 
 Para questões de pagamento, contacte-nos em "${__SalesEmail}":"mailto:${__SalesEmail}". Para resolver quaisquer problemas técnicos, use "${__SupportLink}":"${__SupportLink}".
 
@@ -634,7 +634,7 @@ Email: $UserEmail
 $Body</value>
   </data>
   <data name="pattern_for_sales_notify" xml:space="preserve">
-    <value>h1.Mensagem do portal "${__VirtualRootPath}":"${__VirtualRootPath}" 
+    <value>h1.Mensagem do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Nome: $UserName
 
@@ -675,12 +675,12 @@ $TrulyYours</value>
       Login: &lt;b&gt;$Login&lt;/b&gt;
       Palavra-chave: "&lt;b&gt;definir palavra-chave&lt;/b&gt;":"$MyStaffLink"
 
-     Caixa de Entrada (IMAP): 
+     Caixa de Entrada (IMAP):
       Servidor: &lt;b&gt;$Server&lt;/b&gt;
       Porta: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Enviados (SMTP): 
+      Enviados (SMTP):
       Servidor: &lt;b&gt;$Server&lt;/b&gt;
       Porta: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -1014,7 +1014,7 @@ $TrulyYours</value>
     <value>${LetterLogoText} O ${LetterLogoText} foi eliminado.
 
 *Portal:* ${PortalUrl}
-*Proprietário:* ${UserName} ${UserEmail} 
+*Proprietário:* ${UserName} ${UserEmail}
 *Cliente:* ${OwnerName}
 
 Certifique-se de que o faturamento automático está desativado. Verifique o estado do faturamento automático na conta Stripe do cliente.</value>

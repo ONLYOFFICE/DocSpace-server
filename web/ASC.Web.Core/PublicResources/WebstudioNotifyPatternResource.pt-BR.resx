@@ -268,7 +268,7 @@
     <value>Manter meu espaço e meus fundos</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
-    <value>Deixar Feedback</value>
+    <value>Deixar feedback</value>
   </data>
   <data name="ButtonLogIn" xml:space="preserve">
     <value>Entrar no ${LetterLogoText}</value>
@@ -413,9 +413,9 @@ Não deseja alterar seu e-mail? Simplesmente ignore esta mensagem.</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Deseja alterar a senha da sua conta do ${LetterLogoText}? Clique no botão abaixo para confirmar.
- 
+
 $OrangeButton
- 
+
 O link é válido por 7 dias.
 
 Não quer mudar sua senha? Apenas ignore esta mensagem</value>
@@ -514,7 +514,7 @@ $OrangeButton
 
 Você também pode entrar em contato com seu gerente de vendas dedicado diretamente para a atualização da licença.
 
-Para questões de pagamento, entre em contato conosco 
+Para questões de pagamento, entre em contato conosco
 
 em "${__SalesEmail}":"mailto:${__SalesEmail}". Para resolver qualquer problema técnico, use "${__SupportLink}":"${__SupportLink}".
 
@@ -561,7 +561,7 @@ Para poder usar todos os recursos disponíveis no momento da compra por um *per�
 
 $OrangeButton
 
-Você também pode entrar em contato com seu gerente de vendas dedicado diretamente para a atualização da licença. 
+Você também pode entrar em contato com seu gerente de vendas dedicado diretamente para a atualização da licença.
 
 Para questões de pagamento, entre em contato conosco em "${__SalesEmail}":"mailto:${__SalesEmail}". Para resolver qualquer problema técnico, use "${__SupportLink}":"${__SupportLink}".
 
@@ -669,12 +669,12 @@ $TrulyYours</value>
       Login: &lt;b&gt;$Login&lt;/b&gt;
       Senha: "&lt;b&gt;definir senha&lt;/b&gt;":"$MyStaffLink"
 
-      Correspondência recebida (IMAP): 
+      Correspondência recebida (IMAP):
       Servidor: &lt;b&gt;$Server&lt;/b&gt;
       Porta: &lt;b&gt;$ImapPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
 
-      Correspondência enviada (SMTP): 
+      Correspondência enviada (SMTP):
       Servidor: &lt;b&gt;$Server&lt;/b&gt;
       Porta: &lt;b&gt;$SmtpPort&lt;/b&gt;
       SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
@@ -1070,7 +1070,7 @@ $OrangeButton
 *Nota*: este link é válido apenas por 7 dias. Conclua o processo de desativação da conta dentro desse período.</value>
   </data>
   <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
-    <value>Usuário "$FromUserName":"$FromUserLink" eliminou seu perfil, e este perfil está agora bloqueado. Todos os arquivos do usuário ainda estão atribuídos a ele/ela e ocupam espaço em disco. 
+    <value>Usuário "$FromUserName":"$FromUserLink" eliminou seu perfil, e este perfil está agora bloqueado. Todos os arquivos do usuário ainda estão atribuídos a ele/ela e ocupam espaço em disco.
 
 Você pode reatribuir os documentos do usuário compartilhados com outros usuários a outro usuário ativo ou removê-los para liberar o espaço em disco do portal.
 
@@ -1638,7 +1638,7 @@ $TrulyYours</value>
 
 Você foi convidado a juntar-se ao escritório seguro e protegido de sua empresa na web, o que aumentaria sua colaboração. Seu endereço é "${__VirtualRootPath}":"${__VirtualRootPath}". Adicionar este link aos seus bookmarks é uma boa idéia, é provável que você o utilize muito.
 
-Aceite o convite seguindo o link abaixo e use seu login e senha da conta corporativa para fazer o login. 
+Aceite o convite seguindo o link abaixo e use seu login e senha da conta corporativa para fazer o login.
 
 $OrangeButton
 
