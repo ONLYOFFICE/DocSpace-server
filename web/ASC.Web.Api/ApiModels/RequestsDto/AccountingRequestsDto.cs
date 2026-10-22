@@ -408,6 +408,12 @@ public static class ServiceLimitConstraints
     /// The largest amount threshold a service limit may have, in the currency of the AI services.
     /// </summary>
     public const double MaxAmountValue = 10_000;
+
+    /// <summary>
+    /// The most users one call may set a personal limit for: the whole list goes to the accounting service in one
+    /// request and into one audit record.
+    /// </summary>
+    public const int MaxUserIds = 1000;
 }
 
 /// <summary>
@@ -577,6 +583,7 @@ public class SetParticipantServiceLimitsRequestDto
     /// <example>["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"]</example>
     [Required]
     [MinLength(1)]
+    [MaxLength(ServiceLimitConstraints.MaxUserIds)]
     public List<Guid> UserIds { get; init; }
 
     /// <summary>

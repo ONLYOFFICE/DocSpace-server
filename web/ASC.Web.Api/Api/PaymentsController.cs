@@ -1769,10 +1769,7 @@ public class PaymentController(
                 throw new ArgumentException("A personal limit needs the user it is set for");
             }
 
-            if (!await userManager.UserExistsAsync(inDto.UserId.Value))
-            {
-                throw new ItemNotFoundException("User could not be found");
-            }
+            await DemandPortalUserAsync(inDto.UserId.Value);
 
             participantName = inDto.UserId.Value.ToString();
         }
@@ -1836,7 +1833,8 @@ public class PaymentController(
     /// replacing the personal limit any of them already has and switching it on, so it is how a ceiling is rolled out
     /// to a group of users. The portal needs a billing customer, and the caller needs the permission to edit the portal
     /// settings as well as DocSpace administrator rights. At least one of `amountValue` and `quantityValue` must be
-    /// given, every user in `userIds` must exist on the portal, and a user listed twice is limited once. Unlike
+    /// given, every user in `userIds` must exist on the portal, and a user listed twice is limited once. One call takes
+    /// at most 1000 users; split a larger group into several calls. Unlike
     /// `PUT api/2.0/portal/payment/servicelimit`, this sets the whole limit: a threshold left out is removed, and the
     /// period may change, though a lifetime limit set to lifetime again keeps counting from where it was. Each personal
     /// limit applies instead of the one for every user, and the limit of the portal is checked on top. The call is mutating and idempotent, and it is written to the portal audit trail. The answer is
@@ -1849,7 +1847,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit/participants</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The number of personal limits that were set", typeof(int))]
-    [SwaggerResponse(400, "`userIds` is empty, neither `amountValue` nor `quantityValue` is given, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(400, "`userIds` is empty or lists more than 1000 users, neither `amountValue` nor `quantityValue` is given, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or one of the users does not exist")]
     [HttpPut("servicelimit/participants")]
@@ -1869,10 +1867,7 @@ public class PaymentController(
         var userIds = inDto.UserIds.Distinct().ToList();
         foreach (var userId in userIds)
         {
-            if (!await userManager.UserExistsAsync(userId))
-            {
-                throw new ItemNotFoundException($"User {userId} could not be found");
-            }
+            await DemandPortalUserAsync(userId);
         }
 
         var participantNames = userIds.Select(userId => userId.ToString()).ToList();
@@ -1984,6 +1979,16 @@ public class PaymentController(
         }
 
         await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id, userIds);
+    }
+
+    // A personal limit is set only for a real user of the portal. The system accounts count as existing users, but they
+    // never use the AI services, so a limit for one is refused like one for a user that does not exist.
+    private async Task DemandPortalUserAsync(Guid userId)
+    {
+        if (userManager.IsSystemUser(userId) || !await userManager.UserExistsAsync(userId))
+        {
+            throw new ItemNotFoundException($"User {userId} could not be found");
+        }
     }
 
     // The owner is a member of the administrators group too.
