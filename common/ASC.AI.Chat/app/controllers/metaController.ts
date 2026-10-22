@@ -49,14 +49,18 @@ function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
 }
 
-// The entry both routes work on: one file or one folder, named by its table
-// and its integer id. Metadata lives on internal entries only (positive
-// integer ids); a third-party id has no metadata and the Files API would
-// answer 404 anyway.
+// The entry both routes work on: one file, named by its table and its
+// integer id. Folders and rooms are not accepted for now: whether their
+// metadata should describe the folder itself or be filled on the files
+// inside is still undecided, so the client offers the AI actions on files
+// only and the routes refuse the other kinds; the folder reading behind
+// `generateMeta` and `fillMeta` stays for when that is settled. Metadata
+// lives on internal entries only (positive integer ids); a third-party id
+// has no metadata and the Files API would answer 404 anyway.
 function asEntry(body: Record<string, unknown>): { kind: EntryKind; id: string } {
   const kind = body["kind"];
-  if (kind !== "file" && kind !== "folder") {
-    badRequest('kind must be "file" or "folder"');
+  if (kind !== "file") {
+    badRequest('kind must be "file"');
   }
   const rawId = body["id"];
   const id =
@@ -66,7 +70,7 @@ function asEntry(body: Record<string, unknown>): { kind: EntryKind; id: string }
         ? rawId.trim()
         : "";
   if (!/^[1-9]\d*$/.test(id)) {
-    badRequest("id must be the integer id of a file or folder");
+    badRequest("id must be the integer id of a file");
   }
   return { kind, id };
 }

@@ -114,13 +114,16 @@ describe("metaController.generate", () => {
 
   it.each([
     [null, "body must be an object"],
-    [{}, 'kind must be "file" or "folder"'],
-    [{ kind: "room", id: 1 }, 'kind must be "file" or "folder"'],
-    [{ kind: "file" }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: "" }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: "sbox-1" }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: [1, 2] }, "id must be the integer id of a file or folder"],
+    [{}, 'kind must be "file"'],
+    [{ kind: "room", id: 1 }, 'kind must be "file"'],
+    // Folders are refused for now, until it is settled what their metadata
+    // should describe; the client offers the actions on files only too.
+    [{ kind: "folder", id: 1 }, 'kind must be "file"'],
+    [{ kind: "file" }, "id must be the integer id of a file"],
+    [{ kind: "file", id: "" }, "id must be the integer id of a file"],
+    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file"],
+    [{ kind: "file", id: "sbox-1" }, "id must be the integer id of a file"],
+    [{ kind: "file", id: [1, 2] }, "id must be the integer id of a file"],
     [{ kind: "file", id: 1, prompt: 5 }, "prompt must be a string"],
   ])("rejects %j with 400", async (body, message) => {
     const res = await run(metaController.generate, body);
@@ -133,13 +136,13 @@ describe("metaController.generate", () => {
   it("normalizes the entry, trims the prompt, attributes the round and answers the result", async () => {
     generateMeta.mockResolvedValue({ fields: [], sources: [], skipped: [] });
     const res = await run(metaController.generate, {
-      kind: "folder",
+      kind: "file",
       id: " 10 ",
       prompt: "  dates ",
     });
     expect(res.statusCode).toBe(200);
-    expect(generateMeta).toHaveBeenCalledWith({ kind: "folder", id: "10", prompt: "dates" });
-    expect(primeSourceMeta).toHaveBeenCalledWith("10", "folder");
+    expect(generateMeta).toHaveBeenCalledWith({ kind: "file", id: "10", prompt: "dates" });
+    expect(primeSourceMeta).toHaveBeenCalledWith("10", "file");
   });
 
   it("attributes a file request to the file", async () => {
@@ -159,7 +162,7 @@ describe("metaController.generate", () => {
     });
 
     generateMeta.mockRejectedValueOnce(new FakeDocspaceApiHttpError(404, "Not Found"));
-    res = await run(metaController.generate, { kind: "folder", id: 9 });
+    res = await run(metaController.generate, { kind: "file", id: 9 });
     expect(res.statusCode).toBe(404);
 
     generateMeta.mockRejectedValueOnce(new NoProfileError());
@@ -181,13 +184,14 @@ describe("metaController.fill", () => {
   });
 
   it.each([
-    [{}, 'kind must be "file" or "folder"'],
-    [{ kind: "file", id: 0 }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: "-5" }, "id must be the integer id of a file or folder"],
-    [{ kind: "room", id: 1 }, 'kind must be "file" or "folder"'],
-    [{ kind: "file" }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: "abc-123" }, "id must be the integer id of a file or folder"],
-    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file or folder"],
+    [{}, 'kind must be "file"'],
+    [{ kind: "file", id: 0 }, "id must be the integer id of a file"],
+    [{ kind: "file", id: "-5" }, "id must be the integer id of a file"],
+    [{ kind: "room", id: 1 }, 'kind must be "file"'],
+    [{ kind: "folder", id: 1 }, 'kind must be "file"'],
+    [{ kind: "file" }, "id must be the integer id of a file"],
+    [{ kind: "file", id: "abc-123" }, "id must be the integer id of a file"],
+    [{ kind: "file", id: 1.5 }, "id must be the integer id of a file"],
     [{ kind: "file", id: 1, prompt: [] }, "prompt must be a string"],
     [{ kind: "file", id: 1, overwrite: "yes" }, "overwrite must be a boolean"],
     [{ kind: "file", id: 1, dryRun: 1 }, "dryRun must be a boolean"],
@@ -206,16 +210,16 @@ describe("metaController.fill", () => {
       sources: [],
       skipped: [],
     });
-    const res = await run(metaController.fill, { kind: "folder", id: " 12 ", prompt: " totals " });
+    const res = await run(metaController.fill, { kind: "file", id: " 12 ", prompt: " totals " });
     expect(res.statusCode).toBe(200);
     expect(fillMeta).toHaveBeenCalledWith({
-      kind: "folder",
+      kind: "file",
       id: "12",
       prompt: "totals",
       overwrite: false,
       dryRun: true,
     });
-    expect(primeSourceMeta).toHaveBeenCalledWith("12", "folder");
+    expect(primeSourceMeta).toHaveBeenCalledWith("12", "file");
 
     await run(metaController.fill, { kind: "file", id: 3, overwrite: true, dryRun: false });
     expect(fillMeta).toHaveBeenLastCalledWith({

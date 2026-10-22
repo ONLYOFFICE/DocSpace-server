@@ -123,7 +123,7 @@ describe("PortalTextReader", () => {
         answer: () => portalJson([operation("op-1")]),
       },
       {
-        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        match: (url) => url.includes("/api/2.0/files/fileops?id="),
         answer: () => {
           polls += 1;
           return portalJson(
@@ -156,6 +156,11 @@ describe("PortalTextReader", () => {
       returnSingleOperation: true,
     });
     expect(polls).toBe(2);
+    // Each poll asks for this operation only: a read of the whole list would
+    // dequeue the user's other finished operations behind the UI's back.
+    for (const poll of calls.filter((c) => c.url.includes("/api/2.0/files/fileops?"))) {
+      expect(new URL(poll.url).searchParams.get("id")).toBe("op-1");
+    }
     const download = calls.find((c) => c.url.includes("filehandler.ashx"));
     expect(download?.url).toBe(`${PROXY}/filehandler.ashx?action=bulk&ext=.txt`);
     expect((download?.init?.headers as Record<string, string>)["accept"]).toBe("text/plain");
@@ -179,15 +184,19 @@ describe("PortalTextReader", () => {
         started.push(id);
         return portalJson([operation(id)]);
       }
-      if (url.endsWith("/api/2.0/files/fileops")) {
-        // Every operation started so far is finished by the next poll.
+      if (url.includes("/api/2.0/files/fileops?id=")) {
+        // Every operation started so far is finished by the next poll; the
+        // portal answers with the one operation asked for.
         for (const id of started) {
           finished.add(id);
         }
+        const asked = new URL(url).searchParams.get("id");
         return portalJson(
-          started.map((id) =>
-            operation(id, { finished: true, url: `https://x/filehandler.ashx?op=${id}` }),
-          ),
+          started
+            .filter((id) => id === asked)
+            .map((id) =>
+              operation(id, { finished: true, url: `https://x/filehandler.ashx?op=${id}` }),
+            ),
         );
       }
       if (url.includes("filehandler.ashx")) {
@@ -261,7 +270,7 @@ describe("PortalTextReader", () => {
         answer: () => portalJson([operation("op-1")]),
       },
       {
-        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        match: (url) => url.includes("/api/2.0/files/fileops?id="),
         answer: () => {
           polls += 1;
           return polls === 1
@@ -290,7 +299,7 @@ describe("PortalTextReader", () => {
         answer: () => portalJson([operation("op-1")]),
       },
       {
-        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        match: (url) => url.includes("/api/2.0/files/fileops?id="),
         answer: () => {
           polls += 1;
           // Missing on polls 1, 3 and 5 (three misses, never consecutive),
@@ -341,7 +350,7 @@ describe("PortalTextReader", () => {
         answer: () => portalJson([operation("op-err")]),
       },
       {
-        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        match: (url) => url.includes("/api/2.0/files/fileops?id="),
         answer: () => portalJson([operation("op-err", { error: "Password protected" })]),
       },
     ]);
@@ -359,7 +368,7 @@ describe("PortalTextReader", () => {
         match: (url) => url.endsWith("/fileops/bulkdownload"),
         answer: () => portalJson([operation("op-gone")]),
       },
-      { match: (url) => url.endsWith("/api/2.0/files/fileops"), answer: () => portalJson([]) },
+      { match: (url) => url.includes("/api/2.0/files/fileops?id="), answer: () => portalJson([]) },
     ]);
     vi.stubGlobal("fetch", fetchMock);
     const reader = new PortalTextReader(new AbortController().signal);
@@ -405,7 +414,7 @@ describe("PortalTextReader budget", () => {
         answer: () => portalJson([operation("op-slow")]),
       },
       {
-        match: (url) => url.endsWith("/api/2.0/files/fileops"),
+        match: (url) => url.includes("/api/2.0/files/fileops?id="),
         answer: () => portalJson([operation("op-slow", { progress: 10 })]),
       },
     ]);

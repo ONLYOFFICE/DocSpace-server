@@ -262,10 +262,12 @@ async function startConversion(
 }
 
 /**
- * Polls `GET files/fileops` for the operations a reader started and settles
- * each one as it finishes. One poller per reader: the list is the caller's
- * own, and a read of it drops the finished operations, so several pollers
- * for the same user would steal each other's results.
+ * Polls `GET files/fileops?id=<operation>` for each operation a reader
+ * started and settles it as it finishes. The id is passed on every read: the
+ * portal drops the finished operations it reports from the user's queue, so a
+ * read of the whole list would also take the results of operations the user
+ * started elsewhere (a move or an archive download in the UI), and the UI's
+ * own poll would then find nothing and report an error.
  */
 class OperationWatcher {
   private readonly waiters = new Map<
@@ -323,46 +325,58 @@ class OperationWatcher {
     if (this.waiters.size === 0) {
       return;
     }
-    let operations: FileOperation[] | undefined;
-    try {
-      operations = envelopeList(
-        await portalGet(`${proxyBaseUrl}/api/2.0/files/fileops`, this.signal),
-      ).flatMap((raw) => {
+    await Promise.all([...this.waiters.keys()].map((id) => this.pollOne(id)));
+    this.schedule();
+  }
+
+  /** Reads one operation by id; a finished one is dequeued by the read. */
+  private async fetchOperation(id: string): Promise<FileOperation | undefined> {
+    const url = `${proxyBaseUrl}/api/2.0/files/fileops?id=${encodeURIComponent(id)}`;
+    return envelopeList(await portalGet(url, this.signal))
+      .flatMap((raw) => {
         const op = isObject(raw) ? toOperation(raw) : undefined;
         return op ? [op] : [];
-      });
+      })
+      .find((op) => op.id === id);
+  }
+
+  private async pollOne(id: string): Promise<void> {
+    let found: FileOperation | undefined;
+    try {
+      found = await this.fetchOperation(id);
     } catch (err) {
       if (this.signal.aborted) {
         return;
       }
       // A failed poll (a proxy hiccup, a transient 5xx) is one missed look
-      // at the list, not the end of every conversion in flight.
+      // at the operation, not the end of the conversion in flight.
       logger.warn(
-        `meta: polling file operations failed: ${err instanceof Error ? err.message : String(err)}`,
+        `meta: polling file operation ${id} failed: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
-    for (const [id, waiter] of [...this.waiters.entries()]) {
-      const found = operations?.find((op) => op.id === id);
-      if (!found) {
-        // The list holds the operations still running or not yet read; one
-        // that is gone was finished and read by someone else (the portal UI
-        // polls the same list), so its result is lost to us.
-        waiter.misses += 1;
-        if (waiter.misses >= MAX_POLL_MISSES) {
-          waiter.reject(new Error(`file operation ${id} disappeared before it finished`));
-        }
-        continue;
-      }
-      if (found.error) {
-        waiter.reject(new Error(`conversion failed: ${found.error}`));
-      } else if (found.finished) {
-        waiter.resolve(found);
-      } else {
-        // Seen again: only consecutive misses count as lost.
-        waiter.misses = 0;
-      }
+    const waiter = this.waiters.get(id);
+    if (!waiter) {
+      // Aborted while the read was in flight.
+      return;
     }
-    this.schedule();
+    if (!found) {
+      // The portal reports an operation while it runs or until its result is
+      // read; one that is gone was finished and read by someone else (the
+      // portal UI polls the full list), so its result is lost to us.
+      waiter.misses += 1;
+      if (waiter.misses >= MAX_POLL_MISSES) {
+        waiter.reject(new Error(`file operation ${id} disappeared before it finished`));
+      }
+      return;
+    }
+    if (found.error) {
+      waiter.reject(new Error(`conversion failed: ${found.error}`));
+    } else if (found.finished) {
+      waiter.resolve(found);
+    } else {
+      // Seen again: only consecutive misses count as lost.
+      waiter.misses = 0;
+    }
   }
 }
 
@@ -380,8 +394,7 @@ function throughProxy(downloadUrl: string): string {
 
 /**
  * Reads files as text for one request. All conversions started through the
- * same reader share one poller of the file-operations list and one abort
- * signal.
+ * same reader share one operation poller and one abort signal.
  */
 export class PortalTextReader {
   private readonly watcher: OperationWatcher;
