@@ -128,4 +128,15 @@ public class RawApiClient(HttpClient client)
 
         return wrapper ?? throw new InvalidOperationException($"Empty response body for {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri}.");
     }
+
+    /// <summary>
+    /// GETs a paged list and returns its <c>total</c> - for lists whose generated SDK wrapper has
+    /// no <c>Total</c> property (<c>FileShareArrayWrapper</c>).
+    /// </summary>
+    public async Task<long?> GetTotalAsync(string path, CancellationToken cancellationToken)
+    {
+        using var response = await client.GetAsync(path, cancellationToken);
+
+        return (await ReadEnvelopeAsync<JsonElement>(response, cancellationToken)).Total;
+    }
 }

@@ -140,7 +140,7 @@ public class RoomShareFilterTests(
             count: 1,
             startIndex: 1,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var total = await ReadShareTotal(room.Id, "filterType=UserOrGroup&count=1&startIndex=1");
+        var total = await ReadShareTotal($"api/2.0/files/rooms/{room.Id}/share?filterType=UserOrGroup&count=1&startIndex=1");
 
         // the owner (room manager) sorts first, the group second, the invited user last
         page.Should().ContainSingle();
@@ -154,7 +154,7 @@ public class RoomShareFilterTests(
     {
         var (room, _, _) = await CreateRoomWithUserAndGroup("Autotest Filter Group Total");
 
-        var total = await ReadShareTotal(room.Id, "filterType=Group");
+        var total = await ReadShareTotal($"api/2.0/files/rooms/{room.Id}/share?filterType=Group");
 
         total.Should().Be(1);
     }
@@ -190,7 +190,7 @@ public class RoomShareFilterTests(
     {
         var templateId = await CreateTemplate("Autotest Filter Everyone Total", isPublic: true);
 
-        var total = await ReadShareTotal(templateId, "filterType=Group");
+        var total = await ReadShareTotal($"api/2.0/files/rooms/{templateId}/share?filterType=Group");
 
         total.Should().Be(1, "Everyone is the only group of a public template");
     }
@@ -217,16 +217,5 @@ public class RoomShareFilterTests(
         }, TestContext.Current.CancellationToken);
 
         return (room, user, group.Id);
-    }
-
-    /// <summary>
-    /// Reads the <c>total</c> of the room share list from the raw envelope: <c>FileShareArrayWrapper</c>
-    /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
-    /// </summary>
-    private async Task<long?> ReadShareTotal(int roomId, string query)
-    {
-        using var response = await _filesClient.GetAsync($"api/2.0/files/rooms/{roomId}/share?{query}", TestContext.Current.CancellationToken);
-
-        return (await new RawApiClient(_filesClient).ReadEnvelopeAsync<JsonElement>(response, TestContext.Current.CancellationToken)).Total;
     }
 }

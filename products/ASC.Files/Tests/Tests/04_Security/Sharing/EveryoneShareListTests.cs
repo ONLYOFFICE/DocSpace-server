@@ -197,15 +197,4 @@ public class EveryoneShareListTests(
     {
         return entries.FirstOrDefault(e => e.SharedToGroup != null && e.SharedToGroup.Id == _everyoneId);
     }
-
-    /// <summary>
-    /// Reads the <c>total</c> of a share list from the raw envelope: <c>FileShareArrayWrapper</c> in
-    /// the SDK has no <c>Total</c> property, so the typed call cannot see it.
-    /// </summary>
-    private async Task<long?> ReadShareTotal(string path)
-    {
-        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-
-        return (await new RawApiClient(_filesClient).ReadEnvelopeAsync<JsonElement>(response, TestContext.Current.CancellationToken)).Total;
-    }
 }
