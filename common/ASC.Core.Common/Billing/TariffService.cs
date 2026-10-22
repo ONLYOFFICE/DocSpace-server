@@ -1706,13 +1706,38 @@ public class TariffService(
             return null;
         }
 
-        var balance = await GetCustomerBalanceAsync(tenantId);
-        if (balance == null || balance.AccountNumber != serviceLimit.CustomerAccountNumber)
+        var accountNumber = await GetCustomerAccountNumberAsync(tenantId);
+        if (accountNumber != serviceLimit.CustomerAccountNumber)
         {
             return null;
         }
 
         return serviceLimit;
+    }
+
+    // The account number of the tenant's customer, null when the portal is not a customer. The cached balance is empty
+    // both for a portal that is not a customer and for a while after a failed read, so an empty one is read again
+    // straight from the accounting service: a failure then surfaces as one instead of making an existing limit look
+    // like one of another portal.
+    private async Task<int?> GetCustomerAccountNumberAsync(int tenantId)
+    {
+        var balance = await GetCustomerBalanceAsync(tenantId);
+        if (balance != null)
+        {
+            return balance.AccountNumber;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return (await accountingClient.GetCustomerBalanceAsync(portalId)).AccountNumber;
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
     }
 
     /// <summary>

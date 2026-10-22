@@ -66,13 +66,45 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     [Fact]
     public async Task GetServiceLimit_PortalWithoutBillingCustomer_ReturnsNull()
     {
-        // An empty balance is what TariffService caches for a portal the accounting service does not know.
+        // An empty balance is what TariffService caches for a portal the accounting service does not know; the owner
+        // check reads it again and gets the same answer.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => ServiceLimitResponse(OwnAccountNumber));
+            request => IsBalanceRequest(request)
+                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}""")
+                : ServiceLimitResponse(OwnAccountNumber));
 
         var serviceLimit = await tariffService.GetServiceLimitAsync(TenantId, 42);
 
         serviceLimit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetServiceLimit_BalanceReadFailedBefore_ReadsItAgainAndReturnsTheLimit()
+    {
+        // A failed balance read leaves an empty balance in the cache for minutes; a limit of this portal must not look
+        // like one of another portal meanwhile.
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+            request => IsBalanceRequest(request)
+                ? AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"accountNumber":{{OwnAccountNumber}},"subAccounts":[]}""")
+                : ServiceLimitResponse(OwnAccountNumber));
+
+        var serviceLimit = await tariffService.GetServiceLimitAsync(TenantId, 42);
+
+        serviceLimit.Should().NotBeNull();
+        serviceLimit.Id.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task GetServiceLimit_BalanceUnavailable_ThrowsInsteadOfReportingNoLimit()
+    {
+        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+            request => IsBalanceRequest(request)
+                ? AccountingClientTests.Json(HttpStatusCode.ServiceUnavailable, "unavailable")
+                : ServiceLimitResponse(OwnAccountNumber));
+
+        var act = async () => await tariffService.GetServiceLimitAsync(TenantId, 42);
+
+        await act.Should().ThrowAsync<AccountingException>();
     }
 
     [Fact]

@@ -118,6 +118,11 @@ public abstract class TariffServiceServiceLimitTestBase
         return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
     }
 
+    protected static bool IsBalanceRequest(HttpRequestMessage request)
+    {
+        return request.RequestUri!.AbsolutePath.EndsWith("/balance", StringComparison.Ordinal);
+    }
+
     protected static bool IsGlobalRequest(HttpRequestMessage request)
     {
         return request.RequestUri!.AbsolutePath.EndsWith("/global", StringComparison.Ordinal);
