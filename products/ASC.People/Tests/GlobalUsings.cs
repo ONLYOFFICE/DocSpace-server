@@ -53,6 +53,8 @@ global using DocSpace.API.SDK.Model;
 global using FluentAssertions;
 
 global using Xunit;
+
+global using CoreConstants = ASC.Core.Users.Constants;
 // Files-service clients the People tests need for room-scoped scenarios. Imported one by one
 // instead of the whole namespace: DocSpace.API.SDK.Api.Files also carries QuotaApi and SettingsApi,
 // which would clash with the People and Settings ones already in scope here.
