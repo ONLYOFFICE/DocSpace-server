@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>确认账户终止</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>联系支持团队</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>停用门户</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>加入房间</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>保留我的空间</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>保留我的空间和资金</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>留下反馈</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>设置密码</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>分享我的反馈</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>开始免费试用</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>解除空间锁定</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>升级</value>
@@ -761,6 +776,186 @@ IP 地址: *$IP*
 如果此操作由您本人执行，则可忽视此邮件。如果此更改可疑或未经您授权，请立即重置密码并禁用此设备对 ${LetterLogoText} 的访问权限。
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定：该门户未被使用，或其订阅未续订，具体情况见下方类别。
+
+*门户:* ${PortalUrl}
+*所有者:* ${UserName} ${UserEmail}
+*类别:* ${Category}
+*删除日期:* ${DeleteDate}
+
+除非解除锁定，否则该门户及其所有数据将在该日期被删除。
+
+如果所有者要求保留，请在该日期前重新激活门户。</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.您的空间已被锁定，但目前没有任何数据丢失
+
+#if($Unpaid == "True")
+由于您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 的订阅已结束，我们已暂时锁定该空间。这意味着您的团队成员目前都无法登录，但您的所有文档和设置仍然安全。
+#else
+由于您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 已有一段时间未被使用，我们已暂时锁定该空间。这意味着您的团队成员目前都无法登录，但您的所有文档和设置仍然安全。
+#end
+
+您的数据将保留至 *$DeleteDate* 。此后，该空间及其中的所有内容将被永久删除。
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前解除空间锁定，然后续订即可恢复工作。一切都将保持原样。
+#else
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前解除空间锁定，一切都将保持原样。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+如果您决定不再继续使用，也完全没问题。如果有想要保留的数据，请在 ${DeleteDateShort} 前解除空间锁定并进行备份。
+#else
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前解除空间锁定并下载这些文件。
+#end
+#else
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前联系我们的支持团队，我们将帮助您按原样恢复空间。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.您的空间已被删除
+
+#if($Unpaid == "True")
+由于您的 ${LetterLogoText} 空间 *$PortalName* 的订阅已结束且未续订，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#else
+由于您的 ${LetterLogoText} 空间 *$PortalName* 已长时间未被使用，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#end
+
+#if($Unpaid == "True")
+感谢您一直以来的使用。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#else
+感谢您试用 ${LetterLogoText}。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#end
+
+$OrangeButton
+
+如果您将来想回来，我们随时欢迎。您可以随时 "创建新空间":"$URL2" 。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.您的空间即将被删除
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#else
+#if($FinalNotice == "True")
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，然后续订即可恢复工作。一切都将保持原样。
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，一切都将保持原样。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+如果您决定不再继续使用，也完全没问题。如果有想要保留的数据，请在 ${DeleteDateShort} 前解除空间锁定并进行备份。此后我们将无法恢复。
+#else
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前解除空间锁定并下载这些文件。此后我们将无法恢复。
+#end
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前联系我们的支持团队，我们将帮助您按原样恢复空间。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。此后我们将无法恢复。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.好久不见
+
+已经有一段时间没有人登录您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 了。我们希望在您的文档和设置受到影响之前提醒您。
+
+为了让所有人都能顺畅使用，我们会锁定一段时间未使用的免费空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将被永久删除。
+
+好消息是：保留空间很简单。只需在 ${BlockDateShort} 前登录一次，一切都会保持原样。
+
+$OrangeButton
+
+如果您不再需要该空间，则无需执行任何操作。只需确保在 ${BlockDateShort} 前下载您想保留的文件。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.您的订阅已结束，但您的空间仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。希望 ${LetterLogoText} 让您的工作更轻松了一些。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将被永久删除。
+
+好消息是：保留空间很简单。只需在 ${BlockDateShort} 前续订，您的文档、设置和团队都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.您的订阅已结束，但您的空间和资金仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。您的钱包中仍有资金（ "查看余额":"$URL1" ），我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前续订，您的文档、设置和资金都将保持原样。您的钱包余额甚至可以抵扣部分费用。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+#else
+h1.您的空间中仍有资金等待着您
+
+已经有一段时间没有人登录您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 了，但其 "钱包":"$URL1" 中仍有资金。我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定不活跃的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前登录一次，您的文档、设置和资金都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前下载您想保留的文件。
+#end
 
 $TrulyYours</value>
   </data>
@@ -1605,6 +1800,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>您的密码已成功更改</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间已被锁定，但您的数据在 ${DeleteDateShort} 前都是安全的</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间已被删除</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间即将被删除（删除日期：${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>保留您的 ${LetterLogoText} 空间的最后机会（删除日期：${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间中仍有资金（请在 $BlockDate 前采取行动）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>禁用${__VirtualRootHost}门户</value>

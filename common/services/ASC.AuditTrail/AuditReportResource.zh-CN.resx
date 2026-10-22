@@ -723,6 +723,12 @@
   <data name="PortalDeactivated" xml:space="preserve">
     <value>门户已停用</value>
   </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>门户已被数据保留策略锁定</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>门户已解锁</value>
+  </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>门户已删除</value>
   </data>

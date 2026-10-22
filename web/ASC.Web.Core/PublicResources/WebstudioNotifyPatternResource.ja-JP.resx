@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>アカウント停止の確認</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>サポートに問い合わせる</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>ポータルの無効化</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>ルームに参加する</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>スペースを維持する</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>スペースと残高を維持する</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>フィードバックを書く</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>パスワードの設定</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>フィードバックを送る</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>無料トライアルを開始する</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>スペースのブロックを解除する</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>升级</value>
@@ -752,6 +767,186 @@ IP: *$IP*
 この操作があなた自身によって行われた場合は、これ以上の対応は必要ありません。この変更が不審に思われる場合や、あなたが許可していない場合は、すぐにパスワードをリセットし、このデバイスからの${LetterLogoText}へのアクセスを無効にしてください。
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>ポータル ${PortalUrl} はデータ保持ポリシーによりブロックされました。使用されていなかったか、サブスクリプションが更新されなかったためです。どちらに該当するかは、以下のカテゴリで確認できます。
+
+*ポータル:* ${PortalUrl}
+*所有者:* ${UserName} ${UserEmail}
+*カテゴリ:* ${Category}
+*削除日:* ${DeleteDate}
+
+ブロックが解除されない場合、ポータルとそのすべてのデータはこの日に削除されます。
+
+所有者から維持の依頼があった場合は、この日より前にポータルを再度有効にしてください。</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.スペースはブロックされましたが、まだ何も失われていません
+
+#if($Unpaid == "True")
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* のサブスクリプションが終了したため、一時的にスペースをブロックしました。現在、チームのどなたもサインインできませんが、ドキュメントと設定はすべて安全に保管されています。
+#else
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* がしばらく使用されていないため、一時的にスペースをブロックしました。現在、チームのどなたもサインインできませんが、ドキュメントと設定はすべて安全に保管されています。
+#end
+
+データは *$DeleteDate* まで保管されます。その後、スペースとその中のすべてのデータは完全に削除されます。
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+良いお知らせ：まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除し、サブスクリプションを更新すれば、作業を再開できます。すべてがそのままの状態で残っています。
+#else
+良いお知らせ：まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除するだけで、すべてがそのままの状態で戻ります。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータがある場合は、${DeleteDateShort}までにスペースのブロックを解除してバックアップしてください。
+#else
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにスペースのブロックを解除してダウンロードしてください。
+#end
+#else
+良いお知らせ：まだ間に合います。${DeleteDateShort}までにサポートチームにご連絡いただければ、スペースをそのままの状態で復元できるようお手伝いします。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにお知らせください。ファイルにアクセスできるようお手伝いします。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.スペースは削除されました
+
+#if($Unpaid == "True")
+${LetterLogoText} のスペース *$PortalName* のサブスクリプションが終了し、更新されなかったため、 "プライバシーポリシー":"$URL1" に従い、スペースをすべてのデータとともに削除しました。
+#else
+${LetterLogoText} のスペース *$PortalName* が長期間使用されていなかったため、 "プライバシーポリシー":"$URL1" に従い、スペースをすべてのデータとともに削除しました。
+#end
+
+#if($Unpaid == "True")
+これまでご利用いただき、ありがとうございました。ご利用をやめられた理由をぜひお聞かせください。うまく機能しなかった点があったのか、より適したサービスが見つかったのか、それとも単に必要なくなったのか。回答は1分ほどで終わり、いただいたご意見はすべてサービスの改善に役立てられます。
+#else
+${LetterLogoText} をお試しいただき、ありがとうございました。ご利用をやめられた理由をぜひお聞かせください。うまく機能しなかった点があったのか、より適したサービスが見つかったのか、それとも単に必要なくなったのか。回答は1分ほどで終わり、いただいたご意見はすべてサービスの改善に役立てられます。
+#end
+
+$OrangeButton
+
+またいつでもお戻りください。いつでも "新しいスペースを作成":"$URL2" できます。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.スペースはまもなく削除されます
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、サブスクリプションが終了したため、引き続きブロックされています。最後のお知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#else
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、サブスクリプションが終了したため、引き続きブロックされています。お知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#end
+#else
+#if($FinalNotice == "True")
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、しばらく使用されていないため、引き続きブロックされています。最後のお知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#else
+${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* は、しばらく使用されていないため、引き続きブロックされています。お知らせです： *$DeleteDate* に、スペースとそのすべてのデータが完全に削除されます。
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除し、サブスクリプションを更新すれば、作業を再開できます。すべてがそのままの状態で残っています。
+#else
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにスペースのブロックを解除するだけで、すべてがそのままの状態で戻ります。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータがある場合は、${DeleteDateShort}までにスペースのブロックを解除してバックアップしてください。その後は復元できなくなります。
+#else
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにスペースのブロックを解除してダウンロードしてください。その後は復元できなくなります。
+#end
+#else
+スペースを維持したい場合は、まだ間に合います。${DeleteDateShort}までにサポートチームにご連絡いただければ、スペースをそのままの状態で復元できるようお手伝いします。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルがある場合は、${DeleteDateShort}までにお知らせください。ファイルにアクセスできるようお手伝いします。その後は復元できなくなります。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.しばらくお見かけしていません
+
+しばらくの間、${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* にどなたもサインインしていません。ドキュメントや設定に何かが起こる前に、ご連絡したいと思いました。
+
+すべての方に快適にご利用いただくため、しばらく使用されていない無料スペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが完全に削除されます。
+
+良いお知らせ：スペースの維持は簡単です。${BlockDateShort}までに一度サインインするだけで、すべてがそのままの状態で保たれます。
+
+$OrangeButton
+
+スペースが不要になった場合は、何もする必要はありません。保存しておきたいファイルは${BlockDateShort}までにダウンロードしてください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.サブスクリプションは終了しましたが、スペースはまだ残っています
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* の ${LetterLogoText} サブスクリプションは *$DueDate* に終了しました。これまでご利用いただき、ありがとうございました。${LetterLogoText} がお仕事を少しでも楽にできていれば幸いです。
+
+快適にご利用いただくため、サブスクリプションが終了したスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが完全に削除されます。
+
+良いお知らせ：スペースの維持は簡単です。${BlockDateShort}までにサブスクリプションを更新するだけで、ドキュメント、設定、チームはそのまま保たれます。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータは${BlockDateShort}までに必ずバックアップしてください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.サブスクリプションは終了しましたが、スペースと残高はまだ残っています
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* の ${LetterLogoText} サブスクリプションは *$DueDate* に終了しました。これまでご利用いただき、ありがとうございました。ウォレットにはまだ残高があります（ "残高を確認":"$URL1" ）。知らないうちに失われることがないよう、お知らせします。
+
+快適にご利用いただくため、サブスクリプションが終了したスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが、ウォレットの残高とともに完全に削除されます。
+
+良いお知らせ：どちらも簡単に維持できます。${BlockDateShort}までにサブスクリプションを更新するだけで、ドキュメント、設定、残高はそのまま保たれます。ウォレットの残高で費用の一部をまかなえる場合もあります。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいデータは${BlockDateShort}までに必ずバックアップしてください。
+#else
+h1.スペースに残高が残っています
+
+しばらくの間、${LetterLogoText} のスペース *"${__VirtualRootPath}":"${__VirtualRootPath}"* にどなたもサインインしていませんが、その "ウォレット":"$URL1" にはまだ残高があります。知らないうちに失われることがないよう、お知らせします。
+
+快適にご利用いただくため、使用されていないスペースはブロックしています。お客様のスペースについては次のとおりです：
+
+*$BlockDate*: スペースがブロックされ、サインインできなくなります。
+*$DeleteDate*: スペースとそのすべてのデータが、ウォレットの残高とともに完全に削除されます。
+
+良いお知らせ：どちらも簡単に維持できます。${BlockDateShort}までに一度サインインするだけで、ドキュメント、設定、残高はそのまま保たれます。
+
+$OrangeButton
+
+別の方法を選ばれた場合でも、まったく問題ありません。保存しておきたいファイルは${BlockDateShort}までに必ずダウンロードしてください。
+#end
 
 $TrulyYours</value>
   </data>
@@ -1564,6 +1759,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>パスワードが正常に変更されました</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>ポータル ${PortalUrl} はデータ保持ポリシーによりブロックされました</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText} のスペースはブロックされましたが、データは${DeleteDateShort}まで安全に保管されます</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} のスペースは削除されました</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} のスペースはまもなく削除されます（削除日: ${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} のスペースを維持する最後のチャンスです（削除日: ${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースがお待ちしています（${BlockDateShort}までに対応が必要です）</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} のスペースに残高が残っています（$BlockDateまでに対応が必要です）</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost}ポータルの停止</value>
