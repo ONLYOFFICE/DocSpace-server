@@ -1299,4 +1299,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Valores de metadados atualizados: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Ficheiro aberto pelo script do Document Builder: {0}</value>
+  </data>
 </root>

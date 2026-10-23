@@ -1299,4 +1299,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Стойностите на метаданните са актуализирани: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Файлът е отворен от скрипт на Document Builder: {0}</value>
+  </data>
 </root>

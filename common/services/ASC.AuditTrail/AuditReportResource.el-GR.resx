@@ -1299,4 +1299,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Οι τιμές μεταδεδομένων ενημερώθηκαν: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Το αρχείο άνοιξε από σενάριο Document Builder: {0}</value>
+  </data>
 </root>
