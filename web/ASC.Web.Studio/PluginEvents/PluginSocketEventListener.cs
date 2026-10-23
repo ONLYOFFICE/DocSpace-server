@@ -172,6 +172,12 @@ public partial class PluginSocketEventListener(
             return "the message has no user_id property";
         }
 
+        // the sender is the module: it namespaces the event and the room, so it must be usable inside both names
+        if (!ModuleRegex().IsMatch(sender))
+        {
+            return "the sender's name is not a valid module name (1-64 letters, digits or the characters _ . -)";
+        }
+
         PluginSocketEvent @event;
         try
         {
@@ -187,9 +193,20 @@ public partial class PluginSocketEventListener(
             return "the body is not a PluginSocketEvent JSON object";
         }
 
-        if (!NameRegex().IsMatch(@event.Room ?? string.Empty) || !NameRegex().IsMatch(@event.Event ?? string.Empty))
+        if (!NameRegex().IsMatch(@event.Event ?? string.Empty))
         {
-            return "room and event must be 1-128 letters, digits or the characters _ . : -";
+            return "event must be 1-128 letters, digits or the characters _ . : -";
+        }
+
+        var toUser = !string.IsNullOrEmpty(@event.User);
+        if (toUser == !string.IsNullOrEmpty(@event.Room))
+        {
+            return "set exactly one addressee: room or user";
+        }
+
+        if (!toUser && !NameRegex().IsMatch(@event.Room))
+        {
+            return "room must be 1-128 letters, digits or the characters _ . : -";
         }
 
         if (!IsAllowed(sender, @event.TenantId))
@@ -201,13 +218,30 @@ public partial class PluginSocketEventListener(
 
         await using var scope = serviceProvider.CreateAsyncScope();
 
-        var tenant = await scope.ServiceProvider.GetRequiredService<TenantManager>().GetTenantAsync(@event.TenantId);
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        var tenant = await tenantManager.GetTenantAsync(@event.TenantId);
         if (tenant is not { Status: TenantStatus.Active })
         {
             return $"tenant {@event.TenantId} does not exist or is not active";
         }
 
-        await scope.ServiceProvider.GetRequiredService<PluginSocketManager>().SendAsync(@event);
+        Guid? userId = null;
+        if (toUser)
+        {
+            // the lookup is bound to this portal: an address from another portal finds nobody here
+            await tenantManager.SetCurrentTenantAsync(tenant.Id);
+
+            var user = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUserByEmailAsync(@event.User);
+            if (user.Id == ASC.Core.Users.Constants.LostUser.Id || user.Status != EmployeeStatus.Active)
+            {
+                return $"no active user with this e-mail in tenant {tenant.Id}";
+            }
+
+            userId = user.Id;
+        }
+
+        await scope.ServiceProvider.GetRequiredService<PluginSocketManager>()
+            .SendAsync(tenant.Id, sender, toUser ? null : @event.Room, userId, @event.Event, @event.Message);
 
         return null;
     }
@@ -238,4 +272,8 @@ public partial class PluginSocketEventListener(
 
     [GeneratedRegex("^[A-Za-z0-9_.:-]{1,128}$")]
     private static partial Regex NameRegex();
+
+    // no colon: it separates the module from the event in "plugin:{module}:{event}"
+    [GeneratedRegex("^[A-Za-z0-9_.-]{1,64}$")]
+    private static partial Regex ModuleRegex();
 }

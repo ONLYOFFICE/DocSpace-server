@@ -46,10 +46,15 @@ public class PluginSocketManager(
 {
     protected override string Hub => "files";
 
-    public async Task SendAsync(PluginSocketEvent @event)
+    /// <param name="tenantId">The portal, already checked against the sender's allowed portals.</param>
+    /// <param name="module">The sender, which namespaces the event and the room.</param>
+    /// <param name="room">The portal room; null when the event is addressed to <paramref name="userId"/>.</param>
+    /// <param name="userId">The addressee, resolved inside <paramref name="tenantId"/>; null for a room event.</param>
+    /// <param name="eventName">The event name without the namespace.</param>
+    /// <param name="message">Passed to the client as is.</param>
+    public async Task SendAsync(int tenantId, string module, string room, Guid? userId, string eventName, string message)
     {
-        // one source for the tenant: the room prefix and the tariff check both use the event's TenantId,
-        // which the caller has already checked against the sender's allowed portals
-        await MakeRequest("plugin-event", new { tenantId = @event.TenantId, room = @event.Room, @event = @event.Event, message = @event.Message }, @event.TenantId);
+        // one source for the tenant: the room prefix and the tariff check both use the same tenantId
+        await MakeRequest("plugin-event", new { tenantId, module, room, userId, @event = eventName, message }, tenantId);
     }
 }

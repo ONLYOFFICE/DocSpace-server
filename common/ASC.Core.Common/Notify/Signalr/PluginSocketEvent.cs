@@ -34,16 +34,23 @@
 namespace ASC.Core.Notify.Socket;
 
 /// <summary>
-/// A socket event an integration plugin publishes, as JSON, to the <c>asc_plugin_events</c> exchange
-/// (routing key <c>socket</c>). This is a public contract for plugins in any language, separate from the
-/// internal event bus: ASC.Web.Studio emits <see cref="Event"/> as <c>plugin:{Event}</c> to the
-/// <c>{TenantId}-plugin-{Room}</c> socket room, which a client joins by subscribing to <c>plugin-{Room}</c>.
+/// A socket event an integration module publishes, as JSON, to the <c>asc_plugin_events</c> exchange
+/// (routing key <c>socket</c>). This is a public contract for modules in any language, separate from the
+/// internal event bus. The module is the sender's RabbitMQ user, never a field of the event; clients receive
+/// <see cref="Event"/> as <c>plugin:{module}:{Event}</c>.
 /// </summary>
+/// <remarks>
+/// Exactly one addressee: <see cref="Room"/> reaches everyone in the portal subscribed to
+/// <c>plugin-{module}-{Room}</c>; <see cref="User"/> (an e-mail, the identity shared through the single
+/// sign-on) reaches only that user's sessions, through a room the socket service joins on its own.
+/// </remarks>
 public record PluginSocketEvent
 {
     public int TenantId { get; init; }
 
     public string Room { get; init; }
+
+    public string User { get; init; }
 
     public string Event { get; init; }
 

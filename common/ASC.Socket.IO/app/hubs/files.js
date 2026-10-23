@@ -102,6 +102,14 @@ module.exports = (io) => {
 
     logger.info(connectMessage);
 
+    // A room only the server puts a connection into: events addressed to one user (plugin modules today)
+    // go here. Clients cannot join it themselves - every subscribe path drops "private-" parts below.
+    if (session.user && !session.anonymous) {
+      const privateRoom = `${tenantId()}-private-${userId()}`;
+      logger.info(`client ${socket.id} join private room ${privateRoom}`);
+      socket.join(privateRoom);
+    }
+
     socket.on("disconnect", (reason) => {
       const disconnectMessage = !session.anonymous ? 
         `disconnect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}` :
@@ -156,8 +164,18 @@ module.exports = (io) => {
       socket.to(room).emit("storage-encryption");
     });
 
+    const isPrivateRoomPart = (part) => typeof part === "string" && /(^|-)private-/.test(part);
+
     function changeSubscription(roomParts, individual, changeFunc) {
       if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) {
+        roomParts = roomParts.filter((p) => !isPrivateRoomPart(p));
+        if (roomParts.length === 0) return;
+      } else if (isPrivateRoomPart(roomParts)) {
+        logger.warn(`client ${socket.id} tried to change a private room subscription: ${roomParts}`);
+        return;
+      }
 
       changeFunc(roomParts);
 
@@ -651,21 +669,28 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:form-suggested-questions", { attachmentId, questions });
   }
 
-  // Events pushed by integration plugins (PluginSocketEvent, forwarded by ASC.Web.Studio).
-  // tenantId is the one the sender was checked against. A plugin only reaches its own namespace:
-  // rooms "{tenantId}-plugin-{room}" (clients subscribe to "plugin-{room}") and events "plugin:{event}",
-  // so it can neither post into the product's rooms nor imitate the product's "s:*" events.
+  // Events pushed by integration modules (PluginSocketEvent, forwarded by ASC.Web.Studio). tenantId is the one
+  // the sender was checked against, module is the sender itself. A module only reaches its own namespace:
+  // events "plugin:{module}:{event}", rooms "{tenantId}-plugin-{module}-{room}" (clients subscribe to
+  // "plugin-{module}-{room}") or, addressed to one user, that user's private room.
   const pluginName = /^[A-Za-z0-9_.:-]{1,128}$/;
+  const pluginModule = /^[A-Za-z0-9_.-]{1,64}$/;
+  const guid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  function pluginEvent({ tenantId, room, event, message } = {}) {
-    if (!Number.isInteger(tenantId) || tenantId <= 0 || !pluginName.test(room ?? "") || !pluginName.test(event ?? "")) {
-      logger.warn(`plugin event skipped: tenantId=${tenantId}, room=${room}, event=${event}`);
+  function pluginEvent({ tenantId, module, room, userId, event, message } = {}) {
+    const valid =
+      Number.isInteger(tenantId) && tenantId > 0 &&
+      pluginModule.test(module ?? "") && pluginName.test(event ?? "") &&
+      (userId ? guid.test(userId) && !room : pluginName.test(room ?? ""));
+
+    if (!valid) {
+      logger.warn(`plugin event skipped: tenantId=${tenantId}, module=${module}, room=${room}, userId=${userId}, event=${event}`);
       return;
     }
 
-    const target = `${tenantId}-plugin-${room}`;
-    logger.info(`plugin event plugin:${event} in room ${target}`);
-    filesIO.to(target).emit(`plugin:${event}`, { message });
+    const target = userId ? `${tenantId}-private-${userId}` : `${tenantId}-plugin-${module}-${room}`;
+    logger.info(`plugin event plugin:${module}:${event} in room ${target}`);
+    filesIO.to(target).emit(`plugin:${module}:${event}`, { message });
   }
 
   return {
