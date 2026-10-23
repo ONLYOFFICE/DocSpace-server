@@ -86,6 +86,8 @@ public class TariffService(
     private const int ParticipantServiceLimitsPageSize = 100;
     private const int ParticipantServiceLimitsDefaultPageSize = 25;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _productPriceCacheDuration = TimeSpan.FromHours(1);
+    private static readonly TimeSpan _productPriceMemoryCacheDuration = TimeSpan.FromMinutes(5);
 
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
@@ -764,48 +766,60 @@ public class TariffService(
             return [];
         }
 
+        var ids = productIds.Distinct().ToList();
+
         if (billingClient.Configured)
         {
             try
             {
-                var key = $"billing-prices-{partnerId}-{wallet}-{string.Join(",", productIds)}";
-                var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
-                if (result == null)
+                var result = new Dictionary<string, Dictionary<string, decimal>>(ids.Count);
+                var missing = new List<string>();
+
+                // Every product is a key of its own, and a key missing from process memory is a Redis round trip,
+                // so the keys are read, and later written, all at once rather than one after another.
+                var cached = await Task.WhenAll(ids.Select(async productId =>
                 {
-                    if (wallet)
+                    var key = GetProductPriceCacheKey(partnerId, wallet, productId);
+                    var price = await hybridCache.TryGetAsync<Dictionary<string, decimal>>(key,
+                        SetProductPriceCacheOptions);
+
+                    return (ProductId: productId, Price: price);
+                }));
+
+                foreach (var (productId, price) in cached)
+                {
+                    if (price.HasValue)
                     {
-                        var accountingServices = new List<string>();
-                        var billingProducts = new List<string>();
-
-                        foreach (var productId in productIds)
-                        {
-                            // numeric → billing, non-numeric → accounting
-                            if (!int.TryParse(productId, out _))
-                            {
-                                accountingServices.Add(productId);
-                            }
-                            else
-                            {
-                                billingProducts.Add(productId);
-                            }
-                        }
-
-                        var accountingPrices = accountingServices.Count == 0 ? [] : await accountingClient.GetProductPriceInfoAsync(partnerId, accountingServices);
-                        var billingPrices = billingProducts.Count == 0 ? [] : await billingClient.GetProductPriceInfoAsync(partnerId, wallet, billingProducts);
-
-                        foreach (var billingPrice in billingPrices)
-                        {
-                            accountingPrices.Add(billingPrice.Key, billingPrice.Value);
-                        }
-
-                        result = accountingPrices;
+                        result.Add(productId, price.Value);
                     }
                     else
                     {
-                        result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
+                        missing.Add(productId);
+                    }
+                }
+
+                if (missing.Count > 0)
+                {
+                    var prices = await RequestProductPricesAsync(partnerId, wallet, missing);
+                    var writes = new List<Task>(missing.Count);
+
+                    foreach (var productId in missing)
+                    {
+                        if (prices.TryGetValue(productId, out var price))
+                        {
+                            result.Add(productId, price);
+                            var key = GetProductPriceCacheKey(partnerId, wallet, productId);
+                            writes.Add(hybridCache.SetAsync(key, price, SetProductPriceCacheOptions).AsTask());
+                        }
+                        else
+                        {
+                            // The payment service of this product failed: it goes without a price this time and is
+                            // not cached, so the next request asks for it again.
+                            result.Add(productId, []);
+                        }
                     }
 
-                    cache.Insert(key, result, DateTime.Now.AddHours(1));
+                    await Task.WhenAll(writes);
                 }
 
                 return result;
@@ -816,7 +830,92 @@ public class TariffService(
             }
         }
 
-        return productIds.ToDictionary(p => p, p => new Dictionary<string, decimal>());
+        return ids.ToDictionary(p => p, _ => new Dictionary<string, decimal>());
+    }
+
+    // The payment services price a whole list in one request, so the products missing from the cache are asked
+    // for together: numeric ids are billing products, the other wallet ids are accounting services.
+    // The answer holds every product of a service that answered; the products of a failed service are left out.
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestProductPricesAsync(string partnerId,
+        bool wallet, List<string> productIds)
+    {
+        if (!wallet)
+        {
+            return await RequestServicePricesAsync(productIds,
+                ids => billingClient.GetProductPriceInfoAsync(partnerId, false, ids));
+        }
+
+        var accountingServices = new List<string>();
+        var billingProducts = new List<string>();
+
+        foreach (var productId in productIds)
+        {
+            if (int.TryParse(productId, out _))
+            {
+                billingProducts.Add(productId);
+            }
+            else
+            {
+                accountingServices.Add(productId);
+            }
+        }
+
+        // The two services do not depend on each other, so they are asked at the same time.
+        var accountingTask = RequestServicePricesAsync(accountingServices, accountingClient.GetProductPriceInfoAsync);
+        var billingTask = RequestServicePricesAsync(billingProducts,
+            ids => billingClient.GetProductPriceInfoAsync(partnerId, true, ids));
+
+        await Task.WhenAll(accountingTask, billingTask);
+
+        var result = await accountingTask;
+        var billingPrices = await billingTask;
+
+        foreach (var (productId, prices) in billingPrices)
+        {
+            result[productId] = prices;
+        }
+
+        return result;
+    }
+
+    // One payment service failing must not cost the products of the other one, or those already cached, their
+    // prices: the failure is logged and its products are left out of the answer.
+    private async Task<Dictionary<string, Dictionary<string, decimal>>> RequestServicePricesAsync(
+        List<string> productIds, Func<List<string>, Task<Dictionary<string, Dictionary<string, decimal>>>> request)
+    {
+        if (productIds.Count == 0)
+        {
+            return [];
+        }
+
+        try
+        {
+            var prices = await request(productIds);
+
+            // A product the service has no price for is answered as empty, so it is cached too and not asked for again.
+            return productIds.ToDictionary(productId => productId, productId => prices.GetValueOrDefault(productId) ?? []);
+        }
+        catch (Exception error)
+        {
+            LogError(error);
+
+            return [];
+        }
+    }
+
+    // A price lives an hour in Redis but only minutes in process memory, so a price key deleted in Redis reaches
+    // every service without a restart. Reads pass the same options: a value read from Redis with the defaults
+    // would be copied into memory for the whole hour.
+    private static void SetProductPriceCacheOptions(FusionCacheEntryOptions options)
+    {
+        options.SetDuration(_productPriceCacheDuration).SetMemoryCacheDuration(_productPriceMemoryCacheDuration);
+    }
+
+    // Prices depend on the partner and the payment system, not on the portal: the key carries no tenant id,
+    // and one entry serves every portal of the partner.
+    private static string GetProductPriceCacheKey(string partnerId, bool wallet, string productId)
+    {
+        return $"billing-product-price-{partnerId}-{wallet}-{productId}";
     }
 
     public async Task<Uri> GetAccountLinkAsync(int tenant, string backUrl)

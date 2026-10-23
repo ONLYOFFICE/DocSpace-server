@@ -36,7 +36,14 @@ namespace ASC.Core.Billing;
 [Scope]
 public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
-    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
+    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromHours(1);
+
+    // Prices are kept in Redis; the copy in process memory lives shorter, so a price key deleted in Redis
+    // reaches every service within this time, without a restart.
+    private static readonly TimeSpan _priceMemoryCacheDuration = TimeSpan.FromMinutes(5);
+    private const string ApprovedServiceStatus = "Approved";
+    private const string DefaultCurrencyCode = "USD";
+    private const int ServicePageSize = 100;
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
@@ -153,13 +160,6 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return configuration.Value.Currencies;
     }
 
-    public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.GetServiceInfoAsync(serviceName);
-    }
-
     /// <summary>
     /// Returns the prices of the service. The accounting service addresses prices by service ID, so the name is
     /// resolved first; the result is not tenant-specific and is cached for all portals.
@@ -177,7 +177,7 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             }
 
             return await accountingApi.GetServicePricesAsync(serviceInfo.Id, active);
-        }, opt => opt.SetDuration(_servicePricesCacheDuration));
+        }, opt => opt.SetDuration(_servicePricesCacheDuration).SetMemoryCacheDuration(_priceMemoryCacheDuration));
     }
 
     public async Task<ServiceLimit> GetServiceLimitAsync(int id)
@@ -288,39 +288,35 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return $"accounting-service-prices-{serviceName}-{active}";
     }
 
-    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
+    /// <summary>
+    /// Returns the unit price of each named service in the currency of the service, as service name to currency code
+    /// to price; a service that is not among the approved ones is left out. All the names go in one request (one per
+    /// page of the answer). Not cached here: the caller caches the price of every service on its own.
+    /// </summary>
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(List<string> serviceNames)
     {
-        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
-        var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+        EnsureConfigured();
 
-        if (result != null)
+        var result = new Dictionary<string, Dictionary<string, decimal>>();
+
+        if (serviceNames.Count == 0)
         {
             return result;
         }
 
-        var currencies = await GetAllCurrenciesAsync();
+        var requested = serviceNames.ToHashSet();
 
-        var serviceInfos = await Task.WhenAll(serviceNames.Select(GetServiceInfoAsync));
-
-        result = [];
-        for (var i = 0; i < serviceNames.Count; i++)
+        await foreach (var page in accountingApi.GetServicePages(ApprovedServiceStatus, requested, ServicePageSize).AsPages())
         {
-            var serviceInfo = serviceInfos[i];
-            if (serviceInfo == null)
+            // An accounting service that does not filter by names yet answers with every approved service.
+            foreach (var service in (page.Collection ?? []).Where(s => requested.Contains(s.Name)))
             {
-                continue;
+                result[service.Name] = new Dictionary<string, decimal>
+                {
+                    { service.Currency?.Code ?? DefaultCurrencyCode, service.PriceValue }
+                };
             }
-
-            var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
-            var currencyCode = currency?.Code ?? "USD";
-
-            result.Add(serviceNames[i], new Dictionary<string, decimal>
-            {
-                { currencyCode, serviceInfo.PriceValue }
-            });
         }
-
-        cache.Insert(key, result, DateTime.Now.AddDays(1));
 
         return result;
     }
@@ -736,6 +732,11 @@ public class ServiceInfo
     public int CurrencyId { get; init; }
 
     /// <summary>
+    /// The currency of the price value.
+    /// </summary>
+    public Currency Currency { get; init; }
+
+    /// <summary>
     /// The name.
     /// </summary>
     public string Name { get; init; }
@@ -1048,6 +1049,13 @@ public class CustomerServiceUsage : CurrencyTotalAmount
 /// Represents a paged report of customer service usage statistics.
 /// </summary>
 public class UsageReport : BaseReport<CustomerServiceUsage>
+{
+}
+
+/// <summary>
+/// Represents a page of the accounting service catalog.
+/// </summary>
+public class ServiceReport : BaseReport<ServiceInfo>
 {
 }
 
