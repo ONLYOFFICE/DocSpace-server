@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
 /// A deletion event describes the user or group as it was right before it went: the payload is built
-/// before the delete (UserWebhookManager.PrepareAsync) and sent after it, so what the delete clears — group
+/// before the delete (UserWebhookManager.PublishAfterAsync) and sent after it, so what the delete clears — group
 /// memberships, the member list — is still in it.
 /// </summary>
 [Trait("Category", "Settings")]

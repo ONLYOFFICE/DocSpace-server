@@ -247,35 +247,34 @@ public class ReassignProgressItem : DistributedTaskProgress
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await userManager.GetUserGroupsAsync(user.Id);
 
-        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
-
-        await userPhotoManager.RemovePhotoAsync(user.Id);
-        await userManager.DeleteUserAsync(user.Id);
-
-        if (isGuest)
+        await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
         {
-            await socketManager.DeleteGuestAsync(user.Id);
-        }
-        else
-        {
-            await socketManager.DeleteUserAsync(user.Id);
-            foreach (var group in groups)
+            await userPhotoManager.RemovePhotoAsync(user.Id);
+            await userManager.DeleteUserAsync(user.Id);
+
+            if (isGuest)
             {
-                var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
-                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-                await socketManager.UpdateGroupAsync(groupDto);
+                await socketManager.DeleteGuestAsync(user.Id);
             }
-        }
-        if (_httpHeaders != null)
-        {
-            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
-        }
-        else
-        {
-            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
-        }
-
-        await publishWebhook();
+            else
+            {
+                await socketManager.DeleteUserAsync(user.Id);
+                foreach (var group in groups)
+                {
+                    var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                    var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                    await socketManager.UpdateGroupAsync(groupDto);
+                }
+            }
+            if (_httpHeaders != null)
+            {
+                messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            }
+            else
+            {
+                messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            }
+        });
     }
 }
 

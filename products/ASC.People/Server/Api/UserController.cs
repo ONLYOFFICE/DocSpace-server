@@ -788,36 +788,35 @@ public class UserController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
-        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
-
-        if (!isGuest)
+        await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
         {
-            await client.DeleteClientsAsync(user.Id);
-        }
-
-        await _userPhotoManager.RemovePhotoAsync(user.Id);
-        await _userManager.DeleteUserAsync(user.Id);
-        await fileSecurity.RemoveSubjectAsync(user.Id, true);
-        var tenant = tenantManager.GetCurrentTenant();
-        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
-
-        messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
-        if (isGuest)
-        {
-            await socketManager.DeleteGuestAsync(user.Id);
-        }
-        else
-        {
-            await socketManager.DeleteUserAsync(user.Id);
-            foreach (var group in groups)
+            if (!isGuest)
             {
-                var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
-                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-                await socketManager.UpdateGroupAsync(groupDto);
+                await client.DeleteClientsAsync(user.Id);
             }
-        }
 
-        await publishWebhook();
+            await _userPhotoManager.RemovePhotoAsync(user.Id);
+            await _userManager.DeleteUserAsync(user.Id);
+            await fileSecurity.RemoveSubjectAsync(user.Id, true);
+            var tenant = tenantManager.GetCurrentTenant();
+            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
+            if (isGuest)
+            {
+                await socketManager.DeleteGuestAsync(user.Id);
+            }
+            else
+            {
+                await socketManager.DeleteUserAsync(user.Id);
+                foreach (var group in groups)
+                {
+                    var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
+                    var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                    await socketManager.UpdateGroupAsync(groupDto);
+                }
+            }
+        });
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1600,19 +1599,18 @@ public class UserController(
 
             var isGuest = userType == EmployeeType.Guest;
 
-            var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
-
-            if (!isGuest)
+            await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
             {
-                await client.DeleteClientsAsync(user.Id);
-            }
+                if (!isGuest)
+                {
+                    await client.DeleteClientsAsync(user.Id);
+                }
 
-            await _userPhotoManager.RemovePhotoAsync(user.Id);
-            await _userManager.DeleteUserAsync(user.Id);
-            await fileSecurity.RemoveSubjectAsync(user.Id, true);
-            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
-
-            await publishWebhook();
+                await _userPhotoManager.RemovePhotoAsync(user.Id);
+                await _userManager.DeleteUserAsync(user.Id);
+                await fileSecurity.RemoveSubjectAsync(user.Id, true);
+                await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+            });
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);

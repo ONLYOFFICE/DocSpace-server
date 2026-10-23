@@ -57,7 +57,25 @@ public class UserWebhookManager(
         await publish();
     }
 
-    public async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, UserInfo userInfo)
+    public async Task PublishAfterAsync(WebhookTrigger trigger, UserInfo userInfo, Func<Task> action)
+    {
+        var publish = await PrepareAsync(trigger, userInfo);
+
+        await action();
+
+        await publish();
+    }
+
+    public async Task PublishAfterAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo, Func<Task> action)
+    {
+        var publish = await PrepareAsync(trigger, groupInfo);
+
+        await action();
+
+        await publish();
+    }
+
+    private async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
         var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookUserAccessChecker, userInfo);
 
@@ -86,7 +104,7 @@ public class UserWebhookManager(
         };
     }
 
-    public async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
+    private async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
         var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookGroupAccessChecker, groupInfo);
 

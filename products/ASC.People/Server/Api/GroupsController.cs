@@ -311,16 +311,15 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.GroupDeleted, group);
+        await webhookManager.PublishAfterAsync(WebhookTrigger.GroupDeleted, group, async () =>
+        {
+            await userManager.DeleteGroupAsync(inDto.Id);
+            await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
-        await userManager.DeleteGroupAsync(inDto.Id);
-        await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
+            messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
 
-        messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
-
-        await socketManager.DeleteGroupAsync(inDto.Id);
-
-        await publishWebhook();
+            await socketManager.DeleteGroupAsync(inDto.Id);
+        });
 
         return NoContent();
     }
