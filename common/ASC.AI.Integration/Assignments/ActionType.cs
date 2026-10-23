@@ -57,5 +57,6 @@ public enum ActionType
     ImageGeneration,
     OCR,
     Vision,
-    FormAnalysis
+    FormAnalysis,
+    GenerateMeta
 }
