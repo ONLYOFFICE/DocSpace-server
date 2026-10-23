@@ -1082,7 +1082,7 @@ public class PaymentController(
             return null;
         }
 
-        return depositDtoMapper.Map(report);
+        return depositDtoMapper.Map(report, filter);
     }
 
     /// <remarks>

@@ -60,14 +60,14 @@ public class DepositReportDto
     /// asked for.
     /// </summary>
     /// <example>0</example>
-    public int Offset { get; init; }
+    public int Offset { get; set; }
 
     /// <summary>
     /// How many top-ups one page may hold, echoed from the request; it is 25 unless another value was asked for. A
     /// full page is not proof that more exist - compare `currentPage` with `totalPage`.
     /// </summary>
     /// <example>25</example>
-    public int Limit { get; init; }
+    public int Limit { get; set; }
 
     /// <summary>
     /// How many top-ups match the filters in total, across every page.
@@ -142,7 +142,22 @@ public class DepositDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public partial class DepositDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
-    public partial DepositReportDto Map(DepositReport source);
+    public DepositReportDto Map(DepositReport source, DepositFilter filter)
+    {
+        var result = Map(source);
+
+        // The accounting service answers a filter nothing matches with a zero window, so the window asked for is
+        // echoed instead; a page with items keeps the one the accounting service applied.
+        if (result.TotalQuantity == 0)
+        {
+            result.Offset = filter.Offset ?? 0;
+            result.Limit = filter.Limit ?? 0;
+        }
+
+        return result;
+    }
+
+    private partial DepositReportDto Map(DepositReport source);
 
     [MapProperty(nameof(Deposit.Sum), nameof(DepositDto.Amount))]
     private partial DepositDto Map(Deposit source);
