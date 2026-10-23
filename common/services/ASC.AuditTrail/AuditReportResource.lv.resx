@@ -1299,4 +1299,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Metadatu vērtības atjauninātas: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Failu atvēra Document Builder skripts: {0}</value>
+  </data>
 </root>

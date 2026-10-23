@@ -1299,4 +1299,7 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI aracısının MCP sunucusu {0} güncellendi</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Dosya Document Builder Komut Dosyası Tarafından Açıldı: {0}</value>
+  </data>
 </root>
