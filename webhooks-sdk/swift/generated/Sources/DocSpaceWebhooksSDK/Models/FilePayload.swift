@@ -7,53 +7,71 @@
 
 import Foundation
 
-/** ASC.Files/Core/ApiModels/WebhookDto/FileWebhookDto.cs. A copy of the REST FileDto. Sent by every file.* trigger and by form.filled.out and form.stopped.  Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not - dimensions in particular opens the file stream to measure the image.  */
+/** The file carried by a file.* webhook, and by form.filled.out and form.stopped.  A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in particular opens the file stream to measure the image. */
 public struct FilePayload: Sendable, Codable, Hashable {
 
     public var id: EntryId?
     public var parentId: EntryId?
     public var rootFolderId: EntryId?
+    /** The file entry title. */
     public var title: String?
-    /** 1 folder, 2 file. Present on every entry payload. */
+    /** The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     public var fileEntryType: Int?
+    /** The UTC date when the file entry was created. */
     public var created: Date?
     public var createdBy: UserSummaryPayload?
+    /** The UTC date when the file entry was last updated. */
     public var updated: Date?
     public var updatedBy: UserSummaryPayload?
-    /** enum FolderType */
+    /** The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var rootFolderType: Int?
-    /** enum FolderType */
+    /** The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var parentRoomType: Int?
     public var originId: EntryId?
     public var originRoomId: EntryId?
+    /** The origin title of the file entry. */
     public var originTitle: String?
+    /** The origin room title of the file entry. */
     public var originRoomTitle: String?
+    /** Specifies whether the file entry is backed by a third-party provider or not. */
     public var providerItem: Bool?
+    /** The third-party provider key of the file entry. */
     public var providerKey: String?
+    /** The third-party provider ID of the file entry. */
     public var providerId: Int?
-    /** Position within an indexed room. */
+    /** The position of the file entry within an indexed room. */
     public var order: Int?
+    /** The file version. */
     public var version: Int?
+    /** The version group of the file. */
     public var versionGroup: Int?
-    /** Bytes, as a number. The REST DTO sends a formatted string. */
+    /** The file size in bytes, as a number; the REST FileDto sends a formatted string instead. */
     public var contentLength: Int64?
-    /** enum FileType */
+    /** The file type. Values of `FileType`: 0 = Unknown, 1 = Archive, 2 = Video, 3 = Audio, 4 = Image, 5 = Spreadsheet, 6 = Presentation, 7 = Document, 10 = Pdf, 11 = Diagram. */
     public var fileType: Int?
-    /** Includes the leading dot, e.g. \".docx\". */
+    /** The file extension, including the leading dot. */
     public var fileExst: String?
+    /** The comment on the current file version. */
     public var comment: String?
-    /** Download URL. Carries no share token. */
+    /** The URL the file content can be downloaded from. Carries no share token. */
     public var viewUrl: String?
-    /** Browser URL. Carries no share token. */
+    /** The URL the file can be opened at in a browser. Carries no share token. */
     public var webUrl: String?
+    /** Specifies whether the file is encrypted or not. */
     public var encrypted: Bool?
+    /** Specifies whether the file is locked or not. */
     public var locked: Bool?
+    /** The user name of whoever locked the file. */
     public var lockedBy: String?
+    /** Specifies whether the file is a form or not. */
     public var isForm: Bool?
+    /** Specifies whether a custom filter is enabled for the file or not. */
     public var customFilterEnabled: Bool?
+    /** The user name of whoever enabled the custom filter. */
     public var customFilterEnabledBy: String?
+    /** The UTC date when the file was last opened. */
     public var lastOpened: Date?
-    /** enum VectorizationStatus */
+    /** The AI vectorization status of the file. Values of `VectorizationStatus`: 0 = InProgress, 1 = Completed, 2 = Failed. */
     public var vectorizationStatus: Int?
 
     public init(id: EntryId? = nil, parentId: EntryId? = nil, rootFolderId: EntryId? = nil, title: String? = nil, fileEntryType: Int? = nil, created: Date? = nil, createdBy: UserSummaryPayload? = nil, updated: Date? = nil, updatedBy: UserSummaryPayload? = nil, rootFolderType: Int? = nil, parentRoomType: Int? = nil, originId: EntryId? = nil, originRoomId: EntryId? = nil, originTitle: String? = nil, originRoomTitle: String? = nil, providerItem: Bool? = nil, providerKey: String? = nil, providerId: Int? = nil, order: Int? = nil, version: Int? = nil, versionGroup: Int? = nil, contentLength: Int64? = nil, fileType: Int? = nil, fileExst: String? = nil, comment: String? = nil, viewUrl: String? = nil, webUrl: String? = nil, encrypted: Bool? = nil, locked: Bool? = nil, lockedBy: String? = nil, isForm: Bool? = nil, customFilterEnabled: Bool? = nil, customFilterEnabledBy: String? = nil, lastOpened: Date? = nil, vectorizationStatus: Int? = nil) {

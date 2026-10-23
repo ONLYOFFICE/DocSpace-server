@@ -109,7 +109,7 @@ it has nothing to render and is not used here.
 `generated/triggers.ts` is derived from the contract's
 `x-docspace-trigger-payloads` block, never hand-written: 37 triggers × 9
 languages is exactly the list that rots silently. Add a trigger to
-`WebhookTrigger.cs` and the contract, regenerate, and it propagates.
+`WebhookTrigger.cs`, regenerate the contract and the SDKs, and it propagates.
 
 Nine targets: `csharp go java kotlin php python ruby swift typescript`.
 
@@ -143,8 +143,12 @@ the package name lives in the hand-written `typescript/package.json` instead.
 
 The contract lives with the server code that defines it, not here:
 [`common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`](../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml).
-It sits next to `WebhookTrigger.cs` and `WebhookPayload.cs` so that a change to
-either shows up in the same review as the contract change it implies.
+It is generated from the code by `common/Tools/ASC.Webhooks.Contract` (the
+payload DTOs, the envelope, `WebhookTrigger` and their XML docs), with the
+hand-written `docspace-webhooks.header.yaml` next to it merged in for what the
+code cannot say. Never edit the YAML itself: change the code or the header and
+run `dotnet run --project common/Tools/ASC.Webhooks.Contract` (`-- --check`
+only reports whether the committed file is out of date).
 
 ## Regenerating
 
@@ -200,10 +204,10 @@ Each trigger carries a DTO that belongs to the webhook contract:
 | `room.*`, `agent.*` | `RoomPayload` | `RoomWebhookDto<T>` |
 | `form.submit` | `FormSubmitPayload` | `FormSubmitWebhookDto<T>` |
 
-The pairing above is declared in code — `[WebhookPayload(WebhookPayloadKind.File)]` sits on the
-`WebhookTrigger` field *and* on the DTO — so this table and the
-`x-docspace-trigger-payloads` block of the contract are both mirrors of the source,
-kept honest by `WebhookPayloadPairingTests`.
+The pairing above is declared once, in the trigger table of
+`common/Tools/ASC.Webhooks.Contract` (`WebhookContractGenerator`), which writes it into the
+`x-docspace-trigger-payloads` block of the contract. A trigger whose family the table does
+not know stops the generator.
 
 ## Receiving: the parts a runtime has to get right
 

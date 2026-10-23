@@ -40,8 +40,9 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 /// A copy of FileEntryDto, deliberately not derived from it, and populated straight from the domain entity
 /// rather than through FileEntryDtoHelper. Three groups of the REST fields are not carried:
 /// <list type="bullet">
-/// <item>caller-relative state - access, security, availableShareRights, shareSettings, canShare, shared,
-/// sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external. A delivery has no caller;
+/// <item>caller-relative state - access, security, securityByUsers, availableShareRights, shareSettings, canShare,
+/// shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. A delivery
+/// has no caller;
 /// who may receive it is already decided by WebhookFileEntryAccessChecker against the subscription owner, and
 /// putting one user's permission matrix on the wire would be both meaningless and a disclosure.</item>
 /// <item>anything the REST helper pays for per request - thumbnails, image dimensions (it opens the file
@@ -78,7 +79,7 @@ public abstract class FileEntryWebhookDto<T>
     public string Title { get; set; }
 
     /// <summary>
-    /// The file entry type: 1 for a folder, 2 for a file.
+    /// The file entry type: 1 for a folder, 2 for a file. Present on every entry payload.
     /// </summary>
     /// <example>2</example>
     public abstract FileEntryType FileEntryType { get; }

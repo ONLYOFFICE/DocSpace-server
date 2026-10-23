@@ -1,6 +1,6 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
  * The version of the OpenAPI document: 1.0.0
  * 
@@ -54,7 +54,7 @@ import java.util.Set;
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
 /**
- * ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes. 
+ * The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader&#39;s role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes.
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class UserPayload {
@@ -252,7 +252,7 @@ public class UserPayload {
   }
 
   /**
-   * Get id
+   * The user ID.
    * @return id
    */
   @javax.annotation.Nullable
@@ -271,7 +271,7 @@ public class UserPayload {
   }
 
   /**
-   * Get displayName
+   * The HTML-encoded user display name formatted according to the portal default format.
    * @return displayName
    */
   @javax.annotation.Nullable
@@ -290,7 +290,7 @@ public class UserPayload {
   }
 
   /**
-   * Get firstName
+   * The user first name.
    * @return firstName
    */
   @javax.annotation.Nullable
@@ -309,7 +309,7 @@ public class UserPayload {
   }
 
   /**
-   * Get lastName
+   * The user last name.
    * @return lastName
    */
   @javax.annotation.Nullable
@@ -328,7 +328,7 @@ public class UserPayload {
   }
 
   /**
-   * Get userName
+   * The user name.
    * @return userName
    */
   @javax.annotation.Nullable
@@ -347,7 +347,7 @@ public class UserPayload {
   }
 
   /**
-   * Get email
+   * The user email address.
    * @return email
    */
   @javax.annotation.Nullable
@@ -374,7 +374,7 @@ public class UserPayload {
   }
 
   /**
-   * Get contacts
+   * The list of user contacts.
    * @return contacts
    */
   @javax.annotation.Nullable
@@ -393,7 +393,7 @@ public class UserPayload {
   }
 
   /**
-   * enum EmployeeStatus
+   * The user status. Flags of &#x60;EmployeeStatus&#x60;: 1 &#x3D; Active, 2 &#x3D; Terminated, 4 &#x3D; Pending, 5 &#x3D; Default, 7 &#x3D; All.
    * @return status
    */
   @javax.annotation.Nullable
@@ -412,7 +412,7 @@ public class UserPayload {
   }
 
   /**
-   * enum EmployeeActivationStatus (flags), AutoGenerated masked off
+   * The user activation status, with the &#x60;AutoGenerated&#x60; flag masked off. Flags of &#x60;EmployeeActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated, 2 &#x3D; Pending, 4 &#x3D; AutoGenerated.
    * @return activationStatus
    */
   @javax.annotation.Nullable
@@ -431,7 +431,7 @@ public class UserPayload {
   }
 
   /**
-   * Get terminated
+   * The UTC date when the user was terminated.
    * @return terminated
    */
   @javax.annotation.Nullable
@@ -450,7 +450,7 @@ public class UserPayload {
   }
 
   /**
-   * Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
+   * The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.
    * @return department
    */
   @javax.annotation.Nullable
@@ -477,7 +477,7 @@ public class UserPayload {
   }
 
   /**
-   * Get groups
+   * The list of groups the user belongs to. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.
    * @return groups
    */
   @javax.annotation.Nullable
@@ -496,7 +496,7 @@ public class UserPayload {
   }
 
   /**
-   * Get location
+   * The user location.
    * @return location
    */
   @javax.annotation.Nullable
@@ -515,7 +515,7 @@ public class UserPayload {
   }
 
   /**
-   * Get notes
+   * The user notes.
    * @return notes
    */
   @javax.annotation.Nullable
@@ -534,7 +534,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isAdmin
+   * Specifies whether the user is a DocSpace administrator or not.
    * @return isAdmin
    */
   @javax.annotation.Nullable
@@ -553,7 +553,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isRoomAdmin
+   * Specifies whether the user is a room administrator or not.
    * @return isRoomAdmin
    */
   @javax.annotation.Nullable
@@ -572,7 +572,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isOwner
+   * Specifies whether the user is the portal owner or not.
    * @return isOwner
    */
   @javax.annotation.Nullable
@@ -591,7 +591,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isVisitor
+   * Specifies whether the user is a guest or not.
    * @return isVisitor
    */
   @javax.annotation.Nullable
@@ -610,7 +610,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isCollaborator
+   * Specifies whether the user is a user with limited rights or not.
    * @return isCollaborator
    */
   @javax.annotation.Nullable
@@ -629,7 +629,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isLDAP
+   * Specifies whether the user comes from LDAP or not.
    * @return isLDAP
    */
   @javax.annotation.Nullable
@@ -648,7 +648,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isSSO
+   * Specifies whether the user comes from SSO or not.
    * @return isSSO
    */
   @javax.annotation.Nullable
@@ -675,7 +675,7 @@ public class UserPayload {
   }
 
   /**
-   * Get listAdminModules
+   * The list of the modules the user administers.
    * @return listAdminModules
    */
   @javax.annotation.Nullable
@@ -694,7 +694,7 @@ public class UserPayload {
   }
 
   /**
-   * Get cultureName
+   * The user culture code.
    * @return cultureName
    */
   @javax.annotation.Nullable
@@ -713,7 +713,7 @@ public class UserPayload {
   }
 
   /**
-   * Get mobilePhone
+   * The user mobile phone number.
    * @return mobilePhone
    */
   @javax.annotation.Nullable
@@ -732,7 +732,7 @@ public class UserPayload {
   }
 
   /**
-   * enum MobilePhoneActivationStatus
+   * The mobile phone activation status. Flags of &#x60;MobilePhoneActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated.
    * @return mobilePhoneActivationStatus
    */
   @javax.annotation.Nullable
@@ -751,7 +751,7 @@ public class UserPayload {
   }
 
   /**
-   * Get quotaLimit
+   * The user quota limit in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
    * @return quotaLimit
    */
   @javax.annotation.Nullable
@@ -770,7 +770,7 @@ public class UserPayload {
   }
 
   /**
-   * Get usedSpace
+   * The portal space used by the user in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
    * @return usedSpace
    */
   @javax.annotation.Nullable
@@ -789,7 +789,7 @@ public class UserPayload {
   }
 
   /**
-   * Get isCustomQuota
+   * Specifies whether the user has a custom quota or not. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
    * @return isCustomQuota
    */
   @javax.annotation.Nullable
@@ -827,7 +827,7 @@ public class UserPayload {
   }
 
   /**
-   * Get registrationDate
+   * The UTC date when the user was registered.
    * @return registrationDate
    */
   @javax.annotation.Nullable
@@ -846,7 +846,7 @@ public class UserPayload {
   }
 
   /**
-   * Get hasAvatar
+   * Specifies whether the user has an avatar or not.
    * @return hasAvatar
    */
   @javax.annotation.Nullable
@@ -865,7 +865,7 @@ public class UserPayload {
   }
 
   /**
-   * Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
+   * The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
    * @return avatar
    */
   @javax.annotation.Nullable
@@ -884,7 +884,7 @@ public class UserPayload {
   }
 
   /**
-   * Absolute URL of the original avatar, with the same hash parameter.
+   * The absolute URL of the original avatar, with the same hash parameter.
    * @return avatarOriginal
    */
   @javax.annotation.Nullable
@@ -903,7 +903,7 @@ public class UserPayload {
   }
 
   /**
-   * Absolute URL of the 200x200 avatar, with the same hash parameter.
+   * The absolute URL of the 200x200 avatar, with the same hash parameter.
    * @return avatarMax
    */
   @javax.annotation.Nullable
@@ -922,7 +922,7 @@ public class UserPayload {
   }
 
   /**
-   * Absolute URL of the 48x48 avatar, with the same hash parameter.
+   * The absolute URL of the 48x48 avatar, with the same hash parameter.
    * @return avatarMedium
    */
   @javax.annotation.Nullable
@@ -941,7 +941,7 @@ public class UserPayload {
   }
 
   /**
-   * Absolute URL of the 32x32 avatar, with the same hash parameter.
+   * The absolute URL of the 32x32 avatar, with the same hash parameter.
    * @return avatarSmall
    */
   @javax.annotation.Nullable
@@ -960,7 +960,7 @@ public class UserPayload {
   }
 
   /**
-   * Get profileUrl
+   * The user profile URL.
    * @return profileUrl
    */
   @javax.annotation.Nullable

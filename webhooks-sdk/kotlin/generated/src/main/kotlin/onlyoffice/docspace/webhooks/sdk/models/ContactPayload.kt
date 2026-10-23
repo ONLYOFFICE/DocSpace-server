@@ -28,18 +28,20 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * 
+ * A user contact.
  *
- * @param type 
- * @param `value` 
+ * @param type The contact type.
+ * @param `value` The contact value.
  */
 
 
 data class ContactPayload (
 
+    /* The contact type. */
     @Json(name = "type")
     val type: kotlin.String? = null,
 
+    /* The contact value. */
     @Json(name = "value")
     val `value`: kotlin.String? = null
 

@@ -1,7 +1,7 @@
 
 # UserPayload
 
-ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
+The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader\'s role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. `contacts` appears once, as a typed list, rather than twice in two shapes.
 
 ## Properties
 

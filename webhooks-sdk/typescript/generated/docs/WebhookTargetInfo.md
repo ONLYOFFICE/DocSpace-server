@@ -1,7 +1,7 @@
 
 # WebhookTargetInfo
 
-Present only when the subscription is scoped to one entity.
+The entity the subscription is scoped to. Present only when the subscription is scoped to one entity.
 
 ## Properties
 

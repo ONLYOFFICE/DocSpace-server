@@ -6,16 +6,16 @@ The subscription, plus its delivery state at send time.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **int** |  | [optional] 
-**name** | **str** |  | [optional] 
-**url** | **str** |  | [optional] 
-**triggers** | **List[str]** | Subscribed events, or [\&quot;*\&quot;] for the catch-all. | [optional] 
+**id** | **int** | The subscription ID. | [optional] 
+**name** | **str** | The subscription name given by its creator. | [optional] 
+**url** | **str** | The URL the delivery is posted to. | [optional] 
+**triggers** | **List[str]** | The subscribed events, or [\&quot;*\&quot;] for the catch-all. | [optional] 
 **target** | [**WebhookTargetInfo**](WebhookTargetInfo.md) |  | [optional] 
-**last_failure_on** | **datetime** |  | [optional] 
-**last_failure_content** | **str** |  | [optional] 
-**last_success_on** | **datetime** |  | [optional] 
-**retry_count** | **int** | Omitted on the first attempt (0). Present from attempt 2. | [optional] 
-**retry_on** | **datetime** |  | [optional] 
+**last_failure_on** | **datetime** | When the last delivery to this subscription failed, in UTC; absent when none has failed. | [optional] 
+**last_failure_content** | **str** | What the receiver answered, or the network error, when the last delivery to this subscription failed. | [optional] 
+**last_success_on** | **datetime** | When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet. | [optional] 
+**retry_count** | **int** | How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2. | [optional] 
+**retry_on** | **datetime** | When the next retry is scheduled, in UTC; absent when no retry is pending. | [optional] 
 
 ## Example
 

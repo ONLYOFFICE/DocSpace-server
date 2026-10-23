@@ -1,7 +1,7 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://github.com/openapitools/openapi-generator.git
@@ -27,7 +27,7 @@ using OpenAPIDateConverter = DocSpace.Webhooks.SDK.Client.OpenAPIDateConverter;
 namespace DocSpace.Webhooks.SDK.Model
 {
     /// <summary>
-    /// ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes. 
+    /// The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader&#39;s role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes.
     /// </summary>
     [DataContract(Name = "UserPayload")]
     public partial class UserPayload : IValidatableObject
@@ -35,43 +35,43 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="UserPayload" /> class.
         /// </summary>
-        /// <param name="id">id.</param>
-        /// <param name="displayName">displayName.</param>
-        /// <param name="firstName">firstName.</param>
-        /// <param name="lastName">lastName.</param>
-        /// <param name="userName">userName.</param>
-        /// <param name="email">email.</param>
-        /// <param name="contacts">contacts.</param>
-        /// <param name="status">enum EmployeeStatus.</param>
-        /// <param name="activationStatus">enum EmployeeActivationStatus (flags), AutoGenerated masked off.</param>
-        /// <param name="terminated">terminated.</param>
-        /// <param name="department">Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded)..</param>
-        /// <param name="groups">groups.</param>
-        /// <param name="location">location.</param>
-        /// <param name="notes">notes.</param>
-        /// <param name="isAdmin">isAdmin.</param>
-        /// <param name="isRoomAdmin">isRoomAdmin.</param>
-        /// <param name="isOwner">isOwner.</param>
-        /// <param name="isVisitor">isVisitor.</param>
-        /// <param name="isCollaborator">isCollaborator.</param>
-        /// <param name="isLDAP">isLDAP.</param>
-        /// <param name="isSSO">isSSO.</param>
-        /// <param name="listAdminModules">listAdminModules.</param>
-        /// <param name="cultureName">cultureName.</param>
-        /// <param name="mobilePhone">mobilePhone.</param>
-        /// <param name="mobilePhoneActivationStatus">enum MobilePhoneActivationStatus.</param>
-        /// <param name="quotaLimit">quotaLimit.</param>
-        /// <param name="usedSpace">usedSpace.</param>
-        /// <param name="isCustomQuota">isCustomQuota.</param>
+        /// <param name="id">The user ID..</param>
+        /// <param name="displayName">The HTML-encoded user display name formatted according to the portal default format..</param>
+        /// <param name="firstName">The user first name..</param>
+        /// <param name="lastName">The user last name..</param>
+        /// <param name="userName">The user name..</param>
+        /// <param name="email">The user email address..</param>
+        /// <param name="contacts">The list of user contacts..</param>
+        /// <param name="status">The user status. Flags of &#x60;EmployeeStatus&#x60;: 1 &#x3D; Active, 2 &#x3D; Terminated, 4 &#x3D; Pending, 5 &#x3D; Default, 7 &#x3D; All..</param>
+        /// <param name="activationStatus">The user activation status, with the &#x60;AutoGenerated&#x60; flag masked off. Flags of &#x60;EmployeeActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated, 2 &#x3D; Pending, 4 &#x3D; AutoGenerated..</param>
+        /// <param name="terminated">The UTC date when the user was terminated..</param>
+        /// <param name="department">The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else..</param>
+        /// <param name="groups">The list of groups the user belongs to. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else..</param>
+        /// <param name="location">The user location..</param>
+        /// <param name="notes">The user notes..</param>
+        /// <param name="isAdmin">Specifies whether the user is a DocSpace administrator or not..</param>
+        /// <param name="isRoomAdmin">Specifies whether the user is a room administrator or not..</param>
+        /// <param name="isOwner">Specifies whether the user is the portal owner or not..</param>
+        /// <param name="isVisitor">Specifies whether the user is a guest or not..</param>
+        /// <param name="isCollaborator">Specifies whether the user is a user with limited rights or not..</param>
+        /// <param name="isLDAP">Specifies whether the user comes from LDAP or not..</param>
+        /// <param name="isSSO">Specifies whether the user comes from SSO or not..</param>
+        /// <param name="listAdminModules">The list of the modules the user administers..</param>
+        /// <param name="cultureName">The user culture code..</param>
+        /// <param name="mobilePhone">The user mobile phone number..</param>
+        /// <param name="mobilePhoneActivationStatus">The mobile phone activation status. Flags of &#x60;MobilePhoneActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated..</param>
+        /// <param name="quotaLimit">The user quota limit in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves..</param>
+        /// <param name="usedSpace">The portal space used by the user in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves..</param>
+        /// <param name="isCustomQuota">Specifies whether the user has a custom quota or not. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves..</param>
         /// <param name="createdBy">createdBy.</param>
-        /// <param name="registrationDate">registrationDate.</param>
-        /// <param name="hasAvatar">hasAvatar.</param>
-        /// <param name="avatar">Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does..</param>
-        /// <param name="avatarOriginal">Absolute URL of the original avatar, with the same hash parameter..</param>
-        /// <param name="avatarMax">Absolute URL of the 200x200 avatar, with the same hash parameter..</param>
-        /// <param name="avatarMedium">Absolute URL of the 48x48 avatar, with the same hash parameter..</param>
-        /// <param name="avatarSmall">Absolute URL of the 32x32 avatar, with the same hash parameter..</param>
-        /// <param name="profileUrl">profileUrl.</param>
+        /// <param name="registrationDate">The UTC date when the user was registered..</param>
+        /// <param name="hasAvatar">Specifies whether the user has an avatar or not..</param>
+        /// <param name="avatar">The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does..</param>
+        /// <param name="avatarOriginal">The absolute URL of the original avatar, with the same hash parameter..</param>
+        /// <param name="avatarMax">The absolute URL of the 200x200 avatar, with the same hash parameter..</param>
+        /// <param name="avatarMedium">The absolute URL of the 48x48 avatar, with the same hash parameter..</param>
+        /// <param name="avatarSmall">The absolute URL of the 32x32 avatar, with the same hash parameter..</param>
+        /// <param name="profileUrl">The user profile URL..</param>
         public UserPayload(Guid id = default, string displayName = default, string firstName = default, string lastName = default, string userName = default, string email = default, List<ContactPayload> contacts = default, int status = default, int activationStatus = default, DateTime terminated = default, string department = default, List<GroupSummaryPayload> groups = default, string location = default, string notes = default, bool isAdmin = default, bool isRoomAdmin = default, bool isOwner = default, bool isVisitor = default, bool isCollaborator = default, bool isLDAP = default, bool isSSO = default, List<string> listAdminModules = default, string cultureName = default, string mobilePhone = default, int mobilePhoneActivationStatus = default, long quotaLimit = default, double usedSpace = default, bool isCustomQuota = default, UserSummaryPayload createdBy = default, DateTime registrationDate = default, bool hasAvatar = default, string avatar = default, string avatarOriginal = default, string avatarMax = default, string avatarMedium = default, string avatarSmall = default, string profileUrl = default)
         {
             this.Id = id;
@@ -114,174 +114,198 @@ namespace DocSpace.Webhooks.SDK.Model
         }
 
         /// <summary>
-        /// Gets or Sets Id
+        /// The user ID.
         /// </summary>
+        /// <value>The user ID.</value>
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public Guid Id { get; set; }
 
         /// <summary>
-        /// Gets or Sets DisplayName
+        /// The HTML-encoded user display name formatted according to the portal default format.
         /// </summary>
+        /// <value>The HTML-encoded user display name formatted according to the portal default format.</value>
         [DataMember(Name = "displayName", EmitDefaultValue = false)]
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// Gets or Sets FirstName
+        /// The user first name.
         /// </summary>
+        /// <value>The user first name.</value>
         [DataMember(Name = "firstName", EmitDefaultValue = false)]
         public string FirstName { get; set; }
 
         /// <summary>
-        /// Gets or Sets LastName
+        /// The user last name.
         /// </summary>
+        /// <value>The user last name.</value>
         [DataMember(Name = "lastName", EmitDefaultValue = false)]
         public string LastName { get; set; }
 
         /// <summary>
-        /// Gets or Sets UserName
+        /// The user name.
         /// </summary>
+        /// <value>The user name.</value>
         [DataMember(Name = "userName", EmitDefaultValue = false)]
         public string UserName { get; set; }
 
         /// <summary>
-        /// Gets or Sets Email
+        /// The user email address.
         /// </summary>
+        /// <value>The user email address.</value>
         [DataMember(Name = "email", EmitDefaultValue = false)]
         public string Email { get; set; }
 
         /// <summary>
-        /// Gets or Sets Contacts
+        /// The list of user contacts.
         /// </summary>
+        /// <value>The list of user contacts.</value>
         [DataMember(Name = "contacts", EmitDefaultValue = false)]
         public List<ContactPayload> Contacts { get; set; }
 
         /// <summary>
-        /// enum EmployeeStatus
+        /// The user status. Flags of &#x60;EmployeeStatus&#x60;: 1 &#x3D; Active, 2 &#x3D; Terminated, 4 &#x3D; Pending, 5 &#x3D; Default, 7 &#x3D; All.
         /// </summary>
-        /// <value>enum EmployeeStatus</value>
+        /// <value>The user status. Flags of &#x60;EmployeeStatus&#x60;: 1 &#x3D; Active, 2 &#x3D; Terminated, 4 &#x3D; Pending, 5 &#x3D; Default, 7 &#x3D; All.</value>
         [DataMember(Name = "status", EmitDefaultValue = false)]
         public int Status { get; set; }
 
         /// <summary>
-        /// enum EmployeeActivationStatus (flags), AutoGenerated masked off
+        /// The user activation status, with the &#x60;AutoGenerated&#x60; flag masked off. Flags of &#x60;EmployeeActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated, 2 &#x3D; Pending, 4 &#x3D; AutoGenerated.
         /// </summary>
-        /// <value>enum EmployeeActivationStatus (flags), AutoGenerated masked off</value>
+        /// <value>The user activation status, with the &#x60;AutoGenerated&#x60; flag masked off. Flags of &#x60;EmployeeActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated, 2 &#x3D; Pending, 4 &#x3D; AutoGenerated.</value>
         [DataMember(Name = "activationStatus", EmitDefaultValue = false)]
         public int ActivationStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets Terminated
+        /// The UTC date when the user was terminated.
         /// </summary>
+        /// <value>The UTC date when the user was terminated.</value>
         [DataMember(Name = "terminated", EmitDefaultValue = false)]
         public DateTime Terminated { get; set; }
 
         /// <summary>
-        /// Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
+        /// The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.
         /// </summary>
-        /// <value>Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).</value>
+        /// <value>The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.</value>
         [DataMember(Name = "department", EmitDefaultValue = false)]
         public string Department { get; set; }
 
         /// <summary>
-        /// Gets or Sets Groups
+        /// The list of groups the user belongs to. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.
         /// </summary>
+        /// <value>The list of groups the user belongs to. Omitted when the subscription owner is a &#x60;User&#x60; or a &#x60;Guest&#x60; and the event is about someone else.</value>
         [DataMember(Name = "groups", EmitDefaultValue = false)]
         public List<GroupSummaryPayload> Groups { get; set; }
 
         /// <summary>
-        /// Gets or Sets Location
+        /// The user location.
         /// </summary>
+        /// <value>The user location.</value>
         [DataMember(Name = "location", EmitDefaultValue = false)]
         public string Location { get; set; }
 
         /// <summary>
-        /// Gets or Sets Notes
+        /// The user notes.
         /// </summary>
+        /// <value>The user notes.</value>
         [DataMember(Name = "notes", EmitDefaultValue = false)]
         public string Notes { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsAdmin
+        /// Specifies whether the user is a DocSpace administrator or not.
         /// </summary>
+        /// <value>Specifies whether the user is a DocSpace administrator or not.</value>
         [DataMember(Name = "isAdmin", EmitDefaultValue = true)]
         public bool IsAdmin { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsRoomAdmin
+        /// Specifies whether the user is a room administrator or not.
         /// </summary>
+        /// <value>Specifies whether the user is a room administrator or not.</value>
         [DataMember(Name = "isRoomAdmin", EmitDefaultValue = true)]
         public bool IsRoomAdmin { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsOwner
+        /// Specifies whether the user is the portal owner or not.
         /// </summary>
+        /// <value>Specifies whether the user is the portal owner or not.</value>
         [DataMember(Name = "isOwner", EmitDefaultValue = true)]
         public bool IsOwner { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsVisitor
+        /// Specifies whether the user is a guest or not.
         /// </summary>
+        /// <value>Specifies whether the user is a guest or not.</value>
         [DataMember(Name = "isVisitor", EmitDefaultValue = true)]
         public bool IsVisitor { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsCollaborator
+        /// Specifies whether the user is a user with limited rights or not.
         /// </summary>
+        /// <value>Specifies whether the user is a user with limited rights or not.</value>
         [DataMember(Name = "isCollaborator", EmitDefaultValue = true)]
         public bool IsCollaborator { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsLDAP
+        /// Specifies whether the user comes from LDAP or not.
         /// </summary>
+        /// <value>Specifies whether the user comes from LDAP or not.</value>
         [DataMember(Name = "isLDAP", EmitDefaultValue = true)]
         public bool IsLDAP { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsSSO
+        /// Specifies whether the user comes from SSO or not.
         /// </summary>
+        /// <value>Specifies whether the user comes from SSO or not.</value>
         [DataMember(Name = "isSSO", EmitDefaultValue = true)]
         public bool IsSSO { get; set; }
 
         /// <summary>
-        /// Gets or Sets ListAdminModules
+        /// The list of the modules the user administers.
         /// </summary>
+        /// <value>The list of the modules the user administers.</value>
         [DataMember(Name = "listAdminModules", EmitDefaultValue = false)]
         public List<string> ListAdminModules { get; set; }
 
         /// <summary>
-        /// Gets or Sets CultureName
+        /// The user culture code.
         /// </summary>
+        /// <value>The user culture code.</value>
         [DataMember(Name = "cultureName", EmitDefaultValue = false)]
         public string CultureName { get; set; }
 
         /// <summary>
-        /// Gets or Sets MobilePhone
+        /// The user mobile phone number.
         /// </summary>
+        /// <value>The user mobile phone number.</value>
         [DataMember(Name = "mobilePhone", EmitDefaultValue = false)]
         public string MobilePhone { get; set; }
 
         /// <summary>
-        /// enum MobilePhoneActivationStatus
+        /// The mobile phone activation status. Flags of &#x60;MobilePhoneActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated.
         /// </summary>
-        /// <value>enum MobilePhoneActivationStatus</value>
+        /// <value>The mobile phone activation status. Flags of &#x60;MobilePhoneActivationStatus&#x60;: 0 &#x3D; NotActivated, 1 &#x3D; Activated.</value>
         [DataMember(Name = "mobilePhoneActivationStatus", EmitDefaultValue = false)]
         public int MobilePhoneActivationStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets QuotaLimit
+        /// The user quota limit in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
         /// </summary>
+        /// <value>The user quota limit in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.</value>
         [DataMember(Name = "quotaLimit", EmitDefaultValue = false)]
         public long QuotaLimit { get; set; }
 
         /// <summary>
-        /// Gets or Sets UsedSpace
+        /// The portal space used by the user in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
         /// </summary>
+        /// <value>The portal space used by the user in bytes. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.</value>
         [DataMember(Name = "usedSpace", EmitDefaultValue = false)]
         public double UsedSpace { get; set; }
 
         /// <summary>
-        /// Gets or Sets IsCustomQuota
+        /// Specifies whether the user has a custom quota or not. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.
         /// </summary>
+        /// <value>Specifies whether the user has a custom quota or not. Sent only to a &#x60;DocSpaceAdmin&#x60; or to the user themselves.</value>
         [DataMember(Name = "isCustomQuota", EmitDefaultValue = true)]
         public bool IsCustomQuota { get; set; }
 
@@ -292,55 +316,58 @@ namespace DocSpace.Webhooks.SDK.Model
         public UserSummaryPayload CreatedBy { get; set; }
 
         /// <summary>
-        /// Gets or Sets RegistrationDate
+        /// The UTC date when the user was registered.
         /// </summary>
+        /// <value>The UTC date when the user was registered.</value>
         [DataMember(Name = "registrationDate", EmitDefaultValue = false)]
         public DateTime RegistrationDate { get; set; }
 
         /// <summary>
-        /// Gets or Sets HasAvatar
+        /// Specifies whether the user has an avatar or not.
         /// </summary>
+        /// <value>Specifies whether the user has an avatar or not.</value>
         [DataMember(Name = "hasAvatar", EmitDefaultValue = true)]
         public bool HasAvatar { get; set; }
 
         /// <summary>
-        /// Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
+        /// The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
         /// </summary>
-        /// <value>Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.</value>
+        /// <value>The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.</value>
         [DataMember(Name = "avatar", EmitDefaultValue = false)]
         public string Avatar { get; set; }
 
         /// <summary>
-        /// Absolute URL of the original avatar, with the same hash parameter.
+        /// The absolute URL of the original avatar, with the same hash parameter.
         /// </summary>
-        /// <value>Absolute URL of the original avatar, with the same hash parameter.</value>
+        /// <value>The absolute URL of the original avatar, with the same hash parameter.</value>
         [DataMember(Name = "avatarOriginal", EmitDefaultValue = false)]
         public string AvatarOriginal { get; set; }
 
         /// <summary>
-        /// Absolute URL of the 200x200 avatar, with the same hash parameter.
+        /// The absolute URL of the 200x200 avatar, with the same hash parameter.
         /// </summary>
-        /// <value>Absolute URL of the 200x200 avatar, with the same hash parameter.</value>
+        /// <value>The absolute URL of the 200x200 avatar, with the same hash parameter.</value>
         [DataMember(Name = "avatarMax", EmitDefaultValue = false)]
         public string AvatarMax { get; set; }
 
         /// <summary>
-        /// Absolute URL of the 48x48 avatar, with the same hash parameter.
+        /// The absolute URL of the 48x48 avatar, with the same hash parameter.
         /// </summary>
-        /// <value>Absolute URL of the 48x48 avatar, with the same hash parameter.</value>
+        /// <value>The absolute URL of the 48x48 avatar, with the same hash parameter.</value>
         [DataMember(Name = "avatarMedium", EmitDefaultValue = false)]
         public string AvatarMedium { get; set; }
 
         /// <summary>
-        /// Absolute URL of the 32x32 avatar, with the same hash parameter.
+        /// The absolute URL of the 32x32 avatar, with the same hash parameter.
         /// </summary>
-        /// <value>Absolute URL of the 32x32 avatar, with the same hash parameter.</value>
+        /// <value>The absolute URL of the 32x32 avatar, with the same hash parameter.</value>
         [DataMember(Name = "avatarSmall", EmitDefaultValue = false)]
         public string AvatarSmall { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProfileUrl
+        /// The user profile URL.
         /// </summary>
+        /// <value>The user profile URL.</value>
         [DataMember(Name = "profileUrl", EmitDefaultValue = false)]
         public string ProfileUrl { get; set; }
 

@@ -13,7 +13,7 @@
 /**
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://openapi-generator.tech
@@ -35,7 +35,7 @@ use \OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
  * GroupPayload Class Doc Comment
  *
  * @category Class
- * @description ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}.
+ * @description The group carried by a group.* webhook.  A copy of GroupDto, deliberately not derived from it. The member list is not carried: a group can hold thousands of users and every one of them would be expanded into the body of every group event. Receivers that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed.
  * @package  OnlyOffice\DocSpace\Webhooks\Sdk
  * @author   OpenAPI Generator team
  * @link     https://openapi-generator.tech
@@ -83,7 +83,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
         'is_ldap' => null,
         'is_system' => null,
         'manager' => null,
-        'members_count' => null
+        'members_count' => 'int32'
     ];
 
     /**
@@ -352,7 +352,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets id
      *
-     * @param string|null $id id
+     * @param string|null $id The group ID.
      *
      * @return self
      */
@@ -379,7 +379,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets name
      *
-     * @param string|null $name name
+     * @param string|null $name The group name.
      *
      * @return self
      */
@@ -406,7 +406,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets parent
      *
-     * @param string|null $parent ID of the parent group; absent for a top-level group.
+     * @param string|null $parent The parent group ID; absent for a top-level group.
      *
      * @return self
      */
@@ -433,7 +433,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets category
      *
-     * @param string|null $category category
+     * @param string|null $category The group category ID.
      *
      * @return self
      */
@@ -460,7 +460,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_ldap
      *
-     * @param bool|null $is_ldap is_ldap
+     * @param bool|null $is_ldap Specifies whether the group comes from LDAP or not.
      *
      * @return self
      */
@@ -487,7 +487,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_system
      *
-     * @param bool|null $is_system is_system
+     * @param bool|null $is_system Specifies whether the group is a system group or not.
      *
      * @return self
      */
@@ -541,7 +541,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets members_count
      *
-     * @param int|null $members_count members_count
+     * @param int|null $members_count The number of group members.
      *
      * @return self
      */

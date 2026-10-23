@@ -1,15 +1,15 @@
 # GroupSummaryPayload
 
-A group referenced from another payload.
+A group referenced from another webhook payload.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **UUID** |  | [optional] 
-**name** | **str** |  | [optional] 
-**manager** | **str** | The user name of the group manager, not an id. | [optional] 
-**is_system** | **bool** |  | [optional] 
+**id** | **UUID** | The group ID. | [optional] 
+**name** | **str** | The group name. | [optional] 
+**manager** | **str** | The user name of the group manager, not an ID. | [optional] 
+**is_system** | **bool** | Specifies whether the group is a system group or not. | [optional] 
 
 ## Example
 

@@ -13,7 +13,7 @@
 /**
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://openapi-generator.tech
@@ -35,7 +35,7 @@ use \OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
  * FilePayload Class Doc Comment
  *
  * @category Class
- * @description ASC.Files/Core/ApiModels/WebhookDto/FileWebhookDto.cs. A copy of the REST FileDto. Sent by every file.* trigger and by form.filled.out and form.stopped.  Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not - dimensions in particular opens the file stream to measure the image.
+ * @description The file carried by a file.* webhook, and by form.filled.out and form.stopped.  A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in particular opens the file stream to measure the image.
  * @package  OnlyOffice\DocSpace\Webhooks\Sdk
  * @author   OpenAPI Generator team
  * @link     https://openapi-generator.tech
@@ -120,10 +120,10 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
         'origin_room_title' => null,
         'provider_item' => null,
         'provider_key' => null,
-        'provider_id' => null,
-        'order' => null,
-        'version' => null,
-        'version_group' => null,
+        'provider_id' => 'int32',
+        'order' => 'int32',
+        'version' => 'int32',
+        'version_group' => 'int32',
         'content_length' => 'int64',
         'file_type' => null,
         'file_exst' => null,
@@ -622,7 +622,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets title
      *
-     * @param string|null $title title
+     * @param string|null $title The file entry title.
      *
      * @return self
      */
@@ -649,7 +649,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets file_entry_type
      *
-     * @param int|null $file_entry_type 1 folder, 2 file. Present on every entry payload.
+     * @param int|null $file_entry_type The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File.
      *
      * @return self
      */
@@ -676,7 +676,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets created
      *
-     * @param \DateTime|null $created created
+     * @param \DateTime|null $created The UTC date when the file entry was created.
      *
      * @return self
      */
@@ -730,7 +730,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets updated
      *
-     * @param \DateTime|null $updated updated
+     * @param \DateTime|null $updated The UTC date when the file entry was last updated.
      *
      * @return self
      */
@@ -784,7 +784,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets root_folder_type
      *
-     * @param int|null $root_folder_type enum FolderType
+     * @param int|null $root_folder_type The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
      *
      * @return self
      */
@@ -811,7 +811,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets parent_room_type
      *
-     * @param int|null $parent_room_type enum FolderType
+     * @param int|null $parent_room_type The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
      *
      * @return self
      */
@@ -892,7 +892,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets origin_title
      *
-     * @param string|null $origin_title origin_title
+     * @param string|null $origin_title The origin title of the file entry.
      *
      * @return self
      */
@@ -919,7 +919,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets origin_room_title
      *
-     * @param string|null $origin_room_title origin_room_title
+     * @param string|null $origin_room_title The origin room title of the file entry.
      *
      * @return self
      */
@@ -946,7 +946,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets provider_item
      *
-     * @param bool|null $provider_item provider_item
+     * @param bool|null $provider_item Specifies whether the file entry is backed by a third-party provider or not.
      *
      * @return self
      */
@@ -973,7 +973,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets provider_key
      *
-     * @param string|null $provider_key provider_key
+     * @param string|null $provider_key The third-party provider key of the file entry.
      *
      * @return self
      */
@@ -1000,7 +1000,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets provider_id
      *
-     * @param int|null $provider_id provider_id
+     * @param int|null $provider_id The third-party provider ID of the file entry.
      *
      * @return self
      */
@@ -1027,7 +1027,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets order
      *
-     * @param int|null $order Position within an indexed room.
+     * @param int|null $order The position of the file entry within an indexed room.
      *
      * @return self
      */
@@ -1054,7 +1054,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets version
      *
-     * @param int|null $version version
+     * @param int|null $version The file version.
      *
      * @return self
      */
@@ -1081,7 +1081,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets version_group
      *
-     * @param int|null $version_group version_group
+     * @param int|null $version_group The version group of the file.
      *
      * @return self
      */
@@ -1108,7 +1108,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets content_length
      *
-     * @param int|null $content_length Bytes, as a number. The REST DTO sends a formatted string.
+     * @param int|null $content_length The file size in bytes, as a number; the REST FileDto sends a formatted string instead.
      *
      * @return self
      */
@@ -1135,7 +1135,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets file_type
      *
-     * @param int|null $file_type enum FileType
+     * @param int|null $file_type The file type. Values of `FileType`: 0 = Unknown, 1 = Archive, 2 = Video, 3 = Audio, 4 = Image, 5 = Spreadsheet, 6 = Presentation, 7 = Document, 10 = Pdf, 11 = Diagram.
      *
      * @return self
      */
@@ -1162,7 +1162,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets file_exst
      *
-     * @param string|null $file_exst Includes the leading dot, e.g. \".docx\".
+     * @param string|null $file_exst The file extension, including the leading dot.
      *
      * @return self
      */
@@ -1189,7 +1189,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets comment
      *
-     * @param string|null $comment comment
+     * @param string|null $comment The comment on the current file version.
      *
      * @return self
      */
@@ -1216,7 +1216,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets view_url
      *
-     * @param string|null $view_url Download URL. Carries no share token.
+     * @param string|null $view_url The URL the file content can be downloaded from. Carries no share token.
      *
      * @return self
      */
@@ -1243,7 +1243,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets web_url
      *
-     * @param string|null $web_url Browser URL. Carries no share token.
+     * @param string|null $web_url The URL the file can be opened at in a browser. Carries no share token.
      *
      * @return self
      */
@@ -1270,7 +1270,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets encrypted
      *
-     * @param bool|null $encrypted encrypted
+     * @param bool|null $encrypted Specifies whether the file is encrypted or not.
      *
      * @return self
      */
@@ -1297,7 +1297,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets locked
      *
-     * @param bool|null $locked locked
+     * @param bool|null $locked Specifies whether the file is locked or not.
      *
      * @return self
      */
@@ -1324,7 +1324,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets locked_by
      *
-     * @param string|null $locked_by locked_by
+     * @param string|null $locked_by The user name of whoever locked the file.
      *
      * @return self
      */
@@ -1351,7 +1351,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_form
      *
-     * @param bool|null $is_form is_form
+     * @param bool|null $is_form Specifies whether the file is a form or not.
      *
      * @return self
      */
@@ -1378,7 +1378,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets custom_filter_enabled
      *
-     * @param bool|null $custom_filter_enabled custom_filter_enabled
+     * @param bool|null $custom_filter_enabled Specifies whether a custom filter is enabled for the file or not.
      *
      * @return self
      */
@@ -1405,7 +1405,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets custom_filter_enabled_by
      *
-     * @param string|null $custom_filter_enabled_by custom_filter_enabled_by
+     * @param string|null $custom_filter_enabled_by The user name of whoever enabled the custom filter.
      *
      * @return self
      */
@@ -1432,7 +1432,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets last_opened
      *
-     * @param \DateTime|null $last_opened last_opened
+     * @param \DateTime|null $last_opened The UTC date when the file was last opened.
      *
      * @return self
      */
@@ -1459,7 +1459,7 @@ class FilePayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets vectorization_status
      *
-     * @param int|null $vectorization_status enum VectorizationStatus
+     * @param int|null $vectorization_status The AI vectorization status of the file. Values of `VectorizationStatus`: 0 = InProgress, 1 = Completed, 2 = Failed.
      *
      * @return self
      */

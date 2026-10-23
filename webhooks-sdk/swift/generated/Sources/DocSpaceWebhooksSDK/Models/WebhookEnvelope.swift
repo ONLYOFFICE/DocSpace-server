@@ -7,11 +7,11 @@
 
 import Foundation
 
-/** The body of every delivery. &#x60;payload&#x60; is narrowed by &#x60;event.trigger&#x60; per x-docspace-trigger-payloads.  */
+/** The body of every delivery. &#x60;payload&#x60; is narrowed by &#x60;event.trigger&#x60; per x-docspace-trigger-payloads. */
 public struct WebhookEnvelope: Sendable, Codable, Hashable {
 
     public var event: WebhookEventInfo?
-    /** Trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it.  */
+    /** The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it. */
     public var payload: JSONValue?
     public var webhook: WebhookConfigInfo?
 

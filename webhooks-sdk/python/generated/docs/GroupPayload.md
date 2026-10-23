@@ -1,19 +1,19 @@
 # GroupPayload
 
-ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
+The group carried by a group.* webhook.  A copy of GroupDto, deliberately not derived from it. The member list is not carried: a group can hold thousands of users and every one of them would be expanded into the body of every group event. Receivers that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **UUID** |  | [optional] 
-**name** | **str** |  | [optional] 
-**parent** | **UUID** | ID of the parent group; absent for a top-level group. | [optional] 
-**category** | **UUID** |  | [optional] 
-**is_ldap** | **bool** |  | [optional] 
-**is_system** | **bool** |  | [optional] 
+**id** | **UUID** | The group ID. | [optional] 
+**name** | **str** | The group name. | [optional] 
+**parent** | **UUID** | The parent group ID; absent for a top-level group. | [optional] 
+**category** | **UUID** | The group category ID. | [optional] 
+**is_ldap** | **bool** | Specifies whether the group comes from LDAP or not. | [optional] 
+**is_system** | **bool** | Specifies whether the group is a system group or not. | [optional] 
 **manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 
-**members_count** | **int** |  | [optional] 
+**members_count** | **int** | The number of group members. | [optional] 
 
 ## Example
 

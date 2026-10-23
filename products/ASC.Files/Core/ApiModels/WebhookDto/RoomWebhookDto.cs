@@ -38,11 +38,10 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 /// </summary>
 /// <remarks>
 /// A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and
-/// has the same shape today, so agent.* is paired to the same kind. Splitting it later is one attribute change.
-/// The room logo and watermark are not carried - both need per-request URL building that a delivery should not
-/// pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
+/// has the same shape today, so agent.* sends it as well.
+/// Not carried: logo, watermark, lifetime, tags and chatSettings. Each needs per-request URL building or an extra
+/// query that a delivery should not pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
 /// </remarks>
-[WebhookPayload(WebhookPayloadKind.Room)]
 public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
 {
     /// <inheritdoc/>

@@ -7,9 +7,12 @@
 
 import Foundation
 
+/** A user contact. */
 public struct ContactPayload: Sendable, Codable, Hashable {
 
+    /** The contact type. */
     public var type: String?
+    /** The contact value. */
     public var value: String?
 
     public init(type: String? = nil, value: String? = nil) {

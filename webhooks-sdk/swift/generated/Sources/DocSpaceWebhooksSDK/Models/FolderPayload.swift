@@ -7,36 +7,47 @@
 
 import Foundation
 
-/** ASC.Files/Core/ApiModels/WebhookDto/FolderWebhookDto.cs. The folder.* triggers. Rooms are RoomPayload, never this, even though both come from Folder&lt;T&gt;.  Not carried: inRoom, mute, new - all per-viewer state.  */
+/** The folder carried by a folder.* webhook.  A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload (RoomWebhookDto) even though both come from Folder&lt;T&gt;, because room.* and folder.* are separate triggers whose contracts should be free to move independently. Not carried: inRoom, mute and new, all of them per-viewer state. */
 public struct FolderPayload: Sendable, Codable, Hashable {
 
     public var id: EntryId?
     public var parentId: EntryId?
     public var rootFolderId: EntryId?
+    /** The file entry title. */
     public var title: String?
-    /** 1 folder, 2 file. Present on every entry payload. */
+    /** The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     public var fileEntryType: Int?
+    /** The UTC date when the file entry was created. */
     public var created: Date?
     public var createdBy: UserSummaryPayload?
+    /** The UTC date when the file entry was last updated. */
     public var updated: Date?
     public var updatedBy: UserSummaryPayload?
-    /** enum FolderType */
+    /** The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var rootFolderType: Int?
-    /** enum FolderType */
+    /** The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var parentRoomType: Int?
     public var originId: EntryId?
     public var originRoomId: EntryId?
+    /** The origin title of the file entry. */
     public var originTitle: String?
+    /** The origin room title of the file entry. */
     public var originRoomTitle: String?
+    /** Specifies whether the file entry is backed by a third-party provider or not. */
     public var providerItem: Bool?
+    /** The third-party provider key of the file entry. */
     public var providerKey: String?
+    /** The third-party provider ID of the file entry. */
     public var providerId: Int?
-    /** Position within an indexed room. */
+    /** The position of the file entry within an indexed room. */
     public var order: Int?
+    /** The number of files the folder directly contains. */
     public var filesCount: Int?
+    /** The number of subfolders the folder directly contains. */
     public var foldersCount: Int?
-    /** enum FolderType */
+    /** The folder type. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var type: Int?
+    /** Specifies whether the folder can be shared or not. */
     public var isShareable: Bool?
 
     public init(id: EntryId? = nil, parentId: EntryId? = nil, rootFolderId: EntryId? = nil, title: String? = nil, fileEntryType: Int? = nil, created: Date? = nil, createdBy: UserSummaryPayload? = nil, updated: Date? = nil, updatedBy: UserSummaryPayload? = nil, rootFolderType: Int? = nil, parentRoomType: Int? = nil, originId: EntryId? = nil, originRoomId: EntryId? = nil, originTitle: String? = nil, originRoomTitle: String? = nil, providerItem: Bool? = nil, providerKey: String? = nil, providerId: Int? = nil, order: Int? = nil, filesCount: Int? = nil, foldersCount: Int? = nil, type: Int? = nil, isShareable: Bool? = nil) {

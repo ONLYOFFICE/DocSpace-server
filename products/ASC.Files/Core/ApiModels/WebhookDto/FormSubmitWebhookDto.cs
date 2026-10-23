@@ -41,7 +41,6 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 /// only one whose webhook.target.id refers to a different entity - the original form - than the file that
 /// changed. form.filled.out and form.stopped do not use this shape; they carry a plain FileWebhookDto.
 /// </remarks>
-[WebhookPayload(WebhookPayloadKind.FormSubmit)]
 public class FormSubmitWebhookDto<T>
 {
     /// <summary>

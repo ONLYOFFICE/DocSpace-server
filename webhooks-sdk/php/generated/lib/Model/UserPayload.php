@@ -13,7 +13,7 @@
 /**
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://openapi-generator.tech
@@ -35,7 +35,7 @@ use \OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
  * UserPayload Class Doc Comment
  *
  * @category Class
- * @description ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes.
+ * @description The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader&#39;s role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes.
  * @package  OnlyOffice\DocSpace\Webhooks\Sdk
  * @author   OpenAPI Generator team
  * @link     https://openapi-generator.tech
@@ -555,7 +555,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets id
      *
-     * @param string|null $id id
+     * @param string|null $id The user ID.
      *
      * @return self
      */
@@ -582,7 +582,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets display_name
      *
-     * @param string|null $display_name display_name
+     * @param string|null $display_name The HTML-encoded user display name formatted according to the portal default format.
      *
      * @return self
      */
@@ -609,7 +609,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets first_name
      *
-     * @param string|null $first_name first_name
+     * @param string|null $first_name The user first name.
      *
      * @return self
      */
@@ -636,7 +636,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets last_name
      *
-     * @param string|null $last_name last_name
+     * @param string|null $last_name The user last name.
      *
      * @return self
      */
@@ -663,7 +663,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets user_name
      *
-     * @param string|null $user_name user_name
+     * @param string|null $user_name The user name.
      *
      * @return self
      */
@@ -690,7 +690,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets email
      *
-     * @param string|null $email email
+     * @param string|null $email The user email address.
      *
      * @return self
      */
@@ -717,7 +717,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets contacts
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\ContactPayload[]|null $contacts contacts
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\ContactPayload[]|null $contacts The list of user contacts.
      *
      * @return self
      */
@@ -744,7 +744,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets status
      *
-     * @param int|null $status enum EmployeeStatus
+     * @param int|null $status The user status. Flags of `EmployeeStatus`: 1 = Active, 2 = Terminated, 4 = Pending, 5 = Default, 7 = All.
      *
      * @return self
      */
@@ -771,7 +771,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets activation_status
      *
-     * @param int|null $activation_status enum EmployeeActivationStatus (flags), AutoGenerated masked off
+     * @param int|null $activation_status The user activation status, with the `AutoGenerated` flag masked off. Flags of `EmployeeActivationStatus`: 0 = NotActivated, 1 = Activated, 2 = Pending, 4 = AutoGenerated.
      *
      * @return self
      */
@@ -798,7 +798,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets terminated
      *
-     * @param \DateTime|null $terminated terminated
+     * @param \DateTime|null $terminated The UTC date when the user was terminated.
      *
      * @return self
      */
@@ -825,7 +825,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets department
      *
-     * @param string|null $department Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
+     * @param string|null $department The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.
      *
      * @return self
      */
@@ -852,7 +852,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets groups
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupSummaryPayload[]|null $groups groups
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupSummaryPayload[]|null $groups The list of groups the user belongs to. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.
      *
      * @return self
      */
@@ -879,7 +879,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets location
      *
-     * @param string|null $location location
+     * @param string|null $location The user location.
      *
      * @return self
      */
@@ -906,7 +906,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets notes
      *
-     * @param string|null $notes notes
+     * @param string|null $notes The user notes.
      *
      * @return self
      */
@@ -933,7 +933,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_admin
      *
-     * @param bool|null $is_admin is_admin
+     * @param bool|null $is_admin Specifies whether the user is a DocSpace administrator or not.
      *
      * @return self
      */
@@ -960,7 +960,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_room_admin
      *
-     * @param bool|null $is_room_admin is_room_admin
+     * @param bool|null $is_room_admin Specifies whether the user is a room administrator or not.
      *
      * @return self
      */
@@ -987,7 +987,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_owner
      *
-     * @param bool|null $is_owner is_owner
+     * @param bool|null $is_owner Specifies whether the user is the portal owner or not.
      *
      * @return self
      */
@@ -1014,7 +1014,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_visitor
      *
-     * @param bool|null $is_visitor is_visitor
+     * @param bool|null $is_visitor Specifies whether the user is a guest or not.
      *
      * @return self
      */
@@ -1041,7 +1041,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_collaborator
      *
-     * @param bool|null $is_collaborator is_collaborator
+     * @param bool|null $is_collaborator Specifies whether the user is a user with limited rights or not.
      *
      * @return self
      */
@@ -1068,7 +1068,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_ldap
      *
-     * @param bool|null $is_ldap is_ldap
+     * @param bool|null $is_ldap Specifies whether the user comes from LDAP or not.
      *
      * @return self
      */
@@ -1095,7 +1095,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_sso
      *
-     * @param bool|null $is_sso is_sso
+     * @param bool|null $is_sso Specifies whether the user comes from SSO or not.
      *
      * @return self
      */
@@ -1122,7 +1122,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets list_admin_modules
      *
-     * @param string[]|null $list_admin_modules list_admin_modules
+     * @param string[]|null $list_admin_modules The list of the modules the user administers.
      *
      * @return self
      */
@@ -1149,7 +1149,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets culture_name
      *
-     * @param string|null $culture_name culture_name
+     * @param string|null $culture_name The user culture code.
      *
      * @return self
      */
@@ -1176,7 +1176,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets mobile_phone
      *
-     * @param string|null $mobile_phone mobile_phone
+     * @param string|null $mobile_phone The user mobile phone number.
      *
      * @return self
      */
@@ -1203,7 +1203,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets mobile_phone_activation_status
      *
-     * @param int|null $mobile_phone_activation_status enum MobilePhoneActivationStatus
+     * @param int|null $mobile_phone_activation_status The mobile phone activation status. Flags of `MobilePhoneActivationStatus`: 0 = NotActivated, 1 = Activated.
      *
      * @return self
      */
@@ -1230,7 +1230,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets quota_limit
      *
-     * @param int|null $quota_limit quota_limit
+     * @param int|null $quota_limit The user quota limit in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
      *
      * @return self
      */
@@ -1257,7 +1257,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets used_space
      *
-     * @param float|null $used_space used_space
+     * @param float|null $used_space The portal space used by the user in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
      *
      * @return self
      */
@@ -1284,7 +1284,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets is_custom_quota
      *
-     * @param bool|null $is_custom_quota is_custom_quota
+     * @param bool|null $is_custom_quota Specifies whether the user has a custom quota or not. Sent only to a `DocSpaceAdmin` or to the user themselves.
      *
      * @return self
      */
@@ -1338,7 +1338,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets registration_date
      *
-     * @param \DateTime|null $registration_date registration_date
+     * @param \DateTime|null $registration_date The UTC date when the user was registered.
      *
      * @return self
      */
@@ -1365,7 +1365,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets has_avatar
      *
-     * @param bool|null $has_avatar has_avatar
+     * @param bool|null $has_avatar Specifies whether the user has an avatar or not.
      *
      * @return self
      */
@@ -1392,7 +1392,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar
      *
-     * @param string|null $avatar Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
+     * @param string|null $avatar The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
      *
      * @return self
      */
@@ -1419,7 +1419,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_original
      *
-     * @param string|null $avatar_original Absolute URL of the original avatar, with the same hash parameter.
+     * @param string|null $avatar_original The absolute URL of the original avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1446,7 +1446,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_max
      *
-     * @param string|null $avatar_max Absolute URL of the 200x200 avatar, with the same hash parameter.
+     * @param string|null $avatar_max The absolute URL of the 200x200 avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1473,7 +1473,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_medium
      *
-     * @param string|null $avatar_medium Absolute URL of the 48x48 avatar, with the same hash parameter.
+     * @param string|null $avatar_medium The absolute URL of the 48x48 avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1500,7 +1500,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets avatar_small
      *
-     * @param string|null $avatar_small Absolute URL of the 32x32 avatar, with the same hash parameter.
+     * @param string|null $avatar_small The absolute URL of the 32x32 avatar, with the same hash parameter.
      *
      * @return self
      */
@@ -1527,7 +1527,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets profile_url
      *
-     * @param string|null $profile_url profile_url
+     * @param string|null $profile_url The user profile URL.
      *
      * @return self
      */

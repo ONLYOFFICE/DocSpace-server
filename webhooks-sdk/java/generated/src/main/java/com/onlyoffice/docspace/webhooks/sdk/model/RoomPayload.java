@@ -1,6 +1,6 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
  * The version of the OpenAPI document: 1.0.0
  * 
@@ -50,7 +50,7 @@ import java.util.Set;
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
 /**
- * ASC.Files/Core/ApiModels/WebhookDto/RoomWebhookDto.cs. The room.* triggers and every agent.* trigger - an agent is an AI room and has the same shape today.  Not carried: logo, watermark, lifetime, tags, chatSettings. Each needs per-request URL building or an extra query; read them from GET api/2.0/files/rooms/{id}. 
+ * The room carried by a room.* webhook, and by every agent.* webhook.  A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and has the same shape today, so agent.* sends it as well. Not carried: logo, watermark, lifetime, tags and chatSettings. Each needs per-request URL building or an extra query that a delivery should not pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class RoomPayload {
@@ -275,7 +275,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get title
+   * The file entry title.
    * @return title
    */
   @javax.annotation.Nullable
@@ -294,7 +294,7 @@ public class RoomPayload {
   }
 
   /**
-   * 1 folder, 2 file. Present on every entry payload.
+   * The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of &#x60;FileEntryType&#x60;: 1 &#x3D; Folder, 2 &#x3D; File.
    * @return fileEntryType
    */
   @javax.annotation.Nullable
@@ -313,7 +313,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get created
+   * The UTC date when the file entry was created.
    * @return created
    */
   @javax.annotation.Nullable
@@ -351,7 +351,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get updated
+   * The UTC date when the file entry was last updated.
    * @return updated
    */
   @javax.annotation.Nullable
@@ -389,7 +389,7 @@ public class RoomPayload {
   }
 
   /**
-   * enum FolderType
+   * The root folder type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.
    * @return rootFolderType
    */
   @javax.annotation.Nullable
@@ -408,7 +408,7 @@ public class RoomPayload {
   }
 
   /**
-   * enum FolderType
+   * The parent room type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.
    * @return parentRoomType
    */
   @javax.annotation.Nullable
@@ -465,7 +465,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get originTitle
+   * The origin title of the file entry.
    * @return originTitle
    */
   @javax.annotation.Nullable
@@ -484,7 +484,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get originRoomTitle
+   * The origin room title of the file entry.
    * @return originRoomTitle
    */
   @javax.annotation.Nullable
@@ -503,7 +503,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get providerItem
+   * Specifies whether the file entry is backed by a third-party provider or not.
    * @return providerItem
    */
   @javax.annotation.Nullable
@@ -522,7 +522,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get providerKey
+   * The third-party provider key of the file entry.
    * @return providerKey
    */
   @javax.annotation.Nullable
@@ -541,7 +541,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get providerId
+   * The third-party provider ID of the file entry.
    * @return providerId
    */
   @javax.annotation.Nullable
@@ -560,7 +560,7 @@ public class RoomPayload {
   }
 
   /**
-   * Position within an indexed room.
+   * The position of the file entry within an indexed room.
    * @return order
    */
   @javax.annotation.Nullable
@@ -579,7 +579,7 @@ public class RoomPayload {
   }
 
   /**
-   * enum RoomType
+   * The room type. Values of &#x60;RoomType&#x60;: 1 &#x3D; FillingFormsRoom, 2 &#x3D; EditingRoom, 5 &#x3D; CustomRoom, 6 &#x3D; PublicRoom, 8 &#x3D; VirtualDataRoom, 9 &#x3D; AiRoom.
    * @return roomType
    */
   @javax.annotation.Nullable
@@ -598,7 +598,7 @@ public class RoomPayload {
   }
 
   /**
-   * enum FolderType
+   * The underlying folder type of the room. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.
    * @return type
    */
   @javax.annotation.Nullable
@@ -617,7 +617,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get filesCount
+   * The number of files the room directly contains.
    * @return filesCount
    */
   @javax.annotation.Nullable
@@ -636,7 +636,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get foldersCount
+   * The number of folders the room directly contains.
    * @return foldersCount
    */
   @javax.annotation.Nullable
@@ -655,7 +655,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get _private
+   * Specifies whether the room is private or not.
    * @return _private
    */
   @javax.annotation.Nullable
@@ -674,7 +674,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get indexing
+   * Specifies whether the room is indexed or not.
    * @return indexing
    */
   @javax.annotation.Nullable
@@ -693,7 +693,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get denyDownload
+   * Specifies whether downloading from the room is denied or not.
    * @return denyDownload
    */
   @javax.annotation.Nullable
@@ -712,7 +712,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get pinned
+   * Specifies whether the room is pinned or not.
    * @return pinned
    */
   @javax.annotation.Nullable
@@ -731,7 +731,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get quotaLimit
+   * The room quota limit in bytes.
    * @return quotaLimit
    */
   @javax.annotation.Nullable
@@ -750,7 +750,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get usedSpace
+   * The space used by the room in bytes.
    * @return usedSpace
    */
   @javax.annotation.Nullable
@@ -769,7 +769,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get color
+   * The room cover colour.
    * @return color
    */
   @javax.annotation.Nullable
@@ -788,7 +788,7 @@ public class RoomPayload {
   }
 
   /**
-   * Get cover
+   * The room cover name.
    * @return cover
    */
   @javax.annotation.Nullable

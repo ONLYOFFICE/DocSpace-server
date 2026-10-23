@@ -39,9 +39,9 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 /// <remarks>
 /// A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload
 /// (<see cref="RoomWebhookDto{T}"/>) even though both come from Folder&lt;T&gt;, because room.* and folder.*
-/// are separate triggers whose contracts should be free to move independently.
+/// are separate triggers whose contracts should be free to move independently. Not carried: inRoom, mute and new,
+/// all of them per-viewer state.
 /// </remarks>
-[WebhookPayload(WebhookPayloadKind.Folder)]
 public class FolderWebhookDto<T> : FileEntryWebhookDto<T>
 {
     /// <inheritdoc/>

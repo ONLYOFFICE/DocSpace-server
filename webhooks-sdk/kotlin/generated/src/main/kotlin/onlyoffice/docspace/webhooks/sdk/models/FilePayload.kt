@@ -29,43 +29,43 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * ASC.Files/Core/ApiModels/WebhookDto/FileWebhookDto.cs. A copy of the REST FileDto. Sent by every file.* trigger and by form.filled.out and form.stopped.  Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not - dimensions in particular opens the file stream to measure the image. 
+ * The file carried by a file.* webhook, and by form.filled.out and form.stopped.  A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in particular opens the file stream to measure the image.
  *
  * @param id 
  * @param parentId 
  * @param rootFolderId 
- * @param title 
- * @param fileEntryType 1 folder, 2 file. Present on every entry payload.
- * @param created 
+ * @param title The file entry title.
+ * @param fileEntryType The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File.
+ * @param created The UTC date when the file entry was created.
  * @param createdBy 
- * @param updated 
+ * @param updated The UTC date when the file entry was last updated.
  * @param updatedBy 
- * @param rootFolderType enum FolderType
- * @param parentRoomType enum FolderType
+ * @param rootFolderType The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+ * @param parentRoomType The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
  * @param originId 
  * @param originRoomId 
- * @param originTitle 
- * @param originRoomTitle 
- * @param providerItem 
- * @param providerKey 
- * @param providerId 
- * @param order Position within an indexed room.
- * @param version 
- * @param versionGroup 
- * @param contentLength Bytes, as a number. The REST DTO sends a formatted string.
- * @param fileType enum FileType
- * @param fileExst Includes the leading dot, e.g. \".docx\".
- * @param comment 
- * @param viewUrl Download URL. Carries no share token.
- * @param webUrl Browser URL. Carries no share token.
- * @param encrypted 
- * @param locked 
- * @param lockedBy 
- * @param isForm 
- * @param customFilterEnabled 
- * @param customFilterEnabledBy 
- * @param lastOpened 
- * @param vectorizationStatus enum VectorizationStatus
+ * @param originTitle The origin title of the file entry.
+ * @param originRoomTitle The origin room title of the file entry.
+ * @param providerItem Specifies whether the file entry is backed by a third-party provider or not.
+ * @param providerKey The third-party provider key of the file entry.
+ * @param providerId The third-party provider ID of the file entry.
+ * @param order The position of the file entry within an indexed room.
+ * @param version The file version.
+ * @param versionGroup The version group of the file.
+ * @param contentLength The file size in bytes, as a number; the REST FileDto sends a formatted string instead.
+ * @param fileType The file type. Values of `FileType`: 0 = Unknown, 1 = Archive, 2 = Video, 3 = Audio, 4 = Image, 5 = Spreadsheet, 6 = Presentation, 7 = Document, 10 = Pdf, 11 = Diagram.
+ * @param fileExst The file extension, including the leading dot.
+ * @param comment The comment on the current file version.
+ * @param viewUrl The URL the file content can be downloaded from. Carries no share token.
+ * @param webUrl The URL the file can be opened at in a browser. Carries no share token.
+ * @param encrypted Specifies whether the file is encrypted or not.
+ * @param locked Specifies whether the file is locked or not.
+ * @param lockedBy The user name of whoever locked the file.
+ * @param isForm Specifies whether the file is a form or not.
+ * @param customFilterEnabled Specifies whether a custom filter is enabled for the file or not.
+ * @param customFilterEnabledBy The user name of whoever enabled the custom filter.
+ * @param lastOpened The UTC date when the file was last opened.
+ * @param vectorizationStatus The AI vectorization status of the file. Values of `VectorizationStatus`: 0 = InProgress, 1 = Completed, 2 = Failed.
  */
 
 
@@ -80,30 +80,33 @@ data class FilePayload (
     @Json(name = "rootFolderId")
     val rootFolderId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The file entry title. */
     @Json(name = "title")
     val title: kotlin.String? = null,
 
-    /* 1 folder, 2 file. Present on every entry payload. */
+    /* The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     @Json(name = "fileEntryType")
     val fileEntryType: kotlin.Int? = null,
 
+    /* The UTC date when the file entry was created. */
     @Json(name = "created")
     val created: java.time.OffsetDateTime? = null,
 
     @Json(name = "createdBy")
     val createdBy: UserSummaryPayload? = null,
 
+    /* The UTC date when the file entry was last updated. */
     @Json(name = "updated")
     val updated: java.time.OffsetDateTime? = null,
 
     @Json(name = "updatedBy")
     val updatedBy: UserSummaryPayload? = null,
 
-    /* enum FolderType */
+    /* The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "rootFolderType")
     val rootFolderType: kotlin.Int? = null,
 
-    /* enum FolderType */
+    /* The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "parentRoomType")
     val parentRoomType: kotlin.Int? = null,
 
@@ -113,76 +116,91 @@ data class FilePayload (
     @Json(name = "originRoomId")
     val originRoomId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The origin title of the file entry. */
     @Json(name = "originTitle")
     val originTitle: kotlin.String? = null,
 
+    /* The origin room title of the file entry. */
     @Json(name = "originRoomTitle")
     val originRoomTitle: kotlin.String? = null,
 
+    /* Specifies whether the file entry is backed by a third-party provider or not. */
     @Json(name = "providerItem")
     val providerItem: kotlin.Boolean? = null,
 
+    /* The third-party provider key of the file entry. */
     @Json(name = "providerKey")
     val providerKey: kotlin.String? = null,
 
+    /* The third-party provider ID of the file entry. */
     @Json(name = "providerId")
     val providerId: kotlin.Int? = null,
 
-    /* Position within an indexed room. */
+    /* The position of the file entry within an indexed room. */
     @Json(name = "order")
     val order: kotlin.Int? = null,
 
+    /* The file version. */
     @Json(name = "version")
     val version: kotlin.Int? = null,
 
+    /* The version group of the file. */
     @Json(name = "versionGroup")
     val versionGroup: kotlin.Int? = null,
 
-    /* Bytes, as a number. The REST DTO sends a formatted string. */
+    /* The file size in bytes, as a number; the REST FileDto sends a formatted string instead. */
     @Json(name = "contentLength")
     val contentLength: kotlin.Long? = null,
 
-    /* enum FileType */
+    /* The file type. Values of `FileType`: 0 = Unknown, 1 = Archive, 2 = Video, 3 = Audio, 4 = Image, 5 = Spreadsheet, 6 = Presentation, 7 = Document, 10 = Pdf, 11 = Diagram. */
     @Json(name = "fileType")
     val fileType: kotlin.Int? = null,
 
-    /* Includes the leading dot, e.g. \".docx\". */
+    /* The file extension, including the leading dot. */
     @Json(name = "fileExst")
     val fileExst: kotlin.String? = null,
 
+    /* The comment on the current file version. */
     @Json(name = "comment")
     val comment: kotlin.String? = null,
 
-    /* Download URL. Carries no share token. */
+    /* The URL the file content can be downloaded from. Carries no share token. */
     @Json(name = "viewUrl")
     val viewUrl: kotlin.String? = null,
 
-    /* Browser URL. Carries no share token. */
+    /* The URL the file can be opened at in a browser. Carries no share token. */
     @Json(name = "webUrl")
     val webUrl: kotlin.String? = null,
 
+    /* Specifies whether the file is encrypted or not. */
     @Json(name = "encrypted")
     val encrypted: kotlin.Boolean? = null,
 
+    /* Specifies whether the file is locked or not. */
     @Json(name = "locked")
     val locked: kotlin.Boolean? = null,
 
+    /* The user name of whoever locked the file. */
     @Json(name = "lockedBy")
     val lockedBy: kotlin.String? = null,
 
+    /* Specifies whether the file is a form or not. */
     @Json(name = "isForm")
     val isForm: kotlin.Boolean? = null,
 
+    /* Specifies whether a custom filter is enabled for the file or not. */
     @Json(name = "customFilterEnabled")
     val customFilterEnabled: kotlin.Boolean? = null,
 
+    /* The user name of whoever enabled the custom filter. */
     @Json(name = "customFilterEnabledBy")
     val customFilterEnabledBy: kotlin.String? = null,
 
+    /* The UTC date when the file was last opened. */
     @Json(name = "lastOpened")
     val lastOpened: java.time.OffsetDateTime? = null,
 
-    /* enum VectorizationStatus */
+    /* The AI vectorization status of the file. Values of `VectorizationStatus`: 0 = InProgress, 1 = Completed, 2 = Failed. */
     @Json(name = "vectorizationStatus")
     val vectorizationStatus: kotlin.Int? = null
 

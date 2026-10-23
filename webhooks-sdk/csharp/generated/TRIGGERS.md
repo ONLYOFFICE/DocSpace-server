@@ -76,14 +76,6 @@ defaults — a property missing from the JSON means empty, `false` or zero, neve
 | `room.restored` | [`RoomPayload`](docs/RoomPayload.md) |
 | `room.copied` | [`RoomPayload`](docs/RoomPayload.md) |
 
-## Agents
-
-| Event | Payload |
-|---|---|
-| `agent.created` | [`RoomPayload`](docs/RoomPayload.md) |
-| `agent.updated` | [`RoomPayload`](docs/RoomPayload.md) |
-| `agent.deleted` | [`RoomPayload`](docs/RoomPayload.md) |
-
 ## Forms
 
 | Event | Payload |
@@ -91,6 +83,14 @@ defaults — a property missing from the JSON means empty, `false` or zero, neve
 | `form.submit` | [`FormSubmitPayload`](docs/FormSubmitPayload.md) |
 | `form.filled.out` | [`FilePayload`](docs/FilePayload.md) |
 | `form.stopped` | [`FilePayload`](docs/FilePayload.md) |
+
+## Agents
+
+| Event | Payload |
+|---|---|
+| `agent.created` | [`RoomPayload`](docs/RoomPayload.md) |
+| `agent.updated` | [`RoomPayload`](docs/RoomPayload.md) |
+| `agent.deleted` | [`RoomPayload`](docs/RoomPayload.md) |
 
 ## Events added later
 

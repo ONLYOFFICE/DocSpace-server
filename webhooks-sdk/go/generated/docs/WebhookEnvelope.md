@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Event** | Pointer to [**WebhookEventInfo**](WebhookEventInfo.md) |  | [optional] 
-**Payload** | Pointer to **interface{}** | Trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it.  | [optional] 
+**Payload** | Pointer to **interface{}** | The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it. | [optional] 
 **Webhook** | Pointer to [**WebhookConfigInfo**](WebhookConfigInfo.md) |  | [optional] 
 
 ## Methods

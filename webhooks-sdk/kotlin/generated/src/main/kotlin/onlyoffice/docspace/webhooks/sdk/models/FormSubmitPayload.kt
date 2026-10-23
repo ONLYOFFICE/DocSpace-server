@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * ASC.Files/Core/ApiModels/WebhookDto/FormSubmitWebhookDto.cs. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose `webhook.target.id` refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
+ * The pair of files carried by a form.submit webhook.  A copy of SubmittedFormData. The only trigger whose payload is a wrapper rather than a bare entry, and the only one whose webhook.target.id refers to a different entity - the original form - than the file that changed. form.filled.out and form.stopped do not use this shape; they carry a plain FileWebhookDto.
  *
  * @param originalForm 
  * @param submittedForm 

@@ -31,22 +31,27 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+var check = args.Contains("--check");
+var directory = WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory);
+var contractPath = Path.Combine(directory, WebhookContractGenerator.ContractFileName);
 
-namespace ASC.Webhooks.Core;
+var contract = WebhookContractGenerator.Generate(File.ReadAllText(Path.Combine(directory, WebhookContractGenerator.HeaderFileName)));
 
-/// <summary>
-/// Declares which payload model a webhook trigger carries.
-/// </summary>
-/// <remarks>
-/// Applied to a <see cref="WebhookTrigger"/> field and to the DTO class that models the payload. The two are
-/// paired by <see cref="WebhookPayloadKind"/>; see the remarks on that type for why the DTO cannot simply be
-/// named with <c>typeof</c> here.
-/// </remarks>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class)]
-public sealed class WebhookPayloadAttribute(WebhookPayloadKind kind) : Attribute
+if (check)
 {
-    /// <summary>
-    /// The payload kind this trigger sends, or that this DTO models.
-    /// </summary>
-    public WebhookPayloadKind Kind { get; } = kind;
+    var current = File.Exists(contractPath) ? File.ReadAllText(contractPath).ReplaceLineEndings("\n") : "";
+
+    if (current == contract)
+    {
+        Console.WriteLine($"{contractPath} is up to date.");
+        return 0;
+    }
+
+    Console.Error.WriteLine($"{contractPath} is out of date: run dotnet run --project common/Tools/ASC.Webhooks.Contract and commit the result.");
+    return 1;
 }
+
+File.WriteAllText(contractPath, contract, new UTF8Encoding(false));
+Console.WriteLine($"Wrote {contractPath}");
+
+return 0;

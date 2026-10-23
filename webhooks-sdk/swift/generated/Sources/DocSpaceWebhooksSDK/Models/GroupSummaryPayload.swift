@@ -7,13 +7,16 @@
 
 import Foundation
 
-/** A group referenced from another payload. */
+/** A group referenced from another webhook payload. */
 public struct GroupSummaryPayload: Sendable, Codable, Hashable {
 
+    /** The group ID. */
     public var id: UUID?
+    /** The group name. */
     public var name: String?
-    /** The user name of the group manager, not an id. */
+    /** The user name of the group manager, not an ID. */
     public var manager: String?
+    /** Specifies whether the group is a system group or not. */
     public var isSystem: Bool?
 
     public init(id: UUID? = nil, name: String? = nil, manager: String? = nil, isSystem: Bool? = nil) {

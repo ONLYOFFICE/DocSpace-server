@@ -1,7 +1,7 @@
 
 # FolderPayload
 
-ASC.Files/Core/ApiModels/WebhookDto/FolderWebhookDto.cs. The folder.* triggers. Rooms are RoomPayload, never this, even though both come from Folder<T>.  Not carried: inRoom, mute, new - all per-viewer state. 
+The folder carried by a folder.* webhook.  A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload (RoomWebhookDto) even though both come from Folder<T>, because room.* and folder.* are separate triggers whose contracts should be free to move independently. Not carried: inRoom, mute and new, all of them per-viewer state.
 
 ## Properties
 

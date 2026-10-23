@@ -4,11 +4,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | Pointer to **string** |  | [optional] 
-**DisplayName** | Pointer to **string** |  | [optional] 
-**UserName** | Pointer to **string** |  | [optional] 
-**Avatar** | Pointer to **string** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
-**ProfileUrl** | Pointer to **string** |  | [optional] 
+**Id** | Pointer to **string** | The user ID. | [optional] 
+**DisplayName** | Pointer to **string** | The HTML-encoded user display name. | [optional] 
+**UserName** | Pointer to **string** | The user name. | [optional] 
+**Avatar** | Pointer to **string** | The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
+**ProfileUrl** | Pointer to **string** | The user profile URL. | [optional] 
 
 ## Methods
 

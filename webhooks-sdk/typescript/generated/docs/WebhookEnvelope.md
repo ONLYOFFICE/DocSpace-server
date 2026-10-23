@@ -1,7 +1,7 @@
 
 # WebhookEnvelope
 
-The body of every delivery. `payload` is narrowed by `event.trigger` per x-docspace-trigger-payloads. 
+The body of every delivery. `payload` is narrowed by `event.trigger` per x-docspace-trigger-payloads.
 
 ## Properties
 

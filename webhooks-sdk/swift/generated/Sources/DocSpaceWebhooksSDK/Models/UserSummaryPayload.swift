@@ -7,14 +7,18 @@
 
 import Foundation
 
-/** A user referenced from another payload. */
+/** A user referenced from another webhook payload. */
 public struct UserSummaryPayload: Sendable, Codable, Hashable {
 
+    /** The user ID. */
     public var id: UUID?
+    /** The HTML-encoded user display name. */
     public var displayName: String?
+    /** The user name. */
     public var userName: String?
-    /** Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
+    /** The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
     public var avatar: String?
+    /** The user profile URL. */
     public var profileUrl: String?
 
     public init(id: UUID? = nil, displayName: String? = nil, userName: String? = nil, avatar: String? = nil, profileUrl: String? = nil) {

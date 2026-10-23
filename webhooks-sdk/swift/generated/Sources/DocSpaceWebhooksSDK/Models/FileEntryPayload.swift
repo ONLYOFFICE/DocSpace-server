@@ -7,31 +7,39 @@
 
 import Foundation
 
-/** ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What FilePayload, FolderPayload and RoomPayload have in common.  This schema is never sent on its own -- unlike the previous contract, where every file, folder, room, agent and form trigger sent exactly this and nothing else. The old payload was typed as the abstract FileEntry&lt;T&gt; at the publish site, so System.Text.Json serialized by DECLARED type and every File&lt;T&gt; and Folder&lt;T&gt; member was silently dropped: version, contentLength, fileType, folderType, filesCount, roomType never reached a receiver. That is fixed; the subtypes below carry their own fields.  Not carried, deliberately: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. Those answer \&quot;what may the caller see\&quot;, and a delivery has no caller - who receives it is decided by WebhookFileEntryAccessChecker against the subscription owner. Putting one user&#39;s permission matrix on the wire was both meaningless to the receiver and a disclosure.  */
+/** What every file, folder and room webhook payload has in common.  A copy of FileEntryDto, deliberately not derived from it, and populated straight from the domain entity rather than through FileEntryDtoHelper. Three groups of the REST fields are not carried:  - caller-relative state - access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. A delivery has no caller; who may receive it is already decided by WebhookFileEntryAccessChecker against the subscription owner, and putting one user&#39;s permission matrix on the wire would be both meaningless and a disclosure.  - anything the REST helper pays for per request - thumbnails, image dimensions (it opens the file stream), form-filling roles, view accessibility, external share links.  - subtype fields belong on the subtype, unlike the previous payload where File and Folder members were erased by the declared parameter type and never reached the wire at all.  Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime. */
 public struct FileEntryPayload: Sendable, Codable, Hashable {
 
     public var id: EntryId?
     public var parentId: EntryId?
     public var rootFolderId: EntryId?
+    /** The file entry title. */
     public var title: String?
-    /** 1 folder, 2 file. Present on every entry payload. */
+    /** The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     public var fileEntryType: Int?
+    /** The UTC date when the file entry was created. */
     public var created: Date?
     public var createdBy: UserSummaryPayload?
+    /** The UTC date when the file entry was last updated. */
     public var updated: Date?
     public var updatedBy: UserSummaryPayload?
-    /** enum FolderType */
+    /** The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var rootFolderType: Int?
-    /** enum FolderType */
+    /** The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     public var parentRoomType: Int?
     public var originId: EntryId?
     public var originRoomId: EntryId?
+    /** The origin title of the file entry. */
     public var originTitle: String?
+    /** The origin room title of the file entry. */
     public var originRoomTitle: String?
+    /** Specifies whether the file entry is backed by a third-party provider or not. */
     public var providerItem: Bool?
+    /** The third-party provider key of the file entry. */
     public var providerKey: String?
+    /** The third-party provider ID of the file entry. */
     public var providerId: Int?
-    /** Position within an indexed room. */
+    /** The position of the file entry within an indexed room. */
     public var order: Int?
 
     public init(id: EntryId? = nil, parentId: EntryId? = nil, rootFolderId: EntryId? = nil, title: String? = nil, fileEntryType: Int? = nil, created: Date? = nil, createdBy: UserSummaryPayload? = nil, updated: Date? = nil, updatedBy: UserSummaryPayload? = nil, rootFolderType: Int? = nil, parentRoomType: Int? = nil, originId: EntryId? = nil, originRoomId: EntryId? = nil, originTitle: String? = nil, originRoomTitle: String? = nil, providerItem: Bool? = nil, providerKey: String? = nil, providerId: Int? = nil, order: Int? = nil) {

@@ -7,17 +7,18 @@
 
 import Foundation
 
+/** The event a delivery reports. */
 public struct WebhookEventInfo: Sendable, Codable, Hashable {
 
-    /** Delivery-log record id, and the idempotency key. Stable across every resend of one delivery -- the server's automatic retries and a manual retry from the admin UI alike, since a manual retry requeues the same record rather than minting a new one. The same id therefore means the same logical event, always. It is also echoed in x-docspace-event-id. The delivery log keeps only the latest attempt of a record, so a manual retry overwrites the outcome of the previous one.  */
+    /** The ID of the first delivery-log record of the event, and the idempotency key. It is stable across every resend of one event, the server's automatic retries and a manual retry from the admin UI alike: a manual retry is a delivery-log record of its own, but it still sends the ID of the first one. The same ID therefore always means the same logical event. It is also echoed in the x-docspace-event-id header. */
     public var id: Int?
-    /** UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body.  */
+    /** When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp header, but that header is not signed, so replay defence must read this value from the verified body. */
     public var createOn: Date?
-    /** Acting user. Omitted when the empty guid (background jobs). */
+    /** The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for background jobs. */
     public var createBy: UUID?
-    /** e.g. \"file.created\". \"*\" only in the legacy-payload fallback. */
+    /** The trigger name, e.g. \"file.created\". \"*\" only in the legacy-payload fallback. */
     public var trigger: String?
-    /** Bit value of the trigger. Omitted when 0 (the \"*\" fallback). */
+    /** The bit value of the trigger. Omitted when 0, the \"*\" fallback. */
     public var triggerId: Int64?
 
     public init(id: Int? = nil, createOn: Date? = nil, createBy: UUID? = nil, trigger: String? = nil, triggerId: Int64? = nil) {

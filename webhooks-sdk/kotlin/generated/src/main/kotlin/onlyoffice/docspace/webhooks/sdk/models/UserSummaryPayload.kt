@@ -28,31 +28,35 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * A user referenced from another payload.
+ * A user referenced from another webhook payload.
  *
- * @param id 
- * @param displayName 
- * @param userName 
- * @param avatar Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
- * @param profileUrl 
+ * @param id The user ID.
+ * @param displayName The HTML-encoded user display name.
+ * @param userName The user name.
+ * @param avatar The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
+ * @param profileUrl The user profile URL.
  */
 
 
 data class UserSummaryPayload (
 
+    /* The user ID. */
     @Json(name = "id")
     val id: java.util.UUID? = null,
 
+    /* The HTML-encoded user display name. */
     @Json(name = "displayName")
     val displayName: kotlin.String? = null,
 
+    /* The user name. */
     @Json(name = "userName")
     val userName: kotlin.String? = null,
 
-    /* Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
+    /* The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
     @Json(name = "avatar")
     val avatar: kotlin.String? = null,
 
+    /* The user profile URL. */
     @Json(name = "profileUrl")
     val profileUrl: kotlin.String? = null
 

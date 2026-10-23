@@ -1,12 +1,13 @@
 # ContactPayload
 
+A user contact.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **str** |  | [optional] 
-**value** | **str** |  | [optional] 
+**type** | **str** | The contact type. | [optional] 
+**value** | **str** | The contact value. | [optional] 
 
 ## Example
 

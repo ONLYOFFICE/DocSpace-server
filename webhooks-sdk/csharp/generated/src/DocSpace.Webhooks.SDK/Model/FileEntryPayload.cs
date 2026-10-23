@@ -1,7 +1,7 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://github.com/openapitools/openapi-generator.git
@@ -27,7 +27,7 @@ using OpenAPIDateConverter = DocSpace.Webhooks.SDK.Client.OpenAPIDateConverter;
 namespace DocSpace.Webhooks.SDK.Model
 {
     /// <summary>
-    /// ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What FilePayload, FolderPayload and RoomPayload have in common.  This schema is never sent on its own - - unlike the previous contract, where every file, folder, room, agent and form trigger sent exactly this and nothing else. The old payload was typed as the abstract FileEntry&lt;T&gt; at the publish site, so System.Text.Json serialized by DECLARED type and every File&lt;T&gt; and Folder&lt;T&gt; member was silently dropped: version, contentLength, fileType, folderType, filesCount, roomType never reached a receiver. That is fixed; the subtypes below carry their own fields.  Not carried, deliberately: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. Those answer \&quot;what may the caller see\&quot;, and a delivery has no caller - who receives it is decided by WebhookFileEntryAccessChecker against the subscription owner. Putting one user&#39;s permission matrix on the wire was both meaningless to the receiver and a disclosure. 
+    /// What every file, folder and room webhook payload has in common.  A copy of FileEntryDto, deliberately not derived from it, and populated straight from the domain entity rather than through FileEntryDtoHelper. Three groups of the REST fields are not carried:  - caller-relative state - access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. A delivery has no caller; who may receive it is already decided by WebhookFileEntryAccessChecker against the subscription owner, and putting one user&#39;s permission matrix on the wire would be both meaningless and a disclosure.  - anything the REST helper pays for per request - thumbnails, image dimensions (it opens the file stream), form-filling roles, view accessibility, external share links.  - subtype fields belong on the subtype, unlike the previous payload where File and Folder members were erased by the declared parameter type and never reached the wire at all.  Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime.
     /// </summary>
     [DataContract(Name = "FileEntryPayload")]
     public partial class FileEntryPayload : IValidatableObject
@@ -38,22 +38,22 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <param name="id">id.</param>
         /// <param name="parentId">parentId.</param>
         /// <param name="rootFolderId">rootFolderId.</param>
-        /// <param name="title">title.</param>
-        /// <param name="fileEntryType">1 folder, 2 file. Present on every entry payload..</param>
-        /// <param name="created">created.</param>
+        /// <param name="title">The file entry title..</param>
+        /// <param name="fileEntryType">The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of &#x60;FileEntryType&#x60;: 1 &#x3D; Folder, 2 &#x3D; File..</param>
+        /// <param name="created">The UTC date when the file entry was created..</param>
         /// <param name="createdBy">createdBy.</param>
-        /// <param name="updated">updated.</param>
+        /// <param name="updated">The UTC date when the file entry was last updated..</param>
         /// <param name="updatedBy">updatedBy.</param>
-        /// <param name="rootFolderType">enum FolderType.</param>
-        /// <param name="parentRoomType">enum FolderType.</param>
+        /// <param name="rootFolderType">The root folder type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai..</param>
+        /// <param name="parentRoomType">The parent room type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai..</param>
         /// <param name="originId">originId.</param>
         /// <param name="originRoomId">originRoomId.</param>
-        /// <param name="originTitle">originTitle.</param>
-        /// <param name="originRoomTitle">originRoomTitle.</param>
-        /// <param name="providerItem">providerItem.</param>
-        /// <param name="providerKey">providerKey.</param>
-        /// <param name="providerId">providerId.</param>
-        /// <param name="order">Position within an indexed room..</param>
+        /// <param name="originTitle">The origin title of the file entry..</param>
+        /// <param name="originRoomTitle">The origin room title of the file entry..</param>
+        /// <param name="providerItem">Specifies whether the file entry is backed by a third-party provider or not..</param>
+        /// <param name="providerKey">The third-party provider key of the file entry..</param>
+        /// <param name="providerId">The third-party provider ID of the file entry..</param>
+        /// <param name="order">The position of the file entry within an indexed room..</param>
         public FileEntryPayload(EntryId id = default, EntryId parentId = default, EntryId rootFolderId = default, string title = default, int fileEntryType = default, DateTime created = default, UserSummaryPayload createdBy = default, DateTime updated = default, UserSummaryPayload updatedBy = default, int rootFolderType = default, int parentRoomType = default, EntryId originId = default, EntryId originRoomId = default, string originTitle = default, string originRoomTitle = default, bool providerItem = default, string providerKey = default, int providerId = default, int order = default)
         {
             this.Id = id;
@@ -96,21 +96,23 @@ namespace DocSpace.Webhooks.SDK.Model
         public EntryId RootFolderId { get; set; }
 
         /// <summary>
-        /// Gets or Sets Title
+        /// The file entry title.
         /// </summary>
+        /// <value>The file entry title.</value>
         [DataMember(Name = "title", EmitDefaultValue = false)]
         public string Title { get; set; }
 
         /// <summary>
-        /// 1 folder, 2 file. Present on every entry payload.
+        /// The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of &#x60;FileEntryType&#x60;: 1 &#x3D; Folder, 2 &#x3D; File.
         /// </summary>
-        /// <value>1 folder, 2 file. Present on every entry payload.</value>
+        /// <value>The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of &#x60;FileEntryType&#x60;: 1 &#x3D; Folder, 2 &#x3D; File.</value>
         [DataMember(Name = "fileEntryType", EmitDefaultValue = false)]
         public int FileEntryType { get; set; }
 
         /// <summary>
-        /// Gets or Sets Created
+        /// The UTC date when the file entry was created.
         /// </summary>
+        /// <value>The UTC date when the file entry was created.</value>
         [DataMember(Name = "created", EmitDefaultValue = false)]
         public DateTime Created { get; set; }
 
@@ -121,8 +123,9 @@ namespace DocSpace.Webhooks.SDK.Model
         public UserSummaryPayload CreatedBy { get; set; }
 
         /// <summary>
-        /// Gets or Sets Updated
+        /// The UTC date when the file entry was last updated.
         /// </summary>
+        /// <value>The UTC date when the file entry was last updated.</value>
         [DataMember(Name = "updated", EmitDefaultValue = false)]
         public DateTime Updated { get; set; }
 
@@ -133,16 +136,16 @@ namespace DocSpace.Webhooks.SDK.Model
         public UserSummaryPayload UpdatedBy { get; set; }
 
         /// <summary>
-        /// enum FolderType
+        /// The root folder type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.
         /// </summary>
-        /// <value>enum FolderType</value>
+        /// <value>The root folder type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.</value>
         [DataMember(Name = "rootFolderType", EmitDefaultValue = false)]
         public int RootFolderType { get; set; }
 
         /// <summary>
-        /// enum FolderType
+        /// The parent room type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.
         /// </summary>
-        /// <value>enum FolderType</value>
+        /// <value>The parent room type of the file entry. Values of &#x60;FolderType&#x60;: 0 &#x3D; DEFAULT, 1 &#x3D; COMMON, 2 &#x3D; BUNCH, 3 &#x3D; TRASH, 5 &#x3D; USER, 6 &#x3D; SHARE, 8 &#x3D; Projects, 10 &#x3D; Favorites, 11 &#x3D; Recent, 12 &#x3D; Templates, 13 &#x3D; Privacy, 14 &#x3D; VirtualRooms, 15 &#x3D; FillingFormsRoom, 16 &#x3D; EditingRoom, 19 &#x3D; CustomRoom, 20 &#x3D; Archive, 21 &#x3D; ThirdpartyBackup, 22 &#x3D; PublicRoom, 25 &#x3D; ReadyFormFolder, 26 &#x3D; InProcessFormFolder, 27 &#x3D; FormFillingFolderDone, 28 &#x3D; FormFillingFolderInProgress, 29 &#x3D; VirtualDataRoom, 30 &#x3D; RoomTemplates, 31 &#x3D; AiRoom, 32 &#x3D; Knowledge, 33 &#x3D; ChatOutputs, 34 &#x3D; AiAgents, 35 &#x3D; DefaultTemplates, 36 &#x3D; Forms, 37 &#x3D; Ai.</value>
         [DataMember(Name = "parentRoomType", EmitDefaultValue = false)]
         public int ParentRoomType { get; set; }
 
@@ -159,39 +162,44 @@ namespace DocSpace.Webhooks.SDK.Model
         public EntryId OriginRoomId { get; set; }
 
         /// <summary>
-        /// Gets or Sets OriginTitle
+        /// The origin title of the file entry.
         /// </summary>
+        /// <value>The origin title of the file entry.</value>
         [DataMember(Name = "originTitle", EmitDefaultValue = false)]
         public string OriginTitle { get; set; }
 
         /// <summary>
-        /// Gets or Sets OriginRoomTitle
+        /// The origin room title of the file entry.
         /// </summary>
+        /// <value>The origin room title of the file entry.</value>
         [DataMember(Name = "originRoomTitle", EmitDefaultValue = false)]
         public string OriginRoomTitle { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProviderItem
+        /// Specifies whether the file entry is backed by a third-party provider or not.
         /// </summary>
+        /// <value>Specifies whether the file entry is backed by a third-party provider or not.</value>
         [DataMember(Name = "providerItem", EmitDefaultValue = true)]
         public bool ProviderItem { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProviderKey
+        /// The third-party provider key of the file entry.
         /// </summary>
+        /// <value>The third-party provider key of the file entry.</value>
         [DataMember(Name = "providerKey", EmitDefaultValue = false)]
         public string ProviderKey { get; set; }
 
         /// <summary>
-        /// Gets or Sets ProviderId
+        /// The third-party provider ID of the file entry.
         /// </summary>
+        /// <value>The third-party provider ID of the file entry.</value>
         [DataMember(Name = "providerId", EmitDefaultValue = false)]
         public int ProviderId { get; set; }
 
         /// <summary>
-        /// Position within an indexed room.
+        /// The position of the file entry within an indexed room.
         /// </summary>
-        /// <value>Position within an indexed room.</value>
+        /// <value>The position of the file entry within an indexed room.</value>
         [DataMember(Name = "order", EmitDefaultValue = false)]
         public int Order { get; set; }
 

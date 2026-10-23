@@ -41,7 +41,6 @@ namespace ASC.Api.Core.Webhook.Payloads;
 /// thousands of users and every one of them would be expanded into the body of every group event. Receivers
 /// that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed.
 /// </remarks>
-[WebhookPayload(WebhookPayloadKind.Group)]
 public class GroupWebhookDto
 {
     /// <summary>
@@ -57,7 +56,7 @@ public class GroupWebhookDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The parent group ID; null for a top-level group.
+    /// The parent group ID; absent for a top-level group.
     /// </summary>
     /// <example>3f5c2a1e-8b7d-4e6f-9a0b-1c2d3e4f5a6b</example>
     public Guid? Parent { get; set; }
@@ -115,7 +114,7 @@ public class GroupSummaryWebhookDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The user name of the group manager.
+    /// The user name of the group manager, not an ID.
     /// </summary>
     /// <example>Mike.Zanyatski</example>
     public string Manager { get; set; }

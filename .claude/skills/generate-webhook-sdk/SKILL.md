@@ -1,6 +1,6 @@
 ---
 name: generate-webhook-sdk
-description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): checking that the hand-written contract docspace-webhooks.yaml still matches the webhook payload DTOs and triggers, running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update webhooks-sdk, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing anything under webhooks-sdk/<lang>/generated/, changing payload DTOs or WebhookTrigger itself."
+description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): regenerating the contract docspace-webhooks.yaml from the webhook payload DTOs and triggers (common/Tools/ASC.Webhooks.Contract), running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update webhooks-sdk, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing anything under webhooks-sdk/<lang>/generated/, changing payload DTOs or WebhookTrigger itself."
 ---
 
 # Generating the webhook SDKs
@@ -14,18 +14,19 @@ add webhook commands to that tool as a side effect.
 
 The skill does three things:
 
-1. **Check the contract** against the code it describes — always.
+1. **Regenerate the contract** from the code it describes — always.
 2. **Generate and verify** the requested languages, step by step, with no shell script — stage A.
 3. **Report** what changed and how each language verified; on request, **check the packages** —
    stage B.
 
 ## Ground rules
 
-- **The contract is hand-written and nothing checks it.** `common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`
-  is not emitted by a build. `WebhookPayloadPairingTests` checks trigger ↔ payload kind ↔ DTO in C#
-  only; it never reads the YAML. So a DTO change that was not mirrored in the contract regenerates
-  nine SDKs that are confidently wrong. Step 1 below exists for that reason — do not skip it because
-  the user only asked to "regenerate".
+- **The contract is generated, never edited.** `common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`
+  is written by `common/Tools/ASC.Webhooks.Contract` from the payload DTOs, the envelope,
+  `WebhookTrigger` and the hand-written `docspace-webhooks.header.yaml` next to it. Nothing
+  regenerates it on its own, so a DTO change that was not followed by a run of the tool leaves the
+  SDKs describing the old payload. Step 1 below exists for that reason — do not skip it because the
+  user only asked to "regenerate the SDKs".
 - **No script, no particular shell.** There is no generation script: this skill *is* the procedure,
   and its steps go through `openapi-generator-cli`, `python` and each language's own toolchain, which
   behave the same in bash and PowerShell on every OS. Where a step is a file operation that differs
@@ -56,9 +57,8 @@ The skill does three things:
 
 ## Algorithm
 
-1. **Contract check** (below). If the contract is behind the code, say exactly what differs and ask
-   whether to update the contract first (`AskUserQuestion`). Updating it is part of the job when the
-   user agrees — it is the only correct place for the change.
+1. **Contract** (below): regenerate it and review its diff. A change in it that the code change does
+   not explain is a finding — report it before generating the SDKs.
 2. **Languages** — from the request; if none named, ask (`AskUserQuestion`, multiSelect) out of the
    targets read from `targets.conf`, plus "all". A contract change normally means **all**: every
    language carries the same models.
@@ -68,37 +68,41 @@ The skill does three things:
    `webhooks-sdk/`, and anything the contract check found.
 5. **Stage B** only when asked (publishing, packaging changes, "does it still install").
 
-## 1. Contract check
+## 1. Contract
 
-What the contract mirrors, and where it lives:
+From the repository root:
 
-| Contract part | Source in code |
+```bash
+dotnet run --project common/Tools/ASC.Webhooks.Contract
+git diff -- common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml
+```
+
+`--check` instead writes nothing and exits 1 when the committed file is out of date. Where each part
+of the contract comes from — and therefore where a change to it belongs:
+
+| Contract part | Source |
 | --- | --- |
 | `components.schemas.*Payload` (user, group, file, folder, room, form submit, summaries) | `common/ASC.Api.Core/Webhook/Payloads/*WebhookDto.cs` (user, group) and `products/ASC.Files/Core/ApiModels/WebhookDto/*.cs` (files, folders, rooms, forms) |
 | the envelope (`WebhookEnvelope`, `WebhookEventInfo`, `WebhookConfigInfo`, `WebhookTargetInfo`) | `common/ASC.Webhooks.Core/WebhookPayload.cs` |
-| `x-docspace-trigger-payloads` (trigger → payload) | `[WebhookPayload(...)]` on `common/ASC.Webhooks.Core/WebhookTrigger.cs` fields |
-| serialization rules in `info.description` | `WebhookPublisher.cs` (`_serializerOptions`) |
+| a schema `description` | the type's `<summary>` and `<remarks>` |
+| a property `description` | the property's `<summary>`; for an enum the generator appends its members |
+| `x-docspace-trigger-payloads.map` | the trigger table in `WebhookContractGenerator` (by trigger family, with per-trigger exceptions), in `[Order]` order |
+| `info`, the transport and serialization notes, `EntryId`, the map's description | `common/ASC.Webhooks.Core/Contract/docspace-webhooks.header.yaml` |
 
-Do it from the diff, not from memory:
+How the generator reads the code, so that its output can be predicted:
 
-```bash
-git diff <base>... -- common/ASC.Api.Core/Webhook/Payloads products/ASC.Files/Core/ApiModels/WebhookDto common/ASC.Webhooks.Core/WebhookTrigger.cs common/ASC.Webhooks.Core/WebhookPayload.cs common/ASC.Webhooks.Core/WebhookPublisher.cs
-git diff <base>... -- common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml
-```
+- Property names and the set of properties come from `WebhookPublisher.CreateSerializerOptions`:
+  camelCase, `[JsonIgnore]` honoured, read-only getters included.
+- A property typed by the entry ID parameter `T` becomes `EntryId`; a base class becomes `allOf`;
+  `int` is `int32`, `long` `int64`; `[EmailAddress]` adds `format: email`; enums are integers.
+- A schema name is the DTO name with `WebhookDto` replaced by `Payload` (the envelope types have
+  fixed names). A payload type that does not end in `WebhookDto` stops the generator.
+- A `$ref` property carries no description: several generators turn a `$ref` with siblings into a
+  new inline model.
+- A member without a `<summary>` stops the generator with the list of them.
 
-For every DTO property added, removed or renamed, and for every changed meaning (null vs default,
-encoding, absolute vs relative URL), the YAML needs the matching change — including the property
-`description`, which is what lands in every language's `docs/<Model>.md`. Serialized names are
-camelCase (`PropertyNamingPolicy = CamelCase`); a property that is `[JsonIgnore]` or never set is
-not on the wire. A trigger added to `WebhookTrigger.cs` needs its row in
-`x-docspace-trigger-payloads` — that block is what `tools/gen-trigger-map.py` turns into each
-language's dispatch table.
-
-When the trigger/DTO pairing changed, also run the pairing tests (fast, no Aspire):
-
-```bash
-dotnet test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*WebhookPayloadPairing*"
-```
+A trigger whose family the table does not know stops the generator: add the family, or an
+exception for the trigger, to the table.
 
 ## Stage A — generate and verify
 

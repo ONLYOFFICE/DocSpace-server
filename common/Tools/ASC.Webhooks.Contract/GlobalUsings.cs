@@ -31,53 +31,18 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.ComponentModel.DataAnnotations;
+global using System.Reflection;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization.Metadata;
+global using System.Xml.Linq;
 
-namespace ASC.Webhooks.Core;
+global using ASC.Api.Core.Webhook.Payloads;
+global using ASC.Files.Core.ApiModels.WebhookDto;
+global using ASC.Webhooks.Contract;
+global using ASC.Webhooks.Core;
 
-/// <summary>
-/// The kind of payload a webhook trigger carries.
-/// </summary>
-/// <remarks>
-/// This is the join key between a <see cref="WebhookTrigger"/> and the DTO that models its payload.
-/// Both sides carry a <see cref="WebhookPayloadAttribute"/> with the same kind: the trigger, so that
-/// <c>WebhookTrigger.cs</c> stays the single readable index of which trigger sends which model, and the
-/// DTO, which cannot be named from here because it lives in a product assembly above this one.
-/// The pairing is resolved by reflection and is the source of truth for the webhook SDK contract.
-/// </remarks>
-public enum WebhookPayloadKind
-{
-    /// <summary>
-    /// No payload model. Only the <see cref="WebhookTrigger.All"/> catch-all uses this.
-    /// </summary>
-    None = 0,
-
-    /// <summary>
-    /// A portal user.
-    /// </summary>
-    User = 1,
-
-    /// <summary>
-    /// A group of portal users.
-    /// </summary>
-    Group = 2,
-
-    /// <summary>
-    /// A file.
-    /// </summary>
-    File = 3,
-
-    /// <summary>
-    /// A folder that is not a room.
-    /// </summary>
-    Folder = 4,
-
-    /// <summary>
-    /// A room, including an AI agent room.
-    /// </summary>
-    Room = 5,
-
-    /// <summary>
-    /// A submitted form together with the original form it was filled from.
-    /// </summary>
-    FormSubmit = 6
-}
+global using YamlDotNet.Core;
+global using YamlDotNet.Core.Events;
+global using YamlDotNet.RepresentationModel;

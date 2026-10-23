@@ -4,16 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | Pointer to **int32** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Url** | Pointer to **string** |  | [optional] 
-**Triggers** | Pointer to **[]string** | Subscribed events, or [\&quot;*\&quot;] for the catch-all. | [optional] 
+**Id** | Pointer to **int32** | The subscription ID. | [optional] 
+**Name** | Pointer to **string** | The subscription name given by its creator. | [optional] 
+**Url** | Pointer to **string** | The URL the delivery is posted to. | [optional] 
+**Triggers** | Pointer to **[]string** | The subscribed events, or [\&quot;*\&quot;] for the catch-all. | [optional] 
 **Target** | Pointer to [**WebhookTargetInfo**](WebhookTargetInfo.md) |  | [optional] 
-**LastFailureOn** | Pointer to **time.Time** |  | [optional] 
-**LastFailureContent** | Pointer to **string** |  | [optional] 
-**LastSuccessOn** | Pointer to **time.Time** |  | [optional] 
-**RetryCount** | Pointer to **int32** | Omitted on the first attempt (0). Present from attempt 2. | [optional] 
-**RetryOn** | Pointer to **time.Time** |  | [optional] 
+**LastFailureOn** | Pointer to **time.Time** | When the last delivery to this subscription failed, in UTC; absent when none has failed. | [optional] 
+**LastFailureContent** | Pointer to **string** | What the receiver answered, or the network error, when the last delivery to this subscription failed. | [optional] 
+**LastSuccessOn** | Pointer to **time.Time** | When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet. | [optional] 
+**RetryCount** | Pointer to **int32** | How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2. | [optional] 
+**RetryOn** | Pointer to **time.Time** | When the next retry is scheduled, in UTC; absent when no retry is pending. | [optional] 
 
 ## Methods
 

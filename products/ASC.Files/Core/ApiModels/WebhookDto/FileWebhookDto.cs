@@ -37,9 +37,10 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 /// The file carried by a file.* webhook, and by form.filled.out and form.stopped.
 /// </summary>
 /// <remarks>
-/// A copy of FileDto. See FileEntryWebhookDto for what the webhook contract leaves out and why.
+/// A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the
+/// form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in
+/// particular opens the file stream to measure the image.
 /// </remarks>
-[WebhookPayload(WebhookPayloadKind.File)]
 public class FileWebhookDto<T> : FileEntryWebhookDto<T>
 {
     /// <inheritdoc/>
@@ -58,7 +59,7 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public int VersionGroup { get; set; }
 
     /// <summary>
-    /// The file size in bytes.
+    /// The file size in bytes, as a number; the REST FileDto sends a formatted string instead.
     /// </summary>
     /// <example>12345</example>
     public long ContentLength { get; set; }
@@ -82,13 +83,13 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public string Comment { get; set; }
 
     /// <summary>
-    /// The URL the file content can be downloaded from.
+    /// The URL the file content can be downloaded from. Carries no share token.
     /// </summary>
     /// <example>https://example.com/filehandler.ashx?action=download&amp;fileid=10</example>
     public string ViewUrl { get; set; }
 
     /// <summary>
-    /// The URL the file can be opened at in a browser.
+    /// The URL the file can be opened at in a browser. Carries no share token.
     /// </summary>
     /// <example>https://example.com/doceditor?fileid=10</example>
     public string WebUrl { get; set; }

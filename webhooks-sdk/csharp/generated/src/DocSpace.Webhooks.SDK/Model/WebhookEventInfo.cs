@@ -1,7 +1,7 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
  * The version of the OpenAPI document: 1.0.0
  * Generated by: https://github.com/openapitools/openapi-generator.git
@@ -27,7 +27,7 @@ using OpenAPIDateConverter = DocSpace.Webhooks.SDK.Client.OpenAPIDateConverter;
 namespace DocSpace.Webhooks.SDK.Model
 {
     /// <summary>
-    /// WebhookEventInfo
+    /// The event a delivery reports.
     /// </summary>
     [DataContract(Name = "WebhookEventInfo")]
     public partial class WebhookEventInfo : IValidatableObject
@@ -35,11 +35,11 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="WebhookEventInfo" /> class.
         /// </summary>
-        /// <param name="id">Delivery-log record id, and the idempotency key. Stable across every resend of one delivery - - the server&#39;s automatic retries and a manual retry from the admin UI alike, since a manual retry requeues the same record rather than minting a new one. The same id therefore means the same logical event, always. It is also echoed in x-docspace-event-id. The delivery log keeps only the latest attempt of a record, so a manual retry overwrites the outcome of the previous one. .</param>
-        /// <param name="createOn">UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body. .</param>
-        /// <param name="createBy">Acting user. Omitted when the empty guid (background jobs)..</param>
-        /// <param name="trigger">e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback..</param>
-        /// <param name="triggerId">Bit value of the trigger. Omitted when 0 (the \&quot;*\&quot; fallback)..</param>
+        /// <param name="id">The ID of the first delivery-log record of the event, and the idempotency key. It is stable across every resend of one event, the server&#39;s automatic retries and a manual retry from the admin UI alike: a manual retry is a delivery-log record of its own, but it still sends the ID of the first one. The same ID therefore always means the same logical event. It is also echoed in the x-docspace-event-id header..</param>
+        /// <param name="createOn">When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp header, but that header is not signed, so replay defence must read this value from the verified body..</param>
+        /// <param name="createBy">The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for background jobs..</param>
+        /// <param name="trigger">The trigger name, e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback..</param>
+        /// <param name="triggerId">The bit value of the trigger. Omitted when 0, the \&quot;*\&quot; fallback..</param>
         public WebhookEventInfo(int id = default, DateTime createOn = default, Guid createBy = default, string trigger = default, long triggerId = default)
         {
             this.Id = id;
@@ -50,37 +50,37 @@ namespace DocSpace.Webhooks.SDK.Model
         }
 
         /// <summary>
-        /// Delivery-log record id, and the idempotency key. Stable across every resend of one delivery - - the server&#39;s automatic retries and a manual retry from the admin UI alike, since a manual retry requeues the same record rather than minting a new one. The same id therefore means the same logical event, always. It is also echoed in x-docspace-event-id. The delivery log keeps only the latest attempt of a record, so a manual retry overwrites the outcome of the previous one. 
+        /// The ID of the first delivery-log record of the event, and the idempotency key. It is stable across every resend of one event, the server&#39;s automatic retries and a manual retry from the admin UI alike: a manual retry is a delivery-log record of its own, but it still sends the ID of the first one. The same ID therefore always means the same logical event. It is also echoed in the x-docspace-event-id header.
         /// </summary>
-        /// <value>Delivery-log record id, and the idempotency key. Stable across every resend of one delivery - - the server&#39;s automatic retries and a manual retry from the admin UI alike, since a manual retry requeues the same record rather than minting a new one. The same id therefore means the same logical event, always. It is also echoed in x-docspace-event-id. The delivery log keeps only the latest attempt of a record, so a manual retry overwrites the outcome of the previous one. </value>
+        /// <value>The ID of the first delivery-log record of the event, and the idempotency key. It is stable across every resend of one event, the server&#39;s automatic retries and a manual retry from the admin UI alike: a manual retry is a delivery-log record of its own, but it still sends the ID of the first one. The same ID therefore always means the same logical event. It is also echoed in the x-docspace-event-id header.</value>
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public int Id { get; set; }
 
         /// <summary>
-        /// UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body. 
+        /// When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp header, but that header is not signed, so replay defence must read this value from the verified body.
         /// </summary>
-        /// <value>UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body. </value>
+        /// <value>When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp header, but that header is not signed, so replay defence must read this value from the verified body.</value>
         [DataMember(Name = "createOn", EmitDefaultValue = false)]
         public DateTime CreateOn { get; set; }
 
         /// <summary>
-        /// Acting user. Omitted when the empty guid (background jobs).
+        /// The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for background jobs.
         /// </summary>
-        /// <value>Acting user. Omitted when the empty guid (background jobs).</value>
+        /// <value>The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for background jobs.</value>
         [DataMember(Name = "createBy", EmitDefaultValue = false)]
         public Guid CreateBy { get; set; }
 
         /// <summary>
-        /// e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback.
+        /// The trigger name, e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback.
         /// </summary>
-        /// <value>e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback.</value>
+        /// <value>The trigger name, e.g. \&quot;file.created\&quot;. \&quot;*\&quot; only in the legacy-payload fallback.</value>
         [DataMember(Name = "trigger", EmitDefaultValue = false)]
         public string Trigger { get; set; }
 
         /// <summary>
-        /// Bit value of the trigger. Omitted when 0 (the \&quot;*\&quot; fallback).
+        /// The bit value of the trigger. Omitted when 0, the \&quot;*\&quot; fallback.
         /// </summary>
-        /// <value>Bit value of the trigger. Omitted when 0 (the \&quot;*\&quot; fallback).</value>
+        /// <value>The bit value of the trigger. Omitted when 0, the \&quot;*\&quot; fallback.</value>
         [DataMember(Name = "triggerId", EmitDefaultValue = false)]
         public long TriggerId { get; set; }
 

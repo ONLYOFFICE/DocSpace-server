@@ -1,6 +1,7 @@
 
 # ContactPayload
 
+A user contact.
 
 ## Properties
 

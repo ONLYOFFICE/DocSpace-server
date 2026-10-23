@@ -10,17 +10,24 @@ import Foundation
 /** The subscription, plus its delivery state at send time. */
 public struct WebhookConfigInfo: Sendable, Codable, Hashable {
 
+    /** The subscription ID. */
     public var id: Int?
+    /** The subscription name given by its creator. */
     public var name: String?
+    /** The URL the delivery is posted to. */
     public var url: String?
-    /** Subscribed events, or [\"*\"] for the catch-all. */
+    /** The subscribed events, or [\"*\"] for the catch-all. */
     public var triggers: [String]?
     public var target: WebhookTargetInfo?
+    /** When the last delivery to this subscription failed, in UTC; absent when none has failed. */
     public var lastFailureOn: Date?
+    /** What the receiver answered, or the network error, when the last delivery to this subscription failed. */
     public var lastFailureContent: String?
+    /** When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet. */
     public var lastSuccessOn: Date?
-    /** Omitted on the first attempt (0). Present from attempt 2. */
+    /** How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2. */
     public var retryCount: Int?
+    /** When the next retry is scheduled, in UTC; absent when no retry is pending. */
     public var retryOn: Date?
 
     public init(id: Int? = nil, name: String? = nil, url: String? = nil, triggers: [String]? = nil, target: WebhookTargetInfo? = nil, lastFailureOn: Date? = nil, lastFailureContent: String? = nil, lastSuccessOn: Date? = nil, retryCount: Int? = nil, retryOn: Date? = nil) {

@@ -30,10 +30,10 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * The body of every delivery. `payload` is narrowed by `event.trigger` per x-docspace-trigger-payloads. 
+ * The body of every delivery. `payload` is narrowed by `event.trigger` per x-docspace-trigger-payloads.
  *
  * @param event 
- * @param payload Trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it. 
+ * @param payload The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it.
  * @param webhook 
  */
 
@@ -43,7 +43,7 @@ data class WebhookEnvelope (
     @Json(name = "event")
     val event: WebhookEventInfo? = null,
 
-    /* Trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it.  */
+    /* The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime narrows it. */
     @Json(name = "payload")
     val payload: kotlin.Any? = null,
 

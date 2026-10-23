@@ -47,12 +47,12 @@ public static class WebhookTriggers
             ["room.deleted"] = typeof(RoomPayload),
             ["room.restored"] = typeof(RoomPayload),
             ["room.copied"] = typeof(RoomPayload),
-            ["agent.created"] = typeof(RoomPayload),
-            ["agent.updated"] = typeof(RoomPayload),
-            ["agent.deleted"] = typeof(RoomPayload),
             ["form.submit"] = typeof(FormSubmitPayload),
             ["form.filled.out"] = typeof(FilePayload),
             ["form.stopped"] = typeof(FilePayload),
+            ["agent.created"] = typeof(RoomPayload),
+            ["agent.updated"] = typeof(RoomPayload),
+            ["agent.deleted"] = typeof(RoomPayload),
         };
 
     /// <summary>

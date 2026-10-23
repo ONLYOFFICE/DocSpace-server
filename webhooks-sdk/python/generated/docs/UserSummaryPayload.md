@@ -1,16 +1,16 @@
 # UserSummaryPayload
 
-A user referenced from another payload.
+A user referenced from another webhook payload.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **UUID** |  | [optional] 
-**display_name** | **str** |  | [optional] 
-**user_name** | **str** |  | [optional] 
-**avatar** | **str** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
-**profile_url** | **str** |  | [optional] 
+**id** | **UUID** | The user ID. | [optional] 
+**display_name** | **str** | The HTML-encoded user display name. | [optional] 
+**user_name** | **str** | The user name. | [optional] 
+**avatar** | **str** | The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
+**profile_url** | **str** | The user profile URL. | [optional] 
 
 ## Example
 

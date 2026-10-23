@@ -3,7 +3,7 @@
 """
     ONLYOFFICE DocSpace Webhooks
 
-    Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+    Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
     The version of the OpenAPI document: 1.0.0
     Generated by OpenAPI Generator (https://openapi-generator.tech)
@@ -30,45 +30,45 @@ from pydantic_core import to_jsonable_python
 
 class UserPayload(BaseModel):
     """
-    ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
+    The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader's role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. `contacts` appears once, as a typed list, rather than twice in two shapes.
     """ # noqa: E501
-    id: Optional[UUID] = None
-    display_name: Optional[StrictStr] = Field(default=None, alias="displayName")
-    first_name: Optional[StrictStr] = Field(default=None, alias="firstName")
-    last_name: Optional[StrictStr] = Field(default=None, alias="lastName")
-    user_name: Optional[StrictStr] = Field(default=None, alias="userName")
-    email: Optional[StrictStr] = None
-    contacts: Optional[List[ContactPayload]] = None
-    status: Optional[StrictInt] = Field(default=None, description="enum EmployeeStatus")
-    activation_status: Optional[StrictInt] = Field(default=None, description="enum EmployeeActivationStatus (flags), AutoGenerated masked off", alias="activationStatus")
-    terminated: Optional[datetime] = None
-    department: Optional[StrictStr] = Field(default=None, description="Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).")
-    groups: Optional[List[GroupSummaryPayload]] = None
-    location: Optional[StrictStr] = None
-    notes: Optional[StrictStr] = None
-    is_admin: Optional[StrictBool] = Field(default=None, alias="isAdmin")
-    is_room_admin: Optional[StrictBool] = Field(default=None, alias="isRoomAdmin")
-    is_owner: Optional[StrictBool] = Field(default=None, alias="isOwner")
-    is_visitor: Optional[StrictBool] = Field(default=None, alias="isVisitor")
-    is_collaborator: Optional[StrictBool] = Field(default=None, alias="isCollaborator")
-    is_ldap: Optional[StrictBool] = Field(default=None, alias="isLDAP")
-    is_sso: Optional[StrictBool] = Field(default=None, alias="isSSO")
-    list_admin_modules: Optional[List[StrictStr]] = Field(default=None, alias="listAdminModules")
-    culture_name: Optional[StrictStr] = Field(default=None, alias="cultureName")
-    mobile_phone: Optional[StrictStr] = Field(default=None, alias="mobilePhone")
-    mobile_phone_activation_status: Optional[StrictInt] = Field(default=None, description="enum MobilePhoneActivationStatus", alias="mobilePhoneActivationStatus")
-    quota_limit: Optional[StrictInt] = Field(default=None, alias="quotaLimit")
-    used_space: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="usedSpace")
-    is_custom_quota: Optional[StrictBool] = Field(default=None, alias="isCustomQuota")
+    id: Optional[UUID] = Field(default=None, description="The user ID.")
+    display_name: Optional[StrictStr] = Field(default=None, description="The HTML-encoded user display name formatted according to the portal default format.", alias="displayName")
+    first_name: Optional[StrictStr] = Field(default=None, description="The user first name.", alias="firstName")
+    last_name: Optional[StrictStr] = Field(default=None, description="The user last name.", alias="lastName")
+    user_name: Optional[StrictStr] = Field(default=None, description="The user name.", alias="userName")
+    email: Optional[StrictStr] = Field(default=None, description="The user email address.")
+    contacts: Optional[List[ContactPayload]] = Field(default=None, description="The list of user contacts.")
+    status: Optional[StrictInt] = Field(default=None, description="The user status. Flags of `EmployeeStatus`: 1 = Active, 2 = Terminated, 4 = Pending, 5 = Default, 7 = All.")
+    activation_status: Optional[StrictInt] = Field(default=None, description="The user activation status, with the `AutoGenerated` flag masked off. Flags of `EmployeeActivationStatus`: 0 = NotActivated, 1 = Activated, 2 = Pending, 4 = AutoGenerated.", alias="activationStatus")
+    terminated: Optional[datetime] = Field(default=None, description="The UTC date when the user was terminated.")
+    department: Optional[StrictStr] = Field(default=None, description="The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.")
+    groups: Optional[List[GroupSummaryPayload]] = Field(default=None, description="The list of groups the user belongs to. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.")
+    location: Optional[StrictStr] = Field(default=None, description="The user location.")
+    notes: Optional[StrictStr] = Field(default=None, description="The user notes.")
+    is_admin: Optional[StrictBool] = Field(default=None, description="Specifies whether the user is a DocSpace administrator or not.", alias="isAdmin")
+    is_room_admin: Optional[StrictBool] = Field(default=None, description="Specifies whether the user is a room administrator or not.", alias="isRoomAdmin")
+    is_owner: Optional[StrictBool] = Field(default=None, description="Specifies whether the user is the portal owner or not.", alias="isOwner")
+    is_visitor: Optional[StrictBool] = Field(default=None, description="Specifies whether the user is a guest or not.", alias="isVisitor")
+    is_collaborator: Optional[StrictBool] = Field(default=None, description="Specifies whether the user is a user with limited rights or not.", alias="isCollaborator")
+    is_ldap: Optional[StrictBool] = Field(default=None, description="Specifies whether the user comes from LDAP or not.", alias="isLDAP")
+    is_sso: Optional[StrictBool] = Field(default=None, description="Specifies whether the user comes from SSO or not.", alias="isSSO")
+    list_admin_modules: Optional[List[StrictStr]] = Field(default=None, description="The list of the modules the user administers.", alias="listAdminModules")
+    culture_name: Optional[StrictStr] = Field(default=None, description="The user culture code.", alias="cultureName")
+    mobile_phone: Optional[StrictStr] = Field(default=None, description="The user mobile phone number.", alias="mobilePhone")
+    mobile_phone_activation_status: Optional[StrictInt] = Field(default=None, description="The mobile phone activation status. Flags of `MobilePhoneActivationStatus`: 0 = NotActivated, 1 = Activated.", alias="mobilePhoneActivationStatus")
+    quota_limit: Optional[StrictInt] = Field(default=None, description="The user quota limit in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.", alias="quotaLimit")
+    used_space: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The portal space used by the user in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.", alias="usedSpace")
+    is_custom_quota: Optional[StrictBool] = Field(default=None, description="Specifies whether the user has a custom quota or not. Sent only to a `DocSpaceAdmin` or to the user themselves.", alias="isCustomQuota")
     created_by: Optional[UserSummaryPayload] = Field(default=None, alias="createdBy")
-    registration_date: Optional[datetime] = Field(default=None, alias="registrationDate")
-    has_avatar: Optional[StrictBool] = Field(default=None, alias="hasAvatar")
-    avatar: Optional[StrictStr] = Field(default=None, description="Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.")
-    avatar_original: Optional[StrictStr] = Field(default=None, description="Absolute URL of the original avatar, with the same hash parameter.", alias="avatarOriginal")
-    avatar_max: Optional[StrictStr] = Field(default=None, description="Absolute URL of the 200x200 avatar, with the same hash parameter.", alias="avatarMax")
-    avatar_medium: Optional[StrictStr] = Field(default=None, description="Absolute URL of the 48x48 avatar, with the same hash parameter.", alias="avatarMedium")
-    avatar_small: Optional[StrictStr] = Field(default=None, description="Absolute URL of the 32x32 avatar, with the same hash parameter.", alias="avatarSmall")
-    profile_url: Optional[StrictStr] = Field(default=None, alias="profileUrl")
+    registration_date: Optional[datetime] = Field(default=None, description="The UTC date when the user was registered.", alias="registrationDate")
+    has_avatar: Optional[StrictBool] = Field(default=None, description="Specifies whether the user has an avatar or not.", alias="hasAvatar")
+    avatar: Optional[StrictStr] = Field(default=None, description="The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.")
+    avatar_original: Optional[StrictStr] = Field(default=None, description="The absolute URL of the original avatar, with the same hash parameter.", alias="avatarOriginal")
+    avatar_max: Optional[StrictStr] = Field(default=None, description="The absolute URL of the 200x200 avatar, with the same hash parameter.", alias="avatarMax")
+    avatar_medium: Optional[StrictStr] = Field(default=None, description="The absolute URL of the 48x48 avatar, with the same hash parameter.", alias="avatarMedium")
+    avatar_small: Optional[StrictStr] = Field(default=None, description="The absolute URL of the 32x32 avatar, with the same hash parameter.", alias="avatarSmall")
+    profile_url: Optional[StrictStr] = Field(default=None, description="The user profile URL.", alias="profileUrl")
     __properties: ClassVar[List[str]] = ["id", "displayName", "firstName", "lastName", "userName", "email", "contacts", "status", "activationStatus", "terminated", "department", "groups", "location", "notes", "isAdmin", "isRoomAdmin", "isOwner", "isVisitor", "isCollaborator", "isLDAP", "isSSO", "listAdminModules", "cultureName", "mobilePhone", "mobilePhoneActivationStatus", "quotaLimit", "usedSpace", "isCustomQuota", "createdBy", "registrationDate", "hasAvatar", "avatar", "avatarOriginal", "avatarMax", "avatarMedium", "avatarSmall", "profileUrl"]
 
     model_config = ConfigDict(

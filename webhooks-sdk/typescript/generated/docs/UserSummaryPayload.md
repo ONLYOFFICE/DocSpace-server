@@ -1,7 +1,7 @@
 
 # UserSummaryPayload
 
-A user referenced from another payload.
+A user referenced from another webhook payload.
 
 ## Properties
 

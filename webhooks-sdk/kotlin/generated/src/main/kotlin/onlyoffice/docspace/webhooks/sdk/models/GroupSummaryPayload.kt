@@ -28,27 +28,30 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * A group referenced from another payload.
+ * A group referenced from another webhook payload.
  *
- * @param id 
- * @param name 
- * @param manager The user name of the group manager, not an id.
- * @param isSystem 
+ * @param id The group ID.
+ * @param name The group name.
+ * @param manager The user name of the group manager, not an ID.
+ * @param isSystem Specifies whether the group is a system group or not.
  */
 
 
 data class GroupSummaryPayload (
 
+    /* The group ID. */
     @Json(name = "id")
     val id: java.util.UUID? = null,
 
+    /* The group name. */
     @Json(name = "name")
     val name: kotlin.String? = null,
 
-    /* The user name of the group manager, not an id. */
+    /* The user name of the group manager, not an ID. */
     @Json(name = "manager")
     val manager: kotlin.String? = null,
 
+    /* Specifies whether the group is a system group or not. */
     @Json(name = "isSystem")
     val isSystem: kotlin.Boolean? = null
 

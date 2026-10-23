@@ -7,17 +7,23 @@
 
 import Foundation
 
-/** ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}.  */
+/** The group carried by a group.* webhook.  A copy of GroupDto, deliberately not derived from it. The member list is not carried: a group can hold thousands of users and every one of them would be expanded into the body of every group event. Receivers that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed. */
 public struct GroupPayload: Sendable, Codable, Hashable {
 
+    /** The group ID. */
     public var id: UUID?
+    /** The group name. */
     public var name: String?
-    /** ID of the parent group; absent for a top-level group. */
+    /** The parent group ID; absent for a top-level group. */
     public var parent: UUID?
+    /** The group category ID. */
     public var category: UUID?
+    /** Specifies whether the group comes from LDAP or not. */
     public var isLDAP: Bool?
+    /** Specifies whether the group is a system group or not. */
     public var isSystem: Bool?
     public var manager: UserSummaryPayload?
+    /** The number of group members. */
     public var membersCount: Int?
 
     public init(id: UUID? = nil, name: String? = nil, parent: UUID? = nil, category: UUID? = nil, isLDAP: Bool? = nil, isSystem: Bool? = nil, manager: UserSummaryPayload? = nil, membersCount: Int? = nil) {

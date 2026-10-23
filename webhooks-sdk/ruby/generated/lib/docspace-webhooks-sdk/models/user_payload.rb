@@ -1,7 +1,7 @@
 =begin
 #ONLYOFFICE DocSpace Webhooks
 
-#Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+#Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).  Which trigger sends which payload is the map below, x-docspace-trigger-payloads.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Each request waits 30s for a response, so   receivers must acknowledge fast and process out of band. Any non-2xx   answer, timeout or network error is a failed attempt; a failed delivery   is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.   7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per   installation as webhooks:retryIntervals), and then abandoned. A portal   admin or the subscription's creator can retry it manually from the   delivery log, which starts a fresh series under the same event.id.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
 The version of the OpenAPI document: 1.0.0
 
@@ -14,89 +14,116 @@ require 'date'
 require 'time'
 
 module DocspaceWebhooksSdk
-  # ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
+  # The user carried by a user.* webhook.  A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker against the subscription owner, and the fields the REST API shows by the reader's role (groups, quota, CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync). Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the REST API uses.  Not carried, deliberately: sid, ssoNameId and ssoSessionId (the LDAP and SAML identifiers and a SAML session ID, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim and shared. `contacts` appears once, as a typed list, rather than twice in two shapes.
   class UserPayload < ApiModelBase
+    # The user ID.
     attr_accessor :id
 
+    # The HTML-encoded user display name formatted according to the portal default format.
     attr_accessor :display_name
 
+    # The user first name.
     attr_accessor :first_name
 
+    # The user last name.
     attr_accessor :last_name
 
+    # The user name.
     attr_accessor :user_name
 
+    # The user email address.
     attr_accessor :email
 
+    # The list of user contacts.
     attr_accessor :contacts
 
-    # enum EmployeeStatus
+    # The user status. Flags of `EmployeeStatus`: 1 = Active, 2 = Terminated, 4 = Pending, 5 = Default, 7 = All.
     attr_accessor :status
 
-    # enum EmployeeActivationStatus (flags), AutoGenerated masked off
+    # The user activation status, with the `AutoGenerated` flag masked off. Flags of `EmployeeActivationStatus`: 0 = NotActivated, 1 = Activated, 2 = Pending, 4 = AutoGenerated.
     attr_accessor :activation_status
 
+    # The UTC date when the user was terminated.
     attr_accessor :terminated
 
-    # Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
+    # The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.
     attr_accessor :department
 
+    # The list of groups the user belongs to. Omitted when the subscription owner is a `User` or a `Guest` and the event is about someone else.
     attr_accessor :groups
 
+    # The user location.
     attr_accessor :location
 
+    # The user notes.
     attr_accessor :notes
 
+    # Specifies whether the user is a DocSpace administrator or not.
     attr_accessor :is_admin
 
+    # Specifies whether the user is a room administrator or not.
     attr_accessor :is_room_admin
 
+    # Specifies whether the user is the portal owner or not.
     attr_accessor :is_owner
 
+    # Specifies whether the user is a guest or not.
     attr_accessor :is_visitor
 
+    # Specifies whether the user is a user with limited rights or not.
     attr_accessor :is_collaborator
 
+    # Specifies whether the user comes from LDAP or not.
     attr_accessor :is_ldap
 
+    # Specifies whether the user comes from SSO or not.
     attr_accessor :is_sso
 
+    # The list of the modules the user administers.
     attr_accessor :list_admin_modules
 
+    # The user culture code.
     attr_accessor :culture_name
 
+    # The user mobile phone number.
     attr_accessor :mobile_phone
 
-    # enum MobilePhoneActivationStatus
+    # The mobile phone activation status. Flags of `MobilePhoneActivationStatus`: 0 = NotActivated, 1 = Activated.
     attr_accessor :mobile_phone_activation_status
 
+    # The user quota limit in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
     attr_accessor :quota_limit
 
+    # The portal space used by the user in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
     attr_accessor :used_space
 
+    # Specifies whether the user has a custom quota or not. Sent only to a `DocSpaceAdmin` or to the user themselves.
     attr_accessor :is_custom_quota
 
     attr_accessor :created_by
 
+    # The UTC date when the user was registered.
     attr_accessor :registration_date
 
+    # Specifies whether the user has an avatar or not.
     attr_accessor :has_avatar
 
-    # Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
+    # The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
     attr_accessor :avatar
 
-    # Absolute URL of the original avatar, with the same hash parameter.
+    # The absolute URL of the original avatar, with the same hash parameter.
     attr_accessor :avatar_original
 
-    # Absolute URL of the 200x200 avatar, with the same hash parameter.
+    # The absolute URL of the 200x200 avatar, with the same hash parameter.
     attr_accessor :avatar_max
 
-    # Absolute URL of the 48x48 avatar, with the same hash parameter.
+    # The absolute URL of the 48x48 avatar, with the same hash parameter.
     attr_accessor :avatar_medium
 
-    # Absolute URL of the 32x32 avatar, with the same hash parameter.
+    # The absolute URL of the 32x32 avatar, with the same hash parameter.
     attr_accessor :avatar_small
 
+    # The user profile URL.
     attr_accessor :profile_url
 
     # Attribute mapping from ruby-style variable name to JSON key.

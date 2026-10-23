@@ -29,31 +29,31 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * ASC.Files/Core/ApiModels/WebhookDto/FolderWebhookDto.cs. The folder.* triggers. Rooms are RoomPayload, never this, even though both come from Folder<T>.  Not carried: inRoom, mute, new - all per-viewer state. 
+ * The folder carried by a folder.* webhook.  A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload (RoomWebhookDto) even though both come from Folder<T>, because room.* and folder.* are separate triggers whose contracts should be free to move independently. Not carried: inRoom, mute and new, all of them per-viewer state.
  *
  * @param id 
  * @param parentId 
  * @param rootFolderId 
- * @param title 
- * @param fileEntryType 1 folder, 2 file. Present on every entry payload.
- * @param created 
+ * @param title The file entry title.
+ * @param fileEntryType The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File.
+ * @param created The UTC date when the file entry was created.
  * @param createdBy 
- * @param updated 
+ * @param updated The UTC date when the file entry was last updated.
  * @param updatedBy 
- * @param rootFolderType enum FolderType
- * @param parentRoomType enum FolderType
+ * @param rootFolderType The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+ * @param parentRoomType The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
  * @param originId 
  * @param originRoomId 
- * @param originTitle 
- * @param originRoomTitle 
- * @param providerItem 
- * @param providerKey 
- * @param providerId 
- * @param order Position within an indexed room.
- * @param filesCount 
- * @param foldersCount 
- * @param type enum FolderType
- * @param isShareable 
+ * @param originTitle The origin title of the file entry.
+ * @param originRoomTitle The origin room title of the file entry.
+ * @param providerItem Specifies whether the file entry is backed by a third-party provider or not.
+ * @param providerKey The third-party provider key of the file entry.
+ * @param providerId The third-party provider ID of the file entry.
+ * @param order The position of the file entry within an indexed room.
+ * @param filesCount The number of files the folder directly contains.
+ * @param foldersCount The number of subfolders the folder directly contains.
+ * @param type The folder type. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+ * @param isShareable Specifies whether the folder can be shared or not.
  */
 
 
@@ -68,30 +68,33 @@ data class FolderPayload (
     @Json(name = "rootFolderId")
     val rootFolderId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The file entry title. */
     @Json(name = "title")
     val title: kotlin.String? = null,
 
-    /* 1 folder, 2 file. Present on every entry payload. */
+    /* The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     @Json(name = "fileEntryType")
     val fileEntryType: kotlin.Int? = null,
 
+    /* The UTC date when the file entry was created. */
     @Json(name = "created")
     val created: java.time.OffsetDateTime? = null,
 
     @Json(name = "createdBy")
     val createdBy: UserSummaryPayload? = null,
 
+    /* The UTC date when the file entry was last updated. */
     @Json(name = "updated")
     val updated: java.time.OffsetDateTime? = null,
 
     @Json(name = "updatedBy")
     val updatedBy: UserSummaryPayload? = null,
 
-    /* enum FolderType */
+    /* The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "rootFolderType")
     val rootFolderType: kotlin.Int? = null,
 
-    /* enum FolderType */
+    /* The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "parentRoomType")
     val parentRoomType: kotlin.Int? = null,
 
@@ -101,35 +104,43 @@ data class FolderPayload (
     @Json(name = "originRoomId")
     val originRoomId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The origin title of the file entry. */
     @Json(name = "originTitle")
     val originTitle: kotlin.String? = null,
 
+    /* The origin room title of the file entry. */
     @Json(name = "originRoomTitle")
     val originRoomTitle: kotlin.String? = null,
 
+    /* Specifies whether the file entry is backed by a third-party provider or not. */
     @Json(name = "providerItem")
     val providerItem: kotlin.Boolean? = null,
 
+    /* The third-party provider key of the file entry. */
     @Json(name = "providerKey")
     val providerKey: kotlin.String? = null,
 
+    /* The third-party provider ID of the file entry. */
     @Json(name = "providerId")
     val providerId: kotlin.Int? = null,
 
-    /* Position within an indexed room. */
+    /* The position of the file entry within an indexed room. */
     @Json(name = "order")
     val order: kotlin.Int? = null,
 
+    /* The number of files the folder directly contains. */
     @Json(name = "filesCount")
     val filesCount: kotlin.Int? = null,
 
+    /* The number of subfolders the folder directly contains. */
     @Json(name = "foldersCount")
     val foldersCount: kotlin.Int? = null,
 
-    /* enum FolderType */
+    /* The folder type. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "type")
     val type: kotlin.Int? = null,
 
+    /* Specifies whether the folder can be shared or not. */
     @Json(name = "isShareable")
     val isShareable: kotlin.Boolean? = null
 

@@ -29,39 +29,39 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * ASC.Files/Core/ApiModels/WebhookDto/RoomWebhookDto.cs. The room.* triggers and every agent.* trigger - an agent is an AI room and has the same shape today.  Not carried: logo, watermark, lifetime, tags, chatSettings. Each needs per-request URL building or an extra query; read them from GET api/2.0/files/rooms/{id}. 
+ * The room carried by a room.* webhook, and by every agent.* webhook.  A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and has the same shape today, so agent.* sends it as well. Not carried: logo, watermark, lifetime, tags and chatSettings. Each needs per-request URL building or an extra query that a delivery should not pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
  *
  * @param id 
  * @param parentId 
  * @param rootFolderId 
- * @param title 
- * @param fileEntryType 1 folder, 2 file. Present on every entry payload.
- * @param created 
+ * @param title The file entry title.
+ * @param fileEntryType The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File.
+ * @param created The UTC date when the file entry was created.
  * @param createdBy 
- * @param updated 
+ * @param updated The UTC date when the file entry was last updated.
  * @param updatedBy 
- * @param rootFolderType enum FolderType
- * @param parentRoomType enum FolderType
+ * @param rootFolderType The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+ * @param parentRoomType The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
  * @param originId 
  * @param originRoomId 
- * @param originTitle 
- * @param originRoomTitle 
- * @param providerItem 
- * @param providerKey 
- * @param providerId 
- * @param order Position within an indexed room.
- * @param roomType enum RoomType
- * @param type enum FolderType
- * @param filesCount 
- * @param foldersCount 
- * @param `private` 
- * @param indexing 
- * @param denyDownload 
- * @param pinned 
- * @param quotaLimit 
- * @param usedSpace 
- * @param color 
- * @param cover 
+ * @param originTitle The origin title of the file entry.
+ * @param originRoomTitle The origin room title of the file entry.
+ * @param providerItem Specifies whether the file entry is backed by a third-party provider or not.
+ * @param providerKey The third-party provider key of the file entry.
+ * @param providerId The third-party provider ID of the file entry.
+ * @param order The position of the file entry within an indexed room.
+ * @param roomType The room type. Values of `RoomType`: 1 = FillingFormsRoom, 2 = EditingRoom, 5 = CustomRoom, 6 = PublicRoom, 8 = VirtualDataRoom, 9 = AiRoom.
+ * @param type The underlying folder type of the room. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+ * @param filesCount The number of files the room directly contains.
+ * @param foldersCount The number of folders the room directly contains.
+ * @param `private` Specifies whether the room is private or not.
+ * @param indexing Specifies whether the room is indexed or not.
+ * @param denyDownload Specifies whether downloading from the room is denied or not.
+ * @param pinned Specifies whether the room is pinned or not.
+ * @param quotaLimit The room quota limit in bytes.
+ * @param usedSpace The space used by the room in bytes.
+ * @param color The room cover colour.
+ * @param cover The room cover name.
  */
 
 
@@ -76,30 +76,33 @@ data class RoomPayload (
     @Json(name = "rootFolderId")
     val rootFolderId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The file entry title. */
     @Json(name = "title")
     val title: kotlin.String? = null,
 
-    /* 1 folder, 2 file. Present on every entry payload. */
+    /* The file entry type: 1 for a folder, 2 for a file. Present on every entry payload. Flags of `FileEntryType`: 1 = Folder, 2 = File. */
     @Json(name = "fileEntryType")
     val fileEntryType: kotlin.Int? = null,
 
+    /* The UTC date when the file entry was created. */
     @Json(name = "created")
     val created: java.time.OffsetDateTime? = null,
 
     @Json(name = "createdBy")
     val createdBy: UserSummaryPayload? = null,
 
+    /* The UTC date when the file entry was last updated. */
     @Json(name = "updated")
     val updated: java.time.OffsetDateTime? = null,
 
     @Json(name = "updatedBy")
     val updatedBy: UserSummaryPayload? = null,
 
-    /* enum FolderType */
+    /* The root folder type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "rootFolderType")
     val rootFolderType: kotlin.Int? = null,
 
-    /* enum FolderType */
+    /* The parent room type of the file entry. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "parentRoomType")
     val parentRoomType: kotlin.Int? = null,
 
@@ -109,60 +112,75 @@ data class RoomPayload (
     @Json(name = "originRoomId")
     val originRoomId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The origin title of the file entry. */
     @Json(name = "originTitle")
     val originTitle: kotlin.String? = null,
 
+    /* The origin room title of the file entry. */
     @Json(name = "originRoomTitle")
     val originRoomTitle: kotlin.String? = null,
 
+    /* Specifies whether the file entry is backed by a third-party provider or not. */
     @Json(name = "providerItem")
     val providerItem: kotlin.Boolean? = null,
 
+    /* The third-party provider key of the file entry. */
     @Json(name = "providerKey")
     val providerKey: kotlin.String? = null,
 
+    /* The third-party provider ID of the file entry. */
     @Json(name = "providerId")
     val providerId: kotlin.Int? = null,
 
-    /* Position within an indexed room. */
+    /* The position of the file entry within an indexed room. */
     @Json(name = "order")
     val order: kotlin.Int? = null,
 
-    /* enum RoomType */
+    /* The room type. Values of `RoomType`: 1 = FillingFormsRoom, 2 = EditingRoom, 5 = CustomRoom, 6 = PublicRoom, 8 = VirtualDataRoom, 9 = AiRoom. */
     @Json(name = "roomType")
     val roomType: kotlin.Int? = null,
 
-    /* enum FolderType */
+    /* The underlying folder type of the room. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai. */
     @Json(name = "type")
     val type: kotlin.Int? = null,
 
+    /* The number of files the room directly contains. */
     @Json(name = "filesCount")
     val filesCount: kotlin.Int? = null,
 
+    /* The number of folders the room directly contains. */
     @Json(name = "foldersCount")
     val foldersCount: kotlin.Int? = null,
 
+    /* Specifies whether the room is private or not. */
     @Json(name = "private")
     val `private`: kotlin.Boolean? = null,
 
+    /* Specifies whether the room is indexed or not. */
     @Json(name = "indexing")
     val indexing: kotlin.Boolean? = null,
 
+    /* Specifies whether downloading from the room is denied or not. */
     @Json(name = "denyDownload")
     val denyDownload: kotlin.Boolean? = null,
 
+    /* Specifies whether the room is pinned or not. */
     @Json(name = "pinned")
     val pinned: kotlin.Boolean? = null,
 
+    /* The room quota limit in bytes. */
     @Json(name = "quotaLimit")
     val quotaLimit: kotlin.Long? = null,
 
+    /* The space used by the room in bytes. */
     @Json(name = "usedSpace")
     val usedSpace: kotlin.Long? = null,
 
+    /* The room cover colour. */
     @Json(name = "color")
     val color: kotlin.String? = null,
 
+    /* The room cover name. */
     @Json(name = "cover")
     val cover: kotlin.String? = null
 

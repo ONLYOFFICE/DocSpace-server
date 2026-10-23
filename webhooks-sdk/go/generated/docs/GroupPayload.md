@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Parent** | Pointer to **string** | ID of the parent group; absent for a top-level group. | [optional] 
-**Category** | Pointer to **string** |  | [optional] 
-**IsLDAP** | Pointer to **bool** |  | [optional] 
-**IsSystem** | Pointer to **bool** |  | [optional] 
+**Id** | Pointer to **string** | The group ID. | [optional] 
+**Name** | Pointer to **string** | The group name. | [optional] 
+**Parent** | Pointer to **string** | The parent group ID; absent for a top-level group. | [optional] 
+**Category** | Pointer to **string** | The group category ID. | [optional] 
+**IsLDAP** | Pointer to **bool** | Specifies whether the group comes from LDAP or not. | [optional] 
+**IsSystem** | Pointer to **bool** | Specifies whether the group is a system group or not. | [optional] 
 **Manager** | Pointer to [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 
-**MembersCount** | Pointer to **int32** |  | [optional] 
+**MembersCount** | Pointer to **int32** | The number of group members. | [optional] 
 
 ## Methods
 

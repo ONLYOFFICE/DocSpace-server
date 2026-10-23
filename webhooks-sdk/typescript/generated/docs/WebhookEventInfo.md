@@ -1,6 +1,7 @@
 
 # WebhookEventInfo
 
+The event a delivery reports.
 
 ## Properties
 

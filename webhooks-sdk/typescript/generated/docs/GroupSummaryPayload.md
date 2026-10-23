@@ -1,7 +1,7 @@
 
 # GroupSummaryPayload
 
-A group referenced from another payload.
+A group referenced from another webhook payload.
 
 ## Properties
 

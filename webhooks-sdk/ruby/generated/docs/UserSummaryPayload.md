@@ -4,11 +4,11 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **String** |  | [optional] |
-| **display_name** | **String** |  | [optional] |
-| **user_name** | **String** |  | [optional] |
-| **avatar** | **String** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] |
-| **profile_url** | **String** |  | [optional] |
+| **id** | **String** | The user ID. | [optional] |
+| **display_name** | **String** | The HTML-encoded user display name. | [optional] |
+| **user_name** | **String** | The user name. | [optional] |
+| **avatar** | **String** | The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] |
+| **profile_url** | **String** | The user profile URL. | [optional] |
 
 ## Example
 

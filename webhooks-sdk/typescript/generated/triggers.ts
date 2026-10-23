@@ -52,12 +52,12 @@ export interface TriggerPayloadMap {
     'room.deleted': RoomPayload;
     'room.restored': RoomPayload;
     'room.copied': RoomPayload;
-    'agent.created': RoomPayload;
-    'agent.updated': RoomPayload;
-    'agent.deleted': RoomPayload;
     'form.submit': FormSubmitPayload;
     'form.filled.out': FilePayload;
     'form.stopped': FilePayload;
+    'agent.created': RoomPayload;
+    'agent.updated': RoomPayload;
+    'agent.deleted': RoomPayload;
     '*': unknown;
 }
 
@@ -101,12 +101,12 @@ export const PAYLOAD_DESERIALIZERS: {
     'room.deleted': RoomPayloadFromJSON,
     'room.restored': RoomPayloadFromJSON,
     'room.copied': RoomPayloadFromJSON,
-    'agent.created': RoomPayloadFromJSON,
-    'agent.updated': RoomPayloadFromJSON,
-    'agent.deleted': RoomPayloadFromJSON,
     'form.submit': FormSubmitPayloadFromJSON,
     'form.filled.out': FilePayloadFromJSON,
     'form.stopped': FilePayloadFromJSON,
+    'agent.created': RoomPayloadFromJSON,
+    'agent.updated': RoomPayloadFromJSON,
+    'agent.deleted': RoomPayloadFromJSON,
     '*': identity,
 };
 

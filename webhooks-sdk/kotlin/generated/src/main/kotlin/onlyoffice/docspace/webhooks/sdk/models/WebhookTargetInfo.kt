@@ -28,10 +28,10 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * Present only when the subscription is scoped to one entity.
+ * The entity the subscription is scoped to. Present only when the subscription is scoped to one entity.
  *
  * @param id 
- * @param type The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. 
+ * @param type The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum: every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.
  */
 
 
@@ -40,7 +40,7 @@ data class WebhookTargetInfo (
     @Json(name = "id")
     val id: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
-    /* The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.  */
+    /* The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum: every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. */
     @Json(name = "type")
     val type: kotlin.String? = null
 

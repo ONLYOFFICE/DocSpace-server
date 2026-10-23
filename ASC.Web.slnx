@@ -42,6 +42,7 @@
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
   <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
   <Project Path="common/services/ASC.TelegramService/ASC.TelegramService.csproj" />
+  <Project Path="common/Tools/ASC.Webhooks.Contract/ASC.Webhooks.Contract.csproj" />
   <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
   <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />
   <Project Path="products/ASC.AI/Worker/ASC.AI.Worker.csproj" />

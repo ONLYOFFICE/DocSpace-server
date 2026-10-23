@@ -4,10 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | Pointer to **string** |  | [optional] 
-**Name** | Pointer to **string** |  | [optional] 
-**Manager** | Pointer to **string** | The user name of the group manager, not an id. | [optional] 
-**IsSystem** | Pointer to **bool** |  | [optional] 
+**Id** | Pointer to **string** | The group ID. | [optional] 
+**Name** | Pointer to **string** | The group name. | [optional] 
+**Manager** | Pointer to **string** | The user name of the group manager, not an ID. | [optional] 
+**IsSystem** | Pointer to **bool** | Specifies whether the group is a system group or not. | [optional] 
 
 ## Methods
 

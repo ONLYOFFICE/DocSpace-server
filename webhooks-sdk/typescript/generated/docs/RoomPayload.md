@@ -1,7 +1,7 @@
 
 # RoomPayload
 
-ASC.Files/Core/ApiModels/WebhookDto/RoomWebhookDto.cs. The room.* triggers and every agent.* trigger - an agent is an AI room and has the same shape today.  Not carried: logo, watermark, lifetime, tags, chatSettings. Each needs per-request URL building or an extra query; read them from GET api/2.0/files/rooms/{id}. 
+The room carried by a room.* webhook, and by every agent.* webhook.  A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and has the same shape today, so agent.* sends it as well. Not carried: logo, watermark, lifetime, tags and chatSettings. Each needs per-request URL building or an extra query that a delivery should not pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
 
 ## Properties
 

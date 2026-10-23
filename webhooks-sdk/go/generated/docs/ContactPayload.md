@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Type** | Pointer to **string** |  | [optional] 
-**Value** | Pointer to **string** |  | [optional] 
+**Type** | Pointer to **string** | The contact type. | [optional] 
+**Value** | Pointer to **string** | The contact value. | [optional] 
 
 ## Methods
 

@@ -31,50 +31,57 @@ import com.squareup.moshi.JsonClass
 /**
  * The subscription, plus its delivery state at send time.
  *
- * @param id 
- * @param name 
- * @param url 
- * @param triggers Subscribed events, or [\"*\"] for the catch-all.
+ * @param id The subscription ID.
+ * @param name The subscription name given by its creator.
+ * @param url The URL the delivery is posted to.
+ * @param triggers The subscribed events, or [\"*\"] for the catch-all.
  * @param target 
- * @param lastFailureOn 
- * @param lastFailureContent 
- * @param lastSuccessOn 
- * @param retryCount Omitted on the first attempt (0). Present from attempt 2.
- * @param retryOn 
+ * @param lastFailureOn When the last delivery to this subscription failed, in UTC; absent when none has failed.
+ * @param lastFailureContent What the receiver answered, or the network error, when the last delivery to this subscription failed.
+ * @param lastSuccessOn When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet.
+ * @param retryCount How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2.
+ * @param retryOn When the next retry is scheduled, in UTC; absent when no retry is pending.
  */
 
 
 data class WebhookConfigInfo (
 
+    /* The subscription ID. */
     @Json(name = "id")
     val id: kotlin.Int? = null,
 
+    /* The subscription name given by its creator. */
     @Json(name = "name")
     val name: kotlin.String? = null,
 
+    /* The URL the delivery is posted to. */
     @Json(name = "url")
     val url: kotlin.String? = null,
 
-    /* Subscribed events, or [\"*\"] for the catch-all. */
+    /* The subscribed events, or [\"*\"] for the catch-all. */
     @Json(name = "triggers")
     val triggers: kotlin.collections.List<kotlin.String>? = null,
 
     @Json(name = "target")
     val target: WebhookTargetInfo? = null,
 
+    /* When the last delivery to this subscription failed, in UTC; absent when none has failed. */
     @Json(name = "lastFailureOn")
     val lastFailureOn: java.time.OffsetDateTime? = null,
 
+    /* What the receiver answered, or the network error, when the last delivery to this subscription failed. */
     @Json(name = "lastFailureContent")
     val lastFailureContent: kotlin.String? = null,
 
+    /* When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet. */
     @Json(name = "lastSuccessOn")
     val lastSuccessOn: java.time.OffsetDateTime? = null,
 
-    /* Omitted on the first attempt (0). Present from attempt 2. */
+    /* How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2. */
     @Json(name = "retryCount")
     val retryCount: kotlin.Int? = null,
 
+    /* When the next retry is scheduled, in UTC; absent when no retry is pending. */
     @Json(name = "retryOn")
     val retryOn: java.time.OffsetDateTime? = null
 
