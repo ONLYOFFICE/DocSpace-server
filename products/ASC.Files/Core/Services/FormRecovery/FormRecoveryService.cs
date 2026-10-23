@@ -230,7 +230,7 @@ public class FormRecoveryService(
     // A file that failed too often is left out until it gets a new version, and so is a response of another form.
     private async Task<List<File<int>>> FindOrphansAsync(IFileDao<int> fileDao, Folder<int> doneFolder, int originalFormId)
     {
-        // A file put here by hand may lack the form category, so the extension decides.
+        // Only a submission puts a file here, but an older one may lack the form category, so the extension decides.
         var completed = await fileDao.GetFilesAsync(doneFolder.Id, null, FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false)
             .Where(f => FileUtility.GetFileTypeByFileName(f.Title) == FileType.Pdf)
             .ToListAsync();

@@ -57,6 +57,7 @@ public class FormRecoveryTask : DistributedTaskProgress
     private const double RecoveryShare = 25;
     private const double HistoryShare = 5;
     private DistributedTaskQueue<FormFillingReportTask> _reportQueue;
+    private ILogger<FormRecoveryTask> _logger;
 
     public FormRecoveryTask() { }
 
@@ -78,7 +79,7 @@ public class FormRecoveryTask : DistributedTaskProgress
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<FormRecoveryTask>>();
+        var logger = _logger = scope.ServiceProvider.GetRequiredService<ILogger<FormRecoveryTask>>();
 
         try
         {
@@ -223,13 +224,23 @@ public class FormRecoveryTask : DistributedTaskProgress
         }
 
         _lastHeartbeatAt = Environment.TickCount64;
-        await PublishChanges();
 
-        var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
-        if (report is { IsCompleted: false, Status: DistributedTaskStatus.Created })
+        // A failed publication must not stop the recovery or a report of the history; one that keeps failing gets the task
+        // cancelled by its queue anyway.
+        try
         {
-            report.Percentage = Percentage;
-            await _reportQueue.PublishTask(report);
+            await PublishChanges();
+
+            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
+            if (report is { IsCompleted: false, Status: DistributedTaskStatus.Created })
+            {
+                report.Percentage = Percentage;
+                await _reportQueue.PublishTask(report);
+            }
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            _logger.WarnRecoveryHeartbeatFailed(e, _reportData.OriginalFormId);
         }
     }
 }

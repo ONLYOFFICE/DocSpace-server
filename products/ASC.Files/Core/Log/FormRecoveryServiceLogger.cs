@@ -61,4 +61,7 @@ internal static partial class FormRecoveryServiceLogger
 
     [LoggerMessage(LogLevel.Warning, "Form recovery: the report of form {formId} version {version} could not be built, the new report keeps the older versions before it; delete the report and generate it again to build them")]
     public static partial void WarnReportHistoryStopped(this ILogger<FormRecoveryTask> logger, Exception exception, int formId, int version);
+
+    [LoggerMessage(LogLevel.Warning, "Form recovery: failed to publish the progress of form {formId}, the recovery goes on")]
+    public static partial void WarnRecoveryHeartbeatFailed(this ILogger<FormRecoveryTask> logger, Exception exception, int formId);
 }
