@@ -135,8 +135,7 @@ public class PaymentQuotaInformationTests(
 
         // Assert
         quota.StatusCode.Should().Be(200);
-        quota.Response.Features.Should().Contain(f => f.Id == "total_size");
-        quota.Response.Features.Should().OnlyContain(f => _roomAdminFeatures.Contains(f.Id));
+        quota.Response.Features.Select(f => f.Id).Should().BeEquivalentTo(_roomAdminFeatures);
         AssertNoBillingData(quota.Response);
     }
 
