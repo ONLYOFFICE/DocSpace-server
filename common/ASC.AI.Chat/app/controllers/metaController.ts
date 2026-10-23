@@ -114,8 +114,10 @@ function asFillInput(body: unknown): FillMetaInput {
 }
 
 // The outcomes `asyncHandler` would otherwise flatten: a 422 that has to
-// carry the skipped list, and the 5xx statuses with a reason (the handler
-// relays 4xx statuses only and turns everything else into a bare 500).
+// carry the skipped list, a model-call failure that carries the error code
+// and the provider's message, and the 5xx statuses with a reason (the
+// handler relays 4xx statuses only and turns everything else into a bare
+// 500).
 function answerMetaError(
   err: unknown,
   res: { status: (code: number) => { json: (b: unknown) => unknown } },
@@ -124,8 +126,16 @@ function answerMetaError(
     res.status(err.status).json({ error: err.message, skipped: err.skipped });
     return true;
   }
-  if (err instanceof NoProfileError || err instanceof ModelCallError) {
+  if (err instanceof NoProfileError) {
     res.status(err.status).json({ error: err.message });
+    return true;
+  }
+  if (err instanceof ModelCallError) {
+    res.status(err.status).json({
+      error: err.message,
+      code: err.code,
+      ...(err.providerMessage !== undefined && { providerMessage: err.providerMessage }),
+    });
     return true;
   }
   return false;

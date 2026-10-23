@@ -36,7 +36,7 @@
  * most, each cut to a budget) and the report of what was left out.
  */
 
-import { ActionType, customSync, getErrorStatus } from "@onlyoffice/ai-chat/core";
+import { ActionType, customSync, extractErrorMessage, toChatError } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
@@ -105,19 +105,28 @@ export class NoContentError extends Error {
 
 /**
  * The model round did not produce an answer: the request's budget ran out
- * (504), the provider throttled the call (429) or failed (502). The detail
- * stays in the log; the client gets the status and a short reason.
+ * (504), the provider throttled the call (429), refused it for lack of
+ * credit (402) or failed (502). Besides the status and a short reason the
+ * client gets the chat library's stable error `code` (`rate_limit`,
+ * `insufficient_funds`, `auth`, `model_not_found`, `timeout`, ...) and the
+ * provider's own message, so it can say what went wrong instead of a
+ * generic "the request failed" (the chat widget shows the same pair).
  */
 export class ModelCallError extends Error {
   readonly expose = true;
   constructor(
-    public readonly status: 429 | 502 | 504,
+    public readonly status: 402 | 429 | 502 | 504,
+    public readonly code: string,
     message: string,
+    public readonly providerMessage?: string,
     public override readonly cause?: unknown,
   ) {
     super(message);
   }
 }
+
+/** Length of the provider's message relayed to the client. */
+const MAX_PROVIDER_MESSAGE_CHARS = 500;
 
 /** The model round's budget, reading the files included. */
 export const GENERATION_BUDGET_MS = 120_000;
@@ -145,20 +154,71 @@ export async function runModel(
 
 export function classifyModelError(err: unknown, signal: AbortSignal): ModelCallError {
   if (signal.aborted || (err instanceof Error && err.name === "AbortError")) {
-    return new ModelCallError(504, "The model did not answer within the time budget", err);
+    return new ModelCallError(
+      504,
+      "timeout",
+      "The model did not answer within the time budget",
+      undefined,
+      err,
+    );
   }
-  if (getErrorStatus(err) === 429) {
-    return new ModelCallError(429, "The model provider is rate-limiting requests", err);
+  const { code } = toChatError(asError(err));
+  const providerMessage = providerMessageOf(err);
+  if (code === "rate_limit") {
+    return new ModelCallError(
+      429,
+      code,
+      "The model provider is rate-limiting requests",
+      providerMessage,
+      err,
+    );
+  }
+  if (code === "insufficient_funds") {
+    return new ModelCallError(
+      402,
+      code,
+      "The model provider refused the request for lack of credit",
+      providerMessage,
+      err,
+    );
   }
   const detail = err instanceof Error ? err.message : String(err);
-  logger.error(`meta: model call failed: ${detail}`);
-  return new ModelCallError(502, "The model request failed", err);
+  logger.error(`meta: model call failed (${code}): ${detail}`);
+  return new ModelCallError(502, code, "The model request failed", providerMessage, err);
+}
+
+// `toChatError` reads the status, code and type off an `Error` only; a
+// plain object (a rejection built by hand, a proxy's parsed body) is given
+// the same shape so its status is classified the same way.
+function asError(err: unknown): unknown {
+  if (err instanceof Error || typeof err !== "object" || err === null) {
+    return err;
+  }
+  const message = (err as { message?: unknown }).message;
+  return Object.assign(new Error(typeof message === "string" ? message : String(err)), err);
+}
+
+// The provider's own words, as the SDK error carries them (the nested
+// Anthropic envelope included), cut to a sane length. A bare transport
+// failure has nothing worth relaying.
+function providerMessageOf(err: unknown): string | undefined {
+  const message = extractErrorMessage(err)?.trim();
+  if (!message) {
+    return undefined;
+  }
+  return message.length > MAX_PROVIDER_MESSAGE_CHARS
+    ? `${message.slice(0, MAX_PROVIDER_MESSAGE_CHARS)}...`
+    : message;
 }
 
 /** Thrown when the budget ran out while the files were still being read. */
 export function assertNotTimedOut(signal: AbortSignal): void {
   if (signal.aborted) {
-    throw new ModelCallError(504, "Reading the files did not finish within the time budget");
+    throw new ModelCallError(
+      504,
+      "timeout",
+      "Reading the files did not finish within the time budget",
+    );
   }
 }
 
