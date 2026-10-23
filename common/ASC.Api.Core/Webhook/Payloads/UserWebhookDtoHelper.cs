@@ -47,27 +47,26 @@ public class UserWebhookDtoHelper(
     UserManager userManager,
     UserPhotoManager userPhotoManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    CommonLinkUtility commonLinkUtility,
+    UserFieldsHelper userFieldsHelper,
     WebItemSecurity webItemSecurity,
     WebItemManager webItemManager,
-    SettingsManager settingsManager,
-    IQuotaService quotaService,
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings)
 {
     public async Task<UserWebhookDto> GetAsync(UserInfo userInfo)
     {
         var tenant = tenantManager.GetCurrentTenant();
-        var currentType = await userManager.GetUserTypeAsync(userInfo.Id);
 
         var result = userInfo.MapToWebhookDto();
 
         result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
-        result.IsOwner = userInfo.IsOwner(tenant);
-        result.IsAdmin = currentType is EmployeeType.DocSpaceAdmin && !userInfo.IsOwner(tenant);
-        result.IsRoomAdmin = currentType is EmployeeType.RoomAdmin;
-        result.IsCollaborator = currentType is EmployeeType.User;
-        result.IsVisitor = await userManager.IsGuestAsync(userInfo);
+
+        var roles = await userFieldsHelper.GetRoleFlagsAsync(userInfo, tenant);
+        result.IsOwner = roles.IsOwner;
+        result.IsAdmin = roles.IsAdmin;
+        result.IsRoomAdmin = roles.IsRoomAdmin;
+        result.IsCollaborator = roles.IsCollaborator;
+        result.IsVisitor = roles.IsVisitor;
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
@@ -122,13 +121,12 @@ public class UserWebhookDtoHelper(
     }
 
     /// <summary>
-    /// Whether the subscription owner is a User or a Guest: the readers the REST API shows neither the groups nor
-    /// the profile link of another user. The profile link is a people search by email (bug 81093), so it would
-    /// hand them an address they have no access to. A subscription without an owner is not restricted.
+    /// Whether the subscription owner may not see the contacts of another user (see
+    /// <see cref="UserExtensions.IsWithoutContactsAccessAsync"/>). A subscription without an owner is not restricted.
     /// </summary>
     public async Task<bool> IsWithoutContactsAccessAsync(Guid? subscriberId)
     {
-        return subscriberId.HasValue && (await userManager.IsUserAsync(subscriberId.Value) || await userManager.IsGuestAsync(subscriberId.Value));
+        return subscriberId.HasValue && await userManager.IsWithoutContactsAccessAsync(subscriberId.Value);
     }
 
     /// <summary>
@@ -163,22 +161,14 @@ public class UserWebhookDtoHelper(
             return null;
         }
 
-        var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
-
-        var result = new UserSummaryWebhookDto
+        return new UserSummaryWebhookDto
         {
             Id = userInfo.Id,
             DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo),
             UserName = userInfo.UserName,
-            Avatar = GetAvatarUrl(await userPhotoManager.GetBigPhotoURL(userInfo.Id), cacheKey)
+            Avatar = await userFieldsHelper.GetAvatarUrlAsync(userInfo, absolute: true),
+            ProfileUrl = await userFieldsHelper.GetProfileUrlAsync(userInfo.Id)
         };
-
-        if (userInfo.Id != Guid.Empty)
-        {
-            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userInfo.Id));
-        }
-
-        return result;
     }
 
     private async Task FillGroupsAsync(UserWebhookDto result, UserInfo userInfo)
@@ -211,50 +201,28 @@ public class UserWebhookDtoHelper(
 
     private async Task FillAvatarsAsync(UserWebhookDto result, UserInfo userInfo)
     {
-        var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
+        var avatars = await userFieldsHelper.GetAvatarUrlsAsync(userInfo, absolute: true);
 
         result.HasAvatar = await userPhotoManager.UserHasAvatar(userInfo.Id);
-        result.Avatar = GetAvatarUrl(await userPhotoManager.GetBigPhotoURL(userInfo.Id), cacheKey);
-        result.AvatarOriginal = GetAvatarUrl(await userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id), cacheKey);
-        result.AvatarMax = GetAvatarUrl(await userPhotoManager.GetMaxPhotoURL(userInfo.Id), cacheKey);
-        result.AvatarMedium = GetAvatarUrl(await userPhotoManager.GetMediumPhotoURL(userInfo.Id), cacheKey);
-        result.AvatarSmall = GetAvatarUrl(await userPhotoManager.GetSmallPhotoURL(userInfo.Id), cacheKey);
-
-        if (userInfo.Id != Guid.Empty)
-        {
-            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userInfo.Id));
-        }
-    }
-
-    private string GetAvatarUrl(string path, int cacheKey)
-    {
-        return commonLinkUtility.GetFullAbsolutePath(path) + $"?hash={cacheKey}";
+        result.Avatar = avatars.Avatar;
+        result.AvatarOriginal = avatars.AvatarOriginal;
+        result.AvatarMax = avatars.AvatarMax;
+        result.AvatarMedium = avatars.AvatarMedium;
+        result.AvatarSmall = avatars.AvatarSmall;
+        result.ProfileUrl = await userFieldsHelper.GetProfileUrlAsync(userInfo.Id);
     }
 
     private async Task FillQuotaAsync(UserWebhookDto result, UserInfo userInfo, Tenant tenant)
     {
-        if (!coreBaseSettings.Standalone && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        var quota = await userFieldsHelper.GetQuotaAsync(userInfo, tenant);
+
+        if (quota == null)
         {
             return;
         }
 
-        var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-
-        result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id))
-            .Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString()))
-            .Sum(r => r.Counter));
-
-        if (!quotaSettings.EnableQuota)
-        {
-            return;
-        }
-
-        var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-
-        result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
-
-        result.QuotaLimit = userQuotaSettings != null
-            ? userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
-            : quotaSettings.DefaultQuota;
+        result.UsedSpace = quota.UsedSpace;
+        result.QuotaLimit = quota.QuotaLimit;
+        result.IsCustomQuota = quota.IsCustomQuota;
     }
 }
