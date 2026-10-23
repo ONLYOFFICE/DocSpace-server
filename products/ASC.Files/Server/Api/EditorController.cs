@@ -283,7 +283,9 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
 
-            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            // the editor re-requests the configuration in its own mode ("edit" even while filling), so only an
+            // actual edit session may take the form off filling
+            if (inDto.Edit && formOpenSetup.CanEdit && rootFolder.FolderType == FolderType.FillingFormsRoom)
             {
                 await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
             }
