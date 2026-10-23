@@ -42,6 +42,11 @@ public class DbWorker(
     AuthContext authContext,
     WebhookCache webhookCache)
 {
+    /// <summary>
+    /// How many times one claim reads candidates again after other instances won part of its batch.
+    /// </summary>
+    private const int MaxClaimRounds = 3;
+
     private static string GetCacheKey(int tenantId)
     {
         return $"webhooks_configs_{tenantId}";
@@ -320,27 +325,39 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
+        var leaseId = Guid.NewGuid();
+        var claimed = new List<(int TenantId, int Id, Guid LeaseId)>();
 
-        return await strategy.ExecuteAsync(async () =>
+        // Instances polling at the same moment read the same candidates and each UPDATE takes only the rows still due,
+        // so a batch can come back short because another instance won part of it. Reading again fills it from the rows
+        // behind; a round that won everything it read, or found nothing, means there is nothing more to take.
+        for (var round = 0; round < MaxClaimRounds && claimed.Count < count; round++)
         {
-            await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
-
             var now = DateTime.UtcNow;
-            var leaseId = Guid.NewGuid();
+            var candidates = await webhooksDbContext.DueWebhooksLogIdsAsync(now, count - claimed.Count).ToListAsync();
 
-            // Rows held by another instance are skipped, so concurrent instances take disjoint batches.
-            var due = await webhooksDbContext.LockDueWebhooksLogsAsync(now, count);
-
-            if (due.Count > 0)
+            if (candidates.Count == 0)
             {
-                await webhooksDbContext.ClaimWebhooksLogsAsync(due.Select(r => r.Id).ToList(), now + lease, leaseId);
+                break;
             }
 
-            await tx.CommitAsync();
+            var won = await webhooksDbContext.ClaimWebhooksLogsAsync(candidates, now, now + lease, leaseId);
 
-            return due.Select(r => (r.TenantId, r.Id, leaseId)).ToList();
-        });
+            if (won > 0)
+            {
+                await foreach (var row in webhooksDbContext.ClaimedWebhooksLogsAsync(candidates, leaseId))
+                {
+                    claimed.Add((row.TenantId, row.Id, leaseId));
+                }
+            }
+
+            if (won == candidates.Count)
+            {
+                break;
+            }
+        }
+
+        return claimed;
     }
 
     /// <summary>
@@ -360,8 +377,10 @@ public class DbWorker(
             var now = DateTime.UtcNow;
             var eventId = source.EventId;
 
+            await webhooksDbContext.LockWebhooksEventAsync(source.TenantId, eventId);
+
             // the rows go together with their subscription, which may have been removed since the caller read them
-            if ((await webhooksDbContext.LockWebhooksEventAsync(source.TenantId, eventId)).Count == 0)
+            if (!await webhooksDbContext.WebhooksEventExistsAsync(source.TenantId, eventId))
             {
                 return new WebhookRetryResult(WebhookRetryStatus.NotFound);
             }
@@ -505,12 +524,9 @@ public class DbWebhooks
     public DbWebhooksConfig Config { get; init; }
 }
 
-public class DueWebhooksLog
+public class ClaimedWebhooksLog
 {
-    [Column("tenant_id")]
     public int TenantId { get; init; }
-
-    [Column("id")]
     public int Id { get; init; }
 }
 

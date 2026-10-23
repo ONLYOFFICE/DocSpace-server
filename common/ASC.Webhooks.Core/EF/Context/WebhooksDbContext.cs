@@ -38,6 +38,7 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     public DbSet<DbWebhook> Webhooks { get; set; } // TODO: Deprecated
     public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
+    public DbSet<DbTenant> Tenants { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -93,45 +94,53 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return Queries.WebhooksEventInFlightAsync(this, tenantId, eventId, now);
     }
 
-    // Not precompiled on purpose: FOR UPDATE ... SKIP LOCKED has no LINQ translation. Must run inside a transaction:
-    // the selected rows stay locked until it ends, and rows another instance holds are skipped instead of waited on.
-    // The SQL is the same for MySQL 8+ and PostgreSQL (lowercase identifiers, no quoting needed).
-    public Task<List<DueWebhooksLog>> LockDueWebhooksLogsAsync(DateTime now, int count)
+    // The candidates are read without a lock: several instances may read the same ones, and ClaimWebhooksLogsAsync
+    // decides which of them each instance gets.
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> DueWebhooksLogIdsAsync(DateTime now, int count)
     {
-        return Database.SqlQuery<DueWebhooksLog>($"""
-            SELECT l.tenant_id, l.id
-            FROM webhooks_logs l
-            JOIN tenants_tenants t ON t.id = l.tenant_id
-            WHERE l.next_attempt_on IS NOT NULL AND l.next_attempt_on <= {now} AND t.status = {(int)TenantStatus.Active}
-            ORDER BY l.next_attempt_on, l.id
-            LIMIT {count}
-            FOR UPDATE OF l SKIP LOCKED
-            """).ToListAsync();
+        return Queries.DueWebhooksLogIdsAsync(this, now, count);
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
-    // Leases the rows locked by LockDueWebhooksLogsAsync in one statement: NextAttemptOn moves forward to leaseUntil,
-    // so no instance claims them again before the lease expires, and leaseId marks them as being delivered.
-    public Task<int> ClaimWebhooksLogsAsync(List<int> ids, DateTime leaseUntil, Guid leaseId)
+    // Leases the candidates that are still due, in one statement: NextAttemptOn moves forward to leaseUntil, so no
+    // instance claims them again before the lease expires, and leaseId marks them as being delivered. The due check
+    // runs again on the current row inside the UPDATE (MySQL and PostgreSQL both re-read a row a concurrent UPDATE has
+    // changed), so a row another instance has just claimed is no longer due and is left to it.
+    public Task<int> ClaimWebhooksLogsAsync(List<int> ids, DateTime now, DateTime leaseUntil, Guid leaseId)
     {
         return WebhooksLogs
-            .Where(r => ids.Contains(r.Id))
+            .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
             .ExecuteUpdateAsync(q => q
                 .SetProperty(p => p.NextAttemptOn, leaseUntil)
                 .SetProperty(p => p.LeaseId, leaseId));
     }
 
-    // Not precompiled on purpose: FOR UPDATE has no LINQ translation. Must run inside a transaction: it locks every
-    // row of one event (the original and its manual retries) until the transaction ends, so a sender cannot claim
-    // one of them between the in-flight check of a manual retry (WebhooksEventInFlightAsync) and the requeue.
-    public Task<List<DueWebhooksLog>> LockWebhooksEventAsync(int tenantId, int eventId)
+    // The rows of ids that ClaimWebhooksLogsAsync leased with leaseId, which are this instance's to deliver.
+    [PreCompileQuery]
+    public IAsyncEnumerable<ClaimedWebhooksLog> ClaimedWebhooksLogsAsync(List<int> ids, Guid leaseId)
     {
-        return Database.SqlQuery<DueWebhooksLog>($"""
-            SELECT l.tenant_id, l.id
-            FROM webhooks_logs l
-            WHERE l.tenant_id = {tenantId} AND (l.id = {eventId} OR l.retry_of = {eventId})
-            FOR UPDATE
-            """).ToListAsync();
+        return Queries.ClaimedWebhooksLogsAsync(this, ids, leaseId);
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Must run inside a transaction. Locks every row of one event (the original and its manual retries) until the
+    // transaction ends, so a sender cannot claim one of them, and an attempt in flight cannot schedule its next retry,
+    // between the in-flight check of a manual retry (WebhooksEventInFlightAsync) and the requeue. It writes a column
+    // back unchanged: an UPDATE takes the same exclusive row locks as SELECT ... FOR UPDATE on MySQL and PostgreSQL,
+    // and LINQ has no FOR UPDATE. The row count is not used: MySQL reports changed rows rather than matched ones when
+    // the connection sets UseAffectedRows.
+    public Task<int> LockWebhooksEventAsync(int tenantId, int eventId)
+    {
+        return WebhooksLogs
+            .Where(r => r.TenantId == tenantId && (r.Id == eventId || r.RetryOf == eventId))
+            .ExecuteUpdateAsync(q => q.SetProperty(p => p.Attempts, p => p.Attempts));
+    }
+
+    [PreCompileQuery]
+    public Task<bool> WebhooksEventExistsAsync(int tenantId, int eventId)
+    {
+        return Queries.WebhooksEventExistsAsync(this, tenantId, eventId);
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
@@ -283,6 +292,30 @@ static file class Queries
                     .Where(it => it.TenantId == tenantId && it.Id == id)
                     .Select(it => (int?)it.Attempts)
                     .FirstOrDefault());
+
+    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<int>> DueWebhooksLogIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, DateTime now, int count) =>
+                ctx.WebhooksLogs
+                    .Where(it => it.NextAttemptOn != null && it.NextAttemptOn <= now)
+                    .Join(ctx.Tenants, l => l.TenantId, t => t.Id, (log, tenant) => new { log, tenant })
+                    .Where(it => it.tenant.Status == TenantStatus.Active)
+                    .OrderBy(it => it.log.NextAttemptOn)
+                    .ThenBy(it => it.log.Id)
+                    .Select(it => it.log.Id)
+                    .Take(count));
+
+    public static readonly Func<WebhooksDbContext, List<int>, Guid, IAsyncEnumerable<ClaimedWebhooksLog>> ClaimedWebhooksLogsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, List<int> ids, Guid leaseId) =>
+                ctx.WebhooksLogs
+                    .Where(it => ids.Contains(it.Id) && it.LeaseId == leaseId)
+                    .Select(it => new ClaimedWebhooksLog { TenantId = it.TenantId, Id = it.Id }));
+
+    public static readonly Func<WebhooksDbContext, int, int, Task<bool>> WebhooksEventExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, int tenantId, int eventId) =>
+                ctx.WebhooksLogs.Any(it => it.TenantId == tenantId && (it.Id == eventId || it.RetryOf == eventId)));
 
     public static readonly Func<WebhooksDbContext, int, int, DateTime, Task<bool>> WebhooksEventInFlightAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
