@@ -35,8 +35,9 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 
 /// <summary>
 /// GET /api/2.0/portal/payment/quota — the current portal quota. The action only denies Guests
-/// explicitly (<c>IsGuestAsync</c>); it never calls <c>PaymentHelper.DemandConfigured</c>, so it
-/// answers the same free "Startup" plan here as it would in production before any tariff is set.
+/// explicitly (<c>IsGuestAsync</c>) and trims the answer for everyone below a DocSpace admin; it
+/// never calls <c>PaymentHelper.DemandConfigured</c>, so it answers the same free "Startup" plan
+/// here as it would in production before any tariff is set.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentQuotaInformationTests(
@@ -98,15 +99,32 @@ public class PaymentQuotaInformationTests(
         exception.ErrorCode.Should().Be(403);
     }
 
-    // BUG 81534 asked for this endpoint to be closed to a RoomAdmin and a User, on the grounds that
-    // neither should see billing information. It cannot be: the client reads it during start-up for
-    // every non-guest (AuthStore.getPaymentInfo) to learn the plan's feature limits, and rethrows on
-    // failure, so denying it leaves those roles on a blank page. The endpoint is role-aware instead
-    // — QuotaHelper.GetFeatures drops admin-only features and withholds the usage figures from a
-    // User — which is what these two cases pin.
+    // BUG 81534: a RoomAdmin and a User used to get the whole quota - price, due date and every paid
+    // feature. The endpoint stays open to them, because the client reads it during start-up for every
+    // non-guest (AuthStore.getPaymentInfo) and rethrows on failure, so a 403 would leave those roles on
+    // a blank page. It is trimmed by caller type instead: each feature carries the lowest type that is
+    // shown it, and the price, due date and storage overrides are for DocSpace admins only.
+    private static readonly string[] _roomAdminFeatures = ["manager", "total_size", "room", "statistic"];
+
     [Trait("Bug", "81534")]
     [Fact]
-    public async Task GetQuotaPaymentInformation_RoomAdmin_ReturnsQuota()
+    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsAdminOnlyFeatures()
+    {
+        // Arrange
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await _webApiClient.Authenticate(admin);
+
+        // Act
+        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        quota.StatusCode.Should().Be(200);
+        quota.Response.Features.Should().Contain(f => !_roomAdminFeatures.Contains(f.Id));
+    }
+
+    [Trait("Bug", "81534")]
+    [Fact]
+    public async Task GetQuotaPaymentInformation_RoomAdmin_ReturnsLimitsWithoutBillingData()
     {
         // Arrange
         var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
@@ -117,12 +135,14 @@ public class PaymentQuotaInformationTests(
 
         // Assert
         quota.StatusCode.Should().Be(200);
-        quota.Response.Features.Should().NotBeEmpty();
+        quota.Response.Features.Should().Contain(f => f.Id == "total_size");
+        quota.Response.Features.Should().OnlyContain(f => _roomAdminFeatures.Contains(f.Id));
+        AssertNoBillingData(quota.Response);
     }
 
     [Trait("Bug", "81534")]
     [Fact]
-    public async Task GetQuotaPaymentInformation_User_ReturnsQuotaWithoutUsageFigures()
+    public async Task GetQuotaPaymentInformation_User_ReturnsTotalSizeOnly()
     {
         // Arrange
         var user = await InviteMember(EmployeeType.User);
@@ -133,12 +153,21 @@ public class PaymentQuotaInformationTests(
 
         // Assert
         quota.StatusCode.Should().Be(200);
-        quota.Response.Features.Should().NotBeEmpty();
+        quota.Response.Features.Should().ContainSingle()
+            .Which.Should().Match<TenantQuotaFeatureDto>(f => f.Id == "total_size" && f.Used != null);
+        AssertNoBillingData(quota.Response);
+    }
 
-        // Only the portal's total size is disclosed to a User; no other feature carries a counter.
-        quota.Response.Features
-            .Where(f => f.Used is not null)
-            .Should().OnlyContain(f => f.Id == "total_size");
+    private static void AssertNoBillingData(QuotaDto quota)
+    {
+        quota.Price.Value.Should().BeNull();
+        quota.Price.CurrencySymbol.Should().BeNull();
+        quota.Price.IsoCurrencySymbol.Should().BeNull();
+        quota.DueDate.Should().BeNull();
+        quota.UsersQuota.Should().BeNull();
+        quota.RoomsQuota.Should().BeNull();
+        quota.AiAgentsQuota.Should().BeNull();
+        quota.TenantCustomQuota.Should().BeNull();
     }
 
     [Fact]

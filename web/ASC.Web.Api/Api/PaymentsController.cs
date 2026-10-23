@@ -718,15 +718,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the quota the portal is on right now - its paid plan or the free one - with everything a client needs
-    /// to render itself: the price, the features that are switched on, the limits they grant (rooms, storage in
-    /// bytes, users, administrators, AI) and how much of each is already used. Every signed-in member of the portal
-    /// reads it, so it is not restricted to administrators; only guests are refused with 403. The call is read-only.
-    /// The plan is served from the cache by default, which is what a start-up needs; `refresh=true` fetches it from
-    /// the billing service instead, so use that right after a purchase and not routinely, because it is a remote
-    /// call. The catalogue of the quotas that could be bought instead is `GET api/2.0/portal/payment/quotas`, and the
-    /// money side of the same portal - customer, wallet and balance - starts at
-    /// `GET api/2.0/portal/payment/customerinfo`.
+    /// Returns the quota the portal is on right now - its paid plan or the free one - with the limits its features
+    /// grant (storage in bytes, rooms, administrators) and how much of each is already used. Every signed-in member
+    /// except a guest may call it, and guests are refused with 403. The answer depends on the caller's type. A
+    /// DocSpace administrator or the owner gets the whole quota: the price, the due date, every feature and the
+    /// storage overrides. A room administrator gets only the administrators, rooms, storage and statistics
+    /// features. A user gets only the storage feature. Below a DocSpace administrator the plan's name and its
+    /// free, trial and non-profit flags are still returned, while the price comes back empty and `dueDate`,
+    /// `usersQuota`, `roomsQuota`, `aiAgentsQuota` and `tenantCustomQuota` are omitted. The call is read-only. The
+    /// plan is served from the cache by default; `refresh=true` fetches it from the billing service instead, so use
+    /// it right after a purchase and not routinely, because it is a remote call. The catalogue of the quotas that
+    /// could be bought instead is `GET api/2.0/portal/payment/quotas`.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits
@@ -738,9 +740,9 @@ public class PaymentController(
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaPaymentInformation(PaymentInformationRequestDto inDto)
     {
-        // Every non-guest member reads this at start-up: the client's AuthStore.getPaymentInfo needs
-        // the plan's feature limits (rooms, storage, AI agents) to render at all, and rethrows on
-        // failure. Narrowing this to administrators leaves a RoomAdmin or a User with a blank page.
+        // Every non-guest member reads this at start-up: the client's AuthStore.getPaymentInfo rethrows
+        // on failure, so a 403 would leave a RoomAdmin or a User with a blank page. Instead QuotaHelper
+        // trims the answer to what the caller's type may see.
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();

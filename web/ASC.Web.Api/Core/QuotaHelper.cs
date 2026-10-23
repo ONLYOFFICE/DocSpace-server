@@ -121,6 +121,10 @@ public class QuotaHelper(
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices, currentQuota).ToListAsync();
 
+        // Below a DocSpace admin nobody manages billing: the plan is named, but its price, term and the
+        // storage overrides an administrator has set stay empty.
+        var isAdmin = employeeType == EmployeeType.DocSpaceAdmin;
+
         var result = new QuotaDto
         {
             Id = quota.TenantId,
@@ -130,18 +134,20 @@ public class QuotaHelper(
             Free = quota.Free,
             Trial = quota.Trial,
 
-            Price = new PriceDto
-            {
-                Value = quota.Price,
-                CurrencySymbol = quota.PriceCurrencySymbol,
-                ISOCurrencySymbol = quota.PriceISOCurrencySymbol
-            },
+            Price = isAdmin
+                ? new PriceDto
+                {
+                    Value = quota.Price,
+                    CurrencySymbol = quota.PriceCurrencySymbol,
+                    ISOCurrencySymbol = quota.PriceISOCurrencySymbol
+                }
+                : new PriceDto(),
 
             Features = features,
-            DueDate = quota.DueDate
+            DueDate = isAdmin ? quota.DueDate : null
         };
 
-        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        if (isAdmin && (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic))
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
@@ -166,12 +172,12 @@ public class QuotaHelper(
         foreach (var feature in quota.TenantQuotaFeatures.
                     Where(r =>
                         {
-                            if (r.Standalone)
+                            if (r.Standalone && !coreBaseSettings.Standalone)
                             {
-                                return coreBaseSettings.Standalone;
+                                return false;
                             }
 
-                            if (r.EmployeeType == EmployeeType.DocSpaceAdmin && employeeType != EmployeeType.DocSpaceAdmin)
+                            if (EmployeeTypeComparer.Instance.Compare(employeeType, r.EmployeeType) < 0)
                             {
                                 return false;
                             }
@@ -202,9 +208,6 @@ public class QuotaHelper(
             object used = null;
             var hasStat = false;
             var availableFeature = true;
-            var isUsedAvailable = employeeType != EmployeeType.Guest &&
-                                  (employeeType != EmployeeType.User ||
-                                   feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)
             {
@@ -252,9 +255,7 @@ public class QuotaHelper(
 
             if (getUsed)
             {
-                // "used" carries a required value, so it is left out entirely rather than emitted
-                // empty for a caller who is not shown the figure.
-                if (hasStat && isUsedAvailable)
+                if (hasStat)
                 {
                     result.Used = new FeatureUsedDto
                     {
@@ -294,15 +295,7 @@ public class QuotaHelper(
                 }
 
                 hasStat = true;
-
-                // A Guest sees no usage numbers at all and a User sees only the total size, so for
-                // everything else the figure is computed and then thrown away — a portal-wide count
-                // per feature, and one that some providers are not even allowed to run for such a
-                // caller, which used to surface as an unhandled error instead of a quota.
-                if (isUsedAvailable)
-                {
-                    used = await statisticProvider.GetValueAsync();
-                }
+                used = await statisticProvider.GetValueAsync();
             }
         }
     }
