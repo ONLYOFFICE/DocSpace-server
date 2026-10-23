@@ -81,8 +81,7 @@ public class QuotaDto
 
     /// <summary>
     /// What the quota costs, in the currency resolved for the request. Its `value` is empty for a quota that is
-    /// not sold for money, which is what `free`, `trial` and `nonProfit` describe, and all of it is empty when the
-    /// caller is not a DocSpace administrator.
+    /// not sold for money, which is what `free`, `trial` and `nonProfit` describe.
     /// </summary>
     /// <example>{"value": 99.99, "currencySymbol": "$", "iSOCurrencySymbol": "USD"}</example>
     public required PriceDto Price { get; set; }
@@ -109,10 +108,8 @@ public class QuotaDto
     public required bool Trial { get; set; }
 
     /// <summary>
-    /// The features the quota switches on, each with the limit it grants and, on the quota the portal is
-    /// actually on, how much of that limit is already used. For a DocSpace administrator a feature that is absent
-    /// is off; a room administrator or a user is shown only the features that concern them, so for them an absent
-    /// feature says nothing about the quota.
+    /// The features the quota includes, each with the limit it grants and, on the portal's own quota, how much of it
+    /// is used. A flag that is off is listed with `value` false; an absent feature is one this answer does not report.
     /// </summary>
     /// <example>[{"id": "00000000-0000-0000-0000-000000000001", "title": "Premium Storage"}]</example>
     public required IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
@@ -120,8 +117,7 @@ public class QuotaDto
     /// <summary>
     /// The per-member storage allowance an administrator has set on top of the quota, and whether it is applied
     /// at all. It describes the live portal rather than this quota, so every entry of a catalogue listing repeats
-    /// the same values. It is empty unless the caller is a DocSpace administrator and the portal is a server
-    /// installation or its plan includes statistics.
+    /// the same values. It is filled in only on a server installation or when the portal's plan includes statistics.
     /// </summary>
     /// <example>{"enableQuota": true, "defaultQuota": 1073741824}</example>
     public EntityQuotaDto UsersQuota { get; set; }
@@ -148,7 +144,7 @@ public class QuotaDto
 
     /// <summary>
     /// When the quota runs out, in UTC. It is empty on a quota from the catalogue, which has no date until it is
-    /// bought, on a quota that never expires, and when the caller is not a DocSpace administrator.
+    /// bought, and on a quota that never expires.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? DueDate { get; set; }
@@ -196,8 +192,8 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     public string Type { get; set; }
 
     /// <summary>
-    /// How much of the limit is already used. It is present only on the quota the portal is actually on, and
-    /// only for a feature whose consumption is counted.
+    /// How much of the limit is already used. It is present only when the portal's own quota is read through
+    /// `GET api/2.0/portal/payment/quota`, and only for a feature whose consumption is counted.
     /// </summary>
     /// <example>{"value": 53687091200, "title": "50 GB used"}</example>
     public FeatureUsedDto Used { get; set; }

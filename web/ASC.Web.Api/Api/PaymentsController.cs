@@ -718,24 +718,21 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the quota the portal is on right now - its paid plan or the free one - with the limits its features
-    /// grant (storage in bytes, rooms, administrators) and how much of each is already used. Every signed-in member
-    /// except a guest may call it, and guests are refused with 403. The answer depends on the caller's type. A
-    /// DocSpace administrator or the owner gets the whole quota: the price, the due date, every feature and the
-    /// storage overrides. A room administrator gets only the administrators, rooms, storage and statistics
-    /// features. A user gets only the storage feature. Below a DocSpace administrator the plan's name and its
-    /// free, trial and non-profit flags are still returned, while the price comes back empty and `dueDate`,
-    /// `usersQuota`, `roomsQuota`, `aiAgentsQuota` and `tenantCustomQuota` are omitted. The call is read-only. The
-    /// plan is served from the cache by default; `refresh=true` fetches it from the billing service instead, so use
-    /// it right after a purchase and not routinely, because it is a remote call. The catalogue of the quotas that
-    /// could be bought instead is `GET api/2.0/portal/payment/quotas`.
+    /// Returns the quota the portal is on - its paid plan or the free one - with the limits its features grant and how
+    /// much of each is already used. Any signed-in member except a guest may call it. The call is read-only; the plan
+    /// comes from the cache, and `refresh=true` re-reads it from the billing service, a remote call meant for right
+    /// after a purchase. The answer is trimmed to the caller's user type: a DocSpace administrator or the owner gets
+    /// the price, the due date and all features, a room administrator only the `manager`, `room`, `total_size` and
+    /// `statistic` features, and a user only `total_size`. For both of the latter `price` is an empty object and
+    /// `dueDate`, `usersQuota`, `roomsQuota`, `aiAgentsQuota` and `tenantCustomQuota` are omitted. The quotas that
+    /// could be bought instead are `GET api/2.0/portal/payment/quotas`. A guest is refused with 403.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits
     /// </summary>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The quota the portal is on, with its price, features, limits and current usage", typeof(QuotaDto))]
+    [SwaggerResponse(200, "The quota the portal is on with its limits and current usage, trimmed to what the caller's user type may see", typeof(QuotaDto))]
     [SwaggerResponse(403, "The caller is a guest of this portal")]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaPaymentInformation(PaymentInformationRequestDto inDto)
