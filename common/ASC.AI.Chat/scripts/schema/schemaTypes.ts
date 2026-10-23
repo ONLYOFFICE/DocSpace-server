@@ -219,8 +219,12 @@ export type AiToolCallData = {
   messageId: string;
   /** Index of the tool-call content part inside `message.content`. */
   idx: number;
-  /** Snapshot of the assistant message at the time the tool call surfaced. */
-  message: ThreadMessageLike;
+  /**
+   * Snapshot of the assistant message at the time the tool call surfaced.
+   * Optional and ignored: the engine resumes from the stored message, and
+   * the copy inflated the body past the parser limit (Bug 84608).
+   */
+  message?: ThreadMessageLike;
   /** Per-request engine options: extra tools, reasoning, prompt override. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
