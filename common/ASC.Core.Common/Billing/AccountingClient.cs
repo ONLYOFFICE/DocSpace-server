@@ -180,6 +180,109 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         }, opt => opt.SetDuration(_servicePricesCacheDuration).SetMemoryCacheDuration(_priceMemoryCacheDuration));
     }
 
+    public async Task<ServiceLimit> GetServiceLimitAsync(int id)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetServiceLimitAsync(id);
+    }
+
+    /// <summary>
+    /// The limit of the customer as a whole on the service group, with its spending in the current period when
+    /// <paramref name="includeUsage"/> is set. Throws <see cref="AccountingNotFoundException"/> when there is none.
+    /// </summary>
+    public async Task<ServiceLimit> GetTotalServiceLimitAsync(string portalId, string groupName, bool includeUsage)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetTotalServiceLimitAsync(portalId, groupName, includeUsage);
+    }
+
+    /// <summary>
+    /// The limit for every participant of the customer on the service group, without spending: that is counted per
+    /// participant. Throws <see cref="AccountingNotFoundException"/> when there is none.
+    /// </summary>
+    public async Task<ServiceLimit> GetGlobalServiceLimitAsync(string portalId, string groupName)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetGlobalServiceLimitAsync(portalId, groupName);
+    }
+
+    public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string groupName, ServiceLimitFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetParticipantServiceLimitsAsync(portalId, groupName, filter);
+    }
+
+    /// <summary>
+    /// The limit in force for every participant of the customer on the service group - the personal one, or else the
+    /// one for every participant - one page per request; the page size is <see cref="ServiceLimitFilter.Limit"/>,
+    /// <see cref="ServiceLimitFilter.Offset"/> must stay unset. Requests are sent while the result is enumerated.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="ServiceLimitFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string groupName, ServiceLimitFilter filter)
+    {
+        EnsureConfigured();
+
+        // The page offset travels in a query parameter of its own, as in EnsureNoOffset.
+        if (filter?.Offset != null)
+        {
+            throw new ArgumentException($"{nameof(ServiceLimitFilter.Offset)} must be unset for the paged methods.", nameof(filter));
+        }
+
+        return accountingApi.GetParticipantServiceLimitPages(portalId, groupName, filter);
+    }
+
+    public async Task<ServiceLimit> CreateServiceLimitAsync(string portalId, string groupName, ServiceLimitScope scope, string customerParticipantName,
+        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.CreateServiceLimitAsync(new ServiceLimitCreateOperation(portalId, groupName, scope, customerParticipantName,
+            amountValue, quantityValue, period));
+    }
+
+    public async Task<ServiceLimit> UpdateServiceLimitAsync(int id, decimal? amountValue, int? quantityValue, bool? enabled)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.UpdateServiceLimitAsync(new ServiceLimitUpdateOperation(id, amountValue, quantityValue, enabled));
+    }
+
+    /// <summary>
+    /// Sets the same personal limit for each of the participants, replacing the personal limits they already have and
+    /// switching them on, and returns the number of limits set.
+    /// </summary>
+    public async Task<int> SetParticipantServiceLimitsAsync(string portalId, string groupName, List<string> customerParticipantNames,
+        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.SetParticipantServiceLimitsAsync(new ServiceLimitParticipantSetOperation(portalId, groupName,
+            customerParticipantNames, amountValue, quantityValue, period));
+    }
+
+    /// <summary>
+    /// Switches off every personal limit of the participants of the customer on the service group, leaving the limit of
+    /// the customer as a whole and the one for every participant as they are, and returns the number of limits switched
+    /// off.
+    /// </summary>
+    public async Task<int> DisableParticipantServiceLimitsAsync(string portalId, string groupName)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.DisableParticipantServiceLimitsAsync(portalId, groupName);
+    }
+
+    public async Task DeleteServiceLimitAsync(int id)
+    {
+        EnsureConfigured();
+
+        await accountingApi.DeleteServiceLimitAsync(id);
+    }
+
     private static string GetServicePricesCacheKey(string serviceName, bool active)
     {
         return $"accounting-service-prices-{serviceName}-{active}";
@@ -642,28 +745,53 @@ public class ServiceInfo
     /// The account number.
     /// </summary>
     public int AccountNumber { get; init; }
+
+    /// <summary>
+    /// The service period.
+    /// </summary>
+    public PriceTimeUnit ServicePeriod { get; init; }
 }
 
 /// <summary>
-/// The time unit the price is bound to.
+/// A unit of time of the accounting service: the time unit a price is bound to, and the calendar period a service
+/// limit is reset with. Numbered as the accounting service numbers it.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PriceTimeUnit
 {
+    /// <summary>
+    /// No time unit: a price charged per use rather than per period, or a limit with no calendar period.
+    /// </summary>
     [Description("None")]
-    None,
+    None = 1,
+
+    /// <summary>One hour.</summary>
     [Description("Hour")]
-    Hour,
+    Hour = 2,
+
+    /// <summary>One day.</summary>
     [Description("Day")]
-    Day,
+    Day = 3,
+
+    /// <summary>One week.</summary>
     [Description("Week")]
-    Week,
+    Week = 4,
+
+    /// <summary>One month.</summary>
     [Description("Month")]
-    Month,
+    Month = 5,
+
+    /// <summary>One year.</summary>
     [Description("Year")]
-    Year,
+    Year = 6,
+
+    /// <summary>Three years.</summary>
     [Description("ThreeYears")]
-    ThreeYears
+    ThreeYears = 7,
+
+    /// <summary>One minute.</summary>
+    [Description("Minute")]
+    Minute = 8
 }
 
 /// <summary>
@@ -1104,6 +1232,305 @@ public class Currency
     public string Code { get; init; }
 }
 
+/// <summary>
+/// The field the service limits in force for the portal users are sorted by.
+/// </summary>
+public enum ServiceLimitOrderBy
+{
+    /// <summary>
+    /// The participant the limit is set for.
+    /// </summary>
+    [Description("Participant")]
+    Participant,
+
+    /// <summary>
+    /// The date and time the limit was created.
+    /// </summary>
+    [Description("Created")]
+    Created
+}
+
+/// <summary>
+/// The paging and ordering of the service limits in force for the portal users.
+/// </summary>
+public class ServiceLimitFilter
+{
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    public int? Offset { get; init; }
+
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    public int? Limit { get; init; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public ServiceLimitOrderBy? OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
+
+    /// <summary>
+    /// Whether every limit comes with its spending in the current period. The accounting service attaches it when
+    /// this is omitted.
+    /// </summary>
+    public bool? IncludeUsage { get; init; }
+}
+
+/// <summary>
+/// The service groups the accounting service keeps spending limits for. A limit is always set on a group, never on a
+/// single service of it.
+/// </summary>
+public static class ServiceLimitGroups
+{
+    /// <summary>
+    /// The AI services of the portal as one group: AI tools and AI search.
+    /// </summary>
+    public const string AiServices = "ai-services";
+}
+
+/// <summary>
+/// Whom a service limit applies to. Numbered as the accounting service numbers it.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ServiceLimitScope
+{
+    /// <summary>
+    /// The portal as a whole: the spending of every user counts towards one ceiling. Checked in addition to the
+    /// limits of the users.
+    /// </summary>
+    [Description("Total")]
+    Total = 1,
+
+    /// <summary>
+    /// Every user separately, the same ceiling for each: applies to a user who has no personal limit in force.
+    /// </summary>
+    [Description("Global")]
+    Global = 2,
+
+    /// <summary>
+    /// One user: a personal limit that applies to this user instead of the one for every user.
+    /// </summary>
+    [Description("Custom")]
+    Custom = 3
+}
+
+/// <summary>
+/// The window a service limit counts the spending over, in UTC. The windows are calendar-aligned rather than rolling,
+/// except for a lifetime limit, which never resets. Numbered as the accounting service numbers it.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ServiceLimitPeriod
+{
+    /// <summary>
+    /// The current day, from 00:00 to 23:59:59 UTC.
+    /// </summary>
+    [Description("Day")]
+    Day = 1,
+
+    /// <summary>
+    /// The current ISO week, from Monday.
+    /// </summary>
+    [Description("Week")]
+    Week = 2,
+
+    /// <summary>
+    /// The current calendar month.
+    /// </summary>
+    [Description("Month")]
+    Month = 3,
+
+    /// <summary>
+    /// From the moment the limit was created, never reset; spending before that moment does not count.
+    /// </summary>
+    [Description("Lifetime")]
+    Lifetime = 4
+}
+
+/// <summary>
+/// A spending limit on a service group, set for the portal as a whole, for every user, or for one user.
+/// </summary>
+public class ServiceLimit
+{
+    /// <summary>
+    /// The service limit ID.
+    /// </summary>
+    /// <example>42</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The limited service group.
+    /// </summary>
+    /// <example>ai-services</example>
+    public string ServiceGroupName { get; init; }
+
+    /// <summary>
+    /// The number of the billing account of the portal the limit belongs to.
+    /// </summary>
+    /// <example>12345</example>
+    public int CustomerAccountNumber { get; init; }
+
+    /// <summary>
+    /// Whom the limit applies to.
+    /// </summary>
+    /// <example>Custom</example>
+    public ServiceLimitScope Scope { get; init; }
+
+    /// <summary>
+    /// The participant the limit applies to: the user of a personal limit, or, in the list of participants, the user a
+    /// limit for every user applies to. Null for a limit of the portal as a whole, and for a limit for every user read
+    /// on its own.
+    /// </summary>
+    /// <example>3f2504e0-4f89-11d3-9a0c-0305e82c3301</example>
+    public string Participant { get; init; }
+
+    /// <summary>
+    /// The most money the group may cost per period, in `currency`; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>50</example>
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The currency of `amountValue`; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The largest quantity the group may consume per period, in `serviceUnit`; null when the limit has no quantity
+    /// threshold.
+    /// </summary>
+    /// <example>1000</example>
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The unit of `quantityValue`; null when the limit has no quantity threshold.
+    /// </summary>
+    /// <example>request</example>
+    public string ServiceUnit { get; init; }
+
+    /// <summary>
+    /// The window the thresholds apply to.
+    /// </summary>
+    /// <example>Day</example>
+    public ServiceLimitPeriod Period { get; init; }
+
+    /// <summary>
+    /// The moment a lifetime limit counts from; null for the other periods.
+    /// </summary>
+    /// <example>2026-10-01T09:12:00Z</example>
+    public DateTime? UsageFrom { get; init; }
+
+    /// <summary>
+    /// Whether the limit is in force.
+    /// </summary>
+    /// <example>true</example>
+    public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The date and time when the limit was created.
+    /// </summary>
+    /// <example>2026-09-01T10:30:00Z</example>
+    public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The date and time when the limit was last changed.
+    /// </summary>
+    /// <example>2026-09-15T08:00:00Z</example>
+    public DateTime Modified { get; init; }
+
+    /// <summary>
+    /// The spending in the current period; filled only by the reads that are asked for it.
+    /// </summary>
+    public ServiceLimitUsage Usage { get; init; }
+}
+
+/// <summary>
+/// What has been spent against a service limit in its current period, and what is left.
+/// </summary>
+public class ServiceLimitUsage
+{
+    /// <summary>
+    /// The start of the current period, in UTC.
+    /// </summary>
+    /// <example>2026-10-01T00:00:00Z</example>
+    public DateTime PeriodStart { get; init; }
+
+    /// <summary>
+    /// The end of the current period, in UTC; null for a lifetime limit, which never resets.
+    /// </summary>
+    /// <example>2026-10-01T23:59:59Z</example>
+    public DateTime? PeriodEnd { get; init; }
+
+    /// <summary>
+    /// The money charged in the current period.
+    /// </summary>
+    /// <example>12.5</example>
+    public decimal AmountConsumed { get; init; }
+
+    /// <summary>
+    /// The money still available: the threshold less what was charged and what is reserved, never below zero; null
+    /// when the limit has no money threshold.
+    /// </summary>
+    /// <example>37.5</example>
+    public decimal? AmountAvailable { get; init; }
+
+    /// <summary>
+    /// The units consumed in the current period.
+    /// </summary>
+    /// <example>250</example>
+    public int QuantityConsumed { get; init; }
+
+    /// <summary>
+    /// The units still available, never below zero; null when the limit has no quantity threshold.
+    /// </summary>
+    /// <example>750</example>
+    public int? QuantityAvailable { get; init; }
+}
+
+/// <summary>
+/// Represents a paged list of the service limits in force for the portal users.
+/// </summary>
+public class ServiceLimitReport : BaseReport<ServiceLimit>
+{
+}
+
+public record ServiceLimitCreateOperation(
+    string CustomerName,
+    string ServiceGroupName,
+    ServiceLimitScope Scope,
+    string CustomerParticipantName,
+    decimal? AmountValue,
+    int? QuantityValue,
+    ServiceLimitPeriod Period);
+
+public record ServiceLimitUpdateOperation(
+    int Id,
+    decimal? AmountValue,
+    int? QuantityValue,
+    bool? Enabled);
+
+public record ServiceLimitParticipantSetOperation(
+    string CustomerName,
+    string ServiceGroupName,
+    List<string> CustomerParticipantNames,
+    decimal? AmountValue,
+    int? QuantityValue,
+    ServiceLimitPeriod Period);
+
 public record SessionOpenOperation(
     string CustomerName,
     string ServiceName,
@@ -1183,6 +1610,13 @@ public static class AccountingHttpClientExtension
                             return false;
                         }
 
+                        // A missing service limit is a definitive result ("no limit is set"), so its 404 is not retried.
+                        // Other 404s are retried: a customer created a moment ago may not be visible yet.
+                        if (response.StatusCode == HttpStatusCode.NotFound && IsServiceLimitRequest(response.RequestMessage))
+                        {
+                            return false;
+                        }
+
                         // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
                         if (response.StatusCode == HttpStatusCode.BadRequest)
                         {
@@ -1219,8 +1653,8 @@ public static class AccountingHttpClientExtension
 
         return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
     }
-    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
-    // and wraps any other failure into AccountingException with the status code and response body.
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found /
+    // resource not found), and wraps any other failure into AccountingException with the status code and response body.
     private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
@@ -1234,12 +1668,99 @@ public static class AccountingHttpClientExtension
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        if (IsCustomerNotFound(response.StatusCode, content))
+        var detail = GetProblemDetail(content);
+        var serviceLimitRequest = IsServiceLimitRequest(response.RequestMessage);
+
+        // On the service limit paths a 400 "not found" may name something other than the customer - a service group the
+        // accounting service does not have - and reporting that as a missing customer would hide the real reason.
+        if (IsCustomerNotFound(response.StatusCode, content) &&
+            (!serviceLimitRequest || detail.StartsWith("Customer", StringComparison.OrdinalIgnoreCase)))
         {
             return new AccountingCustomerNotFoundException();
         }
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new AccountingNotFoundException($"Accounting resource not found {content}");
+        }
+
+        // A limit that does not exist is answered with 404 on a read but with 400 on an update or a deletion; both mean
+        // the same, and only this one 400 must not be confused with a threshold the accounting service rejects.
+        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest && IsServiceLimitNotFound(detail))
+        {
+            return new AccountingNotFoundException($"Accounting resource not found {content}");
+        }
+
+        // A charge or a reservation refused by a spending limit; a 403 without this title means our API client lacks
+        // the access level, which stays a plain failure.
+        if (response.StatusCode == HttpStatusCode.Forbidden && content.Contains(ServiceLimitExceededTitle, StringComparison.OrdinalIgnoreCase))
+        {
+            return new AccountingServiceLimitExceededException(detail);
+        }
+
+        // A second limit of the same scope, or for the same user; elsewhere a 409 stays a plain failure, as before.
+        if (response.StatusCode == HttpStatusCode.Conflict && serviceLimitRequest)
+        {
+            return new AccountingConflictException(detail);
+        }
+
+        // The service limit operations pass values the portal user chose, so their 400 explains a mistake of that user
+        // (a quantity threshold for services with different units, a missing threshold) or a gap in the setup of the
+        // accounting service (a missing service group). Elsewhere a 400 is our bug.
+        if (response.StatusCode == HttpStatusCode.BadRequest && serviceLimitRequest)
+        {
+            return new AccountingBadRequestException(detail);
+        }
+
         return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    private const string ServiceLimitExceededTitle = "Service limit exceeded";
+
+    // The accounting service answers errors as ProblemDetails, the reason in "detail"; validation errors come in the
+    // ASP.NET format with an "errors" object instead.
+    private static string GetProblemDetail(string content)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("detail", out var detail) && detail.ValueKind == JsonValueKind.String)
+            {
+                return detail.GetString();
+            }
+
+            if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+            {
+                return string.Join(" ", errors.EnumerateObject()
+                    .SelectMany(error => error.Value.ValueKind == JsonValueKind.Array ? error.Value.EnumerateArray() : Enumerable.Empty<JsonElement>())
+                    .Where(message => message.ValueKind == JsonValueKind.String)
+                    .Select(message => message.GetString()));
+            }
+        }
+        catch (JsonException)
+        {
+            // Not a JSON body: the text itself is the reason.
+        }
+
+        return content;
+    }
+
+    // Both /serviceLimit itself (create, update) and every path below it.
+    private static bool IsServiceLimitRequest(HttpRequestMessage request)
+    {
+        var path = request?.RequestUri?.AbsolutePath;
+
+        return path != null &&
+               (path.EndsWith("/serviceLimit", StringComparison.OrdinalIgnoreCase) ||
+                path.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsServiceLimitNotFound(string detail)
+    {
+        return detail.StartsWith("Service limit", StringComparison.OrdinalIgnoreCase) &&
+               detail.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsCustomerNotFound(HttpStatusCode status, string content)
@@ -1275,3 +1796,24 @@ public class AccountingNotConfiguredException(string message = "Accounting servi
 public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
 
 public class AccountingCustomerNotFoundException(string message = "Customer not found") : AccountingException(message);
+
+/// <summary>
+/// The accounting service answered 404: the requested resource (e.g. a service limit) does not exist.
+/// </summary>
+public class AccountingNotFoundException(string message = "Resource not found") : AccountingException(message);
+
+/// <summary>
+/// The accounting service refused a charge or a reservation because a spending limit has no room left for it. The
+/// wallet may well have the money; a wallet without it is <see cref="AccountingPaymentRequiredException"/>.
+/// </summary>
+public class AccountingServiceLimitExceededException(string message) : AccountingException(message);
+
+/// <summary>
+/// The accounting service answered 409: what was to be created exists already, e.g. a second limit of the same scope.
+/// </summary>
+public class AccountingConflictException(string message) : AccountingException(message);
+
+/// <summary>
+/// The accounting service rejected a service limit request as invalid; the message says why.
+/// </summary>
+public class AccountingBadRequestException(string message) : AccountingException(message);

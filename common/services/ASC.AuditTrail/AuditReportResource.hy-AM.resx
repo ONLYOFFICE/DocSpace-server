@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Ծառայության ծախսերի սահմանաչափը ստեղծվել է՝ {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Ծառայության ծախսերի սահմանաչափը թարմացվել է՝ {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Ծառայության ծախսերի սահմանաչափը ջնջվել է՝ {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Սահմանվել են ծառայության անհատական ծախսերի սահմանաչափերը՝ {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Անջատվել են ծառայության անհատական ծախսերի սահմանաչափերը՝ {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
   </data>

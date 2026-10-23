@@ -77,7 +77,8 @@ public class PaymentController(
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    PaymentHelper paymentHelper)
+    PaymentHelper paymentHelper,
+    QuotaSocketManager quotaSocketManager)
     : ControllerBase
 {
     /// <remarks>
@@ -1604,6 +1605,416 @@ public class PaymentController(
         var prices = await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
 
         return prices?.Select(r => r.Map()).ToList();
+    }
+
+    /// <remarks>
+    /// Returns one spending limit on the AI services of the portal by its ID - the limit of the portal as a whole, the
+    /// one for every user, or a personal one. Only a DocSpace administrator may read it, an installation without a
+    /// billing service answers 403, and the call is read-only. The limit comes back with its scope, thresholds, their
+    /// currency and unit, the period and whether it is in force, but without its spending: that comes with
+    /// `GET api/2.0/portal/payment/servicelimit/total` for the portal and with
+    /// `GET api/2.0/portal/payment/servicelimit/participants` for each user. A portal with no billing customer, and an
+    /// ID that does not exist, belongs to another portal or is not a limit on the AI services, answer 404.
+    /// </remarks>
+    /// <summary>
+    /// Get a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/{id}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit with its scope, thresholds, period and state", typeof(ServiceLimitDto))]
+    [SwaggerResponse(400, "The ID is zero or negative")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
+    [HttpGet("servicelimit/{id:int}")]
+    public async Task<ServiceLimitDto> GetServiceLimit(ServiceLimitIdRequestDto inDto)
+    {
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.GetServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id);
+
+        return serviceLimit?.Map() ?? throw new ItemNotFoundException("Service limit could not be found");
+    }
+
+    /// <remarks>
+    /// Returns the spending limit on the AI services for the portal as a whole - the ceiling the spending of every user
+    /// counts towards - together with what was spent against it in the current period and what is left. Only a
+    /// DocSpace administrator may read it, an installation without a billing service answers 403, and the call is
+    /// read-only. The limit is checked in addition to the limits
+    /// of the users, so a user can be stopped by it before reaching their own. The spending includes the expected cost
+    /// of AI operations still in progress. When no such limit has been set, or it was deleted, the answer is 200 with a
+    /// null `response`; create the limit with `POST api/2.0/portal/payment/servicelimit` and the scope `Total`. A
+    /// switched-off limit is still returned, with `enabled` false. A portal with no billing customer answers 404.
+    /// </remarks>
+    /// <summary>
+    /// Get the portal service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/total</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The limit of the portal as a whole with its spending, or null when no such limit is set", typeof(ServiceLimitDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
+    [HttpGet("servicelimit/total")]
+    public async Task<ServiceLimitDto> GetTotalServiceLimit()
+    {
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.GetTotalServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices);
+
+        return serviceLimit?.Map();
+    }
+
+    /// <remarks>
+    /// Returns the spending limit on the AI services for every user - the same ceiling applied to each user separately,
+    /// for any user without a personal limit in force. Only a DocSpace administrator may read it, an installation
+    /// without a billing service answers 403, and the call is read-only. It comes without spending, since that is
+    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`; `periodEnd`
+    /// still says when the current period ends for everyone. When no
+    /// such limit has been set, or it was deleted, the answer is 200 with a null `response`; create the limit with
+    /// `POST api/2.0/portal/payment/servicelimit` and the scope `Global`. A switched-off limit is still returned, with
+    /// `enabled` false. A portal with no billing customer answers 404.
+    /// </remarks>
+    /// <summary>
+    /// Get the global service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/global</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The limit for every user, or null when no such limit is set", typeof(ServiceLimitDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
+    [HttpGet("servicelimit/global")]
+    public async Task<ServiceLimitDto> GetGlobalServiceLimit()
+    {
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices);
+
+        return serviceLimit?.Map();
+    }
+
+    /// <remarks>
+    /// Lists, one page at a time, the spending limit on the AI services in force for each portal user, with what the
+    /// user spent against it in the current period and what is left. Only a DocSpace administrator may read it, an
+    /// installation without a billing service answers 403, a portal with no billing customer answers 404, and the call
+    /// is read-only; a portal with no limits gets an empty page. A user's own limit wins over the one for every user: an item with the scope `Custom` is a
+    /// personal limit, one with `Global` the limit for every user, its ID repeated for each user it applies to.
+    /// Switched-off limits are not listed, and a user who has not used the AI services yet may be missing. `offset`
+    /// and `limit` page through the result and default to 0 and 25, and the answer repeats them next to
+    /// `totalQuantity`, `totalPage` and `currentPage`; `orderBy` and `orderType` sort it, the newest limits first by
+    /// default.
+    /// </remarks>
+    /// <summary>
+    /// Get the user service limits
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/participants</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "A page of the limits in force for the users with their spending and paging information", typeof(ServiceLimitReportDto))]
+    [SwaggerResponse(400, "`offset` is negative, `limit` is outside the allowed page size, or `orderBy` or `orderType` is not one of its values")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
+    [HttpGet("servicelimit/participants")]
+    public async Task<ServiceLimitReportDto> GetParticipantServiceLimits(GetParticipantServiceLimitsRequestDto inDto)
+    {
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var filter = new ServiceLimitFilter
+        {
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType,
+            IncludeUsage = true
+        };
+
+        return (await tariffService.GetParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices, filter))?.Map();
+    }
+
+    /// <remarks>
+    /// Creates a spending limit on the AI services - AI tools and AI search together - with `scope` saying whom it
+    /// applies to: `Total` for the portal as a whole, `Global` for every user separately, `Custom` for the user in
+    /// `userId`, which only this scope takes. A personal limit applies to its user instead of the one for every user,
+    /// and the limit of the portal is checked on top of both. The portal needs a billing customer, and the caller needs
+    /// the permission to edit the portal settings as well as DocSpace administrator rights. At least one of
+    /// `amountValue` and `quantityValue` must be given; with both, the services stop as soon as either is reached. The
+    /// call is mutating and written to the portal audit trail. It is not idempotent: a second limit of the same scope,
+    /// or for the same user, is refused with 409 - change the existing one with
+    /// `PUT api/2.0/portal/payment/servicelimit` instead. The scope, the user and the period cannot be changed later.
+    /// </remarks>
+    /// <summary>
+    /// Create a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimitDto))]
+    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given, `userId` is missing for the scope `Custom` or given for another scope, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the user does not exist")]
+    [SwaggerResponse(409, "A limit of this scope, or for this user, exists already")]
+    [HttpPost("servicelimit")]
+    public async Task<ServiceLimitDto> CreateServiceLimit(CreateServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        if (!inDto.AmountValue.HasValue && !inDto.QuantityValue.HasValue)
+        {
+            throw new ArgumentException("Either the amount or the quantity threshold must be set");
+        }
+
+        string participantName = null;
+        if (inDto.Scope == ServiceLimitScope.Custom)
+        {
+            if (!inDto.UserId.HasValue)
+            {
+                throw new ArgumentException("A personal limit needs the user it is set for");
+            }
+
+            await DemandPortalUserAsync(inDto.UserId.Value);
+
+            participantName = inDto.UserId.Value.ToString();
+        }
+        else if (inDto.UserId.HasValue)
+        {
+            throw new ArgumentException("Only a personal limit is set for a user");
+        }
+
+        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Scope, participantName,
+            inDto.AmountValue, inDto.QuantityValue, inDto.Period);
+
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, inDto.Scope, participantName);
+
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, inDto.Scope, participantName);
+
+        return serviceLimit.Map();
+    }
+
+    /// <remarks>
+    /// Changes the thresholds of an existing spending limit on the AI services, or switches it off and back on with
+    /// `enabled`. The portal needs a billing customer, and the caller needs the permission to edit the portal settings
+    /// as well as DocSpace administrator rights. Only the given fields change: an omitted threshold keeps its value, so
+    /// a threshold once set cannot be removed here - delete the limit with
+    /// `DELETE api/2.0/portal/payment/servicelimit/{id}` and create it anew with
+    /// `POST api/2.0/portal/payment/servicelimit`, which is also the way to change its scope, user or period. A
+    /// switched-off limit stops restricting the AI services at once. The call is mutating and idempotent, it is written
+    /// to the portal audit trail, and a new threshold applies from the very next operation; lowering it below what was
+    /// already spent blocks the AI services until the period ends. An ID that does not exist, belongs to another portal
+    /// or is not a limit on the AI services answers 404.
+    /// </remarks>
+    /// <summary>
+    /// Update a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimitDto))]
+    [SwaggerResponse(400, "The ID is zero or negative, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
+    [HttpPut("servicelimit")]
+    public async Task<ServiceLimitDto> UpdateServiceLimit(UpdateServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled)
+            ?? throw new ItemNotFoundException("Service limit could not be found");
+
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
+
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Scope, serviceLimit.Participant);
+
+        return serviceLimit.Map();
+    }
+
+    /// <remarks>
+    /// Sets the same personal spending limit on the AI services for each of the listed portal users in one call,
+    /// replacing the personal limit any of them already has and switching it on, so it is how a ceiling is rolled out
+    /// to a group of users. The portal needs a billing customer, and the caller needs the permission to edit the portal
+    /// settings as well as DocSpace administrator rights. At least one of `amountValue` and `quantityValue` must be
+    /// given, every user in `userIds` must exist on the portal, and a user listed twice is limited once. One call takes
+    /// at most 1000 users; split a larger group into several calls. Unlike
+    /// `PUT api/2.0/portal/payment/servicelimit`, this sets the whole limit: a threshold left out is removed, and the
+    /// period may change, though a lifetime limit set to lifetime again keeps counting from where it was. Each personal
+    /// limit applies instead of the one for every user, and the limit of the portal is checked on top. The call is mutating and idempotent, and it is written to the portal audit trail. The answer is
+    /// the number of personal limits that were set; the result is listed by
+    /// `GET api/2.0/portal/payment/servicelimit/participants`.
+    /// </remarks>
+    /// <summary>
+    /// Set the user service limits
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/participants</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The number of personal limits that were set", typeof(int))]
+    [SwaggerResponse(400, "`userIds` is empty or lists more than 1000 users, neither `amountValue` nor `quantityValue` is given, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or one of the users does not exist")]
+    [HttpPut("servicelimit/participants")]
+    public async Task<int> SetParticipantServiceLimits(SetParticipantServiceLimitsRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        if (!inDto.AmountValue.HasValue && !inDto.QuantityValue.HasValue)
+        {
+            throw new ArgumentException("Either the amount or the quantity threshold must be set");
+        }
+
+        var userIds = inDto.UserIds.Distinct().ToList();
+        foreach (var userId in userIds)
+        {
+            await DemandPortalUserAsync(userId);
+        }
+
+        var participantNames = userIds.Select(userId => userId.ToString()).ToList();
+
+        var count = await tariffService.SetParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices, participantNames,
+            inDto.AmountValue, inDto.QuantityValue, inDto.Period);
+
+        // The explicit type argument picks the list overload; with a List<Guid> the compiler takes the single-value one.
+        messageService.Send(MessageAction.CustomerServiceLimitsSet, MessageTarget.Create<Guid>(userIds), ServiceLimitGroups.AiServices);
+
+        // The users who got the limit, and the administrators, who see it in the list of the users.
+        var recipients = await GetAdministratorIdsAsync();
+        recipients.UnionWith(userIds);
+
+        await quotaSocketManager.ChangeServiceLimitsAsync(ServiceLimitGroups.AiServices, userIds: recipients);
+
+        return count;
+    }
+
+    /// <remarks>
+    /// Switches off every personal spending limit on the AI services in one call, so each user falls back to the limit
+    /// for every user, if one is set. The limit of the portal as a whole and the one for every user stay as they are.
+    /// The portal needs a billing customer, and the caller needs the permission to edit the portal settings as well as
+    /// DocSpace administrator rights. The switched-off limits stop restricting their users at once and are kept, so
+    /// each can be switched back on with `PUT api/2.0/portal/payment/servicelimit`. The call is mutating and
+    /// idempotent - repeating it switches off nothing more - and it is written to the portal audit trail. The answer is
+    /// the number of personal limits that were switched off, zero when none was in force. To switch off the limit of a
+    /// single user, use `PUT api/2.0/portal/payment/servicelimit` with `enabled` set to false.
+    /// </remarks>
+    /// <summary>
+    /// Disable the user service limits
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/participants/disable</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The number of personal limits that were switched off", typeof(int))]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer")]
+    [HttpPut("servicelimit/participants/disable")]
+    public async Task<int> DisableParticipantServiceLimits()
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var count = await tariffService.DisableParticipantServiceLimitsAsync(tenantId, ServiceLimitGroups.AiServices);
+
+        messageService.Send(MessageAction.CustomerServiceLimitsDisabled, ServiceLimitGroups.AiServices);
+
+        // The accounting service reports how many personal limits it switched off, not whose, so every user re-reads.
+        await quotaSocketManager.ChangeServiceLimitsAsync(ServiceLimitGroups.AiServices);
+
+        return count;
+    }
+
+    /// <remarks>
+    /// Removes one spending limit on the AI services completely - the limit of the portal as a whole, the one for
+    /// every user, or a personal one - so it no longer restricts anyone. The portal needs a billing customer, and the
+    /// caller needs the permission to edit the portal settings as well as DocSpace administrator rights. The call is
+    /// destructive and cannot be undone: unlike switching a limit off with `PUT api/2.0/portal/payment/servicelimit`,
+    /// which keeps its settings, a deleted limit is gone, and a new one has to be created with
+    /// `POST api/2.0/portal/payment/servicelimit`. Deleting a personal limit lets the limit for every user apply to
+    /// that user. It is written to the portal audit trail. An ID that does not exist, belongs to another portal or is
+    /// not a limit on the AI services answers 404, which is also what a repeated deletion of the same limit gets.
+    /// </remarks>
+    /// <summary>
+    /// Delete a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/{id}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit has been deleted; the response carries no content")]
+    [SwaggerResponse(400, "The ID is zero or negative")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or the portal has no limit on the AI services with this ID")]
+    [HttpDelete("servicelimit/{id:int}")]
+    public async Task DeleteServiceLimit(ServiceLimitIdRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.DeleteServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Id)
+            ?? throw new ItemNotFoundException("Service limit could not be found");
+
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitDeleted, serviceLimit.ServiceGroupName, serviceLimit.Scope, serviceLimit.Participant);
+
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, serviceLimit.Scope, serviceLimit.Participant);
+    }
+
+    // The event goes to whoever may read the limit: the limit for every user to every user, as each reads it as their own
+    // limit; the limit of the portal as a whole to the administrators only; a personal limit to its user and to the
+    // administrators, who see it in the list of the users. The event only asks the clients to re-read, so it carries no
+    // thresholds.
+    private async Task NotifyServiceLimitChangeAsync(string serviceGroupName, int id, ServiceLimitScope scope, string participantName)
+    {
+        if (scope == ServiceLimitScope.Global)
+        {
+            await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id);
+            return;
+        }
+
+        var userIds = await GetAdministratorIdsAsync();
+        if (Guid.TryParse(participantName, out var userId))
+        {
+            userIds.Add(userId);
+        }
+
+        await quotaSocketManager.ChangeServiceLimitsAsync(serviceGroupName, id, userIds);
+    }
+
+    // A personal limit is set only for a real user of the portal. The system accounts count as existing users, but they
+    // never use the AI services, so a limit for one is refused like one for a user that does not exist.
+    private async Task DemandPortalUserAsync(Guid userId)
+    {
+        if (userManager.IsSystemUser(userId) || !await userManager.UserExistsAsync(userId))
+        {
+            throw new ItemNotFoundException($"User {userId} could not be found");
+        }
+    }
+
+    // The owner is a member of the administrators group too.
+    private async Task<HashSet<Guid>> GetAdministratorIdsAsync()
+    {
+        var administrators = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+
+        return administrators.Select(administrator => administrator.Id).ToHashSet();
+    }
+
+    // The audit record names the service group and, as its second parameter, the scope of the limit - for a personal
+    // limit together with the user it is set for. The user ID goes into the target, because the display name may
+    // change later.
+    private async Task SendServiceLimitAuditMessageAsync(MessageAction action, string serviceGroupName, ServiceLimitScope scope, string participantName)
+    {
+        if (!Guid.TryParse(participantName, out var userId))
+        {
+            messageService.Send(action, null, serviceGroupName, scope.ToString());
+            return;
+        }
+
+        var userName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, false, false);
+
+        messageService.Send(action, MessageTarget.Create(userId), serviceGroupName, $"{scope} ({userName})");
     }
 
     /// <remarks>

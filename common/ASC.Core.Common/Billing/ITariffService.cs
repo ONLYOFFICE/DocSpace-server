@@ -78,6 +78,17 @@ public interface ITariffService
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
     Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
+    Task<ServiceLimit> GetServiceLimitAsync(int tenantId, string groupName, int id);
+    Task<ServiceLimit> GetTotalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimit> GetGlobalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string groupName, ServiceLimitFilter filter);
+    Task<Dictionary<Guid, UserServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName);
+    Task<UserServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId);
+    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, string groupName, int id, decimal? amountValue, int? quantityValue, bool? enabled);
+    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName);
+    Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, string groupName, int id);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
 }

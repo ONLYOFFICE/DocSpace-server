@@ -236,6 +236,39 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetServicePrices_ResolvesTheServiceThenBuildsByServicePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath);
+            return request.RequestUri.AbsolutePath.Contains("/servicePrice/")
+                ? Json(HttpStatusCode.OK, """[{"id":12,"serviceId":7,"timeUnit":"Minute","servicePrice":0.5}]""")
+                : Json(HttpStatusCode.OK, """{"id":7,"name":"ai-tools"}""");
+        });
+
+        var prices = await client.GetServicePricesAsync("ai-tools", active: true);
+
+        paths.Should().Equal("/api/service/by-name/ai-tools", "/api/servicePrice/by-service/7");
+        prices.Should().ContainSingle().Which.TimeUnit.Should().Be(PriceTimeUnit.Minute);
+    }
+
+    [Fact]
+    public async Task CompleteCustomerSession_PostsToSessionCompletePath()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
+
+        await client.CompleteCustomerSessionAsync("portal-1", "backup", 42, 3, "3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/complete");
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        body.RootElement.GetProperty("sessionId").GetInt32().Should().Be(42);
+        body.RootElement.GetProperty("customerName").GetString().Should().Be("portal-1");
+    }
+
+    [Fact]
     public async Task GetProductPriceInfo_SendsNamesInOneRequest_AndLeavesUnknownServicesOut()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
@@ -467,7 +500,7 @@ public class AccountingClientTests
         await act.Should().ThrowAsync<AccountingNotConfiguredException>();
     }
 
-    private static (AccountingClient client, CapturingHandler handler) CreateClient(
+    internal static (AccountingClient client, CapturingHandler handler) CreateClient(
         Func<HttpRequestMessage, HttpResponseMessage> responder, string baseUrl = BaseUrl)
     {
         var configuration = new ConfigurationBuilder()
@@ -513,7 +546,7 @@ public class AccountingClientTests
         return $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""";
     }
 
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
+    internal static HttpResponseMessage Json(HttpStatusCode status, string json)
     {
         return new HttpResponseMessage(status)
         {
@@ -539,7 +572,7 @@ public class AccountingClientTests
             .ToList();
     }
 
-    private static Dictionary<string, string> ParseQuery(Uri uri)
+    internal static Dictionary<string, string> ParseQuery(Uri uri)
     {
         var result = new Dictionary<string, string>();
         var query = uri.Query.TrimStart('?');
@@ -560,7 +593,7 @@ public class AccountingClientTests
         return result;
     }
 
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
+    internal sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
         public int CallCount { get; private set; }
         public Uri? LastUri { get; private set; }
