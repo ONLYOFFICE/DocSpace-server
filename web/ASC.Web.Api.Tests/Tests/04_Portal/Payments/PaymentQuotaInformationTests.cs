@@ -108,7 +108,7 @@ public class PaymentQuotaInformationTests(
 
     [Trait("Bug", "81534")]
     [Fact]
-    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsAdminOnlyFeatures()
+    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsAdminOnlyFeaturesAndPrice()
     {
         // Arrange
         var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
@@ -118,8 +118,14 @@ public class PaymentQuotaInformationTests(
         var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
+        // The full admin set and the due date depend on the plan and the edition the host runs, so only
+        // what holds for any plan is pinned: the room admin's features plus more, and a price that is
+        // always written for an admin (zero on a free plan, but never left out).
         quota.StatusCode.Should().Be(200);
-        quota.Response.Features.Should().Contain(f => !_roomAdminFeatures.Contains(f.Id));
+        var featureIds = quota.Response.Features.Select(f => f.Id).ToList();
+        featureIds.Should().Contain(_roomAdminFeatures);
+        featureIds.Should().Contain(id => !_roomAdminFeatures.Contains(id));
+        quota.Response.Price.Value.Should().NotBeNull();
     }
 
     [Trait("Bug", "81534")]
