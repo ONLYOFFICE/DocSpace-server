@@ -537,38 +537,38 @@ public class TenantQuota
         _featuresList = [];
 
         _countUserFeature = new CountUserFeature(this) { Order = 1 };
-        _countPaidUserFeature = new CountPaidUserFeature(this);
+        _countPaidUserFeature = new CountPaidUserFeature(this) { EmployeeType = EmployeeType.RoomAdmin };
         _usersInRoomFeature = new UsersInRoomFeature(this) { Visible = false };
-        _countRoomFeature = new CountRoomFeature(this) { Order = 2 };
-        _maxTotalSizeFeature = new MaxTotalSizeFeature(this);
+        _countRoomFeature = new CountRoomFeature(this) { Order = 2, EmployeeType = EmployeeType.RoomAdmin };
+        _maxTotalSizeFeature = new MaxTotalSizeFeature(this) { EmployeeType = EmployeeType.User };
         _maxFileSizeFeature = new MaxFileSizeFeature(this);
         _nonProfitFeature = new TenantQuotaFeatureFlag(this, "non-profit") { Visible = false };
         _trialFeature = new TenantQuotaFeatureFlag(this, "trial") {  Visible = false };
         _freeFeature = new FreeFeature(this) { Visible = false };
         _updateFeature = new TenantQuotaFeatureFlag(this, "update") { Standalone = true };
-        _auditFeature = new TenantQuotaFeatureFlag(this, "audit") { Order = 8, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _auditFeature = new TenantQuotaFeatureFlag(this, "audit") { Order = 8 };
         _docsEditionFeature = new TenantQuotaFeatureFlag(this, "docs") { Visible = false };
-        _ldapFeature = new TenantQuotaFeatureFlag(this, "ldap") { Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _ssoFeature = new TenantQuotaFeatureFlag(this, "sso") { Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _brandingFeature = new TenantQuotaFeatureFlag(this, "branding") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _ldapFeature = new TenantQuotaFeatureFlag(this, "ldap") { Order = 4 };
+        _ssoFeature = new TenantQuotaFeatureFlag(this, "sso") { Order = 5 };
+        _brandingFeature = new TenantQuotaFeatureFlag(this, "branding");
+        _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3 };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this, "lifetime") { Standalone = true };
         _automationApiFeature = new TenantQuotaFeatureFlag(this, "automationapi") { Order = 12 };
         _customFeature = new TenantQuotaFeatureFlag(this, "custom") { Visible = false };
-        _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7 };
         _oauthFeature = new TenantQuotaFeatureFlag(this, "oauth");
         _contentSearchFeature = new TenantQuotaFeatureFlag(this, "contentsearch") { Visible = false };
-        _thirdPartyFeature = new TenantQuotaFeatureFlag(this, "thirdparty") { Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _statisticFeature = new TenantQuotaFeatureFlag(this, "statistic") { Order = 10 };
-        _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _thirdPartyFeature = new TenantQuotaFeatureFlag(this, "thirdparty") { Order = 9 };
+        _statisticFeature = new TenantQuotaFeatureFlag(this, "statistic") { Order = 10, EmployeeType = EmployeeType.RoomAdmin };
+        _yearFeature = new TenantQuotaFeatureFlag(this, "year");
+        _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6 };
+        _backup = new WalletFeatureFlag(this, "backup");
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
-        _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiSearch = new WalletFeatureFlag(this, "aisearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiTools = new WalletFeatureFlag(this, "aitools");
+        _aiSearch = new WalletFeatureFlag(this, "aisearch");
         _countDocsCloud = new CountDocsCloudFeature(this) { Order = 13 };
-        _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack");
+        _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial");
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {

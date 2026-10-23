@@ -448,7 +448,7 @@ public class PaymentController(
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
-    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, the price of the administrators product is unknown, or after the move its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPost("subscription/movetowallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
@@ -492,15 +492,9 @@ public class PaymentController(
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
         var participant = securityContext.CurrentAccount.ID.ToString();
 
-        // Calculate the cost of the requested admins from the known quota price (price * quantity).
-        var walletQuotas = await tariffHelper.GetQuotasAsync(wallet: true).ToListAsync();
-        var quotaDto = walletQuotas.FirstOrDefault(q => q.Id == quota.TenantId);
-        if (quotaDto?.Price?.Value is not { } unitPrice)
-        {
-            throw new ItemNotFoundException("Quota price could not be found");
-        }
-
-        var requiredAmount = unitPrice * productQty;
+        // Calculate the cost of the requested admins from the quota price (price * quantity). The price is read from
+        // the quota itself: the payer need not be a DocSpace admin, and QuotaHelper empties the price for anyone else.
+        var requiredAmount = quota.Price * productQty;
 
         // Move the unused subscription balance to the wallet.
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
@@ -719,29 +713,29 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the quota the portal is on right now - its paid plan or the free one - with everything a client needs
-    /// to render itself: the price, the features that are switched on, the limits they grant (rooms, storage in
-    /// bytes, users, administrators, AI) and how much of each is already used. Every signed-in member of the portal
-    /// reads it, so it is not restricted to administrators; only guests are refused with 403. The call is read-only.
-    /// The plan is served from the cache by default, which is what a start-up needs; `refresh=true` fetches it from
-    /// the billing service instead, so use that right after a purchase and not routinely, because it is a remote
-    /// call. The catalogue of the quotas that could be bought instead is `GET api/2.0/portal/payment/quotas`, and the
-    /// money side of the same portal - customer, wallet and balance - starts at
-    /// `GET api/2.0/portal/payment/customerinfo`.
+    /// Returns the quota the portal is on - its paid plan or the free one - with the limits its features grant and how
+    /// much of each is already used. Any signed-in member except a guest may call it. The call is read-only; the plan
+    /// comes from the cache, and `refresh=true` re-reads it from the billing service, a remote call meant for right
+    /// after a purchase. The answer is trimmed to the caller's user type: a DocSpace administrator or the owner gets
+    /// the price, the due date and all features, a room administrator only the `manager`, `room`, `total_size` and
+    /// `statistic` features, and a user only `total_size`. For both of the latter `price` is an empty object and
+    /// `dueDate` is omitted, while the storage quota settings (`usersQuota`, `roomsQuota`, `aiAgentsQuota`,
+    /// `tenantCustomQuota`) come back as for an administrator. The quotas that could be bought instead are
+    /// `GET api/2.0/portal/payment/quotas`. A guest is refused with 403.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits
     /// </summary>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The quota the portal is on, with its price, features, limits and current usage", typeof(QuotaDto))]
+    [SwaggerResponse(200, "The quota the portal is on with its limits and current usage, trimmed to what the caller's user type may see", typeof(QuotaDto))]
     [SwaggerResponse(403, "The caller is a guest of this portal")]
     [HttpGet("quota")]
     public async Task<QuotaDto> GetQuotaPaymentInformation(PaymentInformationRequestDto inDto)
     {
-        // Every non-guest member reads this at start-up: the client's AuthStore.getPaymentInfo needs
-        // the plan's feature limits (rooms, storage, AI agents) to render at all, and rethrows on
-        // failure. Narrowing this to administrators leaves a RoomAdmin or a User with a blank page.
+        // Every non-guest member reads this at start-up: the client's AuthStore.getPaymentInfo rethrows
+        // on failure, so a 403 would leave a RoomAdmin or a User with a blank page. Instead QuotaHelper
+        // trims the answer to what the caller's type may see.
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             throw new SecurityException();
