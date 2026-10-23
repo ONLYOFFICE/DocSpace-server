@@ -147,9 +147,21 @@ public class FormRecoveryService(
         }
     }
 
-    private async Task RecoverFormAsync(int roomId, int originalFormId, Action<double> progress, CancellationToken cancellationToken)
+    /// <summary>
+    /// Whether the folder of completed forms holds forms missing from the search index; false when the index cannot be read.
+    /// </summary>
+    public async Task<bool> HasMissingResponsesAsync(int roomId, int originalFormId)
     {
-        var fileDao = daoFactory.GetFileDao<int>();
+        var (_, _, _, orphans) = await FindFormOrphansAsync(daoFactory.GetFileDao<int>(), roomId, originalFormId);
+
+        return orphans.Count > 0;
+    }
+
+    private async Task<(Folder<int> Room, File<int> Form, Folder<int> DoneFolder, List<File<int>> Orphans)> FindFormOrphansAsync(
+        IFileDao<int> fileDao,
+        int roomId,
+        int originalFormId)
+    {
         var folderDao = daoFactory.GetFolderDao<int>();
 
         var room = await folderDao.GetFolderAsync(roomId);
@@ -157,16 +169,23 @@ public class FormRecoveryService(
         var formFilling = (await fileDao.GetProperties(originalFormId))?.FormFilling;
         if (room is not { FolderType: FolderType.FillingFormsRoom } || form == null || formFilling is not { ResultsFolderId: not 0 })
         {
-            return;
+            return (room, form, null, []);
         }
 
         var doneFolder = await folderDao.GetFolderAsync(formFilling.ResultsFolderId);
         if (doneFolder is not { FolderType: FolderType.FormFillingFolderDone })
         {
-            return;
+            return (room, form, null, []);
         }
 
-        var orphans = await FindOrphansAsync(fileDao, doneFolder, originalFormId);
+        return (room, form, doneFolder, await FindOrphansAsync(fileDao, doneFolder, originalFormId));
+    }
+
+    private async Task RecoverFormAsync(int roomId, int originalFormId, Action<double> progress, CancellationToken cancellationToken)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+
+        var (room, form, doneFolder, orphans) = await FindFormOrphansAsync(fileDao, roomId, originalFormId);
         if (orphans.Count == 0)
         {
             return;

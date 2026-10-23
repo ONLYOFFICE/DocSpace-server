@@ -40,6 +40,7 @@ public class FormFillingReportIntegrationEventHandler(
     TenantManager tenantManager,
     DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
     FormRecoveryTaskManager formRecoveryTaskManager,
+    FormRecoveryService formRecoveryService,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
@@ -70,7 +71,7 @@ public class FormFillingReportIntegrationEventHandler(
                 var reportData = new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers);
 
                 // The recovery starts the report when it is done, also the one of a repeated request that finds it running.
-                if (@event.Recover)
+                if (@event.Recover && await NeedsRecoveryAsync(@event))
                 {
                     var recoveryTask = serviceProvider.GetService<FormRecoveryTask>();
                     recoveryTask.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData);
@@ -90,6 +91,35 @@ public class FormFillingReportIntegrationEventHandler(
             {
                 logger.ErrorWithException(ex);
             }
+        }
+    }
+
+    // Only when there is something to do: forms missing from the index, or the versions of the older form versions that a
+    // new report file gets. Otherwise the report starts at once, as without the recovery, and so it does when the check
+    // fails.
+    private async Task<bool> NeedsRecoveryAsync(FormFillingReportIntegrationEvent @event)
+    {
+        try
+        {
+            if (await formRecoveryService.HasMissingResponsesAsync(@event.RoomId, @event.OriginalFormId))
+            {
+                return true;
+            }
+
+            if (!@event.IsNewFile)
+            {
+                return false;
+            }
+
+            var versions = await formRecoveryService.GetVersionsWithResponsesAsync(@event.RoomId, @event.OriginalFormId);
+
+            return versions != null && versions.Any(v => v < @event.OriginalFormVersion);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+
+            return false;
         }
     }
 }
