@@ -103,13 +103,75 @@ public class ChunkedUploaderAccessTests(
     }
 
     /// <summary>
-    /// Opens a session; returns its id, or <c>null</c> when the handler refused (it answers 200 with
-    /// <c>success: false</c> on errors).
+    /// Bug 84582: with <c>fileid</c> the handler opens a session that commits a new version of an
+    /// existing file, and it used to skip <c>CanEditAsync</c> on that file, so a user who could not
+    /// even read it could overwrite it (its real title kept, only the version bumped) and read its
+    /// title back from the response. Fixed by running the same check as
+    /// <c>POST /files/file/{fileId}/edit_session</c> (<c>FileUploader.VerifyChunkedUploadForEditing</c>)
+    /// before such a session is initiated.
     /// </summary>
-    private async Task<string?> InitiateAsync(int folderId, string title, string content)
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "84582")]
+    public async Task Initiate_FileCallerCannotEdit_DoesNotOverwriteFile()
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Chunked Uploader Overwrite Room");
+        var victim = await CreateFile("victim-original.docx", room.Id);
+        var user = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(user);
+
+        var sanity = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.GetFileInfoAsync(victim.Id, cancellationToken: TestContext.Current.CancellationToken));
+        sanity.ErrorCode.Should().Be(403);
+
+        // Act
+        var uploadId = await InitiateAsync(room.Id, "wrong-name.txt", "ATTACKER CONTENT", victim.Id);
+        var uploadStatus = uploadId is null ? (HttpStatusCode?)null : await UploadAsync(uploadId, "wrong-name.txt", "ATTACKER CONTENT");
+
+        // Assert
+        uploadStatus.Should().NotBe(HttpStatusCode.Created);
+
+        await _filesClient.Authenticate(Owner);
+        var after = await GetFile(victim.Id);
+        after.@Version.Should().Be(1, "a caller with no edit access must not commit a new version through the legacy handler");
+        after.Title.Should().Be("victim-original.docx");
+    }
+
+    [Fact]
+    public async Task Initiate_FileCallerCanEdit_OverwritesFile()
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Chunked Uploader Editor Room");
+        var file = await CreateFile("editor-original.docx", room.Id);
+        var user = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Editing);
+
+        await _filesClient.Authenticate(user);
+
+        // Act
+        var uploadId = await InitiateAsync(room.Id, "editor-original.docx", "EDITOR CONTENT", file.Id);
+        uploadId.Should().NotBeNull();
+        var uploadStatus = await UploadAsync(uploadId!, "editor-original.docx", "EDITOR CONTENT");
+
+        // Assert
+        uploadStatus.Should().Be(HttpStatusCode.Created);
+
+        await _filesClient.Authenticate(Owner);
+        var after = await GetFile(file.Id);
+        after.@Version.Should().Be(2);
+    }
+
+    /// <summary>
+    /// Opens a session (for a new version of <paramref name="fileId"/> when given); returns its id, or
+    /// <c>null</c> when the handler refused (it answers 200 with <c>success: false</c> on errors).
+    /// </summary>
+    private async Task<string?> InitiateAsync(int folderId, string title, string content, int? fileId = null)
     {
         var query = "ChunkedUploader.ashx?initiate=true" +
             $"&folderid={folderId}" +
+            (fileId is null ? "" : $"&fileid={fileId}") +
             $"&title={Uri.EscapeDataString(title)}" +
             $"&fileSize={Encoding.UTF8.GetByteCount(content)}";
 
