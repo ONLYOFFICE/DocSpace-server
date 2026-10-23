@@ -53,6 +53,11 @@ public class DbWebhooksLog
     // Set by the worker instance that claimed the row for delivery, cleared when that attempt is recorded.
     // While it is set and NextAttemptOn is in the future, an instance is delivering the row right now.
     public Guid? LeaseId { get; set; }
+    // A manual retry is a row of its own that points to the original row of the event (never to another retry),
+    // so the earlier outcome stays in the log. The receiver sees the original row's id as the event id either way.
+    public int? RetryOf { get; set; }
+    public Guid? RetriedBy { get; set; }
+    public int EventId => RetryOf ?? Id;
     public DbWebhooksConfig Config { get; set; }
     public DbTenant Tenant { get; set; }
 }
@@ -163,6 +168,21 @@ public static class WebhooksPayloadExtension
                     .HasColumnType("varchar(36)")
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
+
+                entity.HasIndex(e => new { e.TenantId, e.RetryOf })
+                    .HasDatabaseName("tenant_id_retry_of");
+
+                entity.Property(e => e.RetryOf)
+                    .HasColumnType("int")
+                    .HasColumnName("retry_of");
+
+                entity.Property(e => e.RetriedBy)
+                    .HasColumnName("retried_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
+                entity.Ignore(e => e.EventId);
             });
         }
 
@@ -233,12 +253,23 @@ public static class WebhooksPayloadExtension
                 entity.Property(e => e.LeaseId)
                     .HasColumnName("lease_id");
 
+                entity.Property(e => e.RetryOf)
+                    .HasColumnName("retry_of");
+
+                entity.Property(e => e.RetriedBy)
+                    .HasColumnName("retried_by");
+
+                entity.Ignore(e => e.EventId);
+
                 // Add indexes (PostgreSQL-specific naming)
                 entity.HasIndex(e => e.TenantId)
                     .HasDatabaseName("ix_webhooks_logs_tenant_id");
 
                 entity.HasIndex(e => e.NextAttemptOn)
                     .HasDatabaseName("ix_webhooks_logs_next_attempt_on");
+
+                entity.HasIndex(e => new { e.TenantId, e.RetryOf })
+                    .HasDatabaseName("ix_webhooks_logs_tenant_id_retry_of");
 
                 // Relationships (optional depending upon requirements)
                 entity.HasOne(e => e.Config)

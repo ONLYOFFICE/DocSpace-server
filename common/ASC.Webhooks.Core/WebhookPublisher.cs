@@ -140,23 +140,18 @@ public class WebhookPublisher(
 
     public async Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog)
     {
-        if (!await dbWorker.ResetJournalAttemptsAsync(webhookLog.TenantId, webhookLog.Id))
-        {
-            var current = await dbWorker.ReadJournal(webhookLog.TenantId, webhookLog.Id);
+        var result = await dbWorker.RetryJournalAsync(webhookLog, authContext.CurrentAccount.ID);
 
-            return new WebhookRetryResult(current == null ? WebhookRetryStatus.NotFound : WebhookRetryStatus.InProgress);
+        if (result.Status != WebhookRetryStatus.Requeued)
+        {
+            return result;
         }
 
-        var reset = await dbWorker.ReadJournal(webhookLog.TenantId, webhookLog.Id);
+        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, result.Log.TenantId, result.Log.Id));
 
-        if (reset == null)
-        {
-            return new WebhookRetryResult(WebhookRetryStatus.NotFound);
-        }
+        result.Log.Config = webhookLog.Config;
 
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, reset.TenantId, reset.Id));
-
-        return new WebhookRetryResult(WebhookRetryStatus.Requeued, reset);
+        return result;
     }
 
     private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)

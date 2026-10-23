@@ -34,12 +34,14 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// One delivery of a webhook event, updated in place by every attempt: what was sent where, and what came back
-/// the last time.
+/// One delivery of a webhook event, updated in place by its automatic retries: what was sent where, and what came
+/// back the last time. A manual retry is a delivery record of its own for the same event.
 /// </summary>
 /// <example>
 /// {
 ///   "id": 1,
+///   "eventId": 1,
+///   "retriedBy": null,
 ///   "configName": "Room activity",
 ///   "trigger": 128,
 ///   "creationTime": "2024-01-15T10:30:00Z",
@@ -56,13 +58,27 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class WebhooksLogDto
 {
     /// <summary>
-    /// The identifier of this delivery, which is what the `eventId` filter of
-    /// `GET api/2.0/settings/webhooks/log` picks one record by and what
-    /// `PUT api/2.0/settings/webhook/{id}/retry` re-sends. Every attempt, a manual retry included, updates this same
-    /// record, and the receiver sees this identifier as `event.id` and in the `x-docspace-event-id` header.
+    /// The identifier of this delivery record, which is what `PUT api/2.0/settings/webhook/{id}/retry` re-sends.
+    /// The automatic retries of the delivery update this same record, while a manual retry gets a record and an
+    /// identifier of its own.
     /// </summary>
     /// <example>1</example>
     public required int Id { get; set; }
+
+    /// <summary>
+    /// The identifier of the event the delivery is for, which the receiver sees as `event.id` and in the
+    /// `x-docspace-event-id` header. It is the `id` of the event's first delivery record, so it equals `id` there and
+    /// stays the same on every manual retry, which makes it the value to group the records of one event by.
+    /// </summary>
+    /// <example>1</example>
+    public int EventId { get; set; }
+
+    /// <summary>
+    /// The member who asked for this delivery with a manual retry. It is empty on the first delivery of an event,
+    /// which the portal sends by itself.
+    /// </summary>
+    /// <example>{ "displayName": "Mike Zanyatski" }</example>
+    public EmployeeDto RetriedBy { get; set; }
 
     /// <summary>
     /// The name of the subscription the delivery belongs to. It is the name as it stands now, so it follows a
@@ -114,7 +130,7 @@ public class WebhooksLogDto
 
     /// <summary>
     /// The headers the target answered with on the latest attempt, serialised the same way as `requestHeaders`. It
-    /// is empty until an attempt is answered, after a manual retry clears it, and when the target was not reached.
+    /// is empty until an attempt is answered, and when the target was not reached.
     /// </summary>
     /// <example>{"content-type":"application/json"}</example>
     public string ResponseHeaders { get; set; }
@@ -152,7 +168,8 @@ public class WebhooksLogDto
 
     /// <summary>
     /// When the next attempt is due, as a UTC instant like `creationTime`. It is empty once the record is
-    /// delivered, once the retries run out, and once the subscription is disabled or removed.
+    /// delivered, once the retries run out, once the subscription is disabled or removed, and once a manual retry of
+    /// the same event takes over from this record.
     /// </summary>
     /// <example>2024-01-15T10:35:00Z</example>
     public DateTime? NextAttemptOn { get; set; }
@@ -160,9 +177,19 @@ public class WebhooksLogDto
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil)
+public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper)
 {
-    public partial WebhooksLogDto Map(DbWebhooksLog source);
+    public async Task<WebhooksLogDto> MapAsync(DbWebhooksLog source)
+    {
+        var result = Map(source);
+
+        result.RetriedBy = source.RetriedBy.HasValue ? await employeeDtoHelper.GetAsync(source.RetriedBy.Value) : null;
+
+        return result;
+    }
+
+    [MapperIgnoreTarget(nameof(WebhooksLogDto.RetriedBy))]
+    private partial WebhooksLogDto Map(DbWebhooksLog source);
 
     private DateTime MapDateToUtc(DateTime source) => tenantUtil.DateTimeToUtc(source);
 }

@@ -57,7 +57,7 @@ public class RetryWebhooksTests(
     }
 
     [Fact]
-    public async Task RetryWebhooks_SeveralDeliveries_RequeuesEachKeepingItsId()
+    public async Task RetryWebhooks_SeveralDeliveries_QueuesANewRecordForEach()
     {
         // Arrange
         var configId = await CreateSubscriptionAsync();
@@ -70,13 +70,18 @@ public class RetryWebhooksTests(
         // Act
         var result = await _webhooksApi.RetryWebhooksAsync(new WebhookRetryRequestDto(ids), TestContext.Current.CancellationToken);
 
-        // Assert
-        result.Response.Select(r => r.Id).Should().BeEquivalentTo(ids);
+        // Assert: new records, one per retried event
+        result.Response.Should().HaveCount(2);
+        result.Response.Select(r => r.Id).Should().NotIntersectWith(ids);
         result.Response.Should().AllSatisfy(r =>
         {
             r.Status.Should().Be(0);
             r.Delivery.Should().BeNull();
         });
+
+        var newIds = result.Response.Select(r => r.Id).ToList();
+        var records = await GetDeliveryRecordsAsync(configId);
+        records.Where(r => newIds.Contains(r.Id)).Select(r => r.EventId).Should().BeEquivalentTo(ids);
     }
 
     [Fact]
@@ -90,7 +95,7 @@ public class RetryWebhooksTests(
             new WebhookRetryRequestDto([delivery.Id, int.MaxValue]), TestContext.Current.CancellationToken);
 
         // Assert: a shorter response is the only sign that something was left out
-        result.Response.Select(r => r.Id).Should().Equal(delivery.Id);
+        result.Response.Should().ContainSingle().Which.Id.Should().NotBe(delivery.Id);
     }
 
     [Fact]

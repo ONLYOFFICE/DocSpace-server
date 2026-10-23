@@ -114,7 +114,8 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// Polls one delivery record until it has been attempted (a non-zero status), and returns the last observed
-    /// state either way.
+    /// state either way. The <c>eventId</c> filter also returns the manual retries of an original record, so the
+    /// record is picked out of them by its own id.
     /// </summary>
     protected async Task<WebhooksLogDto?> WaitForAttemptAsync(int deliveryId)
     {
@@ -123,7 +124,7 @@ public abstract class WebhookDeliveryTestBase(
         while (true)
         {
             var record = (await _webhooksApi.GetWebhooksLogsAsync(
-                eventId: deliveryId, cancellationToken: TestContext.Current.CancellationToken)).Response.SingleOrDefault();
+                eventId: deliveryId, cancellationToken: TestContext.Current.CancellationToken)).Response.SingleOrDefault(r => r.Id == deliveryId);
 
             if (record is { Status: not 0 } || DateTime.UtcNow >= deadline)
             {
@@ -151,7 +152,8 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// The delivery records of one subscription with the retry fields the SDK model does not carry yet
-    /// (<c>attempts</c>, <c>nextAttemptOn</c>), read as raw JSON as the owner.
+    /// (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>, <c>retriedBy</c>), read as raw JSON as the owner,
+    /// newest first.
     /// </summary>
     protected async Task<List<DeliveryRecord>> GetDeliveryRecordsAsync(int configId)
     {
@@ -264,9 +266,17 @@ public sealed record WebhookSubscription(int Id, string Name, string Uri, string
 public sealed class DeliveryRecord
 {
     public int Id { get; init; }
+    public int EventId { get; init; }
+    public DeliveryRecordAuthor? RetriedBy { get; init; }
     public int Status { get; init; }
     public DateTime? Delivery { get; init; }
     public int Attempts { get; init; }
     public DateTime? NextAttemptOn { get; init; }
     public string RequestPayload { get; init; } = "";
+}
+
+/// <summary>The member a delivery record names, of whom only the id is compared.</summary>
+public sealed class DeliveryRecordAuthor
+{
+    public Guid Id { get; init; }
 }

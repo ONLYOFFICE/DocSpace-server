@@ -84,8 +84,8 @@ public class WebhookLogsRequestDto
     public int? ConfigId { get; set; }
 
     /// <summary>
-    /// A single delivery record, by its own identifier. It narrows the answer to that one record, which is how a
-    /// client follows up a retry it queued earlier.
+    /// One event, by the `eventId` of its delivery records, which is also the `event.id` the receiver got. Pass the
+    /// `id` of a record returned by a retry to follow up that one record alone.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "eventId")]

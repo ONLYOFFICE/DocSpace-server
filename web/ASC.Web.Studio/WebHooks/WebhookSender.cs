@@ -120,7 +120,8 @@ public class WebhookSender(
                 webhookPayload = new WebhookPayload<object, object>(WebhookTrigger.All, entry.Config, entry.RequestPayload, null, entry.Uid);
             }
 
-            webhookPayload.Event.Id = entry.Id;
+            // the original row's id, also on a manual retry, so the receiver recognises the event it may already have
+            webhookPayload.Event.Id = entry.EventId;
 
             if (entry.Attempts > 0)
             {
@@ -162,7 +163,7 @@ public class WebhookSender(
 
                 request.Headers.Add("Accept", "*/*");
 
-                request.Headers.Add(EventIdHeader, entry.Id.ToString(CultureInfo.InvariantCulture));
+                request.Headers.Add(EventIdHeader, entry.EventId.ToString(CultureInfo.InvariantCulture));
                 request.Headers.Add(EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
 
                 request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");

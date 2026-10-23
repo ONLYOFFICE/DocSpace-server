@@ -42,7 +42,7 @@ public class RetryWebhookTests(
     : WebhookDeliveryTestBase(fixture)
 {
     [Fact]
-    public async Task RetryWebhook_AttemptedDelivery_KeepsIdAndClearsOutcome()
+    public async Task RetryWebhook_AttemptedDelivery_QueuesANewRecordOfTheSameEvent()
     {
         // Arrange
         var delivery = await CreateAttemptedDeliveryAsync();
@@ -50,29 +50,108 @@ public class RetryWebhookTests(
         // Act
         var result = await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
 
-        // Assert: the same record is requeued, so the receiver gets the same event.id again
-        result.Response.Id.Should().Be(delivery.Id);
+        // Assert: a record of its own, not yet attempted, with the body of the retried one
+        result.Response.Id.Should().NotBe(delivery.Id);
         result.Response.Status.Should().Be(0);
         result.Response.Delivery.Should().BeNull();
         result.Response.RequestPayload.Should().Be(delivery.RequestPayload);
     }
 
     [Fact]
-    public async Task RetryWebhook_AttemptedDelivery_IsAttemptedAgainUnderTheSameId()
+    public async Task RetryWebhook_AttemptedDelivery_NewRecordIsAttempted()
     {
         // Arrange
         var delivery = await CreateAttemptedDeliveryAsync();
 
         // Act
-        await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
+        var result = await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
 
         // Assert
-        var record = await WaitForAttemptAsync(delivery.Id);
+        var record = await WaitForAttemptAsync(result.Response.Id);
 
         record.Should().NotBeNull();
-        record!.Id.Should().Be(delivery.Id);
-        record.Status.Should().NotBe(0);
+        record!.Status.Should().NotBe(0);
         record.ResponsePayload.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task RetryWebhook_FailedDelivery_KeepsTheEarlierOutcomeAndNamesWhoRetried()
+    {
+        // Arrange: a first attempt that fails and is scheduled for an automatic retry
+        var receiver = await CreateReceiverAsync(status: 500);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+
+        // Act: the test stack retries every few seconds, so an automatic attempt may be in flight right then (409)
+        WebhooksLogWrapper? result = null;
+
+        for (var i = 0; i < 10 && result is null; i++)
+        {
+            try
+            {
+                result = await _webhooksApi.RetryWebhookAsync(original!.Id, TestContext.Current.CancellationToken);
+            }
+            catch (ApiException e) when (e.ErrorCode == 409)
+            {
+                await Task.Delay(300, TestContext.Current.CancellationToken);
+            }
+        }
+
+        result.Should().NotBeNull("the automatic attempts in between take well under a second each");
+
+        // Assert: the failed record keeps its answer, and its automatic retries give way to the manual one
+        var records = await GetDeliveryRecordsAsync(subscription.Id);
+
+        var earlier = records.Should().ContainSingle(r => r.Id == original!.Id).Subject;
+        earlier.Status.Should().Be(500);
+        earlier.EventId.Should().Be(original!.Id);
+        earlier.RetriedBy.Should().BeNull();
+        earlier.NextAttemptOn.Should().BeNull();
+
+        var retry = records.Should().ContainSingle(r => r.Id == result!.Response.Id).Subject;
+        retry.EventId.Should().Be(original.Id);
+        retry.RetriedBy.Should().NotBeNull();
+        retry.RetriedBy!.Id.Should().Be(Owner.Id);
+    }
+
+    [Fact]
+    public async Task RetryWebhook_RetryOfARetry_SendsTheOriginalEventId()
+    {
+        // Arrange
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        var firstRetry = await _webhooksApi.RetryWebhookAsync(original!.Id, TestContext.Current.CancellationToken);
+        await WaitForAttemptAsync(firstRetry.Response.Id);
+
+        // Act
+        var secondRetry = await _webhooksApi.RetryWebhookAsync(firstRetry.Response.Id, TestContext.Current.CancellationToken);
+
+        // Assert: every resend carries the id of the event's first record
+        var deliveries = await receiver.WaitForDeliveriesAsync(3);
+
+        deliveries.Should().HaveCount(3);
+        deliveries.Should().AllSatisfy(d => d.Header("x-docspace-event-id").Should().Be(original.Id.ToString()));
+
+        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        records.Single(r => r.Id == secondRetry.Response.Id).EventId.Should().Be(original.Id);
+    }
+
+    [Fact]
+    public async Task RetryWebhook_EventIdFilter_ReturnsEveryRecordOfTheEvent()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+        var retry = await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
+
+        // Act
+        var records = (await _webhooksApi.GetWebhooksLogsAsync(
+            eventId: delivery.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert: newest first
+        records.Select(r => r.Id).Should().Equal(retry.Response.Id, delivery.Id);
     }
 
     [Fact]

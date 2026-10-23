@@ -47,12 +47,13 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("webhooks_config", "tenant_id", "id"),
-        new("webhooks_logs", "tenant_id", "id")
+        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by"] }
     ];
 
     private readonly RelationInfo[] _relations =
     [
-        new("webhooks_config", "id", "webhooks_logs", "config_id")
+        new("webhooks_config", "id", "webhooks_logs", "config_id"),
+        new("webhooks_logs", "id", "webhooks_logs", "retry_of")
     ];
 
     public override void PrepareData(DataTable data, BackupCorrection backupCorrection)

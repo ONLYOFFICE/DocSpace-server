@@ -343,13 +343,57 @@ public class DbWorker(
         });
     }
 
-    public async Task<bool> ResetJournalAttemptsAsync(int tenantId, int id)
+    /// <summary>
+    /// Queues a manual retry of the event <paramref name="source"/> belongs to as a new journal row, leaving the rows
+    /// of the earlier attempts as they are. Nothing is queued while a row of that event is being sent right now.
+    /// </summary>
+    public async Task<WebhookRetryResult> RetryJournalAsync(DbWebhooksLog source, Guid retriedBy)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var reset = await webhooksDbContext.ResetWebhooksLogAttemptsAsync(tenantId, id, DateTime.UtcNow);
+        var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
 
-        return reset > 0;
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
+
+            var now = DateTime.UtcNow;
+            var eventId = source.EventId;
+
+            // the rows go together with their subscription, which may have been removed since the caller read them
+            if ((await webhooksDbContext.LockWebhooksEventAsync(source.TenantId, eventId)).Count == 0)
+            {
+                return new WebhookRetryResult(WebhookRetryStatus.NotFound);
+            }
+
+            // a second series next to one in flight would send the event to the receiver twice at the same time
+            if (await webhooksDbContext.WebhooksEventInFlightAsync(source.TenantId, eventId, now))
+            {
+                return new WebhookRetryResult(WebhookRetryStatus.InProgress);
+            }
+
+            await webhooksDbContext.StopWebhooksEventAttemptsAsync(source.TenantId, eventId);
+
+            var retry = new DbWebhooksLog
+            {
+                TenantId = source.TenantId,
+                ConfigId = source.ConfigId,
+                Trigger = source.Trigger,
+                Uid = source.Uid,
+                CreationTime = now,
+                RequestPayload = source.RequestPayload,
+                RetryOf = eventId,
+                RetriedBy = retriedBy,
+                Attempts = 0,
+                NextAttemptOn = now
+            };
+
+            await webhooksDbContext.WebhooksLogs.AddAsync(retry);
+            await webhooksDbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return new WebhookRetryResult(WebhookRetryStatus.Requeued, retry);
+        });
     }
 
     public async Task CancelJournalAttemptsAsync(int tenantId, int id, Guid leaseId)
@@ -425,7 +469,7 @@ public class DbWorker(
 
         if (eventId != null)
         {
-            q = q.Where(r => r.Log.Id == eventId);
+            q = q.Where(r => r.Log.Id == eventId || r.Log.RetryOf == eventId);
         }
 
         if (webhookGroupStatus != null && webhookGroupStatus != WebhookGroupStatus.None)
