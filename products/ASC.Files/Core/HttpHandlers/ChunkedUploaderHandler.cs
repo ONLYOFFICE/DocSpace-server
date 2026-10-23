@@ -109,6 +109,15 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
 
                 case ChunkedRequestType.Initiate:
+                    if (EqualityComparer<T>.Default.Equals(request.FileId, default))
+                    {
+                        await fileUploader.VerifyFolderForUploadAsync(request.FolderId);
+                    }
+                    else
+                    {
+                        await fileUploader.VerifyChunkedUploadForEditing(request.FileId, request.FileSize);
+                    }
+
                     var createdSession = await fileUploader.InitiateUploadAsync(request.FolderId, request.FileId, request.FileName, request.FileSize, request.Encrypted);
                     await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true));
 

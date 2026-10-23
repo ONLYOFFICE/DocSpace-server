@@ -355,6 +355,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiExportTextToDocx:
     "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
+  // Metadata.
+  aiMetaGenerate:
+    "Reads one file as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe it, and what their values are. `kind` names the entry's table and `id` its integer identifier, the same way as `POST api/2.0/ai/meta/fill`; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The text is the file itself, converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry; each field carries the value the text supports as a string, or `null` when the text does not state one, since a custom field on the portal is text and cannot be saved empty. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+
+  aiMetaFill:
+    "Fills the metadata of one file from its text and writes the result. `kind` names the entry's table and `id` its integer identifier; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`; `dryRun` (default true) resolves the values but writes nothing, so the caller shows them for confirmation and saves the accepted ones itself; only an explicit `dryRun: false` writes, and it is meant for a caller that has already collected the user's confirmation. The fields are the entry's own: every field of the visible templates it carries, assigned or inherited through a cascade - a hidden template is skipped as the UI and the search skip it - and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need; a write the portal refuses is reported per field as `write_failed`, and the call fails with the portal's status only when nothing was written at all. The answer carries `dryRun` as it was applied, the entry's metadata after the write (or as it stands, with `dryRun`), the values written or proposed, the fields left empty with the reason for each, and the documents that were read.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
@@ -466,7 +473,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsGetById:
     "Returns one thread by its ID, without its messages - read those with `GET api/2.0/ai/threads/read-messages`. `threadId` is required and an unknown one answers 404, so the result is never an empty body. The answer carries the thread's title, its model binding and its last-edit date. This is a read-only operation and does not bump that date.",
   aiThreadsGetMessageById:
-    'Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required and, as with `GET api/2.0/ai/threads/get-by-id`, an unknown or deleted ID answers 404, so the result is never an empty body. Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.',
+    "Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required and, as with `GET api/2.0/ai/threads/get-by-id`, an unknown or deleted ID answers 404, so the result is never an empty body. Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.",
   aiThreadsUpdateMessage:
     "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object with a known `role` and a content that is a non-blank string or a part list with at least one real part - a tool-call-only assistant message counts, an empty list does not. The role has to match the stored message's: a user message cannot be turned into an assistant one. An unknown `messageId` answers 404. The answer only confirms the write.",
   aiThreadsDeleteMessage:
@@ -637,7 +644,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Assignments - every write validates its action type first; reading all
   // assignments of a room resolves the room.
   aiSend: {
-    "400": "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+    "400":
+      "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
   },
   aiSendCustom: {
     "400":
@@ -664,7 +672,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiAssignmentsCascadeProfileDelete: { "400": "`profileId` is missing." },
 
   // Attachments - `linkToMessage` is the only one that resolves a message.
-  aiAttachmentsSaveFile: { "400": "The attachment payload is malformed, or `input.path` is missing or empty." },
+  aiAttachmentsSaveFile: {
+    "400": "The attachment payload is malformed, or `input.path` is missing or empty.",
+  },
   aiAttachmentsSaveFilesMany: {
     "400": "`inputs` is not an array, or one of its entries is malformed.",
   },
@@ -676,12 +686,40 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Editor tools.
-  aiEditorToolsCall: { "400": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports." },
+  aiEditorToolsCall: {
+    "400": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports.",
+  },
 
   // Export - asynchronous, so the success code is 202 rather than 200.
   aiExportTextToDocx: {
-    "400": "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`.",
+    "400":
+      "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`.",
     "413": "The transcript is larger than 15 MB, this route's own parser limit.",
+  },
+
+  // Metadata.
+  aiMetaGenerate: {
+    "400":
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+    "403": "The caller cannot open the entry.",
+    "404": "The entry does not exist.",
+    "422": "The content could not be read as text; `skipped` says why.",
+    "429": "The model provider is rate-limiting requests.",
+    "502": "The model request failed; the detail is in the server log.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+    "504": "Reading the files or the model round did not finish within the time budget.",
+  },
+  aiMetaFill: {
+    "400":
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+    "403": "The caller cannot read the entry, or cannot edit it when the values are written.",
+    "404": "The entry does not exist.",
+    "422":
+      "The entry has no metadata fields to fill, or none of its content could be read as text.",
+    "429": "The model provider is rate-limiting requests.",
+    "502": "The model request failed; the detail is in the server log.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+    "504": "Reading the files or the model round did not finish within the time budget.",
   },
 
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
@@ -690,14 +728,17 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
-    "502": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
   aiOpenaiImagesGenerations: {
-    "400": "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
+    "400":
+      "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
-    "502": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
 
   // Preferences.
@@ -756,12 +797,14 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
 
   // Prompts.
   aiPromptsCreate: {
-    "400": "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null.",
+    "400":
+      "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null.",
     "404": "`folderId` names no folder of the caller's.",
     "409": "A prompt of that name already sits in the folder.",
   },
   aiPromptsUpdate: {
-    "400": "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty.",
+    "400":
+      "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty.",
     "404": "No prompt has this ID, or `folderId` names no folder of the caller's.",
     "409": "A prompt of that name already sits in the target folder.",
   },
@@ -780,7 +823,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "409": "A folder of that name already exists.",
   },
   aiPromptsImportBundle: {
-    "400": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
+    "400":
+      "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
     "409": "Every refused entry is a name that already exists in the library (`merge` only).",
   },
   aiPromptsDelete: { "400": "The prompt ID is missing." },
@@ -822,7 +866,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "No message has this ID.",
   },
   aiThreadsUpdateMessage: {
-    "400": "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
+    "400":
+      "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
     "404": "No message has this ID.",
   },
   aiThreadsDeleteMessage: { "400": "`messageId` is missing." },
@@ -844,7 +889,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": true,
   },
   aiToolsSetDisabled: {
-    "400": "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`.",
+    "400":
+      "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`.",
     "404": true,
   },
   aiToolsGetDisabled: { "400": "`scope` is not `user` or `tenant`." },
@@ -862,33 +908,36 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiWebSearchIsConfigured: { "400": "`entityId` is not a string.", "404": true },
   aiWebSearchTestConnection: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private "
-      + "network address.",
+      "The configuration is missing or malformed, or the provider URL points at a private " +
+      "network address.",
   },
   aiWebSearchConfigure: {
     "400":
-      "The configuration is missing or malformed, the provider URL points at a private "
-      + "network address, or the provider refused the configuration - the body then carries "
-      + "`success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
+      "The configuration is missing or malformed, the provider URL points at a private " +
+      "network address, or the provider refused the configuration - the body then carries " +
+      "`success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private "
-      + "network address.",
+      "The configuration is missing or malformed, or the provider URL points at a private " +
+      "network address.",
     "404": true,
   },
   aiWebSearchPassthroughSearch: {
-    "400": "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
+    "400":
+      "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
-    "502": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
   aiWebSearchPassthroughContents: {
     "400": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
-    "502": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
 };
 
@@ -1273,6 +1322,14 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Confirms the export was queued. The file arrives in the target folder later, announced by " +
     "a folder-modified socket event.",
 
+  aiMetaGenerate:
+    "The proposed fields, each with a name and the value found or null, the documents the proposal was read from, " +
+    "and the entries that were left out with the reason for each.",
+
+  aiMetaFill:
+    "Whether it was a dry run, the entry's metadata, the values written or proposed, the fields left empty " +
+    "with the reason for each, and the documents the values were read from.",
+
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",
   aiOpenaiImagesGenerations:
@@ -1338,8 +1395,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiThreadsClearMessages: "Confirms the request was accepted. It does not mean the thread existed.",
   aiThreadsRegenerateTitle: "The newly generated title, already stored on the thread.",
   aiThreadsList: "The threads of the scope, most recently edited first.",
-  aiThreadsReadMessages:
-    "The thread's messages, oldest first unless `direction` reversed them.",
+  aiThreadsReadMessages: "The thread's messages, oldest first unless `direction` reversed them.",
   aiThreadsGetById: "The thread, without its messages.",
   aiThreadsGetMessageById: "The message.",
   aiThreadsUpdateMessage: "Confirms the replacement was stored.",
