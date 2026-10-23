@@ -79,9 +79,9 @@ public class FormRecoveryService(
 
     /// <summary>
     /// Best effort: a failure is logged, and the report is built from what the index holds. The progress, the share of the
-    /// forms read from 0 to 1, is reported for every form, so that the caller can show it through a long run.
+    /// forms read from 0 to 1, is reported for every form.
     /// </summary>
-    public async Task RecoverAsync(int roomId, int originalFormId, Func<double, Task> progress, CancellationToken cancellationToken)
+    public async Task RecoverAsync(int roomId, int originalFormId, Action<double> progress, CancellationToken cancellationToken)
     {
         try
         {
@@ -147,7 +147,7 @@ public class FormRecoveryService(
         }
     }
 
-    private async Task RecoverFormAsync(int roomId, int originalFormId, Func<double, Task> progress, CancellationToken cancellationToken)
+    private async Task RecoverFormAsync(int roomId, int originalFormId, Action<double> progress, CancellationToken cancellationToken)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
@@ -183,7 +183,7 @@ public class FormRecoveryService(
         for (var i = 0; i < orphans.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await progress((double)i / orphans.Count);
+            progress((double)i / orphans.Count);
 
             var orphan = orphans[i];
 
@@ -196,9 +196,16 @@ public class FormRecoveryService(
             {
                 throw;
             }
-            catch (Exception e)
+            catch (Exception e) when (IsFileFailure(e))
             {
                 logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
+            }
+            catch (Exception e)
+            {
+                // The builder or the network failed, not the file: the rest is left for the next report, uncounted, rather
+                // than have every form fail the same way and run out of attempts.
+                logger.WarnRecoveryStopped(e, originalFormId, i, orphans.Count);
+                break;
             }
 
             if (outcome == RecoveryOutcome.Recovered)
@@ -282,6 +289,13 @@ public class FormRecoveryService(
         return orphans;
     }
 
+    // A failure the file itself causes, so that reading it again would fail too: one counts as an attempt on it.
+    private static bool IsFileFailure(Exception e) =>
+        e is JsonException or DocumentServiceException
+        {
+            Code: DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword
+        };
+
     // From the index, or from that version of the form file; read once per run.
     private async Task<HashSet<string>> GetVersionKeysAsync(FormVersion version, CancellationToken cancellationToken)
     {
@@ -298,11 +312,7 @@ public class FormRecoveryService(
             {
                 keys = formFillingReportCreator.GetFieldKeys(await formFieldsExtractor.ExtractFieldsJsonAsync(version.File, cancellationToken));
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (IsFileFailure(e))
             {
                 logger.WarnRecoveryVersionFieldsFailed(e, version.File.Id, version.File.Version);
                 keys = [];

@@ -47,6 +47,9 @@ public class FormFieldsExtractor(
 {
     private const string ScriptName = "ExtractFormFieldsData.docbuilder";
 
+    // The builder is polled with no limit of its own, and a run kept alive by its heartbeat would wait forever.
+    private static readonly TimeSpan _maxBuildTime = TimeSpan.FromMinutes(5);
+
     // The default encoder escapes "&", which the script engine does not decode in a string literal.
     private static readonly JsonSerializerOptions _scriptStringOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
@@ -70,10 +73,20 @@ public class FormFieldsExtractor(
             .Replace("${sourceFileUrl}", JsonSerializer.Serialize(sourceUrl, _scriptStringOptions))
             .Replace("${tempFileName}", tempFileName);
 
-        var resultUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(script, tempFileName, ""), cancellationToken);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(_maxBuildTime);
 
-        var httpClient = httpClientFactory.CreateClient();
+        try
+        {
+            var resultUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(script, tempFileName, ""), deadline.Token);
 
-        return (await httpClient.GetStringAsync(resultUrl, cancellationToken)).Trim();
+            var httpClient = httpClientFactory.CreateClient();
+
+            return (await httpClient.GetStringAsync(resultUrl, deadline.Token)).Trim();
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException($"The build did not finish within {_maxBuildTime.TotalMinutes} minutes");
+        }
     }
 }

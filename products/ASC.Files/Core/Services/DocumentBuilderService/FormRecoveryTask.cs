@@ -47,9 +47,8 @@ public class FormRecoveryTask : DistributedTaskProgress
     private FormFillingReportTaskData _reportData;
 
     // The queue cancels a task that publishes nothing for a minute (its default unregister window), and a recovery of
-    // hundreds of forms runs for many, so it publishes its progress as it goes.
-    private const long HeartbeatIntervalMs = 3000;
-    private long _lastHeartbeatAt;
+    // hundreds of forms runs for many, so it publishes on a timer: a single read through the builder can outlast the window.
+    private static readonly TimeSpan _heartbeatInterval = TimeSpan.FromSeconds(3);
 
     // The report the client polls waits in its own queue, under the same window, until the recovery starts it, and shows
     // the progress of the recovery. The report then publishes its own from 30 on, so the recovery and the older versions
@@ -91,16 +90,26 @@ public class FormRecoveryTask : DistributedTaskProgress
             await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(_tenantId);
             await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(_userId);
 
-            _lastHeartbeatAt = Environment.TickCount64;
             _reportQueue = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>().CreateQueue<FormFillingReportTask>();
 
-            var recoveryService = scope.ServiceProvider.GetRequiredService<FormRecoveryService>();
-            await recoveryService.RecoverAsync(_reportData.RoomId, _reportData.OriginalFormId, share => ProgressAsync(share * RecoveryShare), CancellationToken);
-            await ProgressAsync(RecoveryShare);
-
-            if (_reportData.IsNewFile)
+            using var heartbeatStop = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken);
+            var heartbeat = KeepAliveAsync(heartbeatStop.Token);
+            try
             {
-                await BuildReportHistoryAsync(scope.ServiceProvider, recoveryService, logger);
+                var recoveryService = scope.ServiceProvider.GetRequiredService<FormRecoveryService>();
+                await recoveryService.RecoverAsync(_reportData.RoomId, _reportData.OriginalFormId, share => Progress(share * RecoveryShare), CancellationToken);
+                Progress(RecoveryShare);
+
+                if (_reportData.IsNewFile)
+                {
+                    await BuildReportHistoryAsync(scope.ServiceProvider, recoveryService, logger);
+                }
+            }
+            finally
+            {
+                // Stopped before the report starts, so that it is not published over.
+                await heartbeatStop.CancelAsync();
+                await heartbeat;
             }
 
             Status = DistributedTaskStatus.Completed;
@@ -173,7 +182,7 @@ public class FormRecoveryTask : DistributedTaskProgress
         for (var i = 0; i < olderVersions.Count; i++)
         {
             CancellationToken.ThrowIfCancellationRequested();
-            await ProgressAsync(RecoveryShare + HistoryShare * i / olderVersions.Count);
+            Progress(RecoveryShare + HistoryShare * i / olderVersions.Count);
 
             var version = olderVersions[i];
 
@@ -198,35 +207,40 @@ public class FormRecoveryTask : DistributedTaskProgress
     }
 
     // Run here, one after another, since the versions of the file follow the order of the runs. The client follows only the
-    // requested report, so the progress of these only keeps the tasks alive in their queues.
+    // requested report, so these publish nothing: the heartbeat keeps this task alive meanwhile.
     private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version, bool isNewFile)
     {
         var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
         reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version, IsNewFile = isNewFile }, $"{Id}_v{version}");
-        reportTask.Publication = _ => HeartbeatAsync();
+        reportTask.Publication = _ => Task.CompletedTask;
         await reportTask.RunJob(CancellationToken);
 
         return reportTask;
     }
 
-    private Task ProgressAsync(double percentage)
+    private void Progress(double percentage)
     {
         Percentage = Math.Max(Percentage, percentage);
+    }
 
-        return HeartbeatAsync();
+    private async Task KeepAliveAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(_heartbeatInterval);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await HeartbeatAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     private async Task HeartbeatAsync()
     {
-        if (Environment.TickCount64 - _lastHeartbeatAt < HeartbeatIntervalMs)
-        {
-            return;
-        }
-
-        _lastHeartbeatAt = Environment.TickCount64;
-
-        // A failed publication must not stop the recovery or a report of the history; one that keeps failing gets the task
-        // cancelled by its queue anyway.
+        // A failed publication must not stop the recovery; one that keeps failing gets the task cancelled by its queue anyway.
         try
         {
             await PublishChanges();
