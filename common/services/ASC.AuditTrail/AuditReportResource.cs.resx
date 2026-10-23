@@ -1314,4 +1314,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Hodnoty metadat byly aktualizovány: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Soubor byl otevřen skriptem Document Builder: {0}</value>
+  </data>
 </root>

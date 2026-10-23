@@ -1314,4 +1314,7 @@
   <data name="SuspiciousLoginDetected" xml:space="preserve">
     <value>Login suspeito detectado: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Arquivo aberto pelo script do Document Builder: {0}</value>
+  </data>
 </root>

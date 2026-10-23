@@ -1314,4 +1314,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>تم تحديث قيم البيانات الوصفية: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>تم فتح الملف بواسطة نص Document Builder: {0}</value>
+  </data>
 </root>

@@ -1314,4 +1314,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Մետատվյալների արժեքները թարմացվեցին՝ {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Ֆայլը բացվել է Document Builder սցենարի կողմից՝ {0}</value>
+  </data>
 </root>

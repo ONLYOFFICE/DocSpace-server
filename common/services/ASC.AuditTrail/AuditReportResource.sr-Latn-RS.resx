@@ -1314,4 +1314,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Vrednosti metapodataka su ažurirane: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Datoteku je otvorila skripta Document Builder: {0}</value>
+  </data>
 </root>
