@@ -1299,4 +1299,7 @@
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>메타데이터 값이 업데이트되었습니다: {0}</value>
   </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Document Builder 스크립트에 의해 파일이 열렸습니다: {0}</value>
+  </data>
 </root>

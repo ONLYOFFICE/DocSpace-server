@@ -381,8 +381,7 @@ public class ServicePricesRequestDto
 {
     /// <summary>
     /// The service whose price list is read, named the way the billing catalogue names it, such as `ai-tools` or
-    /// `backup`. Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`; a name
-    /// the accounting service does not price yields an empty list rather than an error.
+    /// `backup`. Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`.
     /// </summary>
     /// <example>ai-tools</example>
     [StringLength(255)]
