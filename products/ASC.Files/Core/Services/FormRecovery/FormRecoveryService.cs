@@ -87,7 +87,7 @@ public class FormRecoveryService(
         {
             await RecoverFormAsync(roomId, originalFormId, progress, cancellationToken);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
@@ -192,20 +192,20 @@ public class FormRecoveryService(
             {
                 (outcome, version) = await RecoverSubmissionAsync(orphan, doneFolder, roomId, form, versions, fileDao, cancellationToken);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 throw;
             }
-            catch (Exception e) when (IsFileFailure(e))
-            {
-                logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
-            }
-            catch (Exception e)
+            catch (Exception e) when (IsPassingFailure(e))
             {
                 // The builder or the network failed, not the file: the rest is left for the next report, uncounted, rather
                 // than have every form fail the same way and run out of attempts.
                 logger.WarnRecoveryStopped(e, originalFormId, i, orphans.Count);
                 break;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
             }
 
             if (outcome == RecoveryOutcome.Recovered)
@@ -289,11 +289,13 @@ public class FormRecoveryService(
         return orphans;
     }
 
-    // A failure the file itself causes, so that reading it again would fail too: one counts as an attempt on it.
-    private static bool IsFileFailure(Exception e) =>
-        e is JsonException or DocumentServiceException
+    // A failure of the builder, the network or a lock, which passes. Anything else, a defect included, counts as an
+    // attempt on the file, so that it cannot hold back the forms after it for good.
+    private static bool IsPassingFailure(Exception e) =>
+        e is HttpRequestException or TimeoutException or TaskCanceledException or IOException or DistributedLockException
+        || e is DocumentServiceException
         {
-            Code: DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword
+            Code: not (DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword)
         };
 
     // From the index, or from that version of the form file; read once per run.
@@ -312,7 +314,11 @@ public class FormRecoveryService(
             {
                 keys = formFillingReportCreator.GetFieldKeys(await formFieldsExtractor.ExtractFieldsJsonAsync(version.File, cancellationToken));
             }
-            catch (Exception e) when (IsFileFailure(e))
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception e) when (!IsPassingFailure(e))
             {
                 logger.WarnRecoveryVersionFieldsFailed(e, version.File.Id, version.File.Version);
                 keys = [];
