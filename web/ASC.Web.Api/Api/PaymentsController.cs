@@ -718,8 +718,9 @@ public class PaymentController(
     /// after a purchase. The answer is trimmed to the caller's user type: a DocSpace administrator or the owner gets
     /// the price, the due date and all features, a room administrator only the `manager`, `room`, `total_size` and
     /// `statistic` features, and a user only `total_size`. For both of the latter `price` is an empty object and
-    /// `dueDate`, `usersQuota`, `roomsQuota`, `aiAgentsQuota` and `tenantCustomQuota` are omitted. The quotas that
-    /// could be bought instead are `GET api/2.0/portal/payment/quotas`. A guest is refused with 403.
+    /// `dueDate` is omitted, while the storage quota settings (`usersQuota`, `roomsQuota`, `aiAgentsQuota`,
+    /// `tenantCustomQuota`) come back as for an administrator. The quotas that could be bought instead are
+    /// `GET api/2.0/portal/payment/quotas`. A guest is refused with 403.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits

@@ -121,8 +121,9 @@ public class QuotaHelper(
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices, currentQuota).ToListAsync();
 
-        // Below a DocSpace admin nobody manages billing: the plan is named, but its price, term and the
-        // storage overrides an administrator has set stay empty.
+        // Below a DocSpace admin nobody manages billing: the plan is named, but its price and term stay empty.
+        // The storage quota settings below are not billing data - the client needs them to show and edit room,
+        // agent and personal limits - so every caller gets them.
         var isAdmin = employeeType == EmployeeType.DocSpaceAdmin;
 
         var result = new QuotaDto
@@ -147,7 +148,7 @@ public class QuotaHelper(
             DueDate = isAdmin ? quota.DueDate : null
         };
 
-        if (isAdmin && (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic))
+        if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();

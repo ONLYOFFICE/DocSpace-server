@@ -103,7 +103,9 @@ public class PaymentQuotaInformationTests(
     // feature. The endpoint stays open to them, because the client reads it during start-up for every
     // non-guest (AuthStore.getPaymentInfo) and rethrows on failure, so a 403 would leave those roles on
     // a blank page. It is trimmed by caller type instead: each feature carries the lowest type that is
-    // shown it, and the price, due date and storage overrides are for DocSpace admins only.
+    // shown it, and the price and due date are for DocSpace admins only. The storage quota settings are
+    // not billing data and stay as an admin sees them: the client hides the room, agent and personal
+    // quota controls when they are missing.
     private static readonly string[] _roomAdminFeatures = ["manager", "total_size", "room", "statistic"];
 
     [Trait("Bug", "81534")]
@@ -133,6 +135,7 @@ public class PaymentQuotaInformationTests(
     public async Task GetQuotaPaymentInformation_RoomAdmin_ReturnsLimitsWithoutBillingData()
     {
         // Arrange
+        var ownerQuota = await GetOwnerQuotaAsync();
         var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
         await _webApiClient.Authenticate(roomAdmin);
 
@@ -143,6 +146,7 @@ public class PaymentQuotaInformationTests(
         quota.StatusCode.Should().Be(200);
         quota.Response.Features.Select(f => f.Id).Should().BeEquivalentTo(_roomAdminFeatures);
         AssertNoBillingData(quota.Response);
+        AssertSameQuotaSettings(quota.Response, ownerQuota);
     }
 
     [Trait("Bug", "81534")]
@@ -150,6 +154,7 @@ public class PaymentQuotaInformationTests(
     public async Task GetQuotaPaymentInformation_User_ReturnsTotalSizeOnly()
     {
         // Arrange
+        var ownerQuota = await GetOwnerQuotaAsync();
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);
 
@@ -161,6 +166,14 @@ public class PaymentQuotaInformationTests(
         quota.Response.Features.Should().ContainSingle()
             .Which.Should().Match<TenantQuotaFeatureDto>(f => f.Id == "total_size" && f.Used != null);
         AssertNoBillingData(quota.Response);
+        AssertSameQuotaSettings(quota.Response, ownerQuota);
+    }
+
+    private async Task<QuotaDto> GetOwnerQuotaAsync()
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        return (await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
     private static void AssertNoBillingData(QuotaDto quota)
@@ -169,10 +182,14 @@ public class PaymentQuotaInformationTests(
         quota.Price.CurrencySymbol.Should().BeNull();
         quota.Price.IsoCurrencySymbol.Should().BeNull();
         quota.DueDate.Should().BeNull();
-        quota.UsersQuota.Should().BeNull();
-        quota.RoomsQuota.Should().BeNull();
-        quota.AiAgentsQuota.Should().BeNull();
-        quota.TenantCustomQuota.Should().BeNull();
+    }
+
+    private static void AssertSameQuotaSettings(QuotaDto quota, QuotaDto ownerQuota)
+    {
+        quota.UsersQuota.Should().NotBeNull().And.BeEquivalentTo(ownerQuota.UsersQuota);
+        quota.RoomsQuota.Should().BeEquivalentTo(ownerQuota.RoomsQuota);
+        quota.AiAgentsQuota.Should().BeEquivalentTo(ownerQuota.AiAgentsQuota);
+        quota.TenantCustomQuota.Should().BeEquivalentTo(ownerQuota.TenantCustomQuota);
     }
 
     [Fact]
