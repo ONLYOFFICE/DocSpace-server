@@ -491,15 +491,14 @@ public class PaymentController(
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
         var participant = securityContext.CurrentAccount.ID.ToString();
 
-        // Calculate the cost of the requested admins from the known quota price (price * quantity).
-        var walletQuotas = await tariffHelper.GetQuotasAsync(wallet: true).ToListAsync();
-        var quotaDto = walletQuotas.FirstOrDefault(q => q.Id == quota.TenantId);
-        if (quotaDto?.Price?.Value is not { } unitPrice)
+        // Calculate the cost of the requested admins from the quota price (price * quantity). The price is read from
+        // the quota itself: the payer need not be a DocSpace admin, and QuotaHelper empties the price for anyone else.
+        if (quota.Price <= 0)
         {
             throw new ItemNotFoundException("Quota price could not be found");
         }
 
-        var requiredAmount = unitPrice * productQty;
+        var requiredAmount = quota.Price * productQty;
 
         // Move the unused subscription balance to the wallet.
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
