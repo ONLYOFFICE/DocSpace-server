@@ -447,7 +447,7 @@ public class PaymentController(
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
-    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, the price of the administrators product is unknown, or after the move its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPost("subscription/movetowallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
@@ -493,11 +493,6 @@ public class PaymentController(
 
         // Calculate the cost of the requested admins from the quota price (price * quantity). The price is read from
         // the quota itself: the payer need not be a DocSpace admin, and QuotaHelper empties the price for anyone else.
-        if (quota.Price < 0)
-        {
-            throw new ItemNotFoundException("Quota price could not be found");
-        }
-
         var requiredAmount = quota.Price * productQty;
 
         // Move the unused subscription balance to the wallet.
