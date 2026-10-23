@@ -373,4 +373,134 @@ public class CopyPermissionsTests(
         // Assert
         FolderTitles(await GetFolderContent(myDocsId)).Should().Contain(folder.Title);
     }
+
+    /// <summary>
+    /// Production report: the portal owner copies a folder with documents from a room of their own
+    /// into a subfolder of a room another user created and shared with the owner as RoomManager.
+    /// The copy must succeed, not answer 403.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.RoomAdmin, RoomType.CustomRoom, RoomType.CustomRoom)]
+    [InlineData(EmployeeType.RoomAdmin, RoomType.VirtualDataRoom, RoomType.VirtualDataRoom)]
+    [InlineData(EmployeeType.RoomAdmin, RoomType.EditingRoom, RoomType.CustomRoom)]
+    [InlineData(EmployeeType.RoomAdmin, RoomType.PublicRoom, RoomType.CustomRoom)]
+    [InlineData(EmployeeType.DocSpaceAdmin, RoomType.CustomRoom, RoomType.CustomRoom)]
+    public async Task CopyFolder_OwnerAsRoomManagerOfForeignRoom_CopiesFolderFromOwnRoomToSubfolder(
+        EmployeeType destRoomCreatorType,
+        RoomType destRoomType,
+        RoomType srcRoomType)
+    {
+        // Arrange
+        var destRoomCreator = await InviteMember(destRoomCreatorType);
+        await _filesClient.Authenticate(destRoomCreator);
+        var destRoom = await CreateRoom(new CreateRoomRequestDto("Autotest CopyFolder Foreign Dest Room", roomType: destRoomType));
+        var destSubfolder = await CreateFolder("Autotest CopyFolder Foreign Dest Subfolder", destRoom.Id);
+        await InviteToRoom(destRoom.Id, Owner, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(Owner);
+        var srcRoom = await CreateRoom(new CreateRoomRequestDto("Autotest CopyFolder Foreign Src Room", roomType: srcRoomType));
+        var folder = await CreateFolder("Autotest CopyFolder Foreign Folder", srcRoom.Id);
+        const string innerFileTitle = "Autotest CopyFolder Foreign Inner.docx";
+        await CreateFile(innerFileTitle, folder.Id);
+        var nestedFolder = await CreateFolder("Autotest CopyFolder Foreign Nested", folder.Id);
+        const string nestedFileTitle = "Autotest CopyFolder Foreign Nested.docx";
+        await CreateFile(nestedFileTitle, nestedFolder.Id);
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destSubfolder.Id, folderIds: [folder.Id]));
+
+        // Assert
+        FolderTitles(await GetFolderContent(destSubfolder.Id)).Should().Contain(folder.Title);
+        var copiedFolderId = await FindEntryIdByTitle(destSubfolder.Id, folder.Title, inFolders: true);
+        var copiedContent = await GetFolderContent(copiedFolderId);
+        FileTitles(copiedContent).Should().Contain(innerFileTitle);
+        FolderTitles(copiedContent).Should().Contain(nestedFolder.Title);
+        var copiedNestedId = await FindEntryIdByTitle(copiedFolderId, nestedFolder.Title, inFolders: true);
+        FileTitles(await GetFolderContent(copiedNestedId)).Should().Contain(nestedFileTitle);
+    }
+
+    /// <summary>
+    /// The production case behind the test above: the source room is shared with a group, its
+    /// members add documents to the owner's folder, and none of them is a member of the destination
+    /// room. The owner copying that folder must still succeed. It used to answer 403 "Access denied"
+    /// as soon as a member had one of those documents open in the editor: the folder check ran the
+    /// "file is being edited" test of a move on every file of the subtree. Fixed: a copy skips it, as
+    /// copying a single file already did.
+    /// </summary>
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task CopyFolder_OwnerAsRoomManagerOfForeignRoom_CopiesFolderWithFilesOfOtherMembers(bool shareViaGroup, bool memberFileOpenForEditing)
+    {
+        // Arrange
+        var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
+        var destRoom = await CreateCustomRoom("Autotest CopyFolder Members Dest Room");
+        var destSubfolder = await CreateFolder("Autotest CopyFolder Members Dest Subfolder", destRoom.Id);
+        await InviteToRoom(destRoom.Id, Owner, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(Owner);
+        var member = await InviteMember(EmployeeType.User);
+        var srcRoom = await CreateCustomRoom("Autotest CopyFolder Members Src Room");
+        if (shareViaGroup)
+        {
+            var group = (await _groupApi.AddGroupAsync(
+                new GroupRequestDto([member.Id], member.Id, $"Autotest CopyFolder Group {Guid.NewGuid():N}"),
+                TestContext.Current.CancellationToken)).Response;
+            await _roomsApi.SetRoomSecurityAsync(srcRoom.Id, new RoomInvitationRequest
+            {
+                Invitations = [new RoomInvitation { Id = group.Id, Access = FileShare.ContentCreator }],
+                Notify = false
+            }, TestContext.Current.CancellationToken);
+        }
+        else
+        {
+            await InviteToRoom(srcRoom.Id, member, FileShare.ContentCreator);
+        }
+
+        var folder = await CreateFolder("Autotest CopyFolder Members Folder", srcRoom.Id);
+        const string ownerFileTitle = "Autotest CopyFolder Members Owner.docx";
+        await CreateFile(ownerFileTitle, folder.Id);
+
+        await _filesClient.Authenticate(member);
+        const string memberFileTitle = "Autotest CopyFolder Members Member.docx";
+        var memberFile = await CreateFile(memberFileTitle, folder.Id);
+        if (memberFileOpenForEditing)
+        {
+            // copying only reads the file, so a co-author editing it must not block the copy
+            await _filesApi.StartEditFileAsync(memberFile.Id, new StartEditRequest(true), TestContext.Current.CancellationToken);
+        }
+
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destSubfolder.Id, folderIds: [folder.Id]));
+
+        // Assert
+        FolderTitles(await GetFolderContent(destSubfolder.Id)).Should().Contain(folder.Title);
+        var copiedFolderId = await FindEntryIdByTitle(destSubfolder.Id, folder.Title, inFolders: true);
+        FileTitles(await GetFolderContent(copiedFolderId)).Should().Contain([ownerFileTitle, memberFileTitle]);
+    }
+
+    [Fact]
+    public async Task CopyFile_OwnerAsRoomManagerOfForeignRoom_CopiesFileFromOwnRoomToSubfolder()
+    {
+        // Arrange
+        var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
+        var destRoom = await CreateCustomRoom("Autotest CopyFile Foreign Dest Room");
+        var destSubfolder = await CreateFolder("Autotest CopyFile Foreign Dest Subfolder", destRoom.Id);
+        await InviteToRoom(destRoom.Id, Owner, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(Owner);
+        var srcRoom = await CreateCustomRoom("Autotest CopyFile Foreign Src Room");
+        var sourceFile = await CreateFile("Autotest CopyFile Foreign File.docx", srcRoom.Id);
+
+        // Act
+        await CopyAndWait(BuildCopyRequest(destSubfolder.Id, fileIds: [sourceFile.Id]));
+
+        // Assert
+        FileTitles(await GetFolderContent(destSubfolder.Id)).Should().Contain(sourceFile.Title);
+    }
 }

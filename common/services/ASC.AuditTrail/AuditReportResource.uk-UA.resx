@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Звіт про клієнтські операції завантажено</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Створено ліміт витрат на службу: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Оновлено ліміт витрат на службу: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Видалено ліміт витрат на службу: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Встановлено персональні ліміти витрат на службу: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Вимкнено персональні ліміти витрат на службу: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Підписку клієнта оновлено: {0}</value>
   </data>
@@ -731,6 +746,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Портал деактивовано</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Портал заблоковано політикою зберігання даних</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Портал розблоковано</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Портал видалено</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Значення метаданих оновлено: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Файл відкрито скриптом Document Builder: {0}</value>
   </data>
 </root>
