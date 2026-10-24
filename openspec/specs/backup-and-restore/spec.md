@@ -87,9 +87,14 @@ operation.
 `startBackup` SHALL queue one backup job for the portal and answer 200 with the job: `taskId`,
 `progress`, `status` Created (Running when the worker was quick) and an empty `error`; the worker
 writes the archive later, and the `taskId` becomes the `id` of the history record. `storageType`
-defaults to `Documents`. `Documents` needs an integer `folderId`, `ThridpartyDocuments` a
-non-integer one, `Local` needs `filePath` and is standalone-only, `ThirdPartyConsumer` needs
-`module` plus the consumer keys, `DataStore` nothing.
+defaults to `Documents`, and every storage type has the `storageParams` it needs.
+
+#### Scenario: What each storage type needs
+
+- **WHEN** `storageType` is `Documents`
+- **THEN** an integer `folderId` is needed, and `ThridpartyDocuments` needs a non-integer one
+- **AND** `Local` needs `filePath` and is standalone-only
+- **AND** `ThirdPartyConsumer` needs `module` plus the consumer keys, and `DataStore` needs nothing
 
 #### Scenario: Owner backs up into a room
 
@@ -227,8 +232,7 @@ SHALL have no limit.
 `response` member when there is no job; while running `isCompleted` false, `progress` never
 decreasing, `error` and `link` empty; afterwards `isCompleted` true, `progress` 100 and `status`
 Completed, Canceled or Failted (`error` set). Every poll SHALL name the `taskId` of the start; a
-finished job SHALL stay in the queue until a new start or a cancel replaces it. The progress SHALL
-also go to the backup socket room, which only admins may join.
+finished job SHALL stay in the queue until a new start or a cancel replaces it.
 
 #### Scenario: No job for the portal
 
@@ -275,9 +279,13 @@ file still in the database but unreadable SHALL fail the backup.
 When a backup job fails, the server SHALL e-mail the "backup failed" letter to the account that
 started it (to every active DocSpace admin for a scheduled backup), record "backup failed" in the
 audit trail and close the paid billing session (v3.6). `cancelBackup` SHALL drop the job of the
-portal from the queue, running or finished, and answer true, or false when the queue holds none; a
-cancelled job leaves no archive, shows as Canceled or not at all, gets no failure letter (v3.7), and
-the archives and counters are untouched.
+portal from the queue, running or finished, and answer true, or false when the queue holds none.
+
+#### Scenario: What a cancelled job leaves behind
+
+- **WHEN** a backup job has been cancelled
+- **THEN** it leaves no archive and shows as Canceled or not at all
+- **AND** no failure letter is sent for it (v3.7), and the existing archives and the counters are untouched
 
 #### Scenario: Backup fails in the worker
 
@@ -333,9 +341,8 @@ installation or transient (short links, account links, tariff rows, notify and e
 `getBackupHistory` SHALL list the backups of the portal whose archive still exists in its storage:
 `id` (the `taskId` of the start), `fileName`, `storageType`, `createdOn` (UTC, no zone designator)
 and `expiresOn` (one day after creation for `DataStore`, `0001-01-01` otherwise). A fresh portal
-gets an empty list; each completed backup adds one record. A record whose archive is gone SHALL be
-dropped by the read; one whose storage cannot be reached SHALL be neither listed nor dropped. The
-order is unspecified.
+gets an empty list; each completed backup adds one record. A record whose archive cannot be found or
+reached SHALL NOT be listed. The order is unspecified.
 
 #### Scenario: Two backups listed
 
@@ -374,10 +381,9 @@ never reused, deleted records included.
 
 `deleteBackup/{id}` SHALL mark the record removed and then delete the archive, answering true; a
 record of another portal or one already removed is left alone and the call still answers true; an
-unknown id answers 404, as does a route value that is not a GUID. Of several deletes of one backup
-at once exactly one deletes the archive. `deleteBackupHistory` SHALL walk every record of the portal
-(or of the server with `dump`), remove each record and its archive, swallow failures and always
-answer true; the schedule is kept.
+unknown id or a route value that is not a GUID answers 404. `deleteBackupHistory` SHALL walk every
+record of the portal (or of the server with `dump`), remove each record and its archive, swallow
+failures and always answer true; the schedule is kept.
 
 #### Scenario: Owner deletes one backup
 
@@ -398,6 +404,7 @@ answer true; the schedule is kept.
 
 - **WHEN** `deleteBackup` is called twice with the same id, in a row or at the same time
 - **THEN** both calls answer 200 true and the history ends with exactly the other records
+- **AND** of several deletes of one backup at once exactly one deletes the archive
 
 #### Scenario: Id of another portal
 
@@ -418,15 +425,16 @@ answer true; the schedule is kept.
 
 `getBackupsCount` SHALL count the history records (deleted ones included) of the portal created in
 the period, `paid` choosing the paid (true) or the free (false, default) ones; `getBackupsCounts`
-returns both as `free` and `paid` and ignores `paid`. The period defaults to the first day of the
-current month at 00:00 UTC up to now, both bounds inclusive; `from` after `to` or a bound that is
-not a date is 400. `getBackupsServiceState` SHALL report `enabled`: whether the paid backup service
-is on in the wallet settings.
+returns both as `free` and `paid` and ignores `paid`. The period `from`-`to` is inclusive and
+defaults to the current month; `from` after `to` or a bound that is not a date is 400.
+`getBackupsServiceState` SHALL report `enabled`: whether the paid backup service is on in the wallet
+settings.
 
 #### Scenario: Default period
 
 - **WHEN** the owner calls `getBackupsCount` with no parameters after one backup this month
 - **THEN** the system answers 1, the same as for the explicit period from the first of the month to tomorrow, and `getBackupsCounts` answers `{free: 1, paid: 0}` whether or not `paid` is sent
+- **AND** the default period runs from the first day of the current month at 00:00 UTC up to now
 
 #### Scenario: Period around the backup
 
@@ -473,12 +481,9 @@ backup. Sending the same schedule again changes nothing; changing one field keep
 
 ### Requirement: Bodies createBackupSchedule refuses
 
-`createBackupSchedule` SHALL answer 400, keeping the stored schedule, when `cronParams` is missing,
-`period` is outside the known values, `hour` is outside 0-23, a weekly or monthly schedule has no
-`day` or one outside its range, `backupsStored` is outside 1-30, `storageType` cannot hold a backup,
-a `ThirdPartyConsumer` schedule has no known `module`, a `Documents` or `ThridpartyDocuments`
-schedule lacks `folderId` or a `Documents` one has a non-integer `folderId`, or a field has the
-wrong JSON type. A missing folder is 404.
+`createBackupSchedule` SHALL answer 400, keeping the stored schedule, when `cronParams` is missing
+or one of its values is out of range, `backupsStored` is outside 1-30, `storageType` cannot hold a
+backup or lacks the parameters it needs, or a field has the wrong JSON type. A missing folder is 404.
 
 #### Scenario: Weekly schedule without a day
 
@@ -525,11 +530,15 @@ standalone installation has no such limit.
 ### Requirement: Reading and deleting the schedule
 
 `getBackupSchedule` SHALL answer 200 with the schedule (`storageType`, `storageParams` as an
-object, `cronParams`, `backupsStored` or null for unlimited, `lastBackupTime` — `0001-01-01` until
-the first run — and `dump`) or 200 with no `response` member when none is set. Except for
-`ThirdPartyConsumer`, whose saved keys come back as sent, `storageParams.folderId` holds the stored
-base path, null for `DataStore`. `deleteBackupSchedule` SHALL delete the schedule, keep the
-archives, audit the deletion and answer true even when there was none.
+object, `cronParams`, `backupsStored` or null for unlimited, `lastBackupTime` and `dump`) or 200
+with no `response` member when none is set. `deleteBackupSchedule` SHALL delete the schedule, keep
+the archives, audit the deletion and answer true even when there was none.
+
+#### Scenario: Fields read back
+
+- **WHEN** a schedule is read before its first run
+- **THEN** `lastBackupTime` is `0001-01-01`
+- **AND** `storageParams.folderId` holds the stored base path, null for `DataStore`, except for `ThirdPartyConsumer`, whose saved keys come back as sent
 
 #### Scenario: No schedule
 
@@ -597,9 +606,8 @@ dropped only when it is older than six months.
 `startBackupRestore` SHALL require the portal-settings right (403 "Access denied" before the body
 is read), the Restore section not being hidden (403) and, on a hosted portal, the `restore` feature
 of the tariff (402). `backupId` names the source: a GUID picks a history record (404 when none),
-anything else means `storageParams.filePath` on `storageType` (a file id for Documents, checked like
-a backup target; a server path for Local); without `filePath` the call is 400. The answer is the
-queued job.
+anything else means `storageParams.filePath` on `storageType`; without `filePath` the call is 400.
+The answer is the queued job.
 
 #### Scenario: Restore from a history record
 
@@ -620,6 +628,7 @@ queued job.
 
 - **WHEN** `backupId` is "file" and `storageParams` is `[{key: filePath, value: "<file id>"}]`
 - **THEN** the archive is read from that file; a missing file answers 404
+- **AND** for `Documents` the file id is checked like a backup target, while for `Local` `filePath` is a server path
 
 #### Scenario: Member starts a restore
 
@@ -647,11 +656,15 @@ answer then names the field. The portal and its rooms SHALL be untouched afterwa
 ### Requirement: Uploading an archive to restore from
 
 A standalone installation SHALL accept an archive in chunks at `backupFileUpload.ashx` for a
-`Local` restore: the first request carries `Init=true`, `totalSize` and `extension` (`tar` or
-`tar.gz`), later requests one chunk each up to the chunk size the server reports; the upload
-replaces an earlier one and must not exceed `maxTotalSize`. The caller needs the restore right;
-failures come back as `success: false`. `startBackupRestore` with `storageType: Local` restores the
-uploaded file (404 when none).
+`Local` restore; the upload replaces an earlier one and must not exceed `maxTotalSize`. The caller
+needs the restore right; failures come back as `success: false`. `startBackupRestore` with
+`storageType: Local` restores the uploaded file (404 when none).
+
+#### Scenario: Shape of the upload
+
+- **WHEN** the upload begins
+- **THEN** the first request carries `Init=true`, `totalSize` and `extension` (`tar` or `tar.gz`)
+- **AND** every later request carries one chunk, up to the chunk size the server reports
 
 #### Scenario: Archive larger than the portal allowance
 
@@ -665,12 +678,17 @@ uploaded file (404 when none).
 
 ### Requirement: The portal while it is being restored
 
-When the worker starts a restore it SHALL e-mail "restore started" to every active user
-(`notify: true`) or the owner alone (`notify: false`), activated accounts only, and put the portal
-into the restoring state, where every API call but the portal, settings and branding reads and
+When the worker starts a restore it SHALL e-mail "restore started" and put the portal into the
+restoring state, where every API call but the portal, settings and branding reads and
 `getRestoreProgress` answers 403. `getRestoreProgress` SHALL answer every caller, anonymous
 included, with 200: an empty payload without a job, whatever `dump` says, otherwise `isCompleted`,
 `progress`, `status` and `error`; `link` and `warning` stay empty.
+
+#### Scenario: Who is told that the restore started
+
+- **WHEN** the restore was started with `notify: true`
+- **THEN** every active user receives "restore started"
+- **AND** with `notify: false` the owner alone receives it, and in both cases only activated accounts are written to
 
 #### Scenario: Member calls the files API during a restore
 
@@ -696,9 +714,8 @@ included, with 200: an empty payload without a job, whatever `dump` says, otherw
 ### Requirement: What a restore produces
 
 On a hosted portal the archive SHALL be one of this portal's own backups (its hash matches a
-history record), otherwise the job fails with "The backup file is invalid. Please use the file
-created in the same portal."; an unreadable archive fails with "The backup file is invalid." The
-restore SHALL load the archive into a new tenant, keep the alias and mapped domain, carry the
+history record), otherwise the job fails; an unreadable archive fails with "The backup file is
+invalid." The restore SHALL load the archive into a new tenant, keep the alias and mapped domain, carry the
 history over, clear the two-factor settings, set the portal active and e-mail "restore completed";
 on failure the original portal is active again.
 

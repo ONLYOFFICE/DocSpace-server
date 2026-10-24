@@ -59,7 +59,7 @@ VRC = `products/ASC.Files/Server/Api/VirtualRoomsController.cs`.
 | Guest resends for another account → 403 | PT/01_Profiles/ResendActivationTests.cs:75-91 | TEST-CONFIRMED |
 | User resends for another account → 403, bug 79545 | PT/01_Profiles/ResendActivationTests.cs:96-112 | TEST-CONFIRMED |
 | Anonymous 401 | PT/01_Profiles/ResendActivationTests.cs:115-125 | TEST-CONFIRMED |
-| Active / disabled skipped; activation instructions for non-confirmed; new link each time; resendAll admin-only; own id only for User/Guest | UC:1646-1760; yaml `resendUserInvites` | CODE-ONLY |
+| Skipped accounts and resendAll: active / disabled skipped; activation instructions for non-confirmed; new link each time; resendAll admin-only; own id only for User/Guest | UC:1646-1760; yaml `resendUserInvites` | CODE-ONLY |
 | Throttling 5 per 15 minutes → 429 | UC `[EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]`; yaml `resendUserInvites` 429 header text | CODE-ONLY |
 
 ## Portal invitation links per user type
@@ -105,7 +105,7 @@ VRC = `products/ASC.Files/Server/Api/VirtualRoomsController.cs`.
 | Room manager role for User / Guest → 403, not added | RoomSharePermissionsTests.cs:218-237 | TEST-CONFIRMED |
 | Room admin inviting a foreign guest → empty result — referenced from `room-role-permissions` | RoomSharePermissionsTests.cs:143-161 | TEST-CONFIRMED |
 | Guest to an AI agent as Room manager / Content creator → 403 | FS:255-260; release notes v3.6 | CODE-ONLY |
-| Subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
+| Invisible subjects and notification: subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
 | Group as subject | FS:144-157 (subject type resolved to Group), 452-458 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:175-189` helper "user or a group"; release notes v2.5 | CODE-ONLY |
 | `notify` emails existing accounts that gained access, with `message` | FS:430-437 (`SendEmailRoomInviteExistingUserAsync`); yaml `RoomInvitationRequest.notify/message` | CODE-ONLY |
 
@@ -121,7 +121,7 @@ VRC = `products/ASC.Files/Server/Api/VirtualRoomsController.cs`.
 |---|---|---|
 | Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:273-300, 404-418; IS:61-66; `UserManagerWrapper.cs:101-130` | CODE-ONLY |
 | Existing pending account → related, access set, invitation resent | FS:277-290 | CODE-ONLY |
-| Existing non-pending account → no invitation email, existing-user notice when `notify` | FS:286-290, 430-437 | CODE-ONLY |
+| Address of an existing active account → related, access set, no invitation email, existing-user notice when `notify` | FS:286-290, 430-437 | CODE-ONLY |
 | Guest invitations disabled → 403 for the whole request | VRC `SetRoomSecurity` (`newGuestsInvited` / `AllowInvitingGuests`); yaml `setRoomSecurity` 403 | CODE-ONLY |
 | Malformed or overlong address → 400 | `common/ASC.Api.Core/Model/EmailInvitationDto.cs:59-61`; yaml `setRoomSecurity` 400 | CODE-ONLY |
 | Address rejected during profile creation → `warning`, other entries applied | FS:292-300 | CODE-ONLY |
@@ -203,13 +203,13 @@ holds password, modules and web-item security only).
 | Sending reduces `invitationLimit` by one | PT/00_Regressions/InvitationLimitTest.cs:42-72; `web/ASC.Web.Core/Notify/StudioNotifyService.cs:177-180, 194+` (`ReduceLimit`) | TEST-CONFIRMED (returns early when the limit is unlimited, which is the default) |
 | Quota exceeded → 400 "Invitation limit is exceeded" | InvitationLimitTest.cs:79-93; `common/ASC.Api.Core/Model/EmailInvitationDto.cs:64-88` | TEST-CONFIRMED (same caveat) |
 | Following the link gives one back, capped at the limit | UC:330-332; `web/ASC.Web.Core/Users/UserInvitationLimitHelper.cs:97-124` | CODE-ONLY |
-| Config keys, 24-hour window, exposed in settings | `web/ASC.Web.Core/SetupInfo.cs:140-141`; InvitationLimitTest.cs:47-51; release notes, technical changes v2.6 | CODE-ONLY |
+| Config keys `web:invitation-limit` (unlimited by default) and `web:invitation-limit-duration` (24 hours), exposed in settings | `web/ASC.Web.Core/SetupInfo.cs:140-141`; InvitationLimitTest.cs:47-51; release notes, technical changes v2.6 | CODE-ONLY |
 
 ## Daily email invitation rate limit
 
 | Claim | Source | Status |
 |---|---|---|
-| Per-portal fixed one-day window, each address one permit, no address not counted, 429 | `common/ASC.Api.Core/Core/BaseStartup.cs:293-360`; `RateLimiterPolicy.cs:39`; UC `[EnableRateLimiting(EmailInvitationApi)]` on `POST invite`; VRC on `PUT {id}/share`; release notes, technical changes v2.6 | CODE-ONLY |
+| Per-portal fixed one-day window (`core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay`), each address one permit, no address not counted, 429 | `common/ASC.Api.Core/Core/BaseStartup.cs:293-360`; `RateLimiterPolicy.cs:39`; UC `[EnableRateLimiting(EmailInvitationApi)]` on `POST invite`; VRC on `PUT {id}/share`; release notes, technical changes v2.6 | CODE-ONLY |
 
 ## Paid-user limit when inviting
 

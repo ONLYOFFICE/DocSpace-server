@@ -313,12 +313,13 @@ settings, remove the plugin's CSP domains, write the audit event and answer 200.
 right and compare, in the installation-wide and the portal scope, the served plugin with the manifest in
 storage: when the versions differ or the plugin appeared or vanished, it SHALL re-read that scope's list
 on every server and notify the portal's clients. It SHALL answer 200 with the plugin as served
-afterwards, or 404 "Plugin not found"; stored state, settings and CSP domains are untouched.
+afterwards, or 404 "Plugin not found".
 
 #### Scenario: Files replaced during a deployment
 
 - **WHEN** a new version of an installation-wide plugin is put into storage and the owner calls `refreshWebPlugin`
 - **THEN** the system answers 200 with the new `version` and `url`, and every portal lists the new version
+- **AND** the plugin's stored state, settings and CSP domains are untouched
 
 #### Scenario: Nothing changed
 

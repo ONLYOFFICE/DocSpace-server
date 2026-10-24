@@ -324,7 +324,7 @@ id 400). `aiAssignmentsUnassign` removes one binding (repeat accepted);
 anonymous 401) and require `profileId` naming a chat-capable catalogue profile (missing, malformed,
 unknown, restricted or image-only 400) and `prompt` (missing 400), plus the `room-types` fields. It SHALL
 create an AI room in the AI Agents section with Knowledge and Chat outputs folders, bind the profile as the
-agent's Chat assignment, count against the agent limit (402); `agent.created` is published.
+agent's Chat assignment and count against the agent limit (402).
 
 #### Scenario: Tool fields of the body are ignored
 
@@ -335,6 +335,7 @@ agent's Chat assignment, count against the agent limit (402); `agent.created` is
 
 - **WHEN** a Room admin posts a title, a prompt and a chat-capable `profileId`
 - **THEN** the system answers 200 with the agent, `aiAgentsGet` reports the prompt as `chatSettings.prompt` and `aiAssignmentsGetAssignment` for Chat in the agent's scope returns that profile
+- **AND** the socket event `agent.created` is published
 
 #### Scenario: Missing prompt or profile
 

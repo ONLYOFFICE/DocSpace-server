@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the room types a portal offers — Custom, Collaboration (`EditingRoom`), Public, Virtual Data Room,
+Defines the room types a portal offers — Custom, Collaboration, Public, Virtual Data Room,
 Form filling and AI room — and what each type adds beyond the access matrix: the parameters a room is created
 and updated with (title, tags, logo, cover, colour, quota, indexing, file lifetime, deny download, watermark,
 the private flag, third-party storage backing), the Virtual Data Room features (manual order with reorder and
@@ -24,20 +24,17 @@ where the tests assert them.
 
 ### Requirement: Room types offered by the API
 
-The system SHALL expose the room type as the `roomType` field of `createRoom` with the values of the `RoomType`
-enum: `1` Form filling room (`FillingFormsRoom`), `2` Collaboration room (`EditingRoom`), `5` Custom room,
-`6` Public room, `8` Virtual Data Room, `9` AI room. There is no separate "Private" room type: end-to-end
-encryption is the boolean `private` flag of a room of any of these types. `roomType` is required, MUST be one
-of the listed values, and cannot be changed after the room exists (`updateRoom` has no `roomType` property).
+The system SHALL expose the room type as the required `roomType` field of `createRoom`: Form filling room
+(1), Collaboration room (2), Custom room (5), Public room (6), Virtual Data Room (8) and AI room (9). There is
+no separate "Private" room type: end-to-end encryption is the boolean `private` flag of a room of any of these
+types. `roomType` MUST be one of the listed values and cannot be changed after the room exists (`updateRoom`
+has no `roomType` property).
 
-| Type              | Value | Primary external link on creation | Section it lives in |
-|-------------------|:-----:|:---------------------------------:|---------------------|
-| Form filling room | 1     | yes                               | Forms (`searchArea=Forms`, root `FolderType.Forms`) |
-| Collaboration     | 2     | no                                | Rooms (`searchArea=Active`, root `FolderType.VirtualRooms`) |
-| Custom            | 5     | no                                | Rooms |
-| Public            | 6     | yes                               | Rooms |
-| Virtual Data Room | 8     | no                                | Rooms |
-| AI room           | 9     | no                                | AI Agents (`searchArea=AiAgents`) |
+#### Scenario: Section and primary link per type
+
+- **WHEN** a room of each type is created
+- **THEN** a Form filling room and a Public room get a primary external link on creation, while a Collaboration, Custom, Virtual Data and AI room do not
+- **AND** a Form filling room lives in the Forms section (`searchArea=Forms`, the Forms root), an AI room in the AI Agents section (`searchArea=AiAgents`) and the other types in the Rooms section (`searchArea=Active`, the Virtual Rooms root)
 
 #### Scenario: Every type is created with its own value
 
@@ -92,9 +89,9 @@ a non-empty value is rejected (400) and members are invited afterwards with `set
 
 The system SHALL require a title of 1 to 170 characters after trimming. Characters a folder name cannot hold
 (`"`, `<`, `>`, `/`, `\` and characters outside the Basic Multilingual Plane such as emoji) SHALL be replaced
-with underscores; letters of any script, `&`, `'` and `;` SHALL be kept. Titles are not unique: two rooms may
-carry the same title and are told apart by id. On `updateRoom` a missing, null, empty or whitespace-only title
-SHALL leave the current title unchanged, while a title over 170 characters SHALL be rejected (400).
+with underscores; letters of any script, `&`, `'` and `;` SHALL be kept. Titles are not unique. On `updateRoom`
+a missing, null, empty or whitespace-only title SHALL leave the current title unchanged, while a title over
+170 characters SHALL be rejected (400).
 
 #### Scenario: Blank or missing title on creation
 
@@ -116,7 +113,7 @@ SHALL leave the current title unchanged, while a title over 170 characters SHALL
 #### Scenario: Duplicate titles are allowed
 
 - **WHEN** two rooms are created with the same title
-- **THEN** both are created with different ids and the same title
+- **THEN** both are created with different ids and the same title, and are told apart by id
 
 #### Scenario: Blank title on update is a no-op
 
@@ -127,11 +124,15 @@ SHALL leave the current title unchanged, while a title over 170 characters SHALL
 
 The system SHALL attach the tags named in `tags` to the room. Names missing from the portal tag catalogue
 (`getRoomTagsInfo`) are added to it; duplicates within one request are stored once. On `updateRoom` the `tags`
-list SHALL replace the whole tag set, an empty list clears it and a null list leaves it unchanged. A tag name
-over 255 characters SHALL be rejected (400); characters that a title cannot hold are stored verbatim in a tag.
-When a room is deleted, a tag used by no other room SHALL be removed from the catalogue and a tag still used by
-another room SHALL stay. Tags are also attached and detached with `addRoomTags` and `deleteRoomTags` and
-listed in `getRoomsFolder` through the `tags` filter (a JSON array of names, any match) and `withoutTags`.
+list SHALL replace the whole tag set, an empty list clears it and a null list leaves it unchanged. Tags are
+also attached and detached with `addRoomTags` and `deleteRoomTags`, and rooms are filtered by them in
+`getRoomsFolder`. A tag used by no other room disappears with its room.
+
+#### Scenario: Tag name limits
+
+- **WHEN** a tag name over 255 characters is given on creation or update
+- **THEN** the system rejects the request (400)
+- **AND** characters that a title cannot hold (`"`, `<`, `>`, `/`, `\`) are stored verbatim in a tag
 
 #### Scenario: Tags given on creation
 
@@ -148,6 +149,7 @@ listed in `getRoomsFolder` through the `tags` filter (a JSON array of names, any
 
 - **WHEN** `getRoomsFolder` is called with `tags=AutotestFilterTag` or `tags=A,B` instead of a JSON array
 - **THEN** the system rejects the request (400)
+- **AND** a JSON array of names returns the rooms carrying any of them, and `withoutTags` returns the rooms carrying none
 
 #### Scenario: Single-use tag disappears with its room
 
@@ -157,13 +159,15 @@ listed in `getRoomsFolder` through the `tags` filter (a JSON array of names, any
 ### Requirement: Room colour, cover and logo
 
 The system SHALL draw a room without a logo with a colour and an optional cover. `color` MUST be six
-hexadecimal digits without `#` (case-insensitive); an empty value restores a random default colour of the
-room, null leaves it unchanged, and any other value is rejected (400). `cover` MUST be an identifier from
-`getRoomCovers`; an empty value removes the cover and an unknown value is rejected (400). The gallery of
-covers is the same for every role and language and contains `schedule`. A logo is an image uploaded with
-`uploadRoomLogo` beforehand and applied with `createRoomLogo` (or the `logo` field of `createRoom`), and is
-reported in `logo.original/large/medium/small`; applying a logo to an archived room (403) or a deleted room
-(404) is refused, and so is a `tmpFile` the caller did not upload (403).
+hexadecimal digits without `#` (case-insensitive); an empty value restores a random default colour, null
+leaves it unchanged, any other value is rejected (400). `cover` MUST be an identifier from `getRoomCovers`; an
+empty value removes it and an unknown value is rejected (400). A logo is an image uploaded with
+`uploadRoomLogo` and applied with `createRoomLogo` or the `logo` field of `createRoom`.
+
+#### Scenario: Cover gallery
+
+- **WHEN** `getRoomCovers` is called by any role in any language
+- **THEN** the same gallery is returned and it contains the cover `schedule`
 
 #### Scenario: Colour set on creation and update
 
@@ -184,21 +188,27 @@ reported in `logo.original/large/medium/small`; applying a logo to an archived r
 #### Scenario: Logo applied from an uploaded image
 
 - **WHEN** an image is uploaded with `uploadRoomLogo` and applied with `createRoomLogo` to a room
-- **THEN** the room reports all four logo URLs and `getRoomInfo` returns the same paths; applying another image changes the original URL
+- **THEN** the room reports the logo in `logo.original/large/medium/small` and `getRoomInfo` returns the same paths; applying another image changes the original URL
+
+#### Scenario: Logo refused on an archived, deleted or foreign upload
+
+- **WHEN** a logo is applied to an archived room, to a deleted room, or with a `tmpFile` the caller did not upload
+- **THEN** the system answers 403 for the archived room, 404 for the deleted room and 403 for the foreign upload
 
 ### Requirement: Data-protection settings of a room
 
 The system SHALL accept `indexing`, `denyDownload`, `lifetime` and `watermark` on `createRoom` and `updateRoom`.
 They were shipped for the Virtual Data Room (v3.0) and the client offers them there, but the API SHALL accept
 `indexing` and `denyDownload` on a room of any type. Defaults are `indexing:false`, `denyDownload:false`, no
-lifetime, no watermark.
+lifetime, no watermark. A boolean setting is removed with `false`; `lifetime` and `watermark` are removed with
+`enabled:false` and are then reported as null.
 
-| Setting        | Shape                                                        | Removal |
-|----------------|--------------------------------------------------------------|---------|
-| `indexing`     | boolean; the contents keep a manual order (see reorder)     | `false` |
-| `denyDownload` | boolean; members without editing rights cannot download or print | `false` |
-| `lifetime`     | `{enabled, value 1-999, period 0 Day / 1 Month / 2 Year, deletePermanently}` | `enabled:false`, reported as null |
-| `watermark`    | `{enabled, text up to 255, additions bitmask 1 UserName / 2 UserEmail / 4 UserIpAdress / 8 CurrentDate / 16 RoomName, rotate, imageScale, imageUrl}` | `enabled:false`, reported as null |
+#### Scenario: Shape of the four settings
+
+- **WHEN** a room is created or updated with the settings
+- **THEN** `indexing` is a boolean that makes the contents keep a manual order (see reorder) and `denyDownload` a boolean that stops members without editing rights from downloading or printing
+- **AND** `lifetime` carries `enabled`, a `value` of 1 to 999, a `period` of Day, Month or Year and `deletePermanently`
+- **AND** `watermark` carries `enabled`, a `text` of up to 255 characters, `additions` (any combination of user name, user email, user IP address, current date and room name), `rotate`, `imageScale` and `imageUrl`
 
 #### Scenario: Settings given on creation of a Virtual Data Room
 
@@ -231,11 +241,8 @@ lifetime, no watermark.
 When `indexing` is on, every file and folder of the room SHALL carry an `order` that listings follow and that
 `setFileOrder`/`setFolderOrder` change. `reorderRoom` SHALL renumber the direct children of the room — folders
 and files in one sequence — to a dense 1..N keeping their relative order; it SHALL NOT touch nested folders'
-contents, nor delete, rename, duplicate or move anything, and running it twice gives the same result. It
-answers 404 for an unknown or deleted room and 403 for an archived one, and runs without error on a room whose
-`indexing` is off. Only the Room Owner, a member with the Room manager role and a DocSpace admin invited as
-such may reorder; a DocSpace admin or Room admin who is not a member and any invited User or Guest get 403,
-anonymous 401.
+contents, nor delete, rename, duplicate or move anything, and running it twice gives the same result. Only
+the room's owner and its Room managers may reorder.
 
 #### Scenario: Gaps are compacted
 
@@ -252,12 +259,13 @@ anonymous 401.
 
 - **WHEN** `reorderRoom` is called on an archived room, or with id 0, -1, 999999999 or a deleted room's id
 - **THEN** the system answers 403 for the archived room and 404 otherwise
+- **AND** a room whose `indexing` is off is reordered without error
 
 #### Scenario: Reorder permissions
 
-- **WHEN** a Room admin invited as Room manager reorders a VDR
+- **WHEN** the Room Owner, a Room admin invited as Room manager, or a DocSpace admin invited as Room manager reorders a VDR
 - **THEN** the room is reordered
-- **AND** the same Room admin invited with any other VDR role, an uninvited DocSpace admin, an invited User or Guest get 403
+- **AND** the same Room admin invited with any other VDR role, a DocSpace admin or Room admin who is not a member, an invited User or Guest get 403, and an anonymous caller 401
 
 ### Requirement: Index export of a Virtual Data Room
 
@@ -265,12 +273,13 @@ The system SHALL start a background export of the room index with `startRoomInde
 `getRoomIndexExport` (null while nothing runs; `isCompleted`, `error`, `resultFileId` once done) and cancel it
 with `terminateRoomIndexExport`. The export SHALL be refused for an archived room (403), for a room that is
 not an indexed room or whose caller is neither its Room manager nor a portal administrator (403), and SHALL
-answer 404 for id 0, -1 or a missing room. An unarchived VDR can be exported again.
+answer 404 for id 0, -1 or a missing room.
 
 #### Scenario: Owner or DocSpace admin starts the export
 
 - **WHEN** the Owner, or a DocSpace admin who was never invited, calls `startRoomIndexExport` on a VDR
 - **THEN** a job with a non-empty id and no error is returned
+- **AND** a VDR that was archived and restored can be exported again
 
 #### Scenario: Members without manager rights cannot export
 
@@ -285,28 +294,26 @@ answer 404 for id 0, -1 or a missing room. An unarchived VDR can be exported aga
 ### Requirement: Form filling rooms live in the Forms section
 
 Form filling rooms (v4.0) SHALL belong to a root of their own: `getRoomsFolder` with `searchArea=Forms` and
-`getFormsFolder` (root `FolderType.Forms`, value 36) list them, while `searchArea=Active` and the Virtual Rooms
-root (`FolderType.VirtualRooms`, value 14) SHALL NOT list them even when the `type` filter asks for them. Their
-content SHALL be counted in `formsUsedSpace` of the files statistics, not in `roomsUsedSpace`, and SHALL move
-to `archiveUsedSpace` while archived. Templates made from a Form filling room SHALL be listed under
-`searchArea=FormTemplates` and not under `Templates`, and a room created from such a template SHALL appear in
-the Forms section. Room groups of the Forms section are created with `searchArea=Forms`.
+`getFormsFolder` list them, while `searchArea=Active` and the Virtual Rooms root SHALL NOT list them even when
+the `type` filter asks for them. Their used space, the templates made from them, the rooms created from such
+templates and the room groups holding them SHALL all be accounted to the Forms section, as the scenarios state.
 
 #### Scenario: Form filling room is listed only in Forms
 
 - **WHEN** a Form filling room, a Custom room and a Public room are created
 - **THEN** `searchArea=Forms` lists the form room only and `searchArea=Active` lists the other two only
 - **AND** `getRoomsFolder` with `type=[1]` and `searchArea=Active` does not return the form room
+- **AND** a room group over the form room is created with `searchArea=Forms` (see "Room groups")
 
 #### Scenario: Forms root folder
 
 - **WHEN** the root folders are listed
-- **THEN** one of them has `rootFolderType` 36 (Forms), its id equals the id `getFormsFolder` returns, and browsing it by id lists form rooms only
+- **THEN** one of them has the `rootFolderType` of the Forms root, its id equals the id `getFormsFolder` returns, and browsing it by id lists form rooms only
 
 #### Scenario: Used space is accounted to Forms
 
 - **WHEN** a file is uploaded to a Form filling room, the room is archived, unarchived and finally deleted
-- **THEN** `formsUsedSpace` grows by the file size and `roomsUsedSpace` does not change; while archived the size sits in `archiveUsedSpace`; after deletion `formsUsedSpace` is back to the previous value
+- **THEN** `formsUsedSpace` of the files statistics grows by the file size and `roomsUsedSpace` does not change; while archived the size sits in `archiveUsedSpace`; after deletion `formsUsedSpace` is back to the previous value
 
 #### Scenario: Form room templates have their own section
 
@@ -323,18 +330,21 @@ the Forms section. Room groups of the Forms section are created with `searchArea
 
 The system SHALL turn a folder of a connected third-party account into a room with `createRoomThirdParty`
 (v2.5). The path parameter is the folder id of the connected account, not a room id; one connected account
-backs one room only; with `createAsNewFolder` the room is a new subfolder named after `title` ("Create a new
-folder in the storage"), otherwise the connected folder itself becomes the room and `indexing`, `denyDownload`,
-`tags` and `logo` are dropped. The room has string identifiers and reports `providerKey`/`providerId`. The
-release notes restrict this to Public rooms; the API SHALL accept every room type of `RoomType` 1-8. Only the
-account that connected the storage may make a room of it (403 for a User or Guest using someone else's
-connection); an id that is not a connected third-party folder is refused with a 4xx. Deleting such a room
-disconnects the account behind it.
+backs one room only. The release notes restrict this to Public rooms; the API SHALL accept every room type
+except the AI room. Only the account that connected the storage may make a room of it, and deleting such a
+room disconnects the account behind it.
 
 #### Scenario: Connected folder becomes the room
 
 - **WHEN** the Owner connects a Nextcloud account and calls `createRoomThirdParty` with its id and `roomType` Custom
 - **THEN** the room id equals the connection id, `rootFolderType` is VirtualRooms, `providerKey` names the provider and the room is listed in `getRoomsFolder` with that `providerKey`
+- **AND** the room has string identifiers and reports `providerKey` and `providerId`
+
+#### Scenario: New folder or the connected folder itself
+
+- **WHEN** `createRoomThirdParty` is called with `createAsNewFolder` true
+- **THEN** the room is a new subfolder of the connected folder named after `title` ("Create a new folder in the storage")
+- **AND** without `createAsNewFolder` the connected folder itself becomes the room and `indexing`, `denyDownload`, `tags` and `logo` are dropped
 
 #### Scenario: Every room type is accepted
 
@@ -350,6 +360,7 @@ disconnects the account behind it.
 
 - **WHEN** a User or a Guest calls `createRoomThirdParty` with the id of a connection made by the Owner
 - **THEN** the system rejects the request (403)
+- **AND** an id that is not a connected third-party folder is refused with a 4xx
 
 #### Scenario: Deleting a third-party room
 
@@ -372,27 +383,22 @@ link rules themselves.
 ### Requirement: Room templates
 
 The system SHALL create a template from a room with `createRoomTemplate` (v3.1) as a background job whose
-state is read with `getRoomTemplateCreatingStatus` (`isCompleted`, `progress`, `templateId`, `error`), and
-create a room from a template with `createRoomFromTemplate`, polled with `getRoomCreatingStatus` (`roomId`).
-Both statuses are per caller: another account never sees the caller's job. A template is listed with
-`searchArea=Templates` and read with `getRoomInfo`; its title is sanitised like a room title and titles need
-not be unique. Creation accepts `title` (required, non-blank, 400 otherwise), `color`, `cover`, `tags`,
-`quota`, `public`, `share` (emails given read access) and `groups`. Template creation SHALL require that the
-caller may edit the source room — its owner, a Room manager, a Room admin or DocSpace admin on their own room —
-and SHALL answer 403 for an archived source, for a DocSpace admin, User or Guest with no access and for a User
-invited with any non-manager role, 404 for room id 0, a missing or a deleted room, 401 for anonymous or
-terminated callers.
+state is read with `getRoomTemplateCreatingStatus`, and create a room from a template with
+`createRoomFromTemplate`, polled with `getRoomCreatingStatus`. Both statuses are per caller. A template is
+listed with `searchArea=Templates` and read with `getRoomInfo`; its title follows the room title rules.
+Template creation SHALL require that the caller may edit the source room.
 
 #### Scenario: Template created from a room
 
 - **WHEN** the Owner creates a template from a Custom room
-- **THEN** the immediate answer has no error and a progress in 0..100; polling ends with `isCompleted` true and a positive, stable `templateId`; the template appears in the Templates listing
+- **THEN** the immediate answer has no `error` and a `progress` in 0..100; polling ends with `isCompleted` true and a positive, stable `templateId`; the template appears in the Templates listing
 - **AND** two consecutive templates get distinct ids and two templates may share one title
 
 #### Scenario: Template options are stored
 
 - **WHEN** a template is created with `color`, `cover`, `tags`, `quota` (with the room quota feature on) or `public:true`
 - **THEN** `getRoomInfo` of the template reflects the colour, cover, tags and `quotaLimit`, and `getPublicSettings` returns true
+- **AND** `title` is required and non-blank (400 otherwise), `share` gives the listed emails read access and `groups` the listed groups
 
 #### Scenario: Source room cannot be used
 
@@ -404,20 +410,19 @@ terminated callers.
 
 - **WHEN** a DocSpace admin, User or Guest with no access to the room, or a User invited as Editor, Reviewer, Commentator or Viewer, creates a template from it
 - **THEN** the system rejects the request (403) and no template with that title exists
+- **AND** the room's owner, a Room manager, and a Room admin or DocSpace admin on their own room succeed; anonymous and terminated callers get 401
 
 #### Scenario: Status does not leak between users
 
 - **WHEN** the Owner has just created a template and a DocSpace admin reads `getRoomTemplateCreatingStatus`
-- **THEN** the admin's status does not carry the Owner's template id
+- **THEN** the admin's status does not carry the Owner's template id: another account never sees the caller's job
 
 ### Requirement: Template visibility and public setting
 
 A template SHALL be visible to its creator and to the accounts and groups it was shared with. A template with
 `public:true` (or made public with `setPublicSettings`) SHALL additionally be visible to every DocSpace admin and
-Room admin, and SHALL NOT be visible to Users and Guests. `getPublicSettings` answers 404 for a deleted
-template, for a non-template room and for an unknown id, and 400 for id 0, -1 or a non-integer; the same
-applies to `setPublicSettings`. Setting the same value twice keeps it, setting it for one template does not
-change another, and the public flag survives deletion or archiving of the source room.
+Room admin, and SHALL NOT be visible to Users and Guests. The flag is read with `getPublicSettings` and
+written with `setPublicSettings`; it survives deletion or archiving of the source room.
 
 #### Scenario: Non-public template is hidden from an unrelated user
 
@@ -438,18 +443,26 @@ change another, and the public flag survives deletion or archiving of the source
 
 - **WHEN** `setPublicSettings` is called with true, then false, then true, then false
 - **THEN** `getPublicSettings` returns each value in turn; the template is still usable for `createRoomFromTemplate`
+- **AND** setting the same value twice keeps it, and setting it for one template does not change another
+
+#### Scenario: Public setting of an unusable id
+
+- **WHEN** `getPublicSettings` or `setPublicSettings` names a deleted template, a non-template room or an unknown id, or id 0, -1 or a non-integer
+- **THEN** the system answers 404 for the first three and 400 for the last three
 
 ### Requirement: Creating a room from a template
 
-`createRoomFromTemplate` SHALL create a new room whose title comes from the request (required, non-blank,
-at most 170 characters, sanitised; 400 otherwise). The room SHALL inherit the `roomType`, `indexing` and
-`denyDownload` of the source room and the folders and files captured in the template (nested hierarchy
-included, with new ids); it SHALL NOT inherit the source's lifetime or watermark. Rooms made from one template
-are independent of each other, of the template and of the source room, which may already be deleted. The
-caller must be able to read the template and must be allowed to create rooms: a DocSpace admin with a public
-template succeeds; a User or Guest (403), a DocSpace admin on someone else's non-public template (403), a User
-with access to the source room but not the template (403), anonymous and terminated callers (401) are refused.
-A template id of 0, a non-existent or a deleted template answers 404.
+`createRoomFromTemplate` SHALL create a new room titled by the request (a room title; 400 otherwise). The
+room SHALL inherit the `roomType`, `indexing` and `denyDownload` of the source room and the folders and files
+captured in the template, with new ids, but NOT the source's lifetime or watermark. Rooms made from one
+template are independent of each other, of the template and of the source room (which may be deleted).
+The caller must be able to read the template and be allowed to create rooms.
+
+#### Scenario: Who may create a room from a template
+
+- **WHEN** a DocSpace admin creates a room from a public template
+- **THEN** the room is created
+- **AND** a User or Guest, a DocSpace admin on someone else's non-public template, and a User with access to the source room but not the template get 403; anonymous and terminated callers get 401
 
 #### Scenario: Room created from a Custom room template
 
@@ -470,35 +483,39 @@ A template id of 0, a non-existent or a deleted template answers 404.
 #### Scenario: Validation of the request
 
 - **WHEN** `createRoomFromTemplate` is called without `templateId`, with `templateId` null, without `title`, with an empty, whitespace or 1000-character title
-- **THEN** the system rejects the request (400) and no room is created
+- **THEN** the system rejects the request (400) and no room is created; a title of at most 170 characters is accepted and sanitised like a room title
 - **AND** `templateId` 0, 999999999 or a deleted template answers 404
 
 ### Requirement: Room groups
 
 The system SHALL let every account group the rooms it can read into personal room groups (v3.7) with
 `addRoomGroup`, `getRoomGroups`, `getRoomGroupInfo`, `updateRoomGroup`, `changeRoomGroupIcon` and
-`deleteRoomGroup`. A group has a `name` (required, trimmed, non-blank, at most 128 characters; 400 otherwise,
-and a name with characters outside the Basic Multilingual Plane is refused), an `icon` from the fixed set
-(`star`, `heart`, `flag`, `folder`; a missing, blank, unknown or `none` icon is 400), a non-empty `rooms` list
-(empty is 403; missing, null, non-array, string or fractional ids are 400; id 0 or negative is 400; no listed
-room existing is 404) and a `searchArea` of `Active` (default) or `Forms`, which fixes the section the group
-belongs to: a Forms group accepts Form filling rooms only and an Active group accepts the other types only (400
-otherwise); `Archive`, `Any`, `Templates` and `FormTemplates` are refused (400). Groups are private to their
-creator: any other role reading or updating the group gets 404 and deleting it gets 403. A room may be in
-several groups, two groups may share a name, and a group keeps its rooms after `getRoomGroups` is called with
-or without `includeMembers`.
+`deleteRoomGroup`. A group has a `name`, an `icon` from a fixed set, a non-empty `rooms` list and a
+`searchArea` of `Active` (default) or `Forms`, which fixes the section the group belongs to. Groups are private
+to their creator. A room may be in several groups and two groups may share a name.
 
 #### Scenario: Group created over rooms of several types
 
 - **WHEN** the Owner creates a group over a Custom, a Collaboration, a Public and a VDR room
 - **THEN** the group has the given name, a positive id, `totalRooms` 4 equal to the length of `rooms`, the icon `star` and `searchArea` Active; `getRoomGroupInfo` and `getRoomGroups` return it
-- **AND** a private (encrypted) room can be grouped as well
+- **AND** a private (encrypted) room can be grouped as well, and the group keeps its rooms whether `getRoomGroups` is called with or without `includeMembers`
+
+#### Scenario: Name and icon validation
+
+- **WHEN** a group is created with a `name` that is missing, blank, over 128 characters after trimming, or holds characters outside the Basic Multilingual Plane
+- **THEN** the system refuses the request (400; the non-BMP name is refused as well)
+- **AND** an `icon` other than `star`, `heart`, `flag` or `folder` — missing, blank, unknown or `none` — is rejected (400)
+
+#### Scenario: Rooms list validation
+
+- **WHEN** a group is created with an empty `rooms` list; with `rooms` missing, null, not an array, a string or fractional ids; with id 0 or a negative id; or with ids none of which exists
+- **THEN** the system answers 403 for the empty list, 400 for the malformed shapes and the non-positive ids, and 404 when no listed room exists
 
 #### Scenario: Section of a group
 
 - **WHEN** a group is created over a Form filling room with `searchArea=Forms`, and another over a Custom room without `searchArea`
 - **THEN** the first has `searchArea` Forms and is listed by `getRoomGroups(searchArea=Forms)` only; the second has Active and is listed by `Active` and by the default call only
-- **AND** a Forms group over a Custom room, an Active group over a form room, and a group with `searchArea` Archive, Any, Templates or FormTemplates are refused (400); a numeric `searchArea` value is accepted
+- **AND** a Forms group accepts Form filling rooms only and an Active group the other types only: a Forms group over a Custom room, an Active group over a form room, and a group with `searchArea` Archive, Any, Templates or FormTemplates are refused (400); a numeric `searchArea` value is accepted
 
 #### Scenario: Partially valid room list
 
@@ -537,12 +554,14 @@ or without `includeMembers`.
 
 `duplicateBatchItems` SHALL copy each listed file or folder next to itself as a background operation (v2.6).
 The copy keeps the original name with a numeric suffix so nothing is overwritten; a folder is copied with its
-content. When the folder is a room, the copy SHALL carry the room's colour, cover, indexing, lifetime, quota,
-watermark and deny-download settings, its logo, its custom tags and its metadata, and a Public or Form filling
-copy gets a primary external link of its own; members of the original SHALL NOT be copied, and the copy counts
-against the room limit of the tariff. The caller needs the rights that creating an item in that folder needs:
-inside a room Room manager or Content creator; Editing or Read rights, no access at all, an archived room and
-an item in Trash answer 403; an id that does not exist answers 404; an empty selection queues nothing.
+content, and a room with its settings but without its members. The caller needs the rights that creating an
+item in that folder needs — inside a room, Room manager or Content creator; an empty selection queues nothing.
+
+#### Scenario: Room duplicated
+
+- **WHEN** a room is duplicated
+- **THEN** the copy carries the room's colour, cover, indexing, lifetime, quota, watermark and deny-download settings, its logo, its custom tags and its metadata, and a Public or Form filling copy gets a primary external link of its own
+- **AND** members of the original are not copied, and the copy counts against the room limit of the tariff
 
 #### Scenario: File duplicated inside a room
 
@@ -552,7 +571,7 @@ an item in Trash answer 403; an id that does not exist answers 404; an empty sel
 #### Scenario: Rights below Content creator
 
 - **WHEN** a User invited as Editor, a Guest invited as Viewer, or a User with no access duplicates a file
-- **THEN** the system rejects the request (403); anonymous gets 401
+- **THEN** the system rejects the request (403), as it does for Read rights; anonymous gets 401
 
 #### Scenario: Archived room, Trash and unknown ids
 
@@ -567,22 +586,25 @@ an item in Trash answer 403; an id that does not exist answers 404; an empty sel
 ### Requirement: Pinning rooms
 
 `pinRoom`/`unpinRoom` SHALL pin a room to the top of the calling account's room list and return the room with
-the `pinned` flag. Pinning is personal (another member sees their own state), idempotent (a second pin or
-unpin answers 200 and the room appears once), limited to 10 pinned rooms per account (v2.6; the eleventh pin
-answers 403 "You can't pin a room" and unpinning one frees a slot), and AI rooms SHALL have a separate limit of
-10 of their own. Pinned rooms SHALL stay above unpinned ones whatever the sort (`AZ`, `DateAndTime`), filter or
-page, their mutual order is stable, and an unpinned room returns to its natural sort position. A pin SHALL
-NOT survive archive and unarchive; an archived room answers 403 to pin and unpin; a deleted or unknown id
-(0, -1, 999999999) answers 404 ("The required folder was not found"). Anybody who can read the room may pin it —
-including a DocSpace admin who was never invited — while a User or Guest who is not a member gets 403,
-anonymous and terminated callers 401. Every room type can be pinned; a Form filling room is pinned within the
-Forms section.
+the `pinned` flag. Pinning is personal, idempotent and limited to 10 pinned rooms per account (v2.6), with a
+separate limit of 10 for AI rooms. Pinned rooms SHALL stay above unpinned ones whatever the sort, filter or
+page. A pin SHALL NOT survive archive and unarchive. Anybody who can read the room may pin it.
 
 #### Scenario: Pin limit of ten
 
 - **WHEN** an account pins ten Custom rooms and pins an eleventh
-- **THEN** the eleventh answers 403, is not pinned and the ten stay pinned
+- **THEN** the eleventh answers 403 "You can't pin a room", is not pinned and the ten stay pinned
 - **AND** after unpinning one of them the eleventh is pinned and exactly ten are pinned
+
+#### Scenario: Who may pin
+
+- **WHEN** a DocSpace admin who was never invited pins a room, and a User or Guest who is not a member does the same
+- **THEN** the admin's pin succeeds, the non-member gets 403, and anonymous and terminated callers get 401
+
+#### Scenario: Every room type can be pinned
+
+- **WHEN** a Custom, Collaboration, Public, Virtual Data and Form filling room are pinned and unpinned
+- **THEN** each answers 200 with the `pinned` flag, and the Form filling room is pinned within the Forms section
 
 #### Scenario: AI rooms have their own limit
 
@@ -592,8 +614,9 @@ Forms section.
 
 #### Scenario: Pinned rooms stay on top
 
-- **WHEN** a room is pinned and the list is sorted by title ascending, by creation date descending, filtered by a title fragment or read in pages of three
+- **WHEN** a room is pinned and the list is sorted by title (`AZ`) ascending, by creation date (`DateAndTime`) descending, filtered by a title fragment or read in pages of three
 - **THEN** the pinned room precedes the first unpinned one and is on the first page; pages contain no duplicates or gaps
+- **AND** the mutual order of pinned rooms is stable, and an unpinned room returns to its natural sort position
 
 #### Scenario: Pin is personal and does not survive archiving
 
@@ -603,43 +626,43 @@ Forms section.
 
 #### Scenario: Pin on archived, deleted or foreign room
 
-- **WHEN** an archived room is pinned or unpinned, a deleted room is pinned, or a non-member User pins a room
-- **THEN** the system answers 403, 404 and 403 respectively
+- **WHEN** an archived room is pinned or unpinned, a deleted room or id 0, -1 or 999999999 is pinned, or a non-member User pins a room
+- **THEN** the system answers 403, 404 ("The required folder was not found") and 403 respectively
 
 #### Scenario: Unpin never changes membership
 
 - **WHEN** a room with an invited Editor is pinned and unpinned
-- **THEN** the room still exists and its member list is unchanged; unpinning a never-pinned room answers 200
+- **THEN** the room still exists and its member list is unchanged; unpinning a never-pinned room answers 200, and a second pin or unpin answers 200 with the room listed once
 
 ### Requirement: Archiving and restoring a room
 
-`archiveRoom` and `unarchiveRoom` SHALL move a room between the active section (`rootFolderType`
-VirtualRooms or Forms) and the Archive (`rootFolderType` Archive) as background operations whose body
-`{deleteAfter}` is required and must be a boolean (null or a string is 400). Only the room's owner and portal
-administrators may archive or restore: the Owner archives a DocSpace admin's room, a DocSpace admin archives
-their own and restores someone else's, while a Room admin, User or Guest — invited or not, with Read or Editing
-rights, or removed from the room — gets 403 and anonymous 401. Archiving is idempotent; restoring a room that is
-active is a no-op (200); an unknown or deleted id answers 404. An archived room SHALL keep its content, title,
-type and tags, SHALL be read-only (creating a folder or file, renaming, adding tags, inviting, applying a logo,
-pinning, reordering, index export, duplication and quota changes answer 403), and SHALL still report its primary
-link if it is a Public room (see `shared-links`). After restoring, renaming, sharing and index export work
-again. Archiving and restoring are also available to members by role as stated in `room-role-permissions`.
+`archiveRoom` and `unarchiveRoom` SHALL move a room between its active section and the Archive as background
+operations whose body `{deleteAfter}` is required and must be a boolean. Only the room's owner and portal
+administrators may archive or restore (members by role as stated in `room-role-permissions`). Archiving is
+idempotent and restoring an active room is a no-op. An archived room SHALL keep its content, title, type and
+tags and SHALL be read-only; after restoring, everything works again.
 
 #### Scenario: Full cycle
 
 - **WHEN** the Owner archives a Custom room with a file and a folder, then restores it
-- **THEN** the archive operation finishes without error, the room is in `searchArea=Archive` and not in `Active`, `getRoomInfo` reports `rootFolderType` Archive, the file and folder are still there; after `unarchiveRoom` the room is back in `Active` with `rootFolderType` VirtualRooms and keeps its title, type and both tags
+- **THEN** the archive operation finishes without error, the room is in `searchArea=Archive` and not in `Active`, `getRoomInfo` reports `rootFolderType` Archive, the file and folder are still there; after `unarchiveRoom` the room is back in `Active` with `rootFolderType` VirtualRooms (Forms for a Form filling room) and keeps its title, type and both tags
+- **AND** an archived Public room still reports its primary link (see `shared-links`)
 
 #### Scenario: Archived room is read-only
 
 - **WHEN** a folder or a file is created in an archived room, the room is renamed, a tag is added, a user is invited, a logo is applied, a quota is set or reset, or a file in it is duplicated
-- **THEN** the system rejects each request (403)
+- **THEN** the system rejects each request (403), as it does pinning, reordering and index export of the room
+
+#### Scenario: Restored room is usable again
+
+- **WHEN** a restored room is renamed, shared and its index exported
+- **THEN** each call succeeds
 
 #### Scenario: Who may archive and restore
 
-- **WHEN** a Room admin, User or Guest who is not invited archives or restores a room, or an invited User with Read or Editing rights restores it
+- **WHEN** a Room admin, User or Guest who is not invited archives or restores a room, or an invited User with Read or Editing rights, or a member removed from the room, restores it
 - **THEN** the system rejects the request (403); an anonymous caller gets 401
-- **AND** the Owner archives a room created by a DocSpace admin, and a DocSpace admin restores a room created by the Owner
+- **AND** the Owner archives a room created by a DocSpace admin, and a DocSpace admin archives their own room and restores a room created by the Owner
 
 #### Scenario: Idempotent and no-op cases
 
@@ -649,34 +672,31 @@ again. Archiving and restoring are also available to members by role as stated i
 #### Scenario: Unknown room and bad body
 
 - **WHEN** archive or unarchive is called with id 999999999, a deleted room's id or a non-numeric id, or with `deleteAfter` null or a string
-- **THEN** the ids answer 404 and the bad bodies 400, and an archived room stays archived
+- **THEN** the unknown and deleted ids answer 404 and the bad bodies 400, and an archived room stays archived
 
 ### Requirement: Deleting a room
 
-`deleteRoom` SHALL queue a background operation (its id is returned; `getOperationStatuses` reports it
-`finished` with progress 100) that removes the room with its files, logo, cover, quota, links and
-single-use tags. The body `{deleteAfter}` is required but does not change the outcome: omitting the field
-defaults to false, null, a string or a number is 400. Only the room's creator and portal administrators on their
-own room may delete it: a User or Guest, invited or not (403 "Access denied"), a Room admin not invited or
-invited with any role including Room manager (403), anonymous and terminated callers (401) are refused. An
-archived room can be deleted. After deletion `getRoomInfo`, `getRoomsPrimaryExternalLink`, a second delete,
-pin, cover and logo changes answer 404, `updateRoom` answers 403, and a member who could read the room before
-gets 404.
+`deleteRoom` SHALL queue a background operation that removes the room with its files, logo, cover, quota,
+links and single-use tags. The body `{deleteAfter}` is required but does not change the outcome: omitting the
+field defaults to false; null, a string or a number is 400. Only the room's creator and portal administrators
+on their own room may delete it. An archived room can be deleted. After deletion the room answers 404 to every
+read and to most changes.
 
 #### Scenario: Owner deletes a room of every type
 
 - **WHEN** the Owner deletes a Custom, Collaboration, Public, Form filling or VDR room
-- **THEN** the call answers 200 with an operation id, the operation finishes without error, the room is gone from the listing and `getRoomInfo` answers 404
+- **THEN** the call answers 200 with an operation id, `getOperationStatuses` reports the operation `finished` with progress 100 and no error, the room is gone from the listing and `getRoomInfo` answers 404
 
 #### Scenario: Content and links go with the room
 
 - **WHEN** a room holding a file, or a Public room with its primary link, is deleted
 - **THEN** `getFileInfo` of the file and `getRoomsPrimaryExternalLink` of the room answer 404
+- **AND** a member who could read the room before gets 404
 
 #### Scenario: Who may delete
 
-- **WHEN** a User or Guest (not invited, or invited with any non-manager role), or a Room admin invited with any role, deletes the Owner's room
-- **THEN** the system rejects the request (403)
+- **WHEN** a User or Guest (not invited, or invited with any non-manager role), or a Room admin not invited or invited with any role including Room manager, deletes the Owner's room
+- **THEN** the system rejects the request (403, "Access denied" for the User and Guest); anonymous and terminated callers get 401
 - **AND** a DocSpace admin deletes a room they created
 
 #### Scenario: Invalid ids and body
@@ -686,50 +706,52 @@ gets 404.
 
 #### Scenario: Deleted room cannot be revived
 
-- **WHEN** a deleted room is updated, archived, deleted again or used as a template source
+- **WHEN** a deleted room is updated, archived, deleted again or used as a template source, or its pin, cover or logo is changed
 - **THEN** `updateRoom` answers 403 and the others 404
 
 ### Requirement: Changing the room owner and leaving the room
 
 `changeFileOwner` (`POST api/2.0/files/owner`, v2.0) SHALL hand the listed rooms over to one account, which
-MUST be an active account allowed to manage rooms (Room admin, DocSpace admin or Owner); a deactivated account,
-a Guest or a User is refused (403, "You cannot select this user"), and for a private room the new owner must
-have encryption keys. The caller MUST be the creator of every listed room or a portal administrator. The
-previous owner keeps the room as its Room manager; an item already owned by the target is returned untouched.
-Leaving a room is removing oneself from the member list and is specified in `room-role-permissions` (the Owner
-cannot leave).
+MUST be an active account allowed to manage rooms (Room admin, DocSpace admin or Owner). The caller MUST be the
+creator of every listed room or a portal administrator. Leaving a room is removing oneself from the member
+list and is specified in `room-role-permissions` (the Owner cannot leave).
 
 #### Scenario: New owner must be an active account
 
 - **WHEN** ownership is transferred to a Room admin whose account was disabled
 - **THEN** the system rejects the request (403, "You cannot select this user")
+- **AND** for a private room the new owner must have encryption keys
 
 #### Scenario: User cannot become the owner
 
 - **WHEN** ownership is transferred to a User or a Guest
-- **THEN** the system rejects the request (403) — see `room-role-permissions`
+- **THEN** the system rejects the request (403, "You cannot select this user") — see `room-role-permissions`
+
+#### Scenario: Previous owner stays a member
+
+- **WHEN** a room is handed over to another account
+- **THEN** the previous owner keeps the room as its Room manager
+- **AND** an item already owned by the target is returned untouched
 
 ### Requirement: Per-room storage quota
 
 The system SHALL support a storage limit per room (v2.5) only while the room quota feature is on
-(`saveRoomQuotaSettings` with a default quota). A room may be created or updated with `quota` (bytes),
-changed for several rooms with `updateRoomsQuota` (the rooms are returned with `quotaLimit` and
-`isCustomQuota:true`; `0` is accepted and stored) and returned to the portal default with `resetRoomQuota`
-(`isCustomQuota:false`, `quotaLimit` equal to the default). With the feature off both calls answer 403. The
-calls need edit rights on each room: an archived room (403), a DocSpace admin or Room admin who is not a
-member, a User (403) and anonymous callers (401) are refused; an empty room list returns an empty array.
-`getRoomInfo` reports `quotaLimit`, `usedSpace` and `isCustomQuota`; a negative `quota` on creation is not
-stored as given (the stored limit is 0 or more).
+(`saveRoomQuotaSettings` with a default quota). A room may be created or updated with `quota` (bytes), changed
+for several rooms with `updateRoomsQuota` and returned to the portal default with `resetRoomQuota`. With the
+feature off both calls answer 403. The calls need edit rights on each room. `getRoomInfo` reports `quotaLimit`,
+`usedSpace` and `isCustomQuota`.
 
 #### Scenario: Custom quota set and reset
 
 - **WHEN** the feature is on with a 1 GB default and a VDR gets `updateRoomsQuota` 2 GB, then `resetRoomQuota`
-- **THEN** the first answer reports `quotaLimit` 2 GB and the second 1 GB; two rooms are handled in one call
+- **THEN** the first answer reports the rooms with `quotaLimit` 2 GB and `isCustomQuota:true`, the second with `quotaLimit` 1 GB (the default) and `isCustomQuota:false`; two rooms are handled in one call
+- **AND** `0` is accepted and stored as the limit, and an empty room list returns an empty array
 
 #### Scenario: Quota given on creation
 
 - **WHEN** the feature is on and a room is created with `quota` 10 MiB
 - **THEN** `getRoomInfo` reports `quotaLimit` 10 MiB
+- **AND** a negative `quota` on creation is not stored as given (the stored limit is 0 or more)
 
 #### Scenario: Feature off, archived room, wrong caller
 
@@ -764,15 +786,13 @@ outright (an upload session answers 402 with a message naming the quota).
 The system SHALL accept `private:true` on `createRoom` for a room whose files are end-to-end encrypted on the
 client (v4.0). The flag cannot be changed after creation, is reported as `private` in the room, and the
 listing can be split by it. Creation requires that the caller has encryption keys set up (403 otherwise) and is
-allowed to create rooms: the Owner, a DocSpace admin and a Room admin succeed, a User or Guest gets 403 and an
-anonymous caller 401. A private room takes a logo and can be put into a room group. The release notes for v4.0
-state that private rooms are hidden in the client until they are production-ready; the API exposes them as
-described here.
+allowed to create rooms. The v4.0 release notes say private rooms are hidden in the client until
+production-ready; the API exposes them as described here.
 
 #### Scenario: Private room created by an account with keys
 
 - **WHEN** the Owner, a DocSpace admin or a Room admin with encryption keys creates a Custom room with `private:true`
-- **THEN** the room is created with a positive id and reports `private:true`; a logo can be applied to it
+- **THEN** the room is created with a positive id and reports `private:true`; a logo can be applied to it and it can be grouped
 
 #### Scenario: User and Guest cannot create a private room
 
@@ -786,14 +806,16 @@ described here.
 
 ### Requirement: Listing rooms and reading a room
 
-`getRoomsFolder` SHALL return the rooms of one section (`searchArea`, default Active) the caller can read —
-the Owner and DocSpace admins see every room of the section, a Room admin, User or Guest only the rooms they
-are invited to — with `current` folder metadata and `total`, and SHALL support the filters `type` (one or more
-room types, OR), `filterValue` (case-insensitive substring of the title), `tags` / `withoutTags`, `subjectId`
-(member), `subjectOwnerId` (creator) with `excludeSubject`, `groupId`, paging (`count`, `startIndex`) and
-sorting. `getRoomInfo` SHALL return the room with its `rootFolderType`, type, title, tags, logo, quota and the
-flags above; it answers 404 for a deleted room and 403 for a room the caller cannot read. Anonymous and
-terminated callers get 401 on both.
+`getRoomsFolder` SHALL return the rooms of one section (`searchArea`, default Active) the caller can read, with
+`current` folder metadata and `total`, and SHALL support filtering by type, title, tags, member, creator and
+group, paging and sorting. `getRoomInfo` SHALL return the room with its `rootFolderType`, type, title, tags,
+logo, quota and the flags above; it answers 404 for a deleted room and 403 for a room the caller cannot read.
+Anonymous and terminated callers get 401 on both.
+
+#### Scenario: Supported filters and paging
+
+- **WHEN** `getRoomsFolder` is called with filters
+- **THEN** it accepts `type` (one or more room types, OR), `filterValue` (case-insensitive substring of the title), `tags` / `withoutTags`, `subjectId` (member), `subjectOwnerId` (creator) with `excludeSubject`, `groupId`, paging (`count`, `startIndex`) and sorting
 
 #### Scenario: Type filter
 
@@ -813,4 +835,4 @@ terminated callers get 401 on both.
 #### Scenario: Visibility by role
 
 - **WHEN** the Owner created two rooms and invited a Room admin, a User or a Guest to one of them
-- **THEN** that account's listing contains the invited room and not the other; a DocSpace admin sees their own room; anonymous and terminated callers get 401
+- **THEN** that account's listing contains the invited room and not the other, because a Room admin, User or Guest sees only the rooms they are invited to while the Owner and DocSpace admins see every room of the section; anonymous and terminated callers get 401

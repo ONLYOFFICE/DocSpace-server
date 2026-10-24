@@ -11,12 +11,12 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 
 | Requirement / scenario | Source | Status |
 |---|---|---|
-| **Room types offered by the API** — enum values 1, 2, 5, 6, 8, 9; no Private type; `roomType` immutable | yaml `RoomType` schema (`x-enum-varnames`), `CreateRoomRequestDto.roomType` ("cannot be changed once the room exists"), `UpdateRoomRequest` has no `roomType`; `private` is a boolean of `CreateRoomRequestDto` | CODE-ONLY |
+| **Room types offered by the API** — enum values 1, 2, 5, 6, 8, 9; no Private type; `roomType` immutable | yaml `RoomType` schema (`x-enum-varnames`: 1 `FillingFormsRoom`, 2 `EditingRoom`, 5 `CustomRoom`, 6 `PublicRoom`, 8 `VirtualDataRoom`, 9 `AiRoom`), `CreateRoomRequestDto.roomType` ("cannot be changed once the room exists"), `UpdateRoomRequest` has no `roomType`; `private` is a boolean of `CreateRoomRequestDto` | CODE-ONLY |
 | Every type is created with its own value | 03_Rooms/Create/RoomCreateTests.cs:44-66; 03_Rooms/Read/RoomInfoTests.cs:45-65 | TEST-CONFIRMED |
 | Unknown or missing room type is rejected (400) | 03_Rooms/Create/RoomCreateValidationTests.cs:100-130 | TEST-CONFIRMED |
 | AI room carries chat settings, other types refuse them (400) | 03_Rooms/Chat/RoomChatSettingsTests.cs:53-92 [Bug 82798]; yaml `CreateRoomRequestDto.chatSettings` | TEST-CONFIRMED |
 | Room info exposes only the flags that were set | 03_Rooms/Read/RoomInfoFieldsTests.cs:114-194 | TEST-CONFIRMED |
-| Sections per type (Forms / Active / AiAgents) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-164; yaml `SearchArea` enum, `getRoomsFolder.searchArea` | TEST-CONFIRMED (Forms/Active), CODE-ONLY (AiAgents) |
+| Section and primary link per type (Forms / Active / AiAgents; primary link for Form filling and Public rooms) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-164; yaml `SearchArea` enum, `getRoomsFolder.searchArea`; roots `FolderType.Forms` (36) and `FolderType.VirtualRooms` (14); primary link on creation: `shared-links` spec, 03_Rooms/Links/RoomLinkPrimaryTests.cs | TEST-CONFIRMED (Forms/Active, primary link), CODE-ONLY (AiAgents) |
 | **Who may create a room** | yaml `createRoom` 403 text | CODE-ONLY |
 | Owner and DocSpace admin create a room | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:42-72; Room admin: 03_Rooms/RoomsApiTests.cs:245-246, 03_Rooms/Listing/RoomsFolderVisibilityTests.cs:45-58 | TEST-CONFIRMED |
 | User and Guest cannot create a room (403, message) | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:75-106, 198-235 | TEST-CONFIRMED |
@@ -30,15 +30,19 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Blank title on update is a no-op | 03_Rooms/Update/RoomUpdateTests.cs:111-124; 03_Rooms/Update/RoomUpdateTitleTests.cs:76-92, 182-214; 03_Rooms/Read/RoomInfoTests.cs:182-194 | TEST-CONFIRMED |
 | **Room tags** — catalogue, replace semantics, 255 limit, verbatim chars | yaml `CreateRoomRequestDto.tags`, `UpdateRoomRequest.tags` ("replaces the whole tag set") | CODE-ONLY |
 | Tags given on creation; dedup; 50 tags; null | 03_Rooms/Create/RoomCreateOptionalFieldsTests.cs:133-179; 03_Rooms/Create/RoomCreateEdgeCaseTests.cs:77-90; 03_Rooms/Create/RoomCreateValidationTests.cs:225-234 | TEST-CONFIRMED |
-| Update replaces the tag set; over-long tag 400; forbidden chars stored | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:47-105 | TEST-CONFIRMED |
+| Update replaces the tag set | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:47-105 | TEST-CONFIRMED |
+| Tag name limits (over-long tag 400; forbidden chars stored verbatim) | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:47-105; yaml `addRoomTags`, `deleteRoomTags` | TEST-CONFIRMED |
 | Tag filter must be JSON (400); any-match; `withoutTags` | 03_Rooms/Listing/RoomsFolderFilterTests.cs:220-327 [Bug 81808] | TEST-CONFIRMED |
 | Single-use tag disappears with its room; shared tag stays | 03_Rooms/Deletion/RoomDeleteTests.cs:160-200 | TEST-CONFIRMED |
 | **Room colour, cover and logo** | yaml `CreateRoomRequestDto.color` (pattern), `.cover` (maxLength 50), `.logo`; `createRoomLogo`, `getRoomCovers` | CODE-ONLY |
 | Colour set on creation and update; "" resets; null no-op | 03_Rooms/Create/RoomCreateOptionalFieldsTests.cs:182-191; 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:109-131; 03_Rooms/Covers/RoomCoverValidationTests.cs:128-149 | TEST-CONFIRMED |
 | Invalid colour (400) | 03_Rooms/Create/RoomCreateValidationTests.cs:188-198; 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:135-175 [Bug 82364]; 03_Rooms/Covers/RoomCoverValidationTests.cs:46-87 [Bug 81558] | TEST-CONFIRMED |
-| Cover set, replaced and cleared; unknown cover 400 | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:179-219; 03_Rooms/Create/RoomCreateValidationTests.cs:201-211; gallery: 03_Rooms/Covers/RoomCoverGalleryTests.cs:46-146 | TEST-CONFIRMED |
-| Logo applied from an uploaded image; archived 403; deleted 404; bad tmpFile 403 | 03_Rooms/Logos/RoomLogoCreateTests.cs:48-218; 03_Rooms/Deletion/RoomDeleteAsyncTests.cs:200-219 | TEST-CONFIRMED |
-| **Data-protection settings** — accepted on every type; defaults | yaml `CreateRoomRequestDto.indexing/denyDownload/lifetime/watermark`, `RoomDataLifetimePeriod`, `WatermarkAdditions`; defaults: 03_Rooms/Create/RoomCreateTests.cs:69-81 | TEST-CONFIRMED (defaults), CODE-ONLY (shape) |
+| Cover set, replaced and cleared; unknown cover 400 | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:179-219; 03_Rooms/Create/RoomCreateValidationTests.cs:201-211 | TEST-CONFIRMED |
+| Cover gallery (same for every role and language, contains `schedule`) | 03_Rooms/Covers/RoomCoverGalleryTests.cs:46-146 | TEST-CONFIRMED |
+| Logo applied from an uploaded image | 03_Rooms/Logos/RoomLogoCreateTests.cs:48-218 | TEST-CONFIRMED |
+| Logo refused on an archived (403), deleted (404) or foreign upload (403) | 03_Rooms/Logos/RoomLogoCreateTests.cs:129-218; 03_Rooms/Deletion/RoomDeleteAsyncTests.cs:200-219 | TEST-CONFIRMED |
+| **Data-protection settings** — accepted on every type; defaults | yaml `CreateRoomRequestDto.indexing/denyDownload/lifetime/watermark`; defaults: 03_Rooms/Create/RoomCreateTests.cs:69-81 | TEST-CONFIRMED (defaults), CODE-ONLY (shape) |
+| Shape of the four settings (lifetime `value` 1-999, `period`; watermark `text` ≤ 255, `additions`) | yaml `RoomDataLifetimePeriod` (0 Day, 1 Month, 2 Year), `WatermarkAdditions` bitmask (1 UserName, 2 UserEmail, 4 UserIpAdress, 8 CurrentDate, 16 RoomName), `RoomDataLifetime`, `WatermarkRequestDto` | CODE-ONLY |
 | Settings given on creation of a VDR | 03_Rooms/Create/RoomCreateOptionalFieldsTests.cs:73-130 | TEST-CONFIRMED |
 | All settings updated at once and toggled off | 03_Rooms/Update/RoomUpdateTests.cs:68-108; 03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:47-168 | TEST-CONFIRMED |
 | Invalid lifetime (400) | 03_Rooms/Create/RoomCreateValidationTests.cs:172-185; 03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:161-167 | TEST-CONFIRMED |
@@ -54,13 +58,14 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Members without manager rights cannot export | 03_Rooms/Permissions/RoomIndexExportStartPermissionsTests.cs:75-128 | TEST-CONFIRMED |
 | Archived (403) or unknown room (404) | 03_Rooms/IndexExport/RoomIndexExportValidationTests.cs:50-87 [Bug 82368, 82369] | TEST-CONFIRMED |
 | Export completes with `resultFileId` | 03_Rooms/IndexExport/RoomIndexExportTests.cs:54-84 is `Skip`ped (document server unreachable in the integration-test profile); release note v3.0 ("generation of a summary report") | NOTES-ONLY |
-| **Form filling rooms live in the Forms section** | release note v4.0 ("Forms are a separate root section"); yaml `FolderType` 36 Forms, `SearchArea` Forms/FormTemplates | — |
+| **Form filling rooms live in the Forms section** | release note v4.0 ("Forms are a separate root section"); yaml `FolderType` 36 Forms / 14 VirtualRooms, `SearchArea` Forms/FormTemplates | — |
 | Form filling room is listed only in Forms (even with type filter) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-181 | TEST-CONFIRMED |
 | Forms root folder (type 36, same id, lists form rooms only) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:185-267 | TEST-CONFIRMED |
 | Used space is accounted to Forms / Archive | 03_Rooms/FormFilling/FormFillingRoomUsedSpaceTests.cs:52-160 | TEST-CONFIRMED |
 | Form room templates have their own section; room from form template in Forms | 03_Rooms/FormFilling/FormFillingRoomTemplateSectionTests.cs:53-207 | TEST-CONFIRMED |
 | Form room opened through its link is listed in Forms | 03_Rooms/FormFilling/FormFillingSectionBugTests.cs:282-314 [Bug 83228] | TEST-CONFIRMED |
-| **Public room backed by third-party storage** — connected folder, `createAsNewFolder`, dropped settings, string ids | yaml `createRoomThirdParty`, `CreateThirdPartyRoomRequest`; release notes v2.5 ("only for Public rooms", "Create a new folder in the storage") | CODE-ONLY |
+| **Public room backed by third-party storage** — connected folder, every `RoomType` 1-8 | yaml `createRoomThirdParty`, `CreateThirdPartyRoomRequest`; release notes v2.5 ("only for Public rooms") | CODE-ONLY |
+| New folder or the connected folder itself (`createAsNewFolder`, dropped `indexing`/`denyDownload`/`tags`/`logo`, string ids, `providerKey`/`providerId`) | yaml `CreateThirdPartyRoomRequest.createAsNewFolder`, `createRoomThirdParty` description; release note v2.5 ("Create a new folder in the storage"); 03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:50-111 (string ids, providerKey) | CODE-ONLY |
 | Connected folder becomes the room; listed with providerKey | 03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:50-111, 154-170 (requires Nextcloud, `[Trait("Requires","Nextcloud")]`) | TEST-CONFIRMED |
 | Every room type is accepted | 03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:114-131 (requires Nextcloud) | TEST-CONFIRMED |
 | One connection, one room (403) | 03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:135-150 (requires Nextcloud) | TEST-CONFIRMED |
@@ -78,13 +83,14 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Non-public template is hidden from an unrelated user (403) | 03_Rooms/Templates/RoomTemplateContentTests.cs:262-280 | TEST-CONFIRMED |
 | Public template visible to admin roles only | 03_Rooms/Templates/RoomTemplateContentTests.cs:285-329 | TEST-CONFIRMED |
 | Shared template (share by email; groups accepted) | 03_Rooms/Templates/RoomTemplateContentTests.cs:148-185 | TEST-CONFIRMED |
-| Public flag toggled; 404/400 id cases; isolation; survives source deletion/archiving | 03_Rooms/Templates/RoomTemplateShareTests.cs:52-371 [Bug 81726, 81939, 81949]; 03_Rooms/Templates/RoomTemplatePublicSettingsTests.cs:52-80 [Bug 81938] | TEST-CONFIRMED |
+| Public flag toggled; isolation; survives source deletion/archiving | 03_Rooms/Templates/RoomTemplateShareTests.cs:52-371 [Bug 81726, 81939, 81949]; 03_Rooms/Templates/RoomTemplatePublicSettingsTests.cs:52-80 [Bug 81938] | TEST-CONFIRMED |
+| Public setting of an unusable id (404 deleted / non-template / unknown; 400 for 0, -1, non-integer) | 03_Rooms/Templates/RoomTemplateShareTests.cs:52-371 [Bug 81726, 81939, 81949] | TEST-CONFIRMED |
 | **Creating a room from a template** — inheritance rules, independence, permissions | yaml `createRoomFromTemplate`, `CreateRoomFromTemplateDto` | CODE-ONLY |
 | Room created from a Custom room template; usable afterwards | 03_Rooms/Templates/RoomFromTemplateTests.cs:50-67, 288-338, 406-457 | TEST-CONFIRMED |
 | VDR settings partially inherited (type, indexing, denyDownload yes; lifetime, watermark no) | 03_Rooms/Templates/RoomFromTemplateTests.cs:71-236 | TEST-CONFIRMED |
 | Content is copied with new ids; independence; source deleted/unchanged | 03_Rooms/Templates/RoomFromTemplateContentTests.cs:52-186 [Bug 81666]; 03_Rooms/Templates/RoomFromTemplateTests.cs:240-403 | TEST-CONFIRMED |
 | Validation of the request (400 / 404) | 03_Rooms/Templates/RoomFromTemplateValidationTests.cs:47-247 [Bug 81667, 81669] | TEST-CONFIRMED |
-| Permissions: admin+public OK; User/Guest 403; admin on foreign private 403; source access only 403; 401 | 03_Rooms/Templates/RoomFromTemplatePermissionsTests.cs:44-230 [Bug 81662, 81663, 81664] | TEST-CONFIRMED |
+| Who may create a room from a template: admin+public OK; User/Guest 403; admin on foreign private 403; source access only 403; 401 | 03_Rooms/Templates/RoomFromTemplatePermissionsTests.cs:44-230 [Bug 81662, 81663, 81664] | TEST-CONFIRMED |
 | **Room groups** — name, icon, rooms, searchArea, per-account | yaml `addRoomGroup` (400/403/404 text), `RoomGroupRequestDto.searchArea`; release note v3.7 | CODE-ONLY |
 | Group created over rooms of several types; private room grouped | 03_Rooms/Groups/RoomGroupCreateTests.cs:43-114, 262-291 | TEST-CONFIRMED |
 | Name and icon validation (400; non-BMP name refused with 500; trimmed) | 03_Rooms/Groups/RoomGroupCreateNameIconValidationTests.cs:53-166 [Bug 80921]; 03_Rooms/Groups/RoomGroupCreateTests.cs:176-258 [Bug 82573] | TEST-CONFIRMED (the non-BMP refusal answers 500, not 400) |
@@ -97,7 +103,8 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Listing rooms by group | 03_Rooms/Groups/RoomGroupSearchAreaTests.cs:273-285 | TEST-CONFIRMED |
 | Deleting a group (404 repeat/bad ids; includeMembers) | 03_Rooms/Groups/RoomGroupDeleteTests.cs:43-190 [Bug 82596]; 03_Rooms/Groups/RoomGroupReadTests.cs:45-270 | TEST-CONFIRMED |
 | Anonymous / invalid token (401) on every group call | 03_Rooms/Groups/RoomGroupAnonymousAccessTests.cs:45-214 | TEST-CONFIRMED |
-| **Duplicating rooms** — settings, logo, tags, metadata copied; primary link recreated for non-Custom; members not copied; room limit | products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:1395-1441 (`CopyFolderAsync`: title via `GetAvailableTitleAsync`, Settings* copied, custom tags and metadata copied, no shares); products/ASC.Files/Core/Services/WCFService/FileOperations/FileMoveCopyOperation.cs:294-346 (`isRoomCopying`: `countRoomChecker.CheckAppend`, `roomLogoManager.CopyAsync`, primary external link re-shared when `FolderType != CustomRoom`); products/ASC.Files/Core/Services/WCFService/FileOperations/FileDuplicateOperation.cs:89-99; release note v2.6 | CODE-ONLY |
+| **Duplicating rooms** — background copy next to the original, numeric suffix, rights of item creation | yaml `duplicateBatchItems`; release note v2.6 | CODE-ONLY |
+| Room duplicated — settings, logo, tags, metadata copied; primary link recreated for non-Custom; members not copied; room limit | products/ASC.Files/Core/Core/Dao/TeamlabDao/FolderDao.cs:1395-1441 (`CopyFolderAsync`: title via `GetAvailableTitleAsync`, Settings* copied, custom tags and metadata copied, no shares); products/ASC.Files/Core/Services/WCFService/FileOperations/FileMoveCopyOperation.cs:294-346 (`isRoomCopying`: `countRoomChecker.CheckAppend`, `roomLogoManager.CopyAsync`, primary external link re-shared when `FolderType != CustomRoom`); products/ASC.Files/Core/Services/WCFService/FileOperations/FileDuplicateOperation.cs:89-99; release note v2.6 | CODE-ONLY |
 | File duplicated inside a room (Owner, Room manager, Content creator) | 06_Operations/Duplicate/DuplicateBatchItemsTests.cs:100-113; 06_Operations/Duplicate/DuplicatePermissionsTests.cs:85-147 | TEST-CONFIRMED |
 | Rights below Content creator (403); anonymous 401 | 06_Operations/Duplicate/DuplicatePermissionsTests.cs:49-66, 107-124, 150-192 | TEST-CONFIRMED |
 | Archived room, Trash (403) and unknown ids (404) | 06_Operations/Duplicate/DuplicateBatchItemsTests.cs:146-220 [Bug 82210] | TEST-CONFIRMED |
@@ -107,7 +114,8 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | AI rooms have their own limit | 03_Rooms/Pin/RoomPinLimitTests.cs:157-204 [Bug 81852] | TEST-CONFIRMED |
 | Pinned rooms stay on top (sort, filter, paging, stable order) | 03_Rooms/Pin/RoomPinOrderingTests.cs:47-222; 03_Rooms/RoomPinOrderTests.cs:47-75 | TEST-CONFIRMED |
 | Pin is personal; does not survive archiving; idempotent; concurrent safe | 03_Rooms/Pin/RoomPinTests.cs:50-211; 03_Rooms/Pin/RoomPinValidationTests.cs:126-142; 03_Rooms/Pin/RoomPinLimitTests.cs:47-123 | TEST-CONFIRMED |
-| Pin on archived (403), deleted (404), foreign room (403), unknown id (404) | 03_Rooms/Pin/RoomPinValidationTests.cs:57-122 [Bug 81850]; 03_Rooms/Pin/RoomUnpinValidationTests.cs:52-111 [Bug 82366]; 03_Rooms/Permissions/RoomPinPermissionsTests.cs:51-149 | TEST-CONFIRMED |
+| Pin on archived (403), deleted (404), foreign room (403), unknown id (404, "The required folder was not found") | 03_Rooms/Pin/RoomPinValidationTests.cs:57-122 [Bug 81850]; 03_Rooms/Pin/RoomUnpinValidationTests.cs:52-111 [Bug 82366] | TEST-CONFIRMED |
+| Who may pin (uninvited DocSpace admin OK; non-member User/Guest 403; anonymous/terminated 401) | 03_Rooms/Permissions/RoomPinPermissionsTests.cs:51-149 | TEST-CONFIRMED |
 | Unpin never changes membership; unpin of never-pinned room 200 | 03_Rooms/Pin/RoomUnpinTests.cs:51-223 | TEST-CONFIRMED |
 | Every room type can be pinned / unpinned (form room within Forms) | 03_Rooms/Pin/RoomPinRoomTypesTests.cs:46-70; 03_Rooms/Pin/RoomUnpinRoomTypesTests.cs:44-66 | TEST-CONFIRMED |
 | **Archiving and restoring** | yaml `archiveRoom`, `unarchiveRoom`, `ArchiveRoomRequest.deleteAfter` | CODE-ONLY |
@@ -124,6 +132,7 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Invalid ids (404) and body (400) | 03_Rooms/Deletion/RoomDeleteValidationTests.cs:48-148 [Bug 81697] | TEST-CONFIRMED |
 | Deleted room cannot be revived (update 403, archive/delete/template 404) | 03_Rooms/Update/RoomUpdateValidationTests.cs:104-118; 03_Rooms/Permissions/RoomArchivePermissionsTests.cs:137-153; 03_Rooms/Deletion/RoomDeleteAsyncTests.cs:164-219; 03_Rooms/Templates/RoomTemplateCreateTests.cs:229-247 | TEST-CONFIRMED |
 | **Changing the room owner and leaving the room** | yaml `changeFileOwner` description; release note v2.0; `room-role-permissions` (leave, User cannot own) | CODE-ONLY |
+| Previous owner stays a member (keeps the room as Room manager; item already owned by the target returned untouched; private room needs keys) | yaml `changeFileOwner` description | CODE-ONLY |
 | New owner must be an active account (403, message) | 04_Security/Sharing/GroupAndOwnerSharingTests.cs:90-101 [Bug 66897] | TEST-CONFIRMED |
 | User cannot become the owner | `openspec/specs/room-role-permissions/spec.md` "User cannot own a room" | TEST-CONFIRMED (there) |
 | **Per-room storage quota** | yaml `updateRoomsQuota`, `resetRoomQuota`, `CreateRoomRequestDto.quota`; release note v2.5 | CODE-ONLY |
@@ -140,6 +149,7 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Default is not private | 03_Rooms/Create/RoomCreateTests.cs:69-81 | TEST-CONFIRMED |
 | Keys required (403 without keys) | yaml `createRoom` 403 text only — no test creates a private room without keys | CODE-ONLY |
 | **Listing rooms and reading a room** | yaml `getRoomsFolder` parameters, `getRoomInfo` | CODE-ONLY |
+| Supported filters and paging (`type`, `filterValue`, `tags`/`withoutTags`, `subjectId`, `subjectOwnerId`+`excludeSubject`, `groupId`, `count`/`startIndex`, sorting) | yaml `getRoomsFolder` parameters; 03_Rooms/Listing/RoomsFolderFilterTests.cs | CODE-ONLY (full set), TEST-CONFIRMED (type/title/tags/subject/group) |
 | Type filter | 03_Rooms/Listing/RoomsFolderFilterTests.cs:87-132; 03_Rooms/RoomsApiTests.cs:206-224 | TEST-CONFIRMED |
 | Title filter | 03_Rooms/Listing/RoomsFolderFilterTests.cs:136-209 | TEST-CONFIRMED |
 | Subject filters | 03_Rooms/Listing/RoomsFolderFilterTests.cs:331-390; 03_Rooms/RoomsApiTests.cs:229-275 | TEST-CONFIRMED |

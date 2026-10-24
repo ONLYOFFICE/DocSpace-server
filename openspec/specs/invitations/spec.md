@@ -28,14 +28,14 @@ stated where the tests assert them.
 The system SHALL let an allowed inviter invite people to the portal by email address and user type through
 `POST /api/2.0/people/invite` (`inviteUsers`). For every address that has no account the system SHALL
 create a pending profile (status Pending, activation Pending, created by the inviter) and mail it an
-invitation link. The answer SHALL list every pending profile of the portal the caller may see, not only
-the ones just invited. The Guest type SHALL be refused through this operation for everybody.
+invitation link. The Guest type SHALL be refused through this operation for everybody.
 
 #### Scenario: Allowed inviter creates a pending member
 
 - **WHEN** the DocSpace Owner, a DocSpace admin or a Room admin invites a new address with a type they may invite
 - **THEN** the answer contains a profile whose display name is that address, with a non-empty id, no avatar and not anonymous
 - **AND** the profile has status Pending and activation status Pending
+- **AND** the answer lists every pending profile of the portal the caller may see, not only the ones just invited
 
 #### Scenario: Guest type is refused for everyone
 
@@ -152,15 +152,19 @@ change it through `PUT /api/2.0/people/status/{status}`.
 
 The system SHALL let the inviter of a pending account send its invitation email again through
 `PUT /api/2.0/people/invite` (`resendUserInvites`), issuing a fresh invitation link, and SHALL send
-activation instructions instead to an account that exists but has not confirmed its address. Accounts
-that are already active or disabled SHALL be skipped without an error. `resendAll` SHALL reach every
-pending account and SHALL be allowed to Room admins and DocSpace admins only; a User or a Guest MAY list
-nothing but their own id.
+activation instructions instead to an account that exists but has not confirmed its address. A User or a
+Guest MAY list nothing but their own id.
 
 #### Scenario: Allowed inviter resends to a pending member
 
 - **WHEN** the DocSpace Owner, a DocSpace admin or a Room admin resends to a member they invited
 - **THEN** the member is returned with its email, status Pending and activation status Pending
+
+#### Scenario: Skipped accounts and resendAll
+
+- **WHEN** the list names an account that is already active or disabled
+- **THEN** it is skipped without an error
+- **AND** `resendAll` reaches every pending account and is allowed to Room admins and DocSpace admins only
 
 #### Scenario: Guest or User resends for another account
 
@@ -182,9 +186,8 @@ nothing but their own id.
 The system SHALL keep at most one invitation link per user type (DocSpace admin, Room admin, User) for
 the whole portal, managed through `POST`, `GET .../{employeeType}`, `PUT` and `DELETE` on
 `/api/2.0/portal/users/invitationlink`. The link SHALL be visible to every admin allowed to invite that
-type, whoever created it, and SHALL carry an optional use limit (1-1000) and an optional expiration in
-the future. A caller MAY act on the link of a type only when they may invite that type, and only the
-DocSpace Owner MAY act on the DocSpace admin link.
+type and MAY carry a use limit and an expiration. A caller MAY act on the link of a type only when they
+may invite that type, and only the DocSpace Owner MAY act on the DocSpace admin link.
 
 #### Scenario: Creating a link for a type the caller may invite
 
@@ -199,7 +202,7 @@ DocSpace Owner MAY act on the DocSpace admin link.
 #### Scenario: Link is shared between admins
 
 - **WHEN** a DocSpace admin or a Room admin reads the link of a type they may invite, created by the DocSpace Owner
-- **THEN** the same link is returned
+- **THEN** the same link is returned, whoever created it
 - **AND** a Room admin or a DocSpace admin can delete the User link the owner created
 
 #### Scenario: Type above the caller's reach
@@ -215,7 +218,7 @@ DocSpace Owner MAY act on the DocSpace admin link.
 #### Scenario: Use limit and expiration validation
 
 - **WHEN** `maxUseCount` is 1001 or `expiration` lies in the past, on create or update
-- **THEN** the system rejects the request (400; "The field MaxUseCount must be between 1 and 1000." for the count)
+- **THEN** the system rejects the request (400; "The field MaxUseCount must be between 1 and 1000." for the count), because the use limit is 1 to 1000 and the expiration must lie in the future
 
 #### Scenario: Limits are stored
 
@@ -273,9 +276,13 @@ bare URL string; it SHALL return an empty string instead of 403 when the caller 
 The system SHALL let a manager of a room add, change and remove members in one batch through
 `PUT /api/2.0/files/rooms/{id}/share` (`setRoomSecurity`), each entry naming an account or a group of
 the portal and an access level; access 0 SHALL remove the subject. The answer SHALL be the resulting access
-entries of the named subjects. A subject the caller is not allowed to see SHALL be dropped without an
-error. With `notify` the system SHALL email existing accounts that gained access, with the optional
-`message`.
+entries of the named subjects.
+
+#### Scenario: Invisible subjects and notification
+
+- **WHEN** an entry names a subject the caller is not allowed to see
+- **THEN** the subject is dropped without an error
+- **AND** with `notify` the existing accounts that gained access are emailed, with the optional `message`
 
 #### Scenario: Room owner or invited Room manager adds a member
 
@@ -323,8 +330,7 @@ The system SHALL let a manager of a room invite somebody who has no account by `
 `PUT /api/2.0/files/rooms/{id}/share` batch, when the portal allows inviting guests. For an unknown
 address the system SHALL create a pending Guest profile created by the caller, record the share and mail an
 invitation link that carries the room id. For an address that already has an account the system SHALL
-relate that account to the caller and apply the access; it SHALL mail the invitation link only while that
-account is still pending, and otherwise notify it as an existing member when `notify` is set.
+relate that account to the caller and apply the access.
 
 #### Scenario: Unknown address
 
@@ -335,6 +341,11 @@ account is still pending, and otherwise notify it as an existing member when `no
 
 - **WHEN** an entry carries the email of a pending account
 - **THEN** the account is related to the caller, its access is set and the room invitation email is sent again
+
+#### Scenario: Address of an existing active account
+
+- **WHEN** an entry carries the email of an account that is no longer pending
+- **THEN** the account is related to the caller and its access is set; no invitation link is mailed, and the account is notified as an existing member when `notify` is set
 
 #### Scenario: Guest invitations disabled
 
@@ -457,11 +468,8 @@ SHALL carry the access level that a person joining through it receives.
 The system SHALL check an invitation link through `POST /api/2.0/authentication/confirm`
 (`checkConfirm`, type LinkInvite) and complete the registration through `POST /api/2.0/people` with
 `fromInviteLink` and the link `key`. For a link into a room the check SHALL answer with the room id and
-title. The outcome SHALL depend on who follows the link: an existing account that is not in the room
-SHALL be added to the room during the check and answered `UserExisted`, an existing member SHALL be
-answered `UserExisted` without a new share, and an unknown person SHALL be answered `Ok` and SHALL get an
-account that joins the room when the registration is completed. The registration SHALL set the type the
-link grants, ignoring the `type` sent, and SHALL count one use of the link.
+title. An existing account is added to the room by the check itself; an unknown person joins the room when
+the registration is completed, which SHALL set the type the link grants, ignoring the `type` sent.
 
 #### Scenario: Existing account not in the room
 
@@ -477,7 +485,7 @@ link grants, ignoring the `type` sent, and SHALL count one use of the link.
 
 - **WHEN** nobody is signed in and the key is valid
 - **THEN** `result` is `Ok` with the room id and title and the email the link was issued for
-- **AND** completing `POST /api/2.0/people` with `fromInviteLink` creates the account, counts the use on the link and adds the account to the room
+- **AND** completing `POST /api/2.0/people` with `fromInviteLink` creates the account, counts one use on the link and adds the account to the room
 
 #### Scenario: Check that is not Ok cannot be completed
 
@@ -533,11 +541,9 @@ link grants, ignoring the `type` sent, and SHALL count one use of the link.
 
 The system SHALL keep two portal-wide switches, `allowInvitingMembers` and `allowInvitingGuests`, both
 on by default, readable by anyone through `GET /api/2.0/settings/invitationsettings` and changeable by
-the DocSpace Owner and DocSpace admins through `PUT /api/2.0/settings/invitationsettings`. Turning
-`allowInvitingMembers` off SHALL block inviting members through Contacts: inviting by email, adding a
-member directly, and creating, reading, updating or deleting a portal invitation link. Turning
-`allowInvitingGuests` off SHALL block inviting a new email through a room and creating a guest. Issued
-links SHALL stay stored but SHALL NOT be accepted while the switch for their type is off.
+the DocSpace Owner and DocSpace admins through `PUT /api/2.0/settings/invitationsettings`. Each switch,
+when off, SHALL block the invitations of its kind. Issued links SHALL stay stored but SHALL NOT be accepted
+while the switch for their type is off.
 
 #### Scenario: Anonymous read and conditional request
 
@@ -552,12 +558,12 @@ links SHALL stay stored but SHALL NOT be accepted while the switch for their typ
 #### Scenario: Member invitations off
 
 - **WHEN** `allowInvitingMembers` is off and a caller invites by email, adds a member directly, or creates, reads, updates or deletes a portal invitation link
-- **THEN** the system denies the request (403, "Access denied")
+- **THEN** the system denies the request (403, "Access denied"); these are the member invitations through Contacts
 
 #### Scenario: Guest invitations off
 
 - **WHEN** `allowInvitingGuests` is off and a room invitation lists an email with an access other than 0, or an account is created as a Guest
-- **THEN** the system denies the request (403, "Access denied")
+- **THEN** the system denies the request (403, "Access denied"); inviting a new email through a room and creating a guest are the guest invitations
 
 #### Scenario: Registration through a stored link while invitations are off
 
@@ -566,11 +572,11 @@ links SHALL stay stored but SHALL NOT be accepted while the switch for their typ
 
 ### Requirement: Invitation quota
 
-The system SHALL keep a replenishable per-portal quota of email invitations, configured by
-`web:invitation-limit` (unlimited by default) with the window `web:invitation-limit-duration` (24 hours),
-exposed as `invitationLimit` in `GET /api/2.0/settings`. Sending an invitation email to the portal or to a
-room SHALL reduce the quota by one, completing a registration through an email invitation SHALL give one
-back, and a request whose email invitations exceed the remaining quota SHALL fail request validation.
+The system SHALL keep a replenishable per-portal quota of email invitations (unlimited by default, with a
+24-hour replenishment window), exposed as `invitationLimit` in `GET /api/2.0/settings`. Sending an
+invitation email to the portal or to a room SHALL reduce the quota by one, completing a registration
+through an email invitation SHALL give one back, and a request whose email invitations exceed the remaining
+quota SHALL fail request validation.
 
 #### Scenario: Sending reduces the quota
 
@@ -589,8 +595,8 @@ back, and a request whose email invitations exceed the remaining quota SHALL fai
 
 ### Requirement: Daily email invitation rate limit
 
-The system SHALL enforce `core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay`, when configured, as
-a fixed one-day window per portal on `POST /api/2.0/people/invite` and `PUT /api/2.0/files/rooms/{id}/share`,
+The system SHALL enforce a configurable daily number of email invitations per portal, when configured, as
+a fixed one-day window on `POST /api/2.0/people/invite` and `PUT /api/2.0/files/rooms/{id}/share`,
 counting each address in the request body as one permit; a request that names no address SHALL not be
 counted. Without the setting no limit SHALL apply.
 

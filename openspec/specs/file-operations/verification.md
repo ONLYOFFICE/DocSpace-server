@@ -186,10 +186,37 @@ not necessarily red. Where a test is known to be red today (its summary says so)
 | **Personal file templates** | | |
 | One, two, twice, empty, `{}`, 999999999 → true | `01_Files/Templates/AddTemplatesTests.cs:47-134` | TEST-CONFIRMED |
 
-Counts: 141 rows — TEST-CONFIRMED 121 (four of them open bugs or Nextcloud-gated, marked in the row; one
-row, the blank folder title on creation, carries TEST-CONFIRMED and CODE-ONLY), CODE-ONLY 18, NOTES-ONLY 3
+### Scenarios added in the 2026-10-24 clean-up, and the code names moved out of the spec text
+
+| Scenario (requirement) | Source | Status |
+|---|---|---|
+| Template chosen by culture (Creating a blank file by title) | `products/ASC.Files/Core/Helpers/Global.cs:331-343, 404-423`; release notes v3.0 | CODE-ONLY / NOTES-ONLY (paper size) |
+| Unknown folder (Creating a text or HTML file from content) | `TextFileCreateTests.cs:191-200` | TEST-CONFIRMED |
+| Same version as lastVersion (Renaming a file) | `FileRenameTests.cs:150-171` (bug 80773) | TEST-CONFIRMED |
+| Formats and titles kept (Single-request upload) | `UploadFormatTests.cs:46-62`; `UploadToMyFormatTests.cs:46-60`; `UploadTests.cs:105-124, 176-196`; `InsertToMyTests.cs:46-99, 141-151`; `UploadToMyTests.cs:151-161` | TEST-CONFIRMED |
+| Refused before the session exists (Chunked upload session) | yaml `createUploadSession` (l. 22300-22359); `products/ASC.Files/Core/Utils/FileUploader.cs:153-166, 205-218, 265-278, 296-304` | CODE-ONLY |
+| PDF classified from the first chunk (Chunked upload session) | `FileUploader.cs:306-362`; `CheckDestFolderTestBase.cs:117-159` | TEST-CONFIRMED |
+| Name clash on a session (Chunked upload session) | yaml `SessionRequest.createNewIfExist` (l. 84046-84053); `FileUploader.cs:88-125` | CODE-ONLY |
+| Shape of an operation record (Long-running operations) — the record is `FileOperationDto`, `Operation` is `FileOperationType` with 0 Move, 1 Copy, 2 Delete, 3 Download, 4 MarkAsRead, 5 Import, 6 Convert, 7 Duplicate | yaml `FileOperationDto` (l. 77019-77133), `FileOperationType` (l. 77148-77170) | CODE-ONLY |
+| Accepted routes (Moving files and folders) | `FileMoveTests.cs:42-79, 198-330`; `FoldersMoveTests.cs:203-241, 274-427` | TEST-CONFIRMED |
+| Copy as a new file (Copying files and folders) | `01_Files/CopySave/CopyFileAsTests.cs:60-80`; `FileCopyTests.cs:42-68, 101-124` | TEST-CONFIRMED |
+| PDF form into a Form filling room (Copying files and folders) | `FileCopyTests.cs:531-561` | TEST-CONFIRMED |
+| Route shared with the Move status (Checking a move or copy for name clashes) | `GetOperationStatusesByTypeTests.cs:44-50`; `CheckMoveCopyTestBase.cs:36-50` | CODE-ONLY |
+| Callers without delete rights (Deleting a single file or folder) | `FileDeletePermissionsTests.cs:49-247`; `FolderDeleteTests.cs:253-272`; `FolderDeletePermissionsTests.cs` | TEST-CONFIRMED |
+| Unknown file (File versions and their history) | `FileVersionInfoTests.cs:102-113`; `EditHistoryTests.cs:96-113` (bug 80962) | TEST-CONFIRMED |
+| Past version needs history access (File versions and their history) | `OpenFileVersionAccessTests.cs:48-75` (bug 80683) | TEST-CONFIRMED |
+| Lock blocks others (Locking and unlocking a file) | `FileDeleteTests.cs:169-243`; `FileCopyTests.cs:364-394` | TEST-CONFIRMED |
+| Target formats (Converting a file) — the list is the `FileFormats` configuration | `products/ASC.Files/Core/Helpers/FileUtility.cs:58-114`; release notes v2.6, v3.0, v3.2.1, v3.6 | CODE-ONLY / NOTES-ONLY (format pairs) |
+| Sizes and media limits (Thumbnails) — the "image limit" is `MaxImageFileSize`, the "video limit" `MaxVideoFileSize` of `ThumbnailSettings` | `buildtools/config/appsettings.json:318-324`; `products/ASC.Files/Core/Core/ThumbnailSettings.cs:101-111` | CODE-ONLY |
+| Unknown folder (New marks of a folder and marking as read) | `FolderNewItemsTests.cs:272-302` (bug 81519) | TEST-CONFIRMED |
+| "Aborting an upload session" and "Changing and restoring versions" were split out of "Chunked upload session" and "File versions and their history"; their scenarios kept their names and rows | — | — |
+| Names moved out of the spec text: `conflictResolveType` is `FileConflictResolveType`; `result` of `checkdestfolder` is `CheckDestFolderResult` (0 AllAllowed, 1 PartAllowed, 2 NoneAllowed); the Trash `folderType` values are `FolderType` `USER` (5) and `VirtualRooms` (14); the "product code where a test leaves a point open" of the Purpose is `FileUploader`, `FileStorageService`, `Global` and `ThumbnailSettings` | yaml `FileConflictResolveType`, `CheckDestFolderResult` (l. 71569-71581), `FolderType`; files cited in the rows above | CODE-ONLY |
+
+Counts: 162 rows — TEST-CONFIRMED 133 (four of them open bugs or Nextcloud-gated, marked in the row; one
+row, the blank folder title on creation, carries TEST-CONFIRMED and CODE-ONLY), CODE-ONLY 26, NOTES-ONLY 3
 (the Letter/A4 paper size, the multi-threaded chunk upload and the format pairs of conversion; each is
-attributed to the release notes inside the spec text). Spec: 32 requirements, 92 scenarios.
+attributed to the release notes inside the spec text; two of the added scenario rows carry the NOTES-ONLY
+part next to their CODE-ONLY part). Spec: 34 requirements, 111 scenarios.
 
 ## Where the server differs from the release notes or the API document (spec follows the server)
 

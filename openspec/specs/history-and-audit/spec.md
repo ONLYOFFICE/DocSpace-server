@@ -11,10 +11,7 @@ syslog collector, and the suspicious-login check that runs after every sign-in.
 Sources: the integration tests of `products/ASC.Files/Tests` (`01_Files/History`, `01_Files/Log`,
 `02_Folders/History`) and `web/ASC.Web.Api.Tests` (`05_Security/AuditTrail`, `LoginHistory`,
 `ActiveConnections`), the OpenAPI document `sdk/docspace-api-spec/docspace-backend.yaml`, the product
-code (`HistoryService`, `HistoryApiHelper`, `AuditInterpreter`, `AuditEventsRepository`,
-`LoginEventsRepository`, `EventTypeConverter`, `SecurityController`, `ConnectionsController`,
-`AuditReportTask`, `AuditLogSender`, `SuspiciousLoginNotifier`) and the release notes v2.6 – v4.0
-(October 2026). Where the notes and the server disagree, this specification follows the server; the
+code where the tests stop (cited in `verification.md`) and the release notes v2.6 – v4.0 (October 2026). Where the notes and the server disagree, this specification follows the server; the
 differences and the suspected defects are listed in `verification.md`. The "view history" right of a
 user type or a room role is defined in `user-type-permissions` and `room-role-permissions`; form-filling
 events are defined in `form-filling-workflow` and only cross-referenced here.
@@ -25,16 +22,20 @@ events are defined in `form-filling-workflow` and only cross-referenced here.
 
 The system SHALL expose the activity history of a file through `GET /api/2.0/files/file/{fileId}/log`
 and of a folder or a room through `GET /api/2.0/files/folder/{folderId}/log`. Each entry SHALL carry
-`id`, `action` (with the `MessageAction` in `action.id`), `initiator` (an account with at least
+`id`, `action` (with the action identifier in `action.id`), `initiator` (an account with at least
 `displayName`), `date` and, where the action has details, `data`. Entries SHALL be returned newest
 first, and the number of entries on the page SHALL be reported in the `count` field of the response
-envelope. Only entries stored in the portal itself have a history; a file in a connected third-party
-storage has none.
+envelope.
 
 #### Scenario: History of a new room has the expected structure
 
 - **WHEN** the owner reads the history of a room they have just created
 - **THEN** the list is not empty, the first entry has a non-null `action.id`, an initiator with a display name and a date
+
+#### Scenario: Third-party file has no history
+
+- **WHEN** the history of a file stored in a connected third-party storage is read
+- **THEN** no entries are returned, because only entries stored in the portal itself have a history
 
 #### Scenario: Unknown folder
 
@@ -100,19 +101,20 @@ Guest) SHALL receive it without a `profileUrl`.
 
 ### Requirement: Actions that produce a history entry
 
-The system SHALL write a history entry for the actions listed below and for no others
-(`HistoryService.TrackedActions`); an audit event whose action is not tracked SHALL never appear in an
-entry history even when it references the entry. The entry is written by the initiator of the action.
+The system SHALL write a history entry for a fixed set of tracked actions and for no others; an audit
+event whose action is not tracked SHALL never appear in an entry history even when it references the
+entry. The entry is written by the initiator of the action. The tracked set covers files, folders, room
+lifecycle and settings, room links, room members, forms (see `form-filling-workflow`) and AI agents.
 
-| Group | Actions |
-|-------|---------|
-| Files | FileCreated, FileUploaded, FileUploadedWithOverwriting, UserFileUpdated, FileRenamed, FileMoved, FileMovedWithOverwriting, FileMovedToTrash, FileCopied, FileCopiedWithOverwriting, FileVersionRemoved, FileDeleted, FileConverted, FileRestoreVersion, FileIndexChanged, FileLocked, FileUnlocked, FileCustomFilterEnabled, FileCustomFilterDisabled, FileSavedButUserQuotaExceeded, FileNotSavedDueToUserQuota, FileSavedButRoomQuotaExceeded, FileNotSavedDueToRoomQuota |
-| Folders | FolderCreated, FolderRenamed, FolderMoved, FolderMovedWithOverwriting, FolderCopied, FolderCopiedWithOverwriting, FolderMovedToTrash, FolderDeleted, FolderIndexChanged, FolderIndexReordered |
-| Room lifecycle and settings | RoomCreated, RoomCopied, RoomRenamed, RoomArchived, RoomUnarchived, AddedRoomTags, DeletedRoomTags, RoomLogoCreated, RoomLogoDeleted, RoomColorChanged, RoomCoverChanged, RoomIndexingEnabled, RoomIndexingDisabled, RoomLifeTimeSet, RoomLifeTimeDisabled, RoomDenyDownloadEnabled, RoomDenyDownloadDisabled, RoomWatermarkSet, RoomWatermarkDisabled, RoomIndexExportSaved |
-| Room links | RoomExternalLinkCreated, RoomExternalLinkRenamed, RoomExternalLinkDeleted, RoomExternalLinkRevoked |
-| Room members | RoomCreateUser, RoomUpdateAccessForUser, RoomRemoveUser, RoomChangeOwner, RoomGroupAdded, RoomUpdateAccessForGroup, RoomGroupRemove, RoomInviteResend |
-| Forms (see `form-filling-workflow`) | FormSubmit, FormOpenedForFilling, FormStartedToFill, FormPartiallyFilled, FormCompletelyFilled, FormStopped |
-| AI agents | AgentCreated, AgentRenamed |
+#### Scenario: The complete tracked set
+
+- **WHEN** an action of the tracked set is performed on an entry
+- **THEN** a history entry is written for the file actions `FileCreated`, `FileUploaded`, `FileUploadedWithOverwriting`, `UserFileUpdated`, `FileRenamed`, `FileMoved`, `FileMovedWithOverwriting`, `FileMovedToTrash`, `FileCopied`, `FileCopiedWithOverwriting`, `FileVersionRemoved`, `FileDeleted`, `FileConverted`, `FileRestoreVersion`, `FileIndexChanged`, `FileLocked`, `FileUnlocked`, `FileCustomFilterEnabled`, `FileCustomFilterDisabled`, `FileSavedButUserQuotaExceeded`, `FileNotSavedDueToUserQuota`, `FileSavedButRoomQuotaExceeded` and `FileNotSavedDueToRoomQuota`
+- **AND** for the folder actions `FolderCreated`, `FolderRenamed`, `FolderMoved`, `FolderMovedWithOverwriting`, `FolderCopied`, `FolderCopiedWithOverwriting`, `FolderMovedToTrash`, `FolderDeleted`, `FolderIndexChanged` and `FolderIndexReordered`
+- **AND** for the room actions `RoomCreated`, `RoomCopied`, `RoomRenamed`, `RoomArchived`, `RoomUnarchived`, `AddedRoomTags`, `DeletedRoomTags`, `RoomLogoCreated`, `RoomLogoDeleted`, `RoomColorChanged`, `RoomCoverChanged`, `RoomIndexingEnabled`, `RoomIndexingDisabled`, `RoomLifeTimeSet`, `RoomLifeTimeDisabled`, `RoomDenyDownloadEnabled`, `RoomDenyDownloadDisabled`, `RoomWatermarkSet`, `RoomWatermarkDisabled` and `RoomIndexExportSaved`
+- **AND** for the link actions `RoomExternalLinkCreated`, `RoomExternalLinkRenamed`, `RoomExternalLinkDeleted` and `RoomExternalLinkRevoked`
+- **AND** for the member actions `RoomCreateUser`, `RoomUpdateAccessForUser`, `RoomRemoveUser`, `RoomChangeOwner`, `RoomGroupAdded`, `RoomUpdateAccessForGroup`, `RoomGroupRemove` and `RoomInviteResend`
+- **AND** for the form actions `FormSubmit`, `FormOpenedForFilling`, `FormStartedToFill`, `FormPartiallyFilled`, `FormCompletelyFilled` and `FormStopped`, and the agent actions `AgentCreated` and `AgentRenamed`
 
 #### Scenario: Room creation, rename, archive and restore
 
@@ -177,20 +179,26 @@ FileRenamed and the form events.
 
 The system SHALL export the history of a folder or a room through
 `POST /api/2.0/files/folder/{folderId}/log/report`, which queues a background task and answers 200
-with the task (`id`, `status` Created or Running, `isCompleted`, `percentage`, `error`,
-`resultFileId`, `resultFileName`, `resultFileUrl`); `GET` on the same path reports the caller's own
-task for that folder, `DELETE` asks to stop it. `format` is `Xlsx` (default) or `Csv`; `from` / `to`
-limit the period and are read in the portal time zone; left out, the whole history is exported. The
-file SHALL be saved in the caller's My documents. The CSV report holds a header row and one row per
-event; the XLSX report keeps at most 200,000 events (`files:audit-report:xlsx-max-rows`) and says in its
-header how many were left out. The folder report has no Country, City, Page, Action-text and Context
-columns, and the IP, Browser and Platform columns SHALL be included only when the caller is a DocSpace
-admin. A running report for the same folder and caller is joined instead of duplicated.
+with the task; `GET` on the same path reports the caller's own task for that folder, `DELETE` asks to
+stop it. The file SHALL be saved in the caller's My documents. A running report for the same folder and
+caller is joined instead of duplicated.
 
 #### Scenario: Report of a room, an archived room and a subfolder
 
 - **WHEN** the owner starts a report for a Custom room, for an archived room or for a subfolder of a room
 - **THEN** the system answers 200 with a task whose `id` is set and whose status is Created or Running
+- **AND** the task carries `id`, `status`, `isCompleted`, `percentage`, `error`, `resultFileId`, `resultFileName` and `resultFileUrl`
+
+#### Scenario: Format and period of the report
+
+- **WHEN** a report is started with `format` `Xlsx` (the default) or `Csv`, with or without `from` / `to`
+- **THEN** the period is read in the portal time zone and, when left out, the whole history is exported
+
+#### Scenario: Contents and columns of the report
+
+- **WHEN** the report file is produced
+- **THEN** the CSV report holds a header row and one row per event, and the XLSX report keeps at most 200,000 events and says in its header how many were left out
+- **AND** the folder report has no Country, City, Page, Action-text and Context columns, and the IP, Browser and Platform columns are included only when the caller is a DocSpace admin
 
 #### Scenario: CSV report holds the events
 
@@ -228,15 +236,14 @@ hidden (402).
 
 The system SHALL expose the version list of a file through `GET /api/2.0/files/file/{fileId}/history`
 and its editing revisions through `GET /api/2.0/files/file/{fileId}/edit/history`. Both require the
-ReadHistory right of `FileSecurity`: editing access and above grant it, Read and Comment do not, a Guest
-never has it, and a third-party file has no revisions. A new file has one version (`version` 1,
-`versionGroup` 1, comment "Created", `fileStatus` None); a revision carries the file id, the document
-key, the version, the version group, the author and the creation date.
+read-history right: editing access and above grant it, Read and Comment do not, a Guest never has it,
+and a third-party file has no revisions.
 
 #### Scenario: Version list and revisions of a new file
 
 - **WHEN** the owner creates a file in My documents and reads its version list and its editing revisions
-- **THEN** both answers hold exactly one item with version 1 and version group 1, and the envelope `count` is 1
+- **THEN** both answers hold exactly one item with `version` 1 and `versionGroup` 1, the comment "Created" and `fileStatus` None, and the envelope `count` is 1
+- **AND** a revision carries the file id, the document key, the version, the version group, the author and the creation date
 
 #### Scenario: Specific version by number
 
@@ -273,18 +280,20 @@ key, the version, the version group, the author and the creation date.
 
 ### Requirement: What the audit trail records
 
-The system SHALL record every `MessageAction` with a value of 2000 or more as an audit event and every
-action below 2000 as a login event. An audit event SHALL carry the event id, the account (`user`,
-`userId`), the readable action text and its `actionId`, the IP address with any port removed, the
-country and city resolved from the IP (empty when unknown), browser, platform, page, the mapped
-`actionType`, `product`, `location`, the `target` items, the `entries` types, the `context` and the
-date in the portal time zone. An event performed by the shared guest account SHALL be named
-"Anonymous", by the system account "System Account", and an account without a name "Unknown Account".
+The system SHALL record every action whose identifier (`actionId`) is 2000 or more as an audit event and
+every action below 2000 as a login event. An audit event SHALL carry the account, the action, where it
+came from and what it touched, with the date in the portal time zone.
 
 #### Scenario: Audit event shape
 
 - **WHEN** the owner sends password-change instructions to a member and reads the audit events
 - **THEN** an event appears with a non-zero id, a user id and name, an action text and `actionId`, a non-null `ip`, a date and a non-null `context`
+- **AND** an event carries the event id, the account (`user`, `userId`), the readable action text and its `actionId`, the IP address with any port removed, the country and city resolved from the IP (empty when unknown), browser, platform, page, the mapped `actionType`, `product`, `location`, the `target` items, the `entries` types and the `context`
+
+#### Scenario: Special accounts are named
+
+- **WHEN** an event was performed by the shared guest account, by the system account, or by an account without a name
+- **THEN** its account is named "Anonymous", "System Account" or "Unknown Account" respectively
 
 ### Requirement: Location (`context`) of an audit event
 
@@ -308,20 +317,26 @@ rooms. No product or "General" prefix is written.
 
 The system SHALL expose the audit trail to callers with the portal-settings right (the DocSpace owner
 and DocSpace admins) through `GET /api/2.0/security/audit/events/last` (the 20 most recent events
-within the audit lifetime, action texts shortened to 50 characters), `GET …/events/filter` (filters
-`userId`, `moduleType`, `actionType`, `action`, `entryType`, `target`, `from`, `to` as UTC instants;
-`count` 1–100, default 100; `startIndex` applied after the filters), `GET …/types` (the names accepted
-by the filters) and `GET …/mappers` (products → modules → actions, narrowed by `productType` and
-`moduleType`). A non-default `action` matches that action only (with `target` exactly) and overrides
-`moduleType` and `actionType`; `target` narrows only together with `action` or `entryType`. On a
-portal without the audit option of its pricing plan the filter endpoint SHALL ignore its filters and
-answer like `events/last`; on a SaaS portal whose login history section is hidden the event endpoints
-SHALL answer 402.
+within the audit lifetime, action texts shortened to 50 characters), `GET …/events/filter`,
+`GET …/types` (the names accepted by the filters) and `GET …/mappers` (products → modules → actions,
+narrowed by `productType` and `moduleType`).
 
 #### Scenario: Owner and DocSpace admin read events
 
 - **WHEN** the owner or a DocSpace admin reads `events/last` or `events/filter`
 - **THEN** the system answers 200 with the events
+
+#### Scenario: Filter parameters
+
+- **WHEN** `events/filter` is called with `userId`, `moduleType`, `actionType`, `action`, `entryType`, `target`, `from` / `to` (UTC instants), `count` (1–100, default 100) and `startIndex`
+- **THEN** the events matching every given filter are returned, `startIndex` being applied after the filters
+- **AND** a non-default `action` matches that action only (with `target` exactly) and overrides `moduleType` and `actionType`; `target` narrows only together with `action` or `entryType`
+
+#### Scenario: Portal without the audit option
+
+- **WHEN** the portal's pricing plan has no audit option and `events/filter` is called
+- **THEN** the filters are ignored and the answer is that of `events/last`
+- **AND** on a SaaS portal whose login history section is hidden the event endpoints answer 402
 
 #### Scenario: Other members are refused
 
@@ -343,13 +358,9 @@ SHALL answer 402.
 The system SHALL build an audit trail report through `POST /api/2.0/security/audit/events/report` and
 a login history report through `POST /api/2.0/security/audit/login/report`, each answering 200 with
 the queued task; `GET` on the same path returns the caller's own task of that kind, `DELETE` cancels
-it. `format` is `Xlsx` (default) or `Csv`; `from` / `to` are UTC instants. The period SHALL be
-resolved against the matching lifetime: a `from` older than the lifetime window is moved up to its
-start, a `to` in the future is moved back to now, and a period that ends before it starts after that
-resolution SHALL be refused with 400. The file SHALL be saved in the caller's My documents; the XLSX
-report keeps at most 200,000 events, the CSV report every event. Finishing the report SHALL write an
-`AuditTrailReportDownloaded` or `LoginHistoryReportDownloaded` audit event. Both reports require the
-portal-settings right and the audit option of the pricing plan (402 otherwise on SaaS).
+it. `format` is `Xlsx` (default) or `Csv`; `from` / `to` are UTC instants resolved against the matching
+lifetime. Both reports require the portal-settings right and the audit option of the pricing plan (402
+otherwise on SaaS).
 
 #### Scenario: Owner and DocSpace admin start a report
 
@@ -359,7 +370,14 @@ portal-settings right and the audit option of the pricing plan (402 otherwise on
 #### Scenario: Invalid period
 
 - **WHEN** a report is started with `from` yesterday and `to` two days ago, or with `to` ten years ago
-- **THEN** the system answers 400
+- **THEN** the system answers 400, because a period that ends before it starts after resolution is refused
+- **AND** a `from` older than the lifetime window is moved up to its start and a `to` in the future is moved back to now
+
+#### Scenario: Report file and audit event
+
+- **WHEN** a report finishes
+- **THEN** the file is saved in the caller's My documents, the XLSX report keeping at most 200,000 events and the CSV report every event
+- **AND** an `AuditTrailReportDownloaded` or `LoginHistoryReportDownloaded` audit event is written
 
 #### Scenario: Other members and anonymous
 
@@ -372,15 +390,20 @@ portal-settings right and the audit option of the pricing plan (402 otherwise on
 The system SHALL keep the lifetime of the login history and of the audit trail in days, readable
 through `GET /api/2.0/security/audit/settings/lifetime` (`loginHistoryLifeTime`, `auditTrailLifeTime`,
 `lastModified`) and replaceable through `POST` on the same path with both values inside `settings`.
-The default of each is 180 days and the accepted range is 1–180; a value outside it SHALL be refused
-with 400 without saving either value. Saving SHALL write an `AuditSettingsUpdated` audit event. The
-lifetimes bound `events/last` and the default period of the reports. The endpoints remain available
-although the settings block was removed from the portal UI in v2.6.
+The default of each is 180 days and the accepted range is 1–180. The lifetimes bound `events/last` and
+the default period of the reports. The endpoints remain available although the settings block was
+removed from the portal UI in v2.6.
 
 #### Scenario: Read and update
 
 - **WHEN** the owner or a DocSpace admin reads the settings and then posts `loginHistoryLifeTime: 180, auditTrailLifeTime: 180`
 - **THEN** the read answers 200 with both values greater than 0 and a `lastModified` field, and the update answers 200 echoing 180 and 180
+- **AND** saving writes an `AuditSettingsUpdated` audit event
+
+#### Scenario: Value outside the range
+
+- **WHEN** either lifetime is posted below 1 or above 180
+- **THEN** the system answers 400 and neither value is saved
 
 #### Scenario: Other members and anonymous
 
@@ -390,17 +413,20 @@ although the settings block was removed from the portal UI in v2.6.
 
 ### Requirement: Login actions that are recorded
 
-The system SHALL record a login event for every sign-in attempt with the action that names the way in:
-`LoginSuccessViaPassword` when the password hash was sent from the login page,
-`LoginSuccessViaApi` when a plain password was sent, `LoginSuccessViaApiSocialAccount` with the
-provider name in the description when a social account was used, `AuthLinkActivated` (initiator = the
-e-mail, description = the key) when a confirmation link completed the sign-in, `LoginSuccessViaOAuth`
-when the identity service signed the user in, and the matching `LoginFail*` action when the attempt
-failed. A login event SHALL carry the account, the login, the action text, the IP with its port
-removed, the country and city resolved from the IP (empty when unknown), browser, platform, page and
-the date in the portal time zone. Logging out of a session records `Logout`; closing connections
-records `UserLogoutActiveConnection`, `UserLogoutActiveConnections` or
-`UserLogoutActiveConnectionsForUser` as an audit event.
+The system SHALL record a login event for every sign-in attempt with the action that names the way in,
+successful or failed. A login event SHALL carry the account, the login, the action, where it came from
+and the date in the portal time zone. Logging out and closing connections are recorded as well.
+
+#### Scenario: Ways in and their actions
+
+- **WHEN** a sign-in succeeds
+- **THEN** the action is `LoginSuccessViaPassword` when the password hash was sent from the login page, `LoginSuccessViaApi` when a plain password was sent, `LoginSuccessViaApiSocialAccount` with the provider name in the description when a social account was used, `AuthLinkActivated` (initiator = the e-mail, description = the key) when a confirmation link completed the sign-in, and `LoginSuccessViaOAuth` when the identity service signed the user in
+- **AND** a failed attempt records the matching `LoginFail*` action
+
+#### Scenario: Logout and closed connections are recorded
+
+- **WHEN** a session is logged out, or connections are closed through the active-connections endpoints
+- **THEN** `Logout` is recorded as a login event, and `UserLogoutActiveConnection`, `UserLogoutActiveConnections` or `UserLogoutActiveConnectionsForUser` as an audit event
 
 #### Scenario: Successful password sign-in appears in the history
 
@@ -411,6 +437,7 @@ records `UserLogoutActiveConnection`, `UserLogoutActiveConnections` or
 
 - **WHEN** the owner reads `audit/login/last`
 - **THEN** each event has a positive id, a user id and name, an action text and `actionId`, a non-null `ip` and a date
+- **AND** an event carries the account, the login, the action text, the IP with its port removed, the country and city resolved from the IP (empty when unknown), browser, platform and page
 
 ### Requirement: Reading the login history
 
@@ -440,17 +467,20 @@ Events of every user type SHALL be visible. Without the audit option the filter 
 
 The system SHALL list the calling account's own active connections through
 `GET /api/2.0/security/activeconnections`: one item per successful sign-in of the last year that is
-still active, newest first, each with `id`, `tenantId`, `userId`, `browser`, `platform`, `page`,
-`ip`, `country`, `city`, `mobile` and `date`. `loginEvent` names the connection the request was made
-with (from the authentication cookie; 0 for a bearer-token request), and that connection is moved to
-the top with its browser, platform, IP and location refreshed from the request. An account with no
-stored connection and no cookie gets a single item describing the current request. Any signed-in user
-of any type may call it; it never shows another account's connections.
+still active, newest first. Any signed-in user of any type may call it; it never shows another account's
+connections.
 
 #### Scenario: Every user type lists own connections
 
 - **WHEN** the owner, a DocSpace admin, a Room admin, a User or a Guest calls the endpoint
 - **THEN** the system answers 200 with a non-empty `items` list whose first item has an id, a positive `tenantId`, a non-default date and, when present, non-empty browser, platform and page
+- **AND** each item carries `id`, `tenantId`, `userId`, `browser`, `platform`, `page`, `ip`, `country`, `city`, `mobile` and `date`
+
+#### Scenario: Current connection is marked and refreshed
+
+- **WHEN** the request is made with an authentication cookie
+- **THEN** `loginEvent` names the connection behind the cookie (0 for a bearer-token request), and that connection is moved to the top with its browser, platform, IP and location refreshed from the request
+- **AND** an account with no stored connection and no cookie gets a single item describing the current request
 
 #### Scenario: DocSpace admin does not see the owner
 
@@ -543,39 +573,42 @@ account.
 
 ### Requirement: Forwarding audit and login events to syslog
 
-Before an event is stored, the system SHALL hand every audit and login event to the `ASC.Audit`
-logger, which the NLog configuration forwards to an external syslog collector as an RFC 5424 message
-whose MSG part is a JSON object with `date`, `eventType` (`login` for actions below 2000, `audit`
-otherwise), `action`, `actionId`, `tenantId`, `userId`, `initiator`, `ip`, `page`, `userAgent`,
-`target`, `description` (the serialized description list), `instanceId`, `applicationContext` and
-`traceId`. Values SHALL be truncated to 50 (ip), 200 (initiator), 256 (target), 512 (user agent, page)
-and 2048 (description) characters with a `...` marker, and control characters and `|` replaced by a
-space. Nothing is sent unless the `ASC_SYSLOG_SERVER` environment variable is set; the default
-transport is UDP port 514, TCP with TLS being a configuration change in `nlog.config`.
+Before an event is stored, the system SHALL hand every audit and login event to a dedicated audit
+logger, which the logging configuration forwards to an external syslog collector as an RFC 5424 message
+whose MSG part is a JSON object. Nothing is sent unless a collector address is configured for the
+installation; the default transport is UDP port 514, TCP with TLS being a configuration change.
 
 #### Scenario: Collector configured
 
-- **WHEN** `ASC_SYSLOG_SERVER` names a collector and a member signs in or renames a file
-- **THEN** a syslog message with `eventType` `login` and one with `eventType` `audit` reach the collector with the fields above
+- **WHEN** a collector address is configured and a member signs in or renames a file
+- **THEN** a syslog message with `eventType` `login` and one with `eventType` `audit` reach the collector
+- **AND** each message carries `date`, `eventType` (`login` for actions below 2000, `audit` otherwise), `action`, `actionId`, `tenantId`, `userId`, `initiator`, `ip`, `page`, `userAgent`, `target`, `description` (the serialized description list), `instanceId`, `applicationContext` and `traceId`
+
+#### Scenario: Long values are truncated
+
+- **WHEN** a field of the message exceeds its limit
+- **THEN** it is truncated to 50 (ip), 200 (initiator), 256 (target), 512 (user agent, page) or 2048 (description) characters with a `...` marker, and control characters and `|` are replaced by a space
 
 #### Scenario: Collector not configured
 
-- **WHEN** `ASC_SYSLOG_SERVER` is empty
+- **WHEN** no collector address is configured
 - **THEN** no syslog message is sent and the events are stored as usual
 
 ### Requirement: Suspicious-login notification
 
 After every successful sign-in that set the authentication cookie, the system SHALL compare the new
-login event with the account's previous successful sign-ins (the last 30) and score three signs: a
-new device (the browser + platform pair, version numbers removed, differs from every previous one),
-a new country (the IP resolves to a country that none of the previous IPs resolved to, counted only
-when at least one previous country resolved), and failed attempts (at least 3 failed sign-ins for the
-account or its e-mail in the last 24 hours since the previous success). When at least two of the three
-signs hold, the system SHALL write a `SuspiciousLoginDetected` login event (IP, browser, platform and
-the reasons) and send the account the "Suspicious login" e-mail with the IP, device, location and
-browser. The check is skipped when the account has no previous successful sign-in or the login event
-is older than 5 minutes. Thresholds come from `web:suspiciousLogin:*` (`historyLimit`,
-`failThreshold`, `suspiciousScore`, `failWindowHours`, `freshLoginWindowMinutes`).
+login event with the account's previous successful sign-ins (the last 30) and score three signs: a new
+device, a new country and recent failed attempts. When at least two of the three signs hold, the system
+SHALL write a `SuspiciousLoginDetected` login event (IP, browser, platform and the reasons) and send the
+account the "Suspicious login" e-mail with the IP, device, location and browser. The thresholds are
+configurable.
+
+#### Scenario: The three signs
+
+- **WHEN** the new login event is compared with the previous successful sign-ins
+- **THEN** a new device holds when the browser + platform pair, version numbers removed, differs from every previous one
+- **AND** a new country holds when the IP resolves to a country that none of the previous IPs resolved to, counted only when at least one previous country resolved
+- **AND** failed attempts hold when at least 3 failed sign-ins for the account or its e-mail happened in the last 24 hours since the previous success
 
 #### Scenario: New device and new country
 
@@ -589,5 +622,5 @@ is older than 5 minutes. Thresholds come from `web:suspiciousLogin:*` (`historyL
 
 #### Scenario: First sign-in
 
-- **WHEN** an account signs in for the first time
+- **WHEN** an account signs in for the first time, or the login event is older than 5 minutes when the check runs
 - **THEN** no check is made

@@ -101,9 +101,24 @@ left out).
 | Settings persisted and read back (defaultShareLinkInternal, applyToDocuments/Rooms, blockExistingLinks) | `ExternalSharingSettingsTests.cs:59-93` | TEST-CONFIRMED |
 | Restriction for documents → file link internal; rooms only → public; block existing links → ExternalAccessDenied for anonymous, Ok for signed-in | `04_Security/ExternalShareAccessTests.cs:60-211` | TEST-CONFIRMED |
 
-Counts: 75 rows — TEST-CONFIRMED 63, CODE-ONLY 12 (one row, the guest `CanSetAccessAsync` rule, carries
+### Scenarios added in the 2026-10-24 clean-up, and the code names moved out of the spec text
+
+| Scenario (requirement) | Source | Status |
+|---|---|---|
+| Accepted access levels (Sharing a file or folder from My documents) | `FileSecurity.cs:85-96` (`_availableRoomFileAccesses[FolderType.USER]`) | CODE-ONLY |
+| Caller without access or missing entry (Reading the sharing rights) | `FileSecurityInfoPermissionsTests.cs:49-57, 161-170`; `FileSecurityInfoLifecycleTests.cs:85-108, 126-135`; `GetSecurityInfoPermissionsTests.cs:47-55, 131-140` | TEST-CONFIRMED |
+| Batch with unknown identifiers (Reading the sharing rights) | `GetSecurityInfoTests.cs:351-357, 391-407`; yaml `getSecurityInfo` | TEST-CONFIRMED |
+| Group shares and rooms follow the same order (Access priority) | `FileSecurity.cs:3705-3759` (`GetUserOrderedSubjectsAsync`, Everyone and the admin group added for a real account); release notes v3.6 | CODE-ONLY |
+| Shared by and owned by (The Shared with me section) | yaml `getFolderByFolderId` parameter `sharedBy` (l. 15545-15553), `FileDto.sharedBy`/`ownedBy` (l. 76280-76292); `FileSecurity.cs:2724-2732` | CODE-ONLY |
+| Parent the caller cannot open (The Shared with me section) | yaml `getFileInfo` description (l. 10630-10635), `FileDto.folderId` (l. 75764-75768) | CODE-ONLY |
+| Nothing to remove (Removing a share) | `RemoveSecurityInfoTests.cs:151-158, 205-225` | TEST-CONFIRMED |
+| History bounded (The Recent section) | `products/ASC.Files/Core/Core/Dao/TeamlabDao/TagDao.cs:61, 342-355` (`MaxRecentTagsCount` = 1000) | CODE-ONLY |
+| Listing filters (The Favorites section) | `FavoritesFilterTypeTests.cs:47-150`; `06_Operations/Favorites/FavoritesTests.cs:49-341`; `FavoritesQueryTests.cs:48-163` | TEST-CONFIRMED |
+| Names moved out of the spec text: the "product code" of the Purpose is `FileSecurity`, `FileSharing`, `EntryManager`, `FileMarker` and `TagDao`; "the file handler" is `FileHandler.ashx.cs:497` (`TryMarkAsRecent`) | files cited in the rows above | CODE-ONLY |
+
+Counts: 85 rows — TEST-CONFIRMED 67, CODE-ONLY 18 (one row, the guest `CanSetAccessAsync` rule, carries
 both), NOTES-ONLY 0 (nothing was written into the spec on the strength of the release notes alone).
-Spec: 14 requirements, 60 scenarios.
+Spec: 14 requirements, 69 scenarios.
 
 ## Where the server differs from the release notes (spec follows the server)
 

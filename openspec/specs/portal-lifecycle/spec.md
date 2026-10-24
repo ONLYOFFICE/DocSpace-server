@@ -32,12 +32,15 @@ next to this file.
 
 ### Requirement: Registering a portal through the system API
 
-`register` SHALL create a portal with its owner from `portalName`, `firstName`, `lastName`, `email`,
-`password` or `passwordHash`, `language`, `timeZoneName`, optional `region`/`awsRegion`, `spam`,
-`calls`, `skipWelcome`, and answer 200 with `reference` (a sign-in link for the owner) and `tenant`
-(`tenantId`, `portalName`, `domain`, `status` "Active", `ownerId`, `language`, time zone). The owner is
-the only member and a DocSpace admin. 400 names the failing rule in `error`; 500 "registerNewTenantError"
-when the portal cannot be created.
+`register` SHALL create a portal with its owner from the request body and answer 200 with `reference`
+(a sign-in link for the owner) and `tenant` (`tenantId`, `portalName`, `domain`, `status` "Active",
+`ownerId`, `language`, time zone). The owner is the only member and a DocSpace admin. 400 names the
+failing rule in `error`; 500 "registerNewTenantError" when the portal cannot be created.
+
+#### Scenario: Fields of the registration body
+
+- **WHEN** `register` receives `portalName`, `firstName`, `lastName`, `email`, `password` or `passwordHash`, `language`, `timeZoneName`, optional `region`/`awsRegion`, `spam`, `calls` and `skipWelcome`
+- **THEN** the portal and its owner are created from exactly those fields
 
 #### Scenario: Test harness registers a portal
 
@@ -74,12 +77,17 @@ made unique the answer SHALL be 400 "portalNameNotAvailable".
 
 ### Requirement: Rules a portal name has to pass
 
-`validateportalname` and every registration SHALL trim and lower-case the name and refuse it with 400
-and `error` "portalNameEmpty" when empty, "tooShortError" when shorter than 6 or longer than 63
-characters, "portalNameIncorrect" when it is not lower-case letters, digits and hyphens starting and
-ending with a letter or digit, or looks like punycode, and "portalNameExist" with `variants` (the taken
-names sharing the stem) when a portal, a mapped domain or a reserved address already uses it. A
-free name answers 200 "portalNameReadyToRegister".
+`validateportalname` and every registration SHALL trim and lower-case the name and refuse a name that
+breaks one of the naming rules with 400 and the rule's code in `error`. A free name answers 200
+"portalNameReadyToRegister".
+
+#### Scenario: Rule codes
+
+- **WHEN** the name is empty
+- **THEN** `error` is "portalNameEmpty"
+- **AND** a name shorter than 6 or longer than 63 characters gets "tooShortError"
+- **AND** a name that is not lower-case letters, digits and hyphens starting and ending with a letter or digit, or that looks like punycode, gets "portalNameIncorrect"
+- **AND** a name already used by a portal, a mapped domain or a reserved address gets "portalNameExist" with `variants`, the taken names sharing the stem
 
 #### Scenario: Name already taken
 
@@ -111,12 +119,17 @@ sent. An owner address matching the installation's test-address pattern SHALL by
 
 ### Requirement: Trial tariff, cache and welcome of a new portal
 
-Right after creation the server SHALL set the portal's Content Security Policy for a new portal, on a
-hosted installation record the portal's domain and region in the hosting cache and its billing key,
-apply the installation's trial tariff when one is configured, and, when a password was supplied,
-hand the owner the welcome mail through the portal (the `reference` then carries `first=true`; with
-`skipWelcome` the mail address is returned as `referenceWelcome` instead of being sent). A portal
-registered without a password SHALL start with the wizard pending.
+Right after creation the server SHALL set the portal's Content Security Policy, on a hosted
+installation record the portal's domain and region in the hosting cache and its billing key, apply
+the installation's trial tariff when one is configured, and, when a password was supplied, hand the
+owner the welcome mail through the portal. A portal registered without a password SHALL start with
+the wizard pending.
+
+#### Scenario: Welcome mail of a registration with a password
+
+- **WHEN** `register` is called with a password and `skipWelcome` false
+- **THEN** the owner receives the welcome mail through the portal and `reference` carries `first=true`
+- **AND** with `skipWelcome` true the mail address is returned as `referenceWelcome` instead of being sent
 
 #### Scenario: Registration without a password on a server installation
 
@@ -127,10 +140,16 @@ registered without a password SHALL start with the wizard pending.
 
 While the wizard is not completed `getPortalSettings` SHALL hand an anonymous caller a `wizardToken`,
 a confirmation link of type `Wizard` for the owner. `completeWizard` SHALL be reached with that link
-only, require the portal-settings right (403), take `email`, `passwordHash`, `lng`, `timeZone`,
-`amiId`, `subscribeFromSite`, set the owner's password and e-mail (a changed address becomes
-unconfirmed), the portal language and time zone, accept the licence on an Enterprise installation,
-mark the wizard completed, sign the owner in and answer the settings with `completed` true.
+only, require the portal-settings right (403), set the owner's password and e-mail and the portal
+language and time zone, mark the wizard completed, sign the owner in and answer the settings with
+`completed` true.
+
+#### Scenario: Body of the wizard call
+
+- **WHEN** `completeWizard` receives `email`, `passwordHash`, `lng`, `timeZone`, `amiId` and `subscribeFromSite`
+- **THEN** the owner's password and e-mail are set, and a changed address becomes unconfirmed
+- **AND** the portal language and time zone are taken from `lng` and `timeZone`
+- **AND** on an Enterprise installation the licence is accepted
 
 #### Scenario: Wizard completed
 
@@ -151,11 +170,14 @@ mark the wizard completed, sign the owner in and answer the settings with `compl
 ### Requirement: Portal information
 
 `getPortalInformation` SHALL answer 200 to every signed-in member and 401 to an anonymous caller. The
-owner and a DocSpace admin get the whole record: `tenantId`, `tenantAlias`, `name`, `ownerId`,
-`language`, `timeZone`, `industry`, `status`, `statusChangeDate`, `creationDateTime`, `lastModified`,
-`version`, `mappedDomain`, trusted domains, `region` (hosted installation with the cache on). A Room
-admin, a User or a Guest get an object in which only `tenantId` is filled. The call SHALL keep
-answering while the portal's payment has lapsed.
+owner and a DocSpace admin get the whole record; a Room admin, a User or a Guest get an object in
+which only `tenantId` is filled. The call SHALL keep answering while the portal's payment has lapsed.
+
+#### Scenario: Fields of the whole record
+
+- **WHEN** the owner or a DocSpace admin calls `getPortalInformation`
+- **THEN** the answer carries `tenantId`, `tenantAlias`, `name`, `ownerId`, `language`, `timeZone`, `industry`, `status`, `statusChangeDate`, `creationDateTime`, `lastModified`, `version`, `mappedDomain` and the trusted domains
+- **AND** on a hosted installation with the hosting cache on it also carries `region`
 
 #### Scenario: Owner or DocSpace admin reads the portal
 
@@ -203,12 +225,16 @@ right (403 "Access denied", anonymous 401) and are specified in `quotas`.
 ### Requirement: Renaming a portal
 
 `PUT portal/portalrename` with `alias` SHALL require the portal-settings right (403), a server
-installation or a tariff with customization (else 402 "Your pricing plan does not support this
-option"), and a non-empty `alias` without whitespace (400). The trimmed, lower-cased name SHALL pass the
-portal-name rules (400 with the rule's message), else the alias changes, the audit event "Portal
-renamed" is written, the Content Security Policy and hosting cache follow the new domain, every other
-active member is signed out, the caller's session ends and a sign-in link to the new address is
-returned. The same name again returns an empty string.
+installation or a tariff with customization (else 402), and a non-empty `alias` without whitespace
+(400). The trimmed, lower-cased name SHALL pass the portal-name rules (400 with the rule's message);
+then the alias changes, every other active member is signed out, the caller's session ends and a
+sign-in link to the new address is returned.
+
+#### Scenario: What follows a rename
+
+- **WHEN** the alias has changed
+- **THEN** the audit event "Portal renamed" is written and the Content Security Policy and the hosting cache follow the new domain
+- **AND** renaming the portal to the name it already has returns an empty string and changes nothing
 
 #### Scenario: Owner renames the portal
 
@@ -229,11 +255,16 @@ returned. The same name again returns an empty string.
 
 A portal SHALL be in exactly one status: Active, Suspended, Remove pending, Transfering, Restoring,
 Migrating, Encryption or Blocked; `getPortalInformation` SHALL report it as `status` and the moment it
-last changed as `statusChangeDate`, and `getPortalSettings` as `tenantStatus`. A Suspended or
-Remove-pending portal SHALL answer 404 to every request but the ones marked as allowed while suspended
-(`continuePortal`, the colour theme); a Blocked portal 404 but the ones allowed while blocked
-(`unblockPortal`, the colour theme); Transfering, Restoring and Encryption 403 but the progress,
-settings, theme, logo, build and `@self` paths.
+last changed as `statusChangeDate`, and `getPortalSettings` as `tenantStatus`. A portal that is not
+Active SHALL refuse every request but a short list of operations allowed in that status, with 404 or
+403 depending on the status.
+
+#### Scenario: What each status lets through
+
+- **WHEN** a portal is Suspended or Remove pending
+- **THEN** every request answers 404 but the ones marked as allowed while suspended: `continuePortal` and the colour theme
+- **AND** a Blocked portal answers 404 to everything but the ones allowed while blocked: `unblockPortal` and the colour theme
+- **AND** a Transfering, Restoring or Encryption portal answers 403 to everything but the progress, settings, theme, logo, build and `@self` paths
 
 #### Scenario: Blocked portal answers almost nothing
 
@@ -248,12 +279,15 @@ settings, theme, logo, build and `@self` paths.
 ### Requirement: Confirmation links of the lifecycle flows
 
 The lifecycle operations that change a portal SHALL be authorized by a confirmation link mailed to
-the portal owner rather than by a session: `suspendPortal` by a PortalSuspend link, `continuePortal`
-by PortalContinue, `deletePortal` by PortalRemove, `updatePortalOwner` by PortalOwnerChange,
-`unblockPortal` by PortalUnblock and `completeWizard` by Wizard. The link's `type`, `key`, `uid` and
-`encemail` travel in the `confirm` header, the link is valid for the installation's e-mail-link period
-(7 days by default), signs its holder in as the owner for that call, and a missing or wrong link
-SHALL answer 401; an ordinary sign-in token 403.
+the portal owner rather than by a session. The link's `type`, `key`, `uid` and `encemail` travel in
+the `confirm` header, the link is valid for the installation's e-mail-link period (7 days by default)
+and signs its holder in as the owner for that call; a missing or wrong link SHALL answer 401, an
+ordinary sign-in token 403.
+
+#### Scenario: One link type per operation
+
+- **WHEN** a lifecycle operation is called with a confirmation link
+- **THEN** `suspendPortal` accepts a PortalSuspend link, `continuePortal` PortalContinue, `deletePortal` PortalRemove, `updatePortalOwner` PortalOwnerChange, `unblockPortal` PortalUnblock and `completeWizard` Wizard, and no other type
 
 #### Scenario: Ordinary token instead of the link
 
@@ -269,15 +303,21 @@ SHALL answer 401; an ordinary sign-in token 403.
 
 `sendSuspendInstructions` SHALL require the portal-settings right and the caller to be the portal
 owner: a DocSpace admin, a Room admin, a User or a Guest get 403 "Access denied", anonymous 401. It
-SHALL mail the owner the deactivation letter with the PortalSuspend and PortalContinue links, write
-the audit event "Owner sent portal deactivation instructions", change nothing else and answer 200
-without a body; it keeps working while the payment has lapsed and is limited to 5 calls per 15
-minutes (429). On a server installation the last space with full access cannot be suspended (500).
+SHALL mail the owner the deactivation letter with the PortalSuspend and PortalContinue links, change
+nothing else and answer 200 without a body. On a server installation the last space with full access
+cannot be suspended (500).
 
 #### Scenario: Owner asks
 
 - **WHEN** the owner calls `sendSuspendInstructions`
 - **THEN** the answer is 200 and the portal stays Active
+
+#### Scenario: Audit, lapsed payment and rate limit of the request
+
+- **WHEN** the owner's request has been accepted
+- **THEN** the audit event "Owner sent portal deactivation instructions" is written
+- **AND** the call keeps working while the portal's payment has lapsed
+- **AND** it is limited to 5 calls per 15 minutes, the sixth answering 429
 
 #### Scenario: DocSpace admin asks
 
@@ -293,10 +333,15 @@ minutes (429). On a server installation the last space with full access cannot b
 
 `suspendPortal` with the PortalSuspend link SHALL check again that the link's account is the owner
 (403 "Access denied") and that it is not the last full-access space of a server installation (500),
-set the status to Suspended with the current `statusChangeDate`, write "Portal deactivated" and
-refresh the portal's base domain; content, rooms and accounts stay. `continuePortal` with the
-PortalContinue link SHALL set the status back to Active, re-apply the Content Security Policy and
-answer 200; an already active portal is left active. Both answer without a body.
+then set the status to Suspended with the current `statusChangeDate`; content, rooms and accounts
+stay. `continuePortal` with the PortalContinue link SHALL set the status back to Active and answer
+200; an already active portal is left active. Both answer without a body.
+
+#### Scenario: Side effects of suspending and continuing
+
+- **WHEN** the portal is suspended
+- **THEN** the audit event "Portal deactivated" is written and the portal's base domain is refreshed
+- **AND** when it is continued the Content Security Policy is re-applied
 
 #### Scenario: Owner suspends and brings the portal back
 
@@ -312,15 +357,20 @@ answer 200; an already active portal is left active. Both answer without a body.
 
 `sendDeleteInstructions` SHALL require the portal-settings right and the owner: a DocSpace admin, a
 Room admin, a User or a Guest get 403 "Access denied", anonymous 401; the last full-access space of a
-server installation 500. It SHALL mail the owner the deletion letter with the PortalRemove link (with
-the auto-renew note when a hosted portal has payments and is not on trial), change nothing, write no
-audit event, answer 200 without a body, keep working while the payment has lapsed and be limited to 5
-calls per 15 minutes.
+server installation 500. It SHALL mail the owner the deletion letter with the PortalRemove link,
+change nothing, write no audit event and answer 200 without a body.
 
 #### Scenario: Owner asks
 
 - **WHEN** the owner calls `sendDeleteInstructions`
 - **THEN** the answer is 200 and the portal stays Active
+
+#### Scenario: Auto-renew note, lapsed payment and rate limit of the request
+
+- **WHEN** a hosted portal has payments and is not on trial
+- **THEN** the deletion letter carries the auto-renew note
+- **AND** the call keeps working while the portal's payment has lapsed
+- **AND** it is limited to 5 calls per 15 minutes
 
 #### Scenario: DocSpace admin asks
 
@@ -330,12 +380,16 @@ calls per 15 minutes.
 ### Requirement: Deleting a portal
 
 `deletePortal` with the PortalRemove link SHALL check the owner (403) and the last-space rule (500),
-remove the portal's OAuth clients, rename the alias to `<alias>_deleted` (a number appended while
-taken) and set the status Remove pending, drop the domain from the hosting cache and the CSP cache,
-mail the owner "has been deleted" and, for a paying hosted portal, the support address, write "Portal
-deleted", and queue the purge: every storage module, the database row and the search index of the
-portal. It SHALL answer 200 with the address of the "registration cancelled" feedback page. Nothing
-can undo it.
+rename the alias to `<alias>_deleted` (a number appended while taken), set the status Remove pending
+and queue the purge: every storage module, the database row and the search index of the portal. It
+SHALL answer 200 with the address of the "registration cancelled" feedback page. Nothing can undo it.
+
+#### Scenario: What else the deletion does
+
+- **WHEN** the portal is set to Remove pending
+- **THEN** its OAuth clients are removed and its domain is dropped from the hosting cache and the CSP cache
+- **AND** the owner is mailed "has been deleted" and, for a paying hosted portal, so is the support address
+- **AND** the audit event "Portal deleted" is written
 
 #### Scenario: Owner confirms the deletion
 
@@ -368,11 +422,16 @@ non-owner 403, anonymous 401. The operation is not in the published API document
 
 On a server installation `remove` (by `portalName` or `tenantId`) SHALL delete a portal whose wizard
 is not completed at once and otherwise mail the owner the PortalRemove link, answering 200 with the
-`tenant` and `removed` (true only for the immediate case); the last full-access space answers 400
-"The last full access space cannot be deleted.", a missing or unknown name 400. `status` SHALL set
-Active for `status` Active and Suspended for anything else. `get` SHALL list Active portals (with
-owner, usage and wizard state when `statistics` is true). On a hosted installation all three answer
-403 "Method for server edition only.".
+`tenant` and `removed` (true only for the immediate case). `status` SHALL set Active for `status`
+Active and Suspended for anything else. `get` SHALL list Active portals. On a hosted installation all
+three answer 403 "Method for server edition only.".
+
+#### Scenario: Refusals of remove and statistics of get
+
+- **WHEN** `remove` names the last full-access space of a server installation
+- **THEN** the answer is 400 "The last full access space cannot be deleted."
+- **AND** a missing or unknown name answers 400
+- **AND** `get` with `statistics` true adds the owner, the usage and the wizard state of every portal
 
 #### Scenario: Portal that never finished the wizard
 
@@ -394,10 +453,14 @@ owner, usage and wizard state when `statistics` is true). On a hosted installati
 `sendOwnerChangeInstructions` with `ownerId` SHALL require the portal-settings right (Room admin,
 User, Guest 403; anonymous 401) and refuse a guest as the new owner with 403 and an owner whose own
 e-mail is not confirmed with 400. Only the owner naming an active, existing member starts the
-transfer: the PortalOwnerChange letter goes to the owner's address, "Owner sent change owner
-instructions" is written and the answer is 200 with `status` 1 and a `message` carrying the address
-in a `mailto:` anchor. A DocSpace admin, or an inactive or unknown member, get 200 with `status` 0
-and the localized refusal.
+transfer and gets 200 with `status` 1. A DocSpace admin, or an inactive or unknown member, get 200
+with `status` 0 and the localized refusal.
+
+#### Scenario: Owner starts the transfer
+
+- **WHEN** the owner calls `sendOwnerChangeInstructions` naming an active User
+- **THEN** the PortalOwnerChange letter goes to the owner's address and "Owner sent change owner instructions" is written
+- **AND** the answer is 200 with `status` 1 and a `message` carrying that address in a `mailto:` anchor
 
 #### Scenario: Room admin, User or Guest
 
@@ -419,9 +482,14 @@ and the localized refusal.
 `updatePortalOwner` with `ownerId` SHALL be reached with the PortalOwnerChange link only (403 with an
 ordinary token, 401 without one), require the link's address to still be the owner's (500 "Access
 denied" otherwise, which is what a replayed link gets) and the named member to exist, be active and
-not a guest (500). A member who is not a DocSpace admin is promoted first (402 when no paid seat is
-left); then the portal's `ownerId` changes, "Owner updated" is written and the answer is 200 without a
-body. The previous owner keeps the account as a DocSpace admin.
+not a guest (500). Then the portal's `ownerId` changes and the answer is 200 without a body.
+
+#### Scenario: Promotion, audit and the previous owner
+
+- **WHEN** the named member is not a DocSpace admin
+- **THEN** the member is promoted to DocSpace admin first, and 402 is answered when no paid seat is left
+- **AND** once `ownerId` has changed the audit event "Owner updated" is written
+- **AND** the previous owner keeps the account as a DocSpace admin
 
 #### Scenario: Room admin, User or Guest with a token
 
@@ -442,10 +510,14 @@ body. The previous owner keeps the account as a DocSpace admin.
 
 A daily job SHALL block a free portal with no sign-in or audit activity for 60 days, a portal whose
 paid tariff lapsed 90 days after the due date, and either one with money left in its wallet after
-365 days, counting from the activity, the due date, the last status change or the policy start,
-whichever is later; a portal with a paid tariff or a paid add-on, and one on a reserved domain,
-SHALL be left alone. Blocking sets the status Blocked, writes "Portal blocked" and mails the owner (and
-support for a paying category); the warning letters are in `notifications`.
+365 days; a portal with a paid tariff or a paid add-on, and one on a reserved domain, SHALL be left
+alone. Blocking sets the status Blocked, writes "Portal blocked" and mails the owner (and support for
+a paying category); the warning letters are in `notifications`.
+
+#### Scenario: Where the count starts
+
+- **WHEN** the job computes the age of a portal
+- **THEN** it counts from the last activity, the due date, the last status change or the start of the policy, whichever is later
 
 #### Scenario: Free portal idle for two months
 
@@ -489,10 +561,15 @@ not blocked, and a missing link SHALL answer 401; an ordinary sign-in token 403.
 
 A Blocked portal nobody unblocks SHALL be removed by the daily job 30 days after the block (free) or
 90 days (lapsed tariff or wallet balance), the owner having been reminded a week (and, for the 90-day
-cases, a month) before; a late reminder moves the removal back so the week is kept. The removal does
-what `deletePortal` does with the alias `<alias>_auto_deleted`, the "deleted" letter and, for a lapsed
-tariff, the support letter. A portal unblocked after the job read it SHALL NOT be removed, and the
-retention of a block SHALL NOT change when the wallet empties.
+cases, a month) before; a late reminder moves the removal back so the week is kept. A portal
+unblocked after the job read it SHALL NOT be removed, and the retention of a block SHALL NOT change
+when the wallet empties.
+
+#### Scenario: What the removal does
+
+- **WHEN** the retention of a Blocked portal has run out
+- **THEN** the job does what `deletePortal` does, with the alias `<alias>_auto_deleted`
+- **AND** the owner receives the "deleted" letter and, for a lapsed tariff, the support address receives the support letter
 
 #### Scenario: Free portal nobody unblocks
 

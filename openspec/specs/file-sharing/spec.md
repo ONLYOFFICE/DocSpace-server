@@ -13,11 +13,12 @@ Sources: the product release notes (v2.5 file sharing from My documents, v3.1 PD
 out", v3.5 folder sharing without rooms / Shared with me / Recent / Favorites, v3.6 access priority and the
 Shared by column, v4.0 "Remove from list"), checked against the integration tests in
 `products/ASC.Files/Tests` and the OpenAPI document `sdk/docspace-api-spec/docspace-backend.yaml`, with the
-product code (`FileSecurity`, `FileSharing`, `EntryManager`, `FileMarker`, `TagDao`) consulted only where tests
-and document leave a point open. Where the release notes and the server disagree, this specification follows
-the server; the differences are listed in `verification.md` next to this file. External (shared) links — where
-a link may be created, its settings and limits — are specified in `shared-links`; which user types may share
-with whom at all is specified in `user-type-permissions`. Both are referenced here, not restated.
+product code (the file security check, the sharing helper, the entry manager, the marker and the tag storage)
+consulted only where tests and document leave a point open; the files are named per row in `verification.md`.
+Where the release notes and the server disagree, this specification follows the server; the differences are
+listed in `verification.md` next to this file. External (shared) links — where a link may be created, its
+settings and limits — are specified in `shared-links`; which user types may share with whom at all is
+specified in `user-type-permissions`. Both are referenced here, not restated.
 
 Operations referred to below: `setFileSecurityInfo` (`PUT /api/2.0/files/file/{id}/share`),
 `setFolderSecurityInfo` (`PUT /api/2.0/files/folder/{id}/share`), `setSecurityInfo` (`PUT /api/2.0/files/share`),
@@ -39,12 +40,15 @@ Operations referred to below: `setFileSecurityInfo` (`PUT /api/2.0/files/file/{i
 
 The system SHALL let the creator of a file or folder in My documents grant access to it to individual portal
 accounts and to groups through `setFileSecurityInfo`, `setFolderSecurityInfo` or the batch `setSecurityInfo`,
-without creating a room. A share on a folder SHALL cover the folder and everything inside it. For an entry in
-My documents the access levels accepted for an account or a group SHALL be Full access (`ReadWrite`),
-Editing, Form filling, Review, Comment and Read; `None` withdraws the access. The levels reserved for room
-membership (Room manager, Content creator) and the pseudo-levels `Varies` and `Restrict` SHALL NOT be
-accepted on a share of a file or folder outside a room. The response SHALL list the resulting rights of the
-subjects that were processed.
+without creating a room. A share on a folder SHALL cover the folder and everything inside it. Only the access
+levels meant for an entry outside a room SHALL be accepted; `None` withdraws the access. The response SHALL
+list the resulting rights of the subjects that were processed.
+
+#### Scenario: Accepted access levels
+
+- **WHEN** an account or a group is given access to an entry in My documents
+- **THEN** Full access (`ReadWrite`), Editing, Form filling, Review, Comment and Read are accepted and `None` withdraws the access
+- **AND** the levels reserved for room membership (Room manager, Content creator) and the pseudo-levels `Varies` and `Restrict` are not accepted on a share of a file or folder outside a room
 
 #### Scenario: File shared with two accounts at different levels
 
@@ -83,11 +87,9 @@ subjects that were processed.
 
 Only a caller who may change the access of an entry SHALL be able to share it: its creator, a portal
 administrator, or — inside a room — a member with the right to manage it. A member who merely holds a share
-on the entry, and a Guest in every case, SHALL be refused (403), even when the request would change nothing.
-Which user types may share with which recipients is specified in `user-type-permissions`; the server applies
-it by silently dropping a recipient the caller may not share with, so the answer SHALL be compared with the
-request. A Room admin or a User MAY share a file with Guests they themselves invited, and NOT with Guests
-that belong to another member.
+on the entry, and a Guest in every case, SHALL be refused (403), even when nothing would change. Which user
+types may share with whom is in `user-type-permissions`; the server silently drops a recipient the caller
+may not share with, so the answer SHALL be compared with the request.
 
 #### Scenario: Shared account tries to re-share
 
@@ -102,7 +104,7 @@ that belong to another member.
 #### Scenario: Guest of another member is dropped
 
 - **WHEN** a Room admin or a User shares a file from their My documents with a Guest invited by somebody else
-- **THEN** the request succeeds but the guest does not appear in the sharing rights of the file
+- **THEN** the request succeeds but the guest does not appear in the sharing rights of the file — a Room admin or a User may share only with Guests they themselves invited
 
 #### Scenario: Own guest and ordinary members are accepted
 
@@ -131,9 +133,7 @@ public (not restricted to DocSpace users). A file inside a folder that has a lin
 subject that has access to the entry. The record of the entry's owner SHALL carry `isOwner` true,
 `canEditAccess` false and `canRevoke` false; the record of an account the entry was shared with SHALL carry
 `isOwner` false and `canRevoke` false. An unshared entry SHALL have exactly one record, the owner's. The
-caller SHALL need read access to the entry; an unauthenticated caller SHALL get 401, a caller without access
-403, and a file that does not exist or was permanently deleted 404. The batch operation SHALL skip
-identifiers that match nothing and answer an empty list for an empty request.
+caller SHALL need read access to the entry.
 
 #### Scenario: Owner record
 
@@ -144,6 +144,11 @@ identifiers that match nothing and answer an empty list for an empty request.
 
 - **WHEN** an account the file was shared with calls `getFileSecurityInfo` or `getSecurityInfo` for it
 - **THEN** the records are returned (200)
+
+#### Scenario: Caller without access or missing entry
+
+- **WHEN** the rights are read by an unauthenticated caller, by a caller without access to the entry, or for a file that does not exist or was permanently deleted
+- **THEN** the answers are 401, 403 and 404 respectively
 
 #### Scenario: Guest shared directly on a personal file
 
@@ -161,6 +166,11 @@ identifiers that match nothing and answer an empty list for an empty request.
 - **WHEN** the owner moves a shared file to the trash
 - **THEN** the shared account's record is gone from the sharing rights and that account can no longer read the file (403)
 
+#### Scenario: Batch with unknown identifiers
+
+- **WHEN** `getSecurityInfo` lists identifiers that match nothing, or carries an empty request
+- **THEN** the unmatched identifiers are skipped and the empty request answers an empty list
+
 #### Scenario: Unreadable entry in a batch
 
 - **WHEN** `getSecurityInfo` lists a file the caller cannot read
@@ -169,12 +179,15 @@ identifiers that match nothing and answer an empty list for an empty request.
 ### Requirement: Access priority when several rights apply
 
 When an account holds more than one right on an entry, the system SHALL apply them in this order of
-strength: a personal share first, then a share on a group the account belongs to (including Everyone and the
-administrators' group), then the link the account is currently using, then links the account opened earlier.
-A right granted on the entry itself SHALL beat a right inherited from a parent folder, and a right on a
-closer parent SHALL beat one on a farther parent. A visitor without an account SHALL get exactly the rights
-of the link they came in through. Inside rooms the same rule applies: a personal right in the room beats the
-rights of a link.
+strength: a personal share, then a share on a group the account belongs to, then the link the account is
+currently using, then links the account opened earlier. A right on the entry itself SHALL beat a right
+inherited from a parent folder, and a closer parent SHALL beat a farther one. A visitor without an account
+SHALL get exactly the rights of the link they came in through.
+
+#### Scenario: Group shares and rooms follow the same order
+
+- **WHEN** the account's right comes from the Everyone group or the administrators' group, or the account is a room member holding a personal right in the room and a link right
+- **THEN** the group share counts as a group right in the order above, and inside the room the personal right beats the rights of the link
 
 #### Scenario: Personal Editing beats a Read link
 
@@ -224,8 +237,7 @@ rights of a link.
 When a signed-in account opens an entry it does not own through a link, and the entry is recorded as
 recent, the system SHALL remember that link for the account and SHALL use the link's rights for the entry in
 Shared with me and when the entry is later read by its identifier without the link. Opening the same entry
-through another link SHALL replace the remembered link, so only the last opened link counts. Deleting a link
-the account never opened SHALL NOT remove the entry from the account's Shared with me.
+through another link SHALL replace the remembered link, so only the last opened link counts.
 
 #### Scenario: Opening a file through three links in turn
 
@@ -235,20 +247,15 @@ the account never opened SHALL NOT remove the entry from the account's Shared wi
 #### Scenario: Unused link deleted
 
 - **WHEN** a file has two Read links, an account opened it through the first and the owner deletes the second
-- **THEN** the file stays in the account's Shared with me with access Read
+- **THEN** the file stays in the account's Shared with me with access Read — deleting a link the account never opened does not remove the entry from its Shared with me
 
 ### Requirement: The Shared with me section
 
 The system SHALL expose a Shared with me section to every signed-in account. It SHALL list the files and
 folders other members shared with the account from their My documents, and the files and folders the
-account reached through a link, each with the access the account holds. A folder reached through a link
-SHALL appear in Shared with me for a signed-in account once the link has been resolved with
-`getExternalShareData`. Each entry read through a share SHALL carry `sharedBy` (who gave the access) and
-`ownedBy` (who owns the place it is shared from) next to its author, and the listing SHALL accept a `sharedBy`
-filter that narrows it to what one member handed out. The section SHALL support the ordinary listing filters,
-including the PDF and PDF form types. A file reached through a share whose real parent the caller cannot
-open SHALL report the Shared with me section as its folder. A file newly shared with an account SHALL count as
-new in that account's Shared with me.
+account reached through a link, each with the access the account holds. Each entry read through a share
+SHALL carry `sharedBy` and `ownedBy` next to its author, and the listing SHALL accept a `sharedBy` filter.
+The section SHALL support the ordinary listing filters.
 
 #### Scenario: Shared file appears with its access
 
@@ -257,8 +264,19 @@ new in that account's Shared with me.
 
 #### Scenario: Folder opened through a link
 
-- **WHEN** a signed-in account resolves a Read link to a folder in someone else's My documents
-- **THEN** the account's Shared with me lists the folder with access Read
+- **WHEN** a signed-in account resolves a Read link to a folder in someone else's My documents with `getExternalShareData`
+- **THEN** the account's Shared with me lists the folder with access Read once the link has been resolved
+
+#### Scenario: Shared by and owned by
+
+- **WHEN** an entry is read through a share
+- **THEN** `sharedBy` names who gave the access and `ownedBy` who owns the place it is shared from
+- **AND** the listing filtered by `sharedBy` holds only what that one member handed out
+
+#### Scenario: Parent the caller cannot open
+
+- **WHEN** a file reached through a share lies in a folder the caller cannot open
+- **THEN** the file reports the Shared with me section as its folder
 
 #### Scenario: Sub-folder of another member's My documents
 
@@ -268,7 +286,7 @@ new in that account's Shared with me.
 #### Scenario: New-item count
 
 - **WHEN** two files are shared with an account one after the other
-- **THEN** the account's Shared with me reports 1 and then 2 new items
+- **THEN** the account's Shared with me reports 1 and then 2 new items — a newly shared file counts as new
 
 #### Scenario: PDF form filter
 
@@ -278,12 +296,10 @@ new in that account's Shared with me.
 ### Requirement: Removing a share and removing an entry from Shared with me
 
 `removeSecurityInfo` SHALL revoke the access of every account and group on the listed files and folders when
-the caller may change their access, keeping the owner's record and the external links untouched, and clear
-the entries from the caller's own favorites, recent and new marks. An account the entry was shared with
-directly, or that reached it through a link, SHALL be able to call the same operation to take the entry out
-of its own Shared with me ("Remove from list"); this SHALL NOT change anybody else's rights. An account with
-no access to the entry SHALL be refused (403), and an unauthenticated caller 401. The answer SHALL be `true`
-in every accepted case, including identifiers that match nothing and an unshared entry.
+the caller may change their access, keeping the owner's record and the external links, and clear the
+entries from the caller's own favorites, recent and new marks. A recipient of the share, or an account that
+reached the entry through a link, uses the same operation to take it out of its own Shared with me ("Remove
+from list"), changing nobody else's rights. The answer is `true` when accepted.
 
 #### Scenario: Owner revokes every share
 
@@ -302,8 +318,13 @@ in every accepted case, including identifiers that match nothing and an unshared
 
 #### Scenario: Unrelated account
 
-- **WHEN** an account with no share on the owner's file or folder calls `removeSecurityInfo` for it
-- **THEN** the request is refused (403) and the entry stays shared with the accounts it was shared with
+- **WHEN** an account with no share on the owner's file or folder calls `removeSecurityInfo` for it, or an unauthenticated caller does
+- **THEN** the request is refused (403; 401 for the unauthenticated caller) and the entry stays shared with the accounts it was shared with
+
+#### Scenario: Nothing to remove
+
+- **WHEN** `removeSecurityInfo` lists identifiers that match nothing, or an entry that is not shared
+- **THEN** the answer is `true`
 
 #### Scenario: Folder reached by link removed and reopened
 
@@ -353,13 +374,10 @@ level SHALL be a Read link that does not expire.
 ### Requirement: The Recent section
 
 The system SHALL keep a personal Recent section per account: the files the account opened, newest first,
-files only. Files from My documents, from rooms of every type and files reached through a link SHALL all be
-recorded, and the listing SHALL accept a folder-type filter that narrows it to My documents, to all rooms or
-to one room type. A file SHALL be recorded when it is opened through the file handler and MAY be recorded
-explicitly with `addFileToRecent`, which SHALL require read access to the file (403 otherwise, 401 for an
-unauthenticated caller, 404 for a file that does not exist) and SHALL be idempotent. `deleteRecent` SHALL
-clear the listed files from the caller's own history without checking access, SHALL be idempotent and SHALL
-answer no body. The server SHALL keep at most the 1000 most recent marks per account.
+files only. Files from My documents, from rooms of every type and files reached through a link are all
+recorded; the listing accepts a folder-type filter. A file is recorded when opened through the file
+handler and MAY be added with `addFileToRecent`, which needs read access and is idempotent. `deleteRecent`
+SHALL clear the listed files from the caller's own history without checking access.
 
 #### Scenario: File from My documents added to Recent
 
@@ -373,34 +391,37 @@ answer no body. The server SHALL keep at most the 1000 most recent marks per acc
 
 #### Scenario: Another member's private file
 
-- **WHEN** an account adds a file from another member's My documents that was not shared with it to Recent
-- **THEN** the request is refused (403)
+- **WHEN** an account adds a file from another member's My documents that was not shared with it to Recent, an unauthenticated caller adds any file, or a file that does not exist is added
+- **THEN** the answers are 403, 401 and 404 respectively
 
 #### Scenario: Filtering by folder type
 
 - **WHEN** the Recent listing is requested with the My documents folder type, the rooms folder types, one room type, or several types
-- **THEN** only the files whose origin matches the requested types are listed
+- **THEN** only the files whose origin matches the requested types are listed — the filter narrows to My documents, to all rooms or to one room type
 
 #### Scenario: Deleting from Recent
 
 - **WHEN** an account deletes one or several files from its Recent, or a file that is not in it
-- **THEN** the files are no longer listed and the call succeeds either way; an unauthenticated caller is refused (401)
+- **THEN** the files are no longer listed and the call succeeds either way with no body; an unauthenticated caller is refused (401)
+
+#### Scenario: History bounded
+
+- **WHEN** an account has opened more than 1000 files
+- **THEN** the server keeps at most the 1000 most recent marks of that account
 
 ### Requirement: The Favorites section
 
 The system SHALL keep a personal Favorites section per account for files and folders. Marking an entry SHALL
-require Read access to it and nothing more (a Guest with Read access to a room file may mark it); an
-unauthenticated caller SHALL be refused (401). `addFavorites` and `deleteFavoritesFromBody` SHALL answer
-`true`, SHALL be idempotent, and SHALL ignore identifiers that match nothing. Entries the account can no
-longer read and entries in the trash SHALL drop out of the listing and out of its `total` although the mark
-is not cleared; entries in archived rooms SHALL stay. The listing SHALL accept the item-kind filter
-(documents, files only, folders only), the ancestor folder-type filter (My documents, all rooms, one room
-type), paging, sorting and a search term; a page size of 0 SHALL be rejected (400).
+require Read access and nothing more; an unauthenticated caller SHALL be refused (401). `addFavorites` and
+`deleteFavoritesFromBody` SHALL answer `true`, be idempotent and ignore identifiers that match nothing.
+Entries the account can no longer read and entries in the trash drop out of the listing and of its `total`
+although the mark is not cleared; entries in archived rooms stay.
 
 #### Scenario: Entry marked and listed
 
 - **WHEN** an account adds a file or a folder from My documents, from a sub-folder or from a room to Favorites
 - **THEN** the Favorites listing contains it with `isFavorite` true; a file from a room also reports its origin room title
+- **AND** a Guest with Read access to a room file may mark it
 
 #### Scenario: Favorites are per account
 
@@ -416,6 +437,12 @@ type), paging, sorting and a search term; a page size of 0 SHALL be rejected (40
 
 - **WHEN** a favorite file is moved to the trash, or a file already in the trash is marked
 - **THEN** the file is not listed in Favorites
+
+#### Scenario: Listing filters
+
+- **WHEN** Favorites are listed with the item-kind filter (documents, files only, folders only), the ancestor folder-type filter (My documents, all rooms, one room type), paging, sorting or a search term
+- **THEN** the listing is narrowed accordingly
+- **AND** a page size of 0 is rejected (400)
 
 #### Scenario: Toggling one file
 
@@ -449,12 +476,9 @@ or terminated caller SHALL be refused (401).
 
 The external sharing switches SHALL be portal-wide and SHALL be changed only by the portal owner and
 DocSpace admins (403 for a Room admin, a User and a Guest; 401 unauthenticated). Turning external sharing off
-SHALL also turn off sharing on social media, and enabling social media sharing SHALL take effect only while
-external sharing is on. `changeExternalSharingSettings` SHALL store whether new links are internal by default
-and whether the restriction applies to documents, to rooms, and to links that already exist. While the
-restriction applies to documents, a link created on a file in My documents SHALL be internal; while it applies
-to rooms only, such a link SHALL be public. While existing links are blocked, an anonymous visitor resolving
-an existing link SHALL get `ExternalAccessDenied`, and a signed-in account SHALL get `Ok`.
+SHALL also turn off sharing on social media, which takes effect only while external sharing is on.
+`changeExternalSharingSettings` SHALL store whether new links are internal by default and whether the
+restriction applies to documents, to rooms, and to links that already exist.
 
 #### Scenario: Non-admin flips the switch
 
@@ -470,6 +494,7 @@ an existing link SHALL get `ExternalAccessDenied`, and a signed-in account SHALL
 
 - **WHEN** the restriction applies to documents and a link is created on a file in My documents
 - **THEN** the link is internal (restricted to DocSpace users)
+- **AND** while the restriction applies to rooms only, such a link is public
 
 #### Scenario: Existing link blocked
 

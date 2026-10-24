@@ -75,6 +75,7 @@ both marked `test.fail`.
 | Reserved-prefix names reach the controller: the proxy routes `^/api/2.0/settings/webplugins(?:/|$)` before `/(files|privacyroom)` | `nginx:601-603` (before 605) — the fix for bug 83425; the tests still carry `[Trait("Bug", "83425")]` and the TS suite `test.fail` | TEST-CONFIRMED (asserts 200) |
 | **Refreshing a plugin replaced in storage** | | |
 | Portal-settings right; name lower-cased and validated (404); version compared per scope (−1 and portal); cache reset and socket event only when outdated; returns the served plugin | `Controller:221-232`; `Manager:406-471` | CODE-ONLY |
+| Refresh leaves stored state, settings and CSP domains untouched (only the served list and the clients are refreshed) | `Manager:406-471` (no write to the settings or the CSP) | CODE-ONLY |
 | Not in the OpenAPI document (see deviations) | yaml has no `refresh` path under `/api/2.0/settings/webplugins` | — |
 | **Plugin files served to the browser** | | |
 | `url` = storage URI of `<name>/plugin.js` + `?hash=<version>`; per-portal vs installation storage; immutable cache for a year on `storage/(webplugins|systemwebplugins)/...?hash` | `Manager:132-137, 196-205, 363-382`; `storage.json:169-185`; `nginx:61` | CODE-ONLY |

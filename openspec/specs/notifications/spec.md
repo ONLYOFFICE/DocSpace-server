@@ -540,10 +540,9 @@ unblocking, its last add-on's end or the policy's first run (spread over 30 days
 
 A free portal with an empty wallet SHALL be warned on day 30 of its count and blocked on day
 60; a lapsed one warned on days 30 and 60, blocked on day 90; one with money on its wallet
-warned on day 30, monthly from month 6 to 11, blocked after a year. The owner and the payer of
-a lapsed portal get "Your <brand> space misses you (action needed by <date>)" or, with money
-left, "You still have funds in your <brand> space (action needed by <date>)" by e-mail, naming
-the block and deletion days in the portal's time zone.
+warned on day 30, monthly from month 6 to 11, blocked after a year. The owner, and the payer of
+a lapsed portal, get the "misses you" letter or, with money left, the "still have funds" letter by
+e-mail, naming the block and deletion days in the portal's time zone.
 
 #### Scenario: Free portal idle for a month
 
