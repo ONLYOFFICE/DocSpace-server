@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,22 +31,15 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Studio.PluginEvents;
+using ASC.Web.Api.Controllers;
 
-internal static partial class PluginSocketEventListenerLogger
+namespace ASC.Web.Api.Log;
+
+internal static partial class ModuleEventsControllerLogger
 {
-    [LoggerMessage(LogLevel.Information, "Plugin socket events are disabled: the event bus is not RabbitMQ")]
-    public static partial void InformationDisabled(this ILogger<PluginSocketEventListener> logger);
+    [LoggerMessage(LogLevel.Warning, "Module event rejected: the X-Module-Key header is missing or matches no configured module")]
+    public static partial void WarningUnknownModuleKey(this ILogger<ModuleEventsController> logger);
 
-    [LoggerMessage(LogLevel.Information, "Consuming plugin socket events from exchange {exchange}, queue {queue}")]
-    public static partial void InformationConsuming(this ILogger<PluginSocketEventListener> logger, string exchange, string queue);
-
-    [LoggerMessage(LogLevel.Error, "Could not start consuming plugin socket events, retrying")]
-    public static partial void ErrorStartConsuming(this ILogger<PluginSocketEventListener> logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Warning, "Plugin socket event {messageId} from {sender} rejected: {reason}")]
-    public static partial void WarningRejected(this ILogger<PluginSocketEventListener> logger, string messageId, string sender, string reason);
-
-    [LoggerMessage(LogLevel.Error, "Plugin socket event {messageId} from {sender} could not be forwarded")]
-    public static partial void ErrorForwarding(this ILogger<PluginSocketEventListener> logger, string messageId, string sender, Exception exception);
+    [LoggerMessage(LogLevel.Warning, "Module event rejected: module {module} is not allowed for tenant {tenantId}")]
+    public static partial void WarningModuleNotAllowed(this ILogger<ModuleEventsController> logger, string module, int tenantId);
 }

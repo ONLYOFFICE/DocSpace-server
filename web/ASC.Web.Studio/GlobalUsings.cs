@@ -32,13 +32,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Collections.Concurrent;
-global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
-global using System.Text.RegularExpressions;
 
 global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
@@ -47,13 +45,9 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
-global using ASC.Core.Notify.Socket;
-global using ASC.Core.Tenants;
-global using ASC.Core.Users;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
-global using ASC.EventBus.RabbitMQ;
 global using ASC.FederatedLogin;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
@@ -65,7 +59,6 @@ global using ASC.Web.Studio;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.IntegrationEvents;
 global using ASC.Web.Studio.IntegrationEvents.EventHandling;
-global using ASC.Web.Studio.PluginEvents;
 global using ASC.Webhooks;
 global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
@@ -84,6 +77,3 @@ global using Microsoft.Extensions.Logging;
 global using Polly;
 global using Polly.Registry;
 global using Polly.Retry;
-
-global using RabbitMQ.Client;
-global using RabbitMQ.Client.Events;

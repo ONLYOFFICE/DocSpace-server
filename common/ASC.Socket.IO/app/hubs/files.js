@@ -164,16 +164,21 @@ module.exports = (io) => {
       socket.to(room).emit("storage-encryption");
     });
 
-    const isPrivateRoomPart = (part) => typeof part === "string" && /(^|-)private-/.test(part);
+    // subscribe takes a part ("private-x"), subscribeInSpaces a full name ("1-private-x"): anchor on both, so a
+    // module room such as "plugin-mail-inbox-private-x" stays allowed
+    const isPrivateRoomPart = (part) => typeof part === "string" && /^(\d+-)?private-/.test(part);
+    // module rooms carry what a module chose to show the portal's users; a share-link visitor is not one of them
+    const isModuleRoomPart = (part) => typeof part === "string" && /^(\d+-)?plugin-/.test(part);
+    const isRefusedRoomPart = (part) => isPrivateRoomPart(part) || (session.anonymous && isModuleRoomPart(part));
 
     function changeSubscription(roomParts, individual, changeFunc) {
       if (!roomParts) return;
 
       if (Array.isArray(roomParts)) {
-        roomParts = roomParts.filter((p) => !isPrivateRoomPart(p));
+        roomParts = roomParts.filter((p) => !isRefusedRoomPart(p));
         if (roomParts.length === 0) return;
-      } else if (isPrivateRoomPart(roomParts)) {
-        logger.warn(`client ${socket.id} tried to change a private room subscription: ${roomParts}`);
+      } else if (isRefusedRoomPart(roomParts)) {
+        logger.warn(`client ${socket.id} tried to change a refused room subscription: ${roomParts}`);
         return;
       }
 

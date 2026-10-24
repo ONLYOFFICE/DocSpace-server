@@ -158,6 +158,13 @@ public class SocketService(
                         // connection checked out, so every call opened a new TCP connection (with a DNS lookup) and the
                         // socket was closed by the finalizer - one connection per notification, hundreds open at peak.
                         using var response = await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
+
+                        // a refused notification (for example 413 for a body over the socket service's limit) reaches
+                        // no client, and nothing else would ever say so
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            logger.WarningServiceRefused(socketData.RequestMessage.Method.Method, socketData.RequestMessage.RequestUri?.ToString(), (int)response.StatusCode);
+                        }
                     }
                     catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                     {

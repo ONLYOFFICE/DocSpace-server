@@ -60,7 +60,6 @@ public static class WebStudioServiceExtensions
         services.AddScoped<EventDataIntegrationEventHandler>();
         services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
-        services.AddHostedService<PluginSocketEventListener>();
 
         services.RegisterQueue<RemovePortalOperation>();
         services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
