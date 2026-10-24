@@ -2162,7 +2162,7 @@ $TrulyYours</value>
     <value>Your ${LetterLogoText} space misses you (action needed by $BlockDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
-    <value>You still have funds in your ${LetterLogoText} space (action needed by $BlockDateShort)</value>
+    <value>You still have funds in your ${LetterLogoText} space (action needed by $BlockDate)</value>
   </data>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Suspicious login to your ${LetterLogoText} account</value>

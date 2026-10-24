@@ -50,7 +50,7 @@ extension RawRepresentable where RawValue: ParameterConvertible, RawValue: Senda
     func asParameter(codableHelper: CodableHelper) -> any Sendable { return self.rawValue }
 }
 
-private func encodeIfPossible<T: Sendable>(_ object: T, codableHelper: CodableHelper) -> any Sendable {
+func encodeIfPossible<T: Sendable>(_ object: T, codableHelper: CodableHelper) -> any Sendable {
     if let encodableObject = object as? ParameterConvertible {
         return encodableObject.asParameter(codableHelper: codableHelper)
     } else {

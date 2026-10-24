@@ -176,7 +176,7 @@
           "Backup"
         ],
         "summary": "Create the backup schedule",
-        "description": "Sets the backup schedule of the current portal. A portal keeps at most one schedule, so this replaces\r\nthe existing one rather than adding a second, and `dump` writes the schedule of the whole server\r\ninstead, which requires the space access permission and works on a standalone installation only.\r\nScheduled backups have to be allowed by the pricing plan of a portal that is not a standalone\r\ninstallation.\r\n`cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0\r\nto 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with\r\nSunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for\r\n`EveryDay`, and because an omitted `day` is stored as 0, which neither period accepts, a weekly or\r\nmonthly schedule sent without it fails instead of falling back to a default.\r\n`backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older\r\ncopies are removed by a background cleaner, and only the ones this schedule created: archives made by\r\n`POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops\r\ncovering backups has its schedule deleted by the scheduler, not suspended, and its administrators are\r\nnotified that the scheduled backup failed.\r\nThe keys expected in `storageParams` are the same as for `POST api/2.0/backup/startbackup`, except\r\nthat they are sent as an array of key and value pairs here and returned as an object by\r\n`GET api/2.0/backup/getbackupschedule`.",
+        "description": "Sets the backup schedule of the current portal. A portal keeps at most one schedule, so this replaces\r\nthe existing one rather than adding a second, and `dump` writes the schedule of the whole server\r\ninstead, which requires the space access permission and works on a standalone installation only.\r\nScheduled backups have to be allowed by the pricing plan of a portal that is not a standalone\r\ninstallation.\r\n`cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0\r\nto 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with\r\nSunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for\r\n`EveryDay`, and a weekly or monthly schedule sent without it is rejected with 400 instead of falling\r\nback to a default.\r\n`backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older\r\ncopies are removed by a background cleaner, and only the ones this schedule created: archives made by\r\n`POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops\r\ncovering backups has its schedule deleted by the scheduler, not suspended, and its administrators are\r\nnotified that the scheduled backup failed.\r\nThe keys expected in `storageParams` are the same as for `POST api/2.0/backup/startbackup`, except\r\nthat they are sent as an array of key and value pairs here and returned as an object by\r\n`GET api/2.0/backup/getbackupschedule`.",
         "operationId": "createBackupSchedule",
         "requestBody": {
           "content": {
@@ -211,7 +211,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, the number of the stored copies is outside 1-30, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`"
+            "description": "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`"
           },
           "402": {
             "description": "The portal subscription does not cover scheduled backups, has expired or has not been paid"
@@ -223,7 +223,7 @@
             "description": "The target folder was not found"
           },
           "500": {
-            "description": "`cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, a key or value of `storageParams` is null, the `folderId` or `filePath` key the storage type needs is missing, or `Local` storage was requested on a portal that is not a standalone installation"
+            "description": "A key or value of `storageParams` is null, or `Local` storage was requested on a portal that is not a standalone installation"
           },
           "401": {
             "description": "Unauthorized",
@@ -449,7 +449,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, the folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key"
+            "description": "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, or a dump was requested on a portal that is not a standalone installation"
           },
           "402": {
             "description": "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged"
@@ -461,7 +461,7 @@
             "description": "The target folder or the backup quota was not found"
           },
           "500": {
-            "description": "A key or value of `storageParams` is null, `ThridpartyDocuments` storage has no `folderId`, or `Local` storage has no `filePath` or was requested on a portal that is not a standalone installation"
+            "description": "`Local` storage has no `filePath` or was requested on a portal that is not a standalone installation"
           },
           "401": {
             "description": "Unauthorized",
@@ -875,7 +875,7 @@
           "Backup"
         ],
         "summary": "Delete the backup",
-        "description": "Deletes one backup: first its history record, then the archive in the storage the record points at.\r\nThe ID is the one listed by `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the\r\nbackup was started with.\r\nDeleting a backup of the whole server rather than of one portal additionally requires the space\r\naccess permission. A record that belongs to another portal is left untouched and the call still\r\nanswers true, so the result confirms that the request was accepted rather than that anything was\r\ndeleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.\r\nThe record is removed before the archive, so when the storage can no longer be reached the archive\r\nstays behind with nothing pointing at it.",
+        "description": "Deletes one backup: first its history record, then the archive in the storage the record points at.\r\nThe ID is the one listed by `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the\r\nbackup was started with.\r\nDeleting a backup of the whole server rather than of one portal additionally requires the space\r\naccess permission. A record that belongs to another portal is left untouched and the call still\r\nanswers true, so the result confirms that the request was accepted rather than that anything was\r\ndeleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.\r\nThe record is removed before the archive, so when the storage can no longer be reached the archive\r\nstays behind with nothing pointing at it. An ID that no backup has ever had is answered with 404.",
         "operationId": "deleteBackup",
         "parameters": [
           {
@@ -920,7 +920,7 @@
           "403": {
             "description": "No permissions to perform this action"
           },
-          "500": {
+          "404": {
             "description": "There is no backup record with this ID"
           },
           "401": {
@@ -940,6 +940,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1157,7 +1167,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `backupId`, or `storageParams` repeats a key"
+            "description": "The request body cannot be read or has no `backupId`, `backupId` is not a GUID and `storageParams` has no `filePath`, or an item of `storageParams` is null, has no key or no value, or repeats a key"
           },
           "402": {
             "description": "The pricing plan of this portal does not allow restoring"
@@ -1167,9 +1177,6 @@
           },
           "404": {
             "description": "The backup record was not found, the file given in `filePath` or its folder was not found, or, for `Local` storage, no backup archive has been uploaded to the portal"
-          },
-          "500": {
-            "description": "`backupId` is not a GUID and `storageParams` has no `filePath`, or a key or value of `storageParams` is null"
           },
           "401": {
             "description": "Unauthorized",
@@ -1188,6 +1195,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1745,7 +1762,7 @@
               "null",
               "integer"
             ],
-            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the\r\nday of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is\r\nstored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent\r\nwithout it fails.",
+            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the\r\nday of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - a weekly or monthly\r\nschedule sent without it is rejected.",
             "format": "int32"
           }
         },
@@ -2279,7 +2296,7 @@
             "format": "int32"
           },
           "cronParams": {
-            "description": "When the backup runs. It is required: a request without it fails rather than falling back to a\r\ndefault.",
+            "description": "When the backup runs. It is required: a request without it is rejected rather than falling back to\r\na default.",
             "$ref": "#/components/schemas/BackupCronRequest"
           },
           "dump": {
@@ -2444,11 +2461,9 @@
         "type": "object",
         "properties": {
           "key": {
-            "type": "null",
             "description": "The left half of the pair. Where the pair configures something, this is the identifier the value belongs to -\r\na setting name, a module id, a logo slot; where the pair reports the result of a call, this is the result\r\nitself, such as the flag telling whether the call succeeded. Which of the two it is, and which keys are\r\naccepted, is stated by the operation that sends or returns the pair."
           },
           "value": {
-            "type": "null",
             "description": "The right half of the pair: what is assigned to the key next to it, or what is reported for it. Its meaning\r\nand its accepted values follow from the key, so read them from the operation that sends or returns the pair."
           }
         },

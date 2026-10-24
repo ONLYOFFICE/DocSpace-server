@@ -59,6 +59,7 @@ public sealed class PortalClients : PortalClientsBase
     public SharingApi SharingApi { get; }
     public PrivacyRoomApi PrivacyroomApi { get; }
     public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+    public MetadataApi MetadataApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
@@ -91,6 +92,7 @@ public sealed class PortalClients : PortalClientsBase
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         PrivacyroomApi = new PrivacyRoomApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        MetadataApi = new MetadataApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
         ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);

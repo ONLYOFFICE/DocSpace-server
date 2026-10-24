@@ -108,9 +108,8 @@ public class QuotaDto
     public required bool Trial { get; set; }
 
     /// <summary>
-    /// The features the quota switches on, each with the limit it grants and, on the quota the portal is
-    /// actually on, how much of that limit is already used. A feature that is absent is off, so the list is the
-    /// whole truth about what the quota includes.
+    /// The features the quota includes, each with the limit it grants and, on the portal's own quota, how much of it
+    /// is used. A flag that is off is listed with `value` false; an absent feature is one this answer does not report.
     /// </summary>
     /// <example>[{"id": "00000000-0000-0000-0000-000000000001", "title": "Premium Storage"}]</example>
     public required IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
@@ -118,8 +117,7 @@ public class QuotaDto
     /// <summary>
     /// The per-member storage allowance an administrator has set on top of the quota, and whether it is applied
     /// at all. It describes the live portal rather than this quota, so every entry of a catalogue listing repeats
-    /// the same values, and it is empty unless the portal is a server installation or its plan includes
-    /// statistics.
+    /// the same values. It is filled in only on a server installation or when the portal's plan includes statistics.
     /// </summary>
     /// <example>{"enableQuota": true, "defaultQuota": 1073741824}</example>
     public EntityQuotaDto UsersQuota { get; set; }
@@ -194,10 +192,8 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     public string Type { get; set; }
 
     /// <summary>
-    /// How much of the limit is already used. It is present only on the quota the portal is actually on, and
-    /// only for a feature whose consumption is counted; a guest is shown none of these figures and a plain member
-    /// only the one for total size, so an absent value can mean the caller may not see it rather than that
-    /// nothing is used.
+    /// How much of the limit is already used. It is present only when the portal's own quota is read through
+    /// `GET api/2.0/portal/payment/quota`, and only for a feature whose consumption is counted.
     /// </summary>
     /// <example>{"value": 53687091200, "title": "50 GB used"}</example>
     public FeatureUsedDto Used { get; set; }

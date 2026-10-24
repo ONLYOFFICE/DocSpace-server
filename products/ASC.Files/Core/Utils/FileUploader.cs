@@ -217,6 +217,11 @@ public class FileUploader(
         return file;
     }
 
+    public async Task VerifyFolderForUploadAsync<T>(T folderId)
+    {
+        await GetFolderIdAsync(folderId, null);
+    }
+
     public async Task<File<T>> VerifyChunkedUploadForEditing<T>(T fileId, long fileSize)
     {
         var fileDao = daoFactory.GetFileDao<T>();

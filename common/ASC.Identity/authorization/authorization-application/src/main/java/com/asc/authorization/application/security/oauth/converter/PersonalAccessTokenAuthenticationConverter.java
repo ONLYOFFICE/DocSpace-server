@@ -54,8 +54,6 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -89,7 +87,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
    */
   public Authentication convert(HttpServletRequest request) {
     log.debug("Converting request to authentication: {}", request.getRequestURI());
-    var parameters = getFormParameters(request);
+    var parameters = FormParameters.from(request);
 
     var grantType = parameters.getFirst(OAuth2ParameterNames.GRANT_TYPE);
     if (!ExtendedAuthorizationGrantType.PERSONAL_ACCESS_TOKEN.getValue().equals(grantType)) {
@@ -165,30 +163,6 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
    */
   private void setRequestAttributes(HttpServletRequest request, BasicSignature basicSignature) {
     request.setAttribute(securityConfigurationProperties.getSignatureCookie(), basicSignature);
-  }
-
-  /**
-   * Extracts form parameters from the HTTP request.
-   *
-   * <p>This method parses the request's parameter map, excluding query string parameters.
-   *
-   * @param request the HTTP request.
-   * @return a {@link MultiValueMap} containing the form parameters.
-   */
-  static MultiValueMap<String, String> getFormParameters(HttpServletRequest request) {
-    var parameterMap = request.getParameterMap();
-    var parameters = new LinkedMultiValueMap<String, String>();
-    parameterMap.forEach(
-        (key, values) -> {
-          var queryString =
-              StringUtils.hasText(request.getQueryString()) ? request.getQueryString() : "";
-          if (!queryString.contains(key)) {
-            for (String value : values) {
-              parameters.add(key, value);
-            }
-          }
-        });
-    return parameters;
   }
 
   /**

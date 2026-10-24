@@ -335,7 +335,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return newId;
     }
 
-    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
+    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken)
     {
         if (toFolderId is int tId)
         {
