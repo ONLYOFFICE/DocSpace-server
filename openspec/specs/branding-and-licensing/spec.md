@@ -16,8 +16,8 @@ server features are gated by a quota flag of the edition. Billing, wallet, payme
 hosted plans are the `billing` specification; the grading of `getPortalTariff` and `getPortalQuota` by role,
 the count and storage limits of a tariff are `quotas`; the letters that carry the branding are `notifications`.
 
-Sources: the integration tests of `web/ASC.Web.Api.Tests` (`02_Settings/Greeting`, `02_Settings/Common`
-colour theme, portal logo and payment settings, `04_Portal/Quota`) and the TypeScript suite they were ported
+Sources: the integration tests of `web/ASC.Web.Api.Tests` (`02_Settings/Rebranding`, `02_Settings/Greeting`,
+`02_Settings/Common` colour theme, portal logo and payment settings, `04_Portal/Quota`) and the TypeScript suite they were ported
 from (`settings/rebranding`, `settings/greeting`, `settings/common`), the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations named by `operationId`), the product code where the
 tests stop, the runtime configuration of the installation, and the release notes (v2.6, v3.0, v3.0.1, v3.1.1,
@@ -29,11 +29,11 @@ follows the server; the evidence per scenario, the differences and the suspected
 
 ### Requirement: Editions of the installation
 
-The server SHALL run in one of four editions decided by the installation configuration, never by the portal:
-hosted (a base domain is configured), Enterprise (self-hosted with a license file path), Developer (Enterprise
-whose configured license type is developer) and open source (self-hosted without a license file path).
-`getSettings` SHALL report `standalone` for the self-hosted editions, and `getPortalTariff` SHALL report
-`openSource`, `enterprise` and `developer` to a caller with the portal-settings right only.
+The server SHALL run in one of four editions decided by the installation, never by the portal: hosted (base domain
+configured), Enterprise (self-hosted with a license file path), Developer (Enterprise with the developer license type)
+and open source (self-hosted without a license file path). `getSettings` SHALL report `standalone` for the self-hosted
+editions; `getPortalTariff` SHALL report `openSource`, `enterprise` and `developer` only to a caller with the
+portal-settings right.
 
 #### Scenario: Owner reads the edition flags
 
@@ -47,22 +47,23 @@ whose configured license type is developer) and open source (self-hosted without
 
 ### Requirement: Whether branding may be changed
 
-`getEnableWhitelabel` SHALL require the portal-settings right (403 "Access denied") and SHALL answer true only
-when the branding section is not hidden by the installation configuration and the portal's current quota
-carries the `customization` feature. While it is false, `saveWhiteLabelSettings`,
-`saveWhiteLabelSettingsFromFiles` and `saveWhiteLabelLogoText` SHALL answer 402 "Your pricing plan does not
-support this option" after the permission check; the restore operations and every read SHALL stay available.
+`getEnableWhitelabel` SHALL require the portal-settings right (403) and answer true only when the branding section is
+not hidden by the installation and the portal's quota carries `customization`. While false, `saveWhiteLabelSettings`,
+`saveWhiteLabelSettingsFromFiles`, `saveWhiteLabelLogoText`, `saveCompanyWhiteLabelSettings` and
+`saveAdditionalWhiteLabelSettings` SHALL answer 402 after the permission and installation checks, before body
+validation; restores, deletes and reads stay open.
 
 #### Scenario: Plan without customization
 
 - **WHEN** the owner of a portal whose plan has no customization calls `getEnableWhitelabel`
 - **THEN** the system answers 200 false
-- **AND** `saveWhiteLabelLogoText` with `logoText` "Autotest Brand" and `saveWhiteLabelSettings` with an empty `logo` list answer 402
+- **AND** `saveWhiteLabelLogoText` with `logoText` "Autotest Brand" and `saveWhiteLabelSettings` with an empty `logo` list answer 402 "Your pricing plan does not support this option"
 
 #### Scenario: Permission is checked before the plan
 
 - **WHEN** a User calls `saveWhiteLabelLogoText` or `getEnableWhitelabel`
 - **THEN** the system answers 403 "Access denied" whatever the plan
+- **AND** a DocSpace admin calling `getEnableWhitelabel` gets 200
 
 #### Scenario: Restore stays open
 
@@ -71,12 +72,11 @@ support this option" after the permission check; the restore operations and ever
 
 ### Requirement: Logo slots and their public listing
 
-The portal SHALL have sixteen logo slots: the compact header logo, the login-page logo, the favicon, the left
-menu logo, the About-page logo, the letter logo, and a normal and an embedded logo for each of the five
-editors (text, spreadsheet, presentation, PDF, diagram). `getWhiteLabelLogos` SHALL need no authentication
-and answer, in slot order, every slot but the letter one with `type`, `name`, `size` (`width`, `height` in
-pixels) and `path` (`light`, `dark` absolute URLs); `isDark` fills one theme only, otherwise `dark` is empty
-when it equals `light`.
+A portal SHALL have sixteen logo slots: compact header, login page, favicon, left menu, About page, letter, and a
+normal and an embedded logo for each of the five editors (text, spreadsheet, presentation, PDF, diagram).
+`getWhiteLabelLogos` SHALL need no authentication and answer, in slot order, every slot but the letter one with
+`type`, `name`, `size` (`width`, `height`) and `path` (`light`, `dark` URLs); `isDark` fills one theme only, otherwise
+`dark` is empty when equal to `light`.
 
 #### Scenario: Anonymous lists the slots
 
@@ -95,12 +95,11 @@ when it equals `light`.
 
 ### Requirement: Saving logos from image data
 
-`saveWhiteLabelSettings` SHALL require the portal-settings right and the branding gate and take `logo`, a list
-of `key`/`value` pairs: `key` the numeric slot `type`, `value.light` and `value.dark` each a `data:` URI of a
-PNG, JPEG or SVG image or the name of an image staged through the logo uploader. A slot not listed SHALL keep
-its image; a dark image SHALL be stored only for the header, login-page, left menu, About-page and letter
-slots; saving the login-page slot SHALL also rebuild the letter logo from it. `logoText` in the same body is
-validated (400 over 40 characters) but not stored. Answer: 200 true.
+`saveWhiteLabelSettings` SHALL require the portal-settings right and the branding gate and take `logo`, a list of
+`key`/`value` pairs: `key` the numeric slot `type`, `value.light`/`value.dark` each a `data:` URI (PNG, JPEG, SVG) or
+the name of an image staged through the logo uploader. A slot not listed keeps its image; a dark image is stored only
+for the header, login-page, left menu, About-page and letter slots; saving the login-page slot rebuilds the letter
+logo. The answer is 200 true.
 
 #### Scenario: Header logo in both themes
 
@@ -112,6 +111,11 @@ validated (400 over 40 characters) but not stored. Answer: 200 true.
 - **WHEN** the entry names the favicon or an editor slot and carries `dark`
 - **THEN** the light image is stored, the dark one is ignored and the slot is marked as customised
 
+#### Scenario: Logo text in the logo body
+
+- **WHEN** the `saveWhiteLabelSettings` body also carries `logoText`
+- **THEN** it is validated (400 when longer than 40 characters) but not stored
+
 #### Scenario: Login-page logo rebuilds the letter logo
 
 - **WHEN** the login-page slot is saved
@@ -119,17 +123,21 @@ validated (400 over 40 characters) but not stored. Answer: 200 true.
 
 ### Requirement: Saving logos from uploaded files
 
-`saveWhiteLabelSettingsFromFiles` SHALL require the portal-settings right and the branding gate and take a
-`multipart/form-data` request whose file names carry the slot and the extension, as in `2.png`; a name
-containing `dark` SHALL be stored as the dark image of that slot. A request without a file SHALL answer 403
-"No input files" before the gate. The staging upload (`/logoUploader.ashx`, form fields `logotype`, `width`,
-`height` and one image) SHALL accept `.bmp`, `.jpg`, `.jpeg`, `.ico`, `.png`, `.svg` not larger than the slot
-and return the temporary file name for `saveWhiteLabelSettings`.
+`saveWhiteLabelSettingsFromFiles` SHALL require the portal-settings right and the branding gate and take
+`multipart/form-data` whose file names carry the slot and the extension, as in `2.png`; a name containing `dark` is
+stored as the dark image of that slot. A request without a file SHALL answer 403 "No input files" before the gate. The
+staging upload (`/logoUploader.ashx`) SHALL accept `.bmp`, `.jpg`, `.jpeg`, `.ico`, `.png`, `.svg` not larger than the
+slot and return a temporary file name.
 
 #### Scenario: No file in the form
 
 - **WHEN** the owner posts `saveWhiteLabelSettingsFromFiles` without a file
 - **THEN** the system answers 403
+
+#### Scenario: Staging upload
+
+- **WHEN** an image is posted to `/logoUploader.ashx` with the form fields `logotype`, `width` and `height`
+- **THEN** the system answers with a temporary file name that `saveWhiteLabelSettings` accepts as `value.light` or `value.dark`
 
 #### Scenario: Light and dark file for the left menu
 
@@ -194,11 +202,11 @@ answer 200 true, leave the logo images alone and write an audit event; the store
 
 ### Requirement: Reading the logo text
 
-`getWhiteLabelLogoText` and `getIsDefaultWhiteLabelLogoText` SHALL require the portal-settings right (403 for
-a User). The first SHALL answer the portal's stored text or `ONLYOFFICE` when none is stored — it SHALL NOT
-fall back to the installation-wide default wordmark unless `isDefault=true` asks for it; the second SHALL
-answer `default` true while the portal stores no text. `getSettings.logoText` SHALL carry the effective
-wordmark: the portal's text, else the installation's default, else `ONLYOFFICE`.
+`getWhiteLabelLogoText` and `getIsDefaultWhiteLabelLogoText` SHALL require the portal-settings right (403 for a User).
+The first SHALL answer the portal's stored text or `ONLYOFFICE` when none is stored, never the installation-wide
+default wordmark unless `isDefault=true` asks for it; the second SHALL answer `default` true while the portal stores
+no text. `getSettings.logoText` SHALL carry the effective wordmark: the portal's text, else the installation's
+default, else `ONLYOFFICE`.
 
 #### Scenario: Owner reads an unbranded portal
 
@@ -212,12 +220,11 @@ wordmark: the portal's text, else the installation's default, else `ONLYOFFICE`.
 
 ### Requirement: Installation-wide default branding
 
-The save and restore operations of the logos and the logo text SHALL accept `isDefault=true` to address the
-default branding of the whole installation, which every portal inherits for the slots and the text it has not
-customised. That SHALL be allowed only on a self-hosted installation whose space access is not limited and
-that is not in custom mode (otherwise 403 "Access denied"); the saves additionally need the branding gate.
-`getWhiteLabelLogos`, `getIsDefaultWhiteLabelLogos`, `getWhiteLabelLogoText` and `getIsDefaultWhiteLabelLogoText`
-SHALL read it with the same query.
+The save and restore operations of the logos and the logo text SHALL accept `isDefault=true` to address the default
+branding of the whole installation, inherited by every portal for the slots and the text it has not customised. That
+SHALL be allowed only on a self-hosted installation whose space access is not limited and that is not in custom mode
+(otherwise 403 "Access denied"); the saves also need the branding gate. The four logo and logo-text reads SHALL accept
+the same query.
 
 #### Scenario: Hosted portal asks for the installation branding
 
@@ -250,17 +257,21 @@ a second item. The values are installation-wide.
 
 ### Requirement: Changing and resetting the company details
 
-`saveCompanyWhiteLabelSettings` SHALL require the portal-settings right, a self-hosted installation without
-limited space access and not in custom mode (403 "Access denied"; a hosted portal is always refused), and the
-branding gate (402). `settings` with `email` and `site` SHALL be required and valid (400); every field is
-replaced, `isLicensor` is stored false, `hideAbout` is kept only when the quota carries `branding`. The answer
-is 200 true. `deleteCompanyWhiteLabelSettings` SHALL need the same installation check but no gate and answer
-the built-in details.
+`saveCompanyWhiteLabelSettings` SHALL require, in this order, the portal-settings right, a self-hosted installation
+without limited space access and not in custom mode (403) and the branding gate (402); only then `settings` with
+`email` and `site` are required and valid (400). Every field is replaced, `isLicensor` is stored false, `hideAbout` is
+kept only when the quota carries `branding`. `deleteCompanyWhiteLabelSettings` SHALL need the installation check only
+and answer the built-in details.
 
 #### Scenario: Hosted owner
 
 - **WHEN** the owner of a hosted portal calls `saveCompanyWhiteLabelSettings` with valid details or `deleteCompanyWhiteLabelSettings`
 - **THEN** the system answers 403
+
+#### Scenario: Self-hosted owner without customization
+
+- **WHEN** the owner of a self-hosted installation whose quota lacks `customization` calls `saveCompanyWhiteLabelSettings` with `companyName`, `site`, `address` and `phone` but no `email`
+- **THEN** the system answers 402, not 400: the gate is checked before the body
 
 #### Scenario: Hiding the About page needs the branding flag
 
@@ -274,31 +285,34 @@ the built-in details.
 
 ### Requirement: Help and community links of the installation
 
-`getAdditionalWhiteLabelSettings` SHALL answer any signed-in member with `startDocsEnabled`,
-`helpCenterEnabled`, `feedbackAndSupportEnabled`, `userForumEnabled`, `videoGuidesEnabled`,
-`licenseAgreementsEnabled` and `isDefault`; the default of each link flag is true when the installation has
-an address for it. `saveAdditionalWhiteLabelSettings` SHALL have the gates of the company details, require
-`settings` (400), replace the whole set — an omitted flag becomes false — and answer true;
-`deleteAdditionalWhiteLabelSettings` SHALL reset to the defaults and answer them.
+`getAdditionalWhiteLabelSettings` SHALL answer any signed-in member with `startDocsEnabled`, `helpCenterEnabled`,
+`feedbackAndSupportEnabled`, `userForumEnabled`, `videoGuidesEnabled`, `licenseAgreementsEnabled` and `isDefault`.
+`saveAdditionalWhiteLabelSettings` SHALL have the gates of the company details, require `settings` (400), replace the
+whole set (an omitted flag becomes false) and answer true; `deleteAdditionalWhiteLabelSettings` SHALL reset to the
+defaults and answer them.
 
 #### Scenario: Defaults on a configured installation
 
 - **WHEN** the owner reads `getAdditionalWhiteLabelSettings` on an installation with every link configured
-- **THEN** all six flags are true and `isDefault` is true
+- **THEN** all six flags are true and `isDefault` is true: a link flag defaults to true exactly when the installation has an address for it
 
 #### Scenario: Hosted owner
 
 - **WHEN** the owner of a hosted portal calls `saveAdditionalWhiteLabelSettings` with all flags false, or `deleteAdditionalWhiteLabelSettings`
 - **THEN** the system answers 403
 
+#### Scenario: Self-hosted owner without customization
+
+- **WHEN** the owner of a self-hosted installation whose quota lacks `customization` calls `saveAdditionalWhiteLabelSettings` with all six flags true
+- **THEN** the system answers 402 and the defaults are untouched
+
 ### Requirement: Where the branding appears and how it is served
 
-The system SHALL use the slot images everywhere it draws a logo: the editors get the logo of their type and
-embed mode, letters get the letter logo (the uploaded one, else the installation's default, else the built-in
-image) and the effective logo text, `getSettings` carries `logoText` and `displayAbout` (false only on a
-self-hosted installation whose quota carries `branding` and whose company details hide the About page).
-Portal logo URLs SHALL carry a content hash and are cached immutably for a year by the proxy; built-in logos
-carry the product version.
+The system SHALL use the slot images wherever it draws a logo: editors get the logo of their type and embed mode,
+letters get the letter logo (uploaded, else installation default, else built-in) and the effective logo text;
+`getSettings` carries `logoText` and `displayAbout` (false only on a self-hosted installation whose quota has
+`branding` and whose company details hide the About page). Logo URLs SHALL carry a content hash (built-in ones the
+version) and be cached immutably for a year.
 
 #### Scenario: Letter after a logo text change
 
@@ -330,12 +344,11 @@ the number of themes, 0 meaning unlimited.
 
 ### Requirement: Adding, changing and selecting a colour theme
 
-`savePortalColorTheme` SHALL require the portal-settings right (403 "Access denied") and take `theme` and/or
-`selected`. A `theme` whose `id` is a stored custom theme SHALL have its `main` and `text` replaced; any other
-`id`, a built-in one included, SHALL add a new custom theme with the next free id and an empty `name` — but
-only while the number of stored themes, built-in ones counted, is below `limit`; beyond it the theme is
-dropped without an error. `selected` SHALL be applied only when that id exists. The answer is the full
-configuration.
+`savePortalColorTheme` SHALL require the portal-settings right (403) and take `theme` and/or `selected`. A `theme`
+whose `id` is a stored custom theme SHALL have its `main` and `text` replaced; any other `id`, built-in ones included,
+SHALL add a custom theme with the next free id and an empty `name`, only while the stored themes, built-ins counted,
+number fewer than `limit`; beyond it the theme is silently dropped. `selected` SHALL apply only when that id exists.
+The answer is the configuration.
 
 #### Scenario: Owner adds a theme
 
@@ -421,12 +434,11 @@ SHALL reset it together with the slots.
 
 ### Requirement: Uploading a license file
 
-`uploadLicense` SHALL be open to a DocSpace admin or to the setup-wizard confirmation link (403 when the link
-is used after the wizard was completed), only on an Enterprise or Developer installation (415 otherwise), and
-take a `multipart/form-data` request with the license file in `files` (400 when empty). The file SHALL be
-parsed as JSON and staged next to the configured license path without being applied: it needs a customer id
-and a signature (500 "License is not correct") and a start date not in the future (400). The answer is a
-confirmation naming the support end when the end date already passed.
+`uploadLicense` SHALL be open to a DocSpace admin or to the setup-wizard confirmation link (403 once the wizard is
+completed), only on an Enterprise or Developer installation (415 otherwise), and take `multipart/form-data` with the
+license file in `files` (400 when empty). The file SHALL be parsed as JSON and staged beside the license path, not
+applied: it needs a customer id and a signature (500 "License is not correct") and a start date not in the future
+(400). It answers a confirmation text.
 
 #### Scenario: Valid license staged
 
@@ -445,17 +457,21 @@ confirmation naming the support end when the end date already passed.
 
 ### Requirement: Activating a license
 
-`acceptLicense` SHALL, on an Enterprise or Developer installation, record the acceptance for the installation,
-write an audit event and apply the staged license: the current file is backed up, the staged one moved into
-place, confirmed by the editing service when it is reachable (the resource key and customer id must match and
-the service must report success), and written as the installation's quota and tariff; on failure the previous
-file is restored. The answer is 200 with an empty string on success or a sentence naming the failure; on
-another edition the sentence says the plan does not support it. Completing the setup wizard SHALL do the same.
+`acceptLicense` SHALL, on an Enterprise or Developer installation, record the acceptance, write an audit event and
+apply the staged license: the current file is backed up, the staged one moved into place, confirmed by the editing
+service when reachable and written as the installation's quota and tariff; on failure the previous file is restored.
+The answer is 200 with an empty string on success, else a sentence naming the failure. Completing the setup wizard
+SHALL do the same.
 
 #### Scenario: Accepted after upload
 
 - **WHEN** a license was uploaded and `acceptLicense` is called
 - **THEN** the answer is "" and `getPortalTariff` reports the license's end date as `dueDate`, its customer as `customerId` and `state` Paid
+
+#### Scenario: Other edition
+
+- **WHEN** `acceptLicense` is called on a hosted portal or an open-source installation
+- **THEN** the answer is 200 "Your pricing plan does not support this option"
 
 #### Scenario: Nothing staged
 
@@ -469,11 +485,10 @@ another edition the sentence says the plan does not support it. Completing the s
 
 ### Requirement: What the license grants
 
-Applying a license SHALL replace the installation's quota with one that has no count limits, keeps the
-installation's file size cap, switches on `audit`, `ldap`, `sso`, `thirdparty`, `restore`, `oauth`,
-`contentsearch`, `docs` and `statistic`, takes `branding`, `customization`, the automation API and `trial`
-from the license, marks `lifetime` when the license is neither trial nor time-limited, and SHALL set the
-tariff's `dueDate` to the license end date. The quota applies to every portal of the installation.
+Applying a license SHALL replace the installation's quota with one that has no count limits, keeps the installation's
+file size cap, switches on `audit`, `ldap`, `sso`, `thirdparty`, `restore`, `oauth`, `contentsearch`, `docs` and
+`statistic`, takes `branding`, `customization`, the automation API and `trial` from the license, marks `lifetime` when
+the license is neither trial nor time-limited, and SHALL set the tariff's `dueDate` to the license end date.
 
 #### Scenario: Developer license
 
@@ -487,11 +502,11 @@ tariff's `dueDate` to the license end date. The quota applies to every portal of
 
 ### Requirement: Refreshing the license
 
-`refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise
-re-read the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable
-file, a validation failure by the editing service SHALL answer 402, a start date in the future 400. The
-Files worker SHALL perform the same re-read periodically (once a day unless configured otherwise) whenever a
-license path is configured, so a license file replaced on disk takes effect without a call.
+`refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise re-read
+the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
+editing-service refusal SHALL answer 402, a start date in the future 400. The Files worker SHALL perform the same
+re-read periodically (daily unless configured otherwise) whenever a license path is configured, so a replaced file
+takes effect without a call.
 
 #### Scenario: Open-source installation
 
@@ -534,12 +549,10 @@ answer true.
 
 ### Requirement: Tariff state of a licensed installation and the payment gate
 
-For a self-hosted installation the tariff SHALL be one for all portals: `state` Paid while the license end
-date lies ahead, Delay for the configured grace period after it (`delayDueDate` = end date plus the period),
-then NotPaid; a `lifetime` quota SHALL never leave Paid and a trial quota SHALL report Trial. While the state
-is NotPaid and the tariff page is enabled, every operation not marked as allowed without payment SHALL answer
-402 unless the request carries the `Payment-Info: false` header; `getPortalTariff`, the license operations and
-the branding reads stay available.
+For a self-hosted installation the tariff SHALL be one for all portals: `state` Paid while the license end date lies
+ahead, Delay for the configured grace period after it (reported as `delayDueDate`), then NotPaid; a `lifetime` quota
+SHALL never leave Paid and a trial quota SHALL report Trial. While NotPaid and the tariff page is enabled, every
+operation not marked as allowed without payment SHALL answer 402 unless the request carries `Payment-Info: false`.
 
 #### Scenario: Grace period
 
@@ -550,6 +563,7 @@ the branding reads stay available.
 
 - **WHEN** `delayDueDate` has passed
 - **THEN** `getPortalTariff` reports `state` NotPaid and a plain read such as `getPortalColorTheme` still answers while `getPortalQuota` answers 402
+- **AND** `getPortalTariff`, the license operations and the branding reads stay available
 
 #### Scenario: Perpetual license
 
@@ -570,22 +584,22 @@ installation sells (999 unless configured).
 
 ### Requirement: Features gated by a quota flag of the edition
 
-The server SHALL gate a feature by a flag of the portal's current quota, never by the edition name:
-`customization` gates the white-label saves (402), `branding` gates hiding the About page, `sso` gates the SSO
-settings of a hosted portal (402), `thirdparty` gates the authorisation keys of paid third-party services on a
-hosted portal, `statistic` the usage statistics; `getQuotaPaymentInformation` lists the flags as features. A
-self-hosted installation SHALL carry the flags its license wrote; plugins and the colour themes SHALL have no
-quota gate at all.
+The server SHALL gate a feature by a flag of the portal's current quota, never by the edition name: `customization`
+gates the white-label saves (402), `branding` gates hiding the About page, `sso` gates the SSO settings of a hosted
+portal (402), `thirdparty` the authorisation keys of paid third-party services on a hosted portal, `statistic` the
+usage statistics. A self-hosted installation carries the flags its license wrote; plugins and the colour themes SHALL
+have no quota gate.
 
 #### Scenario: SSO on a hosted plan without it
 
 - **WHEN** the owner of a hosted portal whose quota lacks `sso` reads the SSO settings
 - **THEN** the system answers 402
+- **AND** `getQuotaPaymentInformation` lists `sso` among the features of the quota, false
 
 #### Scenario: Open-source installation
 
 - **WHEN** the owner of an open-source installation calls `getEnableWhitelabel`
-- **THEN** the answer follows the `customization` flag of the installation's default quota, not the edition
+- **THEN** the answer follows the `customization` flag of the installation's default quota, not the edition: false on the shipped default quota
 
 ### Requirement: Audit trail of branding and license changes
 
