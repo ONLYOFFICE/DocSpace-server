@@ -136,6 +136,7 @@ global using ASC.Web.Api.ApiModel.RequestsDto;
 global using ASC.Web.Api.ApiModel.ResponseDto;
 global using ASC.Web.Api.ApiModels.RequestsDto;
 global using ASC.Web.Api.ApiModels.ResponseDto;
+global using ASC.Web.Api.Controllers;
 global using ASC.Web.Api.Core;
 global using ASC.Web.Api.Log;
 global using ASC.Web.Api.Models;

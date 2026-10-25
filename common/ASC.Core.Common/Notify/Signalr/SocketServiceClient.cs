@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Threading.Channels;
-
 using ASC.Common.Threading;
 
 namespace ASC.Core.Notify.Socket;
