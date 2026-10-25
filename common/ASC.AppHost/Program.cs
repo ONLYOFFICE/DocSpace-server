@@ -212,6 +212,13 @@ if (storybook)
         .WithEnvironment("BROWSER", "none");
 }
 
+// Integration plugins are a local-development convenience: the test profiles must not pick up
+// whatever happens to lie in the sibling plugins folder.
+if (!isIntegrationTest && launchProfile != "test")
+{
+    IntegrationPluginConfiguration.AddIntegrationPlugins(builder, basePath);
+}
+
 // The letter suite never goes through the proxy, and OpenResty binds fixed host ports (8092, 443)
 // and mounts the client packages — which a server-only checkout does not have.
 if (launchProfile != "notify-test")
