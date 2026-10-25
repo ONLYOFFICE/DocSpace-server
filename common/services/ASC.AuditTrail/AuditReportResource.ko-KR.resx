@@ -237,6 +237,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>고객 작업 보고서가 다운로드되었습니다</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>서비스 지출 한도가 생성되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>서비스 지출 한도가 업데이트되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>서비스 지출 한도가 삭제되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>서비스 개인 지출 한도가 설정되었습니다: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>서비스 개인 지출 한도가 비활성화되었습니다: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>고객 구독이 업데이트되었습니다: {0}</value>
   </data>
@@ -1298,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>메타데이터 값이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Document Builder 스크립트에 의해 파일이 열렸습니다: {0}</value>
   </data>
 </root>

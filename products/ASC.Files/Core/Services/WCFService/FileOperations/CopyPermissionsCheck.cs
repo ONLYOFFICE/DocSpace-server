@@ -561,9 +561,16 @@ public class PermissionCheckStarter<T, TTo>(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
         }
 
-        var files = await _fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
+        // a copy only reads the source, so a file someone is editing inside the folder must not
+        // block it - the same rule CheckFilesPermissionsAsync applies to a single file
+        if (copy)
+        {
+            return null;
+        }
 
-        errorMsg = await CheckFilesSecurityPermissionsAsync(files, false);
+        // streamed: the subtree can be arbitrarily large and is only needed for this check
+        errorMsg = await CheckFilesSecurityPermissionsAsync(
+            _fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true), false);
         if (errorMsg != null)
         {
             throw new SecurityException(errorMsg);

@@ -748,6 +748,11 @@ public static class DocumentService
         public string Version { get; set; }
 
         /// <summary>
+        /// The ONLYOFFICE Docs AI tools version, null when the AI tools are disabled or the editors are older than this field.
+        /// </summary>
+        public string AiToolsVersion { get; set; }
+
+        /// <summary>
         /// The command response error type.
         /// </summary>
         public enum ErrorTypes

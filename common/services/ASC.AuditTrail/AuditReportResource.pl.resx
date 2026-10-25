@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Raport operacji klienta został pobrany</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limit wydatków na usługę został utworzony: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limit wydatków na usługę został zaktualizowany: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limit wydatków na usługę został usunięty: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Osobiste limity wydatków na usługę zostały ustawione: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Osobiste limity wydatków na usługę zostały wyłączone: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Subskrypcja klienta została zaktualizowana: {0}</value>
   </data>
@@ -1298,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Wartości metadanych zostały zaktualizowane: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Plik otwarty przez skrypt Document Builder: {0}</value>
   </data>
 </root>

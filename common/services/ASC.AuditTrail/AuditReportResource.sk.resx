@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Bola stiahnutá správa o operáciách zákazníka</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol vytvorený: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol aktualizovaný: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limit výdavkov na službu bol odstránený: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Osobné limity výdavkov na službu boli nastavené: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Osobné limity výdavkov na službu boli vypnuté: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Predplatné zákazníka bolo aktualizované: {0}</value>
   </data>
@@ -1298,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Hodnoty metadát boli aktualizované: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Súbor bol otvorený skriptom Document Builder: {0}</value>
   </data>
 </root>

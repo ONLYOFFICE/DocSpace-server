@@ -404,16 +404,19 @@ public class TenantManager(
         return result;
     }
 
-    public async Task<Dictionary<string, decimal>> GetProductPriceInfoAsync(string productId, bool wallet)
+    /// <summary>
+    /// Returns the prices of the given products for the partner of the current portal, as product id to currency
+    /// code to unit price. All the products go to the payment services in one request.
+    /// </summary>
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(List<string> productIds, bool wallet)
     {
-        if (string.IsNullOrEmpty(productId))
+        if (productIds.Count == 0)
         {
-            return null;
+            return [];
         }
 
         var tenant = GetCurrentTenant(false);
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [productId]);
-        return prices.GetValueOrDefault(productId);
+        return await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, productIds);
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
