@@ -10,17 +10,25 @@ is archived. This is the general matrix; room types with their own actions are s
 
 Sources: product matrix "Types and Roles. Access rights", sheet "Roles", checked against the integration
 tests and a live run against the server (October 2026). Where the matrix and the server disagree, this
-specification follows the server; the differences are listed in `openspec/deviations.md`. In the tables
-below `✔` means the action is allowed and an empty cell means it is denied. Column abbreviations:
-RO — Room Owner, RM — Room manager, CC — Content creator, ED — Editor, FF — Form Filler, RV — Reviewer,
-CM — Commentator, VW — Viewer.
+specification follows the server; the differences are listed in `openspec/deviations.md` and, with the
+evidence for every row, in `verification.md` next to this file. In the tables below `✔` means the action is
+allowed and an empty cell means it is denied. Column abbreviations: RO — Room Owner, RM — Room manager,
+CC — Content creator, ED — Editor, FF — Form Filler, RV — Reviewer, CM — Commentator, VW — Viewer. The
+matrices themselves are stated in the first scenario of each requirement.
 
 ## Requirements
 
 ### Requirement: Roles available in each room type
 
-The system SHALL accept a member role only when the room type offers it. The Room Owner is the room's
-creator, not an assignable role.
+The system SHALL accept a member role only when the room type offers it: a Custom room every role but Form
+Filler, a Public room only Room manager and Content creator, a Collaboration room Room manager, Content
+creator, Editor and Viewer, a Virtual Data Room those four plus Form Filler, a Form filling room Room
+manager, Content creator and Form Filler. The Room Owner is the room's creator, not an assignable role.
+
+#### Scenario: Role availability matrix by room type
+
+- **WHEN** a member is invited to a room of the given type with the given role
+- **THEN** the invitation is accepted or refused according to this table
 
 | Room type          | RM | CC | ED | FF | RV | CM | VW |
 |--------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -42,7 +50,14 @@ creator, not an assignable role.
 
 ### Requirement: Roles available to each user type
 
-The system SHALL allow a room role to be assigned to a member only when the member's user type permits it.
+The system SHALL allow a room role to be assigned to a member only when the member's user type permits it:
+the Owner, DocSpace admins and Room admins may hold every role including Room Owner and Room manager; a
+User or a Guest may hold any role except Room Owner and Room manager.
+
+#### Scenario: Role availability matrix by user type
+
+- **WHEN** a role is assigned to a member of the given user type
+- **THEN** the assignment is accepted or refused according to this table
 
 | User type      | RO | RM | CC | ED | FF | RV | CM | VW |
 |----------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -69,7 +84,16 @@ The system SHALL allow a room role to be assigned to a member only when the memb
 
 ### Requirement: Room management by role
 
-The system SHALL allow room-level actions in an active room by role as follows.
+The system SHALL allow room-level actions in an active room by role: editing the room, inviting, assigning
+and changing roles, removing members and managing room links need the Room Owner or a Room manager;
+viewing the member list, history and info is open to every role; archiving and deleting the room is the
+Room Owner's alone; every role but the Room Owner may leave the room. Invitations take effect immediately;
+there is no moderation of invitations.
+
+#### Scenario: Room management matrix by role
+
+- **WHEN** a member with the given role performs a room-level action in an active room
+- **THEN** the outcome follows this table
 
 | Action                                  | RO | RM | CC | ED | FF | RV | CM | VW |
 |-----------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -86,12 +110,6 @@ The system SHALL allow room-level actions in an active room by role as follows.
 | Archive the room                        | ✔ |   |   |   |   |   |   |   |
 | Delete the room                         | ✔ |   |   |   |   |   |   |   |
 
-A Room manager SHALL be able to demote another Room manager and to lower their own role; once lowered, the
-former Room manager cannot restore themselves. No member other than a Room manager SHALL change their own
-role. Invitations take effect immediately; there is no moderation of invitations. A Room manager inviting
-a guest they did not invite to the portal SHALL get an empty result: the guest is not added (see
-`user-type-permissions`).
-
 #### Scenario: Editor cannot invite
 
 - **WHEN** a Content creator, Editor, Reviewer, Commentator or Viewer invites a user, changes another member's role or removes a member
@@ -99,8 +117,13 @@ a guest they did not invite to the portal SHALL get an empty result: the guest i
 
 #### Scenario: Room manager manages members
 
-- **WHEN** a Room manager invites a user with a role, changes a member's role or removes a member
+- **WHEN** a Room manager invites a user with a role, changes a member's role, demotes another Room manager or removes a member
 - **THEN** the change is applied immediately
+
+#### Scenario: Room manager invites a foreign guest
+
+- **WHEN** a Room manager invites a guest they did not invite to the portal
+- **THEN** the request succeeds with an empty result and the guest is not added (see `user-type-permissions`)
 
 #### Scenario: Room manager cannot archive the room
 
@@ -110,7 +133,7 @@ a guest they did not invite to the portal SHALL get an empty result: the guest i
 #### Scenario: Member cannot raise own role
 
 - **WHEN** a Viewer or an Editor sets a higher role for themselves
-- **THEN** the system rejects the request (403)
+- **THEN** the system rejects the request (403); no member other than a Room manager changes their own role
 
 #### Scenario: Room manager lowers own role
 
@@ -129,8 +152,16 @@ a guest they did not invite to the portal SHALL get an empty result: the guest i
 
 ### Requirement: Working with file content by role
 
-The system SHALL allow content-level actions on files of an active room by role as follows. Form filling
-applies to PDF forms in Virtual Data Rooms and Form filling rooms only (see those specifications).
+The system SHALL allow content-level actions on files of an active room by role: every role views,
+prints, copies to the clipboard and downloads; every role but Viewer comments; Room Owner, Room manager,
+Content creator, Editor and Reviewer review; Room Owner, Room manager, Content creator, Editor and Form
+Filler fill forms; Room Owner, Room manager, Content creator and Editor edit. Form filling applies to PDF
+forms in Virtual Data Rooms and Form filling rooms only (see those specifications).
+
+#### Scenario: Content action matrix by role
+
+- **WHEN** a member with the given role opens a file of an active room
+- **THEN** the editor offers the actions of this table
 
 | Action                               | RO | RM | CC | ED | FF | RV | CM | VW |
 |--------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -161,8 +192,16 @@ applies to PDF forms in Virtual Data Rooms and Form filling rooms only (see thos
 
 ### Requirement: Managing files and folders by role
 
-The system SHALL allow file- and folder-management actions in an active room by role as follows.
-"Own" means created by the member.
+The system SHALL allow file- and folder-management actions in an active room by role: Room Owner, Room
+manager and Content creator create, upload, copy in, lock and manage versions; Room Owner and Room manager
+also act on other members' entries, unlock foreign locks and manage file and folder links; a Content
+creator deletes, moves and renames only entries they created ("own" means created by the member); every
+role copies out of the room. The matrix scenario holds the full table.
+
+#### Scenario: File management matrix by role
+
+- **WHEN** a member with the given role performs a file or folder action in an active room
+- **THEN** the outcome follows this table
 
 | Action                                              | RO | RM | CC | ED | FF | RV | CM | VW |
 |-----------------------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -184,12 +223,10 @@ The system SHALL allow file- and folder-management actions in an active room by 
 | Copy any file or folder within the room             | ✔ | ✔ | ✔ |   |   |   |   |   |
 | Create / edit / delete file and folder links        | ✔ | ✔ |   |   |   |   |   |   |
 
-Copying does not depend on who created the entry: any member who can read a file can copy it to a place
-where they can create content (their My documents, or a room where they are Content creator or higher).
-A Viewer loses the right to copy out when the room denies downloading. Copying from My documents is not
-available to a Guest, who has no My documents section. Locking follows the lock holder, not the author: a
-Content creator can lock any unlocked file, including one they did not create, and cannot unlock a file
-locked by someone else, even one they created.
+#### Scenario: Copying does not depend on authorship
+
+- **WHEN** any member who can read a file copies it
+- **THEN** the copy is created wherever the member can create content (their My documents, or a room where they are Content creator or higher); a Guest, who has no My documents, cannot copy from or to it, and a Viewer loses the right to copy out when the room denies downloading
 
 #### Scenario: Content creator deletes own file
 
@@ -219,7 +256,7 @@ locked by someone else, even one they created.
 #### Scenario: Content creator locks another member's file
 
 - **WHEN** a Content creator locks an unlocked file created by the owner
-- **THEN** the file is locked by the Content creator, and the Content creator can unlock it again
+- **THEN** the file is locked by the Content creator, and the Content creator can unlock it again; locking follows the lock holder, not the author
 
 #### Scenario: Content creator cannot unlock someone else's lock
 
@@ -253,10 +290,16 @@ managing version history to any role.
 
 ### Requirement: Archived room is read-only
 
-Once a room is archived the system SHALL deny every role all modifying actions: editing the room, inviting
-users, assigning or changing roles, removing users, creating, uploading, editing, form filling, reviewing,
-commenting, locking, managing version history, saving docxf as oform, deleting, moving and renaming files
-and folders. The system SHALL allow only the actions below.
+Once a room is archived the system SHALL deny every role all modifying actions: editing the room,
+inviting, assigning or changing roles, removing users, creating, uploading, editing, form filling,
+reviewing, commenting, locking, managing version history, saving docxf as oform, deleting, moving and
+renaming files and folders. Viewing, downloading and copying out stay available to every role; viewing
+version history to Editor and above; restoring and deleting the room to the Room Owner only.
+
+#### Scenario: Archived room matrix by role
+
+- **WHEN** a member with the given role acts in an archived room
+- **THEN** only the actions of this table succeed
 
 | Action in an archived room                              | RO | RM | CC | ED | FF | RV | CM | VW |
 |---------------------------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -273,9 +316,10 @@ and folders. The system SHALL allow only the actions below.
 | Restore the room                                        | ✔ |   |   |   |   |   |   |   |
 | Delete the room                                         | ✔ |   |   |   |   |   |   |   |
 
-Copying out of an archived room to My documents is not available to a Guest, who has no My documents
-section. Restoring and deleting an archived room is also available to the DocSpace Owner and DocSpace
-admins who are not members (see `user-type-permissions`).
+#### Scenario: Non-member administrators restore an archived room
+
+- **WHEN** the DocSpace Owner or a DocSpace admin who is not a member restores or deletes an archived room
+- **THEN** the operation succeeds (see `user-type-permissions`); a Guest cannot copy out to My documents, having no such section
 
 #### Scenario: Editor cannot edit in an archived room
 

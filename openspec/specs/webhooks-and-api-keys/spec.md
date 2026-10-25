@@ -9,11 +9,10 @@ that created them, optionally narrowed to a set of scopes (`keys` endpoints). It
 Developer Tools access rule (`settings/devtoolsaccess`) that governs who may use either of them.
 
 Sources: the integration tests in `web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks`, `06_ApiKeys`,
-`02_Settings/AccessToDevTools` and `05_Security/AccessToDevTools`, the regression test
-`products/ASC.People/Tests/Tests/00_Regressions/WebhookTest.cs`, the OpenAPI document and a static reading of the
-product code (`common/ASC.Webhooks.Core`, `web/ASC.Web.Studio/WebHooks`, `web/ASC.Web.Api/Api/Settings/WebhooksController.cs`,
-`products/ASC.People/Server/Api/ApiKeysController.cs`, `common/ASC.Api.Core/Auth`), checked against the release
-notes (v2.0, v3.1, v3.7). Where the release notes or the endpoint descriptions and the server disagree, this
+`02_Settings/AccessToDevTools` and `05_Security/AccessToDevTools`, the regression tests in
+`products/ASC.People/Tests/Tests/00_Regressions`, the OpenAPI document
+`sdk/docspace-api-spec/docspace-backend.yaml` and the product code where the tests stop (cited in
+`verification.md`), checked against the release notes (v2.0, v3.1, v3.7). Where the release notes or the endpoint descriptions and the server disagree, this
 specification follows the server; the differences are listed in `verification.md`. The webhook events of the
 form-filling workflow (`form.submit`, `form.filled.out`, `form.stopped`) are specified in
 `form-filling-workflow` and only cross-referenced here.
@@ -24,19 +23,14 @@ form-filling workflow (`form.submit`, `form.filled.out`, `form.stopped`) are spe
 
 The server SHALL decide whether a caller may use the Developer Tools — webhook configurations, the webhook
 delivery journal and API keys — from the caller's user type and the portal setting `limitedAccessForUsers`:
+the DocSpace Owner and DocSpace admins always may, a Room admin or a User only while the setting is `false`
+(the default), a Guest never; anonymous is 401. A refused member SHALL be answered with 403 and the message
+"Access denied". The two read-only catalogues are exceptions.
 
-| Caller                              | Developer Tools                                                  |
-|-------------------------------------|------------------------------------------------------------------|
-| DocSpace Owner, DocSpace admin      | always                                                           |
-| Room admin, User                    | only while `limitedAccessForUsers` is `false` (the default)      |
-| Guest                               | never                                                            |
-| anonymous                           | never (401)                                                      |
+#### Scenario: Catalogues are the exceptions
 
-A refused member SHALL be answered with 403 and the message "Access denied". The read-only trigger catalogue
-(`GET /api/2.0/settings/webhook/triggers`) and the API-key permission catalogue are exceptions: the trigger
-catalogue is readable by every authenticated member, a Guest included, and the permission catalogue refuses
-only Guests. The restriction applies to Room admins as well as Users, even though the setting is named after
-Users.
+- **WHEN** a member reads the trigger catalogue (`GET /api/2.0/settings/webhook/triggers`) or the API-key permission catalogue
+- **THEN** the trigger catalogue is returned to every authenticated member, a Guest included, and the permission catalogue refuses only Guests
 
 #### Scenario: Guest is refused everywhere
 
@@ -51,7 +45,7 @@ Users.
 #### Scenario: Restriction switched on
 
 - **WHEN** the DocSpace Owner sets `limitedAccessForUsers` to `true` and a Room admin or a User creates an API key
-- **THEN** the call answers 403 with "Access denied"
+- **THEN** the call answers 403 with "Access denied" — the restriction applies to Room admins as well as Users, although the setting is named after Users
 - **AND** the DocSpace Owner and a DocSpace admin still create a key with 200
 
 #### Scenario: Restriction switched off again
@@ -69,8 +63,8 @@ Users.
 `GET /api/2.0/settings/devtoolsaccess` (`getTenantAccessDevToolsSettings`) SHALL return
 `limitedAccessForUsers` and `lastModified` to every authenticated member, whatever their type.
 `POST /api/2.0/settings/devtoolsaccess` (`setTenantDevToolsAccessSettings`, body `limitedAccessForUsers`)
-SHALL require the portal-settings right — the DocSpace Owner and DocSpace admins — persist the value for the
-whole portal, record the change in the audit trail and echo the saved setting. The default value is `false`.
+SHALL require the portal-settings right, persist the value for the whole portal, record the change in the
+audit trail and echo the saved setting. The default value is `false`.
 
 #### Scenario: Every member reads the setting
 
@@ -96,20 +90,22 @@ whole portal, record the change in the audit trail and echo the saved setting. T
 
 ### Requirement: Creating a webhook configuration
 
-`POST /api/2.0/settings/webhook` (`createWebhook`) SHALL create a subscription with `name` (required, at most
-50 characters), `uri` (required), `secretKey` (required on creation, at most 50 characters, and it MUST satisfy
-the portal password rules), `enabled`, `ssl`, `triggers` (a bitmask of `WebhookTrigger`, `0` meaning every
-event) and an optional `targetId` (at most 255 characters) that limits the subscription to one entity. The
-subscription SHALL belong to the caller (`createdBy`) and SHALL be stored with `createdOn`. The answer SHALL be
-the stored configuration (`id`, `name`, `uri`, `enabled`, `ssl`, `triggers`, `targetId`, `createdBy`,
-`createdOn`, `modifiedBy`, `modifiedOn`, `lastFailureOn`, `lastFailureContent`, `lastSuccessOn`) without the
-secret key. Every call adds another subscription, but a second subscription with the same `name` and `uri` in the
-portal SHALL be refused with 400. Creation is recorded in the audit trail (`WebhookCreated`).
+`POST /api/2.0/settings/webhook` (`createWebhook`) SHALL create a subscription with a `name`, a `uri`, a
+`secretKey`, `enabled`, `ssl`, `triggers` (a bitmask of trigger ids, `0` meaning every event) and an optional
+`targetId` that limits the subscription to one entity. The subscription SHALL belong to the caller and the
+answer SHALL be the stored configuration without the secret key. Every call adds another subscription.
+Creation is recorded in the audit trail (`WebhookCreated`).
 
 #### Scenario: Owner creates an enabled webhook
 
 - **WHEN** the DocSpace Owner posts a name, an `https` URL that answers a HEAD request, a secret key and `enabled: true`
 - **THEN** the call answers 200 with a non-zero `id`, the given `name` and `uri`, `enabled` true, `createdBy` and `createdOn` filled in
+- **AND** the answer carries `id`, `name`, `uri`, `enabled`, `ssl`, `triggers`, `targetId`, `createdBy`, `createdOn`, `modifiedBy`, `modifiedOn`, `lastFailureOn`, `lastFailureContent` and `lastSuccessOn`
+
+#### Scenario: Duplicate name and URL
+
+- **WHEN** a second subscription with the same `name` and `uri` is created in the portal
+- **THEN** the call answers 400
 
 #### Scenario: Triggers and SSL are stored
 
@@ -123,27 +119,32 @@ portal SHALL be refused with 400. Creation is recorded in the audit trail (`Webh
 
 #### Scenario: Missing name, URL or secret
 
-- **WHEN** the request has no `name` or no `uri`, or is a creation without `secretKey`, or the secret does not pass the password rules, or `name`/`secretKey` exceed 50 characters
+- **WHEN** the request has no `name` or no `uri`, or is a creation without `secretKey`, or the secret does not pass the portal password rules, or `name`/`secretKey` exceed 50 characters or `targetId` 255
 - **THEN** the call answers 400
 
 ### Requirement: Validation of the target URL
 
 Before a subscription is stored, switched on or delivered to, the server SHALL validate its URL: it MUST be an
-absolute `http` or `https` address; with `ssl: true` it MUST be `https`; a host given as an IP address, and every
-address the host name resolves to (DNS lookup limited to 3 seconds), MUST NOT fall into the blacklist
-(`webhooks:blacklist`, by default the loopback, link-local, private and carrier-grade NAT ranges of IPv4 and
-IPv6: `0.0.0.0/8`, `10.0.0.0/8`, `100.64.0.0/10`, `127.0.0.0/8`, `169.254.0.0/16`, `172.16.0.0/12`,
-`192.168.0.0/16`, `::/128`, `::1/128`, `fc00::/8`, `fd00::/8`, `fe80::/10`). On creation, update and
-switching on, the server SHALL additionally send a HEAD request to the URL — connecting to the already resolved
-address so that DNS rebinding cannot redirect it, without following redirects, and verifying the TLS certificate
-only when `ssl` is `true` — and refuse the subscription unless the answer is a success status. A URL that fails
-the rules SHALL be refused with 400; a URL that does not answer the HEAD request at all (connection failure,
-timeout, invalid certificate under `ssl`) SHALL be refused with 500.
+absolute `http` or `https` address; with `ssl: true` it MUST be `https`; a host given as an IP address, and
+every address the host name resolves to, MUST NOT fall into the configurable address blacklist. On creation,
+update and switching on, a HEAD request to the URL MUST additionally answer a success status. A URL that
+fails the rules SHALL be refused with 400.
 
 #### Scenario: Private address is refused
 
 - **WHEN** the DocSpace Owner creates a webhook whose URL is `http://localhost`
 - **THEN** the call answers 400
+- **AND** by default the blacklist holds the loopback, link-local, private and carrier-grade NAT ranges of IPv4 and IPv6 (`0.0.0.0/8`, `10.0.0.0/8`, `100.64.0.0/10`, `127.0.0.0/8`, `169.254.0.0/16`, `172.16.0.0/12`, `192.168.0.0/16`, `::/128`, `::1/128`, `fc00::/8`, `fd00::/8`, `fe80::/10`), and the DNS lookup is limited to 3 seconds
+
+#### Scenario: HEAD probe is pinned and does not follow redirects
+
+- **WHEN** the HEAD request is sent
+- **THEN** it connects to the already resolved address so that DNS rebinding cannot redirect it, does not follow redirects, and verifies the TLS certificate only when `ssl` is `true`
+
+#### Scenario: Target that does not answer
+
+- **WHEN** the URL does not answer the HEAD request at all (connection failure, timeout, invalid certificate under `ssl`)
+- **THEN** the call answers 500
 
 #### Scenario: Target that redirects is refused
 
@@ -158,59 +159,25 @@ timeout, invalid certificate under `ssl`) SHALL be refused with 500.
 ### Requirement: Trigger catalogue and per-role availability
 
 `GET /api/2.0/settings/webhook/triggers` (`getWebhookTriggers`) SHALL return the fixed catalogue of events in
-display order — `*`, user, group, file (including `file.downloaded`), folder (including `folder.downloaded`),
-room, form and agent events — each with `name` (the event name used in payloads), `id` (the bit value) and
-`available` (whether the caller's user type may subscribe to it). The catalogue, with the roles allowed to
-subscribe, is:
-
-| Event name          | Bit (`id`) | Member name       | DocSpace admin | Room admin | User |
-|---------------------|-----------:|-------------------|:--:|:--:|:--:|
-| `*` (all events)    | 0          | `All`             | ✔ | ✔ | ✔ |
-| `user.created`      | 1          | `UserCreated`     | ✔ | ✔ |   |
-| `user.invited`      | 2          | `UserInvited`     | ✔ | ✔ |   |
-| `user.updated`      | 4          | `UserUpdated`     | ✔ | ✔ | ✔ |
-| `user.deleted`      | 8          | `UserDeleted`     | ✔ | ✔ | ✔ |
-| `group.created`     | 16         | `GroupCreated`    | ✔ | ✔ |   |
-| `group.updated`     | 32         | `GroupUpdated`    | ✔ | ✔ |   |
-| `group.deleted`     | 64         | `GroupDeleted`    | ✔ | ✔ |   |
-| `file.created`      | 128        | `FileCreated`     | ✔ | ✔ | ✔ |
-| `file.uploaded`     | 256        | `FileUploaded`    | ✔ | ✔ | ✔ |
-| `file.updated`      | 512        | `FileUpdated`     | ✔ | ✔ | ✔ |
-| `file.trashed`      | 1024       | `FileTrashed`     | ✔ | ✔ | ✔ |
-| `file.deleted`      | 2048       | `FileDeleted`     | ✔ | ✔ | ✔ |
-| `file.restored`     | 4096       | `FileRestored`    | ✔ | ✔ | ✔ |
-| `file.copied`       | 8192       | `FileCopied`      | ✔ | ✔ | ✔ |
-| `file.moved`        | 16384      | `FileMoved`       | ✔ | ✔ | ✔ |
-| `folder.created`    | 32768      | `FolderCreated`   | ✔ | ✔ | ✔ |
-| `folder.updated`    | 65536      | `FolderUpdated`   | ✔ | ✔ | ✔ |
-| `folder.trashed`    | 131072     | `FolderTrashed`   | ✔ | ✔ | ✔ |
-| `folder.deleted`    | 262144     | `FolderDeleted`   | ✔ | ✔ | ✔ |
-| `folder.restored`   | 524288     | `FolderRestored`  | ✔ | ✔ | ✔ |
-| `folder.copied`     | 1048576    | `FolderCopied`    | ✔ | ✔ | ✔ |
-| `folder.moved`      | 2097152    | `FolderMoved`     | ✔ | ✔ | ✔ |
-| `room.created`      | 4194304    | `RoomCreated`     | ✔ | ✔ |   |
-| `room.updated`      | 8388608    | `RoomUpdated`     | ✔ | ✔ | ✔ |
-| `room.archived`     | 16777216   | `RoomArchived`    | ✔ | ✔ | ✔ |
-| `room.deleted`      | 33554432   | `RoomDeleted`     | ✔ | ✔ | ✔ |
-| `room.restored`     | 67108864   | `RoomRestored`    | ✔ | ✔ | ✔ |
-| `room.copied`       | 134217728  | `RoomCopied`      | ✔ | ✔ |   |
-| `form.submit`       | 268435456  | `FormSubmit`      | ✔ | ✔ | ✔ |
-| `form.filled.out`   | 536870912  | `FormFilledOut`   | ✔ | ✔ | ✔ |
-| `form.stopped`      | 1073741824 | `FormStopped`     | ✔ | ✔ | ✔ |
-| `agent.created`     | 2^31       | `AgentCreated`    | ✔ | ✔ |   |
-| `agent.updated`     | 2^32       | `AgentUpdated`    | ✔ | ✔ | ✔ |
-| `agent.deleted`     | 2^33       | `AgentDeleted`    | ✔ | ✔ | ✔ |
-| `file.downloaded`   | 2^34       | `FileDownloaded`  | ✔ | ✔ | ✔ |
-| `folder.downloaded` | 2^35       | `FolderDownloaded`| ✔ | ✔ | ✔ |
-
-The DocSpace Owner counts as a DocSpace admin. Creating or updating a subscription whose `triggers` bitmask
-contains an event the caller's type may not subscribe to SHALL be refused with 400 ("Trigger is not available");
-`triggers = 0` (all events) is accepted from every type that may use webhooks.
+display order, each with `name` (the event name used in payloads), `id` (the bit value) and `available`
+(whether the caller's user type may subscribe to it). A subscription whose `triggers` bitmask contains an event
+the caller's type may not subscribe to SHALL be refused with 400 ("Trigger is not available"); `triggers = 0`
+(all events) is accepted from every type that may use webhooks.
 
 #### Scenario: Catalogue is complete and ordered
 
 - **WHEN** any authenticated member requests the catalogue
-- **THEN** the call answers 200 with a non-empty list whose first entry has a name, ordered as in the table
+- **THEN** the call answers 200 with a non-empty list whose first entry has a name — `*`, user, group, file, folder, room, form and agent events in this order with these bit values: `*` 0, `user.created` 1, `user.invited` 2, `user.updated` 4, `user.deleted` 8, `group.created` 16, `group.updated` 32, `group.deleted` 64
+- **AND** `file.created` 128, `file.uploaded` 256, `file.updated` 512, `file.trashed` 1024, `file.deleted` 2048, `file.restored` 4096, `file.copied` 8192, `file.moved` 16384
+- **AND** `folder.created` 32768, `folder.updated` 65536, `folder.trashed` 131072, `folder.deleted` 262144, `folder.restored` 524288, `folder.copied` 1048576, `folder.moved` 2097152
+- **AND** `room.created` 4194304, `room.updated` 8388608, `room.archived` 16777216, `room.deleted` 33554432, `room.restored` 67108864, `room.copied` 134217728, `form.submit` 268435456, `form.filled.out` 536870912, `form.stopped` 1073741824
+- **AND** `agent.created` 2^31, `agent.updated` 2^32, `agent.deleted` 2^33, `file.downloaded` 2^34, `folder.downloaded` 2^35
+
+#### Scenario: Availability per user type
+
+- **WHEN** the catalogue is read by a DocSpace admin (the DocSpace Owner counts as one), a Room admin and a User
+- **THEN** every event is `available` to the DocSpace admin and the Room admin
+- **AND** for the User every event is available except `user.created`, `user.invited`, `group.created`, `group.updated`, `group.deleted`, `room.created`, `room.copied` and `agent.created`
 
 #### Scenario: User subscribes to an admin-only event
 
@@ -248,11 +215,9 @@ of its most recent delivery, `0` when nothing has been delivered yet. The list i
 
 `PUT /api/2.0/settings/webhook` (`updateWebhook`, the subscription addressed by `id` in the body) SHALL replace
 `name`, `uri`, `enabled`, `ssl`, `triggers` and `targetId` with the values of the request — fields left out take
-their defaults — and SHALL replace `secretKey` only when a non-empty one is sent, keeping the stored secret
-otherwise. The same validation as on creation (trigger availability, password rules for a new secret, URL rules
-and the HEAD probe) SHALL run, and it runs before the subscription is looked up. A DocSpace admin may update any
-subscription; anybody else only their own. The answer SHALL be the updated configuration with `modifiedOn` and
-`modifiedBy` set; the update is recorded in the audit trail (`WebhookUpdated`).
+their defaults — and SHALL replace `secretKey` only when a non-empty one is sent. The same validation as on
+creation SHALL run. The answer SHALL be the updated configuration with `modifiedOn` and `modifiedBy` set; the
+update is recorded in the audit trail (`WebhookUpdated`).
 
 #### Scenario: Owner renames and re-targets
 
@@ -262,26 +227,31 @@ subscription; anybody else only their own. The answer SHALL be the updated confi
 #### Scenario: Unknown id
 
 - **WHEN** the body passes validation but no subscription with that `id` exists in the portal
-- **THEN** the call answers 404
+- **THEN** the call answers 404, because the validation (trigger availability, password rules for a new secret, URL rules and the HEAD probe) runs before the subscription is looked up
 
 #### Scenario: Another member's subscription
 
 - **WHEN** a Room admin or User updates a subscription created by someone else
 - **THEN** the call answers 403 with "Access denied"
+- **AND** a DocSpace admin may update any subscription
 
 ### Requirement: Switching a webhook on or off
 
 `PUT /api/2.0/settings/webhook/enable` (`enableWebhook`) SHALL set `enabled` of the subscription addressed by
-`id` and leave every other stored value unchanged, although the body is validated as a full configuration
-(`name` and `uri` required). Switching a subscription **on** SHALL re-run the validation against the stored
-values (URL rules, HEAD probe, password rules on the stored secret) and refuse with 400 when they no longer pass;
-switching **off** is not validated. While a subscription is off, its events SHALL be dropped, not queued. A
-DocSpace admin may switch any subscription; anybody else only their own.
+`id` and leave every other stored value unchanged. Switching a subscription **on** SHALL re-run the validation
+against the stored values; switching **off** is not validated. While a subscription is off, its events SHALL
+be dropped, not queued. A DocSpace admin may switch any subscription; anybody else only their own.
 
 #### Scenario: Owner disables own webhook
 
 - **WHEN** the DocSpace Owner creates an enabled webhook and sends `enabled: false` with its `id`
 - **THEN** the call answers 200 with the same `id`, `name` and `uri`, `enabled` false and `modifiedOn` set
+- **AND** the body is validated as a full configuration (`name` and `uri` required) although only `id` and `enabled` are read
+
+#### Scenario: Switching on re-validates the stored values
+
+- **WHEN** a subscription is switched on and its stored values no longer pass the URL rules, the HEAD probe or the password rules on the stored secret
+- **THEN** the call answers 400
 
 #### Scenario: Another member's webhook
 
@@ -319,25 +289,21 @@ anybody else only their own. The removal is recorded in the audit trail (`Webhoo
 
 The server SHALL publish an event to every subscription of the portal that is enabled, whose `triggers` is `0`
 or contains the event, whose `targetId` (when set) equals the identifier of the entity concerned, and whose
-creator is allowed to see the entity: for files, folders and rooms the creator must be able to read the entry;
-for users the creator must be allowed to view that account; for groups the creator must be a DocSpace admin or
-hold the right to read groups. The subscription's own creator always receives events about actions they perform
-themselves. Events are produced by the product actions below:
+creator is allowed to see the entity. The subscription's own creator always receives events about actions
+they perform themselves.
 
-| Event                         | Produced by                                                                                     |
-|-------------------------------|-------------------------------------------------------------------------------------------------|
-| `user.created`                | adding a member through the people API, confirming an invitation, signing up through a third-party account |
-| `user.invited`                | sending an invitation by e-mail                                                                 |
-| `user.updated`, `user.deleted`| profile and type changes, deletion/reassignment of a member                                     |
-| `group.created/updated/deleted` | group management                                                                              |
-| `file.*`, `folder.*`          | create, upload, edit, trash, delete, restore, copy, move of files and folders                   |
-| `file.downloaded`, `folder.downloaded` | download through the file handler or a download operation                              |
-| `room.created`                | creating a room that is not an AI agent                                                         |
-| `room.updated/archived/deleted/restored` | room management                                                                      |
-| `room.copied`                 | copying a room (including creating one from a template)                                         |
-| `agent.created`               | creating an AI agent room                                                                       |
-| `agent.updated`, `agent.deleted` | AI agent management                                                                          |
-| `form.submit`, `form.filled.out`, `form.stopped` | see `form-filling-workflow` ("Webhook events of the workflow")                |
+#### Scenario: Visibility of the entity to the creator
+
+- **WHEN** an event about a file, folder or room, about an account, or about a group is published
+- **THEN** the subscription's creator must be able to read the entry, must be allowed to view that account, or must be a DocSpace admin or hold the right to read groups respectively
+
+#### Scenario: Actions that produce the events
+
+- **WHEN** a product action is performed
+- **THEN** `user.created` is produced by adding a member through the people API, confirming an invitation or signing up through a third-party account; `user.invited` by sending an invitation by e-mail; `user.updated` and `user.deleted` by profile and type changes and by deletion or reassignment of a member; `group.created`, `group.updated` and `group.deleted` by group management
+- **AND** `file.*` and `folder.*` by create, upload, edit, trash, delete, restore, copy and move of files and folders; `file.downloaded` and `folder.downloaded` by a download through the file handler or a download operation
+- **AND** `room.created` by creating a room that is not an AI agent; `room.updated`, `room.archived`, `room.deleted` and `room.restored` by room management; `room.copied` by copying a room (including creating one from a template); `agent.created` by creating an AI agent room; `agent.updated` and `agent.deleted` by AI agent management
+- **AND** `form.submit`, `form.filled.out` and `form.stopped` as specified in `form-filling-workflow` ("Webhook events of the workflow")
 
 #### Scenario: Subscription not covering the event
 
@@ -356,20 +322,27 @@ themselves. Events are produced by the product actions below:
 
 ### Requirement: Delivery of a webhook
 
-For each queued event the server SHALL write a delivery record and POST a JSON body to the subscription URL with
-`Accept: */*`, `Content-Type: application/json` and the header `x-docspace-signature-256: sha256=<HMAC-SHA256
-of the body, keyed with the secret key, upper-case hex>`. The body SHALL be
-`{ "event": { id, createOn, createBy, trigger, triggerId }, "payload": <the entity>, "webhook": { id, name,
-url, triggers[], target?, lastFailureOn?, lastFailureContent?, lastSuccessOn?, retryCount, retryOn? } }`,
-camel-cased, dates in UTC, with default values omitted. The target URL SHALL be validated again at delivery
-time (same rules as on creation): a blacklisted address deletes the subscription, any other validation failure
-switches it off, both recorded in the audit trail. A delivery that fails (transport error, timeout or a
-non-success status) SHALL be retried up to `webhooks:repeatcount` times (default 5) with exponential back-off
-starting at one second, each retry carrying `retryCount`, `retryOn` and the last failure in `webhook`. When the
-target answers `410 Gone` the subscription SHALL be deleted. After the attempts the record SHALL store the final
-HTTP status (`500` for a non-HTTP failure), the request and response headers and bodies, and `delivery` — set
-only on success. A subscription whose last success (or creation) lies more than `webhooks:trustedDaysCount`
-days back (default 3) when a delivery fails SHALL be switched off.
+For each queued event the server SHALL write a delivery record and POST a signed JSON body to the subscription
+URL. The target URL SHALL be validated again at delivery time. A delivery that fails SHALL be retried with
+exponential back-off; after the attempts the record SHALL store the outcome. A subscription that keeps failing
+SHALL be switched off, and one whose target is gone SHALL be deleted.
+
+#### Scenario: Request headers and body
+
+- **WHEN** a delivery is sent
+- **THEN** the request carries `Accept: */*`, `Content-Type: application/json` and the header `x-docspace-signature-256: sha256=<HMAC-SHA256 of the body, keyed with the secret key, upper-case hex>`
+- **AND** the body is `{ "event": { id, createOn, createBy, trigger, triggerId }, "payload": <the entity>, "webhook": { id, name, url, triggers[], target?, lastFailureOn?, lastFailureContent?, lastSuccessOn?, retryCount, retryOn? } }`, camel-cased, dates in UTC, with default values omitted
+
+#### Scenario: URL re-validated at delivery
+
+- **WHEN** the target URL no longer passes the rules of creation at delivery time
+- **THEN** a blacklisted address deletes the subscription and any other validation failure switches it off, both recorded in the audit trail
+
+#### Scenario: Retries and the final record
+
+- **WHEN** a delivery fails (transport error, timeout or a non-success status)
+- **THEN** it is retried up to a configurable number of times (5 by default) with exponential back-off starting at one second, each retry carrying `retryCount`, `retryOn` and the last failure in `webhook`
+- **AND** after the attempts the record stores the final HTTP status (`500` for a non-HTTP failure), the request and response headers and bodies, and `delivery` — set only on success
 
 #### Scenario: Successful delivery
 
@@ -383,25 +356,27 @@ days back (default 3) when a delivery fails SHALL be switched off.
 
 #### Scenario: Failing for longer than the trusted period
 
-- **WHEN** a delivery fails and the subscription has had no success for more than 3 days
+- **WHEN** a delivery fails and the subscription has had no success (or creation) for more than the trusted period, 3 days by default
 - **THEN** the subscription is switched off and the audit trail records it
 
 ### Requirement: Delivery journal
 
 `GET /api/2.0/settings/webhooks/log` (`getWebhooksLogs`) SHALL return the delivery records of the portal,
 newest first, paged with `startIndex` and `count` (1–100, default 100; an out-of-range `count` answers 400),
-the total number of matching records reported beside the response. Each record carries `id`, `configName`,
-`trigger`, `creationTime`, `method` (`POST`), `route`, `requestHeaders`, `requestPayload`, `responseHeaders`,
-`responsePayload`, `status` (`0` while pending) and `delivery`. Filters SHALL combine with AND: `deliveryFrom`,
-`deliveryTo`, `hookUri` (exact match), `configId`, `eventId`, `groupStatus` (bitmask of `NotSent` 1,
-`Status2xx` 2, `Status3xx` 4, `Status4xx` 8, `Status5xx` 16; 0 = no filter), `userId` (the subscription's
-creator) and `trigger` (0 = all). For a caller who is not a DocSpace admin `userId` SHALL be forced to the
-caller, so they only ever see deliveries of their own subscriptions.
+the total number of matching records reported beside the response. For a caller who is not a DocSpace admin
+the records SHALL be limited to the deliveries of their own subscriptions.
 
 #### Scenario: Owner reads the journal
 
 - **WHEN** the DocSpace Owner requests the journal with `count=10`
 - **THEN** the call answers 200 with a list
+- **AND** each record carries `id`, `configName`, `trigger`, `creationTime`, `method` (`POST`), `route`, `requestHeaders`, `requestPayload`, `responseHeaders`, `responsePayload`, `status` (`0` while pending) and `delivery`
+
+#### Scenario: Filters combine with AND
+
+- **WHEN** the journal is requested with `deliveryFrom`, `deliveryTo`, `hookUri` (exact match), `configId`, `eventId`, `groupStatus`, `userId` (the subscription's creator) or `trigger` (0 = all)
+- **THEN** only the records matching every given filter are returned
+- **AND** `groupStatus` is a bitmask combining not-sent, 2xx, 3xx, 4xx and 5xx groups (0 = no filter), and for a non-admin `userId` is forced to the caller
 
 #### Scenario: Guest and anonymous
 
@@ -412,12 +387,16 @@ caller, so they only ever see deliveries of their own subscriptions.
 ### Requirement: Retrying a delivery
 
 `PUT /api/2.0/settings/webhook/{id}/retry` (`retryWebhook`, `id` being a delivery record) SHALL create a new
-delivery record with the stored payload of the given one and queue it; the answer is the new record with
-`status` 0 and no `delivery` yet. An `id` of 0 answers 400, an unknown record 404, and a record of another
-member's subscription 403 unless the caller is a DocSpace admin. `PUT /api/2.0/settings/webhook/retry`
+delivery record with the stored payload of the given one and queue it. `PUT /api/2.0/settings/webhook/retry`
 (`retryWebhooks`, body `ids`) SHALL do the same for a batch, silently skipping unknown records and — for a
 non-admin — records of other members' subscriptions, and answering the list of new records. Both endpoints are
 rate limited (429 on a burst).
+
+#### Scenario: Single retry
+
+- **WHEN** the DocSpace Owner retries one delivery record
+- **THEN** the answer is the new record with `status` 0 and no `delivery` yet
+- **AND** an `id` of 0 answers 400, an unknown record 404, and a record of another member's subscription 403 unless the caller is a DocSpace admin
 
 #### Scenario: Empty batch
 
@@ -432,20 +411,21 @@ rate limited (429 on a burst).
 ### Requirement: Creating an API key
 
 `POST /api/2.0/keys` (`createApiKey`) SHALL issue a key for the calling account: `name` (required, 1–30
-characters, stored verbatim including HTML), optional `permissions` (scope values from the catalogue; `*` or an
-omitted field means unrestricted; an empty array or an unknown scope answers 400 "Permissions are not valid.")
-and optional `expiresInDays` (1–365; omitted means no expiry). The secret SHALL have the form `sk-` followed by
-64 lower-case hex characters, SHALL be stored only as a hash and SHALL be returned in full in `key` only in this
-answer; every later read SHALL show `sk-***` followed by the last four characters (`keyPostfix`). The answer also
-carries `id`, `name`, `permissions` (an empty list for an unrestricted key), `createBy` (the caller),
-`createOn`, `expiresAt` (set only when `expiresInDays` was given), `lastUsed` (empty) and `isActive` true. The
-DocSpace Owner, DocSpace admins, Room admins and Users may create keys (subject to the access rule); creation is
-recorded in the audit trail and rate limited.
+characters, stored verbatim including HTML), `permissions` (catalogue scopes; `*` or an omitted field
+means unrestricted) and optional `expiresInDays` (1–365; omitted means no expiry). The secret SHALL be returned
+in full only in this answer and stored as a hash. Every type but Guest may create keys (subject to the
+access rule); creation is recorded in the audit trail and rate limited.
 
 #### Scenario: Every type creates a key, with or without scopes and expiry
 
 - **WHEN** the DocSpace Owner, a DocSpace admin, a Room admin or a User creates a key with no permissions, with `*:read`, or with a list of per-area scopes, each with and without `expiresInDays: 7`
 - **THEN** the call answers 200 with a non-empty `id` and `key`, the given `name`, `permissions` equal to what was sent (empty when omitted), `createBy` equal to the caller, and `expiresAt` set exactly when `expiresInDays` was sent
+- **AND** the answer also carries `createOn`, `lastUsed` (empty) and `isActive` true
+
+#### Scenario: Shape of the secret
+
+- **WHEN** a key is created
+- **THEN** `key` is `sk-` followed by 64 lower-case hex characters, and every later read shows `sk-***` followed by the last four characters (`keyPostfix`)
 
 #### Scenario: Name kept verbatim
 
@@ -459,7 +439,7 @@ recorded in the audit trail and rate limited.
 
 #### Scenario: Empty permissions array
 
-- **WHEN** `permissions` is `[]`
+- **WHEN** `permissions` is `[]`, or names a scope that is not in the catalogue
 - **THEN** the call answers 400 with "Permissions are not valid."
 
 #### Scenario: Guest
@@ -526,11 +506,15 @@ answered 400.
 ### Requirement: Updating an API key
 
 `PUT /api/2.0/keys/{keyId}` (`updateApiKey`) SHALL change `name`, `permissions` and/or `isActive` of the key;
-fields left out keep their values, `name` when sent MUST be 1–30 characters and not whitespace only (400,
-nothing changed), `permissions` when sent MUST be a non-empty list of catalogue values (`["*"]` makes the key
-unrestricted). The caller may update their own keys and a DocSpace admin any key; an unknown or already deleted
-`keyId` answers 404. The answer is `true` when the key was changed and `false` when it was left untouched
-because it has already expired. The change is recorded in the audit trail.
+fields left out keep their values, `name` when sent MUST be 1–30 characters and not whitespace only,
+`permissions` when sent MUST be a non-empty list of catalogue values (`["*"]` makes the key unrestricted). The
+caller may update their own keys and a DocSpace admin any key; an unknown or already deleted `keyId` answers
+404. The change is recorded in the audit trail.
+
+#### Scenario: Expired key is left untouched
+
+- **WHEN** a key whose `expiresAt` has passed is updated
+- **THEN** the call answers `false` and nothing is changed; a changed key answers `true`
 
 #### Scenario: Every type updates own key
 
@@ -593,14 +577,13 @@ already deleted `keyId` answers 404. The deletion is recorded in the audit trail
 A request SHALL be authenticated by an API key when its `Authorization` header is `Bearer <token>` and the
 token is not a JWT and starts with `sk-`. The key SHALL be looked up by its hash within the current portal and
 accepted only when it is active (`isActive`) and not expired; an unknown, deactivated or expired key SHALL be
-answered 401. On success the request SHALL run as the account that created the key, the key's `lastUsed` SHALL
-be set to now, and the key's scopes SHALL become the request's `scope` claims — a key without scopes (created
-with no `permissions` or with `*`) carries the single scope `*:write`.
+answered 401. On success the request SHALL run as the account that created the key.
 
 #### Scenario: Valid key
 
 - **WHEN** a request carries a valid, active key
-- **THEN** it is processed as the key's creator and `lastUsed` is updated
+- **THEN** it is processed as the key's creator and `lastUsed` is set to now
+- **AND** the key's scopes become the request's `scope` claims — a key without scopes (created with no `permissions` or with `*`) carries the single scope `*:write`
 
 #### Scenario: Deactivated or expired key
 
@@ -610,20 +593,16 @@ with no `permissions` or with `*`) carries the single scope `*:write`.
 ### Requirement: Scope enforcement for API-key requests
 
 The server SHALL derive the scopes an endpoint demands from its route and method, and refuse an API-key request
-with 403 unless the key holds at least one of them. The route map is:
+with 403 unless the key holds at least one of them. The check applies to anonymous-allowed endpoints too.
+Scopes never widen the account's own rights: an endpoint the creating account may not call stays refused for
+the key.
 
-| Route                                   | GET accepts                                    | POST/PUT/DELETE accept        |
-|-----------------------------------------|------------------------------------------------|-------------------------------|
-| `api/2.0/files/rooms...`                | `rooms:read`, `rooms:write`, `*:read`, `*:write` | `rooms:write`, `*:write`    |
-| `api/2.0/files...` (other)              | `files:read`, `files:write`, `*:read`, `*:write` | `files:write`, `*:write`    |
-| `api/2.0/people/@self...`               | `accounts.self:read`, `accounts.self:write`, `*:read`, `*:write` | `accounts.self:write`, `*:write` |
-| `api/2.0/people...` (other)             | `accounts:read`, `accounts:write`, `*:read`, `*:write` | `accounts:write`, `*:write` |
-| `api/2.0/group...`                      | `accounts:read`, `*:read`, `*:write`           | `accounts:write`, `*:write`   |
-| `api/2.0/keys/@self`                    | any key                                        | —                             |
-| every other route                       | `*:read`, `*:write`                            | `*:write`                     |
+#### Scenario: Route map
 
-The check applies to anonymous-allowed endpoints too. Scopes never widen the account's own rights: an endpoint
-the creating account may not call stays refused for the key.
+- **WHEN** an API-key request reaches an endpoint
+- **THEN** a GET under `api/2.0/files/rooms...` accepts `rooms:read`, `rooms:write`, `*:read` or `*:write` and a write there `rooms:write` or `*:write`; any other `api/2.0/files...` GET accepts `files:read`, `files:write`, `*:read` or `*:write` and a write `files:write` or `*:write`
+- **AND** a GET under `api/2.0/people/@self...` accepts `accounts.self:read`, `accounts.self:write`, `*:read` or `*:write` and a write `accounts.self:write` or `*:write`; any other `api/2.0/people...` GET accepts `accounts:read`, `accounts:write`, `*:read` or `*:write` and a write `accounts:write` or `*:write`; a GET under `api/2.0/group...` accepts `accounts:read`, `*:read` or `*:write` and a write `accounts:write` or `*:write`
+- **AND** `api/2.0/keys/@self` accepts any key, and every other route accepts `*:read` or `*:write` on GET and `*:write` on a write
 
 #### Scenario: Read-only key cannot create another key
 

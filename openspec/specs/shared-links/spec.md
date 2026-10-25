@@ -9,17 +9,26 @@ links.
 
 Sources: product matrix "Shared link rules", checked against the integration tests and a live run against
 the server (October 2026). Where the matrix and the server disagree, this specification follows the
-server; the differences are listed in `openspec/deviations.md`. A link to a room and a link to a folder
-or a file inside it are different links with independent limits and settings. A link is either primary
-(permanent, one per entity in rooms) or additional. An invitation link is not a shared link and is not
-covered here.
+server; the differences are listed in `openspec/deviations.md` and, with the evidence for every row, in
+`verification.md` next to this file. A link to a room and a link to a folder or a file inside it are
+different links with independent limits and settings. A link is either primary (permanent, one per entity
+in rooms) or additional. An invitation link is not a shared link and is not covered here. The matrices
+themselves are stated in the first scenario of each requirement.
 
 ## Requirements
 
 ### Requirement: Entities that accept a shared link
 
 The system SHALL allow creating shared links on an entity according to the section or room type that
-contains it.
+contains it: a Public or Custom room and the entries of a Public room carry a primary link plus additional
+links; a Form filling room and its entries carry a primary link only; a Collaboration room and a Virtual
+Data Room accept no link to the room itself, while their files and folders — like those of My documents
+and a Custom room — accept additional links.
+
+#### Scenario: Link availability matrix by location
+
+- **WHEN** a link is requested on a room, folder or file in the given location
+- **THEN** availability and the maximum follow this table
 
 | Location            | Room | Folder | File |
 |---------------------|:----:|:------:|:----:|
@@ -77,12 +86,8 @@ filling room an entity SHALL have only its primary link. A request beyond the li
 
 A link to a room SHALL NOT be treated as a link to a folder or file inside the room, and a link to a folder
 or a file SHALL NOT be treated as a link to its room: each entity has its own links, its own limit and its
-own settings.
-
-A folder link SHALL open the folder and every file in it with the folder link's access right. A link
-created on a file SHALL open only that file, with its own access right, and SHALL NOT open the parent
-folder or sibling files. Changing the access right of one link SHALL NOT change the access right of any
-other link.
+own settings. A folder link SHALL open the folder and every file in it with the folder link's right; a
+file link SHALL open only that file with its own right. Changing one link SHALL NOT change any other link.
 
 #### Scenario: Room links do not consume the file limit
 
@@ -106,7 +111,15 @@ other link.
 
 ### Requirement: Link settings by room type
 
-The system SHALL offer link settings according to the section or room type that contains the entity.
+The system SHALL offer link settings according to the section or room type that contains the entity:
+access rights, the "who has access" choice ("Anyone with the link" or "DocSpace users only"), a password,
+the deny-download flag and a lifetime (expiration). Where a setting is not offered its value is fixed, as
+the matrix scenario and the fixed-value scenarios state.
+
+#### Scenario: Link settings matrix by location
+
+- **WHEN** a link is created or edited on an entity in the given location
+- **THEN** the settings that can be chosen follow this table
 
 | Location            | Access rights | Who has access | Password | Deny download | Lifetime |
 |---------------------|:-------------:|:--------------:|:--------:|:-------------:|:--------:|
@@ -117,25 +130,20 @@ The system SHALL offer link settings according to the section or room type that 
 | Virtual Data Room   | ✔ | ✗ | ✔ | ✔ | ✔ |
 | Custom room         | ✔ | ✔ | ✔ | ✔ | ✔ |
 
-"Who has access" is the choice between "Anyone with the link" and "DocSpace users only". "Lifetime" is the
-link expiration. Where a setting is not offered, its value is fixed:
+#### Scenario: Fixed audience of Public room and VDR links
 
-- Public room, who has access: every link SHALL be available to anyone with the link.
-- Virtual Data Room, who has access: every link SHALL be available to DocSpace users only.
-- Form filling room, access rights: the room link SHALL grant reading or form filling; a link to a form or
-  folder inside SHALL grant form filling only.
-- Form filling room and Public room, lifetime: the primary link of the room itself SHALL be perpetual; a
-  lifetime MAY be set on additional room links and on links of files and folders inside.
+- **WHEN** a link exists in a Public room or in a Virtual Data Room
+- **THEN** a Public room link is available to anyone with the link and a VDR link to DocSpace users only, whatever the request asked for
 
 #### Scenario: Form filling room link with the editing right
 
 - **WHEN** a link in a Form filling room is created or edited with the editing, review or comment right
-- **THEN** the system rejects the request (403, "The role is not available for this user type")
+- **THEN** the system rejects the request (403, "The role is not available for this user type"); the room link grants reading or form filling
 
 #### Scenario: Form link inside a Form filling room with the read right
 
 - **WHEN** a link to a form or folder inside a Form filling room is requested with the read right
-- **THEN** the system rejects the request (403)
+- **THEN** the system rejects the request (403); such a link grants form filling only
 
 #### Scenario: Primary room link does not expire
 
@@ -144,7 +152,7 @@ link expiration. Where a setting is not offered, its value is fixed:
 
 #### Scenario: Additional link of a Public room expires
 
-- **WHEN** an expiration date is set on an additional link of a Public room
+- **WHEN** an expiration date is set on an additional link of a Public room, or on a link of a file or folder inside a Public or Form filling room
 - **THEN** the expiration date is saved
 
 #### Scenario: Password and download restriction everywhere
@@ -183,9 +191,8 @@ one, SHALL be applied.
 
 The deny-download flag of a link SHALL be stored as requested in every room type. The effective rule for a
 link visitor in a Virtual Data Room SHALL be the stricter of the room-wide restriction on downloading and
-copying content and the link's own flag: when the room setting is on, a link with the flag off still
-denies downloading; when the room setting is off, the link's flag alone decides. The room's owner, Room
-managers, Content creators and Editors are not restricted.
+copying content and the link's own flag. The room's owner, Room managers, Content creators and Editors are
+not restricted.
 
 #### Scenario: Room-wide restriction is on
 
@@ -199,11 +206,10 @@ managers, Content creators and Editors are not restricted.
 
 ### Requirement: Roles that manage links
 
-The system SHALL allow only the Room Owner and Room managers to create, edit and delete shared links — both
-links to the room and links to files and folders inside it. Content creator, Editor, Form Filler, Reviewer,
-Commentator and Viewer SHALL NOT create, edit or delete any shared link, not even on files they created.
-Any member MAY read the room's primary link; reading the primary link of a file requires the right to
-manage links. A DocSpace admin who is not a member MAY read the primary link of a Public room but SHALL NOT
+The system SHALL allow only the Room Owner and Room managers to create, edit and delete shared links —
+both links to the room and links to files and folders inside it. No other role SHALL create, edit or
+delete a shared link, not even on files they created. Reading a primary link follows the rules in the
+scenarios: a DocSpace admin who is not a member MAY read the primary link of a Public room but SHALL NOT
 create, edit or delete links there.
 
 #### Scenario: Room manager creates a link
@@ -223,8 +229,9 @@ create, edit or delete links there.
 
 #### Scenario: Member reads the room's primary link
 
-- **WHEN** a Viewer requests the primary link of a Custom room
+- **WHEN** a Room manager or a Content creator requests the primary link of a Custom room
 - **THEN** the link is returned
+- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403); reading the primary link of a file requires the right to manage links
 
 #### Scenario: Non-member admin cannot create a link
 

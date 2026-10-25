@@ -103,6 +103,36 @@ obtained by uploading the embedded `new.pdf` asset.
 | Used space counted in `formsUsedSpace`, moves to Archive and back, released on delete; `roomsUsedSpace` untouched | `03_Rooms/FormFilling/FormFillingRoomUsedSpaceTests.cs` (four tests) | TEST-CONFIRMED |
 | Release notes v4.0: `/forms` route, Forms block with its own Recent/Favorites/Trash, `searchArea=FormTemplates` | `nct2__Изменения к выпуску v4.0.0.md` lines 93–94 | NOTES-ONLY (the Recent/Favorites/Trash sub-sections of Forms are client views; see "left out" below) |
 
+### Scenarios added in the 2026-10-25 clean-up, and the code names moved out of the spec text
+
+The spec now has 21 requirements and 82 scenarios: "Results spreadsheet" was split into "Results spreadsheet"
+and "Results report generation", and "Role-based filling in a Virtual Data Room" into that requirement, "Form
+roles listing" and "Step submission and interruption in a Virtual Data Room"; the existing scenarios kept their
+names and rows. The rows below cover the scenarios that are new; the claims themselves were already in the
+rows above, which stay the primary evidence.
+
+| Scenario (requirement) | Source | Status |
+|---|---|---|
+| Start action / Stop action / Edit action / Resume action (Form filling actions) — the `action` values are `FormFillingManageAction` `0` Stop, `1` Resume, `2` Start, `3` Edit; "the account that started the filling" is `startedByUserId`; the interruption record is `fillingStopedDate` + `FormFillingInterruption`; the remembered version is `OriginalFormVersion` | `FileStorageService.ManageFormFilling` (5719), cases `Start`/`Stop`/`Edit`/`Resume`; yaml `FormFillingManageAction` | CODE-ONLY |
+| Form in a Form filling room (Start filling endpoint) — the stored properties are `roomId`, `title`, `startedByUserId`, `originalFormId`, `startFilling` | `FileStorageService.StartFillingAsync` (2216); `StartFillingFileTests.cs` `StartFillingFile_FormInFillingFormsRoom_ReturnsForm` | TEST-CONFIRMED (200 + form), CODE-ONLY (property set) |
+| Copy to fill out (Filling state follows a move or copy) — the flag is `copyToFillOut` | `FileMoveCopyOperation.cs` `MoveOrCopyFilesAsync` `_toFillOut` blocks; `nct2__Изменения к выпуску v3.1.0.md` line 105 | CODE-ONLY / NOTES-ONLY (dialog) |
+| Anonymous visitor on a started form (Opening in an FFR) | `DocumentServiceHelper.GetFormOpenSetupForFillingRoomAsync` (590), Guest branch | CODE-ONLY |
+| Forms in the result folders (Opening in an FFR) | `DocumentServiceHelper.GetFormOpenSetupForFolderInProgress`, `GetFormOpenSetupForFolderDone` | CODE-ONLY |
+| Draft created for a filler (Filling draft) | `EntryManager.GetFillFormDraftAsync` (1304); resource `MessageFillFormDraftCreated` | CODE-ONLY |
+| Invalid draft (Filling draft) | `EntryManager.CheckFillFormDraftAsync` (1455), `LinkedForMeAsync`; resource `MessageFillFormDraftDiscard` | CODE-ONLY |
+| System folders are immutable / Files inside the per-form folders (Result folders) — the folder types are `InProcessFormFolder` 26, `ReadyFormFolder` 25, `FormFillingFolderInProgress` 28, `FormFillingFolderDone` 27; the ids on the form are `toFolderId` and `resultsFolderId` | `FileSecurity.FilterEntryAsync` folder and file-action blocks; `EntryManager.InitFormFillingProperties` (2261); yaml `FolderType` | CODE-ONLY |
+| What a submission records / Anonymous submission / Complete subfolder missing (Submission) — the counter is `resultFormNumber` | `EntryManager.SubmitFillingRoomFormAsync` (2283) through the anonymous `SetAceObjectAsync` block; `DocumentServiceTracker.cs` 540–565 | CODE-ONLY |
+| Results file rewritten in place / Setting off (Results spreadsheet) — the results file id on the form is `resultsFileID` | `EntryManager.SubmitFillingRoomFormAsync` (`room.SettingsSaveFormAsXLSX` branches), `CreateFillResultsFile`; `FormFillingReportCreator.UpdateFormFillingReport` (54) | CODE-ONLY |
+| Report by folder / Submissions listing (Results report generation) | `FileStorageService.GenerateXlsxByFolderAsync` (6186), `GetSubmissionsByFormId`; `FoldersController.GenerateXlsxByFolder` (268); yaml `generateXlsxByFolder`, `getFormSubmissions` | CODE-ONLY |
+| Push per submission / Sync job per room / Status record fields (External database export) — the stored table name is `externalDbTableName` | `FormFillingReportCreator.PublishExternalDbSubmissionAsync` (75), `SetExternalDbTableNameAsync`, `SyncExternalDbAsync` (69); `FileStorageService.StartExternalDbSyncAsync` (6268), `GetExternalDbSyncTaskAsync`; yaml `ExternalDbSyncTaskDto`, `ExternalDbSyncFormResultDto` | CODE-ONLY |
+| Room id for a file link (Fill result) — the mapping lives in the hybrid (distributed) cache | `FillingFormResultDtoHelper.GetAsync` (86); `FilesController.GetFillResult` (468) | CODE-ONLY |
+| Roles assigned (Role-based filling in a VDR) | `FileStorageService.SaveFormRoleMapping` (5607) | CODE-ONLY |
+| Statuses along the queue, rule part (Form roles listing) — `roleStatus` is `FormFillingStatus` `0` None, `1` Draft, `2` YouTurn, `3` InProgress, `4` Complete, `5` Stoped; `history` entries are `0` opened, `1` submitted, `2` stopped | `FileStorageService.GetAllFormRoles` (5673) and its `currentStep` switch; `products/ASC.Files/Core/Core/Entries/FormFillingStatus.cs`; yaml `FormRoleDto` | CODE-ONLY |
+| Last step completes the form / Stop and resume / Member with an unfinished role removed (Step submission and interruption) | `EntryManager.SubmitVDRFormAsync` (≈2500–2570), `FormFilledOut` publish at 2561; `FileStorageService.ManageFormFilling` case `Stop` (VDR branch); `VirtualRoomsController.cs` ≈769 (`ShouldPreventUserDeletion`); yaml `RoomSecurityError` | CODE-ONLY |
+| Fill link refused in other room types (Sharing a form to fill out) | `openspec/specs/user-type-permissions` (live run); release notes v3.7.1 line 27 | CODE-ONLY (owned by the other spec) |
+| Submit payload (Webhook events) — the triggers are `WebhookTrigger` `FormSubmit`, `FormFilledOut`, `FormStopped` | `WebhookManager.PublishAsync` (59); `common/ASC.Webhooks.Core/WebhookTrigger.cs` 212–227 | CODE-ONLY |
+| Names moved out of the spec text: the form signature is the `DSE3` header with the form flag or the configured `oform` signature (`FileChecker.CheckExtendedPDFstream`); `startFillingMode` values are `StartFillingMode` `ShareToFillOut` (1) and `StartFillingFormRoom` (3); the Forms root is `FolderType.Forms` (36); the "product code where the tests stop" of the Purpose is `FileStorageService`, `FileSecurity`, `EntryManager`, `DocumentServiceHelper`, `EditorController`, `FileMoveCopyOperation` and `FormFillingReportCreator` | `FileChecker.cs` (57); yaml `StartFillingMode`, `FolderType`; files cited in the rows above | CODE-ONLY |
+
 ## Left out of the spec, and why
 
 - **Recent / Favorites inside the Forms section** (release notes v4.0 "own Recent/Favorites/Trash"):

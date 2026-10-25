@@ -9,14 +9,23 @@ role a person holds inside a particular room (see `room-role-permissions`) narro
 
 Sources: product matrix "Types and Roles. Access rights", sheet "Types", checked against the integration
 tests and a live run against the server (October 2026). Where the matrix and the server disagree, this
-specification follows the server; the differences are listed in `openspec/deviations.md`. In the tables
-below `✔` means the action is allowed and an empty cell means it is denied.
+specification follows the server; the differences are listed in `openspec/deviations.md` and, with the
+evidence for every row, in `verification.md` next to this file. In the tables below `✔` means the action is
+allowed and an empty cell means it is denied. The matrices themselves are stated in the first scenario of
+each requirement.
 
 ## Requirements
 
 ### Requirement: Section availability by user type
 
-The system SHALL expose portal sections to a user according to the user type.
+The system SHALL expose portal sections to a user according to the user type: My documents to every type
+except Guest, Rooms, Archive and Trash to every type, Accounts to Room admins and above, Portal settings to
+DocSpace admins and the Owner only.
+
+#### Scenario: Section matrix by user type
+
+- **WHEN** a user of the given type opens a section
+- **THEN** access follows this table
 
 | Section         | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |-----------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
@@ -55,17 +64,21 @@ My documents.
 
 ### Requirement: Room visibility by user type
 
-The system SHALL limit which rooms a user sees in the Rooms and Archive sections according to the user type.
+The system SHALL limit which rooms a user sees in the Rooms and Archive sections according to the user
+type: the Owner and DocSpace admins see every room, a Room admin the rooms they own or were invited to, a
+User or a Guest only the rooms they were invited to. End-to-end encrypted (private) rooms SHALL be visible
+only to their members, the DocSpace Owner and DocSpace admins included.
+
+#### Scenario: Room visibility matrix
+
+- **WHEN** a user of the given type lists the Rooms or the Archive section
+- **THEN** the rooms shown follow this table
 
 | Action                               | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |--------------------------------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
 | See all rooms of the portal          | ✔ | ✔ |   |   |   |
 | See own rooms (where I am the owner) | ✔ | ✔ | ✔ |   |   |
 | See rooms I was invited to           | ✔ | ✔ | ✔ | ✔ | ✔ |
-
-The same visibility rules SHALL apply to archived rooms in the Archive section. End-to-end encrypted
-(private) rooms are the exception: they SHALL be visible only to their members, the DocSpace Owner and
-DocSpace admins included.
 
 #### Scenario: DocSpace admin sees a room they are not a member of
 
@@ -84,8 +97,15 @@ DocSpace admins included.
 
 ### Requirement: Room creation and management in the Rooms section
 
-The system SHALL allow the following room-level actions in the Rooms section by user type. Actions on a
-room additionally require a room role that grants them (see `room-role-permissions`).
+The system SHALL allow room-level actions in the Rooms section by user type as stated in the matrix
+scenario. Creating, editing, inviting, assigning roles, removing members, archiving and copying rooms
+need the Room admin type or higher; pinning and viewing members, history and info are open to every type.
+Actions on a room additionally require a room role that grants them (see `room-role-permissions`).
+
+#### Scenario: Room action matrix by user type
+
+- **WHEN** a user of the given type performs a room action in the Rooms section
+- **THEN** the outcome follows this table
 
 | Action                                         | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |------------------------------------------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
@@ -103,12 +123,10 @@ room additionally require a room role that grants them (see `room-role-permissio
 | Archive own rooms                              | ✔ | ✔ | ✔ |   |   |
 | Create a copy of own room                      | ✔ | ✔ | ✔ |   |   |
 
-Inviting, assigning and changing roles and removing members require the Room manager role in the room
-(or room ownership), which a User or a Guest can never hold; that is why those rows are empty for them.
-The product matrix plans invitations by Users and Guests for a later version.
+#### Scenario: Inviting needs the Room manager role
 
-The Room manager role SHALL be assignable only to a member whose user type is Room admin or higher; a
-Room admin can therefore hand out any role except Room manager to a User or a Guest.
+- **WHEN** a member invites to a room, assigns or changes roles or removes members
+- **THEN** the member needs the Room manager role in the room (or room ownership), which a User or a Guest can never hold; the product matrix plans invitations by Users and Guests for a later version
 
 #### Scenario: User cannot create a room
 
@@ -129,11 +147,20 @@ Room admin can therefore hand out any role except Room manager to a User or a Gu
 
 - **WHEN** anyone, the DocSpace Owner included, assigns the Room manager role to a member whose user type is User or Guest
 - **THEN** the system rejects the request (403, "The role is not available for this user type")
+- **AND** a Room admin can therefore hand out any role except Room manager to a User or a Guest
 
 ### Requirement: Actions on rooms owned by someone else
 
 Seeing every room SHALL NOT give a DocSpace Owner or DocSpace admin member-level control over a room they
-are not a member of. For a room owned by someone else the system SHALL allow only the actions marked below.
+are not a member of. For a room owned by someone else the system SHALL allow only viewing the member list,
+pinning, downloading content, reading the primary link of a Public room, copying the room, changing its
+owner and archiving it — and only to the Owner and DocSpace admins. Editing, inviting, role changes,
+removals and link management are refused to every non-member.
+
+#### Scenario: Foreign room action matrix
+
+- **WHEN** a user of the given type acts on a room they do not own and are not a member of
+- **THEN** the outcome follows this table
 
 | Action on someone else's room                | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |----------------------------------------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
@@ -150,9 +177,6 @@ are not a member of. For a room owned by someone else the system SHALL allow onl
 | Remove users / groups                        |   |   |   |   |   |
 | Create, edit or delete links                 |   |   |   |   |   |
 
-When the owner of a room is changed, the previous owner SHALL stay in the room as Room manager. The new
-owner MUST be an active user whose type is Room admin or higher.
-
 #### Scenario: DocSpace admin changes the owner of another user's room
 
 - **WHEN** a DocSpace Owner or DocSpace admin reassigns the owner of a room they do not own to a Room admin
@@ -160,8 +184,8 @@ owner MUST be an active user whose type is Room admin or higher.
 
 #### Scenario: Room owner cannot be a User
 
-- **WHEN** the owner of a room is reassigned to a member whose type is User or Guest
-- **THEN** the system rejects the request (403)
+- **WHEN** the owner of a room is reassigned to a member whose type is User or Guest, or to a disabled account
+- **THEN** the system rejects the request (403); the new owner MUST be an active user whose type is Room admin or higher
 
 #### Scenario: DocSpace admin cannot edit another user's room
 
@@ -181,8 +205,14 @@ owner MUST be an active user whose type is Room admin or higher.
 ### Requirement: Archive section actions
 
 Archived rooms SHALL be read-only: no user type can create rooms in the Archive, pin archived rooms, edit
-them, invite users, assign or change member roles, or remove users from them. The system SHALL allow the
-remaining Archive actions by user type as follows.
+them, invite users, assign or change member roles, or remove users from them. Viewing members, history and
+info stays open to every type; copying, restoring and deleting an archived room need the Room admin type
+for own rooms and the DocSpace admin type or the Owner for any room.
+
+#### Scenario: Archive action matrix by user type
+
+- **WHEN** a user of the given type acts on an archived room
+- **THEN** the outcome follows this table
 
 | Action                                         | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |------------------------------------------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
@@ -218,9 +248,15 @@ remaining Archive actions by user type as follows.
 
 ### Requirement: Inviting users by type
 
-The system SHALL restrict which user types an inviter can invite to the portal. Nobody, the DocSpace Owner
-included, SHALL invite a person with the Guest type through the people endpoints: guests appear only
-through room invitations.
+The system SHALL restrict which user types an inviter can invite to the portal: the Owner invites any type
+but Guest, a DocSpace admin invites Room admins and Users, a Room admin invites Users only. Nobody, the
+DocSpace Owner included, SHALL invite a person with the Guest type through the people endpoints: guests
+appear only through room invitations.
+
+#### Scenario: Invitation matrix by inviter type
+
+- **WHEN** an inviter of the given type invites a person with the given type to the portal
+- **THEN** the outcome follows this table
 
 | Invite as        | DocSpace Owner | DocSpace admin | Room admin |
 |------------------|:--------------:|:--------------:|:----------:|
@@ -246,7 +282,15 @@ through room invitations.
 
 ### Requirement: Changing a user's type
 
-The system SHALL restrict user type changes to the transitions below.
+The system SHALL restrict user type changes by the caller's type: only the Owner promotes to or demotes
+from DocSpace admin; the Owner and DocSpace admins promote to Room admin, demote Room admins and Users, and
+promote any Guest; a Room admin promotes only the Guests they invited themselves. Demotions run as a queued
+job that reports its result.
+
+#### Scenario: Type change matrix by caller type
+
+- **WHEN** a caller of the given type requests the given type change
+- **THEN** the outcome follows this table; "own Guest" is a guest the Room admin invited
 
 | Type change                               | DocSpace Owner | DocSpace admin | Room admin |
 |-------------------------------------------|:--------------:|:--------------:|:----------:|
@@ -258,10 +302,6 @@ The system SHALL restrict user type changes to the transitions below.
 | Demote DocSpace admin to User             | ✔ |   |   |
 | Demote Room admin to User                 | ✔ | ✔ |   |
 | Demote User to Guest                      | ✔ | ✔ |   |
-
-"Own Guest" is a guest the Room admin invited. Demotions run as a queued job: the request is accepted and
-the job reports the result; a demotion the caller may not perform SHALL leave the type unchanged and end
-the job with a permission error.
 
 #### Scenario: Only the owner changes a DocSpace admin's type
 
@@ -281,7 +321,7 @@ the job with a permission error.
 #### Scenario: Room admin cannot demote a User
 
 - **WHEN** a Room admin requests the demotion of a User to Guest
-- **THEN** the type stays unchanged and the demotion job ends with a permission error
+- **THEN** the request is accepted as a job, the type stays unchanged and the job ends with a permission error
 
 #### Scenario: Room admin cannot promote to Room admin
 
@@ -291,8 +331,14 @@ the job with a permission error.
 ### Requirement: Disabling, deleting and reassigning users
 
 The system SHALL allow disabling (blocking) and deleting a user, and reassigning the data of a disabled
-user, only as follows. Room admins, Users and Guests SHALL NOT perform any of these actions. An account
-MUST be disabled before it can be deleted.
+user, to the DocSpace Owner for every type and to a DocSpace admin for every type but DocSpace admin.
+Room admins, Users and Guests SHALL NOT perform any of these actions. An account MUST be disabled before it
+can be deleted.
+
+#### Scenario: Disable and delete matrix by target type
+
+- **WHEN** the Owner or a DocSpace admin disables, deletes or reassigns the data of an account of the given type
+- **THEN** the outcome follows this table; reassigning is allowed for exactly the target types the caller may disable
 
 | Target user type | Disable: Owner | Disable: DocSpace admin | Delete: Owner | Delete: DocSpace admin |
 |------------------|:--------------:|:-----------------------:|:-------------:|:----------------------:|
@@ -300,10 +346,6 @@ MUST be disabled before it can be deleted.
 | Room admin       | ✔ | ✔ | ✔ | ✔ |
 | User             | ✔ | ✔ | ✔ | ✔ |
 | Guest            | ✔ | ✔ | ✔ | ✔ |
-
-Reassigning a user's data SHALL be available to the DocSpace Owner and DocSpace admins, for exactly the
-target types each of them is allowed to disable. Data SHALL be reassigned only to an active user whose
-type is Room admin or higher.
 
 #### Scenario: DocSpace admin cannot disable a DocSpace admin
 
@@ -322,13 +364,19 @@ type is Room admin or higher.
 
 #### Scenario: Reassigning to a User is refused
 
-- **WHEN** a DocSpace admin reassigns the data of a disabled Room admin to a User
-- **THEN** the system rejects the request (400)
+- **WHEN** a DocSpace admin reassigns the data of a disabled Room admin to a User, a Guest or a disabled account
+- **THEN** the system rejects the request (400); data is reassigned only to an active Room admin or DocSpace admin
 
 ### Requirement: Groups and guest lists in Accounts
 
-The system SHALL allow group management and guest visibility in Accounts as follows. Guests SHALL NOT be
-members or managers of groups.
+The system SHALL allow group management (create, edit, change membership) to the DocSpace Owner and
+DocSpace admins only; a Room admin reads groups and their members. Guests SHALL NOT be members or managers
+of groups. A Room admin sees only the Guests they invited; the Owner and DocSpace admins see every Guest.
+
+#### Scenario: Accounts matrix by user type
+
+- **WHEN** a user of the given type performs the given action in Accounts
+- **THEN** the outcome follows this table
 
 | Action                                    | DocSpace Owner | DocSpace admin | Room admin |
 |-------------------------------------------|:--------------:|:--------------:|:----------:|
@@ -388,7 +436,16 @@ revoking the DocSpace admin type.
 
 ### Requirement: Sharing files from My documents
 
-The system SHALL allow sharing files by user type as follows.
+The system SHALL allow every type with a My documents section to share files with portal users, the Owner
+and DocSpace admins to share with any guest, and a Room admin only with the guests the Room admin invited.
+A recipient the sharer may not share with SHALL be skipped while the request succeeds. Quick share of a
+form for filling through a link SHALL be offered in My documents, Form filling rooms and Virtual Data
+Rooms only.
+
+#### Scenario: Sharing matrix by user type
+
+- **WHEN** a user of the given type shares a file from My documents
+- **THEN** the outcome follows this table
 
 | Action                                                              | DocSpace Owner | DocSpace admin | Room admin | User | Guest |
 |---------------------------------------------------------------------|:--------------:|:--------------:|:----------:|:----:|:-----:|
@@ -397,18 +454,6 @@ The system SHALL allow sharing files by user type as follows.
 | Share files with any guest                                          | ✔ | ✔ |   |   |   |
 | See the list of users and groups in Contacts                        | ✔ | ✔ | ✔ |   |   |
 | Quick share for forms                                               | ✔ | ✔ | ✔ | ✔ |   |
-
-Sharing with portal users SHALL NOT depend on access to the Contacts section: a User can share files from
-My documents with other portal users although the Contacts section is closed to them.
-
-A Room admin's "own guests" are the guests the Room admin invited. Membership of a guest in one of the Room
-admin's rooms does not make the guest shareable when someone else invited them. The restriction SHALL be
-enforced by the server: a recipient the sharer may not share with is skipped and the request still
-succeeds.
-
-Quick share of a form for filling through a public link SHALL be available only in My documents, Form
-filling rooms and Virtual Data Rooms. In other rooms a link to a form MAY grant editing, commenting or
-reading, but not filling.
 
 #### Scenario: User shares a file with a portal user
 
@@ -438,4 +483,4 @@ reading, but not filling.
 #### Scenario: Form in a Collaboration room is not shared for filling
 
 - **WHEN** an external link with the form-filling access is requested for a PDF form in a Custom, Public or Collaboration room
-- **THEN** the system rejects the request (403, "The role is not available for this user type")
+- **THEN** the system rejects the request (403, "The role is not available for this user type"); a link to such a form MAY grant editing, commenting or reading instead

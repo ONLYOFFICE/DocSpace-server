@@ -43,11 +43,11 @@ shown or to the hidden templates. The template that holds the custom fields SHAL
 
 ### Requirement: Creating a metadata template
 
-`createTemplate` (`POST api/2.0/files/metadata/templates`) SHALL be allowed to a DocSpace admin only (a Room
-admin or a User: 403). `name` SHALL be non-blank, at most 255 characters, unique on the portal without regard to
-case and never the reserved `System` (400); `visible` defaults to true and is stored as sent; the optional
-`fields` SHALL be validated as a whole before anything is stored, so an invalid field leaves no template behind.
-Concurrent creations of one name SHALL yield one 200 and 400 for the rest.
+`createTemplate` (`POST api/2.0/files/metadata/templates`) SHALL be allowed to a DocSpace admin only (others:
+403). `name` SHALL be non-blank, at most 255 characters, unique on the portal without regard to case and never
+the reserved `System` (400); `visible` defaults to true and is stored as sent; the optional `fields` SHALL be
+validated before anything is stored, so an invalid field leaves no template behind. Concurrent creations of one
+name SHALL yield one 200, the rest 400.
 
 #### Scenario: Room admin creates a template
 
@@ -180,9 +180,9 @@ update with `order` SHALL move the field; one without SHALL leave it where it is
 
 `updateField` (`PUT api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`) SHALL be allowed to a
 DocSpace admin only (403) and SHALL change only the properties the body names: `name` (400 when another field of
-the template has it), `type` (only while the field holds no values: 400 otherwise), `options` (new ones get
+the template has it), `type` (only while the field holds no values: else 400), `options` (new ones get
 identifiers; an option selected on any entry cannot be removed: 400) and `order`. A field reached through a
-template it does not belong to SHALL answer 404.
+template it does not belong to: 404.
 
 #### Scenario: Rename keeps the type and options
 
@@ -237,10 +237,10 @@ entry. The stamp has a precision of one second.
 ### Requirement: Reading the metadata of an entry
 
 `getFileMetadata` (`GET api/2.0/files/metadata/file/{fileId}`) and `getFolderMetadata` (`GET
-api/2.0/files/metadata/folder/{folderId}`) SHALL require the right to read the entry (403; unknown entry 404) and
+api/2.0/files/metadata/folder/{folderId}`) SHALL require the right to read the entry (403; unknown 404) and
 answer `templates` — each assigned template with all its fields and their `value` or null, plus `cascade` and
-`conflictResolveType` (null unless the folder cascades it, always false and null on a file) — and `customFields`
-as name/value pairs. The hidden template of the custom fields SHALL never appear in `templates`.
+`conflictResolveType` (null unless the folder cascades it; false and null on a file) — and `customFields` as
+name/value pairs. The template of the custom fields SHALL never appear there.
 
 #### Scenario: Viewer reads a file card
 
@@ -301,9 +301,9 @@ carries, answering 200 with no body. A template that does not exist, or the hidd
 
 `assignFolderTemplates` (`PUT api/2.0/files/metadata/folder/{folderId}/templates`) SHALL take `templateIds`,
 `cascade` and `conflictResolveType`, link the templates to the folder (403 without the folder write right; 404
-for a missing folder or template) and answer an operation: a completed one with no `id`, progress 100 and no
-error when `cascade` is off or the list is empty (nothing else done); the queued pass with its `id` and
-`templateIds` when `cascade` is on and a template is given.
+for a missing folder or template) and answer an operation: completed, with no `id`, progress 100 and no error
+when `cascade` is off or the list is empty (nothing else done); the queued pass with its `id` and `templateIds`
+when `cascade` is on and a template is given.
 
 #### Scenario: No cascade
 
@@ -324,9 +324,9 @@ error when `cascade` is off or the list is empty (nothing else done); the queued
 
 `unassignFileTemplate` (`DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}`) and
 `unassignFolderTemplate` (`DELETE api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`) SHALL remove
-the template and the values of its fields from the entry in one step, answering 200 with no body (403 without the
-write right; 404 for a missing entry or template). When the folder cascaded the template, the links its content
-inherited from it SHALL become direct assignments keeping their values.
+the template and the values of its fields from the entry in one step, answering 200 with no body (403 without
+the write right; 404 for a missing entry or template). A cascaded template's inherited links in the content
+SHALL become direct assignments keeping their values.
 
 #### Scenario: Room un-cascaded by unassignment
 
@@ -344,8 +344,8 @@ inherited from it SHALL become direct assignments keeping their values.
 `setFileValues` (`PUT api/2.0/files/metadata/file/{fileId}/values`) and `setFolderValues` (`PUT
 api/2.0/files/metadata/folder/{folderId}/values`) SHALL take `values`, one per `fieldId` (null list or a field
 listed twice: 400), each field of a template assigned to the entry and not a custom field (400); an unknown
-field: 404. An empty value SHALL clear the field. The answer SHALL be the whole metadata of the entry as
-`getFileMetadata` returns it, every value the entry holds included.
+field: 404. An empty value SHALL clear the field. The answer SHALL be the whole metadata of the entry as the
+read returns it, every value the entry holds included.
 
 #### Scenario: Answer is the entry, not the request
 
@@ -409,9 +409,9 @@ The stored date SHALL come back in `value.dateValue` with its UTC time.
 
 `setFileCustomFields` (`PUT api/2.0/files/metadata/file/{fileId}/customFields`) and `setFolderCustomFields`
 (`PUT api/2.0/files/metadata/folder/{folderId}/customFields`) SHALL take `fields` of `name`/`value` pairs (null
-or empty list, blank name, name over 255 or value over 8000 characters, a name twice in any case: 400). Names
-SHALL match without regard to case; a new name creates the field; a null or empty `value` removes it from this
-entry only; names not listed stay. The answer SHALL be the entry's custom fields.
+or empty list, blank name, name over 255 or value over 8000 characters, a name twice: 400). Names match without
+regard to case; a new name creates the field; a null or empty `value` removes it from this entry only; names not
+listed stay. The answer is the entry's custom fields.
 
 #### Scenario: Several at once, partial update
 
@@ -458,11 +458,11 @@ in the order the names were created, a re-created name taking the last place.
 
 ### Requirement: Cascade of a template over the content of a folder
 
-A folder or room assigned a template with `cascade` SHALL have a pass link the template to every folder and file
-below it and copy the folder's filled fields: in skip mode into empty fields only, in overwrite mode replacing
-the entries' values; an empty folder field SHALL never touch an entry. A nested folder cascading the same
-template, with its subtree, SHALL be left out (the nearest cascading ancestor wins). The pass is a snapshot:
-a later edit of the folder's values SHALL change the folder only, until a cascade is requested again.
+A folder or room assigned a template with `cascade` SHALL have a pass link the template to every entry below it
+and copy the folder's filled fields: in skip mode into empty fields only, in overwrite mode over the entries'
+values; an empty folder field never touches an entry. A nested folder cascading the same template is
+left out with its subtree (the nearest cascading ancestor wins). The pass is a snapshot: a later edit of the
+folder changes the folder only until a cascade is requested again.
 
 #### Scenario: Nearest cascading folder wins
 
@@ -506,10 +506,10 @@ complete with its message in `error`.
 ### Requirement: Switching the cascade of an assigned template
 
 `updateFolderTemplate` (`PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`) SHALL take
-`cascade` and `conflictResolveType` for a template the folder already carries (404 otherwise or for an unknown
-template; 403 without the folder write right). On: mark the link cascading with that mode, queue a pass and
-answer it with its `id`. Off: keep the template and the folder's values, turn the links the content inherited
-from this folder into direct ones, answer a completed operation without `id`; off again is a no-op.
+`cascade` and `conflictResolveType` for a template the folder already carries (otherwise, or unknown: 404; 403
+without the folder write right). On: mark the link cascading with that mode, queue a pass and answer it with its
+`id`. Off: keep the template and the folder's values, make the inherited links of the content direct, answer a
+completed operation without `id`; off again is a no-op.
 
 #### Scenario: Cascade off
 
@@ -529,11 +529,11 @@ from this folder into direct ones, answer a completed operation without `id`; of
 
 ### Requirement: Inheritance when an entry is created or moved
 
-A file or folder created under a cascading folder SHALL carry the cascaded templates and values before the
-create call returns. A move into a cascading folder SHALL stamp the moved entry under that folder's mode (skip
-fills empty fields, overwrite replaces); a moved folder's content SHALL be stamped by a background pass, a moved
-folder cascading the template itself keeping its own for its subtree. Leaving a cascading tree SHALL turn what
-was inherited into the entry's own metadata. A move to Trash SHALL stamp nothing.
+An entry created under a cascading folder SHALL carry the cascaded templates and values before the create call
+returns. A move into a cascading folder SHALL stamp the moved entry under that folder's mode (skip fills empty
+fields, overwrite replaces); a moved folder's content is stamped by a background pass, a moved folder cascading
+the template itself keeps its own for its subtree. Leaving a cascading tree SHALL make the inherited metadata the
+entry's own. A move to Trash stamps nothing.
 
 #### Scenario: Created under a cascade
 
@@ -614,10 +614,10 @@ report the assignments made afterwards.
 ### Requirement: Filtering a listing by metadata
 
 `getFolderByFolderId`, `getRoomsFolder` and the section listings SHALL take `metadataTemplateId` and
-`metadataFilters` (a URL-encoded JSON array of conditions). The template alone keeps the entries carrying it; the
-conditions all hold at once, their fields belonging to the named template when one is given. `total` and `count`
-SHALL count the filtered result; a folder listing searches the whole subtree unless `withSubFolders` is false.
-Unknown template or field, a field of another template, unreadable JSON, over 20 conditions: 400.
+`metadataFilters` (a URL-encoded JSON array of conditions). The template alone keeps the entries carrying it;
+the conditions all hold at once, their fields belonging to the named template when given. `total` counts the
+filtered result; a folder listing searches the subtree unless `withSubFolders` is false. Unknown template or
+field, field of another template, bad JSON, over 20 conditions: 400.
 
 #### Scenario: Template alone
 
@@ -657,10 +657,10 @@ so a caller without access learns nothing about the portal's templates from the 
 ### Requirement: Conditions and operators of a filter
 
 A condition SHALL name a template field by `fieldId` or a custom field by `name` (neither: 400) and MAY name
-`op`: `eq`, `contains` for a string field; `eq`, `range`, `gt`, `gte`, `lt`, `lte` for a number; `range`, `gt`,
-`gte`, `lt`, `lte` for a date; `in` for a choice (an operator the type does not take: 400). Omitted, it is `eq`
-for a string and for a number with `value`, `range` for a date and for a number with bounds, `in` for a choice.
-`value`, `from` and `to` MAY be JSON strings or numbers.
+`op`: `eq`, `contains` for a string; `eq`, `range`, `gt`, `gte`, `lt`, `lte` for a number; `range`, `gt`, `gte`,
+`lt`, `lte` for a date; `in` for a choice (an operator the type does not take: 400). Omitted, it is `eq` for a
+string and a number with `value`, `range` for a date and a number with bounds, `in` for a choice. `value`, `from`
+and `to` MAY be JSON strings or numbers.
 
 #### Scenario: String operators
 
@@ -712,9 +712,9 @@ before it. A bound carrying a time SHALL be an instant taken as is.
 
 The filter SHALL apply on the rooms (active, archive, Forms), on a folder or room, on My documents, Trash,
 Recent, Favorites and Shared with me, by the section's numeric identifier and by its alias (`@my`, `@trash`,
-`@recent`, `@favorites`, `@share`, `@forms`), validated the same way. The Templates section and the Private room
-section SHALL refuse a non-empty filter with 400 rather than answer unfiltered, by identifier, alias or typed
-search. Entries of connected third-party storages carry no metadata and are left out.
+`@recent`, `@favorites`, `@share`, `@forms`), validated the same way. The Templates and the Private room
+sections SHALL refuse a non-empty filter with 400 rather than answer unfiltered, by identifier, alias or typed
+search. Third-party storage entries carry no metadata.
 
 #### Scenario: Recent, Favorites and Shared with me
 
@@ -736,8 +736,8 @@ search. Entries of connected third-party storages carry no metadata and are left
 `searchFolder` (`POST api/2.0/files/{folderId}/search`) and `searchRooms` (`POST api/2.0/files/rooms/search`)
 SHALL take the same filter as a body — `metadataTemplateId`, `metadataFilters` as objects, `filterValue`,
 `includeHiddenMetadata`, paging, sorting — and answer the shape of the listing, validating and matching the
-conditions identically. `count` SHALL be 1 to 100 and `startIndex` non-negative (400 otherwise, a missing `count`
-included). `searchFolder` searches the subtree unless `withSubFolders` is false.
+conditions identically. `count` SHALL be 1 to 100 and `startIndex` non-negative (else 400, a missing `count`
+too). `searchFolder` searches the subtree unless told not to.
 
 #### Scenario: Agrees with the listing
 

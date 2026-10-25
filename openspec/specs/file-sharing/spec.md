@@ -296,10 +296,10 @@ The section SHALL support the ordinary listing filters.
 ### Requirement: Removing a share and removing an entry from Shared with me
 
 `removeSecurityInfo` SHALL revoke the access of every account and group on the listed files and folders when
-the caller may change their access, keeping the owner's record and the external links, and clear the
-entries from the caller's own favorites, recent and new marks. A recipient of the share, or an account that
-reached the entry through a link, uses the same operation to take it out of its own Shared with me ("Remove
-from list"), changing nobody else's rights. The answer is `true` when accepted.
+the caller may change their access, keeping the owner's record and the external links, and clear the entries
+from the caller's own favorites, recent and new marks. A recipient of the share, or an account that reached
+the entry through a link, uses the same operation to take it out of its own Shared with me ("Remove from
+list"), changing nobody else's rights. It answers `true`.
 
 #### Scenario: Owner revokes every share
 

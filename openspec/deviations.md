@@ -205,3 +205,46 @@ everything else is still open.
 | T10 | portal-lifecycle | `validateportalname` variants leak `<alias>_deleted` aliases of removed portals. |
 | A13 | ai-agents | `meta/generate` and `meta/fill` borrow the AI-off gate through a throwaway tool-prefs read instead of a gate of their own. |
 | W7 | billing | `setParticipantServiceLimits` does up to 1000 sequential user lookups per call. |
+
+## Suspected defects found in the fifth batch (apps, metadata, matrix-spec verification, 2026-10-25)
+
+From the `verification.md` of `apps` (AP), `metadata` (MD) and the five matrix specs that received a
+verification.md in this batch (R; their live-run items keep the D-numbers above). Evidence with file:line
+references stays in those files.
+
+### Access and integrity
+
+| # | Spec | What the server does |
+|---|------|----------------------|
+| R2 | user-type-permissions | A DocSpace admin can deactivate another DocSpace admin and the Owner (bug 79900, .NET tests red). |
+| R1 | user-type-permissions | A private room is listed to a non-member Owner / DocSpace admin (bug 82956, tests red). |
+| R7 | shared-links | `getFilePrimaryExternalLink` answers 200 to a caller without access to the file (bug 81572, tests red). |
+| R4 | room-role-permissions | `POST folder/{id}/link` by a Content creator, Viewer, non-member admin, Guest or on an archived room answers 200 with an empty list instead of 403 (bug 81575, tests red). |
+| MD7 | metadata | Section and rooms listings parse the metadata filter before any access check, so any member probes template and field ids through the 400 texts. |
+| AP1 | apps | The `app_settings` table is in no backup module: a restore silently loses every application flag and settings document. |
+| AP3 | apps | The first write freezes the then-current configured `enabled` default into the row; a portal that only saved settings stops following later configuration changes of the default. |
+| MD8 | metadata | Copied values are pasted after stamping without the destination's conflict mode, so an overwrite-cascading destination does not overwrite a copy as it does a move. |
+| MD2 | metadata | The stamp pass after a move is invisible to `getCascadeProgress` and writes no audit. |
+
+### Crashes (500) and wrong status codes
+
+| # | Spec | What the server does |
+|---|------|----------------------|
+| R6 | shared-links | `getFolderPrimaryExternalLink` on a folder inside a Form filling room throws, while `PUT` on the same folder creates a primary link (D12): GET and PUT disagree. |
+| R8 | shared-links | The link-limit refusal is produced as an operation warning with the entry skipped, not as an error; invalid `linkType`/`access` answer 403 instead of 400 (bugs 82370, 82371). |
+| R3 | user-type-permissions | The invitation-link endpoint refuses the Guest type with 400 "EmployeeType" while the people endpoints answer 403 for the same refusal. |
+| AP2 | apps | An application id longer than 64 characters in the configuration reads fine but every write fails at the database → 500; no start-up validation. |
+| MD3 | metadata | Raw exception text is returned in the cascade `error` field to any reader. |
+| MD1 | metadata | Retyping single ↔ multi choice is refused like any retype, and retyping a choice field requires `options: []`. |
+
+### Inconsistencies, messages and documentation
+
+| # | Spec | What the server does |
+|---|------|----------------------|
+| AP5 | apps | A bindable body without the `settings` member drops the stored document with 200, indistinguishable from an explicit reset (a test pins it). |
+| AP4 | apps | The JSON re-parse and its 400 in the settings write are unreachable; the real 400 comes from model binding. |
+| AP6 | apps | A socket event is sent on switching an application, none on saving its settings. |
+| MD4, MD5, MD6 | metadata | Empty `templateIds` on a file still writes audit and socket (the folder variant returns early); cascade-off writes no audit while on/unassign do; a no-op custom-field removal still audits, sockets and re-indexes. |
+| MD9 | metadata | The yaml predates the number-limit text of `setFileValues` and lacks the 403 row of `getCascadeProgress`; the SDK drops `id`, `assignedMetadataTemplates` and `metadataMatches` from listing entries. |
+| R5 | room-role-permissions | `updateFileComment` (version comment) is refused for an Editor; design question, kept outside the Comment row. |
+| — | user-type-permissions | Matrix row "copy of an archived room" is allowed by the matrix but `room-types` refuses duplication of an archived room; kept MATRIX-ONLY and flagged, neither spec changed. |

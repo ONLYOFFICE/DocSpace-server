@@ -24,8 +24,7 @@ The system SHALL expose the activity history of a file through `GET /api/2.0/fil
 and of a folder or a room through `GET /api/2.0/files/folder/{folderId}/log`. Each entry SHALL carry
 `id`, `action` (with the action identifier in `action.id`), `initiator` (an account with at least
 `displayName`), `date` and, where the action has details, `data`. Entries SHALL be returned newest
-first, and the number of entries on the page SHALL be reported in the `count` field of the response
-envelope.
+first, and the page length SHALL be reported in the `count` field of the response envelope.
 
 #### Scenario: History of a new room has the expected structure
 
@@ -75,7 +74,7 @@ backwards, and `fromDate` / `toDate`, read in the time zone of the portal, to na
 ### Requirement: Who may read an entry history
 
 The system SHALL return the history of an entry to every caller who can read the entry (the Read right
-of `FileSecurity`), regardless of user type and room role, and SHALL refuse everyone else. The
+on the entry), regardless of user type and room role, and SHALL refuse everyone else. The
 initiator of an entry is rendered as an account DTO: a caller without access to Contacts (a User or a
 Guest) SHALL receive it without a `profileUrl`.
 
@@ -357,10 +356,9 @@ narrowed by `productType` and `moduleType`).
 
 The system SHALL build an audit trail report through `POST /api/2.0/security/audit/events/report` and
 a login history report through `POST /api/2.0/security/audit/login/report`, each answering 200 with
-the queued task; `GET` on the same path returns the caller's own task of that kind, `DELETE` cancels
+the queued task; `GET` on the same path returns the caller's own task, `DELETE` cancels
 it. `format` is `Xlsx` (default) or `Csv`; `from` / `to` are UTC instants resolved against the matching
-lifetime. Both reports require the portal-settings right and the audit option of the pricing plan (402
-otherwise on SaaS).
+lifetime. Both require the portal-settings right and the audit option of the plan (402 otherwise on SaaS).
 
 #### Scenario: Owner and DocSpace admin start a report
 
@@ -391,8 +389,7 @@ The system SHALL keep the lifetime of the login history and of the audit trail i
 through `GET /api/2.0/security/audit/settings/lifetime` (`loginHistoryLifeTime`, `auditTrailLifeTime`,
 `lastModified`) and replaceable through `POST` on the same path with both values inside `settings`.
 The default of each is 180 days and the accepted range is 1–180. The lifetimes bound `events/last` and
-the default period of the reports. The endpoints remain available although the settings block was
-removed from the portal UI in v2.6.
+the default period of the reports. The endpoints outlived the UI settings block removed in v2.6.
 
 #### Scenario: Read and update
 
@@ -598,10 +595,9 @@ installation; the default transport is UDP port 514, TCP with TLS being a config
 
 After every successful sign-in that set the authentication cookie, the system SHALL compare the new
 login event with the account's previous successful sign-ins (the last 30) and score three signs: a new
-device, a new country and recent failed attempts. When at least two of the three signs hold, the system
-SHALL write a `SuspiciousLoginDetected` login event (IP, browser, platform and the reasons) and send the
-account the "Suspicious login" e-mail with the IP, device, location and browser. The thresholds are
-configurable.
+device, a new country and recent failed attempts. When at least two signs hold, the system SHALL write a
+`SuspiciousLoginDetected` login event (IP, browser, platform, reasons) and send the account the
+"Suspicious login" e-mail (IP, device, location, browser). The thresholds are configurable.
 
 #### Scenario: The three signs
 

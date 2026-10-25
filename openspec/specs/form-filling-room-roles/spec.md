@@ -10,9 +10,11 @@ applies; link rules are in `shared-links`.
 
 Sources: product matrix "Types and Roles. Access rights", sheet "FFR", checked against the integration
 tests and a live run against the server (October 2026). Where the matrix and the server disagree, this
-specification follows the server; the differences are listed in `openspec/deviations.md`. In the tables
-below `✔` means the action is allowed and an empty cell means it is denied. Column abbreviations:
-RO — Room Owner, RM — Room manager, CC — Content creator, FF — Form Filler.
+specification follows the server; the differences are listed in `openspec/deviations.md` and, with the
+evidence for every row, in `verification.md` next to this file. In the tables below `✔` means the action is
+allowed and an empty cell means it is denied. Column abbreviations: RO — Room Owner, RM — Room manager,
+CC — Content creator, FF — Form Filler. The matrices themselves are stated in the first scenario of each
+requirement.
 
 ## Requirements
 
@@ -27,8 +29,15 @@ A Form filling room SHALL offer only the roles Room Owner, Room manager, Content
 
 ### Requirement: Form filling room management by role
 
-The system SHALL allow room-level actions in a Form filling room by role as follows; the self-role and
-leave rules of `room-role-permissions` apply.
+The system SHALL allow room-level actions in a Form filling room by role as in `room-role-permissions`,
+plus the room's own switches: collecting results of any form into the spreadsheet is open to Content
+creators and above, turning spreadsheet collection or database synchronization on or off to the Room
+Owner and Room managers only. The self-role and leave rules of `room-role-permissions` apply.
+
+#### Scenario: Form filling room management matrix
+
+- **WHEN** a member with the given role performs a room-level action in a Form filling room
+- **THEN** the outcome follows this table
 
 | Action                                          | RO | RM | CC | FF |
 |-------------------------------------------------|:--:|:--:|:--:|:--:|
@@ -90,8 +99,16 @@ that a client can refuse it before uploading.
 
 ### Requirement: PDF forms and folders by role
 
-The system SHALL allow actions on PDF forms and folders in a Form filling room by role as follows.
-"Own" means created by the member.
+The system SHALL allow actions on PDF forms and folders in a Form filling room by role: every role views,
+prints, copies to the clipboard, downloads and copies forms out; Content creators and above create,
+upload, edit, lock, manage versions and act on their own entries; the Room Owner and Room managers also
+act on other members' entries, unlock foreign locks and edit the room's primary link. "Own" means
+created by the member.
+
+#### Scenario: Form filling room file matrix
+
+- **WHEN** a member with the given role acts on a PDF form or folder in a Form filling room
+- **THEN** the outcome follows this table
 
 | Action                                              | RO | RM | CC | FF |
 |-----------------------------------------------------|:--:|:--:|:--:|:--:|
@@ -118,14 +135,15 @@ The system SHALL allow actions on PDF forms and folders in a Form filling room b
 | Copy any form within the room                       | ✔ | ✔ | ✔ |   |
 | Edit the room's primary link                        | ✔ | ✔ |   |   |
 
-Once collecting has started, a Content creator SHALL edit the form only if they created it or started its
-collection. A Form Filler SHALL see every form whose collection has started; inside the system folders
-("In process", "Complete") a Form Filler SHALL view only the forms they themselves started or completed.
+#### Scenario: Content creator edits a started form
+
+- **WHEN** collecting has started on a form and a Content creator edits it
+- **THEN** the edit succeeds only if the Content creator created the form or started its collection
 
 #### Scenario: Form Filler opens another member's result
 
-- **WHEN** a Form Filler requests a form in a system folder that was started or completed by another member
-- **THEN** the system denies access
+- **WHEN** a Form Filler requests a form in a system folder ("In process", "Complete") that was started or completed by another member
+- **THEN** the system denies access; a Form Filler sees every form whose collection has started, but inside the system folders only the forms they themselves started or completed
 
 #### Scenario: Form Filler does not see comments
 
@@ -146,8 +164,15 @@ collection. A Form Filler SHALL see every form whose collection has started; ins
 ### Requirement: Form collection lifecycle by role
 
 A PDF form in a Form filling room is either not started ("editable") or started ("fillable"); filling a
-started form produces results in the "In process" and "Complete" folders. The system SHALL allow the
-lifecycle actions by role as follows.
+started form produces results in the "In process" and "Complete" folders. The system SHALL let Content
+creators and above see not-started forms and start collecting any form; cancelling another member's
+collection SHALL need the Room Owner or a Room manager; every role sees started forms and the results, and
+deletes its own results.
+
+#### Scenario: Form lifecycle matrix
+
+- **WHEN** a member with the given role acts on the collection lifecycle of a form
+- **THEN** the outcome follows this table; "own" in cancelling means forms the member created or whose collection the member started
 
 | Action                                         | RO | RM | CC | FF |
 |------------------------------------------------|:--:|:--:|:--:|:--:|
@@ -160,9 +185,6 @@ lifecycle actions by role as follows.
 | See "In process" forms in the room             | ✔ | ✔ | ✔ | ✔ |
 | Delete "Complete" forms in the room            | ✔ | ✔ | ✔ | ✔ |
 | Delete "In process" forms in the room          | ✔ | ✔ | ✔ | ✔ |
-
-"Own" in cancelling means forms the member created or whose collection the member started. A Content
-creator and a Form Filler SHALL see and delete only their own "Complete" and "In process" results.
 
 #### Scenario: Content creator starts and cancels collecting of the owner's form
 
@@ -186,8 +208,8 @@ creator and a Form Filler SHALL see and delete only their own "Complete" and "In
 
 #### Scenario: Form Filler lists results
 
-- **WHEN** a Form Filler lists the "In process" or "Complete" folder
-- **THEN** the list contains only the forms that Form Filler started or completed
+- **WHEN** a Form Filler or a Content creator lists the "In process" or "Complete" folder
+- **THEN** the list contains only the forms that member started or completed
 
 #### Scenario: Form Filler does not see a form that is not started
 
@@ -196,5 +218,5 @@ creator and a Form Filler SHALL see and delete only their own "Complete" and "In
 
 #### Scenario: Form Filler deletes own results
 
-- **WHEN** a Form Filler deletes their own form from the "In process" or "Complete" folder
+- **WHEN** a Form Filler or a Content creator deletes their own form from the "In process" or "Complete" folder
 - **THEN** the form is deleted

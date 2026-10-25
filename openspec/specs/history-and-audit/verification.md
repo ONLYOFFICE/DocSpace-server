@@ -120,7 +120,7 @@ end as left out).
 | **Suspicious-login notification** (scenario "The three signs"; thresholds `web:suspiciousLogin:*` — `historyLimit`, `failThreshold`, `suspiciousScore`, `failWindowHours`, `freshLoginWindowMinutes`) | `web/ASC.Web.Core/Notify/SuspiciousLoginNotifier.cs` (`CheckAsync`, `DeviceKey`, `SuspiciousLoginNotifierConfiguration` defaults 30 / 3 / 2 / 24 h / 5 min); `web/ASC.Web.Core/CookiesManager.cs` (`AuthenticateMeAndSetCookiesAsync` publishes `SuspiciousLoginIntegrationEvent`); `web/ASC.Web.Studio/IntegrationEvents/EventHandling/SuspiciousLoginIntegrationEventHandler.cs`; `WebstudioNotifyPatternResource.resx` (`pattern_suspicious_login`, `subject_suspicious_login`); release notes v4.0 | CODE-ONLY |
 
 Counts: 88 rows — TEST-CONFIRMED 58, CODE-ONLY 30, NOTES-ONLY 0 (nothing was written into the spec on
-the strength of the release notes alone). Spec: 23 requirements, 84 scenarios.
+the strength of the release notes alone). Spec: 23 requirements, 81 scenarios.
 
 ## Where the server differs from the release notes or the OpenAPI text (spec follows the server)
 

@@ -9,9 +9,11 @@ form-filling workflow for PDF forms with ordered participants. Where this specif
 
 Sources: product matrix "Types and Roles. Access rights", sheet "VDR", checked against the integration
 tests and a live run against the server (October 2026). Where the matrix and the server disagree, this
-specification follows the server; the differences are listed in `openspec/deviations.md`. In the tables
-below `✔` means the action is allowed and an empty cell means it is denied. Column abbreviations:
-RO — Room Owner, RM — Room manager, CC — Content creator, ED — Editor, FF — Form Filler, VW — Viewer.
+specification follows the server; the differences are listed in `openspec/deviations.md` and, with the
+evidence for every row, in `verification.md` next to this file. In the tables below `✔` means the action is
+allowed and an empty cell means it is denied. Column abbreviations: RO — Room Owner, RM — Room manager,
+CC — Content creator, ED — Editor, FF — Form Filler, VW — Viewer. The matrices themselves are stated in
+the first scenario of each requirement.
 
 ## Requirements
 
@@ -27,8 +29,15 @@ Form Filler and Viewer.
 
 ### Requirement: VDR room management by role
 
-The system SHALL allow room-level actions in a VDR by role as follows; the self-role and leave rules of
-`room-role-permissions` apply.
+The system SHALL allow room-level actions in a VDR by role as in `room-role-permissions`: editing the
+room, inviting, assigning and changing roles and removing members need the Room Owner or a Room manager;
+viewing the member list, history and info is open to every role; archiving and deleting the room is the
+Room Owner's alone. The self-role and leave rules of `room-role-permissions` apply.
+
+#### Scenario: VDR room management matrix
+
+- **WHEN** a member with the given role performs a room-level action in a VDR
+- **THEN** the outcome follows this table
 
 | Action                                  | RO | RM | CC | ED | FF | VW |
 |-----------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -55,8 +64,16 @@ The system SHALL allow room-level actions in a VDR by role as follows; the self-
 
 ### Requirement: VDR files and folders by role
 
-The system SHALL allow file and folder actions in a VDR by role as follows. "Own" means created by the
-member. Version history of files stored in a third-party provider SHALL NOT be available to any role.
+The system SHALL allow file and folder actions in a VDR by role as in `room-role-permissions`, with two
+VDR rules: a Form Filler SHALL NOT open files that are not PDF forms, and when the room setting that
+restricts copying and downloading content is on, a Viewer SHALL NOT download files or copy them out of the
+room. "Own" means created by the member. Version history of files stored in a third-party provider SHALL
+NOT be available to any role.
+
+#### Scenario: VDR file management matrix
+
+- **WHEN** a member with the given role performs a file or folder action in a VDR
+- **THEN** the outcome follows this table
 
 | Action                                          | RO | RM | CC | ED | FF | VW |
 |-------------------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -85,10 +102,6 @@ member. Version history of files stored in a third-party provider SHALL NOT be a
 | Copy any file or folder within the room         | ✔ | ✔ | ✔ |   |   |   |
 | Create / edit / delete file and folder links    | ✔ | ✔ |   |   |   |   |
 
-A Form Filler SHALL NOT open files that are not PDF forms. When the room setting that restricts copying
-and downloading content is turned on, a Viewer SHALL NOT download files or copy them out of the room; the
-restriction does not apply to the owner, Room managers, Content creators and Editors.
-
 #### Scenario: Form Filler opens an ordinary document
 
 - **WHEN** a Form Filler requests a file in the VDR that is not a PDF form
@@ -102,7 +115,7 @@ restriction does not apply to the owner, Room managers, Content creators and Edi
 #### Scenario: Editor in a room with the download restriction
 
 - **WHEN** the same room has the restriction turned on and an Editor downloads a file
-- **THEN** the download succeeds
+- **THEN** the download succeeds; the restriction does not apply to the owner, Room managers, Content creators and Editors
 
 #### Scenario: Content creator renames own entries
 
@@ -129,9 +142,16 @@ restriction does not apply to the owner, Room managers, Content creators and Edi
 
 ### Requirement: PDF form filling in a VDR
 
-The system SHALL allow the PDF form workflow in a VDR by role as follows. A "configured" form is a PDF
-form for which filling has been set up with assigned participants (roles); a "complete" form is one whose
-filling has finished. No role SHALL be able to edit a complete form.
+The system SHALL allow the PDF form workflow in a VDR by role: Room Owner, Room manager and Content
+creator create, upload and configure forms and stop filling of their own forms; only the Room Owner and
+Room managers stop other members' forms; a Form Filler sees and fills only the configured forms they take
+part in; a Viewer sees forms but does not fill them. A "configured" form has participants assigned; a
+"complete" form has finished filling and no role SHALL edit it.
+
+#### Scenario: VDR form workflow matrix
+
+- **WHEN** a member with the given role acts on a PDF form in a VDR
+- **THEN** the outcome follows this table
 
 | Action                                                    | RO | RM | CC | ED | FF | VW |
 |-----------------------------------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -148,11 +168,6 @@ filling has finished. No role SHALL be able to edit a complete form.
 | See complete forms in the room                            | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Edit complete forms in the room                           |   |   |   |   |   |   |
 
-A Content creator SHALL configure filling for any form in the room, but SHALL stop filling only for forms
-they created — configuring someone else's form does not grant the right to stop it. A Form Filler SHALL
-see a configured form as soon as they are assigned to it, including before their turn; the turn governs
-the right to fill, not visibility. A Form Filler SHALL see only their own complete forms.
-
 #### Scenario: Form Filler sees only forms assigned to them
 
 - **WHEN** a Form Filler lists the contents of a VDR
@@ -162,7 +177,7 @@ the right to fill, not visibility. A Form Filler SHALL see only their own comple
 #### Scenario: Form Filler before their turn
 
 - **WHEN** a form is configured with several participants in order and the turn of a Form Filler on a later step has not come yet
-- **THEN** the form is visible to that Form Filler, with filling not yet available
+- **THEN** the form is visible to that Form Filler, with filling not yet available; the turn governs the right to fill, not visibility
 
 #### Scenario: Content creator configures the owner's form
 
@@ -172,7 +187,7 @@ the right to fill, not visibility. A Form Filler SHALL see only their own comple
 #### Scenario: Content creator cannot stop the owner's form
 
 - **WHEN** a Content creator attempts to stop the filling of a form created by the owner, even one whose filling the Content creator configured
-- **THEN** the system rejects the request (403)
+- **THEN** the system rejects the request (403); configuring someone else's form does not grant the right to stop it
 
 #### Scenario: Content creator stops own form
 
