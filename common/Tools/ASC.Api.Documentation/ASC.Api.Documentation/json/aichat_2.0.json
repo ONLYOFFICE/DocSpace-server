@@ -71,6 +71,11 @@
       "x-displayName": "Export"
     },
     {
+      "name": "AI / Metadata",
+      "description": "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
+      "x-displayName": "Metadata"
+    },
+    {
       "name": "AI / OpenAI passthrough",
       "description": "OpenAI-compatible endpoints proxied to a profile's provider.",
       "x-displayName": "OpenAI passthrough"
@@ -127,6 +132,7 @@
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
+        "AI / Metadata",
         "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
@@ -7957,6 +7963,514 @@
         }
       }
     },
+    "/api/2.0/ai/meta/generate": {
+      "post": {
+        "tags": [
+          "AI / Metadata"
+        ],
+        "operationId": "aiMetaGenerate",
+        "summary": "Generate metadata fields",
+        "description": "Reads one file as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe it, and what their values are. `kind` names the entry's table and `id` its integer identifier, the same way as `POST api/2.0/ai/meta/fill`; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The text is the file itself, converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry; each field carries the value the text supports as a string, or `null` when the text does not state one, since a custom field on the portal is text and cannot be saved empty. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+        "responses": {
+          "200": {
+            "description": "The proposed fields, each with a name and the value found or null, the documents the proposal was read from, and the entries that were left out with the reason for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Field name, at most 255 characters."
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The value found in the documents, or null when the text does not state one."
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The proposed custom metadata fields with the values the text supports."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean",
+                            "description": "Whether the document was cut to fit the model's budget."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "truncated"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The documents the proposal was read from."
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "unsupported",
+                              "limit",
+                              "forbidden",
+                              "not_found",
+                              "empty",
+                              "failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The entries that were left out, with the reason for each."
+                    }
+                  },
+                  "required": [
+                    "fields",
+                    "sources",
+                    "skipped"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot open the entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entry does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The content could not be read as text; `skipped` says why.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The model provider is rate-limiting requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model request failed; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Reading the files or the model round did not finish within the time budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMetaGenerateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/meta/fill": {
+      "post": {
+        "tags": [
+          "AI / Metadata"
+        ],
+        "operationId": "aiMetaFill",
+        "summary": "Fill metadata values",
+        "description": "Fills the metadata of one file from its text and writes the result. `kind` names the entry's table and `id` its integer identifier; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`; `dryRun` (default true) resolves the values but writes nothing, so the caller shows them for confirmation and saves the accepted ones itself; only an explicit `dryRun: false` writes, and it is meant for a caller that has already collected the user's confirmation. The fields are the entry's own: every field of the visible templates it carries, assigned or inherited through a cascade - a hidden template is skipped as the UI and the search skip it - and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need; a write the portal refuses is reported per field as `write_failed`, and the call fails with the portal's status only when nothing was written at all. The answer carries `dryRun` as it was applied, the entry's metadata after the write (or as it stands, with `dryRun`), the values written or proposed, the fields left empty with the reason for each, and the documents that were read.",
+        "responses": {
+          "200": {
+            "description": "Whether it was a dry run, the entry's metadata, the values written or proposed, the fields left empty with the reason for each, and the documents the values were read from.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dryRun": {
+                      "type": "boolean",
+                      "description": "Whether the values were only proposed (`true`) or written as well."
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/AiEntryMetadata",
+                      "description": "The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it."
+                    },
+                    "filled": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fieldId": {
+                            "type": "number",
+                            "description": "Absent for a custom field."
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/AiMetadataValue"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field."
+                    },
+                    "unresolved": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fieldId": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "already_set",
+                              "not_found",
+                              "invalid_value",
+                              "unknown_option",
+                              "write_failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The fields left as they were, with the reason for each."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "truncated"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The documents the values were read from."
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "unsupported",
+                              "limit",
+                              "forbidden",
+                              "not_found",
+                              "empty",
+                              "failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The entries that were left out, with the reason for each."
+                    }
+                  },
+                  "required": [
+                    "dryRun",
+                    "metadata",
+                    "filled",
+                    "unresolved",
+                    "sources",
+                    "skipped"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot read the entry, or cannot edit it when the values are written.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entry does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The entry has no metadata fields to fill, or none of its content could be read as text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The model provider is rate-limiting requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model request failed; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Reading the files or the model round did not finish within the time budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMetaFillRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/agents": {
       "get": {
         "tags": [
@@ -10691,7 +11205,8 @@
           "ImageGeneration",
           "OCR",
           "Vision",
-          "FormAnalysis"
+          "FormAnalysis",
+          "GenerateMeta"
         ],
         "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
@@ -11125,7 +11640,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced.",
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
             "examples": [
               {
                 "role": "assistant",
@@ -11160,8 +11675,7 @@
         "required": [
           "threadId",
           "messageId",
-          "idx",
-          "message"
+          "idx"
         ],
         "additionalProperties": false,
         "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
@@ -12371,6 +12885,132 @@
         "required": [
           "success"
         ]
+      },
+      "AiMetadataValue": {
+        "type": "object",
+        "properties": {
+          "stringValue": {
+            "type": "string"
+          },
+          "numberValue": {
+            "type": "number"
+          },
+          "dateValue": {
+            "type": "string",
+            "description": "ISO 8601 date-time, UTC midnight of the date."
+          },
+          "optionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "A metadata value: exactly one member, by the field's type."
+      },
+      "AiEntryMetadataField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "number",
+            "description": "`MetadataFieldType`: 0 String, 1 Date, 2 Number, 3 SingleChoice, 4 MultiChoice."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "value": {
+            "$ref": "#/components/schemas/AiMetadataValue"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "AiEntryMetadata": {
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "visible": {
+                  "type": "boolean"
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiEntryMetadataField"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "visible",
+                "fields"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "templates",
+          "customFields"
+        ],
+        "additionalProperties": false
       },
       "AiUserSettingsWrapper": {
         "type": "object",
@@ -14815,7 +15455,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
@@ -14832,7 +15472,6 @@
         },
         "required": [
           "idx",
-          "message",
           "messageId",
           "result",
           "threadId"
@@ -15495,6 +16134,66 @@
           "title",
           "content",
           "folderId"
+        ],
+        "additionalProperties": false
+      },
+      "AiMetaGenerateRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What kind of metadata fields the caller is interested in; a hint for the model."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "AiMetaFillRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What to pay attention to; a hint for the model."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Also replace the fields that already carry a value. Default false."
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Resolve the values but write nothing; the caller writes what the user confirms. Default true: a write needs an explicit false."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
         ],
         "additionalProperties": false
       },

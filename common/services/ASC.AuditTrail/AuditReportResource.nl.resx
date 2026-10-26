@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Klantactiviteitenverslag gedownload</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Uitgavenlimiet voor service aangemaakt: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Uitgavenlimiet voor service bijgewerkt: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Uitgavenlimiet voor service verwijderd: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Persoonlijke uitgavenlimieten voor service ingesteld: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Persoonlijke uitgavenlimieten voor service uitgeschakeld: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portaal Gedeactiveerd</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portaal geblokkeerd door het bewaarbeleid</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portaal gedeblokkeerd</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portaal Verwijderd</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Metagegevenswaarden bijgewerkt: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Bestand geopend door Document Builder-script: {0}</value>
   </data>
 </root>

@@ -231,8 +231,11 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Hesabın dayandırılmasını təsdiq edin</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Dəstək xidməti ilə əlaqə saxlayın</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
-    <value>Portalı Deaktiv Edin</value>
+    <value>Portalı deaktiv edin</value>
   </data>
   <data name="ButtonDeletePortal" xml:space="preserve">
     <value>Portalı Silin</value>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Otağa qoşulun</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Sahəmi saxlayın</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Sahəmi və vəsaitlərimi saxlayın</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Fikrinizi bildirin</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Şifrə təyin edin</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Rəyimi bildirin</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Ödənişsiz sınağa başlayın</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Sahəmin blokunu açın</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Təkmilləşdirin</value>
@@ -740,6 +755,186 @@ Brauzer: *$Browser*
 Əgər bu hərəkəti sizin tərəfinizdən etmisinizsə - əlavə addımlar tələb olunmur. Bu dəyişiklik şübhəli görünürsə və ya sizin tərəfinizdən icazə verilməyibsə, lütfən, parolunuzu dərhal sıfırlayın və bu cihaz üçün ${LetterLogoText}-ə girişi söndürün.
 
 $OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı məlumatların saxlanması siyasətinə əsasən bloklanıb: ondan istifadə olunmayıb və ya abunəliyi yenilənməyib. Hansı hal olduğunu aşağıdakı kateqoriya göstərir.
+
+*Portal:* ${PortalUrl}
+*Sahib:* ${UserName} ${UserEmail}
+*Kateqoriya:* ${Category}
+*Silinmə tarixi:* ${DeleteDate}
+
+Bloku açılmasa, portal və onun bütün məlumatları həmin tarixdə silinəcək.
+
+Sahib onu saxlamağı xahiş etsə, portalı həmin tarixdən əvvəl yenidən aktivləşdirin.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Sahəniz bloklanıb, lakin hələ heç nə itirilməyib
+
+#if($Unpaid == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizin abunəliyi başa çatdığı üçün onu hələlik blokladıq. Bu o deməkdir ki, hazırda komandanızdan heç kim daxil ola bilməz, lakin bütün sənədləriniz və parametrləriniz hələ də təhlükəsizdir.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizdən bir müddətdir istifadə olunmadığı üçün onu hələlik blokladıq. Bu o deməkdir ki, hazırda komandanızdan heç kim daxil ola bilməz, lakin bütün sənədləriniz və parametrləriniz hələ də təhlükəsizdir.
+#end
+
+Məlumatlarınız *$DeleteDate* tarixinədək bizdə qalacaq. Bundan sonra sahə və içindəki hər şey həmişəlik silinəcək.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın, sonra işə qayıtmaq üçün abunəliyinizi yeniləyin. Hər şey olduğu yerdə qalacaq.
+#else
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın və hər şey olduğu yerdə qalacaq.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz məlumatlar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onların ehtiyat nüsxəsini çıxarın.
+#else
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onları endirin.
+#end
+#else
+Yaxşı xəbər: hələ gec deyil. Sadəcə $DeleteDateShort tarixinədək dəstək komandamızla əlaqə saxlayın və sahənizi olduğu kimi geri qaytarmağınıza kömək edəcəyik.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, $DeleteDateShort tarixinədək bizə bildirin və onlara giriş əldə etməyinizə kömək edəcəyik.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Sahəniz silinib
+
+#if($Unpaid == "True")
+Abunəliyi başa çatmış və yenilənməmiş *$PortalName* ${LetterLogoText} sahənizi bütün məlumatları ilə birlikdə "Məxfilik Siyasətimizdə":"$URL1" təsvir olunduğu kimi sildik.
+#else
+Uzun müddətdir istifadə olunmayan *$PortalName* ${LetterLogoText} sahənizi bütün məlumatları ilə birlikdə "Məxfilik Siyasətimizdə":"$URL1" təsvir olunduğu kimi sildik.
+#end
+
+#if($Unpaid == "True")
+Bizimlə işlədiyiniz üçün təşəkkür edirik. Ondan istifadəni niyə dayandırdığınızı bilmək çox istərdik: nəsə işləmədi, daha uyğun həll tapdınız, yoxsa sadəcə artıq ehtiyacınız qalmadı? Bu, cəmi bir dəqiqə çəkir və hər cavab bizə inkişaf etməyə kömək edir.
+#else
+${LetterLogoText} xidmətini sınadığınız üçün təşəkkür edirik. Ondan istifadəni niyə dayandırdığınızı bilmək çox istərdik: nəsə işləmədi, daha uyğun həll tapdınız, yoxsa sadəcə artıq ehtiyacınız qalmadı? Bu, cəmi bir dəqiqə çəkir və hər cavab bizə inkişaf etməyə kömək edir.
+#end
+
+$OrangeButton
+
+Nə vaxtsa qayıtmaq istəsəniz, sizi həmişə gözləyirik. İstənilən vaxt "yeni sahə yarada bilərsiniz":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Sahəniz tezliklə silinəcək
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz abunəliyi başa çatdığı üçün hələ də bloklanıb. Bu, dostcasına son xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz abunəliyi başa çatdığı üçün hələ də bloklanıb. Bu, dostcasına xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#end
+#else
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz bir müddətdir istifadə olunmadığı üçün hələ də bloklanıb. Bu, dostcasına son xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahəniz bir müddətdir istifadə olunmadığı üçün hələ də bloklanıb. Bu, dostcasına xatırlatmadır: *$DeleteDate* tarixində sahə və onun bütün məlumatları həmişəlik silinəcək.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın, sonra işə qayıtmaq üçün abunəliyinizi yeniləyin. Hər şey olduğu yerdə qalacaq.
+#else
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək sahənizin blokunu açın və hər şey olduğu yerdə qalacaq.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz məlumatlar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onların ehtiyat nüsxəsini çıxarın. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#else
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, sahənizin blokunu açın və $DeleteDateShort tarixinədək onları endirin. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#end
+#else
+Onu saxlamaq istəyirsinizsə, hələ vaxt var. Sadəcə $DeleteDateShort tarixinədək dəstək komandamızla əlaqə saxlayın və sahənizi olduğu kimi geri qaytarmağınıza kömək edəcəyik.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Saxlamaq istədiyiniz fayllar varsa, $DeleteDateShort tarixinədək bizə bildirin və onlara giriş əldə etməyinizə kömək edəcəyik. Bu tarixdən sonra onları bərpa edə bilməyəcəyik.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Bir müddətdir sizi görmürük
+
+Bir müddətdir heç kim *"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizə daxil olmayıb. Sənədləriniz və parametrlərinizlə nəsə baş verməmişdən əvvəl sizinlə əlaqə saxlamaq istədik.
+
+Hər şeyin hamı üçün qüsursuz işləməsi üçün bir müddətdir istifadə olunmayan pulsuz sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları həmişəlik silinəcək.
+
+Yaxşı xəbər: onu saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək bir dəfə daxil olun və hər şey olduğu kimi qalacaq.
+
+$OrangeButton
+
+Sahəyə artıq ehtiyacınız yoxdursa, heç nə etməyinizə ehtiyac yoxdur. Sadəcə saxlamaq istədiyiniz faylları $BlockDateShort tarixinədək endirməyi unutmayın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Abunəliyiniz başa çatıb, lakin sahəniz hələ də buradadır
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* üçün ${LetterLogoText} abunəliyiniz *$DueDate* tarixində başa çatıb. Bizimlə işlədiyiniz üçün təşəkkür edirik. Ümid edirik ki, ${LetterLogoText} işinizi bir az asanlaşdırdı.
+
+Hər şeyin qüsursuz işləməsi üçün abunəliyi başa çatmış sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları həmişəlik silinəcək.
+
+Yaxşı xəbər: onu saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək abunəliyinizi yeniləyin və sənədləriniz, parametrləriniz və komandanız olduğu yerdə qalacaq.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Sadəcə saxlamaq istədiyiniz məlumatların ehtiyat nüsxəsini $BlockDateShort tarixinədək çıxarmağı unutmayın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Abunəliyiniz başa çatıb, lakin sahəniz və vəsaitləriniz hələ də buradadır
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* üçün ${LetterLogoText} abunəliyiniz *$DueDate* tarixində başa çatıb. Bizimlə işlədiyiniz üçün təşəkkür edirik. Pul kisənizdə hələ də vəsait qalıb ("balansınızı yoxlayın":"$URL1") və onları xəbəriniz olmadan itirməyinizi istəmədik.
+
+Hər şeyin qüsursuz işləməsi üçün abunəliyi başa çatmış sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları pul kisənizdəki vəsaitlərlə birlikdə həmişəlik silinəcək.
+
+Yaxşı xəbər: hər ikisini saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək abunəliyinizi yeniləyin və sənədləriniz, parametrləriniz və vəsaitləriniz olduğu yerdə qalacaq. Pul kisənizin balansı hətta xərcin bir hissəsini ödəyə bilər.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Sadəcə saxlamaq istədiyiniz məlumatların ehtiyat nüsxəsini $BlockDateShort tarixinədək çıxarmağı unutmayın.
+#else
+h1.Sahənizdə sizi gözləyən vəsait var
+
+Bir müddətdir heç kim *"${__VirtualRootPath}":"${__VirtualRootPath}"* ünvanındakı ${LetterLogoText} sahənizə daxil olmayıb, lakin onun "pul kisəsində":"$URL1" hələ də vəsait qalıb. Onları xəbəriniz olmadan itirməyinizi istəmədik.
+
+Hər şeyin qüsursuz işləməsi üçün qeyri-aktiv sahələri bloklayırıq. Bu, sizin sahəniz üçün belə deməkdir:
+
+*$BlockDate*: sahəniz bloklanacaq və daxil ola bilməyəcəksiniz.
+*$DeleteDate*: sahə və onun bütün məlumatları pul kisənizdəki vəsaitlərlə birlikdə həmişəlik silinəcək.
+
+Yaxşı xəbər: hər ikisini saxlamaq asandır. Sadəcə $BlockDateShort tarixinədək bir dəfə daxil olun və sənədləriniz, parametrləriniz və vəsaitləriniz olduğu yerdə qalacaq.
+
+$OrangeButton
+
+Başqa yol seçmək qərarına gəlmisinizsə, bu tamamilə normaldır. Sadəcə saxlamaq istədiyiniz faylları $BlockDateShort tarixinədək endirməyi unutmayın.
+#end
 
 $TrulyYours</value>
   </data>
@@ -1573,6 +1768,30 @@ $TrulyYours</value>
   </data>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parolunuz uğurla dəyişdirildi</value>
+  </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı məlumatların saxlanması siyasətinə əsasən bloklanıb</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz bloklanıb, lakin məlumatlarınız $DeleteDateShort tarixinədək təhlükəsizdir</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz silinib</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz tezliklə silinəcək (silinmə tarixi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} sahənizi saxlamaq üçün son şans (silinmə tarixi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>${LetterLogoText} sahəniz sizin üçün darıxır ($BlockDateShort tarixinədək tədbir görülməlidir)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} sahənizdə hələ də vəsait var ($BlockDate tarixinədək tədbir görülməlidir)</value>
   </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portalının deaktiv edilməsi</value>

@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Έχει γίνει λήψη αναφοράς λειτουργιών πελάτη</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Δημιουργήθηκε όριο δαπανών υπηρεσίας: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Το όριο δαπανών υπηρεσίας ενημερώθηκε: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Το όριο δαπανών υπηρεσίας διαγράφηκε: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Ορίστηκαν προσωπικά όρια δαπανών υπηρεσίας: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Απενεργοποιήθηκαν τα προσωπικά όρια δαπανών υπηρεσίας: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Η συνδρομή πελάτη ενημερώθηκε: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Η πύλη απενεργοποιήθηκε</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Η πύλη αποκλείστηκε από την πολιτική διατήρησης δεδομένων</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Ο αποκλεισμός της πύλης άρθηκε</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Η πύλη διαγράφηκε</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Οι τιμές μεταδεδομένων ενημερώθηκαν: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Το αρχείο άνοιξε από σενάριο Document Builder: {0}</value>
   </data>
 </root>

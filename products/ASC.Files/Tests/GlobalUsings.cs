@@ -73,6 +73,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
+global using CoreConstants = ASC.Core.Users.Constants;
 global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolderRequest;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;

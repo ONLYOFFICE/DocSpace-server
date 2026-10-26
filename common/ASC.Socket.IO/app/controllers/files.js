@@ -129,6 +129,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-service-limits", (req, res) => {
+    files.changeServiceLimits(req.body);
+    res.end();
+  });
+
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
     res.end();
@@ -286,6 +291,11 @@ module.exports = (files) => {
 
   router.post("/form-suggested-questions", (req, res) => {
     files.formSuggestedQuestions(req.body);
+    res.end();
+  });
+
+  router.post("/plugin-event", (req, res) => {
+    files.pluginEvent(req.body);
     res.end();
   });
 
