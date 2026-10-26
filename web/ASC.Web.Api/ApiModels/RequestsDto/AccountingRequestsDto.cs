@@ -418,6 +418,7 @@ public class GetCustomerDepositsRequestDto
     /// Counted after the filters are applied, and starts at 0 when omitted.
     /// </summary>
     /// <example>0</example>
+    [Range(0, int.MaxValue)]
     [FromQuery(Name = "offset")]
     public int? Offset { get; set; }
 
@@ -427,6 +428,7 @@ public class GetCustomerDepositsRequestDto
     /// counting the items.
     /// </summary>
     /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
     [FromQuery(Name = "limit")]
     public int? Limit { get; set; }
 }
