@@ -111,6 +111,31 @@ public class AiGateway(
         return await GenerateKeyAsync(allowEmpty);
     }
 
+    public async Task<string> GetByokKeyAsync(string provider, string apiKey)
+    {
+        if (!Configured)
+        {
+            throw new AiGatewayNotConfiguredException();
+        }
+
+        if (!await IsAiEnabledAsync())
+        {
+            throw new AiServiceDisabledException();
+        }
+
+        return await GenerateKeyAsync(byok: (provider, apiKey));
+    }
+
+    public async Task<bool> VerifyByokKeyAsync(string provider, string apiKey)
+    {
+        var content = JsonContent.Create(new VerifyByokKeyRequest { Provider = provider, ApiKey = apiKey });
+        var key = await GenerateKeyAsync();
+
+        var response = await SendAsync<VerifyByokKeyResponse>(HttpMethod.Post, "/byok/verify", content, key);
+
+        return response.Valid;
+    }
+
     public async Task<AiPricesResponse> GetPricesAsync()
     {
         var key = await GetKeyAsync(allowEmpty: true);
@@ -148,7 +173,7 @@ public class AiGateway(
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> GenerateKeyAsync(bool allowEmpty = false)
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false, (string Provider, string ApiKey)? byok = null)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
@@ -167,7 +192,8 @@ public class AiGateway(
             customerId = customerInfo.PortalId,
             id = user.Id,
             iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            exp = DateTimeOffset.UtcNow.Add(aiGatewayConfiguration.Settings.TokenExpiration).ToUnixTimeSeconds()
+            exp = DateTimeOffset.UtcNow.Add(aiGatewayConfiguration.Settings.TokenExpiration).ToUnixTimeSeconds(),
+            byok = byok.HasValue ? new { provider = byok.Value.Provider, apiKey = byok.Value.ApiKey } : null
         };
 
         return JsonWebToken.Encode(payload, aiGatewayConfiguration.Settings.Secret);
@@ -195,6 +221,17 @@ public class AiGateway(
     private string GetCustomerModelsCacheKey()
     {
         return $"{ModelsCacheKey}:{tenantManager.GetCurrentTenantId()}";
+    }
+
+    private sealed class VerifyByokKeyRequest
+    {
+        public required string Provider { get; init; }
+        public required string ApiKey { get; init; }
+    }
+
+    private sealed record VerifyByokKeyResponse
+    {
+        public bool Valid { get; init; }
     }
 }
 
@@ -498,6 +535,9 @@ public record Model
 
     [JsonPropertyName("output_modalities")]
     public required IEnumerable<string> OutputModalities { get; init; }
+
+    [JsonPropertyName("byok_providers")]
+    public IEnumerable<string> ByokProviders { get; init; } = [];
 }
 
 
