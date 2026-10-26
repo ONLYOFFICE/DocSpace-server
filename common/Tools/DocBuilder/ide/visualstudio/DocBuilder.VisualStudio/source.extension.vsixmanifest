@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="DocSpace.DocBuilder.VisualStudio" Version="0.1.0" Language="en-US" Publisher="DocSpace" />
+    <DisplayName>DocBuilder Scripts</DisplayName>
+    <Description xml:space="preserve">ONLYOFFICE Document Builder scripts (*.docbuilder): completion and documentation of the builder API, error checking with ${placeholders} understood, and a preview of the document a script builds.</Description>
+    <License>LICENSE</License>
+    <Tags>ONLYOFFICE, Document Builder, docbuilder, DocSpace</Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.9,19.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="docbuilder.pkgdef" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+  </Assets>
+</PackageManifest>

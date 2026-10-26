@@ -1,0 +1,248 @@
+{
+  "description": "Docs Connect user quota report (ReportType.DocsCloudUserQuota): ${inputData} is the anonymous object of DocsCloudUserQuotaReportBuilder.BuildCoreAsync (DocsCloudUserQuotaReportBuilder.cs:79) serialized with CustomerReportBuilderBase's camelCase options (nulls omitted); users are DocsCloudUserRow(UserId, UserType, Expire) (:130), summary rows anonymous {label, value} (:175). Internal users are shown by display name, external ones by their raw id; an Expire the server cannot parse is passed through as the raw string ('never' here). info.period is never sent (point-in-time snapshot), so the Period line is not drawn. Viewers exceed their limit (12 of 10), so Remaining is 0 there.",
+  "placeholders": {
+    "inputData": {
+      "resources": {
+        "company": "Company:",
+        "report": "Report:",
+        "period": "Period:",
+        "dateGenerated": "Date generated:",
+        "sheetName": "User quota",
+        "dateGeneratedFormat": "M/d/yyyy h:mm:ss AM/PM",
+        "dateFormat": "M/d/yyyy h:mm:ss AM/PM",
+        "countFormat": "#,##0"
+      },
+      "info": {
+        "company": "Lumen & Partner GmbH",
+        "report": "User quota",
+        "dateGenerated": "10/23/2026 3:41:07 PM"
+      },
+      "logoSrc": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMzAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAxMzAgMjQiPgo8cmVjdCB4PSIwIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSI0IiBmaWxsPSIjNDc4MUQxIi8+CjxyZWN0IHg9IjUiIHk9IjciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPHRleHQgeD0iMjYiIHk9IjE3IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzMzMzMiPkx1bWVuICZhbXA7IFBhcnRuZXI8L3RleHQ+Cjwvc3ZnPg==",
+      "logoWidthMm": 54.2,
+      "logoHeightMm": 10,
+      "themeColors": {
+        "mainBgColor": [
+          71,
+          129,
+          209
+        ],
+        "lightBgColor": [
+          240,
+          244,
+          251
+        ],
+        "mainFontColor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "editors": {
+        "title": "Editors",
+        "desc": "Document editors with full permissions",
+        "headers": [
+          "Editors — User ID",
+          "User type",
+          "Access expires"
+        ],
+        "users": [
+          {
+            "userId": "Olivia Bennett",
+            "userType": "Internal",
+            "expire": "8/21/2027 8:10:03 PM"
+          },
+          {
+            "userId": "b3f1c9e2-7a4d-4c11-9f0e-55a8d2c4e901",
+            "userType": "External",
+            "expire": "11/29/2026 5:12:33 PM"
+          },
+          {
+            "userId": "Marie-Christine Lefèvre-Dubois",
+            "userType": "Internal",
+            "expire": "2/18/2027 9:25:28 PM"
+          },
+          {
+            "userId": "Li Wei",
+            "userType": "Internal",
+            "expire": "2/13/2027 12:15:42 AM"
+          },
+          {
+            "userId": "Jürgen Müller",
+            "userType": "Internal",
+            "expire": "2/16/2027 2:19:52 AM"
+          },
+          {
+            "userId": "partner.reviewer@contoso-legal.de",
+            "userType": "External",
+            "expire": "11/1/2026 8:47:27 PM"
+          },
+          {
+            "userId": "Carlos Ruiz",
+            "userType": "Internal",
+            "expire": "4/11/2027 2:34:47 AM"
+          },
+          {
+            "userId": "Hans-Peter Großmann",
+            "userType": "Internal",
+            "expire": "11/27/2026 1:08:37 AM"
+          },
+          {
+            "userId": "Ингрид Йоханссон",
+            "userType": "Internal",
+            "expire": "7/14/2027 8:39:55 AM"
+          },
+          {
+            "userId": "Tom Ng",
+            "userType": "Internal",
+            "expire": "2/10/2027 7:37:58 PM"
+          },
+          {
+            "userId": "Дмитрий Кузнецов",
+            "userType": "Internal",
+            "expire": "11/29/2026 10:58:39 PM"
+          },
+          {
+            "userId": "j.doe@example.org",
+            "userType": "External",
+            "expire": "12/14/2026 2:49:14 PM"
+          },
+          {
+            "userId": "Екатерина Владимировна Соколова-Петренко",
+            "userType": "Internal",
+            "expire": "3/15/2027 5:40:24 PM"
+          },
+          {
+            "userId": "ext-user-00412",
+            "userType": "External",
+            "expire": "never"
+          },
+          {
+            "userId": "Анна Смирнова",
+            "userType": "Internal",
+            "expire": "4/15/2027 12:45:57 AM"
+          },
+          {
+            "userId": "Sophie Schäfer",
+            "userType": "Internal",
+            "expire": "11/23/2026 8:20:07 AM"
+          }
+        ],
+        "summary": [
+          {
+            "label": "Active",
+            "value": 16
+          },
+          {
+            "label": "Internal",
+            "value": 12
+          },
+          {
+            "label": "External",
+            "value": 4
+          },
+          {
+            "label": "Subscription limit",
+            "value": 25
+          },
+          {
+            "label": "Remaining",
+            "value": 9
+          }
+        ]
+      },
+      "viewers": {
+        "title": "Live Viewer",
+        "desc": "Read-only document viewers",
+        "headers": [
+          "Live Viewer — User ID",
+          "User type",
+          "Access expires"
+        ],
+        "users": [
+          {
+            "userId": "auditor@kpmg-extern.example",
+            "userType": "External",
+            "expire": "10/29/2026 8:36:22 AM"
+          },
+          {
+            "userId": "Li Wei",
+            "userType": "Internal",
+            "expire": "5/28/2027 6:40:50 AM"
+          },
+          {
+            "userId": "Дмитрий Кузнецов",
+            "userType": "Internal",
+            "expire": "3/15/2027 4:50:37 PM"
+          },
+          {
+            "userId": "Анна Смирнова",
+            "userType": "Internal",
+            "expire": "2/28/2027 6:58:32 AM"
+          },
+          {
+            "userId": "Jürgen Müller",
+            "userType": "Internal",
+            "expire": "4/15/2027 3:58:42 AM"
+          },
+          {
+            "userId": "b3f1c9e2-7a4d-4c11-9f0e-55a8d2c4e901",
+            "userType": "External",
+            "expire": "10/30/2026 1:50:30 AM"
+          },
+          {
+            "userId": "j.doe@example.org",
+            "userType": "External",
+            "expire": "12/16/2026 12:32:14 AM"
+          },
+          {
+            "userId": "Marie-Christine Lefèvre-Dubois",
+            "userType": "Internal",
+            "expire": "6/10/2027 5:06:13 AM"
+          },
+          {
+            "userId": "ext-user-00412",
+            "userType": "External",
+            "expire": "never"
+          },
+          {
+            "userId": "partner.reviewer@contoso-legal.de",
+            "userType": "External",
+            "expire": "11/21/2026 8:02:12 PM"
+          },
+          {
+            "userId": "Sophie Schäfer",
+            "userType": "Internal",
+            "expire": "2/28/2027 2:44:40 AM"
+          },
+          {
+            "userId": "Olivia Bennett",
+            "userType": "Internal",
+            "expire": "1/29/2027 7:31:32 PM"
+          }
+        ],
+        "summary": [
+          {
+            "label": "Active",
+            "value": 12
+          },
+          {
+            "label": "Internal",
+            "value": 7
+          },
+          {
+            "label": "External",
+            "value": 5
+          },
+          {
+            "label": "Subscription limit",
+            "value": 10
+          },
+          {
+            "label": "Remaining",
+            "value": 0
+          }
+        ]
+      }
+    }
+  }
+}

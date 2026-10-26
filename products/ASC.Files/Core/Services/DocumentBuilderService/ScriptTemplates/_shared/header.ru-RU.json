@@ -1,0 +1,21 @@
+{
+  "description": "The en-US header with the ru-RU labels (Resource.ru.resx) and the ru-RU date format (ShortDatePattern + LongTimePattern).",
+  "extends": [
+    "header.en-US"
+  ],
+  "placeholders": {
+    "inputData": {
+      "resources": {
+        "company": "Компания:",
+        "report": "Отчёт:",
+        "period": "Период:",
+        "dateGenerated": "Дата создания:",
+        "dateGeneratedFormat": "dd.MM.yyyy H:mm:ss"
+      },
+      "info": {
+        "company": "ООО «Люмен и партнёры»",
+        "dateGenerated": "23.10.2026 15:41:07"
+      }
+    }
+  }
+}

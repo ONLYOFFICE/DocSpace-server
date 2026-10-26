@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <Include href="KnownImageIds.vsct" />
+
+  <Commands package="guidDocBuilderPackage">
+    <Groups>
+      <!-- In the editor's context menu and under Tools. -->
+      <Group guid="guidDocBuilderCommands" id="EditorGroup" priority="0x0100">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+      <Group guid="guidDocBuilderCommands" id="ToolsGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidDocBuilderCommands" id="RunPreview" priority="0x0100" type="Button">
+        <Parent guid="guidDocBuilderCommands" id="EditorGroup" />
+        <Icon guid="ImageCatalogGuid" id="Run" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Run DocBuilder Preview</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidDocBuilderCommands" id="ShowPreview" priority="0x0100" type="Button">
+        <Parent guid="guidDocBuilderCommands" id="ToolsGroup" />
+        <Icon guid="ImageCatalogGuid" id="PreviewSideBySide" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>DocBuilder Preview</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidDocBuilderCommands" id="RunPreview" priority="0x0101">
+      <Parent guid="guidDocBuilderCommands" id="ToolsGroup" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <KeyBindings>
+    <KeyBinding guid="guidDocBuilderCommands" id="RunPreview" editor="guidVSStd97" key1="VK_F5" mod1="Control Shift Alt" />
+  </KeyBindings>
+
+  <Symbols>
+    <GuidSymbol name="guidDocBuilderPackage" value="{6b6f0a4e-3c3b-4d7e-9b0c-2d6e7a1f5c41}" />
+    <GuidSymbol name="guidDocBuilderCommands" value="{a3c5d8e2-1f47-4b9a-8e36-7c0d5b2e9f18}">
+      <IDSymbol name="EditorGroup" value="0x1020" />
+      <IDSymbol name="ToolsGroup" value="0x1021" />
+      <IDSymbol name="RunPreview" value="0x0100" />
+      <IDSymbol name="ShowPreview" value="0x0101" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

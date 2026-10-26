@@ -1,0 +1,22 @@
+{
+  "name": "ONLYOFFICE Document Builder script",
+  "scopeName": "source.docbuilder",
+  "fileTypes": [ "docbuilder" ],
+  "patterns": [
+    {
+      "comment": "A line that starts with builder. is a Document Builder command, not JavaScript.",
+      "match": "^\\s*(builder|builderJS)(\\.)(\\w+)",
+      "captures": {
+        "1": { "name": "support.class.builder.docbuilder" },
+        "2": { "name": "punctuation.accessor.docbuilder" },
+        "3": { "name": "keyword.control.builder.docbuilder" }
+      }
+    },
+    {
+      "comment": "A ${placeholder} the C# code fills before the script runs. entity.name.tag, because the Visual Studio theme paints variable.* like plain text.",
+      "match": "\\$\\{\\w+\\}",
+      "name": "entity.name.tag.placeholder.docbuilder"
+    },
+    { "include": "source.js" }
+  ]
+}

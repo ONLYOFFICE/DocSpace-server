@@ -1,0 +1,3 @@
+; TextMate grammars for *.docbuilder: the Document Builder script grammar and the JavaScript one it includes.
+[$RootKey$\TextMate\Repositories]
+"DocBuilder"="$PackageFolder$\Grammars"

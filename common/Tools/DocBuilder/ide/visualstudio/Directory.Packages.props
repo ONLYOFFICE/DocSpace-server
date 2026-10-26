@@ -1,0 +1,7 @@
+<!-- The extension pins its Visual Studio SDK packages itself: the repository's central package
+     versions are for the server and do not apply here. -->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

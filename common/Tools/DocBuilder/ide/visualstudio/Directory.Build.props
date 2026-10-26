@@ -1,0 +1,4 @@
+<!-- Stops the repository's Directory.Build.props (net10.0, OpenAPI generation) from reaching the
+     Visual Studio extension, which builds for .NET Framework with its own tooling. -->
+<Project>
+</Project>

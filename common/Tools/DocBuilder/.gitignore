@@ -1,0 +1,7 @@
+# Build output of the language server and the IDE plugins
+language-server/dist/
+ide/visualstudio/**/bin/
+ide/visualstudio/**/obj/
+ide/rider/build/
+ide/rider/.gradle/
+ide/rider/.intellijPlatform/

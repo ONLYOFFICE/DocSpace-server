@@ -1,0 +1,332 @@
+{
+  "description": "Room index export of a virtual data room: ${inputData} is the anonymous object of RoomIndexExportBuilder.BuildAsync (RoomIndexExportBuilder.cs:76) and each ${inputDataItems} entry the anonymous {index, name, url, type, size, author, created, modified} of WriteItemsToScriptAsync (:156-213), both serialized with property names as declared and nulls kept. The first item is the room itself (index and size null, type 'Room'); folders have size null and type 'Folder' (drawn bold); files carry their extension as type ('' for a file without one) and the size in MB rounded to 3 decimals as an invariant string. Image/video files link to /media/view/{id}, documents to /doceditor?fileid={id}. Items are in server order (folders, then files); the script sorts them by index.",
+  "placeholders": {
+    "inputData": {
+      "resources": {
+        "company": "Company:",
+        "room": "Room:",
+        "exportAuthor": "Export Author:",
+        "dateGenerated": "Date Generated:",
+        "index": "Index",
+        "name": "Name",
+        "type": "Type",
+        "size": "Size (MB)",
+        "author": "Author",
+        "created": "Created",
+        "modified": "Modified",
+        "total": "Total",
+        "sheetName": "Room index",
+        "numberFormat": "0.000",
+        "dateFormat": "M/d/yyyy h:mm:ss AM/PM"
+      },
+      "logoSrc": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMzAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAxMzAgMjQiPgo8cmVjdCB4PSIwIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSI0IiBmaWxsPSIjNDc4MUQxIi8+CjxyZWN0IHg9IjUiIHk9IjciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPHRleHQgeD0iMjYiIHk9IjE3IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzMzMzMiPkx1bWVuICZhbXA7IFBhcnRuZXI8L3RleHQ+Cjwvc3ZnPg==",
+      "logoWidthMm": 54.2,
+      "logoHeightMm": 10,
+      "themeColors": {
+        "mainBgColor": [
+          71,
+          129,
+          209
+        ],
+        "lightBgColor": [
+          240,
+          244,
+          251
+        ],
+        "mainFontColor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "info": {
+        "company": "Lumen & Partner GmbH",
+        "room": "Projekt Nordlicht — Ausschreibung 2027",
+        "exportAuthor": "Анна Смирнова",
+        "dateGenerated": "10/23/2026 3:41:07 PM"
+      }
+    },
+    "inputDataItems": [
+      {
+        "index": null,
+        "name": "Projekt Nordlicht — Ausschreibung 2027",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8124/filter?withSubfolders=false&folder=8124&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Room",
+        "size": null,
+        "author": "Jürgen Müller",
+        "created": "11/4/2025 10:02:11 AM",
+        "modified": "10/21/2026 5:45:03 PM"
+      },
+      {
+        "index": "1",
+        "name": "01 Verträge",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8200/filter?withSubfolders=false&folder=8200&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Jürgen Müller",
+        "created": "11/15/2025 5:54:02 AM",
+        "modified": "2/18/2026 3:06:32 AM"
+      },
+      {
+        "index": "1.1",
+        "name": "Entwürfe",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8201/filter?withSubfolders=false&folder=8201&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Hans-Peter Großmann",
+        "created": "12/10/2025 3:25:41 PM",
+        "modified": "1/11/2026 4:57:03 PM"
+      },
+      {
+        "index": "1.2",
+        "name": "Unterschrieben",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8202/filter?withSubfolders=false&folder=8202&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Jürgen Müller",
+        "created": "11/24/2025 11:18:46 PM",
+        "modified": "2/24/2026 6:57:41 AM"
+      },
+      {
+        "index": "2",
+        "name": "02 Технические требования",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8203/filter?withSubfolders=false&folder=8203&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Olivia Bennett",
+        "created": "11/20/2025 1:46:44 PM",
+        "modified": "6/8/2026 10:09:49 AM"
+      },
+      {
+        "index": "2.1",
+        "name": "Приложения",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8204/filter?withSubfolders=false&folder=8204&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Анна Смирнова",
+        "created": "12/2/2025 8:38:02 AM",
+        "modified": "1/31/2026 2:33:01 PM"
+      },
+      {
+        "index": "3",
+        "name": "03 Images & Renderings",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8205/filter?withSubfolders=false&folder=8205&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Jürgen Müller",
+        "created": "11/17/2025 1:02:51 AM",
+        "modified": "1/1/2026 1:08:31 PM"
+      },
+      {
+        "index": "4",
+        "name": "Empty folder",
+        "url": "https://lumen-partner.onlyoffice.com/rooms/shared/8206/filter?withSubfolders=false&folder=8206&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+        "type": "Folder",
+        "size": null,
+        "author": "Olivia Bennett",
+        "created": "12/1/2025 7:04:18 PM",
+        "modified": "1/10/2026 11:00:26 PM"
+      },
+      {
+        "index": "1.1.1",
+        "name": "Rahmenvertrag_Entwurf_v3.docx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9101",
+        "type": ".docx",
+        "size": "0.084",
+        "author": "Hans-Peter Großmann",
+        "created": "5/19/2026 11:26:46 AM",
+        "modified": "6/2/2026 6:42:44 PM"
+      },
+      {
+        "index": "1.1.2",
+        "name": "Rahmenvertrag_Entwurf_v4 (Kommentare Legal).docx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9102",
+        "type": ".docx",
+        "size": "0.131",
+        "author": "Olivia Bennett",
+        "created": "6/28/2026 10:46:01 PM",
+        "modified": "8/18/2026 7:03:12 AM"
+      },
+      {
+        "index": "1.2.1",
+        "name": "Rahmenvertrag_final_signed.pdf",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9103",
+        "type": ".pdf",
+        "size": "2.417",
+        "author": "Анна Смирнова",
+        "created": "2/27/2026 10:53:52 AM",
+        "modified": "3/24/2026 10:50:57 PM"
+      },
+      {
+        "index": "1.2.2",
+        "name": "NDA_Contoso.pdf",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9104",
+        "type": ".pdf",
+        "size": "0.356",
+        "author": "Olivia Bennett",
+        "created": "3/27/2026 12:33:50 PM",
+        "modified": "4/19/2026 11:55:10 AM"
+      },
+      {
+        "index": "1.3",
+        "name": "Vertragsübersicht.xlsx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9105",
+        "type": ".xlsx",
+        "size": "0.027",
+        "author": "Li Wei",
+        "created": "7/24/2026 12:35:17 AM",
+        "modified": "8/14/2026 1:35:34 AM"
+      },
+      {
+        "index": "2.1.1",
+        "name": "Приложение 1. Спецификация оборудования.xlsx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9106",
+        "type": ".xlsx",
+        "size": "0.412",
+        "author": "Анна Смирнова",
+        "created": "1/3/2026 7:32:48 PM",
+        "modified": "2/10/2026 5:12:43 AM"
+      },
+      {
+        "index": "2.1.2",
+        "name": "Приложение 2. Схема.vsdx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9107",
+        "type": ".vsdx",
+        "size": "1.903",
+        "author": "Li Wei",
+        "created": "11/24/2025 1:58:59 PM",
+        "modified": "12/22/2025 2:34:08 AM"
+      },
+      {
+        "index": "2.2",
+        "name": "Техническое задание.docx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9108",
+        "type": ".docx",
+        "size": "0.958",
+        "author": "Li Wei",
+        "created": "4/15/2026 1:55:30 AM",
+        "modified": "5/17/2026 6:08:07 AM"
+      },
+      {
+        "index": "2.3",
+        "name": "README",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9109",
+        "type": "",
+        "size": "0.001",
+        "author": "Анна Смирнова",
+        "created": "5/22/2026 7:01:45 AM",
+        "modified": "6/7/2026 8:38:42 AM"
+      },
+      {
+        "index": "3.1",
+        "name": "render_facade_north.png",
+        "url": "https://lumen-partner.onlyoffice.com/media/view/9110",
+        "type": ".png",
+        "size": "14.288",
+        "author": "Li Wei",
+        "created": "6/16/2026 10:05:52 AM",
+        "modified": "7/20/2026 5:16:17 PM"
+      },
+      {
+        "index": "3.2",
+        "name": "render_lobby.jpg",
+        "url": "https://lumen-partner.onlyoffice.com/media/view/9111",
+        "type": ".jpg",
+        "size": "6.05",
+        "author": "Jürgen Müller",
+        "created": "5/11/2026 1:44:22 AM",
+        "modified": "6/22/2026 1:45:41 PM"
+      },
+      {
+        "index": "3.3",
+        "name": "site_walkthrough.mp4",
+        "url": "https://lumen-partner.onlyoffice.com/media/view/9112",
+        "type": ".mp4",
+        "size": "812.5",
+        "author": "Olivia Bennett",
+        "created": "4/14/2026 2:34:25 PM",
+        "modified": "5/17/2026 1:50:03 AM"
+      },
+      {
+        "index": "3.4",
+        "name": "logo.svg",
+        "url": "https://lumen-partner.onlyoffice.com/media/view/9113",
+        "type": ".svg",
+        "size": "0.004",
+        "author": "Hans-Peter Großmann",
+        "created": "6/2/2026 9:54:44 PM",
+        "modified": "7/17/2026 8:40:36 AM"
+      },
+      {
+        "index": "5",
+        "name": "Projektplan.xlsx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9114",
+        "type": ".xlsx",
+        "size": "0.219",
+        "author": "Анна Смирнова",
+        "created": "8/15/2026 2:40:14 PM",
+        "modified": "9/11/2026 4:28:29 AM"
+      },
+      {
+        "index": "6",
+        "name": "Kick-off presentation.pptx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9115",
+        "type": ".pptx",
+        "size": "23.771",
+        "author": "Li Wei",
+        "created": "2/3/2026 8:26:47 AM",
+        "modified": "2/22/2026 11:13:52 PM"
+      },
+      {
+        "index": "7",
+        "name": "Meeting notes 2026-10-14.md",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9116",
+        "type": ".md",
+        "size": "0.006",
+        "author": "Olivia Bennett",
+        "created": "8/12/2026 10:03:04 AM",
+        "modified": "8/30/2026 5:42:13 PM"
+      },
+      {
+        "index": "8",
+        "name": "Budget forecast Q1–Q4.xlsx",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9117",
+        "type": ".xlsx",
+        "size": "0.153",
+        "author": "Li Wei",
+        "created": "6/14/2026 7:09:10 AM",
+        "modified": "7/25/2026 6:53:07 PM"
+      },
+      {
+        "index": "9",
+        "name": "Ausschreibungsunterlagen_komplett.zip",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9118",
+        "type": ".zip",
+        "size": "245.112",
+        "author": "Hans-Peter Großmann",
+        "created": "7/2/2026 2:07:16 AM",
+        "modified": "8/14/2026 9:54:06 AM"
+      },
+      {
+        "index": "10",
+        "name": "Fragebogen Lieferanten.pdf",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9119",
+        "type": ".pdf",
+        "size": "0.884",
+        "author": "Анна Смирнова",
+        "created": "7/25/2026 3:15:52 AM",
+        "modified": "9/5/2026 6:21:06 AM"
+      },
+      {
+        "index": "11",
+        "name": "empty.txt",
+        "url": "https://lumen-partner.onlyoffice.com/doceditor?fileid=9120",
+        "type": ".txt",
+        "size": "0",
+        "author": "Li Wei",
+        "created": "3/31/2026 4:48:12 AM",
+        "modified": "4/21/2026 8:12:12 AM"
+      }
+    ]
+  }
+}

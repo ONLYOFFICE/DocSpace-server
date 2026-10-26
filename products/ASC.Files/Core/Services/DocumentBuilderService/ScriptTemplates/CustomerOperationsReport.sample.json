@@ -1,0 +1,1483 @@
+{
+  "description": "Customer operations report, ReportType.Operations with no service filter (OperationsReportBuilder): ${inputData} is the anonymous object of CustomerReportBuilderBase.RenderAsync (CustomerReportBuilderBase.cs:187) serialized camelCase, nulls omitted, enums as camelCase strings (ReportColumnAlign -> \"left\"/\"right\", ReportPivotSortOrder -> \"descending\"); pivot is ReportPivot/ReportPivotDataField/ReportPivotSort. Each ${dataValues} row is a List<PropertyValue(Value, Format, Halign)> (OperationsReportBuilder.SerializeOperations, :241); a null value (the unit of a top-up) is omitted from its cell. All rows share USD, so the total row is written and the pivot drops the Currency row field and captions 'Total spent (USD)'. Variants: rows in two currencies drop the total row and the pivot grand total; filtering on the AI tools service adds 6 token columns (Prompt, Cached, Cache write, Completion, Reasoning, Image) after Quantity plus Provider cost, Source type, Source name, Source ID (totalColumns/totalCurrencyColumn shift); ServiceUsage (Service, Quantity, Unit of Measurement, Debit, Currency) and MonthlyUsage (Month, Debit, Currency) reports use the same template with no pivot.",
+  "placeholders": {
+    "inputData": {
+      "resources": {
+        "company": "Company:",
+        "report": "Report:",
+        "period": "Period:",
+        "dateGenerated": "Date generated:",
+        "total": "Total",
+        "sheetName": "Transaction history",
+        "dateGeneratedFormat": "M/d/yyyy h:mm:ss AM/PM",
+        "totalFormat": "#,##0.0000000000"
+      },
+      "info": {
+        "company": "Lumen & Partner GmbH",
+        "report": "Transaction history",
+        "period": "10/1/2026 – 10/22/2026",
+        "dateGenerated": "10/23/2026 3:41:07 PM"
+      },
+      "logoSrc": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMzAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAxMzAgMjQiPgo8cmVjdCB4PSIwIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSI0IiBmaWxsPSIjNDc4MUQxIi8+CjxyZWN0IHg9IjUiIHk9IjciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPHRleHQgeD0iMjYiIHk9IjE3IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzMzMzMiPkx1bWVuICZhbXA7IFBhcnRuZXI8L3RleHQ+Cjwvc3ZnPg==",
+      "logoWidthMm": 54.2,
+      "logoHeightMm": 10,
+      "themeColors": {
+        "mainBgColor": [
+          71,
+          129,
+          209
+        ],
+        "lightBgColor": [
+          240,
+          244,
+          251
+        ],
+        "mainFontColor": [
+          255,
+          255,
+          255
+        ]
+      },
+      "keys": [
+        "Date",
+        "Type",
+        "Details",
+        "Contact",
+        "Quantity",
+        "Unit of Measurement",
+        "Credit",
+        "Debit",
+        "Currency"
+      ],
+      "aligns": [
+        "left",
+        "left",
+        "left",
+        "left",
+        "right",
+        "left",
+        "right",
+        "right",
+        "left"
+      ],
+      "totalColumns": [
+        6,
+        7
+      ],
+      "totalCurrencyColumn": 8,
+      "pivot": {
+        "sheetName": "Summary by user",
+        "rowFields": [
+          "Contact",
+          "Currency"
+        ],
+        "dataFields": [
+          {
+            "field": "Debit",
+            "aggregation": "Sum",
+            "caption": "Total spent",
+            "format": "#,##0.0000000000"
+          }
+        ],
+        "sort": {
+          "rowField": "Contact",
+          "by": "Debit",
+          "order": "descending"
+        }
+      }
+    },
+    "dataValues": [
+      [
+        {
+          "value": "10/22/2026 9:14:02 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Vectorization",
+          "format": "@"
+        },
+        {
+          "value": "text-embedding-3-small",
+          "format": "@"
+        },
+        {
+          "value": "Hans-Peter Großmann",
+          "format": "@"
+        },
+        {
+          "value": "1250000",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0250000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/22/2026 8:12:22 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "claude-sonnet-4-5",
+          "format": "@"
+        },
+        {
+          "value": "Ali",
+          "format": "@"
+        },
+        {
+          "value": "241877",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "1.4512620000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/22/2026 8:12:19 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "claude-sonnet-4-5",
+          "format": "@"
+        },
+        {
+          "value": "Olivia Bennett",
+          "format": "@"
+        },
+        {
+          "value": "241877",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "1.4512620000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/22/2026 5:45:39 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Vectorization",
+          "format": "@"
+        },
+        {
+          "value": "text-embedding-3-small",
+          "format": "@"
+        },
+        {
+          "value": "Ali",
+          "format": "@"
+        },
+        {
+          "value": "1250000",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0250000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/21/2026 3:18:59 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Backup",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Екатерина Владимировна Соколова-Петренко",
+          "format": "@"
+        },
+        {
+          "value": "1",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Copies",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "2.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/21/2026 3:18:56 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Balance top-up",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Olivia Bennett",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "format": "@"
+        },
+        {
+          "value": "50",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/21/2026 2:17:16 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Backup",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Екатерина Владимировна Соколова-Петренко",
+          "format": "@"
+        },
+        {
+          "value": "1",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Copies",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "2.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/21/2026 1:15:36 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Docs Connect",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Li Wei",
+          "format": "@"
+        },
+        {
+          "value": "25",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Users",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "125.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/21/2026 9:22:16 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "gpt-4o-mini",
+          "format": "@"
+        },
+        {
+          "value": "Carlos Ruiz",
+          "format": "@"
+        },
+        {
+          "value": "18432",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0027648000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/20/2026 6:55:36 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "claude-sonnet-4-5",
+          "format": "@"
+        },
+        {
+          "value": "Carlos Ruiz",
+          "format": "@"
+        },
+        {
+          "value": "241877",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "1.4512620000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/20/2026 3:02:16 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web crawling",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Ali",
+          "format": "@"
+        },
+        {
+          "value": "3",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Sources",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0150000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/20/2026 12:35:36 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Image",
+          "format": "@"
+        },
+        {
+          "value": "gpt-image-1",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "4160",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.1664000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/20/2026 12:25:36 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Backup",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Olivia Bennett",
+          "format": "@"
+        },
+        {
+          "value": "1",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Copies",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "2.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/19/2026 11:23:56 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "gpt-4o-mini",
+          "format": "@"
+        },
+        {
+          "value": "Ингрид Йоханссон",
+          "format": "@"
+        },
+        {
+          "value": "18432",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0027648000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/19/2026 8:57:16 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web crawling",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Hans-Peter Großmann",
+          "format": "@"
+        },
+        {
+          "value": "3",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Sources",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0150000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/19/2026 8:56:35 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Docs Connect",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "25",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Users",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "125.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:29:55 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web crawling",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Carlos Ruiz",
+          "format": "@"
+        },
+        {
+          "value": "3",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Sources",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0150000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 2:36:35 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "deepseek-chat",
+          "format": "@"
+        },
+        {
+          "value": "Marie-Christine Lefèvre-Dubois",
+          "format": "@"
+        },
+        {
+          "value": "932",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0000312000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 2:35:54 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Image",
+          "format": "@"
+        },
+        {
+          "value": "gpt-image-1",
+          "format": "@"
+        },
+        {
+          "value": "Ali",
+          "format": "@"
+        },
+        {
+          "value": "4160",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.1664000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 2:35:13 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Balance top-up",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "format": "@"
+        },
+        {
+          "value": "1000.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 10:41:53 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Docs Connect",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Jürgen Müller",
+          "format": "@"
+        },
+        {
+          "value": "25",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Users",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "125.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:48:33 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Image",
+          "format": "@"
+        },
+        {
+          "value": "gpt-image-1",
+          "format": "@"
+        },
+        {
+          "value": "Tom Ng",
+          "format": "@"
+        },
+        {
+          "value": "4160",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.1664000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:48:30 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "claude-sonnet-4-5",
+          "format": "@"
+        },
+        {
+          "value": "Дмитрий Кузнецов",
+          "format": "@"
+        },
+        {
+          "value": "241877",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "1.4512620000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:38:30 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web search",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Jürgen Müller",
+          "format": "@"
+        },
+        {
+          "value": "10",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Results",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0500000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:37:49 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Chat",
+          "format": "@"
+        },
+        {
+          "value": "deepseek-chat",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "932",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0000312000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 6:37:46 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Additional disk storage",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "50",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "GB",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "7.50",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/18/2026 2:44:26 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Vectorization",
+          "format": "@"
+        },
+        {
+          "value": "text-embedding-3-small",
+          "format": "@"
+        },
+        {
+          "value": "Olivia Bennett",
+          "format": "@"
+        },
+        {
+          "value": "1250000",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0250000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 12:17:46 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Additional disk storage",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Hans-Peter Großmann",
+          "format": "@"
+        },
+        {
+          "value": "50",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "GB",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "7.50",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 12:17:05 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web crawling",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Hans-Peter Großmann",
+          "format": "@"
+        },
+        {
+          "value": "3",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Sources",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0150000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 8:23:45 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Backup",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Marie-Christine Lefèvre-Dubois",
+          "format": "@"
+        },
+        {
+          "value": "1",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Copies",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "2.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 4:30:25 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Web search",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Ингрид Йоханссон",
+          "format": "@"
+        },
+        {
+          "value": "10",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Results",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.0500000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 4:20:25 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Balance top-up",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "format": "@"
+        },
+        {
+          "value": "1000.00",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/17/2026 3:18:45 AM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Image",
+          "format": "@"
+        },
+        {
+          "value": "gpt-image-1",
+          "format": "@"
+        },
+        {
+          "value": "Tom Ng",
+          "format": "@"
+        },
+        {
+          "value": "4160",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "Tokens",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "0.1664000000",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ],
+      [
+        {
+          "value": "10/16/2026 11:25:25 PM",
+          "format": "M/d/yyyy h:mm:ss AM/PM"
+        },
+        {
+          "value": "Additional disk storage",
+          "format": "@"
+        },
+        {
+          "value": "",
+          "format": "@"
+        },
+        {
+          "value": "Анна Смирнова",
+          "format": "@"
+        },
+        {
+          "value": "50",
+          "format": "#,##0",
+          "halign": "right"
+        },
+        {
+          "value": "GB",
+          "format": "@"
+        },
+        {
+          "value": "0",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "7.50",
+          "format": "#,##0.0000000000",
+          "halign": "right"
+        },
+        {
+          "value": "USD",
+          "format": "@"
+        }
+      ]
+    ]
+  }
+}

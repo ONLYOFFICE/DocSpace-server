@@ -1,0 +1,1002 @@
+{
+  "description": "Audit reports (AuditXlsxReportWriter, AuditReportWriters.cs): ${inputData} is its anonymous object serialized camelCase with nulls omitted; each ${dataValues} row is a string[] of the event columns AuditReportColumns.Resolve picks - audit trail, login history, room history for an admin and for a room user. Dates in rows are ConvertNumerals(\"G\") of the user culture.",
+  "extends": [
+    "_shared/header.en-US"
+  ],
+  "default": "audit",
+  "scenarios": {
+    "audit": {
+      "description": "Audit trail of a period, 32 hand-written events",
+      "placeholders": {
+        "inputData": {
+          "resources": {
+            "rowLimit": "Note:",
+            "sheetName": "Audit Trail Report"
+          },
+          "info": {
+            "report": "Audit Trail Report",
+            "period": "9/1/2026 – 10/22/2026"
+          },
+          "keys": [
+            "IP",
+            "Country",
+            "City",
+            "Browser",
+            "Platform",
+            "Date",
+            "User",
+            "Page",
+            "Action",
+            "Action Type",
+            "Location",
+            "Action ID",
+            "Target ID"
+          ],
+          "aligns": [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left"
+          ],
+          "columns": [
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "M/d/yyyy h:mm:ss AM/PM"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@",
+              "wrap": false
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            }
+          ]
+        },
+        "dataValues": [
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/22/2026 6:05:33 PM",
+            "Анна Смирнова",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/712/filter?folder=840&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File uploaded: Q3 Financial Statement.xlsx",
+            "Upload",
+            "Rooms/Finance",
+            "3001",
+            "file_1043"
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/22/2026 6:05:14 PM",
+            "Olivia Bennett",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/752/filter?folder=979&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Room created: Marketing 2027",
+            "Create",
+            "Rooms",
+            "5001",
+            "folder_812"
+          ],
+          [
+            "203.0.113.88",
+            "Singapore",
+            "Singapore",
+            "Edge 141.0",
+            "Windows 11",
+            "10/22/2026 6:05:07 PM",
+            "Sophie Schäfer",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/716/filter?folder=715&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Users invited to the room: Анна Смирнова, Olivia Bennett",
+            "Send",
+            "Rooms/Marketing 2027",
+            "5018",
+            "folder_812"
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/22/2026 6:05:00 PM",
+            "Marie-Christine Lefèvre-Dubois",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/958/filter?folder=713&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File renamed: Vertrag_Müller_v2.docx",
+            "Update",
+            "Rooms/Legal/Verträge",
+            "3013",
+            "file_2210"
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/22/2026 4:35:00 PM",
+            "Ингрид Йоханссон",
+            null,
+            "Folder moved to trash: Archive 2019",
+            "Delete",
+            "Documents",
+            "3026",
+            "folder_77,folder_78,folder_79"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/22/2026 11:01:40 AM",
+            "Hans-Peter Großmann",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Login settings updated",
+            "Update",
+            "Settings",
+            "5070",
+            null
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/22/2026 10:40:00 AM",
+            "Tom Ng",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Color theme changed",
+            "Update",
+            "Settings",
+            "5051",
+            null
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/22/2026 9:10:00 AM",
+            "Ali",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/703/filter?folder=781&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Form submitted: Заявка на отпуск.pdf",
+            "Send",
+            "Rooms/HR forms",
+            "3115",
+            "file_3501"
+          ],
+          [
+            "10.0.0.5",
+            null,
+            null,
+            "Firefox 143.0",
+            "Ubuntu 24.04",
+            "10/22/2026 3:36:40 AM",
+            "Дмитрий Кузнецов",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/842/filter?folder=779&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Access rights changed for: Hans-Peter Großmann",
+            "UpdateAccess",
+            "Rooms/Engineering",
+            "5032",
+            "folder_901"
+          ],
+          [
+            "172.16.4.19",
+            "France",
+            "Lyon",
+            "Safari Mobile 18.4",
+            "iOS 18.4",
+            "10/22/2026 3:36:21 AM",
+            "Дмитрий Кузнецов",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Backup completed",
+            "Create",
+            "Settings",
+            "5087",
+            null
+          ],
+          [
+            "192.168.10.24",
+            "Germany",
+            "München",
+            "Chrome 141.0",
+            "Windows 11",
+            "10/22/2026 3:36:14 AM",
+            "Sophie Schäfer",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/749/filter?folder=883&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File downloaded: presentation_final_FINAL (3).pptx",
+            "Download",
+            "Rooms/Sales",
+            "3038",
+            "file_4412"
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/21/2026 4:12:54 PM",
+            "Екатерина Владимировна Соколова-Петренко",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Audit trail report downloaded",
+            "Download",
+            "Settings",
+            "5100",
+            null
+          ],
+          [
+            "172.16.4.19",
+            "France",
+            "Lyon",
+            "Safari Mobile 18.4",
+            "iOS 18.4",
+            "10/21/2026 4:08:54 PM",
+            "Jürgen Müller",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/935/filter?folder=974&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File uploaded: Q3 Financial Statement.xlsx",
+            "Upload",
+            "Rooms/Finance",
+            "3001",
+            "file_1043"
+          ],
+          [
+            "10.0.0.5",
+            null,
+            null,
+            "Firefox 143.0",
+            "Ubuntu 24.04",
+            "10/21/2026 4:08:47 PM",
+            "Анна Смирнова",
+            null,
+            "Room created: Marketing 2027",
+            "Create",
+            "Rooms",
+            "5001",
+            "folder_812"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/21/2026 4:45:27 AM",
+            "Екатерина Владимировна Соколова-Петренко",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/885/filter?folder=995&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Users invited to the room: Анна Смирнова, Olivia Bennett",
+            "Send",
+            "Rooms/Marketing 2027",
+            "5018",
+            "folder_812"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/21/2026 4:45:08 AM",
+            "Анна Смирнова",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/723/filter?folder=816&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File renamed: Vertrag_Müller_v2.docx",
+            "Update",
+            "Rooms/Legal/Verträge",
+            "3013",
+            "file_2210"
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/20/2026 5:21:48 PM",
+            "Анна Смирнова",
+            "https://lumen-partner.onlyoffice.com/rooms/personal",
+            "Folder moved to trash: Archive 2019",
+            "Delete",
+            "Documents",
+            "3026",
+            "folder_77,folder_78,folder_79"
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/20/2026 5:58:28 AM",
+            "Анна Смирнова",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Login settings updated",
+            "Update",
+            "Settings",
+            "5070",
+            null
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/20/2026 5:36:48 AM",
+            "Tom Ng",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Color theme changed",
+            "Update",
+            "Settings",
+            "5051",
+            null
+          ],
+          [
+            "172.16.4.19",
+            "France",
+            "Lyon",
+            "Safari Mobile 18.4",
+            "iOS 18.4",
+            "10/20/2026 12:03:28 AM",
+            "Дмитрий Кузнецов",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/783/filter?folder=889&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Form submitted: Заявка на отпуск.pdf",
+            "Send",
+            "Rooms/HR forms",
+            "3115",
+            "file_3501"
+          ],
+          [
+            "85.143.12.7",
+            "Russia",
+            "Санкт-Петербург",
+            "Yandex 25.8",
+            "Windows 10",
+            "10/19/2026 11:59:28 PM",
+            "Carlos Ruiz",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/836/filter?folder=736&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Access rights changed for: Hans-Peter Großmann",
+            "UpdateAccess",
+            "Rooms/Engineering",
+            "5032",
+            "folder_901"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/19/2026 10:29:28 PM",
+            "Olivia Bennett",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Backup completed",
+            "Create",
+            "Settings",
+            "5087",
+            null
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/19/2026 8:59:28 PM",
+            "Marie-Christine Lefèvre-Dubois",
+            null,
+            "File downloaded: presentation_final_FINAL (3).pptx",
+            "Download",
+            "Rooms/Sales",
+            "3038",
+            "file_4412"
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/19/2026 8:37:48 PM",
+            "Carlos Ruiz",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Audit trail report downloaded",
+            "Download",
+            "Settings",
+            "5100",
+            null
+          ],
+          [
+            "203.0.113.88",
+            "Singapore",
+            "Singapore",
+            "Edge 141.0",
+            "Windows 11",
+            "10/19/2026 3:04:28 PM",
+            "Marie-Christine Lefèvre-Dubois",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/866/filter?folder=728&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File uploaded: Q3 Financial Statement.xlsx",
+            "Upload",
+            "Rooms/Finance",
+            "3001",
+            "file_1043"
+          ],
+          [
+            "172.16.4.19",
+            "France",
+            "Lyon",
+            "Safari Mobile 18.4",
+            "iOS 18.4",
+            "10/19/2026 3:04:09 PM",
+            "Jürgen Müller",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/861/filter?folder=905&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Room created: Marketing 2027",
+            "Create",
+            "Rooms",
+            "5001",
+            "folder_812"
+          ],
+          [
+            "192.168.10.24",
+            "Germany",
+            "München",
+            "Chrome 141.0",
+            "Windows 11",
+            "10/19/2026 3:00:09 PM",
+            "Marie-Christine Lefèvre-Dubois",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/990/filter?folder=861&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "Users invited to the room: Анна Смирнова, Olivia Bennett",
+            "Send",
+            "Rooms/Marketing 2027",
+            "5018",
+            "folder_812"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/19/2026 2:59:50 PM",
+            "Tom Ng",
+            "https://lumen-partner.onlyoffice.com/rooms/shared/902/filter?folder=934&count=100&page=1&sortby=DateAndTime&sortorder=descending",
+            "File renamed: Vertrag_Müller_v2.docx",
+            "Update",
+            "Rooms/Legal/Verträge",
+            "3013",
+            "file_2210"
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/19/2026 2:59:31 PM",
+            "Olivia Bennett",
+            "https://lumen-partner.onlyoffice.com/rooms/personal",
+            "Folder moved to trash: Archive 2019",
+            "Delete",
+            "Documents",
+            "3026",
+            "folder_77,folder_78,folder_79"
+          ],
+          [
+            "91.198.174.192",
+            "Germany",
+            "Düsseldorf",
+            "Chrome Mobile 141.0",
+            "Android 15",
+            "10/19/2026 2:59:12 PM",
+            "Hans-Peter Großmann",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Login settings updated",
+            "Update",
+            "Settings",
+            "5070",
+            null
+          ],
+          [
+            "2001:db8:85a3::8a2e:370:7334",
+            "United Kingdom",
+            "London",
+            "Safari 18.4",
+            "macOS 15.5",
+            "10/19/2026 1:29:12 PM",
+            "Ингрид Йоханссон",
+            "https://lumen-partner.onlyoffice.com/portal-settings/customization/general",
+            "Color theme changed",
+            "Update",
+            "Settings",
+            "5051",
+            null
+          ],
+          [
+            "10.0.0.5",
+            null,
+            null,
+            "Firefox 143.0",
+            "Ubuntu 24.04",
+            "10/19/2026 11:59:12 AM",
+            "Екатерина Владимировна Соколова-Петренко",
+            null,
+            "Form submitted: Заявка на отпуск.pdf",
+            "Send",
+            "Rooms/HR forms",
+            "3115",
+            "file_3501"
+          ]
+        ]
+      }
+    },
+    "rowLimit": {
+      "description": "Audit trail cut at the row limit: the header carries the note",
+      "base": "audit",
+      "placeholders": {
+        "inputData": {
+          "info": {
+            "rowLimit": "The report shows the 32 most recent of 248,317 events. Download it in CSV format to get all of them."
+          }
+        }
+      }
+    },
+    "large": {
+      "description": "Audit trail of 5 000 generated events: column widths, wrapping and build time",
+      "base": "audit",
+      "placeholders": {
+        "dataValues": {
+          "$generate": {
+            "count": 5000,
+            "seed": 7,
+            "locale": "en-US",
+            "strings": true,
+            "columns": [
+              "ip",
+              {
+                "kind": "country",
+                "nulls": 0.05
+              },
+              {
+                "kind": "city",
+                "nulls": 0.05
+              },
+              "browser",
+              "platform",
+              "date",
+              "user",
+              {
+                "kind": "url",
+                "nulls": 0.1
+              },
+              "action",
+              "actionType",
+              {
+                "kind": "location",
+                "nulls": 0.1
+              },
+              "actionId",
+              {
+                "kind": "targetId",
+                "nulls": 0.05
+              }
+            ]
+          }
+        }
+      }
+    },
+    "empty": {
+      "description": "Audit trail of a period without events",
+      "base": "audit",
+      "placeholders": {
+        "dataValues": []
+      }
+    },
+    "loginHistory": {
+      "description": "Login history: LoginEvent has no action type, location or ids",
+      "base": "audit",
+      "placeholders": {
+        "inputData": {
+          "resources": {
+            "sheetName": "Login History Report"
+          },
+          "info": {
+            "report": "Login History Report"
+          },
+          "keys": [
+            "IP",
+            "Country",
+            "City",
+            "Browser",
+            "Platform",
+            "Date",
+            "User",
+            "Page",
+            "Action"
+          ],
+          "aligns": [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left"
+          ],
+          "columns": [
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "M/d/yyyy h:mm:ss AM/PM"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@",
+              "wrap": false
+            },
+            {
+              "format": "@"
+            }
+          ]
+        },
+        "dataValues": {
+          "$generate": {
+            "count": 40,
+            "seed": 3,
+            "locale": "en-US",
+            "strings": true,
+            "columns": [
+              "ip",
+              {
+                "kind": "country",
+                "nulls": 0.05
+              },
+              {
+                "kind": "city",
+                "nulls": 0.05
+              },
+              "browser",
+              "platform",
+              "date",
+              "user",
+              {
+                "kind": "url",
+                "nulls": 0.1
+              },
+              {
+                "kind": "action",
+                "login": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "roomHistory": {
+      "description": "History of one room for a DocSpace admin: no country, city, page, action id or location",
+      "base": "audit",
+      "placeholders": {
+        "inputData": {
+          "keys": [
+            "IP",
+            "Browser",
+            "Platform",
+            "Date",
+            "User",
+            "Action",
+            "Action Type",
+            "Target ID"
+          ],
+          "aligns": [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left"
+          ],
+          "columns": [
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "M/d/yyyy h:mm:ss AM/PM"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            }
+          ],
+          "info": {
+            "period": ""
+          }
+        },
+        "dataValues": {
+          "$generate": {
+            "count": 25,
+            "seed": 5,
+            "locale": "en-US",
+            "strings": true,
+            "columns": [
+              "ip",
+              "browser",
+              "platform",
+              "date",
+              "user",
+              "action",
+              "actionType",
+              {
+                "kind": "targetId",
+                "nulls": 0.05
+              }
+            ]
+          }
+        }
+      }
+    },
+    "roomHistoryUser": {
+      "description": "History of one room for a room user: the client columns (IP, browser, platform) go too",
+      "base": "roomHistory",
+      "placeholders": {
+        "inputData": {
+          "keys": [
+            "Date",
+            "User",
+            "Action",
+            "Action Type",
+            "Target ID"
+          ],
+          "aligns": [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left"
+          ],
+          "columns": [
+            {
+              "format": "M/d/yyyy h:mm:ss AM/PM"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            }
+          ]
+        },
+        "dataValues": {
+          "$generate": {
+            "count": 25,
+            "seed": 5,
+            "locale": "en-US",
+            "strings": true,
+            "columns": [
+              "date",
+              "user",
+              "action",
+              "actionType",
+              {
+                "kind": "targetId",
+                "nulls": 0.05
+              }
+            ]
+          }
+        }
+      }
+    },
+    "ru-RU": {
+      "description": "Audit trail for a ru-RU user, cut at the row limit: Russian labels, dates and actions",
+      "base": "audit",
+      "extends": [
+        "_shared/header.ru-RU"
+      ],
+      "placeholders": {
+        "inputData": {
+          "resources": {
+            "rowLimit": "Примечание:",
+            "sheetName": "Отчет по журналу аудита"
+          },
+          "info": {
+            "report": "Отчет по журналу аудита",
+            "period": "01.09.2026 – 22.10.2026",
+            "rowLimit": "В отчете показаны последние 30 из 248 317 событий. Чтобы получить все события, выгрузите отчет в формате CSV."
+          },
+          "keys": [
+            "IP-адрес",
+            "Страна",
+            "Город",
+            "Браузер",
+            "Платформа",
+            "Дата",
+            "Пользователь",
+            "Страница",
+            "Действие",
+            "Тип действия",
+            "Размещение",
+            "ID действия",
+            "ID объекта"
+          ],
+          "aligns": [
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left",
+            "left"
+          ],
+          "columns": [
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "dd.MM.yyyy H:mm:ss"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@",
+              "wrap": false
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            },
+            {
+              "format": "@"
+            }
+          ]
+        },
+        "dataValues": {
+          "$generate": {
+            "count": 30,
+            "seed": 11,
+            "locale": "ru-RU",
+            "strings": true,
+            "columns": [
+              "ip",
+              {
+                "kind": "country",
+                "nulls": 0.05
+              },
+              {
+                "kind": "city",
+                "nulls": 0.05
+              },
+              "browser",
+              "platform",
+              "date",
+              "user",
+              {
+                "kind": "url",
+                "nulls": 0.1
+              },
+              "action",
+              "actionType",
+              {
+                "kind": "location",
+                "nulls": 0.1
+              },
+              "actionId",
+              {
+                "kind": "targetId",
+                "nulls": 0.05
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

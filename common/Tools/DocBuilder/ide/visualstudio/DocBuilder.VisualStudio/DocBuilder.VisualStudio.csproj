@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DocBuilder.VisualStudio</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <!-- Lets Microsoft.VSSDK.BuildTools import the VSIX targets (pkgdef, VSCT, the .vsix itself). -->
+    <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <UseCodebase>true</UseCodebase>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <!-- F5 starts an experimental instance of Visual Studio with the extension installed. -->
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+    <!-- The bundled language server: build it first with `node build.mjs` in language-server. -->
+    <LanguageServerDist>$(MSBuildThisFileDirectory)..\..\..\language-server\dist\</LanguageServerDist>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Visual Studio provides these at run time; the extension only compiles against them. -->
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Client" Version="17.14.60" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" ExcludeAssets="runtime;native" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.9.820" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Design" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="DocBuilderCommands.vsct" ResourceName="Menus.ctmenu" />
+    <Content Include="docbuilder.pkgdef" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Grammars\*" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\..\..\..\..\LICENSE" Link="LICENSE" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\..\..\..\..\LICENSE')" />
+  </ItemGroup>
+
+  <Target Name="IncludeLanguageServer" BeforeTargets="AssignTargetPaths">
+    <Error Condition="!Exists('$(LanguageServerDist)docbuilder-language-server.cjs')"
+           Text="The language server is not built: run `npm install` and `node build.mjs` in common/Tools/DocBuilder/language-server first." />
+    <ItemGroup>
+      <_LanguageServerFile Include="$(LanguageServerDist)**\*" />
+      <Content Include="@(_LanguageServerFile)" Link="server\%(_LanguageServerFile.RecursiveDir)%(_LanguageServerFile.Filename)%(_LanguageServerFile.Extension)" IncludeInVSIX="true" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>
