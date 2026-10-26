@@ -13,9 +13,13 @@ allowed to.
 
 ## Payloads
 
-Files, folders, rooms, agents and forms all deliver the **same payload shape**.
-Nothing in it is specific to one kind of entry, so use `fileEntryType` to tell
-them apart: `1` is a folder, `2` is a file.
+Each event family has a payload of its own, named in the tables below: a file
+event carries the file, a folder event the folder, a room or agent event the
+room. Files, folders and rooms share a common core (`id`, `title`, `parentId`,
+`created`, `createdBy` and the like), and `fileEntryType` in it tells a folder
+(`1`) from a file (`2`). `form.submit` carries both the original form and the
+submitted copy, while `form.filled.out` and `form.stopped` carry the form file
+itself.
 
 Note that a file's name arrives in `title`, and that absent fields are simply
 defaults — a property missing from the JSON means empty, `false` or zero, never

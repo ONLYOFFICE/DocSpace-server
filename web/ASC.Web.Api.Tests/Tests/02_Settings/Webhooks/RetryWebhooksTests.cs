@@ -117,6 +117,32 @@ public class RetryWebhooksTests(
     }
 
     [Fact]
+    public async Task RetryWebhooks_DisabledSubscription_IsSkippedInSilence()
+    {
+        // Arrange: a delivered event, then the subscription is switched off
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        await _webApiClient.Authenticate(Owner);
+        await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
+        {
+            Name = subscription.Name,
+            Uri = subscription.Uri,
+            SecretKey = subscription.SecretKey,
+            Enabled = false
+        }, TestContext.Current.CancellationToken);
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([record!.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task RetryWebhooks_AnotherMembersSubscription_IsSkippedInSilence()
     {
         // Arrange

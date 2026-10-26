@@ -127,6 +127,30 @@ public class WebhookUserPayloadTests(
         (await GetDeliveryRecordsAsync(memberSubscription.Id)).Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task UserUpdated_Payload_AvatarsAreAbsoluteUrls()
+    {
+        // Arrange
+        var subject = await InviteContact(EmployeeType.User);
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+
+        // Act
+        var firstName = await RenameAsync(subject);
+
+        // Assert: a receiver has no portal address to resolve a relative path against
+        var payload = await WaitForUserPayloadAsync(subscription.Id, subject, firstName);
+
+        payload.Should().NotBeNull();
+
+        foreach (var field in new[] { "avatar", "avatarOriginal", "avatarMax", "avatarMedium", "avatarSmall" })
+        {
+            ShouldBeAbsoluteUrl(payload!.Value.GetProperty(field).GetString(), $"{field} must be usable outside the portal");
+        }
+
+        ShouldBeAbsoluteUrl(payload!.Value.GetProperty("createdBy").GetProperty("avatar").GetString(), "so must the avatar of a user summary");
+        ShouldBeAbsoluteUrl(payload.Value.GetProperty("profileUrl").GetString(), "so must the profile link the owner gets");
+    }
+
     private async Task<User> CreateMemberInGroupAsync()
     {
         var subject = await InviteContact(EmployeeType.User);

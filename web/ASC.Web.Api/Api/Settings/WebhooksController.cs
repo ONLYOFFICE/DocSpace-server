@@ -286,17 +286,16 @@ public class WebhooksController(
 
     /// <remarks>
     /// Returns the delivery log of the portal webhooks, one record per delivery of an event, updated in place by its
-    /// automatic retries: the trigger, the request and response headers and bodies, the HTTP `status` the target
-    /// answered on the latest attempt, 0 while no answer has come back, and the `delivery` moment, empty until an
-    /// attempt succeeds. `attempts` counts the tries so far and `nextAttemptOn` is set while another one is due. A
-    /// manual retry adds a record of its own, with a new `id`, the same `eventId` and the member in `retriedBy`, so the
-    /// earlier record keeps its outcome. Records come newest first and are paged with `startIndex` and `count`, at most
-    /// 100 at a time, with the number of matching records reported as `total` beside the response. Filters combine
-    /// with AND: `deliveryFrom` and `deliveryTo` bound the delivery moment, `hookUri` matches the subscription URL
-    /// exactly, `configId` picks one subscription, `eventId` every record of one event, `groupStatus` keeps the answered
-    /// status classes it names with 0 meaning no filter, and `trigger` one event type with 0 meaning all. `userId`
-    /// filters by who created the subscription and is forced to the caller for anyone but a `DocSpaceAdmin`. A `Guest`
-    /// is refused. Nothing is written.
+    /// automatic retries: the trigger, the request and response headers and bodies, the HTTP `status` of the latest
+    /// attempt, 0 while no answer has come back, and the `delivery` moment, empty until an attempt succeeds. `attempts`
+    /// counts the tries so far and `nextAttemptOn` is set while another one is due. A manual retry adds a record of its
+    /// own, with a new `id`, the same `eventId` and the member in `retriedBy`. Records come newest first, paged with
+    /// `startIndex` and `count`, at most 100 at a time, with the number of matches as `total`. Filters combine with
+    /// AND: `deliveryFrom` and `deliveryTo` bound the delivery moment, `hookUri` matches the subscription URL exactly,
+    /// `configId` picks one subscription, `groupStatus` keeps the status classes it names (0 means no filter), and
+    /// `trigger` one event type (0 means all). `eventId` keeps every record of one event; the `id` of a record a manual
+    /// retry returned keeps that record alone. `userId` filters by the creator of the subscription and is forced to the
+    /// caller for anyone but a `DocSpaceAdmin`. A `Guest` is refused. Nothing is written.
     /// </remarks>
     /// <summary>
     /// Get the webhook delivery log
@@ -325,18 +324,17 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Sends one past webhook delivery again to the subscription it belongs to. The `id` in the path is that of a
-    /// delivery record from `GET api/2.0/settings/webhooks/log`, not of a subscription. A `DocSpaceAdmin` may retry any
-    /// delivery in the portal, anyone else only deliveries of the subscriptions they created, and a `Guest` is refused.
-    /// The work is asynchronous: a new delivery record is queued at once and returned with its own `id`, the
-    /// `eventId` of the retried one and the caller in `retriedBy`, while the retried record keeps its outcome and any
-    /// automatic retries still due for the event are stopped. The receiver gets the same event again, with the same
-    /// `event.id` and `x-docspace-event-id` header, in a body serialized and signed anew. To learn the outcome, read
-    /// the log with `eventId` set to the returned `id` until `nextAttemptOn` is empty: `delivery` is then set on
-    /// success and stays empty when the portal gave up, since a failed attempt goes into the automatic schedule of up
-    /// to six more tries over about 18 hours. An `id` of 0 gives 400, an unknown one 404, and an event with a delivery
-    /// being sent at this very moment 409, so retry once that attempt finishes. The operation is rate limited with
-    /// 429; for several records use `PUT api/2.0/settings/webhook/retry`.
+    /// Sends one past webhook delivery again to its subscription. The `id` in the path is that of a delivery record
+    /// from `GET api/2.0/settings/webhooks/log`, not of a subscription. A `DocSpaceAdmin` may retry any delivery in the
+    /// portal, anyone else only deliveries of the subscriptions they created, and a `Guest` is refused. The work is
+    /// asynchronous: a new delivery record is queued and returned with its own `id`, the `eventId` of the retried one
+    /// and the caller in `retriedBy`; the retried record keeps its outcome, and automatic retries still due for the
+    /// event stop. The receiver gets the same `event.id` and `x-docspace-event-id` header in a body serialized and
+    /// signed anew. To learn the outcome, read the log with `eventId` set to the returned `id` until `nextAttemptOn` is
+    /// empty: `delivery` is then set on success and empty when the portal gave up after its automatic retries (on the
+    /// default schedule, six more tries over about 18 hours). An `id` of 0 gives 400 and an unknown one 404. 409 means
+    /// nothing was queued: a delivery of the event is being sent right now, the subscription is disabled, or the record
+    /// predates the current delivery format. Rate limited with 429.
     /// </remarks>
     /// <summary>
     /// Retry a webhook delivery
@@ -347,7 +345,7 @@ public class WebhooksController(
     [SwaggerResponse(400, "The delivery record identifier is 0")]
     [SwaggerResponse(403, "The delivery belongs to another member's subscription, or the caller may not use webhooks")]
     [SwaggerResponse(404, "No delivery record with this ID exists in the portal")]
-    [SwaggerResponse(409, "A delivery of the same event is being sent at this moment, so no retry is queued until that attempt finishes")]
+    [SwaggerResponse(409, "Nothing was queued: a delivery of the same event is being sent at this moment, the subscription is disabled, or the record predates the current delivery format")]
     [HttpPut("webhook/{id:int}/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
@@ -380,26 +378,30 @@ public class WebhooksController(
                 // the record was removed between the read above and the requeue
                 throw new ItemNotFoundException();
             case WebhookRetryStatus.InProgress:
-                throw new CustomHttpException(HttpStatusCode.Conflict, "The event is being sent right now; retry it once the attempt has finished");
+                throw new CustomHttpException(HttpStatusCode.Conflict, Resource.ErrorWebhookRetryInProgress);
+            case WebhookRetryStatus.Disabled:
+                throw new CustomHttpException(HttpStatusCode.Conflict, Resource.ErrorWebhookRetryDisabled);
+            case WebhookRetryStatus.Outdated:
+                throw new CustomHttpException(HttpStatusCode.Conflict, Resource.ErrorWebhookRetryOutdated);
         }
+
+        messageService.Send(MessageAction.WebhookRetried, MessageTarget.Create(item.ConfigId), item.Config.Name);
 
         return await mapper.MapAsync(result.Log);
     }
 
     /// <remarks>
     /// Sends a batch of past webhook deliveries again. `ids` holds identifiers of delivery records from `GET
-    /// api/2.0/settings/webhooks/log`; for each one a new delivery record of the same event is queued, with its own `id`,
-    /// the retried record's `eventId` and the caller in `retriedBy`, and the response lists those new records, while the
-    /// retried records keep their outcome. Records that do not exist, records of an event with a delivery being sent
-    /// at this very moment, and records of another member's subscription when the caller is not a
-    /// `DocSpaceAdmin`, are skipped in silence instead of failing the call, so compare the response with `ids` rather
-    /// than assuming everything was queued; an empty `ids` queues nothing. A `Guest` is refused. Each receiver gets the
-    /// same event again, with the same `event.id` and `x-docspace-event-id` header, in a body serialized and signed
-    /// anew. The work is asynchronous: read the log with `eventId` for each returned identifier until `nextAttemptOn`
-    /// is empty, then a set `delivery` means success and an empty one that the portal gave up, since a failed attempt
-    /// goes back into the automatic schedule of up to six more tries over about 18 hours. The operation is rate limited
-    /// with 429. For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing, forbidden or
-    /// in-flight record instead of skipping it.
+    /// api/2.0/settings/webhooks/log`; for each one a new delivery record of the same event is queued, with its own
+    /// `id`, the retried record's `eventId` and the caller in `retriedBy`, and the response lists those new records.
+    /// Records that do not exist, records of another member's subscription when the caller is not a `DocSpaceAdmin`,
+    /// and records the single retry refuses with 409 (an event being sent right now, a disabled subscription, a record
+    /// older than the current delivery format) are skipped in silence, so compare the response with `ids`; an empty
+    /// `ids` queues nothing. A `Guest` is refused. Each receiver gets the same `event.id` and `x-docspace-event-id`
+    /// header in a body serialized and signed anew. The work is asynchronous: read the log with `eventId` for each
+    /// returned identifier until `nextAttemptOn` is empty; a set `delivery` then means success and an empty one that
+    /// the portal gave up after its automatic retries (on the default schedule, six more tries over about 18 hours).
+    /// Rate limited with 429. `PUT api/2.0/settings/webhook/{id}/retry` reports why a single record was not queued.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries
@@ -436,6 +438,8 @@ public class WebhooksController(
             {
                 continue;
             }
+
+            messageService.Send(MessageAction.WebhookRetried, MessageTarget.Create(item.ConfigId), item.Config.Name);
 
             yield return await mapper.MapAsync(result.Log);
         }

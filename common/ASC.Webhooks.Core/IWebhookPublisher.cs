@@ -46,7 +46,17 @@ public enum WebhookRetryStatus
 {
     Requeued,
     NotFound,
-    InProgress
+    InProgress,
+
+    /// <summary>
+    /// The subscription is disabled.
+    /// </summary>
+    Disabled,
+
+    /// <summary>
+    /// The event was written before the update that introduced the attempt counter; its body is in the old format.
+    /// </summary>
+    Outdated
 }
 
 public record WebhookRetryResult(WebhookRetryStatus Status, DbWebhooksLog Log = null);

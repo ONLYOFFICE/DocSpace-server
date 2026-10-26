@@ -162,7 +162,8 @@ there, are in [`targets.conf`](../.claude/skills/generate-webhook-sdk/targets.co
 next to it.
 
 Needs `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), a
-JDK and `python` (for the trigger tables). Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
+JDK, and `python` with PyYAML (`pip install pyyaml`) for the trigger tables; the
+skill checks for both before it wipes anything. Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
 touched.
 
 After generating, each language is built and its sample is run over every
@@ -218,15 +219,21 @@ not know stops the generator.
 - **Cheap pre-filtering.** `x-docspace-event-id` and `x-docspace-event-timestamp`
   duplicate `event.id` and `event.createOn`, so a delivery can be dropped without
   parsing the body at all. They are **not** covered by the signature — reject on
-  them freely, but never accept on them. A replay with its timestamp header
-  rewritten to "now" still carries a valid signature, so a receiver that checks
-  freshness only against the header has no replay protection whatsoever.
-- **Replay.** `event.createOn` inside the signed body is the authoritative
-  timestamp; check freshness against it after verifying. Comparing it with the
-  header value also detects tampering for free.
-- **Idempotency.** Dedupe on `event.id` **from the body**. It is stable across the
-  server's automatic retries and a *manual* retry from the delivery log alike —
-  a manual retry requeues the same delivery record, so the same logical event
+  them freely, but never accept on them.
+- **Replay.** The signature covers the body only; it does not prove when the
+  request was sent. Deduplicate on `event.id`. Do **not** reject a delivery for
+  being old: `event.createOn` is when the event happened, and it stays the same on
+  every automatic retry (up to about 18 hours later on the default schedule) and
+  on a manual retry, which can come at any time. A freshness check on it would
+  throw away legitimate retries, and one on the unsigned timestamp header proves
+  nothing.
+- **Idempotency.** Dedupe on `event.id` **from the body**, and keep the ids you
+  have processed for at least the retry window — longer if a portal administrator
+  may replay old deliveries. The id is stable across the server's automatic retries
+  and a *manual* retry from the delivery log alike: a manual retry is a new
+  delivery record of its own (in the delivery log it has its own `id`, the
+  `eventId` of the first record and the member who asked for it in `retriedBy`),
+  but it still sends the `event.id` of the first one, so the same logical event
   always arrives with the same key, possibly days later.
 - **Answer fast.** The server waits 30 s for a response; a timeout, network error
   or non-2xx status is a failed attempt. A failed delivery is retried after
@@ -245,7 +252,8 @@ not know stops the generator.
 
 Every sample verifies the signature, parses with the generated models and logs
 the delivery. They all replay the same fixture — `samples/file.created.json`, a
-real production `file.created` delivery — and print identical output.
+`file.created` delivery captured from a test portal with its addresses replaced by
+`docspace.example.com` — and print identical output.
 
 | Language | Run from | Command | Status |
 |---|---|---|---|
@@ -268,7 +276,7 @@ in `samples/`:
 
 | Fixture | What it exercises |
 |---|---|
-| `file.created` | a real production delivery: integer ids, file fields beyond the shared entry part |
+| `file.created` | a captured delivery: integer ids, file fields beyond the shared entry part, user summaries with absolute avatar URLs |
 | `file.created.retry` | the same delivery as its first retry: `webhook` carries `retryCount`, `retryOn`, `lastFailureOn`, `lastFailureContent` and `lastSuccessOn`, every date with its `Z` — the strict `date-time` parsers (Java, Kotlin, Go) reject the whole envelope without it |
 | `user.updated` | a user payload (`usedSpace`, `hasAvatar`, groups) on a subscription scoped to that user, so `webhook.target` carries a string id and a type |
 | `unknown.trigger` | a trigger family and target type this contract does not know, as after a server upgrade |

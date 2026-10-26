@@ -40,9 +40,15 @@ public class Settings
     {
     }
 
-    public Settings(IConfiguration configuration)
+    public Settings(IConfiguration configuration, ILogger<Settings> logger)
     {
         var cfg = configuration.GetSection("webhooks").Get<Settings>();
+
+        // the in-process retries it counted were replaced by the persisted schedule of webhooks:retryIntervals
+        if (configuration["webhooks:repeatcount"] != null)
+        {
+            logger.WarningObsoleteRepeatCount();
+        }
 
         RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : _defaultRetryIntervals;
         ThreadCount = cfg.ThreadCount ?? 10;

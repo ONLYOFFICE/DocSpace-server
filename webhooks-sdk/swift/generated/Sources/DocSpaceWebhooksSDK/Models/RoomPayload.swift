@@ -57,7 +57,7 @@ public struct RoomPayload: Sendable, Codable, Hashable {
     public var denyDownload: Bool?
     /** Specifies whether the room is pinned or not. */
     public var pinned: Bool?
-    /** The room quota limit in bytes. */
+    /** The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event. */
     public var quotaLimit: Int64?
     /** The space used by the room in bytes. */
     public var usedSpace: Int64?

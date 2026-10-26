@@ -28,9 +28,13 @@
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
     <!-- ASC.FederatedLogin carries JsCallbackHelper: the validation of the values spliced into the OAuth callback page. -->
     <ProjectReference Include="..\..\ASC.FederatedLogin\ASC.FederatedLogin.csproj" />
-    <!-- ASC.Files.Core carries the file, folder and room webhook payloads: WebhookPayloadPairingTests checks every
-         trigger against them without starting the Aspire host the ASC.Files.Tests assembly needs. -->
+    <!-- ASC.Files.Core carries the file, folder and room webhook payloads: WebhookPayloadSerializationTests serializes
+         them as the publisher does, and the contract they describe is checked by WebhookContractTests, both without
+         starting the Aspire host the ASC.Files.Tests assembly needs. -->
     <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
+    <!-- ASC.Webhooks.Contract generates docspace-webhooks.yaml: WebhookContractTests fails when the committed contract
+         no longer matches the payload DTOs. -->
+    <ProjectReference Include="..\..\Tools\ASC.Webhooks.Contract\ASC.Webhooks.Contract.csproj" />
   </ItemGroup>
 
   <ItemGroup>

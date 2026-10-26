@@ -34,7 +34,7 @@ import com.squareup.moshi.JsonClass
  * @param id The group ID.
  * @param name The group name.
  * @param parent The parent group ID; absent for a top-level group.
- * @param category The group category ID.
+ * @param category The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups.
  * @param isLDAP Specifies whether the group comes from LDAP or not.
  * @param isSystem Specifies whether the group is a system group or not.
  * @param manager 
@@ -56,7 +56,7 @@ data class GroupPayload (
     @Json(name = "parent")
     val parent: java.util.UUID? = null,
 
-    /* The group category ID. */
+    /* The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. */
     @Json(name = "category")
     val category: java.util.UUID? = null,
 

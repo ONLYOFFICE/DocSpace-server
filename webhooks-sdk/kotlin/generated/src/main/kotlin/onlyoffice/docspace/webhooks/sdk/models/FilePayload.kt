@@ -61,7 +61,7 @@ import com.squareup.moshi.JsonClass
  * @param encrypted Specifies whether the file is encrypted or not.
  * @param locked Specifies whether the file is locked or not.
  * @param lockedBy The user name of whoever locked the file.
- * @param isForm Specifies whether the file is a form or not.
+ * @param isForm True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document.
  * @param customFilterEnabled Specifies whether a custom filter is enabled for the file or not.
  * @param customFilterEnabledBy The user name of whoever enabled the custom filter.
  * @param lastOpened The UTC date when the file was last opened.
@@ -184,7 +184,7 @@ data class FilePayload (
     @Json(name = "lockedBy")
     val lockedBy: kotlin.String? = null,
 
-    /* Specifies whether the file is a form or not. */
+    /* True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document. */
     @Json(name = "isForm")
     val isForm: kotlin.Boolean? = null,
 

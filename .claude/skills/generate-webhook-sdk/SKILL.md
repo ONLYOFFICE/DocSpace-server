@@ -94,7 +94,11 @@ How the generator reads the code, so that its output can be predicted:
 - Property names and the set of properties come from `WebhookPublisher.CreateSerializerOptions`:
   camelCase, `[JsonIgnore]` honoured, read-only getters included.
 - A property typed by the entry ID parameter `T` becomes `EntryId`; a base class becomes `allOf`;
-  `int` is `int32`, `long` `int64`; `[EmailAddress]` adds `format: email`; enums are integers.
+  `int` is `int32`, `long` `int64`; `[EmailAddress]` adds `format: email`. An enum is `type: integer`,
+  or `type: string` when the payload serializer writes it by name (`SchemaBuilder.IsWrittenAsString`
+  serializes the enum's default value and checks for a quote, so a `JsonStringEnumConverter` on the
+  enum type is what flips it); either way the property description lists the members with their
+  numeric values.
 - A schema name is the DTO name with `WebhookDto` replaced by `Payload` (the envelope types have
   fixed names). A payload type that does not end in `WebhookDto` stops the generator.
 - A `$ref` property carries no description: several generators turn a `$ref` with siblings into a
@@ -114,6 +118,18 @@ apply. Fixture files are the one exception: pass them as **absolute** paths, bec
 Languages are independent; do them one after another and run the slow steps (the generator, Maven,
 Swift, the first `npm ci`) in the background. All nine with verification take ~90 s on a warm
 machine; first runs are longer (the generator jar, Maven and npm downloads).
+
+### A0. Check the post-step toolchain
+
+Before anything is wiped: when the run includes `java`, `csharp` or `typescript`, their post-step (A3)
+needs Python with PyYAML. Check it once, up front:
+
+```bash
+python -c "import yaml"     # or python3 on a box without a `python`
+```
+
+If neither `python` nor `python3` is there, or the import fails, stop the run here and ask for
+`pip install pyyaml` — A1 would otherwise wipe `generated/` and leave it without its trigger tables.
 
 ### A1. Wipe `<lang>/generated/`
 
@@ -164,7 +180,7 @@ generated files (Glob `<lang>/generated/**/*`, minus `.generate.log`) for the re
 
 Only these languages have one. The trigger tables are derived from the contract by
 `tools/gen-trigger-map.py`, never hand-maintained. It is invoked as `python` here; on a box where only
-`python3` exists, use that. If neither is there, stop: without this step the trigger tables go stale.
+`python3` exists, use that. A0 has already checked that it and PyYAML are there.
 
 | Language | Post-step |
 | --- | --- |

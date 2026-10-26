@@ -36,10 +36,10 @@ import com.squareup.moshi.JsonClass
  * @param url The URL the delivery is posted to.
  * @param triggers The subscribed events, or [\"*\"] for the catch-all.
  * @param target 
- * @param lastFailureOn When the last delivery to this subscription failed, in UTC; absent when none has failed.
- * @param lastFailureContent What the receiver answered, or the network error, when the last delivery to this subscription failed.
- * @param lastSuccessOn When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet.
- * @param retryCount How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2.
+ * @param lastFailureOn When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry, together with `retryCount`; absent on a first attempt, the first attempt of a manual retry included.
+ * @param lastFailureContent What the receiver answered, or the network error, when the last delivery to this subscription failed. Sent only on an automatic retry, like `lastFailureOn`.
+ * @param lastSuccessOn When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry, like `lastFailureOn`; absent there too when no delivery has succeeded yet.
+ * @param retryCount How many times this delivery has been retried automatically. Omitted on the first attempt (0); present from attempt 2. A manual retry is a new delivery and starts again from 0, so its first attempt carries no `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated `event.id` shows that the event was sent before.
  * @param retryOn When the next retry is scheduled, in UTC; absent when no retry is pending.
  */
 
@@ -65,19 +65,19 @@ data class WebhookConfigInfo (
     @Json(name = "target")
     val target: WebhookTargetInfo? = null,
 
-    /* When the last delivery to this subscription failed, in UTC; absent when none has failed. */
+    /* When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry, together with `retryCount`; absent on a first attempt, the first attempt of a manual retry included. */
     @Json(name = "lastFailureOn")
     val lastFailureOn: java.time.OffsetDateTime? = null,
 
-    /* What the receiver answered, or the network error, when the last delivery to this subscription failed. */
+    /* What the receiver answered, or the network error, when the last delivery to this subscription failed. Sent only on an automatic retry, like `lastFailureOn`. */
     @Json(name = "lastFailureContent")
     val lastFailureContent: kotlin.String? = null,
 
-    /* When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet. */
+    /* When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry, like `lastFailureOn`; absent there too when no delivery has succeeded yet. */
     @Json(name = "lastSuccessOn")
     val lastSuccessOn: java.time.OffsetDateTime? = null,
 
-    /* How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2. */
+    /* How many times this delivery has been retried automatically. Omitted on the first attempt (0); present from attempt 2. A manual retry is a new delivery and starts again from 0, so its first attempt carries no `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated `event.id` shows that the event was sent before. */
     @Json(name = "retryCount")
     val retryCount: kotlin.Int? = null,
 

@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Id** | **Guid** | The group ID. | [optional] 
 **Name** | **string** | The group name. | [optional] 
 **Parent** | **Guid** | The parent group ID; absent for a top-level group. | [optional] 
-**Category** | **Guid** | The group category ID. | [optional] 
+**Category** | **Guid** | The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. | [optional] 
 **IsLDAP** | **bool** | Specifies whether the group comes from LDAP or not. | [optional] 
 **IsSystem** | **bool** | Specifies whether the group is a system group or not. | [optional] 
 **Manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 

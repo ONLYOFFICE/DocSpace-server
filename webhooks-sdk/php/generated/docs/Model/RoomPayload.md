@@ -31,7 +31,7 @@ Name | Type | Description | Notes
 **indexing** | **bool** | Specifies whether the room is indexed or not. | [optional]
 **deny_download** | **bool** | Specifies whether downloading from the room is denied or not. | [optional]
 **pinned** | **bool** | Specifies whether the room is pinned or not. | [optional]
-**quota_limit** | **int** | The room quota limit in bytes. | [optional]
+**quota_limit** | **int** | The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event. | [optional]
 **used_space** | **int** | The space used by the room in bytes. | [optional]
 **color** | **string** | The room cover colour. | [optional]
 **cover** | **string** | The room cover name. | [optional]

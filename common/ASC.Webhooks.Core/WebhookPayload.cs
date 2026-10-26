@@ -122,8 +122,9 @@ public class WebhookPayloadEventInfo
     public int Id { get; set; }
 
     /// <summary>
-    /// When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp header, but that
-    /// header is not signed, so replay defence must read this value from the verified body.
+    /// When the event happened, in UTC and whole seconds. It stays the same on every retry, automatic or manual, so it
+    /// says nothing about when the request was sent: a freshness check on it would reject legitimate retries, and the
+    /// replay defence is deduplication on `id`. Echoed in the unsigned x-docspace-event-timestamp header.
     /// </summary>
     public DateTime CreateOn { get; set; }
 
@@ -192,22 +193,28 @@ public class WebhookPayloadConfigInfo<T2>
     public WebhookPayloadTargetInfo<T2> Target { get; set; }
 
     /// <summary>
-    /// When the last delivery to this subscription failed, in UTC; absent when none has failed.
+    /// When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry, together with
+    /// `retryCount`; absent on a first attempt, the first attempt of a manual retry included.
     /// </summary>
     public DateTime? LastFailureOn { get; set; }
 
     /// <summary>
-    /// What the receiver answered, or the network error, when the last delivery to this subscription failed.
+    /// What the receiver answered, or the network error, when the last delivery to this subscription failed. Sent
+    /// only on an automatic retry, like `lastFailureOn`.
     /// </summary>
     public string LastFailureContent { get; set; }
 
     /// <summary>
-    /// When the last delivery to this subscription succeeded, in UTC; absent when none has succeeded yet.
+    /// When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry, like
+    /// `lastFailureOn`; absent there too when no delivery has succeeded yet.
     /// </summary>
     public DateTime? LastSuccessOn { get; set; }
 
     /// <summary>
-    /// How many times this delivery has been retried. Omitted on the first attempt (0); present from attempt 2.
+    /// How many times this delivery has been retried automatically. Omitted on the first attempt (0); present from
+    /// attempt 2. A manual retry is a new delivery and starts again from 0, so its first attempt carries no
+    /// `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated `event.id` shows that the event was sent
+    /// before.
     /// </summary>
     public int RetryCount { get; set; }
 

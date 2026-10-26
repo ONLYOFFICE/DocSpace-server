@@ -119,6 +119,70 @@ public class WebStudioModuleSpecificsTests
         preparedRow!["retry_of"].Should().BeNull();
     }
 
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_RetryOfAnUnmappedOriginal_IsDropped()
+    {
+        // Arrange — a retry whose original record has not been restored, so its new id is unknown
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", 320);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", OldConfigId);
+        row.SetValue("retry_of", 315);
+        row.SetValue("retried_by", _oldUser);
+
+        // Act
+        var (prepared, _) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — keeping the old id would point the retry, and the event.id it sends, at an unrelated record
+        prepared.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_PendingAttempt_IsNotScheduledAgain()
+    {
+        // Arrange — a record that was due for its next attempt, and leased by a sender, when the backup was taken
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", OldOriginalLogId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", OldConfigId);
+        row.SetValue("uid", _oldUser);
+        row.SetValue("next_attempt_on", DateTime.UtcNow.AddMinutes(5));
+        row.SetValue("lease_id", Guid.NewGuid().ToString());
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — the restored portal keeps the history but sends nothing the source portal had queued
+        prepared.Should().BeTrue();
+        preparedRow!["next_attempt_on"].Should().BeNull();
+        preparedRow["lease_id"].Should().BeNull();
+        preparedRow["uid"].Should().Be(_newUser);
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_EventOfABackgroundJob_KeepsTheEmptyUser()
+    {
+        // Arrange — an event no user caused, written with the empty user id
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", OldOriginalLogId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", OldConfigId);
+        row.SetValue("uid", Guid.Empty.ToString());
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — an unmappable user drops a row, but the empty user is not one
+        prepared.Should().BeTrue();
+        preparedRow!["uid"].Should().Be(Guid.Empty.ToString());
+    }
+
     private static TableInfo DeclaredTable(TestableWebStudioModuleSpecifics specifics, string name)
     {
         var table = specifics.Tables.SingleOrDefault(t => t.Name == name);

@@ -35,6 +35,7 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Reflection;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization.Metadata;
 global using System.Xml.Linq;
 

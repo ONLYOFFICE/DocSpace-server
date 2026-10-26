@@ -34,7 +34,7 @@ import com.squareup.moshi.JsonClass
  * @param displayName The HTML-encoded user display name.
  * @param userName The user name.
  * @param avatar The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
- * @param profileUrl The user profile URL.
+ * @param profileUrl The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other users, unless this user is that creator.
  */
 
 
@@ -56,7 +56,7 @@ data class UserSummaryPayload (
     @Json(name = "avatar")
     val avatar: kotlin.String? = null,
 
-    /* The user profile URL. */
+    /* The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other users, unless this user is that creator. */
     @Json(name = "profileUrl")
     val profileUrl: kotlin.String? = null
 

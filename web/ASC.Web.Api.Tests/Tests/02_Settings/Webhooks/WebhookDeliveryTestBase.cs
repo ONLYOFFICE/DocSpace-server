@@ -44,6 +44,28 @@ public abstract class WebhookDeliveryTestBase(
     private readonly AspireAppFixture _fixture = fixture;
 
     /// <summary>
+    /// The automatic retries the integration-test profile configures: <see cref="ProfileRetryCount"/> of them,
+    /// <see cref="ProfileRetryInterval"/> apart (<c>webhooks:retryIntervals</c> in ConnectionStringManager.AddBaseConfig),
+    /// instead of the production schedule of minutes to hours.
+    /// </summary>
+    protected const int ProfileRetryCount = 3;
+
+    /// <inheritdoc cref="ProfileRetryCount"/>
+    protected static TimeSpan ProfileRetryInterval { get; } = TimeSpan.FromSeconds(3);
+
+    /// <summary>
+    /// How long the sender in Web.Studio sleeps between two polls when nothing is due (the waiting period of
+    /// WorkerService): a due retry can wait that long before it is claimed.
+    /// </summary>
+    protected static TimeSpan SenderPollPeriod { get; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// How long to watch for a delivery that must not happen: every retry the profile allows, stretched by the
+    /// sender's 10% jitter, plus one poll. Anything still scheduled for the event would have gone out by then.
+    /// </summary>
+    protected static TimeSpan NoMoreDeliveriesPeriod { get; } = ProfileRetryInterval * ProfileRetryCount * 1.1 + SenderPollPeriod;
+
+    /// <summary>
     /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/>.
     /// </summary>
     protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0)
@@ -216,6 +238,50 @@ public abstract class WebhookDeliveryTestBase(
         }
     }
 
+    /// <summary>
+    /// Polls the delivery records of one subscription until one was published for <paramref name="trigger"/>, named as
+    /// it appears in <c>event.trigger</c>, with a payload that satisfies <paramref name="match"/>, and returns that
+    /// payload, or null when none did by the deadline. Matching the name rather than the subscription's trigger
+    /// bits lets a catch-all subscription stand in for the triggers the pinned SDK enum does not list yet (agent.*).
+    /// </summary>
+    protected async Task<JsonElement?> WaitForEventPayloadAsync(int configId, string trigger, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+
+        while (true)
+        {
+            foreach (var record in await GetDeliveryRecordsAsync(configId))
+            {
+                using var document = JsonDocument.Parse(record.RequestPayload);
+                var root = document.RootElement;
+
+                if (root.GetProperty("event").GetProperty("trigger").GetString() == trigger
+                    && root.GetProperty("payload") is var payload
+                    && match(payload))
+                {
+                    return payload.Clone();
+                }
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return null;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Asserts that <paramref name="url"/> is an absolute http(s) URL: a receiver has no portal address to resolve a
+    /// relative one against.
+    /// </summary>
+    protected static void ShouldBeAbsoluteUrl(string? url, string because)
+    {
+        Uri.TryCreate(url, UriKind.Absolute, out var uri).Should().BeTrue(because);
+        uri!.Scheme.Should().BeOneOf([Uri.UriSchemeHttp, Uri.UriSchemeHttps], because);
+    }
+
     /// <summary>The subscription as the owner reads it, or null once it is gone.</summary>
     protected async Task<WebhooksConfigDto?> GetSubscriptionAsync(int configId)
     {
@@ -238,6 +304,11 @@ public abstract class WebhookDeliveryTestBase(
     /// Writes to the stack's database directly, for the states no API call can produce on demand: a
     /// subscription that has been failing for days, or a delivery record taken over by another sender.
     /// </summary>
+    /// <remarks>
+    /// MySQL only: the connection is the MySQL container of the integration-test profile, and the statements the
+    /// tests pass are written in its dialect (<c>UTC_TIMESTAMP() - INTERVAL 4 DAY</c>, GUIDs as <c>varchar(36)</c>).
+    /// A run of the suite against PostgreSQL needs both this helper and those statements ported.
+    /// </remarks>
     protected async Task ExecuteSqlAsync(string sql, params (string Name, object Value)[] parameters)
     {
         await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);

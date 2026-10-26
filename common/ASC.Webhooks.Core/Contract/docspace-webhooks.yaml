@@ -50,18 +50,21 @@ info:
                                   Copy of event.createOn, same ISO-8601 UTC
                                   spelling, e.g. 2026-09-17T10:22:56Z.
 
-      The last two exist so a receiver can drop a stale or already-seen delivery
+      The last two exist so a receiver can drop an already-seen delivery
       without parsing the body. They are NOT covered by the signature, which is
       computed over the body alone, so anything in transit can rewrite them.
-
       Reject on them freely -- dropping a delivery is fail-safe, and whoever can
-      rewrite a header could drop the request instead. Never ACCEPT on them: a
-      replayed delivery with its timestamp header rewritten to "now" still
-      carries a valid signature, so a receiver that checks freshness only
-      against the header has no replay protection at all. After verifying,
-      re-check event.createOn and event.id from the parsed body; they are the
-      authoritative values, and comparing them against the headers also detects
-      tampering for free.
+      rewrite a header could drop the request instead -- but never ACCEPT on
+      them: after verifying, read event.id from the parsed body, it is the
+      authoritative value.
+
+      The signature covers the body only; it does not prove when the request was
+      sent. event.createOn is the moment of the event, not of the request: it
+      stays the same through the automatic retries (about 18 hours on the
+      default schedule) and through a manual retry at any later time, so a
+      freshness window on it, or on the timestamp header, rejects legitimate
+      retries. Deduplicate on event.id instead: keep the ids already processed
+      and drop a delivery whose id is among them. That is the replay defence.
 paths: {}
 x-docspace-trigger-payloads:
   description: >
@@ -144,9 +147,10 @@ components:
           type: string
           format: date-time
           description: >-
-            When the event happened, in UTC and whole seconds. Echoed in the x-docspace-event-timestamp
-            header, but that header is not signed, so replay defence must read this value from the verified
-            body.
+            When the event happened, in UTC and whole seconds. It stays the same on every retry, automatic
+            or manual, so it says nothing about when the request was sent: a freshness check on it would
+            reject legitimate retries, and the replay defence is deduplication on `id`. Echoed in the
+            unsigned x-docspace-event-timestamp header.
         createBy:
           type: string
           format: uuid
@@ -184,24 +188,29 @@ components:
         lastFailureOn:
           type: string
           format: date-time
-          description: When the last delivery to this subscription failed, in UTC; absent when none has
-            failed.
+          description: >-
+            When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry,
+            together with `retryCount`; absent on a first attempt, the first attempt of a manual retry
+            included.
         lastFailureContent:
           type: string
           description: >-
             What the receiver answered, or the network error, when the last delivery to this subscription
-            failed.
+            failed. Sent only on an automatic retry, like `lastFailureOn`.
         lastSuccessOn:
           type: string
           format: date-time
-          description: When the last delivery to this subscription succeeded, in UTC; absent when none
-            has succeeded yet.
+          description: >-
+            When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry,
+            like `lastFailureOn`; absent there too when no delivery has succeeded yet.
         retryCount:
           type: integer
           format: int32
           description: >-
-            How many times this delivery has been retried. Omitted on the first attempt (0); present from
-            attempt 2.
+            How many times this delivery has been retried automatically. Omitted on the first attempt
+            (0); present from attempt 2. A manual retry is a new delivery and starts again from 0, so
+            its first attempt carries no `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated
+            `event.id` shows that the event was sent before.
         retryOn:
           type: string
           format: date-time
@@ -367,7 +376,11 @@ components:
           description: The absolute URL of the 32x32 avatar, with the same hash parameter.
         profileUrl:
           type: string
-          description: The user profile URL.
+          description: >-
+            The absolute link to the user in the portal's list of people, or of guests for a guest; today
+            it is a search of that list by the user's email address. Absent when the subscription's creator
+            is a User or a Guest, who may not see the contacts of other users, unless this user is that
+            creator.
     ContactPayload:
       type: object
       description: A user contact.
@@ -416,7 +429,11 @@ components:
             does.
         profileUrl:
           type: string
-          description: The user profile URL.
+          description: >-
+            The absolute link to the user in the portal's list of people, or of guests for a guest; today
+            it is a search of that list by the user's email address. Absent when the subscription's creator
+            is a User or a Guest, who may not see the contacts of other users, unless this user is that
+            creator.
     GroupPayload:
       type: object
       description: |-
@@ -438,7 +455,9 @@ components:
         category:
           type: string
           format: uuid
-          description: The group category ID.
+          description: >-
+            The ID of the group category: the empty GUID for the groups members create, and one fixed
+            category ID for the built-in system groups.
         isLDAP:
           type: boolean
           description: Specifies whether the group comes from LDAP or not.
@@ -501,7 +520,10 @@ components:
               description: The user name of whoever locked the file.
             isForm:
               type: boolean
-              description: Specifies whether the file is a form or not.
+              description: >-
+                True for every PDF file, with or without form fields, since the editor can open any PDF
+                as a form; absent for other files. It does not tell a fillable form from an ordinary PDF
+                document.
             customFilterEnabled:
               type: boolean
               description: Specifies whether a custom filter is enabled for the file or not.
@@ -679,7 +701,11 @@ components:
             quotaLimit:
               type: integer
               format: int64
-              description: The room quota limit in bytes.
+              description: >-
+                The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has
+                no quota of its own, so the portal's default room quota applies, if room quotas are on.
+                Unlike the REST API, which shows the effective limit only to members who may edit the
+                room, the value goes to every subscriber that gets the event.
             usedSpace:
               type: integer
               format: int64

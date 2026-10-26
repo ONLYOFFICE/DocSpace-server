@@ -63,7 +63,7 @@ public struct FilePayload: Sendable, Codable, Hashable {
     public var locked: Bool?
     /** The user name of whoever locked the file. */
     public var lockedBy: String?
-    /** Specifies whether the file is a form or not. */
+    /** True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document. */
     public var isForm: Bool?
     /** Specifies whether a custom filter is enabled for the file or not. */
     public var customFilterEnabled: Bool?

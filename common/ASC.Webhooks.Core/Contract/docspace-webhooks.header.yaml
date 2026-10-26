@@ -51,18 +51,21 @@ info:
                                   Copy of event.createOn, same ISO-8601 UTC
                                   spelling, e.g. 2026-09-17T10:22:56Z.
 
-      The last two exist so a receiver can drop a stale or already-seen delivery
+      The last two exist so a receiver can drop an already-seen delivery
       without parsing the body. They are NOT covered by the signature, which is
       computed over the body alone, so anything in transit can rewrite them.
-
       Reject on them freely -- dropping a delivery is fail-safe, and whoever can
-      rewrite a header could drop the request instead. Never ACCEPT on them: a
-      replayed delivery with its timestamp header rewritten to "now" still
-      carries a valid signature, so a receiver that checks freshness only
-      against the header has no replay protection at all. After verifying,
-      re-check event.createOn and event.id from the parsed body; they are the
-      authoritative values, and comparing them against the headers also detects
-      tampering for free.
+      rewrite a header could drop the request instead -- but never ACCEPT on
+      them: after verifying, read event.id from the parsed body, it is the
+      authoritative value.
+
+      The signature covers the body only; it does not prove when the request was
+      sent. event.createOn is the moment of the event, not of the request: it
+      stays the same through the automatic retries (about 18 hours on the
+      default schedule) and through a manual retry at any later time, so a
+      freshness window on it, or on the timestamp header, rejects legitimate
+      retries. Deduplicate on event.id instead: keep the ids already processed
+      and drop a delivery whose id is among them. That is the replay defence.
 
 paths: {}
 

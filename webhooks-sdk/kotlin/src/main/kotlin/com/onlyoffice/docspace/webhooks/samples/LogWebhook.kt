@@ -1,13 +1,17 @@
 package com.onlyoffice.docspace.webhooks.samples
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 import onlyoffice.docspace.webhooks.sdk.EntryIdAdapter
-import onlyoffice.docspace.webhooks.sdk.models.FileEntryPayload
+import onlyoffice.docspace.webhooks.sdk.models.FilePayload
+import onlyoffice.docspace.webhooks.sdk.models.FolderPayload
+import onlyoffice.docspace.webhooks.sdk.models.FormSubmitPayload
 import onlyoffice.docspace.webhooks.sdk.models.GroupPayload
+import onlyoffice.docspace.webhooks.sdk.models.RoomPayload
 import onlyoffice.docspace.webhooks.sdk.models.UserPayload
 import onlyoffice.docspace.webhooks.sdk.models.WebhookConfigInfo
 import onlyoffice.docspace.webhooks.sdk.models.WebhookEventInfo
@@ -119,22 +123,14 @@ fun main(args: Array<String>) {
     @Suppress("UNCHECKED_CAST")
     val payloadMap = payloadValue as? Map<String, Any?> ?: emptyMap()
 
-    when {
-        trigger.startsWith("user.") -> {
-            val u = moshi.adapter(UserPayload::class.java).fromJsonValue(payloadValue)
-            println("  user: ${u?.userName} <${u?.email}>")
-        }
-        trigger.startsWith("group.") -> {
-            val g = moshi.adapter(GroupPayload::class.java).fromJsonValue(payloadValue)
-            println("  group: ${g?.name}")
-        }
-        else -> {
-            // file.*, folder.*, room.*, agent.* and form.* all arrive as the
-            // FileEntry<T> base; fileEntryType is the only discriminator.
-            val e = moshi.adapter(FileEntryPayload::class.java).fromJsonValue(payloadValue)
-            val kind = if (e?.fileEntryType == 2) "file" else "folder"
-            println("  $kind: ${e?.title}  id=${e?.id ?: "<none>"}  parent=${e?.parentId ?: "<none>"}")
-        }
+    // A parse error stops the sample with a non-zero exit instead of being
+    // skipped: a sample that prints "ok" over a payload its model cannot read
+    // hides a broken SDK.
+    try {
+        logPayload(trigger, payloadValue)
+    } catch (e: JsonDataException) {
+        System.err.println("unparseable $trigger payload: ${e.message}")
+        kotlin.system.exitProcess(1)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -142,6 +138,45 @@ fun main(args: Array<String>) {
 
     println()
     println("  " + mapAdapter.indent("  ").toJson(printable).replace("\n", "\n  "))
+}
+
+/**
+ * The payload model of a trigger, mirroring the x-docspace-trigger-payloads map
+ * of the contract; null for a trigger newer than this SDK. form.submit has a
+ * payload of its own, while form.filled.out and form.stopped carry the form
+ * file itself.
+ */
+fun payloadModel(trigger: String): Class<*>? = when {
+    trigger == "form.submit" -> FormSubmitPayload::class.java
+    trigger == "form.filled.out" || trigger == "form.stopped" -> FilePayload::class.java
+    trigger.startsWith("file.") -> FilePayload::class.java
+    trigger.startsWith("user.") -> UserPayload::class.java
+    trigger.startsWith("group.") -> GroupPayload::class.java
+    trigger.startsWith("folder.") -> FolderPayload::class.java
+    // An agent is an AI room and arrives in the same shape.
+    trigger.startsWith("room.") || trigger.startsWith("agent.") -> RoomPayload::class.java
+    else -> null
+}
+
+/** Parses the payload with the model of its trigger and prints a one-line summary. */
+private fun logPayload(trigger: String, payloadValue: Any?) {
+    val model = payloadModel(trigger)
+    if (model == null) {
+        // A trigger family added on the server after this SDK was generated:
+        // acknowledge it and keep the raw payload rather than failing.
+        println("  no payload model for this trigger; raw payload below")
+        return
+    }
+
+    when (val payload = moshi.adapter(model).fromJsonValue(payloadValue)) {
+        is UserPayload -> println("  user: ${payload.userName} <${payload.email}>")
+        is GroupPayload -> println("  group: ${payload.name}")
+        is FilePayload -> println("  file: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
+        is FolderPayload -> println("  folder: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
+        is RoomPayload -> println("  room: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
+        is FormSubmitPayload -> println("  form: ${payload.originalForm?.title}  submitted as ${payload.submittedForm?.title}")
+        else -> throw JsonDataException("the payload is empty")
+    }
 }
 
 /**

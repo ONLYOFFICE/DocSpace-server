@@ -1200,6 +1200,9 @@
   <data name="WebhookDeleted" xml:space="preserve">
     <value>Webhook deleted: {0}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook delivery retried: {0}</value>
+  </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook updated: {0}</value>
   </data>

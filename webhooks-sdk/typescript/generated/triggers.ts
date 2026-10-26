@@ -110,7 +110,11 @@ export const PAYLOAD_DESERIALIZERS: {
     '*': identity,
 };
 
-/** True when `trigger` is one this build of the SDK knows about. */
+/**
+ * True when `trigger` is in the contract this build of the SDK was generated
+ * from, the untyped `'*'` included; false for a trigger added on the server
+ * later. The C# SDK's `WebhookTriggers.IsKnown` answers the same way.
+ */
 export function isKnownTrigger(trigger: string): trigger is WebhookTriggerName {
     return Object.prototype.hasOwnProperty.call(PAYLOAD_DESERIALIZERS, trigger);
 }

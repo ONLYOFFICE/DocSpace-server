@@ -55,4 +55,7 @@ internal static partial class WebhookSenderLogger
 
     [LoggerMessage(LogLevel.Error, "Failed to schedule the next attempt of webhook tenant: {tenantId}, log: {logId}")]
     public static partial void ErrorFailedToRegisterAttempt(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "webhooks:repeatcount is no longer read: retries follow webhooks:retryIntervals, a list of TimeSpan values")]
+    public static partial void WarningObsoleteRepeatCount(this ILogger<Settings> logger);
 }

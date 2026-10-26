@@ -53,7 +53,7 @@ public class UserWebhookDto
     /// <summary>
     /// The user ID.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9924256a-739c-462b-be1a-e1d3a1d6f2d4</example>
     public Guid Id { get; set; }
 
     /// <summary>
@@ -268,9 +268,11 @@ public class UserWebhookDto
     public string AvatarSmall { get; set; }
 
     /// <summary>
-    /// The user profile URL.
+    /// The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search
+    /// of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other
+    /// users, unless this user is that creator.
     /// </summary>
-    /// <example>https://example.com/profile/user123</example>
+    /// <example>https://example.onlyoffice.com/accounts/people/filter?search=mike.zanyatski%40example.com</example>
     public string ProfileUrl { get; set; }
 
     internal UserWebhookDto Clone()
@@ -287,7 +289,7 @@ public class UserSummaryWebhookDto
     /// <summary>
     /// The user ID.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9924256a-739c-462b-be1a-e1d3a1d6f2d4</example>
     public Guid Id { get; set; }
 
     /// <summary>
@@ -309,9 +311,11 @@ public class UserSummaryWebhookDto
     public string Avatar { get; set; }
 
     /// <summary>
-    /// The user profile URL.
+    /// The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search
+    /// of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other
+    /// users, unless this user is that creator.
     /// </summary>
-    /// <example>https://example.com/profile/user123</example>
+    /// <example>https://example.onlyoffice.com/accounts/people/filter?search=mike.zanyatski%40example.com</example>
     public string ProfileUrl { get; set; }
 
     internal UserSummaryWebhookDto Clone()

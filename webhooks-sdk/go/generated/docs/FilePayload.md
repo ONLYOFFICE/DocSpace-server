@@ -34,7 +34,7 @@ Name | Type | Description | Notes
 **Encrypted** | Pointer to **bool** | Specifies whether the file is encrypted or not. | [optional] 
 **Locked** | Pointer to **bool** | Specifies whether the file is locked or not. | [optional] 
 **LockedBy** | Pointer to **string** | The user name of whoever locked the file. | [optional] 
-**IsForm** | Pointer to **bool** | Specifies whether the file is a form or not. | [optional] 
+**IsForm** | Pointer to **bool** | True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document. | [optional] 
 **CustomFilterEnabled** | Pointer to **bool** | Specifies whether a custom filter is enabled for the file or not. | [optional] 
 **CustomFilterEnabledBy** | Pointer to **string** | The user name of whoever enabled the custom filter. | [optional] 
 **LastOpened** | Pointer to **time.Time** | The UTC date when the file was last opened. | [optional] 

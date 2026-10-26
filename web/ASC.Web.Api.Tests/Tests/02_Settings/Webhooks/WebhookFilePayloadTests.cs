@@ -45,6 +45,7 @@ public class WebhookFilePayloadTests(
     : WebhookDeliveryTestBase(fixture)
 {
     [Fact]
+    [Trait("Bug", "81093")]
     public async Task FileCreated_UserSubscription_OmitsTheProfileLinkOfTheAuthor()
     {
         // Arrange

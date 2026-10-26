@@ -18,7 +18,7 @@ public struct UserSummaryPayload: Sendable, Codable, Hashable {
     public var userName: String?
     /** The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
     public var avatar: String?
-    /** The user profile URL. */
+    /** The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other users, unless this user is that creator. */
     public var profileUrl: String?
 
     public init(id: UUID? = nil, displayName: String? = nil, userName: String? = nil, avatar: String? = nil, profileUrl: String? = nil) {

@@ -46,7 +46,7 @@ public class GroupWebhookDto
     /// <summary>
     /// The group ID.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c</example>
     public Guid Id { get; set; }
 
     /// <summary>
@@ -62,7 +62,8 @@ public class GroupWebhookDto
     public Guid? Parent { get; set; }
 
     /// <summary>
-    /// The group category ID.
+    /// The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for
+    /// the built-in system groups.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Category { get; set; }
@@ -87,7 +88,7 @@ public class GroupWebhookDto
     /// <summary>
     /// The number of group members.
     /// </summary>
-    /// <example>0</example>
+    /// <example>12</example>
     public int MembersCount { get; set; }
 
     internal GroupWebhookDto Clone()
@@ -104,7 +105,7 @@ public class GroupSummaryWebhookDto
     /// <summary>
     /// The group ID.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c</example>
     public Guid Id { get; set; }
 
     /// <summary>
@@ -145,4 +146,13 @@ public static partial class GroupWebhookDtoMapper
     private static Guid? GetParentId(ASC.Core.Users.GroupInfo parent) => parent?.ID;
 
     private static bool GetIsLDAP(string sid) => !string.IsNullOrEmpty(sid);
+}
+
+/// <summary>
+/// A group summary of the REST API as a webhook payload references it: the same fields, the same values.
+/// </summary>
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class GroupSummaryWebhookDtoMapper
+{
+    public static partial GroupSummaryWebhookDto MapToWebhookDto(this GroupSummaryDto source);
 }

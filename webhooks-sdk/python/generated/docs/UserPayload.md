@@ -42,7 +42,7 @@ Name | Type | Description | Notes
 **avatar_max** | **str** | The absolute URL of the 200x200 avatar, with the same hash parameter. | [optional] 
 **avatar_medium** | **str** | The absolute URL of the 48x48 avatar, with the same hash parameter. | [optional] 
 **avatar_small** | **str** | The absolute URL of the 32x32 avatar, with the same hash parameter. | [optional] 
-**profile_url** | **str** | The user profile URL. | [optional] 
+**profile_url** | **str** | The absolute link to the user in the portal&#39;s list of people, or of guests for a guest; today it is a search of that list by the user&#39;s email address. Absent when the subscription&#39;s creator is a User or a Guest, who may not see the contacts of other users, unless this user is that creator. | [optional] 
 
 ## Example
 

@@ -1065,6 +1065,12 @@ public enum MessageAction
     [Description("Portal unblocked")]
     PortalUnblocked = 6111,
 
+    /// <summary>
+    /// A member queued a past webhook delivery to be sent again; the target is the subscription.
+    /// </summary>
+    [Description("Webhook delivery retried")]
+    WebhookRetried = 6112,
+
     #endregion
 
     #region others

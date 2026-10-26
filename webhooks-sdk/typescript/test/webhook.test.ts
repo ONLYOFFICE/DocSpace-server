@@ -26,7 +26,8 @@ const BODY =
     '"webhook":{"id":7,"name":"ci","url":"https://example.com/hooks",' +
     '"triggers":["file.created"]}}';
 
-// A real production delivery, captured from a DocSpace portal. The parse tests
+// A real delivery, captured from a DocSpace test portal with its addresses
+// replaced by docspace.example.com. The parse tests
 // run against this rather than a hand-written body, because the wire shape had
 // surprises no amount of reading the C# predicted.
 const REAL = readFileSync(resolve(__dirname, '../../../samples/file.created.json'), 'utf8');
@@ -179,6 +180,14 @@ test('every contract trigger is dispatchable', () => {
                      'agent.updated', 'form.submit', 'form.stopped', 'file.downloaded']) {
         assert.equal(isKnownTrigger(t), true, `${t} missing from the dispatch table`);
     }
+});
+
+test("'*' is known but stays untyped, as in the C# SDK", () => {
+    assert.equal(isKnownTrigger('*'), true);
+    const hook = parseWebhook(REAL.replace('"file.created"', '"*"'));
+    assert.equal(isKnownWebhook(hook), true);
+    // The legacy catch-all carries no model: the payload comes through as raw JSON.
+    assert.equal((hook.payload as { title: string }).title, 'TestDoc.docx');
 });
 
 test('parseWebhook rejects bodies that are not envelopes', () => {

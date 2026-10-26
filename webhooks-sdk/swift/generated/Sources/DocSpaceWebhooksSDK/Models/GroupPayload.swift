@@ -16,7 +16,7 @@ public struct GroupPayload: Sendable, Codable, Hashable {
     public var name: String?
     /** The parent group ID; absent for a top-level group. */
     public var parent: UUID?
-    /** The group category ID. */
+    /** The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. */
     public var category: UUID?
     /** Specifies whether the group comes from LDAP or not. */
     public var isLDAP: Bool?

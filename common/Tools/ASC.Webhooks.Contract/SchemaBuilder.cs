@@ -255,6 +255,24 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
             return Scalar(IsWrittenAsString(type) ? "string" : "integer");
         }
 
+        // any JSON value: a schema without a type, which every generator maps to its untyped value
+        if (type == typeof(object) || type == typeof(JsonElement) || typeof(JsonNode).IsAssignableFrom(type))
+        {
+            return new YamlMappingNode();
+        }
+
+        // checked before the arrays: a dictionary is an IEnumerable of its pairs, but goes on the wire as an object
+        if (GetDictionaryTypes(type) is var (keyType, valueType))
+        {
+            if (keyType != typeof(string))
+            {
+                throw new NotSupportedException(
+                    $"{declaration?.DeclaringType?.FullName}.{declaration?.Name}: {type} has keys of type {keyType}; only string keys map to a JSON object.");
+            }
+
+            return new YamlMappingNode { { "type", "object" }, { "additionalProperties", BuildType(valueType, null) } };
+        }
+
         if (GetItemType(type) is { } itemType)
         {
             return new YamlMappingNode { { "type", "array" }, { "items", BuildType(itemType, null) } };
@@ -289,6 +307,23 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
         var kind = enumType.GetCustomAttribute<FlagsAttribute>() != null ? "Flags" : "Values";
 
         return $"{kind} of `{enumType.Name}`: {string.Join(", ", values)}.";
+    }
+
+    private static (Type Key, Type Value)? GetDictionaryTypes(Type type)
+    {
+        var dictionary = type.GetInterfaces().Append(type)
+            .FirstOrDefault(i => i.IsGenericType &&
+                                 (i.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                                  i.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)));
+
+        if (dictionary == null)
+        {
+            return null;
+        }
+
+        var arguments = dictionary.GetGenericArguments();
+
+        return (arguments[0], arguments[1]);
     }
 
     private static Type GetItemType(Type type)

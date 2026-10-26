@@ -62,7 +62,12 @@ public static class WebhookTriggers
     public static readonly IReadOnlySet<string> UntypedTriggers =
         new HashSet<string>(StringComparer.Ordinal) { "*" };
 
-    /// <summary>True when this build knows how to type the trigger's payload.</summary>
+    /// <summary>
+    /// True when the trigger is in the contract this build was generated from, the
+    /// untyped catch-all included; false for a trigger added on the server later.
+    /// The TypeScript SDK's <c>isKnownTrigger</c> answers the same way. Whether the
+    /// payload has a type of its own is <see cref="PayloadTypes"/>.
+    /// </summary>
     public static bool IsKnown(string trigger) =>
-        trigger is not null && PayloadTypes.ContainsKey(trigger);
+        trigger is not null && (PayloadTypes.ContainsKey(trigger) || UntypedTriggers.Contains(trigger));
 }

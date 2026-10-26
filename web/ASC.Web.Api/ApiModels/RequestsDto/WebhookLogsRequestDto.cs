@@ -84,8 +84,7 @@ public class WebhookLogsRequestDto
     public int? ConfigId { get; set; }
 
     /// <summary>
-    /// One event, by the `eventId` of its delivery records, which is also the `event.id` the receiver got. Pass the
-    /// `id` of a record returned by a retry to follow up that one record alone.
+    /// One event, by the `eventId` of its delivery records, which is also the `event.id` the receiver got.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "eventId")]

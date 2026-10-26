@@ -47,6 +47,11 @@ public class DbWorker(
     /// </summary>
     private const int MaxClaimRounds = 3;
 
+    /// <summary>
+    /// How long the rows of a portal that is not active wait before the claim looks at them again.
+    /// </summary>
+    public static readonly TimeSpan InactiveTenantDelay = TimeSpan.FromHours(1);
+
     private static string GetCacheKey(int tenantId)
     {
         return $"webhooks_configs_{tenantId}";
@@ -362,16 +367,27 @@ public class DbWorker(
 
     /// <summary>
     /// Queues a manual retry of the event <paramref name="source"/> belongs to as a new journal row, leaving the rows
-    /// of the earlier attempts as they are. Nothing is queued while a row of that event is being sent right now.
+    /// of the earlier attempts as they are. Nothing is queued while a row of that event is being sent right now, for
+    /// a disabled subscription, or for an event written before the attempt counter, whose body is in the old format.
     /// </summary>
     public async Task<WebhookRetryResult> RetryJournalAsync(DbWebhooksLog source, Guid retriedBy)
     {
+        // a disabled subscription receives nothing, so a retry for it would be queued only to be dropped by the sender
+        if (source.Config is { Enabled: false })
+        {
+            return new WebhookRetryResult(WebhookRetryStatus.Disabled);
+        }
+
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
 
         return await strategy.ExecuteAsync(async () =>
         {
+            // the strategy runs this again after a transient failure of SaveChanges or Commit (a deadlock, say); the row
+            // added by the failed run is still tracked as Added and would be inserted next to the new one
+            webhooksDbContext.ChangeTracker.Clear();
+
             await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
 
             var now = DateTime.UtcNow;
@@ -383,6 +399,11 @@ public class DbWorker(
             if (!await webhooksDbContext.WebhooksEventExistsAsync(source.TenantId, eventId))
             {
                 return new WebhookRetryResult(WebhookRetryStatus.NotFound);
+            }
+
+            if (await webhooksDbContext.WebhooksEventPredatesAttemptsAsync(source.TenantId, eventId))
+            {
+                return new WebhookRetryResult(WebhookRetryStatus.Outdated);
             }
 
             // a second series next to one in flight would send the event to the receiver twice at the same time
@@ -420,6 +441,50 @@ public class DbWorker(
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         await webhooksDbContext.CancelWebhooksLogAttemptsAsync(tenantId, id, leaseId);
+    }
+
+    /// <summary>
+    /// Hands a claimed row back without counting an attempt; it is due again at <paramref name="nextAttemptOn"/>.
+    /// </summary>
+    public async Task ReleaseJournalAttemptAsync(int tenantId, int id, Guid leaseId, DateTime nextAttemptOn)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.ReleaseWebhooksLogAsync(tenantId, id, leaseId, nextAttemptOn);
+    }
+
+    /// <summary>
+    /// Records an attempt the target accepted, when the regular bookkeeping after it failed, so that it is not retried.
+    /// </summary>
+    public async Task RecordJournalDeliveryAsync(int tenantId, int id, Guid leaseId, int status, DateTime delivery, int attempts)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.RecordWebhooksLogDeliveryAsync(tenantId, id, leaseId, status, delivery, attempts);
+    }
+
+    /// <summary>
+    /// Moves the due rows of portals that are not active out of the way of the claim: see
+    /// <see cref="WebhooksDbContext.PostponeInactiveTenantsWebhooksLogsAsync"/>.
+    /// </summary>
+    public async Task<int> PostponeInactiveTenantsJournalAsync()
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var now = DateTime.UtcNow;
+
+        return await webhooksDbContext.PostponeInactiveTenantsWebhooksLogsAsync(now, now + InactiveTenantDelay);
+    }
+
+    /// <summary>
+    /// Puts a row written by a publisher of the previous version on the schedule: see
+    /// <see cref="WebhooksDbContext.ScheduleUnscheduledWebhooksLogAsync"/>.
+    /// </summary>
+    public async Task ScheduleUnscheduledJournalEntryAsync(int tenantId, int id)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.ScheduleUnscheduledWebhooksLogAsync(tenantId, id, DateTime.UtcNow);
     }
 
     public async Task<int?> GetJournalAttemptsAsync(int tenantId, int id)

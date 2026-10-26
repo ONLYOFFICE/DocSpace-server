@@ -34,7 +34,7 @@
 | **encrypted** | **Boolean** | Specifies whether the file is encrypted or not. | [optional] |
 | **locked** | **Boolean** | Specifies whether the file is locked or not. | [optional] |
 | **locked_by** | **String** | The user name of whoever locked the file. | [optional] |
-| **is_form** | **Boolean** | Specifies whether the file is a form or not. | [optional] |
+| **is_form** | **Boolean** | True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document. | [optional] |
 | **custom_filter_enabled** | **Boolean** | Specifies whether a custom filter is enabled for the file or not. | [optional] |
 | **custom_filter_enabled_by** | **String** | The user name of whoever enabled the custom filter. | [optional] |
 | **last_opened** | **Time** | The UTC date when the file was last opened. | [optional] |

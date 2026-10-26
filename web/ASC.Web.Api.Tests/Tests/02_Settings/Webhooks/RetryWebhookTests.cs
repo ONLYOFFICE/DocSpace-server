@@ -195,6 +195,53 @@ public class RetryWebhookTests(
     }
 
     [Fact]
+    public async Task RetryWebhook_DisabledSubscription_ThrowsConflict()
+    {
+        // Arrange: a delivered event, then the subscription is switched off
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        await _webApiClient.Authenticate(Owner);
+        await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
+        {
+            Name = subscription.Name,
+            Uri = subscription.Uri,
+            SecretKey = subscription.SecretKey,
+            Enabled = false
+        }, TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.RetryWebhookAsync(record!.Id, TestContext.Current.CancellationToken));
+
+        // Assert: a disabled subscription receives nothing, so nothing is queued for it
+        exception.ErrorCode.Should().Be(409);
+        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task RetryWebhook_RecordOfThePreviousDeliveryFormat_ThrowsConflict()
+    {
+        // Arrange: a record as the sender before the attempt counter left it, sent but with no attempt counted
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await ExecuteSqlAsync("UPDATE webhooks_logs SET attempts = 0 WHERE id = @id", ("@id", record!.Id));
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken));
+
+        // Assert: its body is in the old format, which carried whole REST objects, so it is not sent again
+        exception.ErrorCode.Should().Be(409);
+        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task RetryWebhook_UnknownId_ThrowsNotFound()
     {
         // Arrange

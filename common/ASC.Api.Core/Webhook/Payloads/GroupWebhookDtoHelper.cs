@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using GroupInfo = ASC.Core.Users.GroupInfo;
-
 namespace ASC.Api.Core.Webhook.Payloads;
 
 /// <summary>
@@ -41,7 +39,7 @@ namespace ASC.Api.Core.Webhook.Payloads;
 [Scope]
 public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper userWebhookDtoHelper)
 {
-    public async Task<GroupWebhookDto> GetAsync(GroupInfo group)
+    public async Task<GroupWebhookDto> GetAsync(ASC.Core.Users.GroupInfo group)
     {
         var result = group.MapToWebhookDto();
 

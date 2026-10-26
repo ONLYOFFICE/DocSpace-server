@@ -21,19 +21,23 @@ model-bound object.
 ## 2. Cheap rejection, before parsing at all
 
 Every delivery also carries `x-docspace-event-id` and
-`x-docspace-event-timestamp`, duplicating `event.id` and `event.createOn` so a
-stale or already-seen delivery can be dropped without touching the body.
+`x-docspace-event-timestamp`, duplicating `event.id` and `event.createOn` so an
+already-seen delivery can be dropped without touching the body.
 
 **These headers are not covered by the signature.** Anything in transit can
 rewrite them, so:
 
 - Rejecting on them is safe — dropping a delivery is fail-safe.
-- **Accepting on them is not.** A replay with its timestamp header rewritten to
-  "now" still carries a valid signature. A receiver that checks freshness only
-  against the header has no replay protection whatsoever.
+- **Accepting on them is not.** After verifying, re-check `event.id` from the
+  parsed body. Comparing it against the header also detects tampering for free.
 
-After verifying, re-check `event.createOn` and `event.id` from the parsed body.
-Comparing them against the headers also detects tampering for free.
+**Replay.** The signature covers the body only; it does not prove when the
+request was sent. Deduplicate on `event.id`, and keep the ids you have processed
+for at least the retry window: about 18 hours on the default schedule, longer if
+a portal administrator may replay old deliveries from the log. Do not reject a
+delivery for its age: `event.createOn` is when the event happened and stays the
+same on every automatic and manual retry, so a freshness check on it throws away
+legitimate retries.
 
 ## 3. Parse and narrow
 
@@ -84,9 +88,9 @@ Sustained failures cost the subscription itself, not just the delivery:
 ## 5. Deduplicate on `event.id`
 
 It is stable across every resend of one delivery — the server's automatic retries
-and a manual retry from the delivery log alike, because a manual retry requeues
-the same delivery record rather than creating a new one. The same id always means
-the same logical event, so it is a sound idempotency key on its own.
+and a manual retry from the delivery log alike. A manual retry is a delivery
+record of its own, but it sends the `event.id` of the first one. The same id
+always means the same logical event, so it is a sound idempotency key on its own.
 
 Note what that implies: a delivery you have already processed can arrive again at
 any time, days later, if someone presses retry. Keep the ids you have seen for

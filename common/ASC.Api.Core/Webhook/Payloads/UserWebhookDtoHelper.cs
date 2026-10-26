@@ -51,7 +51,8 @@ public class UserWebhookDtoHelper(
     WebItemSecurity webItemSecurity,
     WebItemManager webItemManager,
     TenantManager tenantManager,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    GroupSummaryDtoHelper groupSummaryDtoHelper)
 {
     public async Task<UserWebhookDto> GetAsync(UserInfo userInfo)
     {
@@ -177,15 +178,10 @@ public class UserWebhookDtoHelper(
 
         List<GroupSummaryWebhookDto> groups = [];
 
+        // the same summary the REST API puts into a user's groups; its lookups are served by the user cache
         foreach (var g in groupsFromDb)
         {
-            groups.Add(new GroupSummaryWebhookDto
-            {
-                Id = g.ID,
-                Name = g.Name,
-                Manager = (await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(g.ID))).UserName,
-                IsSystem = await userManager.IsSystemGroup(g.ID) ? true : null
-            });
+            groups.Add((await groupSummaryDtoHelper.GetAsync(g)).MapToWebhookDto());
         }
 
         if (groups.Count > 0)

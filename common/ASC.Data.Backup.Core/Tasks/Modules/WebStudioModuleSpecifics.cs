@@ -47,7 +47,7 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("webhooks_config", "tenant_id", "id"),
-        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by"] }
+        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];
 
     private readonly RelationInfo[] _relations =
@@ -74,6 +74,17 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
     {
         var (prepared, preparedRow) = await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+
+        if (prepared && table.Name == "webhooks_logs")
+        {
+            // a restored portal must not resend what the source portal had already scheduled or was sending: the
+            // schedule and the lease belong to the delivery pipeline of the source, not to the delivery history
+            SetNull(preparedRow, "next_attempt_on");
+            SetNull(preparedRow, "lease_id");
+
+            return (true, preparedRow);
+        }
+
         if (!prepared || table.Name != "webstudio_settings" || !IsWebSearchSettings(row["ID"]))
         {
             return (prepared, preparedRow);
@@ -86,6 +97,15 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         }
 
         return (true, preparedRow);
+    }
+
+    private static void SetNull(Dictionary<string, object> preparedRow, string column)
+    {
+        var key = preparedRow.Keys.FirstOrDefault(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
+        if (key != null)
+        {
+            preparedRow[key] = null;
+        }
     }
 
     private static bool IsWebSearchSettings(object settingsId)
@@ -151,6 +171,28 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
             return success;
         }
+
+        if (relation.ChildTable == "webhooks_logs" && relation.ChildColumn == "retry_of")
+        {
+            // the original row of an event has a lower id than its retries and is normally restored first. Should it
+            // not be mapped yet, the retry is dropped: the generic rule would keep the old id, which in the new tenant
+            // points to no row or to an unrelated one, and the receiver would get that id as event.id
+            if (value == null || value == DBNull.Value)
+            {
+                return true;
+            }
+
+            var mapped = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, value);
+            if (mapped == null)
+            {
+                return false;
+            }
+
+            value = mapped;
+
+            return true;
+        }
+
         return base.TryPrepareValue(connection, columnMapper, relation, ref value);
     }
 }

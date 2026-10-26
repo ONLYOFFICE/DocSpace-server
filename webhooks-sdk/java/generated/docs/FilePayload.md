@@ -38,7 +38,7 @@ The file carried by a file.* webhook, and by form.filled.out and form.stopped.  
 |**encrypted** | **Boolean** | Specifies whether the file is encrypted or not. |  [optional] |
 |**locked** | **Boolean** | Specifies whether the file is locked or not. |  [optional] |
 |**lockedBy** | **String** | The user name of whoever locked the file. |  [optional] |
-|**isForm** | **Boolean** | Specifies whether the file is a form or not. |  [optional] |
+|**isForm** | **Boolean** | True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for other files. It does not tell a fillable form from an ordinary PDF document. |  [optional] |
 |**customFilterEnabled** | **Boolean** | Specifies whether a custom filter is enabled for the file or not. |  [optional] |
 |**customFilterEnabledBy** | **String** | The user name of whoever enabled the custom filter. |  [optional] |
 |**lastOpened** | **OffsetDateTime** | The UTC date when the file was last opened. |  [optional] |

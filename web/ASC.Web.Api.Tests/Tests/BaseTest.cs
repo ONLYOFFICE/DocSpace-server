@@ -58,6 +58,7 @@ public class BaseTest(
     protected HttpClient _filesClient = null!;
     protected RoomsApi _roomsApi = null!;
     protected FilesApi _filesApi = null!;
+    protected FoldersApi _foldersApi = null!;
 
     protected HttpClient _identityClient = null!;
     protected ClientManagementApi _clientManagementApi = null!;
@@ -120,6 +121,7 @@ public class BaseTest(
         _filesClient = _clients.FilesHttpClient;
         _roomsApi = _clients.RoomsApi;
         _filesApi = _clients.FilesApi;
+        _foldersApi = _clients.FoldersApi;
 
         _identityClient = _clients.IdentityHttpClient;
         _clientManagementApi = _clients.ClientManagementApi;

@@ -36,6 +36,7 @@ namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 [Scope]
 public class WebhookRequestIntegrationEventHandler(
     ILogger<WebhookRequestIntegrationEventHandler> logger,
+    DbWorker dbWorker,
     WorkerSignal workerSignal) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
 {
     public async Task Handle(WebhookRequestIntegrationEvent @event)
@@ -44,9 +45,11 @@ public class WebhookRequestIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            workerSignal.Notify();
+            // during a rolling update a publisher of the previous version writes its row without a schedule; this one
+            // puts it on the schedule, rows written by the current publisher are left as they are
+            await dbWorker.ScheduleUnscheduledJournalEntryAsync(@event.TenantId, @event.WebhookLogId);
 
-            await Task.CompletedTask;
+            workerSignal.Notify();
         }
     }
 }

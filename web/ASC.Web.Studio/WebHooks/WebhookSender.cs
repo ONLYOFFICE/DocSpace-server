@@ -71,6 +71,11 @@ public class WebhookSender(
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
         var journalUpdated = false;
 
+        // set once the target has accepted the request: from then on a failure must not schedule the event again
+        var attempts = 0;
+        var deliveredStatus = 0;
+        DateTime? deliveredOn = null;
+
         try
         {
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -85,7 +90,18 @@ public class WebhookSender(
 
             if (tenant.Status != TenantStatus.Active)
             {
-                // the claim skips inactive portals, so the entry waits here until the portal is active again
+                // the portal stopped being active after the claim. Its rows leave the schedule when it is being removed;
+                // otherwise this one is handed back, so a manual retry does not see it in flight for the whole lease,
+                // and waits like the other rows of an inactive portal (DbWorker.PostponeInactiveTenantsJournalAsync)
+                if (tenant.Status == TenantStatus.RemovePending)
+                {
+                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
+                }
+                else
+                {
+                    await dbWorker.ReleaseJournalAttemptAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + DbWorker.InactiveTenantDelay);
+                }
+
                 return;
             }
 
@@ -96,7 +112,9 @@ public class WebhookSender(
                 return;
             }
 
-            if (entry.Attempts > 0 && !entry.Config.Enabled)
+            // a disabled subscription receives nothing: not the retries, and not the first attempt of an event published
+            // before it was disabled either. A manual retry is refused for it up front (DbWorker.RetryJournalAsync)
+            if (!entry.Config.Enabled)
             {
                 await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                 return;
@@ -143,7 +161,7 @@ public class WebhookSender(
                 webhookPayload.Webhook.RetryOn = null;
             }
 
-            var attempts = entry.Attempts + 1;
+            attempts = entry.Attempts + 1;
             var status = 0;
             var succeeded = false;
             var mayAutoDisable = false;
@@ -179,12 +197,15 @@ public class WebhookSender(
 
                 response.EnsureSuccessStatusCode();
 
+                // the status decides the outcome: a 2xx is a delivery, and from here on nothing may count it as a failure
                 status = (int)response.StatusCode;
-                responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-                responsePayload = await ReadResponsePayloadAsync(response.Content, timeoutCts.Token);
-
                 delivery = DateTime.UtcNow;
                 succeeded = true;
+                deliveredStatus = status;
+                deliveredOn = delivery;
+
+                responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
+                responsePayload = await TryReadResponsePayloadAsync(response.Content, timeoutCts.Token, cancellationToken);
 
                 logger.DebugResponse(response);
             }
@@ -228,6 +249,7 @@ public class WebhookSender(
             }
 
             var autoDisabled = false;
+            var nextAttemptOn = succeeded ? null : GetNextAttemptOn(attempts);
 
             if (succeeded)
             {
@@ -239,13 +261,13 @@ public class WebhookSender(
 
                 await dbWorker.RecordWebhookConfigFailureAsync(tenantId, entry.ConfigId, failureOn, responsePayload);
 
-                if (mayAutoDisable)
+                // only once the retries of this event are used up: a subscription that hears rarely from the portal
+                // would otherwise be disabled by its first failure after a quiet spell, before any retry could succeed
+                if (mayAutoDisable && !nextAttemptOn.HasValue)
                 {
                     autoDisabled = await dbWorker.DisableStaleWebhookConfigAsync(tenantId, entry.ConfigId, failureOn - TimeSpan.FromDays(settings.TrustedDaysCount ?? 3));
                 }
             }
-
-            var nextAttemptOn = succeeded || autoDisabled || !entry.Config.Enabled ? null : GetNextAttemptOn(attempts);
 
             if (nextAttemptOn.HasValue)
             {
@@ -275,16 +297,44 @@ public class WebhookSender(
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // the service is stopping; an accepted request is recorded, or it would go out again once the lease expires
+            if (deliveredOn.HasValue && !journalUpdated)
+            {
+                await RegisterDeliveryAsync(dbWorker, tenantId, webhookLogId, leaseId, deliveredStatus, deliveredOn.Value, attempts);
+            }
+
             throw;
         }
         catch (Exception e)
         {
             logger.ErrorFailedToSend(tenantId, webhookLogId, e);
 
-            if (!journalUpdated)
+            if (journalUpdated)
+            {
+                return;
+            }
+
+            if (deliveredOn.HasValue)
+            {
+                // the target has the event already: record the delivery instead of scheduling it once more
+                await RegisterDeliveryAsync(dbWorker, tenantId, webhookLogId, leaseId, deliveredStatus, deliveredOn.Value, attempts);
+            }
+            else
             {
                 await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
             }
+        }
+    }
+
+    private async Task RegisterDeliveryAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId, int status, DateTime delivery, int attempts)
+    {
+        try
+        {
+            await dbWorker.RecordJournalDeliveryAsync(tenantId, webhookLogId, leaseId, status, delivery, attempts);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFailedToRegisterAttempt(tenantId, webhookLogId, e);
         }
     }
 
@@ -315,6 +365,28 @@ public class WebhookSender(
         catch (Exception e)
         {
             logger.ErrorFailedToRegisterAttempt(tenantId, webhookLogId, e);
+        }
+    }
+
+    /// <summary>
+    /// Reads the start of the body of an accepted request for the log. The delivery has already succeeded, so a body
+    /// that is slow, cut off or broken only leaves a note in the log; only the service shutting down stops the attempt.
+    /// </summary>
+    private async Task<string> TryReadResponsePayloadAsync(HttpContent content, CancellationToken timeoutToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await ReadResponsePayloadAsync(content, timeoutToken);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return $"The response body did not arrive within {_requestTimeout.TotalSeconds:0} seconds";
+        }
+        catch (Exception e) when (e is HttpRequestException or IOException)
+        {
+            logger.WarningWithException(e);
+
+            return $"The response body could not be read: {e.Message}";
         }
     }
 

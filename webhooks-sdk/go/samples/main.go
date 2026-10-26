@@ -70,6 +70,85 @@ func deref[T any](p *T, zero T) T {
 
 func time0() time.Time { return time.Time{} }
 
+// payloadKind names the payload model of a trigger, mirroring the
+// x-docspace-trigger-payloads map of the contract; "" for a trigger newer than
+// this SDK. form.submit has a payload of its own, while form.filled.out and
+// form.stopped carry the form file itself.
+func payloadKind(trigger string) string {
+	switch {
+	case trigger == "form.submit":
+		return "formSubmit"
+	case trigger == "form.filled.out", trigger == "form.stopped", strings.HasPrefix(trigger, "file."):
+		return "file"
+	case strings.HasPrefix(trigger, "user."):
+		return "user"
+	case strings.HasPrefix(trigger, "group."):
+		return "group"
+	case strings.HasPrefix(trigger, "folder."):
+		return "folder"
+	// An agent is an AI room and arrives in the same shape.
+	case strings.HasPrefix(trigger, "room."), strings.HasPrefix(trigger, "agent."):
+		return "room"
+	}
+	return ""
+}
+
+// logPayload parses the payload with the model of its trigger and prints a
+// one-line summary. A parse error is returned, never skipped: a sample that
+// prints "ok" over a payload its model cannot read hides a broken SDK.
+func logPayload(trigger string, raw json.RawMessage) error {
+	switch payloadKind(trigger) {
+	case "user":
+		var u openapi.UserPayload
+		if err := json.Unmarshal(raw, &u); err != nil {
+			return err
+		}
+		fmt.Printf("  user: %s <%s>\n", deref(u.UserName, ""), deref(u.Email, ""))
+	case "group":
+		var g openapi.GroupPayload
+		if err := json.Unmarshal(raw, &g); err != nil {
+			return err
+		}
+		fmt.Printf("  group: %s\n", deref(g.Name, ""))
+	case "file":
+		var f openapi.FilePayload
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return err
+		}
+		fmt.Printf("  file: %s  id=%s  parent=%s\n", deref(f.Title, ""), entryID(f.Id), entryID(f.ParentId))
+	case "folder":
+		var f openapi.FolderPayload
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return err
+		}
+		fmt.Printf("  folder: %s  id=%s  parent=%s\n", deref(f.Title, ""), entryID(f.Id), entryID(f.ParentId))
+	case "room":
+		var r openapi.RoomPayload
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return err
+		}
+		fmt.Printf("  room: %s  id=%s  parent=%s\n", deref(r.Title, ""), entryID(r.Id), entryID(r.ParentId))
+	case "formSubmit":
+		var f openapi.FormSubmitPayload
+		if err := json.Unmarshal(raw, &f); err != nil {
+			return err
+		}
+		original, submitted := "", ""
+		if f.OriginalForm != nil {
+			original = deref(f.OriginalForm.Title, "")
+		}
+		if f.SubmittedForm != nil {
+			submitted = deref(f.SubmittedForm.Title, "")
+		}
+		fmt.Printf("  form: %s  submitted as %s\n", original, submitted)
+	default:
+		// A trigger family added on the server after this SDK was generated:
+		// acknowledge it and keep the raw payload rather than failing.
+		fmt.Println("  no payload model for this trigger; raw payload below")
+	}
+	return nil
+}
+
 func main() {
 	fixtures := filepath.Join("..", "..", "samples")
 	bodyPath := filepath.Join(fixtures, "file.created.json")
@@ -117,34 +196,21 @@ func main() {
 		deref(env.Event.CreateBy, ""))
 	fmt.Printf("  subscription #%d %q\n", deref(env.Webhook.Id, 0), deref(env.Webhook.Name, ""))
 
-	switch {
-	case strings.HasPrefix(trigger, "user."):
-		var u openapi.UserPayload
-		if json.Unmarshal(env.Payload, &u) == nil {
-			fmt.Printf("  user: %s <%s>\n", deref(u.UserName, ""), deref(u.Email, ""))
-		}
-	case strings.HasPrefix(trigger, "group."):
-		var g openapi.GroupPayload
-		if json.Unmarshal(env.Payload, &g) == nil {
-			fmt.Printf("  group: %s\n", deref(g.Name, ""))
-		}
-	default:
-		// file.*, folder.*, room.*, agent.*, form.* all arrive as the
-		// FileEntry<T> base; fileEntryType is the only discriminator.
-		var e openapi.FileEntryPayload
-		if json.Unmarshal(env.Payload, &e) == nil {
-			kind := "folder"
-			if deref(e.FileEntryType, 0) == 2 {
-				kind = "file"
-			}
-			fmt.Printf("  %s: %s  id=%s  parent=%s\n",
-				kind, deref(e.Title, ""), entryID(e.Id), entryID(e.ParentId))
-		}
+	if err := logPayload(trigger, env.Payload); err != nil {
+		fmt.Fprintf(os.Stderr, "unparseable %s payload: %v\n", trigger, err)
+		os.Exit(1)
 	}
 
-	var pretty map[string]any
-	_ = json.Unmarshal(env.Payload, &pretty)
-	out, _ := json.MarshalIndent(pretty, "  ", "  ")
+	var pretty any
+	if err := json.Unmarshal(env.Payload, &pretty); err != nil {
+		fmt.Fprintf(os.Stderr, "unparseable payload: %v\n", err)
+		os.Exit(1)
+	}
+	out, err := json.MarshalIndent(pretty, "  ", "  ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	fmt.Println()
 	fmt.Println("  " + string(out))
 }

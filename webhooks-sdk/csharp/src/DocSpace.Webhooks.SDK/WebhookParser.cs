@@ -26,8 +26,8 @@ public sealed class DocSpaceWebhook
 
     /// <summary>
     /// The payload, deserialized to the type this trigger carries -- or
-    /// <c>null</c> when the trigger is not one this build knows. Cast with
-    /// <see cref="PayloadAs{T}"/>.
+    /// <c>null</c> when the trigger is not one this build knows, or is the
+    /// untyped legacy catch-all <c>*</c>. Cast with <see cref="PayloadAs{T}"/>.
     /// </summary>
     public object? Payload { get; init; }
 

@@ -3535,6 +3535,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Webhook delivery retried: {0}.
+        /// </summary>
+        public static string WebhookRetried {
+            get {
+                return ResourceManager.GetString("WebhookRetried", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Webhook updated: {0}.
         /// </summary>
         public static string WebhookUpdated {

@@ -96,9 +96,11 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public bool Pinned { get; set; }
 
     /// <summary>
-    /// The room quota limit in bytes.
+    /// The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has no quota of its own,
+    /// so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the
+    /// effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.
     /// </summary>
-    /// <example>0</example>
+    /// <example>10737418240</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>

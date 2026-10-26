@@ -94,7 +94,7 @@ Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw bod
 
 `verifySignature` handles the three details that are easy to get wrong: it hashes the raw body, compares in constant time, and folds case — DocSpace emits uppercase hexadecimal where some other services emit lowercase.
 
-Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
+Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so an already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones. The signature covers the body only; it does not prove when the request was sent, and `event.createOn` stays the same on every automatic and manual retry, so deduplicate on `event.id` instead of rejecting a delivery for its age.
 
 Deduplicate on `event.id`. It is stable across every resend of one delivery — the server's automatic retries and a manual retry from the delivery log alike — so keep the ids you have seen for longer than the ~18-hour retry window: a manual retry can bring the same event back days later.
 

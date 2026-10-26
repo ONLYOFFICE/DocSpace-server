@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Id** | Pointer to **string** | The group ID. | [optional] 
 **Name** | Pointer to **string** | The group name. | [optional] 
 **Parent** | Pointer to **string** | The parent group ID; absent for a top-level group. | [optional] 
-**Category** | Pointer to **string** | The group category ID. | [optional] 
+**Category** | Pointer to **string** | The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. | [optional] 
 **IsLDAP** | Pointer to **bool** | Specifies whether the group comes from LDAP or not. | [optional] 
 **IsSystem** | Pointer to **bool** | Specifies whether the group is a system group or not. | [optional] 
 **Manager** | Pointer to [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 

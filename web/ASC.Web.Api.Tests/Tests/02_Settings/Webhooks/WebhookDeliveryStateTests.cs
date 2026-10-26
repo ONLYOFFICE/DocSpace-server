@@ -37,7 +37,8 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// What an attempt may write once it ends: only the delivery record it still holds the lease of, only the
 /// delivery bookkeeping of the subscription, and a disabled subscription only when it has really gone days
 /// without a success. The states behind these — a lease taken over, a subscription failing for days — are
-/// planted in the database, since no API call produces them on demand.
+/// planted in the database, since no API call produces them on demand, with MySQL statements
+/// (<see cref="WebhookDeliveryTestBase.ExecuteSqlAsync"/>).
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookDeliveryStateTests(
@@ -67,7 +68,10 @@ public class WebhookDeliveryStateTests(
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+        // The record is written by the same attempt right after the success, so it is settled within milliseconds;
+        // a poll period of the sender bounds that generously. The record itself is not claimed again meanwhile: the
+        // claim moved its next attempt a whole lease ahead.
+        await Task.Delay(SenderPollPeriod, TestContext.Current.CancellationToken);
 
         var after = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
 
@@ -106,7 +110,7 @@ public class WebhookDeliveryStateTests(
     }
 
     [Fact]
-    public async Task Attempt_FailsOnASubscriptionWithoutSuccessForDays_DisablesIt()
+    public async Task Attempt_RetriesRunOutOnASubscriptionWithoutSuccessForDays_DisablesIt()
     {
         // Arrange: the subscription was created four days ago and has never been delivered to
         var receiver = await CreateReceiverAsync(500);
@@ -118,14 +122,37 @@ public class WebhookDeliveryStateTests(
         // Act
         await FireEventAsync();
 
-        // Assert
-        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        // Assert: the event used up its retries, and only then the subscription was disabled
+        var record = await WaitForRecordAsync(
+            subscription.Id, r => r.Attempts > ProfileRetryCount && r.NextAttemptOn is null, timeoutSeconds: 120);
 
-        record!.Attempts.Should().Be(1);
-        record.NextAttemptOn.Should().BeNull("a disabled subscription is not retried");
+        record!.Attempts.Should().Be(ProfileRetryCount + 1);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Attempt_FirstFailureOnASubscriptionWithoutSuccessForDays_IsRetriedAndKeepsItEnabled()
+    {
+        // Arrange: a subscription that heard nothing for days, as one with rare events does
+        var receiver = await CreateReceiverAsync(500);
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
+            ("@id", subscription.Id));
+
+        // Act
+        await FireEventAsync();
+
+        // Assert: one failure is not enough, the retries get their chance first
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+
+        record!.Attempts.Should().Be(1);
+        record.NextAttemptOn.Should().NotBeNull("the failure is retried");
+
+        var config = await GetSubscriptionAsync(subscription.Id);
+        config!.Enabled.Should().BeTrue("a subscription is disabled only once the retries of an event have run out");
     }
 
     [Fact]

@@ -36,15 +36,15 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <summary>
 /// What the sender in Web.Studio does with a delivery, by the answer it gets: the request it sends, how a
 /// failure is retried and given up on, and what a 410 or a disabled subscription stops. The integration-test
-/// profile retries every 3 seconds, three times (ConnectionStringManager.AddBaseConfig), so a delivery
-/// gets four attempts in all.
+/// profile retries every 3 seconds, three times (<see cref="WebhookDeliveryTestBase.ProfileRetryCount"/>), so a
+/// delivery gets four attempts in all.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookDeliveryTests(
     AspireAppFixture fixture)
     : WebhookDeliveryTestBase(fixture)
 {
-    private const int AttemptsInAll = 4;
+    private const int AttemptsInAll = ProfileRetryCount + 1;
 
     [Fact]
     public async Task Delivery_TargetAnswers200_IsRecordedAsDeliveredOnTheFirstAttempt()
@@ -196,8 +196,8 @@ public class WebhookDeliveryTests(
 
         var received = (await receiver.GetDeliveriesAsync()).Count;
 
-        // two retry intervals plus a poll of the sender: anything still scheduled would have gone out by now
-        await Task.Delay(TimeSpan.FromSeconds(12), TestContext.Current.CancellationToken);
+        // every retry the profile allows plus a poll of the sender: anything still scheduled would have gone out by now
+        await Task.Delay(NoMoreDeliveriesPeriod, TestContext.Current.CancellationToken);
 
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(received);
     }

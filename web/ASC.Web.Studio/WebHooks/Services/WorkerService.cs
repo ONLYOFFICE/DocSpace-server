@@ -48,6 +48,10 @@ public class WorkerService(
     private const int BatchWaves = 5;
     private readonly TimeSpan _lease = TimeSpan.FromMinutes(10);
 
+    // how often this instance moves the due rows of inactive portals out of the claim's way
+    private readonly TimeSpan _postponePeriod = TimeSpan.FromMinutes(10);
+    private DateTime _nextPostponeOn = DateTime.MinValue;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await eventBus.SubscribeAsync<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>();
@@ -68,6 +72,13 @@ public class WorkerService(
                 await using (var scope = scopeFactory.CreateAsyncScope())
                 {
                     var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+
+                    if (DateTime.UtcNow >= _nextPostponeOn)
+                    {
+                        _nextPostponeOn = DateTime.UtcNow + _postponePeriod;
+                        await dbWorker.PostponeInactiveTenantsJournalAsync();
+                    }
+
                     entries = await dbWorker.ClaimDueJournalEntriesAsync(batchSize, _lease);
                 }
 

@@ -69,7 +69,11 @@ export const PAYLOAD_DESERIALIZERS: {{
 {deser_rows}
 }};
 
-/** True when `trigger` is one this build of the SDK knows about. */
+/**
+ * True when `trigger` is in the contract this build of the SDK was generated
+ * from, the untyped `'*'` included; false for a trigger added on the server
+ * later. The C# SDK's `WebhookTriggers.IsKnown` answers the same way.
+ */
 export function isKnownTrigger(trigger: string): trigger is WebhookTriggerName {{
     return Object.prototype.hasOwnProperty.call(PAYLOAD_DESERIALIZERS, trigger);
 }}
@@ -115,9 +119,14 @@ public static class WebhookTriggers
     public static readonly IReadOnlySet<string> UntypedTriggers =
         new HashSet<string>(StringComparer.Ordinal) {{ {catchall} }};
 
-    /// <summary>True when this build knows how to type the trigger's payload.</summary>
+    /// <summary>
+    /// True when the trigger is in the contract this build was generated from, the
+    /// untyped catch-all included; false for a trigger added on the server later.
+    /// The TypeScript SDK's <c>isKnownTrigger</c> answers the same way. Whether the
+    /// payload has a type of its own is <see cref="PayloadTypes"/>.
+    /// </summary>
     public static bool IsKnown(string trigger) =>
-        trigger is not null && PayloadTypes.ContainsKey(trigger);
+        trigger is not null && (PayloadTypes.ContainsKey(trigger) || UntypedTriggers.Contains(trigger));
 }}
 """
 
@@ -238,9 +247,13 @@ allowed to.
 
 ## Payloads
 
-Files, folders, rooms, agents and forms all deliver the **same payload shape**.
-Nothing in it is specific to one kind of entry, so use `fileEntryType` to tell
-them apart: `1` is a folder, `2` is a file.
+Each event family has a payload of its own, named in the tables below: a file
+event carries the file, a folder event the folder, a room or agent event the
+room. Files, folders and rooms share a common core (`id`, `title`, `parentId`,
+`created`, `createdBy` and the like), and `fileEntryType` in it tells a folder
+(`1`) from a file (`2`). `form.submit` carries both the original form and the
+submitted copy, while `form.filled.out` and `form.stopped` carry the form file
+itself.
 
 Note that a file's name arrives in `title`, and that absent fields are simply
 defaults — a property missing from the JSON means empty, `false` or zero, never

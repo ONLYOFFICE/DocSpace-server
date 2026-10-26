@@ -81,7 +81,7 @@ public struct UserPayload: Sendable, Codable, Hashable {
     public var avatarMedium: String?
     /** The absolute URL of the 32x32 avatar, with the same hash parameter. */
     public var avatarSmall: String?
-    /** The user profile URL. */
+    /** The absolute link to the user in the portal's list of people, or of guests for a guest; today it is a search of that list by the user's email address. Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other users, unless this user is that creator. */
     public var profileUrl: String?
 
     public init(id: UUID? = nil, displayName: String? = nil, firstName: String? = nil, lastName: String? = nil, userName: String? = nil, email: String? = nil, contacts: [ContactPayload]? = nil, status: Int? = nil, activationStatus: Int? = nil, terminated: Date? = nil, department: String? = nil, groups: [GroupSummaryPayload]? = nil, location: String? = nil, notes: String? = nil, isAdmin: Bool? = nil, isRoomAdmin: Bool? = nil, isOwner: Bool? = nil, isVisitor: Bool? = nil, isCollaborator: Bool? = nil, isLDAP: Bool? = nil, isSSO: Bool? = nil, listAdminModules: [String]? = nil, cultureName: String? = nil, mobilePhone: String? = nil, mobilePhoneActivationStatus: Int? = nil, quotaLimit: Int64? = nil, usedSpace: Double? = nil, isCustomQuota: Bool? = nil, createdBy: UserSummaryPayload? = nil, registrationDate: Date? = nil, hasAvatar: Bool? = nil, avatar: String? = nil, avatarOriginal: String? = nil, avatarMax: String? = nil, avatarMedium: String? = nil, avatarSmall: String? = nil, profileUrl: String? = nil) {

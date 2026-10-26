@@ -113,7 +113,8 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Specifies whether the file is a form or not.
+    /// True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for
+    /// other files. It does not tell a fillable form from an ordinary PDF document.
     /// </summary>
     /// <example>true</example>
     public bool? IsForm { get; set; }

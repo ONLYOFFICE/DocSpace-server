@@ -44,7 +44,11 @@ public class WebhookPublisher(
     AuthContext authContext)
     : IWebhookPublisher
 {
-    private readonly JsonSerializerOptions _serializerOptions = CreateSerializerOptions(tenantUtil);
+    // One instance for the process: the serializer builds its metadata per options instance, so options created
+    // per scope would rebuild it for every event. The converter needs the TenantUtil of the publishing scope, which
+    // is handed to it for the duration of one synchronous Serialize call.
+    private static readonly AsyncLocal<TenantUtil> _serializingTenantUtil = new();
+    private static readonly JsonSerializerOptions _serializerOptions = CreateSerializerOptions(() => _serializingTenantUtil.Value);
 
     /// <summary>
     /// The options every webhook body is serialized with. Public so the payload tests serialize exactly what goes
@@ -52,6 +56,11 @@ public class WebhookPublisher(
     /// <see cref="DateTimeKind.Local"/> value.
     /// </summary>
     public static JsonSerializerOptions CreateSerializerOptions(TenantUtil tenantUtil)
+    {
+        return CreateSerializerOptions(() => tenantUtil);
+    }
+
+    private static JsonSerializerOptions CreateSerializerOptions(Func<TenantUtil> tenantUtil)
     {
         return new JsonSerializerOptions
         {
@@ -61,7 +70,7 @@ public class WebhookPublisher(
         };
     }
 
-    private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
+    private class TenantToUtcDateTimeJsonConverter(Func<TenantUtil> tenantUtil) : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -70,7 +79,21 @@ public class WebhookPublisher(
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil.DateTimeToUtc(value) : value.ToUniversalTime());
+            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil().DateTimeToUtc(value) : value.ToUniversalTime());
+        }
+    }
+
+    private string Serialize<T>(T payload)
+    {
+        _serializingTenantUtil.Value = tenantUtil;
+
+        try
+        {
+            return JsonSerializer.Serialize(payload, _serializerOptions);
+        }
+        finally
+        {
+            _serializingTenantUtil.Value = null;
         }
     }
 
@@ -122,7 +145,7 @@ public class WebhookPublisher(
     {
         var payload = new WebhookPayload<TPayload, TId>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
 
-        var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
+        var payloadStr = Serialize(payload);
 
         var webhooksLog = new DbWebhooksLog
         {

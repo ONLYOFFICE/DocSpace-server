@@ -7,7 +7,7 @@
 | **id** | [**java.util.UUID**](java.util.UUID.md) | The group ID. |  [optional] |
 | **name** | **kotlin.String** | The group name. |  [optional] |
 | **parent** | [**java.util.UUID**](java.util.UUID.md) | The parent group ID; absent for a top-level group. |  [optional] |
-| **category** | [**java.util.UUID**](java.util.UUID.md) | The group category ID. |  [optional] |
+| **category** | [**java.util.UUID**](java.util.UUID.md) | The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. |  [optional] |
 | **isLDAP** | **kotlin.Boolean** | Specifies whether the group comes from LDAP or not. |  [optional] |
 | **isSystem** | **kotlin.Boolean** | Specifies whether the group is a system group or not. |  [optional] |
 | **manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  |  [optional] |

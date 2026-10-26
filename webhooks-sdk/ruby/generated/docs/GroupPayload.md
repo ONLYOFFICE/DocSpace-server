@@ -7,7 +7,7 @@
 | **id** | **String** | The group ID. | [optional] |
 | **name** | **String** | The group name. | [optional] |
 | **parent** | **String** | The parent group ID; absent for a top-level group. | [optional] |
-| **category** | **String** | The group category ID. | [optional] |
+| **category** | **String** | The ID of the group category: the empty GUID for the groups members create, and one fixed category ID for the built-in system groups. | [optional] |
 | **is_ldap** | **Boolean** | Specifies whether the group comes from LDAP or not. | [optional] |
 | **is_system** | **Boolean** | Specifies whether the group is a system group or not. | [optional] |
 | **manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] |
