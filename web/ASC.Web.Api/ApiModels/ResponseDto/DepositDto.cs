@@ -53,7 +53,7 @@ public class DepositReportDto
     /// nothing was paid into the wallet.
     /// </summary>
     /// <example>[{"id": 15342, "date": "2025-03-14T10:30:00Z", "amount": 100.0, "currency": "USD", "status": "Completed", "hasInvoice": true}]</example>
-    public List<DepositDto> Collection { get; init; }
+    public List<DepositDto> Collection { get; set; }
 
     /// <summary>
     /// How many top-ups were skipped before this page, echoed from the request so a client need not remember what it
@@ -146,6 +146,9 @@ public partial class DepositDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
     public DepositReportDto Map(DepositReport source, DepositFilter filter)
     {
         var result = Map(source);
+
+        // The accounting service may leave the collection out of an answer with no items.
+        result.Collection ??= [];
 
         // The accounting service answers a filter nothing matches with a zero window, so the window asked for is
         // echoed instead; a page with items keeps the one the accounting service applied.
