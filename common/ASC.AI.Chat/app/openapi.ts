@@ -704,8 +704,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "403": "The caller cannot open the entry.",
     "404": "The entry does not exist.",
     "422": "The content could not be read as text; `skipped` says why.",
-    "429": "The model provider is rate-limiting requests.",
-    "502": "The model request failed; the detail is in the server log.",
+    "402":
+      "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+    "429":
+      "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+    "502":
+      "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
     "504": "Reading the files or the model round did not finish within the time budget.",
   },
@@ -716,8 +720,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": "The entry does not exist.",
     "422":
       "The entry has no metadata fields to fill, or none of its content could be read as text.",
-    "429": "The model provider is rate-limiting requests.",
-    "502": "The model request failed; the detail is in the server log.",
+    "402":
+      "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+    "429":
+      "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+    "502":
+      "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
     "504": "Reading the files or the model round did not finish within the time budget.",
   },
@@ -1715,6 +1723,43 @@ const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
 };
 
+// A metadata route whose model round failed says how: `code` is the chat
+// library's stable classification of the provider's answer (the same one the
+// chat widget branches on) and `providerMessage` the provider's own words, so a
+// client can tell an exhausted balance from a throttled key instead of showing
+// "the request failed" for both. `AiErrorResponse` closes itself to extra
+// properties, so the body needs a schema of its own.
+const MODEL_CALL_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "Short reason, ready to be shown to the caller.",
+      examples: ["The model provider refused the request for lack of credit"],
+    },
+    code: {
+      type: "string",
+      description:
+        "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+      examples: ["insufficient_funds"],
+    },
+    providerMessage: {
+      type: "string",
+      description:
+        "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+      examples: ["402 Insufficient Balance"],
+    },
+  },
+  required: ["error", "code"],
+  additionalProperties: false,
+};
+const MODEL_CALL_ERRORS: Readonly<Record<string, Json>> = {
+  "402": MODEL_CALL_ERROR_SCHEMA,
+  "429": MODEL_CALL_ERROR_SCHEMA,
+  "502": MODEL_CALL_ERROR_SCHEMA,
+  "504": MODEL_CALL_ERROR_SCHEMA,
+};
+
 // operationId -> status code -> schema, with `*` standing for every code of that
 // operation. Anything not listed answers with `AiErrorResponse`.
 const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
@@ -1746,6 +1791,8 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   },
   aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
   aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
+  aiMetaGenerate: MODEL_CALL_ERRORS,
+  aiMetaFill: MODEL_CALL_ERRORS,
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {

@@ -1065,11 +1065,26 @@ public enum MessageAction
     [Description("Portal unblocked")]
     PortalUnblocked = 6111,
 
+    [Description("Service spending limit created")]
+    CustomerServiceLimitCreated = 6112,
+
+    [Description("Service spending limit updated")]
+    CustomerServiceLimitUpdated = 6113,
+
+    [Description("Personal service spending limits set")]
+    CustomerServiceLimitsSet = 6114,
+
+    [Description("Personal service spending limits disabled")]
+    CustomerServiceLimitsDisabled = 6115,
+
+    [Description("Service spending limit deleted")]
+    CustomerServiceLimitDeleted = 6116,
+
     /// <summary>
     /// A member queued a past webhook delivery to be sent again; the target is the subscription.
     /// </summary>
     [Description("Webhook delivery retried")]
-    WebhookRetried = 6112,
+    WebhookRetried = 6117,
 
     #endregion
 
