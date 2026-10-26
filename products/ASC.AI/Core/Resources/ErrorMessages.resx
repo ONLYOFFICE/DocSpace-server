@@ -189,4 +189,7 @@
   <data name="ServerAlreadyAdded" xml:space="preserve">
     <value>The server has already been added to the agent</value>
   </data>
+  <data name="ModelNotAvailableForProvider" xml:space="preserve">
+    <value>The selected model is not available with this provider. Choose another model or provider</value>
+  </data>
 </root>

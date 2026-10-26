@@ -161,15 +161,22 @@ public class AiGateway(
     public async Task<ModelsResponse> GetModelsAsync()
     {
         var key = await GetKeyAsync(allowEmpty: true);
-        var path = string.IsNullOrEmpty(key) ? "/models" : "/customer/models";
-
-        var cacheKey = string.IsNullOrEmpty(key)
-            ? ModelsCacheKey
-            : GetCustomerModelsCacheKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return await GetAllModelsAsync();
+        }
 
         return await fusionCache.GetOrSetAsync<ModelsResponse>(
-            cacheKey,
-            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, path, key: key),
+            GetCustomerModelsCacheKey(),
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/customer/models", key: key),
+            opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
+    }
+
+    public async Task<ModelsResponse> GetAllModelsAsync()
+    {
+        return await fusionCache.GetOrSetAsync<ModelsResponse>(
+            ModelsCacheKey,
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
@@ -537,7 +544,13 @@ public record Model
     public required IEnumerable<string> OutputModalities { get; init; }
 
     [JsonPropertyName("byok_providers")]
-    public IEnumerable<string> ByokProviders { get; init; } = [];
+    public IEnumerable<ModelByokProvider> ByokProviders { get; init; } = [];
+}
+
+public record ModelByokProvider
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
 }
 
 

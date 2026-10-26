@@ -22,7 +22,7 @@ namespace ASC.AI.Core.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ErrorMessages {
+    public class ErrorMessages {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace ASC.AI.Core.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ASC.AI.Core.Resources.ErrorMessages", typeof(ErrorMessages).Assembly);
@@ -51,7 +51,7 @@ namespace ASC.AI.Core.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to manage AI settings.
         /// </summary>
-        internal static string AiSettingsAccessDenied {
+        public static string AiSettingsAccessDenied {
             get {
                 return ResourceManager.GetString("AiSettingsAccessDenied", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Cannot process files: {0}. Files may be corrupted or encrypted.
         /// </summary>
-        internal static string AttachmentProcessFailed {
+        public static string AttachmentProcessFailed {
             get {
                 return ResourceManager.GetString("AttachmentProcessFailed", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to use chat.
         /// </summary>
-        internal static string ChatAccessDenied {
+        public static string ChatAccessDenied {
             get {
                 return ResourceManager.GetString("ChatAccessDenied", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Chat not found.
         /// </summary>
-        internal static string ChatNotFound {
+        public static string ChatNotFound {
             get {
                 return ResourceManager.GetString("ChatNotFound", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Incorrect provider type.
         /// </summary>
-        internal static string IncorrectProvider {
+        public static string IncorrectProvider {
             get {
                 return ResourceManager.GetString("IncorrectProvider", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Authentication failed. Verify your credentials.
         /// </summary>
-        internal static string IncorrectServerCredentials {
+        public static string IncorrectServerCredentials {
             get {
                 return ResourceManager.GetString("IncorrectServerCredentials", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Invalid authorization code.
         /// </summary>
-        internal static string InvalidAuthCode {
+        public static string InvalidAuthCode {
             get {
                 return ResourceManager.GetString("InvalidAuthCode", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The specified API key is invalid or does not have access rights. Verify that the key is correct and try again.
         /// </summary>
-        internal static string InvalidKey {
+        public static string InvalidKey {
             get {
                 return ResourceManager.GetString("InvalidKey", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Invalid MCP server name. Only letters, numbers, underscores, and hyphens are allowed.
         /// </summary>
-        internal static string InvalidServerName {
+        public static string InvalidServerName {
             get {
                 return ResourceManager.GetString("InvalidServerName", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The URL path specified is invalid. Please ensure the correct endpoint is used.
         /// </summary>
-        internal static string InvalidUrl {
+        public static string InvalidUrl {
             get {
                 return ResourceManager.GetString("InvalidUrl", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to manage providers.
         /// </summary>
-        internal static string ManageProviders {
+        public static string ManageProviders {
             get {
                 return ResourceManager.GetString("ManageProviders", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have permission to manage MCP servers.
         /// </summary>
-        internal static string ManageServers {
+        public static string ManageServers {
             get {
                 return ResourceManager.GetString("ManageServers", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Message not found.
         /// </summary>
-        internal static string MessageNotFound {
+        public static string MessageNotFound {
             get {
                 return ResourceManager.GetString("MessageNotFound", resourceCulture);
             }
@@ -180,16 +180,25 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The model has been disabled by your provider&apos;s settings..
         /// </summary>
-        internal static string ModelDisabled {
+        public static string ModelDisabled {
             get {
                 return ResourceManager.GetString("ModelDisabled", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The selected model is not available with this provider. Choose another model or provider.
+        /// </summary>
+        public static string ModelNotAvailableForProvider {
+            get {
+                return ResourceManager.GetString("ModelNotAvailableForProvider", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to No models available for this provider.
         /// </summary>
-        internal static string NoModelsAvailable {
+        public static string NoModelsAvailable {
             get {
                 return ResourceManager.GetString("NoModelsAvailable", resourceCulture);
             }
@@ -198,7 +207,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Provider name already exists.
         /// </summary>
-        internal static string ProviderNameExists {
+        public static string ProviderNameExists {
             get {
                 return ResourceManager.GetString("ProviderNameExists", resourceCulture);
             }
@@ -207,7 +216,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Provider not found.
         /// </summary>
-        internal static string ProviderNotFound {
+        public static string ProviderNotFound {
             get {
                 return ResourceManager.GetString("ProviderNotFound", resourceCulture);
             }
@@ -216,7 +225,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to MCP server name is not allowed.
         /// </summary>
-        internal static string ReservedServerName {
+        public static string ReservedServerName {
             get {
                 return ResourceManager.GetString("ReservedServerName", resourceCulture);
             }
@@ -225,7 +234,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The server has already been added to the agent.
         /// </summary>
-        internal static string ServerAlreadyAdded {
+        public static string ServerAlreadyAdded {
             get {
                 return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
             }
@@ -234,7 +243,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Failed to connect to MCP server.
         /// </summary>
-        internal static string ServerFailedConnect {
+        public static string ServerFailedConnect {
             get {
                 return ResourceManager.GetString("ServerFailedConnect", resourceCulture);
             }
@@ -243,7 +252,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to MCP server name is already exists.
         /// </summary>
-        internal static string ServerNameExists {
+        public static string ServerNameExists {
             get {
                 return ResourceManager.GetString("ServerNameExists", resourceCulture);
             }
@@ -252,7 +261,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to MCP server not found.
         /// </summary>
-        internal static string ServerNotFound {
+        public static string ServerNotFound {
             get {
                 return ResourceManager.GetString("ServerNotFound", resourceCulture);
             }
@@ -261,7 +270,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Maximum number of servers per room is {0}.
         /// </summary>
-        internal static string ServersRoomLimit {
+        public static string ServersRoomLimit {
             get {
                 return ResourceManager.GetString("ServersRoomLimit", resourceCulture);
             }
@@ -270,7 +279,7 @@ namespace ASC.AI.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to MCP servers are unavailable: {0}. Check connection settings.
         /// </summary>
-        internal static string UnavailableServers {
+        public static string UnavailableServers {
             get {
                 return ResourceManager.GetString("UnavailableServers", resourceCulture);
             }
