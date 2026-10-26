@@ -82,7 +82,7 @@ public class FormFillingReportIntegrationEventHandler(
 
                 // A report started meanwhile would take the place of the one the client waits for and show a part of the
                 // responses; the recovery's report takes this response in.
-                if (!@event.Recover && await formRecoveryTaskManager.IsRecoveringAsync(@event.TenantId, @event.OriginalFormId))
+                if (!@event.Recover && await IsRecoveringAsync(@event))
                 {
                     return;
                 }
@@ -98,6 +98,21 @@ public class FormFillingReportIntegrationEventHandler(
             {
                 logger.ErrorWithException(ex);
             }
+        }
+    }
+
+    // On every submission: a failed check starts the report as without the recovery, rather than drop it.
+    private async Task<bool> IsRecoveringAsync(FormFillingReportIntegrationEvent @event)
+    {
+        try
+        {
+            return await formRecoveryTaskManager.IsRecoveringAsync(@event.TenantId, @event.OriginalFormId);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+
+            return false;
         }
     }
 
