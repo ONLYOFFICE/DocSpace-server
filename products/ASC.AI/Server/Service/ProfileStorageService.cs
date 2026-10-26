@@ -113,19 +113,20 @@ public class ProfileStorageService(
 
         var existing = await storage.ReadByIdAsync(tenantId, id) ?? throw new ItemNotFoundException();
 
-        var model = await GetByokModelAsync(profile.Provider, profile.ModelId);
+        var model = await GetByokModelAsync(existing.ProviderType, profile.ModelId);
 
-        var key = string.IsNullOrEmpty(profile.Key) ? existing.Key : profile.Key;
-        if (!string.IsNullOrEmpty(profile.Key) || existing.ProviderType != profile.Provider)
+        var key = existing.Key;
+        if (!string.IsNullOrEmpty(profile.Key))
         {
-            await AssertByokKeyValidAsync(profile.Provider, key);
+            await AssertByokKeyValidAsync(existing.ProviderType, profile.Key);
+            key = profile.Key;
         }
 
         var updated = await storage.UpdateAsync(tenantId, new Profile
         {
             Id = existing.Id,
             Name = profile.Name,
-            ProviderType = profile.Provider,
+            ProviderType = existing.ProviderType,
             BaseUrl = string.Empty,
             Key = key,
             ModelId = profile.ModelId,
@@ -273,9 +274,9 @@ public class ProfileStorageService(
                ?? throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
     }
 
-    private async Task AssertByokKeyValidAsync(string provider, string? key)
+    private async Task AssertByokKeyValidAsync(string provider, string key)
     {
-        if (string.IsNullOrEmpty(key) || !await _aiGateway.VerifyByokKeyAsync(provider, key))
+        if (!await _aiGateway.VerifyByokKeyAsync(provider, key))
         {
             throw new ArgumentException(ErrorMessages.InvalidKey);
         }

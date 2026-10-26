@@ -36,7 +36,6 @@ namespace ASC.AI.Integration.Profiles;
 public class ByokProfileUpdateData
 {
     public required string Name { get; init; }
-    public required string Provider { get; init; }
     public required string ModelId { get; init; }
     public string? Key { get; init; }
 }

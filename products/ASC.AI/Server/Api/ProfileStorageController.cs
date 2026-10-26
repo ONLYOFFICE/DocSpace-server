@@ -54,6 +54,27 @@ public class ProfileStorageController(ProfileStorageService profileStorageServic
         return [.. created.Select(ProfileMapper.MapToDto)];
     }
 
+    [HttpPost("profiles/byok")]
+    public async Task<ProfileDto> CreateByokAsync(CreateByokProfileRequestDto inDto)
+    {
+        var created = await profileStorageService.CreateByokAsync(inDto.Map());
+        return ProfileMapper.MapToDto(created);
+    }
+
+    [HttpPut("profiles/byok/{id}")]
+    public async Task<ProfileDto> UpdateByokAsync(UpdateByokProfileRequestDto inDto)
+    {
+        var updated = await profileStorageService.UpdateByokAsync(inDto.Id, inDto.Body.Map());
+        return ProfileMapper.MapToDto(updated);
+    }
+
+    [HttpDelete("profiles/byok/{id}")]
+    public async Task<IActionResult> DeleteByokAsync(DeleteProfileRequestDto inDto)
+    {
+        await profileStorageService.DeleteByokAsync(inDto.Id);
+        return NoContent();
+    }
+
     [HttpGet("profiles/{id}")]
     public async Task<ProfileDto> ReadByIdAsync(ReadProfileRequestDto inDto)
     {
