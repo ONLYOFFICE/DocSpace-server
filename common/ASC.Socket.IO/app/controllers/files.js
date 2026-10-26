@@ -294,5 +294,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/plugin-event", (req, res) => {
+    files.pluginEvent(req.body);
+    res.end();
+  });
+
   return router;
 };

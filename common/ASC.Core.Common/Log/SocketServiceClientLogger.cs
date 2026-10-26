@@ -42,4 +42,7 @@ internal static partial class SocketServiceClientLogger
 
     [LoggerMessage(LogLevel.Warning, "Socket service request timed out: {method} {url}")]
     public static partial void WarningServiceTimeout(this ILogger<SocketServiceClient> logger, string method, string url);
+
+    [LoggerMessage(LogLevel.Warning, "Socket service refused the request: {method} {url} -> {statusCode}")]
+    public static partial void WarningServiceRefused(this ILogger<SocketServiceClient> logger, string method, string url, int statusCode);
 }

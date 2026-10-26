@@ -130,6 +130,13 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
                 break;
+            // The request itself is malformed or over a limit ([RequestSizeLimit] gives 413): the exception
+            // already carries the status the client must see, it is not a server fault.
+            case Microsoft.AspNetCore.Http.BadHttpRequestException e:
+                status = (HttpStatusCode)e.StatusCode;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             default:
                 criticalException = true;
                 break;
