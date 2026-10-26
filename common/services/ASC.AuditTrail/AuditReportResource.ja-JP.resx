@@ -237,6 +237,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>顧客操作レポートがダウンロードされました</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>サービスの支出上限が作成されました: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>サービスの支出上限が更新されました: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>サービスの支出上限が削除されました: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>サービスの個人別支出上限が設定されました: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>サービスの個人別支出上限が無効になりました: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>顧客サブスクリプションが更新されました: {0}</value>
   </data>
@@ -1298,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>メタデータの値が更新されました: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Document Builderスクリプトによってファイルが開かれました: {0}</value>
   </data>
 </root>

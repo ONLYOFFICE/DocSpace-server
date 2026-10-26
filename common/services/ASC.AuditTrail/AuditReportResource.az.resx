@@ -237,6 +237,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Müştəri əməliyyatları hesabatı endirildi</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti yaradıldı: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti yeniləndi: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti silindi: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Xidmət üzrə fərdi xərc limitləri təyin edildi: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Xidmət üzrə fərdi xərc limitləri söndürüldü: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Müştəri abunəliyi yeniləndi: {0}</value>
   </data>
@@ -1298,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Metadata dəyərləri yeniləndi: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Fayl Document Builder skripti tərəfindən açıldı: {0}</value>
   </data>
 </root>
