@@ -70,81 +70,56 @@ func deref[T any](p *T, zero T) T {
 
 func time0() time.Time { return time.Time{} }
 
-// payloadKind names the payload model of a trigger, mirroring the
-// x-docspace-trigger-payloads map of the contract; "" for a trigger newer than
-// this SDK. form.submit has a payload of its own, while form.filled.out and
-// form.stopped carry the form file itself.
-func payloadKind(trigger string) string {
-	switch {
-	case trigger == "form.submit":
-		return "formSubmit"
-	case trigger == "form.filled.out", trigger == "form.stopped", strings.HasPrefix(trigger, "file."):
-		return "file"
-	case strings.HasPrefix(trigger, "user."):
-		return "user"
-	case strings.HasPrefix(trigger, "group."):
-		return "group"
-	case strings.HasPrefix(trigger, "folder."):
-		return "folder"
-	// An agent is an AI room and arrives in the same shape.
-	case strings.HasPrefix(trigger, "room."), strings.HasPrefix(trigger, "agent."):
-		return "room"
+// modelName is what the sample reports for a trigger: the payload model the
+// generated table names, "untyped" for the legacy catch-all, and "unknown" for
+// a trigger newer than this SDK.
+func modelName(trigger string) string {
+	if name, ok := openapi.PayloadModels[trigger]; ok {
+		return name
 	}
-	return ""
+	if openapi.UntypedTriggers[trigger] {
+		return "untyped"
+	}
+	return "unknown"
 }
 
-// logPayload parses the payload with the model of its trigger and prints a
-// one-line summary. A parse error is returned, never skipped: a sample that
-// prints "ok" over a payload its model cannot read hides a broken SDK.
+// logPayload parses the payload with the model the generated trigger table
+// names and prints a one-line summary. A parse error is returned, never
+// skipped: a sample that prints "ok" over a payload its model cannot read hides
+// a broken SDK.
 func logPayload(trigger string, raw json.RawMessage) error {
-	switch payloadKind(trigger) {
-	case "user":
-		var u openapi.UserPayload
-		if err := json.Unmarshal(raw, &u); err != nil {
-			return err
-		}
-		fmt.Printf("  user: %s <%s>\n", deref(u.UserName, ""), deref(u.Email, ""))
-	case "group":
-		var g openapi.GroupPayload
-		if err := json.Unmarshal(raw, &g); err != nil {
-			return err
-		}
-		fmt.Printf("  group: %s\n", deref(g.Name, ""))
-	case "file":
-		var f openapi.FilePayload
-		if err := json.Unmarshal(raw, &f); err != nil {
-			return err
-		}
-		fmt.Printf("  file: %s  id=%s  parent=%s\n", deref(f.Title, ""), entryID(f.Id), entryID(f.ParentId))
-	case "folder":
-		var f openapi.FolderPayload
-		if err := json.Unmarshal(raw, &f); err != nil {
-			return err
-		}
-		fmt.Printf("  folder: %s  id=%s  parent=%s\n", deref(f.Title, ""), entryID(f.Id), entryID(f.ParentId))
-	case "room":
-		var r openapi.RoomPayload
-		if err := json.Unmarshal(raw, &r); err != nil {
-			return err
-		}
-		fmt.Printf("  room: %s  id=%s  parent=%s\n", deref(r.Title, ""), entryID(r.Id), entryID(r.ParentId))
-	case "formSubmit":
-		var f openapi.FormSubmitPayload
-		if err := json.Unmarshal(raw, &f); err != nil {
-			return err
-		}
+	payload, _ := openapi.NewPayload(trigger)
+	if payload == nil {
+		// The catch-all, or a trigger added on the server after this SDK was
+		// generated: acknowledge it and keep the raw payload rather than
+		// parsing it with some other model.
+		fmt.Println("  no payload model for this trigger; raw payload below")
+		return nil
+	}
+	if err := json.Unmarshal(raw, payload); err != nil {
+		return err
+	}
+
+	switch p := payload.(type) {
+	case *openapi.UserPayload:
+		fmt.Printf("  user: %s <%s>\n", deref(p.UserName, ""), deref(p.Email, ""))
+	case *openapi.GroupPayload:
+		fmt.Printf("  group: %s\n", deref(p.Name, ""))
+	case *openapi.FilePayload:
+		fmt.Printf("  file: %s  id=%s  parent=%s\n", deref(p.Title, ""), entryID(p.Id), entryID(p.ParentId))
+	case *openapi.FolderPayload:
+		fmt.Printf("  folder: %s  id=%s  parent=%s\n", deref(p.Title, ""), entryID(p.Id), entryID(p.ParentId))
+	case *openapi.RoomPayload:
+		fmt.Printf("  room: %s  id=%s  parent=%s\n", deref(p.Title, ""), entryID(p.Id), entryID(p.ParentId))
+	case *openapi.FormSubmitPayload:
 		original, submitted := "", ""
-		if f.OriginalForm != nil {
-			original = deref(f.OriginalForm.Title, "")
+		if p.OriginalForm != nil {
+			original = deref(p.OriginalForm.Title, "")
 		}
-		if f.SubmittedForm != nil {
-			submitted = deref(f.SubmittedForm.Title, "")
+		if p.SubmittedForm != nil {
+			submitted = deref(p.SubmittedForm.Title, "")
 		}
 		fmt.Printf("  form: %s  submitted as %s\n", original, submitted)
-	default:
-		// A trigger family added on the server after this SDK was generated:
-		// acknowledge it and keep the raw payload rather than failing.
-		fmt.Println("  no payload model for this trigger; raw payload below")
 	}
 	return nil
 }
@@ -188,8 +163,14 @@ func main() {
 	}
 
 	trigger := deref(env.Event.Trigger, "")
+	if trigger == "" {
+		fmt.Fprintln(os.Stderr, "envelope has no event.trigger")
+		os.Exit(1)
+	}
+
 	fmt.Println(trigger)
 	fmt.Println("  signature ok")
+	fmt.Printf("  model: %s\n", modelName(trigger))
 	fmt.Printf("  event #%d  at %s  by %s\n",
 		deref(env.Event.Id, 0),
 		deref(env.Event.CreateOn, time0()).Format("2006-01-02T15:04:05Z"),

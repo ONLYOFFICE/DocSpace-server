@@ -34,6 +34,7 @@ use OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookConfigInfo;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEventInfo;
 use OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
+use OnlyOffice\DocSpace\Webhooks\Sdk\WebhookTriggers;
 
 const SIGNATURE_HEADER = 'x-docspace-signature-256';
 
@@ -58,28 +59,17 @@ function verify_signature(string $body, string $secret, ?string $signature): boo
     );
 }
 
-/** Which model a trigger's payload deserializes to. */
-function payload_class(string $trigger): string
+/**
+ * The payload model the generated trigger table names: "untyped" for the legacy
+ * catch-all, "unknown" for a trigger newer than this SDK.
+ */
+function model_name(string $trigger): string
 {
-    if (str_starts_with($trigger, 'user.')) {
-        return UserPayload::class;
+    $class = WebhookTriggers::payloadType($trigger);
+    if ($class !== null) {
+        return substr($class, strrpos($class, '\\') + 1);
     }
-    if (str_starts_with($trigger, 'group.')) {
-        return GroupPayload::class;
-    }
-    if ($trigger === 'form.submit') {
-        return FormSubmitPayload::class;
-    }
-    if (str_starts_with($trigger, 'folder.')) {
-        return FolderPayload::class;
-    }
-    // An agent is an AI room and arrives in the same shape.
-    if (str_starts_with($trigger, 'room.') || str_starts_with($trigger, 'agent.')) {
-        return RoomPayload::class;
-    }
-    // file.*, form.filled.out and form.stopped. Match on the concrete payload,
-    // never on FileEntryPayload: that is only the part the three share.
-    return FilePayload::class;
+    return in_array($trigger, WebhookTriggers::UNTYPED_TRIGGERS, true) ? 'untyped' : 'unknown';
 }
 
 $fixtures  = __DIR__ . '/../../samples';
@@ -102,12 +92,29 @@ if (!is_object($envelope) || !isset($envelope->event->trigger)) {
 }
 
 $trigger = (string) $envelope->event->trigger;
+if ($trigger === '') {
+    fwrite(STDERR, "envelope has no event.trigger\n");
+    exit(1);
+}
 $event   = ObjectSerializer::deserialize($envelope->event, WebhookEventInfo::class);
 $config  = ObjectSerializer::deserialize($envelope->webhook, WebhookConfigInfo::class);
-$payload = ObjectSerializer::deserialize($envelope->payload, payload_class($trigger));
+// The catch-all, or a trigger added on the server after this SDK was generated,
+// is acknowledged with its raw payload and never parsed with some other model.
+$model = WebhookTriggers::payloadType($trigger);
+try {
+    $payload = $model === null ? null : ObjectSerializer::deserialize($envelope->payload ?? null, $model);
+} catch (\Throwable $e) {
+    fwrite(STDERR, "unparseable {$trigger} payload: {$e->getMessage()}\n");
+    exit(1);
+}
+if ($model !== null && !($payload instanceof $model)) {
+    fwrite(STDERR, "unparseable {$trigger} payload: not a " . model_name($trigger) . "\n");
+    exit(1);
+}
 
 echo $trigger, PHP_EOL;
 echo '  signature ok', PHP_EOL;
+echo '  model: ', model_name($trigger), PHP_EOL;
 printf("  event #%d  at %s  by %s\n",
     $event->getId(),
     $event->getCreateOn()?->format('Y-m-d\TH:i:s\Z'),
@@ -134,6 +141,8 @@ if ($payload instanceof FilePayload || $payload instanceof FolderPayload || $pay
     printf("  user: %s <%s>\n", $payload->getUserName(), $payload->getEmail());
 } elseif ($payload instanceof GroupPayload) {
     printf("  group: %s\n", $payload->getName());
+} else {
+    echo '  no payload model for this trigger; raw payload below', PHP_EOL;
 }
 
 echo PHP_EOL;

@@ -795,6 +795,9 @@
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Incorrect email address</value>
   </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>The webhook target is not an existing user or group</value>
+  </data>
   <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
     <value>The webhook is disabled. Enable it before retrying its deliveries</value>
   </data>

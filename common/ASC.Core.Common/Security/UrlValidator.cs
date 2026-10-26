@@ -82,7 +82,11 @@ public class UrlValidator(
     IConfiguration configuration,
     ILogger<UrlValidator> logger) : IUrlValidator
 {
-    private static readonly string[] _defaultBlacklist =
+    /// <summary>
+    /// The networks refused when <c>webhooks:blacklist</c> is not configured. A configured list replaces this one as a
+    /// whole, so a copy that narrows it (the integration-test profile of the AppHost) is checked against it by a test.
+    /// </summary>
+    public static IReadOnlyList<string> DefaultBlacklist { get; } =
     [
         "0.0.0.0/8",
         "10.0.0.0/8",
@@ -98,7 +102,7 @@ public class UrlValidator(
         "fe80::/10"
     ];
 
-    private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? _defaultBlacklist;
+    private readonly string[] _blacklist = configuration.GetSection("webhooks:blacklist").Get<string[]>() ?? [.. DefaultBlacklist];
 
     /// <summary>Named <see cref="HttpClient"/> with SSRF-safe <see cref="PinnedConnectCallback"/> and full TLS verification.</summary>
     public const string PinnedHttpClient = "pinnedHttpClient";

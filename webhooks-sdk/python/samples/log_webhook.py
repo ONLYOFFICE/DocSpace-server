@@ -5,8 +5,8 @@ Logs a DocSpace webhook delivery to the console.
     python log_webhook.py                          # replay the shared fixture
     python log_webhook.py <body> <secret> <sig>
 
-Python has no src/ runtime yet, so signature checking and the trigger ->
-payload mapping live here. Regeneration (the generate-webhook-sdk skill) runs
+Python has no src/ runtime yet, so signature checking lives here; the trigger ->
+payload table is generated (docspace_webhooks_sdk.triggers). Regeneration (the generate-webhook-sdk skill) runs
 this over every fixture in ../../samples after each generation.
 """
 
@@ -29,23 +29,9 @@ from docspace_webhooks_sdk.models.room_payload import RoomPayload  # noqa: E402
 from docspace_webhooks_sdk.models.user_payload import UserPayload  # noqa: E402
 from docspace_webhooks_sdk.models.webhook_config_info import WebhookConfigInfo  # noqa: E402
 from docspace_webhooks_sdk.models.webhook_event_info import WebhookEventInfo  # noqa: E402
+from docspace_webhooks_sdk.triggers import UNTYPED_TRIGGERS, payload_type  # noqa: E402
 
 SIGNATURE_HEADER = "x-docspace-signature-256"
-
-# Kept in step with x-docspace-trigger-payloads in the contract. Never match on
-# FileEntryPayload: that is only the part files, folders and rooms share.
-PAYLOAD_TYPES = {
-    "user.": UserPayload,
-    "group.": GroupPayload,
-    "file.": FilePayload,
-    "folder.": FolderPayload,
-    "room.": RoomPayload,
-    # An agent is an AI room and arrives in the same shape.
-    "agent.": RoomPayload,
-    "form.filled.out": FilePayload,
-    "form.stopped": FilePayload,
-}
-
 
 def compute_signature(body: bytes, secret: str) -> str:
     """`sha256=` + UPPERCASE hex, mirroring WebhookSender.GetSecretHash."""
@@ -67,14 +53,12 @@ def verify_signature(body: bytes, secret: str, signature: str | None) -> bool:
     )
 
 
-def payload_model(trigger: str):
-    """The payload model, or None for a trigger newer than this SDK."""
-    if trigger == "form.submit":
-        return FormSubmitPayload
-    for prefix, model in PAYLOAD_TYPES.items():
-        if trigger.startswith(prefix):
-            return model
-    return None
+def model_name(trigger: str) -> str:
+    """The payload model the generated table names; "untyped" for the catch-all, "unknown" for a newer trigger."""
+    model = payload_type(trigger)
+    if model is not None:
+        return model.__name__
+    return "untyped" if trigger in UNTYPED_TRIGGERS else "unknown"
 
 
 def entry_id(value) -> str:
@@ -105,17 +89,23 @@ def main() -> int:
 
     event = WebhookEventInfo.from_dict(envelope.get("event") or {})
     config = WebhookConfigInfo.from_dict(envelope.get("webhook") or {})
-    model = payload_model(trigger)
-    payload = model.from_dict(envelope.get("payload") or {}) if model else None
+    model = payload_type(trigger)
+    try:
+        payload = model.from_dict(envelope.get("payload") or {}) if model else None
+    except Exception as err:  # pydantic's ValidationError, or a bad value
+        print(f"unparseable {trigger} payload: {err}", file=sys.stderr)
+        return 1
 
     print(trigger)
     print("  signature ok")
+    print(f"  model: {model_name(trigger)}")
     print(f"  event #{event.id}  at {event.create_on}  by {event.create_by}")
     print(f'  subscription #{config.id} "{config.name}"')
 
     if model is None:
-        # A trigger family added on the server after this SDK was generated:
-        # acknowledge it and keep the raw payload rather than failing.
+        # The catch-all, or a trigger added on the server after this SDK was
+        # generated: acknowledge it and keep the raw payload rather than parsing
+        # it with some other model.
         print("  no payload model for this trigger; raw payload below")
     elif isinstance(payload, (FilePayload, FolderPayload, RoomPayload)):
         kind = {RoomPayload: "room", FolderPayload: "folder"}.get(type(payload), "file")

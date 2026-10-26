@@ -151,6 +151,50 @@ public class WebhookUserPayloadTests(
         ShouldBeAbsoluteUrl(payload.Value.GetProperty("profileUrl").GetString(), "so must the profile link the owner gets");
     }
 
+    [Fact]
+    public async Task UserUpdated_Payload_RegistrationDateIsUtcInWholeSeconds()
+    {
+        // Arrange: a member whose registration date is read back from the database for the update
+        var subject = await InviteContact(EmployeeType.User);
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+
+        // Act
+        var firstName = await RenameAsync(subject);
+
+        // Assert: a stored date is UTC; read as the server's local time it would be shifted by the server's offset
+        var payload = await WaitForUserPayloadAsync(subscription.Id, subject, firstName);
+
+        payload.Should().NotBeNull();
+
+        var registrationDate = payload!.Value.GetProperty("registrationDate").GetString();
+        registrationDate.Should().MatchRegex(@"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", "every timestamp goes out in UTC, in whole seconds");
+        DateTimeOffset.Parse(registrationDate!, CultureInfo.InvariantCulture).Should()
+            .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(10), "the member registered moments ago");
+    }
+
+    [Fact]
+    public async Task UserInvited_Payload_DescribesThePendingMember()
+    {
+        // Arrange
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserInvited);
+        var email = Initializer.FakerMember.Generate().Email;
+
+        // Act
+        await _peopleClient.Authenticate(Owner);
+        await _profilesApi.InviteUsersAsync(
+            new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]),
+            TestContext.Current.CancellationToken);
+
+        // Assert: the invitee exists only as a pending member with an email until they accept
+        var payload = await WaitForEventPayloadAsync(
+            subscription.Id, "user.invited", p => p.TryGetProperty("email", out var value) && value.GetString() == email);
+
+        payload.Should().NotBeNull("an invitation by email publishes user.invited");
+        payload!.Value.GetProperty("id").GetGuid().Should().NotBeEmpty();
+        payload.Value.TryGetProperty("createdBy", out var createdBy).Should().BeTrue("the owner may see who invited them");
+        createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
+    }
+
     private async Task<User> CreateMemberInGroupAsync()
     {
         var subject = await InviteContact(EmployeeType.User);

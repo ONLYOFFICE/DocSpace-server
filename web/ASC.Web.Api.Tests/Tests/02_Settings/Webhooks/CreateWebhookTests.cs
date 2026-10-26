@@ -47,7 +47,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(enabled: true);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: true);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -63,19 +63,38 @@ public class CreateWebhookTests(
     }
 
     [Fact]
-    public async Task CreateWebhook_Owner_WithTriggersAndSsl_ReturnsCreatedWebhook()
+    public async Task CreateWebhook_Owner_WithTriggers_ReturnsThem()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(ssl: true, triggers: WebhookTrigger.FileCreated);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.FileCreated);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         created.StatusCode.Should().Be(200);
-        created.Response.Ssl.Should().BeTrue();
         created.Response.Triggers.Should().Be(WebhookTrigger.FileCreated);
+    }
+
+    /// <summary>
+    /// <c>ssl</c> demands an https target with a valid certificate. The positive case needs a public https host,
+    /// which this suite does not depend on, so only the refusal of a plain http target is covered here.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_SslWithHttpTarget_ThrowsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        dto.Ssl = true;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
     }
 
     /// <summary>
@@ -88,7 +107,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(enabled: false, ssl: false);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: false);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -106,7 +125,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(null);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -124,7 +143,7 @@ public class CreateWebhookTests(
         // Arrange
         var member = await InviteContact(employeeType);
         await _webApiClient.Authenticate(member);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -140,7 +159,7 @@ public class CreateWebhookTests(
         // Arrange
         var guest = await InviteGuest();
         await _webApiClient.Authenticate(guest);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

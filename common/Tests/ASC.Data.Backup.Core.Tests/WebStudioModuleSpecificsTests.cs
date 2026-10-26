@@ -183,6 +183,65 @@ public class WebStudioModuleSpecificsTests
         preparedRow!["uid"].Should().Be(Guid.Empty.ToString());
     }
 
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_EventOfARemovedUser_KeepsTheRecordWithTheEmptyUser()
+    {
+        // Arrange — the member who caused the event is gone, so their id has no mapping
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", OldOriginalLogId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", OldConfigId);
+        row.SetValue("uid", Guid.NewGuid().ToString());
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — the delivery history survives the user
+        prepared.Should().BeTrue();
+        preparedRow!["uid"].Should().Be(Guid.Empty.ToString());
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksConfig_EditedByARemovedUser_KeepsTheSubscription()
+    {
+        // Arrange — created by a member who is still there, last edited by one who is not
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_config");
+        row.SetValue("id", OldConfigId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("created_by", _oldUser);
+        row.SetValue("modified_by", Guid.NewGuid().ToString());
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_config"), row);
+
+        // Assert
+        prepared.Should().BeTrue();
+        preparedRow!["created_by"].Should().Be(_newUser);
+        preparedRow["modified_by"].Should().BeNull();
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksConfig_OfARemovedCreator_IsDropped()
+    {
+        // Arrange — the owner of the subscription is gone
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_config");
+        row.SetValue("id", OldConfigId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("created_by", Guid.NewGuid().ToString());
+
+        // Act
+        var (prepared, _) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_config"), row);
+
+        // Assert — an owner-less subscription would skip the access checks made for its owner
+        prepared.Should().BeFalse();
+    }
+
     private static TableInfo DeclaredTable(TestableWebStudioModuleSpecifics specifics, string name)
     {
         var table = specifics.Tables.SingleOrDefault(t => t.Name == name);

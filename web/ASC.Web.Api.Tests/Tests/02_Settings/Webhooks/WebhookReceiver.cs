@@ -57,16 +57,38 @@ public sealed class WebhookReceiver
     public string TargetUri => $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}{_path}";
 
     /// <summary>
-    /// A new endpoint that answers every delivery with <paramref name="status"/>, after
-    /// <paramref name="delayMilliseconds"/>. The HEAD the portal sends when a subscription is created or
-    /// changed always gets 200, whatever the deliveries are stubbed to answer.
+    /// A new endpoint that answers every delivery with <paramref name="status"/> and <paramref name="body"/>
+    /// (<c>ok</c> by default), after <paramref name="delayMilliseconds"/>. The HEAD the portal sends when a
+    /// subscription is created or changed always gets 200, whatever the deliveries are stubbed to answer.
     /// </summary>
-    public static async Task<WebhookReceiver> CreateAsync(HttpClient admin, int status = 200, int delayMilliseconds = 0)
+    public static async Task<WebhookReceiver> CreateAsync(HttpClient admin, int status = 200, int delayMilliseconds = 0, string? body = null)
     {
         var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
 
         await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
-        await receiver.StubAsync(new { method = "POST", urlPath = receiver._path }, new { status, body = "ok", fixedDelayMilliseconds = delayMilliseconds });
+        await receiver.StubAsync(new { method = "POST", urlPath = receiver._path }, new { status, body = body ?? "ok", fixedDelayMilliseconds = delayMilliseconds });
+
+        return receiver;
+    }
+
+    /// <summary>
+    /// A new endpoint that answers every delivery with <paramref name="status"/> at once, then sends
+    /// <paramref name="body"/> in <paramref name="chunks"/> pieces spread over <paramref name="bodyDuration"/>
+    /// (WireMock's <c>chunkedDribbleDelay</c>): the status line and headers arrive first, the body only slowly.
+    /// </summary>
+    public static async Task<WebhookReceiver> CreateSlowBodyAsync(HttpClient admin, int status, string body, int chunks, TimeSpan bodyDuration)
+    {
+        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
+
+        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
+        await receiver.StubAsync(
+            new { method = "POST", urlPath = receiver._path },
+            new
+            {
+                status,
+                body,
+                chunkedDribbleDelay = new { numberOfChunks = chunks, totalDuration = (int)bodyDuration.TotalMilliseconds }
+            });
 
         return receiver;
     }

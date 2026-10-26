@@ -33,12 +33,14 @@
 
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Globalization;
 
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Abstractions;

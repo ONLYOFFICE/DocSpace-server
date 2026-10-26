@@ -36,8 +36,8 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <summary>
 /// What the sender in Web.Studio does with a delivery, by the answer it gets: the request it sends, how a
 /// failure is retried and given up on, and what a 410 or a disabled subscription stops. The integration-test
-/// profile retries every 3 seconds, three times (<see cref="WebhookDeliveryTestBase.ProfileRetryCount"/>), so a
-/// delivery gets four attempts in all.
+/// profile retries every half second, three times (<see cref="WebhookDeliveryTestBase.ProfileRetryCount"/>), so a
+/// delivery gets four attempts in all; a retry that is due still waits for the next poll of the sender.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookDeliveryTests(
@@ -171,13 +171,16 @@ public class WebhookDeliveryTests(
     [Fact]
     public async Task Delivery_SubscriptionDisabledWhileRetrying_StopsTheRetries()
     {
-        // Arrange
-        var receiver = await CreateReceiverAsync(500);
+        // Arrange: a delivery whose first attempt failed, with its retry held a day ahead. It is planted on a
+        // delivered record: a real failure would be retried half a second later, before the test could step in
+        var receiver = await CreateReceiverAsync();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
-        await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is not null && r.Status != 0);
+        var failed = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
+            ("@id", failed!.Id));
 
-        // Act
         await _webApiClient.Authenticate(Owner);
         await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
         {
@@ -187,19 +190,19 @@ public class WebhookDeliveryTests(
             Enabled = false
         }, TestContext.Current.CancellationToken);
 
-        // Assert
+        // Act: the retry comes due
+        await MakeDueAsync(failed.Id);
+
+        // Assert: the sender drops it instead of sending it
         var record = await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is null);
 
         record.Should().NotBeNull();
         record!.NextAttemptOn.Should().BeNull();
-        record.Attempts.Should().BeLessThan(AttemptsInAll, "the retries were cancelled, not run out");
+        record.Attempts.Should().Be(1, "the retry was cancelled, not attempted");
 
-        var received = (await receiver.GetDeliveriesAsync()).Count;
-
-        // every retry the profile allows plus a poll of the sender: anything still scheduled would have gone out by now
-        await Task.Delay(NoMoreDeliveriesPeriod, TestContext.Current.CancellationToken);
-
-        (await receiver.GetDeliveriesAsync()).Should().HaveCount(received);
+        // WireMock journals a request as it arrives, before the sender writes its outcome, and a record without a
+        // next attempt is never claimed again: no pause is needed to know that nothing more will come
+        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the attempt before the switch-off went out");
     }
 
     [Fact]
@@ -227,7 +230,7 @@ public class WebhookDeliveryTests(
 
         // a date-time without an offset is rejected by the Java, Kotlin and Go SDKs, which drops the whole delivery
         var lastSuccessOn = webhook.GetProperty("lastSuccessOn").GetString();
-        lastSuccessOn.Should().EndWith("Z");
+        lastSuccessOn.Should().MatchRegex(@"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", "every timestamp goes out in UTC, in whole seconds");
         DateTimeOffset.Parse(lastSuccessOn!, CultureInfo.InvariantCulture).Should()
             .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(5), "it is the time of the first delivery, in UTC");
     }

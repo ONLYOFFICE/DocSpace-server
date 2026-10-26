@@ -46,7 +46,7 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
-        new("webhooks_config", "tenant_id", "id"),
+        new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
         new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];
 
@@ -144,6 +144,39 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
             return data;
         }
+    }
+
+    // Columns that only record who did something. A user who cannot be mapped (removed before the backup) would drop
+    // the whole row under the generic rule, losing a subscription for the admin who last edited it, or a delivery
+    // record for the member who caused it; the column is blanked instead. created_by is not among them: a subscription
+    // without its owner would skip the access checks made for the owner, so it is dropped with its owner.
+    private static readonly HashSet<(string Table, string Column)> _auditUserColumns =
+    [
+        ("webhooks_config", "modified_by"),
+        ("webhooks_logs", "uid"),
+        ("webhooks_logs", "retried_by")
+    ];
+
+    protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
+    {
+        if (!_auditUserColumns.Contains((table.Name, columnName.ToLowerInvariant())))
+        {
+            return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
+        }
+
+        var userId = Convert.ToString(value);
+
+        if (Helpers.IsEmptyOrSystemUser(userId))
+        {
+            return true;
+        }
+
+        // uid is not nullable: the empty user is what an event no member caused carries
+        value = columnMapper.GetUserMapping(userId) ?? (table.Name == "webhooks_logs" && columnName.Equals("uid", StringComparison.OrdinalIgnoreCase)
+            ? Guid.Empty.ToString()
+            : null);
+
+        return true;
     }
 
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)

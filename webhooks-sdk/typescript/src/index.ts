@@ -32,6 +32,7 @@ export {
     parseWebhook,
     isKnownWebhook,
     isKnownTrigger,
+    payloadModelName,
     WebhookParseError,
     type AnyWebhook,
     type DocSpaceWebhook,

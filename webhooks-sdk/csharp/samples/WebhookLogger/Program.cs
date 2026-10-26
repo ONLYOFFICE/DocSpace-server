@@ -49,9 +49,9 @@ if (file is not null)
 {
     // Without a --signature there is nothing to check the body against, so
     // verification is skipped rather than failing a replay that never had a
-    // header to begin with.
-    Log(await File.ReadAllBytesAsync(file), signature, signature is null ? null : secret);
-    return 0;
+    // header to begin with. A rejected signature or a body that does not parse
+    // exits 1, so a script (the SDK's own verification among them) can tell.
+    return Log(await File.ReadAllBytesAsync(file), signature, signature is null ? null : secret, null) ? 0 : 1;
 }
 
 // ------------------------------------------------------------------ listener
@@ -147,16 +147,28 @@ while (!cancel.IsCancellationRequested)
     response.StatusCode = 200;
     response.Close();
 
-    Log(body, context.Request.Headers[WebhookSignature.HeaderName], secret);
+    Log(body, context.Request.Headers[WebhookSignature.HeaderName], secret, context.Request.Headers[ProcessedEvents.EventIdHeader]);
 }
 
 return 0;
 
 // ------------------------------------------------------------------ logging
 
-static void Log(byte[] body, string? signature, string? secret)
+// True when the delivery was accepted (logged, or dropped as a duplicate); false
+// when the signature was rejected or the body did not parse.
+static bool Log(byte[] body, string? signature, string? secret, string? eventIdHeader)
 {
     var now = DateTime.Now.ToString("HH:mm:ss");
+
+    // A cheap pre-check before any work: the header is not signed, so it may
+    // only ever make us DROP a delivery (which is fail-safe -- whoever can
+    // rewrite a header can drop the request anyway), never accept one.
+    if (ProcessedEvents.WasSeen(eventIdHeader))
+    {
+        Console.WriteLine($"[{now}] duplicate of event #{eventIdHeader} (header pre-check), skipped");
+        Console.WriteLine(new string('-', 72));
+        return true;
+    }
 
     string signatureNote;
     if (string.IsNullOrEmpty(secret))
@@ -171,7 +183,7 @@ static void Log(byte[] body, string? signature, string? secret)
     {
         Console.WriteLine($"[{now}] REJECTED: bad or missing signature ({body.Length} bytes)");
         Console.WriteLine(new string('-', 72));
-        return;
+        return false;
     }
 
     DocSpaceWebhook hook;
@@ -183,12 +195,34 @@ static void Log(byte[] body, string? signature, string? secret)
     {
         Console.WriteLine($"[{now}] unparseable body: {ex.Message}");
         Console.WriteLine(new string('-', 72));
-        return;
+        return false;
+    }
+
+    // The model the generated table names for this trigger: "untyped" for the
+    // legacy catch-all, "unknown" for a trigger newer than this build.
+    var model = WebhookTriggers.PayloadTypes.TryGetValue(hook.Trigger, out var payloadType)
+        ? payloadType.Name
+        : WebhookTriggers.UntypedTriggers.Contains(hook.Trigger) ? "untyped" : "unknown";
+
+    if (payloadType is not null && hook.Payload is null)
+    {
+        Console.WriteLine($"[{now}] unparseable body: no {model} payload for '{hook.Trigger}'");
+        Console.WriteLine(new string('-', 72));
+        return false;
+    }
+
+    // The authoritative duplicate check, on the id from the verified body.
+    if (hook.Event is { } seen && !ProcessedEvents.Add(seen.Id))
+    {
+        Console.WriteLine($"[{now}] duplicate of event #{seen.Id}, already processed; skipped");
+        Console.WriteLine(new string('-', 72));
+        return true;
     }
 
     var known = hook.IsKnownTrigger ? "" : "  (trigger unknown to this build)";
     Console.WriteLine($"[{now}] {hook.Trigger}{known}");
     Console.WriteLine($"         {signatureNote}");
+    Console.WriteLine($"         model: {model}");
 
     if (hook.Event is { } ev)
     {
@@ -210,6 +244,8 @@ static void Log(byte[] body, string? signature, string? secret)
     Console.WriteLine();
     Console.WriteLine(Indent(hook.RawPayloadJson));
     Console.WriteLine(new string('-', 72));
+
+    return true;
 }
 
 // A typed line per payload kind, to show the models actually being used.
@@ -237,6 +273,27 @@ static string? Summarize(object? payload) => payload switch
 static string Indent(string text) =>
     string.Join(Environment.NewLine,
         text.Split('\n').Select(l => "         " + l.TrimEnd('\r')));
+
+/// <summary>
+/// The events already handled. DocSpace delivers at least once: an automatic
+/// retry, or a manual retry from the delivery log, sends the same event.id
+/// again, and the signature does not prove when a request was sent. So the
+/// id is the replay and duplicate defence. This set lives in memory for the
+/// sake of the sample; a real receiver persists the ids for as long as an event
+/// can still arrive -- the automatic retries span about 18 hours on the default
+/// schedule, and a manual retry can come at any time later.
+/// </summary>
+internal static class ProcessedEvents
+{
+    internal const string EventIdHeader = "x-docspace-event-id";
+
+    private static readonly HashSet<int> _ids = [];
+
+    internal static bool Add(int id) => _ids.Add(id);
+
+    internal static bool WasSeen(string? header) =>
+        int.TryParse(header, out var id) && _ids.Contains(id);
+}
 
 internal static class HttpMethods
 {

@@ -43,19 +43,12 @@ def verify_signature(body, secret, signature)
   )
 end
 
-# Which model a trigger's payload deserializes to.
-def payload_class(trigger)
-  return DocspaceWebhooksSdk::UserPayload  if trigger.start_with?('user.')
-  return DocspaceWebhooksSdk::GroupPayload if trigger.start_with?('group.')
-  return DocspaceWebhooksSdk::FormSubmitPayload if trigger == 'form.submit'
-
-  return DocspaceWebhooksSdk::FolderPayload if trigger.start_with?('folder.')
-  # An agent is an AI room and arrives in the same shape.
-  return DocspaceWebhooksSdk::RoomPayload if trigger.start_with?('room.', 'agent.')
-
-  # file.*, form.filled.out and form.stopped. Match on the concrete payload,
-  # never on FileEntryPayload: that is only the part the three share.
-  DocspaceWebhooksSdk::FilePayload
+# The payload model the generated trigger table names: "untyped" for the legacy
+# catch-all, "unknown" for a trigger newer than this SDK.
+def model_name(trigger)
+  DocspaceWebhooksSdk::WebhookTriggers::PAYLOAD_TYPES.fetch(trigger) do
+    DocspaceWebhooksSdk::WebhookTriggers::UNTYPED_TRIGGERS.include?(trigger) ? 'untyped' : 'unknown'
+  end
 end
 
 body_path = ARGV[0] || FIXTURES.join('file.created.json').to_s
@@ -80,10 +73,23 @@ end
 
 event   = DocspaceWebhooksSdk::WebhookEventInfo.build_from_hash(envelope['event'])
 config  = DocspaceWebhooksSdk::WebhookConfigInfo.build_from_hash(envelope['webhook'])
-payload = payload_class(trigger).build_from_hash(envelope['payload'])
+# The catch-all, or a trigger added on the server after this SDK was generated,
+# is acknowledged with its raw payload and never parsed with some other model.
+model = DocspaceWebhooksSdk::WebhookTriggers.payload_type(trigger)
+begin
+  payload = model&.build_from_hash(envelope['payload'])
+rescue StandardError => e
+  warn "unparseable #{trigger} payload: #{e.message}"
+  exit 1
+end
+if model && !payload.is_a?(model)
+  warn "unparseable #{trigger} payload: not a #{model_name(trigger)}"
+  exit 1
+end
 
 puts trigger
 puts '  signature ok'
+puts "  model: #{model_name(trigger)}"
 puts format('  event #%s  at %s  by %s', event.id, event.create_on, event.create_by)
 puts format('  subscription #%s "%s"', config.id, config.name)
 
@@ -102,6 +108,8 @@ when DocspaceWebhooksSdk::UserPayload
   puts format('  user: %s <%s>', payload.user_name, payload.email)
 when DocspaceWebhooksSdk::GroupPayload
   puts format('  group: %s', payload.name)
+else
+  puts '  no payload model for this trigger; raw payload below'
 end
 
 puts

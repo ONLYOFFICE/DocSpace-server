@@ -11,12 +11,15 @@ the contract is enough -- regenerating carries it everywhere.
 """
 
 import argparse
+import re
 import sys
 
 try:
     import yaml
 except ImportError:
     sys.exit("PyYAML required: pip install pyyaml")
+
+NL = "\n"
 
 HEADER = (
     "Trigger -> payload dispatch, generated from docspace-webhooks.yaml by\n"
@@ -38,6 +41,11 @@ def typescript(trigger_map, schemas, args):
 
     deser_rows = "\n".join(
         f"    {_ts_key(t)}: {p + 'FromJSON' if p else 'identity'},"
+        for t, p in trigger_map.items()
+    )
+
+    name_rows = "\n".join(
+        f"    {_ts_key(t)}: {_ts_key(p) if p else 'null'},"
         for t, p in trigger_map.items()
     )
 
@@ -67,6 +75,14 @@ export const PAYLOAD_DESERIALIZERS: {{
     [K in WebhookTriggerName]: (json: any) => TriggerPayloadMap[K];
 }} = {{
 {deser_rows}
+}};
+
+/**
+ * The name of the payload model each trigger carries, as the contract names
+ * the schema; `null` for the untyped `'*'`.
+ */
+export const PAYLOAD_MODEL_NAMES: {{ [K in WebhookTriggerName]: string | null }} = {{
+{name_rows}
 }};
 
 /**
@@ -269,10 +285,295 @@ cannot break your endpoint.
 """
 
 
+# Every emitter below gives its language what the C# and TypeScript tables give
+# theirs: the payload model of each trigger with a typed body, the untyped
+# catch-all, and an "is this trigger in the contract" check. A trigger in
+# neither is newer than the SDK: a receiver acknowledges it and keeps the raw
+# payload, and never parses it with some other model.
+
+def _typed(trigger_map):
+    return [(t, p) for t, p in trigger_map.items() if p]
+
+
+def _untyped(trigger_map):
+    return [t for t, p in trigger_map.items() if not p]
+
+
+def _payloads(trigger_map):
+    return sorted({p for _, p in _typed(trigger_map)})
+
+
+def _snake(name):
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+
+
+def java_triggers(trigger_map, schemas, args):
+    imports = NL.join(f"import {args.model_package}.{p};" for p in _payloads(trigger_map))
+    puts = NL.join(f'        types.put("{t}", {p}.class);' for t, p in _typed(trigger_map))
+    untyped = ", ".join(f'"{t}"' for t in _untyped(trigger_map))
+
+    return f"""package {args.package};
+
+// {HEADER.replace(NL, NL + "// ")}
+
+{imports}
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+/** Which payload model each DocSpace trigger carries. */
+public final class WebhookTriggers {{
+
+    /** Trigger name to payload model, for every trigger with a typed body. */
+    public static final Map<String, Class<?>> PAYLOAD_TYPES;
+
+    static {{
+        Map<String, Class<?>> types = new LinkedHashMap<>();
+{puts}
+        PAYLOAD_TYPES = Collections.unmodifiableMap(types);
+    }}
+
+    /** The legacy catch-all: sent only when the server cannot read a stored payload; no typed body. */
+    public static final Set<String> UNTYPED_TRIGGERS = Set.of({untyped});
+
+    private WebhookTriggers() {{
+    }}
+
+    /** True when the trigger is in the contract this build was generated from, the catch-all included. */
+    public static boolean isKnown(String trigger) {{
+        return trigger != null && (PAYLOAD_TYPES.containsKey(trigger) || UNTYPED_TRIGGERS.contains(trigger));
+    }}
+
+    /** The payload model of the trigger, or null when it has no typed body. */
+    public static Class<?> payloadType(String trigger) {{
+        return trigger == null ? null : PAYLOAD_TYPES.get(trigger);
+    }}
+}}
+"""
+
+
+def kotlin(trigger_map, schemas, args):
+    imports = NL.join(f"import {args.model_package}.{p}" for p in _payloads(trigger_map))
+    rows = NL.join(f'        "{t}" to {p}::class.java,' for t, p in _typed(trigger_map))
+    untyped = ", ".join(f'"{t}"' for t in _untyped(trigger_map))
+
+    return f"""// {HEADER.replace(NL, NL + "// ")}
+package {args.package}
+
+{imports}
+
+/** Which payload model each DocSpace trigger carries. */
+object WebhookTriggers {{
+    /** Trigger name to payload model, for every trigger with a typed body. */
+    val payloadTypes: Map<String, Class<*>> = linkedMapOf(
+{rows}
+    )
+
+    /** The legacy catch-all: sent only when the server cannot read a stored payload; no typed body. */
+    val untypedTriggers: Set<String> = setOf({untyped})
+
+    /** True when the trigger is in the contract this build was generated from, the catch-all included. */
+    fun isKnown(trigger: String): Boolean = trigger in payloadTypes || trigger in untypedTriggers
+
+    /** The payload model of the trigger, or null when it has no typed body. */
+    fun payloadType(trigger: String): Class<*>? = payloadTypes[trigger]
+}}
+"""
+
+
+def go(trigger_map, schemas, args):
+    rows = NL.join(f'\t"{t}": "{p}",' for t, p in _typed(trigger_map))
+    untyped = NL.join(f'\t"{t}": true,' for t in _untyped(trigger_map))
+    cases = NL.join(
+        f'\tcase "{p}":{NL}\t\treturn &{p}{{}}, "{p}"' for p in _payloads(trigger_map)
+    )
+
+    return f"""// Code generated by tools/gen-trigger-map.py. DO NOT EDIT.
+//
+// {HEADER.replace(NL, NL + "// ")}
+
+package {args.package}
+
+// PayloadModels names the payload model of every trigger with a typed body.
+var PayloadModels = map[string]string{{
+{rows}
+}}
+
+// UntypedTriggers is the legacy catch-all: the server sends it only when it
+// cannot read a stored payload, and it carries no typed body.
+var UntypedTriggers = map[string]bool{{
+{untyped}
+}}
+
+// IsKnownTrigger reports whether the trigger is in the contract this build was
+// generated from, the catch-all included.
+func IsKnownTrigger(trigger string) bool {{
+	_, typed := PayloadModels[trigger]
+	return typed || UntypedTriggers[trigger]
+}}
+
+// NewPayload returns a pointer to an empty payload model for the trigger, ready
+// for json.Unmarshal, and the model's name; nil and "" when the trigger has no
+// typed body.
+func NewPayload(trigger string) (any, string) {{
+	switch PayloadModels[trigger] {{
+{cases}
+	}}
+	return nil, ""
+}}
+"""
+
+
+def python(trigger_map, schemas, args):
+    imports = NL.join(
+        f"from {args.package}.models.{_snake(p)} import {p}" for p in _payloads(trigger_map)
+    )
+    rows = NL.join(f'    "{t}": {p},' for t, p in _typed(trigger_map))
+    untyped = ", ".join(f'"{t}"' for t in _untyped(trigger_map))
+
+    return (
+        f"# {HEADER.replace(NL, NL + '# ')}" + NL
+        + '"""Which payload model each DocSpace trigger carries."""' + NL + NL
+        + imports + NL + NL
+        + "#: Trigger name to payload model, for every trigger with a typed body." + NL
+        + "PAYLOAD_TYPES = {" + NL + rows + NL + "}" + NL + NL
+        + "#: The legacy catch-all: sent only when the server cannot read a stored" + NL
+        + "#: payload; no typed body." + NL
+        + "UNTYPED_TRIGGERS = frozenset({" + untyped + "})" + NL + NL + NL
+        + "def is_known_trigger(trigger):" + NL
+        + '    """True when the trigger is in the contract this build was generated from, the catch-all included."""' + NL
+        + "    return trigger in PAYLOAD_TYPES or trigger in UNTYPED_TRIGGERS" + NL + NL + NL
+        + "def payload_type(trigger):" + NL
+        + '    """The payload model of the trigger, or None when it has no typed body."""' + NL
+        + "    return PAYLOAD_TYPES.get(trigger)" + NL
+    )
+
+
+def php(trigger_map, schemas, args):
+    model_ns = "\\" + args.model_package + "\\"
+    rows = NL.join(f"        '{t}' => {model_ns}{p}::class," for t, p in _typed(trigger_map))
+    untyped = ", ".join(f"'{t}'" for t in _untyped(trigger_map))
+
+    return f"""<?php
+// {HEADER.replace(NL, NL + "// ")}
+
+declare(strict_types=1);
+
+namespace {args.package};
+
+/** Which payload model each DocSpace trigger carries. */
+final class WebhookTriggers
+{{
+    /** Trigger name to payload model, for every trigger with a typed body. */
+    public const PAYLOAD_TYPES = [
+{rows}
+    ];
+
+    /** The legacy catch-all: sent only when the server cannot read a stored payload; no typed body. */
+    public const UNTYPED_TRIGGERS = [{untyped}];
+
+    /** True when the trigger is in the contract this build was generated from, the catch-all included. */
+    public static function isKnown(string $trigger): bool
+    {{
+        return isset(self::PAYLOAD_TYPES[$trigger]) || in_array($trigger, self::UNTYPED_TRIGGERS, true);
+    }}
+
+    /** The payload model class of the trigger, or null when it has no typed body. */
+    public static function payloadType(string $trigger): ?string
+    {{
+        return self::PAYLOAD_TYPES[$trigger] ?? null;
+    }}
+}}
+"""
+
+
+def ruby(trigger_map, schemas, args):
+    rows = NL.join(f"      '{t}' => '{p}'," for t, p in _typed(trigger_map))
+    untyped = ", ".join(f"'{t}'" for t in _untyped(trigger_map))
+
+    return f"""# frozen_string_literal: true
+
+# {HEADER.replace(NL, NL + "# ")}
+
+module {args.package}
+  # Which payload model each DocSpace trigger carries.
+  module WebhookTriggers
+    # Trigger name to payload model name, for every trigger with a typed body.
+    PAYLOAD_TYPES = {{
+{rows}
+    }}.freeze
+
+    # The legacy catch-all: sent only when the server cannot read a stored
+    # payload; no typed body.
+    UNTYPED_TRIGGERS = [{untyped}].freeze
+
+    # True when the trigger is in the contract this build was generated from,
+    # the catch-all included.
+    def self.known?(trigger)
+      PAYLOAD_TYPES.key?(trigger) || UNTYPED_TRIGGERS.include?(trigger)
+    end
+
+    # The payload model class of the trigger, or nil when it has no typed body.
+    def self.payload_type(trigger)
+      name = PAYLOAD_TYPES[trigger]
+      name && {args.package}.const_get(name)
+    end
+  end
+end
+"""
+
+
+def swift(trigger_map, schemas, args):
+    rows = NL.join(f'        "{t}": "{p}",' for t, p in _typed(trigger_map))
+    untyped = ", ".join(f'"{t}"' for t in _untyped(trigger_map))
+    cases = NL.join(
+        f'        case "{p}": return try decoder.decode({p}.self, from: data)'
+        for p in _payloads(trigger_map)
+    )
+
+    return f"""// {HEADER.replace(NL, NL + "// ")}
+
+import Foundation
+
+/// Which payload model each DocSpace trigger carries.
+public enum WebhookTriggers {{
+    /// Trigger name to payload model name, for every trigger with a typed body.
+    public static let payloadModels: [String: String] = [
+{rows}
+    ]
+
+    /// The legacy catch-all: sent only when the server cannot read a stored payload; no typed body.
+    public static let untypedTriggers: Set<String> = [{untyped}]
+
+    /// True when the trigger is in the contract this build was generated from, the catch-all included.
+    public static func isKnown(_ trigger: String) -> Bool {{
+        payloadModels[trigger] != nil || untypedTriggers.contains(trigger)
+    }}
+
+    /// Decodes the payload with the model of the trigger; nil when the trigger has no typed body.
+    public static func decodePayload(trigger: String, from data: Data, decoder: JSONDecoder) throws -> Any? {{
+        switch payloadModels[trigger] {{
+{cases}
+        default: return nil
+        }}
+    }}
+}}
+"""
+
+
 EMITTERS = {
     "typescript": typescript,
     "csharp": csharp,
     "java": java,
+    "java-triggers": java_triggers,
+    "kotlin": kotlin,
+    "go": go,
+    "python": python,
+    "php": php,
+    "ruby": ruby,
+    "swift": swift,
     "markdown": markdown,
 }
 

@@ -103,4 +103,13 @@ public static class Constants
     public const string WireMockVersion = "3.9.2";
     public const int WebhookReceiverPort = 18089;
     public const string WebhookReceiverHost = "127.0.0.2";
+
+    // UrlValidator.DefaultBlacklist with 127.0.0.0/8 narrowed to 127.0.0.1/32: the receiver is reached as
+    // WebhookReceiverHost, while localhost stays refused (bug 80980). A non-empty list replaces the default as a
+    // whole, so a test in ASC.Web.Api.Tests (WebhookTestProfileTests) keeps the two in step.
+    public static IReadOnlyList<string> WebhookTestBlacklist { get; } =
+    [
+        "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
+        "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
+    ];
 }

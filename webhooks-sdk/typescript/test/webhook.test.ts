@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import test from 'node:test';
 
 import { computeSignature, verifySignature, readSignatureHeader } from '../src/verify';
-import { parseWebhook, isKnownWebhook, isKnownTrigger, WebhookParseError } from '../src/parse';
+import { parseWebhook, isKnownWebhook, isKnownTrigger, payloadModelName, WebhookParseError } from '../src/parse';
 
 // The key of the subscription that sent the captured delivery, and the signature
 // DocSpace put on the wire for it. Read from the shared fixture files so the nine
@@ -26,11 +26,18 @@ const BODY =
     '"webhook":{"id":7,"name":"ci","url":"https://example.com/hooks",' +
     '"triggers":["file.created"]}}';
 
-// A real delivery, captured from a DocSpace test portal with its addresses
-// replaced by docspace.example.com. The parse tests
+// A real delivery, captured byte for byte from a DocSpace test portal by the
+// on-demand WebhookFixtureCaptureTests (see the README, Samples). The parse tests
 // run against this rather than a hand-written body, because the wire shape had
-// surprises no amount of reading the C# predicted.
+// surprises no amount of reading the C# predicted. A re-capture changes ids,
+// names and dates, so the tests compare the parsed values with the raw JSON
+// rather than with literals.
 const REAL = readFileSync(resolve(__dirname, '../../../samples/file.created.json'), 'utf8');
+const RAW = JSON.parse(REAL) as {
+    event: { id: number };
+    webhook: { name: string };
+    payload: { id: number; title: string; fileEntryType: number };
+};
 
 const EXPECTED = 'sha256=E87CD656882927F296A70F1B7A67F83F9F70D7F087A108088E7B5CE223B3088E';
 
@@ -104,14 +111,14 @@ test('parseWebhook narrows the payload by trigger', () => {
     const hook = parseWebhook(REAL);
 
     assert.equal(hook.trigger, 'file.created');
-    assert.equal(hook.event.id, 3);
-    assert.equal(hook.webhook.name, 'test');
+    assert.equal(hook.event.id, RAW.event.id);
+    assert.equal(hook.webhook.name, RAW.webhook.name);
     assert.ok(isKnownWebhook(hook));
 
     if (hook.trigger === 'file.created') {
-        assert.equal(hook.payload.title, 'TestDoc.docx');
-        assert.equal(hook.payload.fileEntryType, 2);
-        assert.equal(hook.payload.id, 47);
+        assert.equal(hook.payload.title, RAW.payload.title);
+        assert.equal(hook.payload.fileEntryType, 2, 'a file, not a folder');
+        assert.equal(hook.payload.id, RAW.payload.id);
     } else {
         assert.fail('trigger did not narrow');
     }
@@ -157,7 +164,7 @@ test('the captured delivery carries no caller-relative state', () => {
 test('nested users are summaries, not full user payloads', () => {
     const payload = JSON.parse(REAL).payload as { createdBy: Record<string, unknown> };
 
-    assert.equal(payload.createdBy.userName, 'administrator');
+    assert.equal(typeof payload.createdBy.userName, 'string');
     // A summary: no groups, quota, admin flags or SSO identifiers ride along.
     for (const absent of ['groups', 'quotaLimit', 'isAdmin', 'sid', 'ssoNameId', 'ssoSessionId']) {
         assert.ok(!(absent in payload.createdBy), `createdBy.${absent} should not be on the wire`);
@@ -172,7 +179,7 @@ test('parseWebhook tolerates a trigger this build does not know', () => {
     assert.equal(isKnownWebhook(hook), false);
     assert.equal(isKnownTrigger(hook.trigger), false);
     // Payload survives unnarrowed rather than blowing up.
-    assert.equal((hook.payload as { title: string }).title, 'TestDoc.docx');
+    assert.equal((hook.payload as { title: string }).title, RAW.payload.title);
 });
 
 test('every contract trigger is dispatchable', () => {
@@ -187,11 +194,21 @@ test("'*' is known but stays untyped, as in the C# SDK", () => {
     const hook = parseWebhook(REAL.replace('"file.created"', '"*"'));
     assert.equal(isKnownWebhook(hook), true);
     // The legacy catch-all carries no model: the payload comes through as raw JSON.
-    assert.equal((hook.payload as { title: string }).title, 'TestDoc.docx');
+    assert.equal((hook.payload as { title: string }).title, RAW.payload.title);
 });
 
 test('parseWebhook rejects bodies that are not envelopes', () => {
     assert.throws(() => parseWebhook('not json'), WebhookParseError);
     assert.throws(() => parseWebhook('[]'), WebhookParseError);
     assert.throws(() => parseWebhook('{"event":{}}'), WebhookParseError);
+});
+
+test('payloadModelName names the model from the generated table', () => {
+    assert.equal(payloadModelName('file.created'), 'FilePayload');
+    assert.equal(payloadModelName('form.filled.out'), 'FilePayload');
+    assert.equal(payloadModelName('form.submit'), 'FormSubmitPayload');
+    assert.equal(payloadModelName('agent.created'), 'RoomPayload');
+    assert.equal(payloadModelName('*'), 'untyped');
+    // A trigger newer than this build is never mapped onto some other model.
+    assert.equal(payloadModelName('space.created'), 'unknown');
 });

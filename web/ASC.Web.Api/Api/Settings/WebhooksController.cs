@@ -87,17 +87,16 @@ public class WebhooksController(
 
     /// <remarks>
     /// Creates a webhook subscription for the current portal: a target URL that the portal calls with a signed JSON
-    /// payload whenever one of the subscribed events happens. The target is checked before anything is stored, so it
-    /// has to be an absolute `http` or `https` address outside the installation's own network, and it has to answer a
-    /// HEAD request with a success code, redirects not being followed. `secretKey` is mandatory here, has to satisfy
-    /// the portal password rules published by `GET api/2.0/settings/security/password`, and signs the payloads; it
-    /// does not appear in any response. `triggers` is a bitmask of the subscribed events with 0 standing for all of
-    /// them; a flag the caller's role may not use is rejected, so take the allowed set from
-    /// `GET api/2.0/settings/webhook/triggers`. `ssl=true` additionally demands an `https` target with a valid
-    /// certificate, while `ssl=false` leaves the certificate unchecked. Set `targetId` to deliver events about a
-    /// single entity only. A subscription fires only for events its creator is allowed to see, and only while it is
-    /// enabled. Any role except `Guest` may create one, and each call adds another subscription rather than replacing
-    /// an existing one.
+    /// payload whenever one of the subscribed events happens. The target is checked before anything is stored: an
+    /// absolute `http` or `https` address outside the installation's own network that answers a HEAD request with a
+    /// success code, redirects not followed. `secretKey` is mandatory, has to satisfy the password rules of `GET
+    /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
+    /// of the subscribed events, 0 standing for all of them; a flag the caller's role may not use is rejected, so take
+    /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl=true` demands an `https` target with a valid
+    /// certificate, `ssl=false` leaves the certificate unchecked. `targetId` limits the events to one entity; for user
+    /// or group events it must be the ID of an existing user or group. A subscription fires only while it is enabled,
+    /// for events its creator may see and their current role may subscribe to. Any role except `Guest` may create one,
+    /// and each call adds another subscription.
     /// </remarks>
     /// <summary>
     /// Create a webhook
@@ -105,7 +104,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key or a trigger flag was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPost("webhook")]
@@ -113,9 +112,9 @@ public class WebhooksController(
     {
         _ = await CheckAdminPermissionsAsync();
 
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, true);
+        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, inDto.TargetId, authContext.CurrentAccount.ID, true);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, inDto.TargetId);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, targetId);
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -123,17 +122,16 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Replaces the stored parameters of one webhook subscription, which is addressed by `id` in the body rather than
-    /// in the path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`,
-    /// `ssl`, `triggers` or `targetId` resets them to off, all events and no target: read the current values with
-    /// `GET api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an
-    /// empty value keeping the existing secret and a new one having to satisfy the portal password rules. The new
-    /// target is validated exactly as on creation, that is it must sit outside the installation's own network and
-    /// answer a HEAD request, and trigger flags the caller's role may not use are rejected. That validation runs
-    /// before the subscription is looked up, so an unusable payload is refused with 400 even when no subscription
-    /// with this `id` exists. A `DocSpaceAdmin` may update any subscription in the portal, anyone else only their
-    /// own, and a `Guest` is refused. Sending the same payload twice leaves the same state. Use
-    /// `PUT api/2.0/settings/webhook/enable` to switch a subscription on or off without touching anything else.
+    /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
+    /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `ssl`,
+    /// `triggers` or `targetId` resets them to off, all events and no target: read the current values with `GET
+    /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an empty
+    /// value keeping the existing secret and a new one having to satisfy the portal password rules. A `DocSpaceAdmin`
+    /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`
+    /// gives 404 and another member's subscription 403 before the payload is validated. The payload is then validated
+    /// as on creation, except that trigger flags are checked against the role of the subscription's creator rather than
+    /// the caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to
+    /// switch a subscription on or off without touching anything else.
     /// </remarks>
     /// <summary>
     /// Update a webhook
@@ -141,15 +139,13 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The updated webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key or a trigger flag was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
     [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, false);
-
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
         if (existingWebhook == null)
@@ -165,12 +161,16 @@ public class WebhooksController(
             }
         }
 
+        // the triggers are the owner's to receive, so they are checked against the owner's role, not the editor's
+        var ownerId = existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID;
+        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, inDto.TargetId, ownerId, false);
+
         existingWebhook.Name = inDto.Name;
         existingWebhook.Uri = inDto.Uri;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
         existingWebhook.Triggers = inDto.Triggers;
-        existingWebhook.TargetId = inDto.TargetId;
+        existingWebhook.TargetId = targetId;
 
         if (!string.IsNullOrEmpty(inDto.SecretKey))
         {
@@ -188,14 +188,13 @@ public class WebhooksController(
     /// Switches one webhook subscription on or off, leaving the rest of its parameters as they are. Only `id` and
     /// `enabled` are read from the body: `name`, `uri`, `secretKey`, `ssl`, `triggers` and `targetId` are demanded by
     /// the schema but ignored here, so change any of them with `PUT api/2.0/settings/webhook` instead. Switching a
-    /// subscription on re-checks what is already stored, probing the saved URL with a HEAD request and re-validating
-    /// the saved secret against the current portal password rules, and the call is refused with 400 when either
-    /// fails: a subscription whose target has gone away, or whose secret predates a tightening of the password rules,
-    /// cannot be switched on until it is updated. Switching one off is not validated. While a subscription is off its
-    /// events are dropped rather than queued, so nothing arrives from that period once it is switched on again. A
-    /// `DocSpaceAdmin` may switch any subscription in the portal, anyone else only their own, and a `Guest` is
-    /// refused. The response carries the subscription in its new state, and repeating the call changes nothing
-    /// further.
+    /// subscription on re-checks what is already stored: the saved URL is probed with a HEAD request, the saved secret
+    /// is checked against the current password rules, and the saved triggers against the current role of the
+    /// subscription's creator. The call is refused with 400 when any of these fails, so a subscription whose target has
+    /// gone away cannot be switched on until it is updated. Switching one off is not validated. While a subscription is
+    /// off its events are dropped rather than queued. A `DocSpaceAdmin` may switch any subscription in the portal,
+    /// anyone else only their own, and a `Guest` is refused. The response carries the subscription in its new state,
+    /// and repeating the call changes nothing further.
     /// </remarks>
     /// <summary>
     /// Switch a webhook on or off
@@ -203,7 +202,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The webhook subscription in its new state, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, although this call reads only `id` and `enabled`, or on switching on the saved target answers the HEAD request with a non-success code or the saved secret no longer passes the password rules")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, although this call reads only `id` and `enabled`, or on switching on the saved target answers the HEAD request with a non-success code or the saved secret no longer passes the password rules, or a saved trigger is no longer open to the creator's role")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
     [SwaggerResponse(500, "On switching on, the saved target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while the subscription has `ssl` set")]
@@ -227,7 +226,9 @@ public class WebhooksController(
 
         if (inDto.Enabled)
         {
-            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, existingWebhook.Triggers, false);
+            // the saved target is not re-validated: an entity that has gone away only means no more events
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, existingWebhook.Triggers, null,
+                existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID, false);
         }
 
         existingWebhook.Enabled = inDto.Enabled;
@@ -418,7 +419,8 @@ public class WebhooksController(
         var isAdmin = await CheckAdminPermissionsAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        foreach (var id in inDto.Ids)
+        // a missing list queues nothing, like an empty one
+        foreach (var id in inDto.Ids ?? [])
         {
             var item = await dbWorker.ReadJournal(tenantId, id);
 
@@ -452,7 +454,7 @@ public class WebhooksController(
     /// subscription, and `available`, telling whether the caller's own role may subscribe to that event at all: a
     /// `User` cannot subscribe to the creation of users, groups or rooms, for instance, while a `RoomAdmin` can. Add
     /// the bit values of the wanted events together to build `triggers`; the entry named `*` has the value 0 and
-    /// stands for every event, so it is used on its own rather than added. Events unavailable to the caller are
+    /// stands for every event the creator's role may subscribe to, so it is used on its own rather than added. Events unavailable to the caller are
     /// listed all the same, but passing one to `POST api/2.0/settings/webhook` or `PUT api/2.0/settings/webhook` is
     /// rejected as an invalid request. This is fixed reference data: the same for every portal, not paginated,
     /// changing only with the product version, and readable by any authenticated caller, a `Guest` included. Nothing
@@ -504,14 +506,18 @@ public class WebhooksController(
         return false;
     }
 
-    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, WebhookTrigger triggers, bool creation)
+    /// <summary>
+    /// Validates a subscription about to be saved for <paramref name="ownerId"/>, and returns its target in the form
+    /// the access checkers compare it in.
+    /// </summary>
+    private async Task<string> CheckWebhook(string name, string uri, string secret, bool ssl, WebhookTrigger triggers, string targetId, Guid ownerId, bool creation)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(uri);
 
         if (triggers != WebhookTrigger.All)
         {
-            var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+            var userType = await userManager.GetUserTypeAsync(ownerId);
 
             foreach (var trigger in Enum.GetValues<WebhookTrigger>())
             {
@@ -560,5 +566,48 @@ public class WebhooksController(
         {
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }
+
+        return await CheckTargetAsync(targetId, triggers);
+    }
+
+    /// <summary>
+    /// A target of user or group events has to name an existing user or group; it is returned as the lowercase GUID
+    /// the checkers compare with. A target of file, folder, room, agent or form events is not looked up here: the
+    /// Files service owns those entries, and the creator's read access to the entry is checked on every event anyway.
+    /// </summary>
+    private async Task<string> CheckTargetAsync(string targetId, WebhookTrigger triggers)
+    {
+        if (string.IsNullOrEmpty(targetId) || triggers == WebhookTrigger.All)
+        {
+            return targetId;
+        }
+
+        var families = Enum.GetValues<WebhookTrigger>()
+            .Where(t => t != WebhookTrigger.All && triggers.HasFlag(t))
+            .Select(t => t.GetTargetType())
+            .ToHashSet();
+
+        var forUsers = families.Contains("user");
+        var forGroups = families.Contains("group");
+
+        if (!forUsers && !forGroups)
+        {
+            return targetId;
+        }
+
+        if (Guid.TryParse(targetId, out var id))
+        {
+            if (forUsers && !(await userManager.GetUsersAsync(id)).Equals(ASC.Core.Users.Constants.LostUser))
+            {
+                return id.ToString();
+            }
+
+            if (forGroups && (await userManager.GetGroupInfoAsync(id)).ID != ASC.Core.Users.Constants.LostGroupInfo.ID)
+            {
+                return id.ToString();
+            }
+        }
+
+        throw new ArgumentException(Resource.ErrorWebhookTargetNotFound);
     }
 }

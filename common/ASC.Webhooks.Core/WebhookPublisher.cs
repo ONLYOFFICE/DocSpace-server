@@ -41,7 +41,9 @@ public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,
     TenantUtil tenantUtil,
-    AuthContext authContext)
+    AuthContext authContext,
+    UserManager userManager,
+    SettingsManager settingsManager)
     : IWebhookPublisher
 {
     // One instance for the process: the serializer builds its metadata per options instance, so options created
@@ -70,6 +72,11 @@ public class WebhookPublisher(
         };
     }
 
+    /// <summary>
+    /// How every timestamp of a webhook body is written: UTC, whole seconds, with the Z.
+    /// </summary>
+    public const string WholeSecondsUtcFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
     private class TenantToUtcDateTimeJsonConverter(Func<TenantUtil> tenantUtil) : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -79,7 +86,18 @@ public class WebhookPublisher(
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil().DateTimeToUtc(value) : value.ToUniversalTime());
+            var utc = value.Kind switch
+            {
+                // TenantUtil marks a value it converted into the portal's time zone as Local
+                DateTimeKind.Local => tenantUtil().DateTimeToUtc(value),
+                // read back from the database, which stores every timestamp in UTC; ToUniversalTime would take it for
+                // the server's local time and shift it by the server's offset
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+                _ => value
+            };
+
+            // whole seconds, as the envelope: a fraction of up to seven digits is what Swift's ISO-8601 decoder refuses
+            writer.WriteStringValue(utc.ToString(WholeSecondsUtcFormat, CultureInfo.InvariantCulture));
         }
     }
 
@@ -103,12 +121,26 @@ public class WebhookPublisher(
         var result = new List<DbWebhooksConfig>();
 
         var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
+        bool? devToolsLimited = null;
 
         foreach (var config in webhookConfigs)
         {
             if (config.Triggers != WebhookTrigger.All && !config.Triggers.HasFlag(trigger))
             {
                 continue;
+            }
+
+            // the creator was allowed to subscribe when the subscription was saved; what counts is what they may receive
+            // now. A catch-all subscription is narrowed the same way: it stands for the events the creator's role may
+            // subscribe to, not for every event of the portal
+            if (config.CreatedBy.HasValue)
+            {
+                devToolsLimited ??= (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+
+                if (!await IsCreatorEntitledAsync(config.CreatedBy.Value, trigger, devToolsLimited.Value))
+                {
+                    continue;
+                }
             }
 
             if (checker != null)
@@ -131,6 +163,31 @@ public class WebhookPublisher(
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Whether the creator of a subscription may still receive <paramref name="trigger"/>: an active member whose
+    /// current role may subscribe to it, and a DocSpace admin while the developer tools are limited for users. A
+    /// creator who was removed, terminated, turned into a guest or downgraded to a role without that trigger gets
+    /// nothing, as the API would no longer let them subscribe to it.
+    /// </summary>
+    private async Task<bool> IsCreatorEntitledAsync(Guid creatorId, WebhookTrigger trigger, bool devToolsLimited)
+    {
+        var creator = await userManager.GetUsersAsync(creatorId);
+
+        if (creator.Equals(Constants.LostUser) || creator.Status != EmployeeStatus.Active)
+        {
+            return false;
+        }
+
+        var creatorType = await userManager.GetUserTypeAsync(creator);
+
+        if (devToolsLimited && creatorType != EmployeeType.DocSpaceAdmin)
+        {
+            return false;
+        }
+
+        return trigger.IsAvailableFor(creatorType);
     }
 
     public async Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId)

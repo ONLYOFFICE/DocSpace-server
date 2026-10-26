@@ -130,36 +130,46 @@ let eventBy: String = envelope.event?.createBy?.uuidString ?? "?"
 let configId: String = envelope.webhook?.id.flatMap { String($0) } ?? "?"
 let configName: String = envelope.webhook?.name ?? ""
 
+// The payload model the generated trigger table names: "untyped" for the legacy
+// catch-all, "unknown" for a trigger newer than this SDK.
+let modelName = WebhookTriggers.payloadModels[trigger]
+    ?? (WebhookTriggers.untypedTriggers.contains(trigger) ? "untyped" : "unknown")
+
+// The catch-all, or a trigger added on the server after this SDK was generated,
+// is acknowledged with its raw payload and never parsed with some other model.
+let payload: Any?
+do {
+    payload = try WebhookTriggers.decodePayload(trigger: trigger, from: payloadData, decoder: decoder)
+} catch {
+    FileHandle.standardError.write(Data("unparseable \(trigger) payload: \(error)\n".utf8))
+    exit(1)
+}
+
 print(trigger)
 print("  signature ok")
+print("  model: \(modelName)")
 print("  event #\(eventId)  at \(eventAt)  by \(eventBy)")
 print("  subscription #\(configId) \"\(configName)\"")
 
-if trigger.hasPrefix("user.") {
-    let user = try decoder.decode(UserPayload.self, from: payloadData)
+switch payload {
+case let user as UserPayload:
     print("  user: \(user.userName ?? "") <\(user.email ?? "")>")
-} else if trigger.hasPrefix("group.") {
-    let group = try decoder.decode(GroupPayload.self, from: payloadData)
+case let group as GroupPayload:
     print("  group: \(group.name ?? "")")
-} else if trigger == "form.submit" {
+case let form as FormSubmitPayload:
     // The one wrapper payload: the original form and the submitted copy.
-    let form = try decoder.decode(FormSubmitPayload.self, from: payloadData)
     print("  form: \(form.originalForm?.title ?? "")  submitted as \(form.submittedForm?.title ?? "")")
-} else if trigger.hasPrefix("folder.") {
-    let folder = try decoder.decode(FolderPayload.self, from: payloadData)
+case let folder as FolderPayload:
     print("  folder: \(folder.title ?? "")"
           + "  id=\(describe(folder.id))  parent=\(describe(folder.parentId))")
-} else if trigger.hasPrefix("room.") || trigger.hasPrefix("agent.") {
-    // An agent is an AI room and arrives in the same shape.
-    let room = try decoder.decode(RoomPayload.self, from: payloadData)
+case let room as RoomPayload:
     print("  room: \(room.title ?? "")"
           + "  id=\(describe(room.id))  parent=\(describe(room.parentId))")
-} else {
-    // file.*, form.filled.out and form.stopped. Match on the concrete payload,
-    // never on FileEntryPayload: that is only the part the three share.
-    let file = try decoder.decode(FilePayload.self, from: payloadData)
+case let file as FilePayload:
     print("  file: \(file.title ?? "")"
           + "  id=\(describe(file.id))  parent=\(describe(file.parentId))")
+default:
+    print("  no payload model for this trigger; raw payload below")
 }
 
 print()

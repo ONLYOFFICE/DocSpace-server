@@ -22,3 +22,7 @@ require '{{gemName}}/{{modelPackage}}/{{classFilename}}'
 {{/parent}}
 {{/model}}
 {{/models}}
+
+# Trigger -> payload model table, written by tools/gen-trigger-map.py in the
+# post-step of the generate-webhook-sdk skill.
+require '{{gemName}}/webhook_triggers'

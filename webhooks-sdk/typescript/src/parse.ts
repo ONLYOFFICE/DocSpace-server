@@ -6,6 +6,7 @@ import {
 } from '../generated/models';
 import {
     PAYLOAD_DESERIALIZERS,
+    PAYLOAD_MODEL_NAMES,
     TriggerPayloadMap,
     WebhookTriggerName,
     isKnownTrigger,
@@ -99,6 +100,15 @@ export function parseWebhook(body: RawBody): AnyWebhook {
         webhook: WebhookConfigInfoFromJSON(json.webhook),
         raw: json,
     };
+}
+
+/**
+ * The name of the payload model the trigger carries, as the contract names the
+ * schema (`FilePayload`, `UserPayload`, ...); `'untyped'` for the legacy
+ * catch-all `'*'`, and `'unknown'` for a trigger added after this build.
+ */
+export function payloadModelName(trigger: string): string {
+    return isKnownTrigger(trigger) ? (PAYLOAD_MODEL_NAMES[trigger] ?? 'untyped') : 'unknown';
 }
 
 /**

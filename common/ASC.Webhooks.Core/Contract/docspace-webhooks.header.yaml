@@ -25,8 +25,8 @@ info:
       4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is
          set only on the sender's options, by which point `payload` is an opaque
          JsonElement, so it never applies to payload bodies.
-      5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated
-         to whole seconds (WebhookPayload.GetShortUtcNow).
+      5. Every timestamp, in the envelope and in the payload alike, is UTC
+         ISO-8601 in whole seconds with a Z, e.g. 2026-09-17T10:22:56Z.
       6. Entry ids are generic T: int for internal storage, string for
          third-party providers. Modelled here as oneOf[integer, string].
 

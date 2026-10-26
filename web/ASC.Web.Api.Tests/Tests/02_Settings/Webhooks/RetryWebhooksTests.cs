@@ -101,14 +101,15 @@ public class RetryWebhooksTests(
     [Fact]
     public async Task RetryWebhooks_DeliveryBeingSent_IsSkippedInSilence()
     {
-        // Arrange: a receiver slow enough to keep the attempt in flight while the retry is asked for
-        var receiver = await CreateReceiverAsync(delayMilliseconds: 15_000);
+        // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
+        var receiver = await CreateReceiverAsync();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
-        await receiver.WaitForDeliveriesAsync(1);
-        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await PlantInFlightAsync(record!.Id);
 
         // Act
+        await _webApiClient.Authenticate(Owner);
         var result = await _webhooksApi.RetryWebhooksAsync(
             new WebhookRetryRequestDto([record.Id]), TestContext.Current.CancellationToken);
 

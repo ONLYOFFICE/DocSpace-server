@@ -7,6 +7,7 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 import onlyoffice.docspace.webhooks.sdk.EntryIdAdapter
+import onlyoffice.docspace.webhooks.sdk.WebhookTriggers
 import onlyoffice.docspace.webhooks.sdk.models.FilePayload
 import onlyoffice.docspace.webhooks.sdk.models.FolderPayload
 import onlyoffice.docspace.webhooks.sdk.models.FormSubmitPayload
@@ -117,6 +118,7 @@ fun main(args: Array<String>) {
 
     println(trigger)
     println("  signature ok")
+    println("  model: ${modelName(trigger)}")
     println("  event #${event?.id}  at ${event?.createOn}  by ${event?.createBy}")
     println("  subscription #${config?.id} \"${config?.name}\"")
 
@@ -141,29 +143,20 @@ fun main(args: Array<String>) {
 }
 
 /**
- * The payload model of a trigger, mirroring the x-docspace-trigger-payloads map
- * of the contract; null for a trigger newer than this SDK. form.submit has a
- * payload of its own, while form.filled.out and form.stopped carry the form
- * file itself.
+ * The payload model the generated trigger table names: "untyped" for the legacy
+ * catch-all, "unknown" for a trigger newer than this SDK.
  */
-fun payloadModel(trigger: String): Class<*>? = when {
-    trigger == "form.submit" -> FormSubmitPayload::class.java
-    trigger == "form.filled.out" || trigger == "form.stopped" -> FilePayload::class.java
-    trigger.startsWith("file.") -> FilePayload::class.java
-    trigger.startsWith("user.") -> UserPayload::class.java
-    trigger.startsWith("group.") -> GroupPayload::class.java
-    trigger.startsWith("folder.") -> FolderPayload::class.java
-    // An agent is an AI room and arrives in the same shape.
-    trigger.startsWith("room.") || trigger.startsWith("agent.") -> RoomPayload::class.java
-    else -> null
-}
+fun modelName(trigger: String): String =
+    WebhookTriggers.payloadType(trigger)?.simpleName
+        ?: if (trigger in WebhookTriggers.untypedTriggers) "untyped" else "unknown"
 
 /** Parses the payload with the model of its trigger and prints a one-line summary. */
 private fun logPayload(trigger: String, payloadValue: Any?) {
-    val model = payloadModel(trigger)
+    val model = WebhookTriggers.payloadType(trigger)
     if (model == null) {
-        // A trigger family added on the server after this SDK was generated:
-        // acknowledge it and keep the raw payload rather than failing.
+        // The catch-all, or a trigger added on the server after this SDK was
+        // generated: acknowledge it and keep the raw payload rather than
+        // parsing it with some other model.
         println("  no payload model for this trigger; raw payload below")
         return
     }

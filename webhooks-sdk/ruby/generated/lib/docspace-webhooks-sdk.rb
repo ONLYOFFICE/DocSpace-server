@@ -23,3 +23,7 @@ require 'docspace-webhooks-sdk/models/webhook_config_info'
 require 'docspace-webhooks-sdk/models/webhook_envelope'
 require 'docspace-webhooks-sdk/models/webhook_event_info'
 require 'docspace-webhooks-sdk/models/webhook_target_info'
+
+# Trigger -> payload model table, written by tools/gen-trigger-map.py in the
+# post-step of the generate-webhook-sdk skill.
+require 'docspace-webhooks-sdk/webhook_triggers'

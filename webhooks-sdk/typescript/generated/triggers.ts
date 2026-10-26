@@ -111,6 +111,50 @@ export const PAYLOAD_DESERIALIZERS: {
 };
 
 /**
+ * The name of the payload model each trigger carries, as the contract names
+ * the schema; `null` for the untyped `'*'`.
+ */
+export const PAYLOAD_MODEL_NAMES: { [K in WebhookTriggerName]: string | null } = {
+    'user.created': 'UserPayload',
+    'user.invited': 'UserPayload',
+    'user.updated': 'UserPayload',
+    'user.deleted': 'UserPayload',
+    'group.created': 'GroupPayload',
+    'group.updated': 'GroupPayload',
+    'group.deleted': 'GroupPayload',
+    'file.created': 'FilePayload',
+    'file.uploaded': 'FilePayload',
+    'file.updated': 'FilePayload',
+    'file.trashed': 'FilePayload',
+    'file.deleted': 'FilePayload',
+    'file.restored': 'FilePayload',
+    'file.copied': 'FilePayload',
+    'file.moved': 'FilePayload',
+    'file.downloaded': 'FilePayload',
+    'folder.created': 'FolderPayload',
+    'folder.updated': 'FolderPayload',
+    'folder.trashed': 'FolderPayload',
+    'folder.deleted': 'FolderPayload',
+    'folder.restored': 'FolderPayload',
+    'folder.copied': 'FolderPayload',
+    'folder.moved': 'FolderPayload',
+    'folder.downloaded': 'FolderPayload',
+    'room.created': 'RoomPayload',
+    'room.updated': 'RoomPayload',
+    'room.archived': 'RoomPayload',
+    'room.deleted': 'RoomPayload',
+    'room.restored': 'RoomPayload',
+    'room.copied': 'RoomPayload',
+    'form.submit': 'FormSubmitPayload',
+    'form.filled.out': 'FilePayload',
+    'form.stopped': 'FilePayload',
+    'agent.created': 'RoomPayload',
+    'agent.updated': 'RoomPayload',
+    'agent.deleted': 'RoomPayload',
+    '*': null,
+};
+
+/**
  * True when `trigger` is in the contract this build of the SDK was generated
  * from, the untyped `'*'` included; false for a trigger added on the server
  * later. The C# SDK's `WebhookTriggers.IsKnown` answers the same way.

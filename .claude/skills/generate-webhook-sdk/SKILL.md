@@ -113,16 +113,25 @@ exception for the trigger, to the table.
 **Working directory: `webhooks-sdk/`** for every command in this stage. Every path below is relative
 to it. That is also what makes the generator version pinned in `webhooks-sdk/openapitools.json`
 apply. Fixture files are the one exception: pass them as **absolute** paths, because `go -C` and
-`dotnet run --project` resolve a relative path against a different directory.
+`dotnet run --project` resolve a relative path against a different directory. In a POSIX shell on
+Windows (Git Bash, MSYS) write that path with `cygpath -m "$PWD/samples/<name>.json"`
+(`W:/Work/...`): MSYS converts a `/w/...` argument for a native program only when the argument
+*starts* with the path, so `"-Dexec.args=/w/... <secret> <sig>"` reaches Maven unconverted and
+Java and Kotlin open a file that does not exist. PowerShell's `(Resolve-Path ...).Path` is already
+native.
 
 Languages are independent; do them one after another and run the slow steps (the generator, Maven,
-Swift, the first `npm ci`) in the background. All nine with verification take ~90 s on a warm
-machine; first runs are longer (the generator jar, Maven and npm downloads).
+Swift, the first `npm ci`) in the background. Measured on a warm Windows machine: the generator
+takes ~25 s for all nine, the post-steps a few seconds, and verification several minutes, almost all
+of it Maven (one JVM start per Java and Kotlin fixture) and `dotnet` -- 225 s for seven languages
+here, plus ~25 s for PHP, Ruby and Swift in Docker with a warm Swift build. Expect four to five
+minutes for the whole run with verification; first runs are longer (the generator jar, Maven and npm downloads), and
+Swift in Docker adds a few minutes for its first package build.
 
 ### A0. Check the post-step toolchain
 
-Before anything is wiped: when the run includes `java`, `csharp` or `typescript`, their post-step (A3)
-needs Python with PyYAML. Check it once, up front:
+Before anything is wiped: every language's post-step (A3) writes its trigger table with Python and
+PyYAML. Check it once, up front:
 
 ```bash
 python -c "import yaml"     # or python3 on a box without a `python`
@@ -178,17 +187,46 @@ generated files (Glob `<lang>/generated/**/*`, minus `.generate.log`) for the re
 
 ### A3. Post-step
 
-Only these languages have one. The trigger tables are derived from the contract by
-`tools/gen-trigger-map.py`, never hand-maintained. It is invoked as `python` here; on a box where only
-`python3` exists, use that. A0 has already checked that it and PyYAML are there.
+Every language has one. The trigger -> payload model tables are derived from the contract by
+`tools/gen-trigger-map.py`, never hand-maintained, and every sample picks its payload model through
+its language's table. It is invoked as `python` here; on a box where only `python3` exists, use that.
+A0 has already checked that it and PyYAML are there.
+
+First, for **every** language: put back the generator's file manifest when only its line endings
+changed. On Windows the generator writes `<lang>/generated/.openapi-generator/FILES` with CRLF; git
+then warns `CRLF will be replaced by LF` on every diff, and depending on `core.autocrlf` lists the
+nine manifests as modified although their content is the same -- rewriting the file with LF does
+not help, git still sees a changed file it cannot tell apart. Restoring it from git does: it leaves
+an LF file and a clean status. A manifest whose content really changed (a model added or removed)
+fails the comparison and stays as generated.
+
+```bash
+# POSIX shell, from the repository root
+for f in webhooks-sdk/*/generated/.openapi-generator/FILES; do git diff --ignore-cr-at-eol --quiet -- "$f" && git checkout -- "$f"; done
+```
+
+```powershell
+# PowerShell, from the repository root
+Get-ChildItem webhooks-sdk/*/generated/.openapi-generator/FILES | ForEach-Object { git diff --ignore-cr-at-eol --quiet -- $_.FullName; if ($LASTEXITCODE -eq 0) { git checkout -- $_.FullName } }
+```
+
+These two run from the repository root rather than `webhooks-sdk/`, the one exception in stage A.
+
+Then, per language (`<spec>` is `../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`):
 
 | Language | Post-step |
 | --- | --- |
-| `java` | copy the contents of `java/shim/` into `java/generated/src/main/java/` (merging directories); then `python tools/gen-trigger-map.py --lang java --spec ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java` |
-| `kotlin` | copy `kotlin/docs/*.md` into `kotlin/generated/docs/` |
-| `go` | copy `go/shim/*.go` into `go/generated/` |
-| `csharp` | `python tools/gen-trigger-map.py --lang csharp --spec ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python tools/gen-trigger-map.py --lang markdown --spec ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml --doc-path docs/ --out csharp/generated/TRIGGERS.md` |
-| `typescript` | `python tools/gen-trigger-map.py --lang typescript --spec ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml --out typescript/generated/triggers.ts` |
+| `java` | copy the contents of `java/shim/` into `java/generated/src/main/java/` (merging directories); then `python tools/gen-trigger-map.py --lang java --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java`; then `python tools/gen-trigger-map.py --lang java-triggers --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.java` |
+| `kotlin` | copy `kotlin/docs/*.md` into `kotlin/generated/docs/`; then `python tools/gen-trigger-map.py --lang kotlin --spec <spec> --package onlyoffice.docspace.webhooks.sdk --model-package onlyoffice.docspace.webhooks.sdk.models --out kotlin/generated/src/main/kotlin/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.kt` |
+| `go` | copy `go/shim/*.go` into `go/generated/`; then `python tools/gen-trigger-map.py --lang go --spec <spec> --package docspace_webhooks_sdk --out go/generated/triggers.go` |
+| `csharp` | `python tools/gen-trigger-map.py --lang csharp --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python tools/gen-trigger-map.py --lang markdown --spec <spec> --doc-path docs/ --out csharp/generated/TRIGGERS.md` |
+| `php` | `python tools/gen-trigger-map.py --lang php --spec <spec> --package "OnlyOffice\DocSpace\Webhooks\Sdk" --model-package "OnlyOffice\DocSpace\Webhooks\Sdk\Model" --out php/generated/lib/WebhookTriggers.php` |
+| `python` | `python tools/gen-trigger-map.py --lang python --spec <spec> --package docspace_webhooks_sdk --out python/generated/docspace_webhooks_sdk/triggers.py` |
+| `ruby` | `python tools/gen-trigger-map.py --lang ruby --spec <spec> --package DocspaceWebhooksSdk --out ruby/generated/lib/docspace-webhooks-sdk/webhook_triggers.rb` (the gem entry point from `templates/ruby/gem.mustache` requires it) |
+| `swift` | `python tools/gen-trigger-map.py --lang swift --spec <spec> --out swift/generated/Sources/DocSpaceWebhooksSDK/WebhookTriggers.swift` |
+| `typescript` | `python tools/gen-trigger-map.py --lang typescript --spec <spec> --out typescript/generated/triggers.ts` |
+
+The PHP namespaces are quoted: both shells keep backslashes inside double quotes.
 
 The copies:
 
@@ -212,7 +250,9 @@ Skip only when the user asked for generation alone, and then say so in the repor
 the same as working: every SDK here once generated cleanly and still failed to compile or to parse
 a real delivery. So each generated language is built, and then its sample is run over **every**
 signed fixture in `samples/`. The sample verifies the signature and parses the payload with the
-generated models, which is exactly what a receiver does.
+generated models, which is exactly what a receiver does. It must also pick the right model and refuse
+what a receiver must refuse, so the run checks both: the model each sample reports, and its exit
+code on the negative fixtures in `samples/negative/`.
 
 Append the output of every command for a language to `<lang>/generated/.verify.log`
 (`>> <lang>/generated/.verify.log 2>&1`, the same in both shells), starting from an empty file.
@@ -235,10 +275,29 @@ and it must never be reported as a pass.
 
 - The `-Dexec.args=…` argument is quoted as a whole on purpose: PowerShell splits an unquoted `-D`
   argument at the first dot.
-- Fixtures: Glob `samples/*.json`. `<body>` is the fixture's **absolute** path. `<sig>` is the
-  content of the `.sig` file with the same name (`sha256=…`). `<secret>` is the content of
-  `samples/SECRET`. Read both files and pass the values trimmed. A fixture whose sample exits
-  non-zero is **FAILED**.
+- Fixtures: Glob `samples/*.json`. `<body>` is the fixture's **absolute** path (`cygpath -m` in a
+  POSIX shell on Windows, see above). `<sig>` is the content of the `.sig` file with the same name
+  (`sha256=…`). `<secret>` is the content of `samples/SECRET`. Read both files and pass the values
+  trimmed. A fixture whose sample exits non-zero is **FAILED**.
+- **The model check.** Every sample prints one line `model: <name>`: the payload model it parsed
+  with, as the contract names the schema (`FilePayload`, `UserPayload`, …), `untyped` for the
+  catch-all `*`, and `unknown` for a trigger the contract does not list. The expected name comes
+  from the contract's `x-docspace-trigger-payloads` map, read with a one-liner (run from
+  `webhooks-sdk/`, the same in both shells):
+
+  ```
+  python -c "import json,sys,yaml; m=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['x-docspace-trigger-payloads']['map']; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print((m[t] or 'untyped') if t in m else 'unknown')" ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml samples/<name>.json
+  ```
+
+  A run whose output has no line that, trimmed, equals `model: <expected>` is **FAILED (wrong
+  model)**, even with exit code 0: the sample parsed the delivery with a model the contract does not
+  give its trigger (a hand-written prefix rule that drifted, an unknown trigger read as a file).
+- **The negative fixtures.** Glob `samples/negative/*.json` and run each sample over them exactly as
+  over the positive ones (their `.sig` sits next to them; `samples/negative/README.md` says what is
+  wrong with each). Every sample must exit **non-zero** on each of them; one that exits 0 is
+  **FAILED (accepted a negative fixture)** — it would accept a forged or broken delivery, and the
+  positive run cannot show that. The positive Glob `samples/*.json` does not descend into the
+  subfolder, so the two sets never mix.
 - Skip the samples of a language whose build failed.
 
 PHP lint, which has to be a loop because `php -l` takes one file:
@@ -264,11 +323,43 @@ Outcomes, per language — use these words in the report:
 | `FAILED — see <lang>/generated/.generate.log` | the generator failed; nothing for that language is verified |
 | `BUILD FAILED — see <lang>/generated/.verify.log` | generated, but the language does not build — the most common real failure |
 | `<fixture>: ok` / `FAILED` | the sample parsed (or did not parse) that real delivery |
+| `<fixture>: FAILED (wrong model)` | it parsed, but with another model than the contract gives its trigger |
+| `negative/<fixture>: ok` / `FAILED (accepted a negative fixture)` | the sample refused (or accepted) a delivery it must refuse |
 | `NOT VERIFIED (toolchain missing): …` | the language was generated but **not** checked |
 
 The run has failed if any generator, build or fixture failed. A missing toolchain does **not** fail
-it. So collect the `NOT VERIFIED` list every time and report it. Ruby and Swift are the usual ones;
-the README records that they were checked in the `ruby:3.4-slim` and `swift:6.1` images instead.
+it. So collect the `NOT VERIFIED` list every time and report it.
+
+### A5. Docker fallback for PHP, Ruby and Swift
+
+PHP, Ruby and Swift are the toolchains a machine most often lacks. When Docker is available, verify
+them in a container instead of reporting them `NOT VERIFIED`: the same build and sample commands,
+over the same fixtures, with `webhooks-sdk/` mounted at `/w`. Inside the container a fixture is
+`/w/samples/<name>.json` (`/w/samples/negative/<name>.json`), not the host path; secret, signature
+and the model check are as in A4. A language verified this way counts as verified; the report says
+so, with the image and the Docker host it ran on.
+
+```bash
+# POSIX shell, from webhooks-sdk/; --user keeps the files the build writes owned by you
+D="docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v $PWD:/w -w /w"
+$D php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
+$D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
+$D ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
+# Swift: build once, then run the built sample per fixture in the same container -- a fresh container
+# per fixture would resolve swift-crypto and compile from scratch each time
+$D swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "<secret>" "$(cat "${f%.json}.sig")"; echo "exit $?"; done'
+```
+
+```powershell
+# PowerShell, from webhooks-sdk/ (Docker Desktop maps file ownership itself, so no --user)
+docker run --rm -v "${PWD}:/w" -w /w ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
+```
+
+- `-v $PWD:/w` mounts a path of the machine the Docker **daemon** runs on. With `DOCKER_HOST`
+  pointing at a remote daemon, the mount works only when `webhooks-sdk/` exists at that same path on
+  that host, so sync the tree there first and run the commands on that host.
+- The images: `php:8.3-cli`, `ruby:3.4-slim`, `swift:6.1`. The Swift package needs network access
+  for swift-crypto on its first build.
 
 ## Stage B — package check (on request)
 
@@ -342,9 +433,14 @@ install — it writes a stray `openapitools.json` into the current directory. Ru
   `targets.conf`.
 - Python, PHP or Kotlin silently lose the entry id (`EntryId` `oneOf`) — the `--schema-mappings`
   in `targets.conf` were changed; see README, *oneOf support varies sharply by generator*.
-- Trigger tables (`Triggers.cs`, `triggers.ts`, `JSON.java`, `TRIGGERS.md`) did not pick up a new
-  trigger — the contract's `x-docspace-trigger-payloads` was not updated, or the post-step was
-  skipped (no `python`).
+- Trigger tables (`Triggers.cs`, `triggers.ts`, `JSON.java`, `WebhookTriggers.java`,
+  `WebhookTriggers.kt`, `triggers.go`, `triggers.py`, `WebhookTriggers.php`, `webhook_triggers.rb`,
+  `WebhookTriggers.swift`, `TRIGGERS.md`) did not pick up a new trigger — the contract's
+  `x-docspace-trigger-payloads` was not updated, or the post-step was skipped (no `python`). A
+  skipped post-step also breaks the build: every sample imports its language's table.
+- `FAILED (wrong model)` for one language only — its sample stopped going through the generated
+  table. `unknown` where a model was expected for every language — the fixture's trigger is missing
+  from the contract map.
 - Every Java/Kotlin sample run fails with an unknown lifecycle phase `.args=…` — the `-Dexec.args`
   argument lost its quotes in PowerShell.
 - A file from an older generator version survives in `generated/` — the wipe in A1 stopped at a
@@ -352,7 +448,9 @@ install — it writes a stray `openapitools.json` into the current directory. Ru
 
 Known-harmless noise:
 
-- `warning: in the working copy of '…/.openapi-generator/FILES', CRLF will be replaced by LF` — the
-  generator's file manifest on Windows; git normalizes it.
+- `warning: in the working copy of '…/.openapi-generator/FILES', CRLF will be replaced by LF`, or
+  the nine manifests listed as modified with an empty diff — the generator's manifest written with
+  CRLF on Windows, when the restore at the top of A3 was skipped. The repository's
+  `* text=auto eol=lf` stores it as LF either way; run that restore.
 - Generator warnings about unused models (`FileEntryPayload` is emitted but nothing points at it —
   README, *Known gaps*).

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
+import com.onlyoffice.docspace.webhooks.sdk.WebhookTriggers;
 import com.onlyoffice.docspace.webhooks.sdk.model.FilePayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.FolderPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.FormSubmitPayload;
@@ -61,6 +62,18 @@ public final class LogWebhook {
         return MessageDigest.isEqual(expected, received);
     }
 
+    /**
+     * The payload model the generated trigger table names: "untyped" for the
+     * legacy catch-all, "unknown" for a trigger newer than this SDK.
+     */
+    static String modelName(String trigger) {
+        Class<?> model = WebhookTriggers.payloadType(trigger);
+        if (model != null) {
+            return model.getSimpleName();
+        }
+        return WebhookTriggers.UNTYPED_TRIGGERS.contains(trigger) ? "untyped" : "unknown";
+    }
+
     private static String read(Path p) throws IOException {
         return Files.readString(p).trim();
     }
@@ -102,33 +115,44 @@ public final class LogWebhook {
                 event.getId(), event.getCreateOn(), event.getCreateBy());
         System.out.printf("  subscription #%d \"%s\"%n", config.getId(), config.getName());
 
-        if (trigger.startsWith("user.")) {
-            UserPayload u = UserPayload.fromJson(payloadJson);
+        Class<?> model = WebhookTriggers.payloadType(trigger);
+        Object payload = null;
+        if (model != null) {
+            // The model's own type adapter validates the JSON against the
+            // contract; a parse error ends the run with a non-zero exit.
+            try {
+                payload = JSON.getGson().fromJson(payloadJson, model);
+            } catch (RuntimeException e) {
+                System.err.printf("unparseable %s payload: %s%n", trigger, e.getMessage());
+                System.exit(1);
+            }
+        }
+
+        System.out.printf("  model: %s%n", modelName(trigger));
+
+        if (payload instanceof UserPayload u) {
             System.out.printf("  user: %s <%s>%n", u.getUserName(), u.getEmail());
-        } else if (trigger.startsWith("group.")) {
-            GroupPayload g = GroupPayload.fromJson(payloadJson);
+        } else if (payload instanceof GroupPayload g) {
             System.out.printf("  group: %s%n", g.getName());
-        } else if (trigger.equals("form.submit")) {
+        } else if (payload instanceof FormSubmitPayload f) {
             // The one wrapper payload: the original form and the submitted copy.
-            FormSubmitPayload f = FormSubmitPayload.fromJson(payloadJson);
             System.out.printf("  form: %s  submitted as %s%n",
                     f.getOriginalForm() == null ? null : f.getOriginalForm().getTitle(),
                     f.getSubmittedForm() == null ? null : f.getSubmittedForm().getTitle());
-        } else if (trigger.startsWith("folder.")) {
-            FolderPayload d = FolderPayload.fromJson(payloadJson);
+        } else if (payload instanceof FolderPayload d) {
             System.out.printf("  folder: %s  id=%s  parent=%s%n",
                     d.getTitle(), d.getId(), d.getParentId());
-        } else if (trigger.startsWith("room.") || trigger.startsWith("agent.")) {
-            // An agent is an AI room and arrives in the same shape.
-            RoomPayload r = RoomPayload.fromJson(payloadJson);
+        } else if (payload instanceof RoomPayload r) {
             System.out.printf("  room: %s  id=%s  parent=%s%n",
                     r.getTitle(), r.getId(), r.getParentId());
-        } else {
-            // file.*, form.filled.out and form.stopped. Match on the concrete
-            // payload, never on FileEntryPayload: that is only the shared part.
-            FilePayload e = FilePayload.fromJson(payloadJson);
+        } else if (payload instanceof FilePayload e) {
             System.out.printf("  file: %s  id=%s  parent=%s%n",
                     e.getTitle(), e.getId(), e.getParentId());
+        } else {
+            // The catch-all, or a trigger added on the server after this SDK was
+            // generated: acknowledge it and keep the raw payload rather than
+            // parsing it with some other model.
+            System.out.println("  no payload model for this trigger; raw payload below");
         }
 
         System.out.println();

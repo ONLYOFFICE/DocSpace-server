@@ -48,9 +48,11 @@ public class WebhookDeliveryStateTests(
     [Fact]
     public async Task Attempt_LeaseTakenOverWhileSending_DoesNotOverwriteTheRecord()
     {
-        // Arrange
-        var receiver = await CreateReceiverAsync(delayMilliseconds: 8_000);
-        var subscription = await CreateSubscriptionAsync(receiver);
+        // Arrange: a receiver slow enough to hold the attempt in flight while the test steps in, and a second,
+        // fast subscription to the same events that serves as a marker
+        var receiver = await CreateReceiverAsync(delayMilliseconds: 4_000);
+        var subscription = await CreateSubscriptionAsync(receiver, WebhookTrigger.UserCreated);
+        var marker = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserCreated);
         await FireEventAsync();
         await receiver.WaitForDeliveriesAsync(1);
         var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
@@ -60,24 +62,45 @@ public class WebhookDeliveryStateTests(
             "UPDATE webhooks_logs SET lease_id = @leaseId WHERE id = @id",
             ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
 
-        // Assert: the subscription records the success, which happens just before the record is written
-        var deadline = DateTime.UtcNow.AddSeconds(60);
+        // Assert: the subscription records the success, just before the attempt tries to write the record
+        (await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null)).Should().NotBeNull();
 
-        while ((await GetSubscriptionAsync(subscription.Id))?.LastSuccessOn is null && DateTime.UtcNow < deadline)
-        {
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        // The sender claims nothing new until every attempt of its current batch has ended, the one above included.
+        // So once an event published only now has been delivered to the marker, the attempt has written whatever it
+        // was going to write: no fixed pause is needed. (The integration-test profile runs one Web.Studio.)
+        var markerRecords = (await GetDeliveryRecordsAsync(marker.Id)).Count;
+        await FireEventAsync();
+        await WaitForAttemptedDeliveriesAsync(marker.Id, markerRecords + 1);
 
-        // The record is written by the same attempt right after the success, so it is settled within milliseconds;
-        // a poll period of the sender bounds that generously. The record itself is not claimed again meanwhile: the
-        // claim moved its next attempt a whole lease ahead.
-        await Task.Delay(SenderPollPeriod, TestContext.Current.CancellationToken);
-
-        var after = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+        var after = (await GetDeliveryRecordsAsync(subscription.Id)).Single(r => r.Id == record.Id);
 
         after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
         after.Delivery.Should().BeNull();
         after.Attempts.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Attempt_LeaseOfADeadSender_IsTakenOverByTheNextPoll()
+    {
+        // Arrange: a record as a sender that died mid-send leaves it: leased, unanswered, the lease already expired
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        // Act
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET status = 0, delivery = NULL, attempts = 0, lease_id = @leaseId, " +
+            "next_attempt_on = UTC_TIMESTAMP() - INTERVAL 1 SECOND WHERE id = @id",
+            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record!.Id));
+
+        // Assert: another poll claims it with a lease of its own and delivers it
+        var redelivered = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        redelivered!.Status.Should().Be(200);
+        redelivered.Attempts.Should().Be(1);
+        redelivered.NextAttemptOn.Should().BeNull();
+        (await receiver.GetDeliveriesAsync()).Should().HaveCount(2, "the dead sender's attempt and the one that took over");
     }
 
     [Fact]
@@ -135,8 +158,9 @@ public class WebhookDeliveryStateTests(
     [Fact]
     public async Task Attempt_FirstFailureOnASubscriptionWithoutSuccessForDays_IsRetriedAndKeepsItEnabled()
     {
-        // Arrange: a subscription that heard nothing for days, as one with rare events does
-        var receiver = await CreateReceiverAsync(500);
+        // Arrange: a subscription that heard nothing for days, as one with rare events does, whose receiver
+        // fails once and then answers
+        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 500, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
         await ExecuteSqlAsync(
             "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
@@ -145,18 +169,17 @@ public class WebhookDeliveryStateTests(
         // Act
         await FireEventAsync();
 
-        // Assert: one failure is not enough, the retries get their chance first
-        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        // Assert: one failure is not enough, the retry got its chance and succeeded
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record!.Attempts.Should().Be(1);
-        record.NextAttemptOn.Should().NotBeNull("the failure is retried");
+        record!.Attempts.Should().Be(2);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeTrue("a subscription is disabled only once the retries of an event have run out");
     }
 
     [Fact]
-    public async Task Attempt_FailsOnAnOldSubscriptionWithARecentSuccess_KeepsItEnabled()
+    public async Task Attempt_RetriesRunOutOnAnOldSubscriptionWithARecentSuccess_KeepsItEnabled()
     {
         // Arrange: four days old, but delivered to an hour ago
         var receiver = await CreateReceiverAsync(500);
@@ -168,10 +191,11 @@ public class WebhookDeliveryStateTests(
         // Act
         await FireEventAsync();
 
-        // Assert
-        var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        // Assert: the event is given up on, but the subscription has not gone days without a success
+        var record = await WaitForRecordAsync(
+            subscription.Id, r => r.Attempts > ProfileRetryCount && r.NextAttemptOn is null, timeoutSeconds: 120);
 
-        record!.NextAttemptOn.Should().NotBeNull("the failure is retried");
+        record!.Attempts.Should().Be(ProfileRetryCount + 1);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeTrue();

@@ -142,7 +142,7 @@ public class WebhookGroupAccessChecker(
 {
     public bool CheckIsTarget(ASC.Core.Users.GroupInfo data, string targetId)
     {
-        return data.ID.ToString() == targetId;
+        return Guid.TryParse(targetId, out var id) && id == data.ID;
     }
 
     public async Task<bool> CheckAccessAsync(ASC.Core.Users.GroupInfo data, Guid userId)
@@ -164,7 +164,7 @@ public class WebhookUserAccessChecker(UserManager userManager) : IWebhookAccessC
 {
     public bool CheckIsTarget(UserInfo data, string targetId)
     {
-        return data.Id.ToString() == targetId;
+        return Guid.TryParse(targetId, out var id) && id == data.Id;
     }
 
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)

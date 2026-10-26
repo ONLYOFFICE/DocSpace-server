@@ -51,7 +51,7 @@ public abstract class WebhookDeliveryTestBase(
     protected const int ProfileRetryCount = 3;
 
     /// <inheritdoc cref="ProfileRetryCount"/>
-    protected static TimeSpan ProfileRetryInterval { get; } = TimeSpan.FromSeconds(3);
+    protected static TimeSpan ProfileRetryInterval { get; } = TimeSpan.FromMilliseconds(500);
 
     /// <summary>
     /// How long the sender in Web.Studio sleeps between two polls when nothing is due (the waiting period of
@@ -60,17 +60,18 @@ public abstract class WebhookDeliveryTestBase(
     protected static TimeSpan SenderPollPeriod { get; } = TimeSpan.FromSeconds(5);
 
     /// <summary>
-    /// How long to watch for a delivery that must not happen: every retry the profile allows, stretched by the
-    /// sender's 10% jitter, plus one poll. Anything still scheduled for the event would have gone out by then.
+    /// A <c>next_attempt_on</c> that is already due: the sender claims such a record at its next poll, at most
+    /// <see cref="SenderPollPeriod"/> later.
     /// </summary>
-    protected static TimeSpan NoMoreDeliveriesPeriod { get; } = ProfileRetryInterval * ProfileRetryCount * 1.1 + SenderPollPeriod;
+    private const string DueNow = "UTC_TIMESTAMP() - INTERVAL 1 SECOND";
 
     /// <summary>
-    /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/>.
+    /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/> and
+    /// <paramref name="body"/> (<c>ok</c> by default).
     /// </summary>
-    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0)
+    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0, string? body = null)
     {
-        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds);
+        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds, body);
     }
 
     /// <summary>
@@ -324,6 +325,120 @@ public abstract class WebhookDeliveryTestBase(
         await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
+    /// <summary>
+    /// Polls a subscription as the owner reads it until <paramref name="until"/> holds, and returns the last observed
+    /// state either way; null once the subscription is gone.
+    /// </summary>
+    protected async Task<WebhooksConfigDto?> WaitForSubscriptionAsync(int configId, Func<WebhooksConfigDto?, bool> until, int timeoutSeconds = 60)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+
+        while (true)
+        {
+            var config = await GetSubscriptionAsync(configId);
+
+            if (until(config) || DateTime.UtcNow >= deadline)
+            {
+                return config;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Makes a settled delivery record look like one a sender is sending right now: leased, with the lease running
+    /// for a day. No sender holds it, so nothing ever finishes it; the record stays "in flight" for the test.
+    /// </summary>
+    protected Task PlantInFlightAsync(int recordId)
+    {
+        return ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET lease_id = @leaseId, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
+            ("@leaseId", Guid.NewGuid().ToString()), ("@id", recordId));
+    }
+
+    /// <summary>
+    /// Puts a settled delivery record back to the state of an event just published and never attempted, due at the
+    /// next poll of the sender (<paramref name="due"/>), or a day ahead so that the test decides when it becomes due
+    /// (<see cref="MakeDueAsync"/>). The receiver and the subscription stay as they are.
+    /// </summary>
+    protected Task RequeueAsUnsentAsync(int recordId, bool due = true)
+    {
+        return ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET status = 0, delivery = NULL, attempts = 0, lease_id = NULL, response_payload = NULL, " +
+            $"next_attempt_on = {(due ? DueNow : "UTC_TIMESTAMP() + INTERVAL 1 DAY")} WHERE id = @id",
+            ("@id", recordId));
+    }
+
+    /// <summary>Makes a delivery record due at the next poll of the sender, keeping its other columns.</summary>
+    protected Task MakeDueAsync(int recordId)
+    {
+        return ExecuteSqlAsync($"UPDATE webhooks_logs SET next_attempt_on = {DueNow} WHERE id = @id", ("@id", recordId));
+    }
+
+    /// <summary>
+    /// Changes the type of <paramref name="member"/> as the owner and waits until the change is done: a demotion
+    /// from <c>RoomAdmin</c> runs as a background task (<c>startUserTypeUpdate</c>), reported through its progress.
+    /// </summary>
+    protected async Task ChangeTypeAsync(User member, EmployeeType type)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var userTypeApi = new UserTypeApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
+
+        await _peopleClient.Authenticate(Owner);
+        await userTypeApi.StartUserTypeUpdateAsync(new StartUpdateUserTypeDto(type, member.Id), cancellationToken);
+
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            var progress = (await userTypeApi.GetUserTypeUpdateProgressAsync(member.Id, cancellationToken)).Response;
+
+            if (progress.IsCompleted || DateTime.UtcNow >= deadline)
+            {
+                progress.IsCompleted.Should().BeTrue("the type change of the member must have finished");
+                progress.Error.Should().BeNullOrEmpty();
+
+                return;
+            }
+
+            await Task.Delay(500, cancellationToken);
+        }
+    }
+
+    /// <summary>Disables (terminates) <paramref name="member"/> as the owner.</summary>
+    protected async Task TerminateAsync(User member)
+    {
+        await _peopleClient.Authenticate(Owner);
+        await _userStatusApi.UpdateUserStatusAsync(
+            EmployeeStatus.Terminated, new UpdateMembersRequestDto([member.Id], false), TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// A room created by the owner, shared for reading with <paramref name="readers"/> and with nobody else.
+    /// </summary>
+    protected async Task<int> CreateRoomAsync(params User[] readers)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await _filesClient.Authenticate(Owner);
+
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
+
+        if (readers.Length > 0)
+        {
+            await _roomsApi.SetRoomSecurityAsync(
+                room.Id,
+                new RoomInvitationRequest(
+                    invitations: readers.Select(r => new RoomInvitation(r.Id, DocSpace.API.SDK.Model.FileShare.Read)).ToList(),
+                    notify: false),
+                cancellationToken);
+        }
+
+        return room.Id;
+    }
+
     /// <summary>The HMAC-SHA256 the portal signs a body with, as the hex string of the signature header.</summary>
     protected static string Sign(string secretKey, string body)
     {
@@ -344,6 +459,7 @@ public sealed class DeliveryRecord
     public int Attempts { get; init; }
     public DateTime? NextAttemptOn { get; init; }
     public string RequestPayload { get; init; } = "";
+    public string? ResponsePayload { get; init; }
 }
 
 /// <summary>The member a delivery record names, of whom only the id is compared.</summary>

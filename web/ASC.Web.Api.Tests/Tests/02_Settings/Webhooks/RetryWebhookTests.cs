@@ -77,39 +77,30 @@ public class RetryWebhookTests(
     [Fact]
     public async Task RetryWebhook_FailedDelivery_KeepsTheEarlierOutcomeAndNamesWhoRetried()
     {
-        // Arrange: a first attempt that fails and is scheduled for an automatic retry
-        var receiver = await CreateReceiverAsync(status: 500);
+        // Arrange: a first attempt that failed, with an automatic retry scheduled. It is planted on a delivered
+        // record and held a day ahead: a real retry comes half a second later and could be in flight (409)
+        var receiver = await CreateReceiverAsync();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
-        var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        var original = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
+            ("@id", original!.Id));
 
-        // Act: the test stack retries every few seconds, so an automatic attempt may be in flight right then (409)
-        WebhooksLogWrapper? result = null;
-
-        for (var i = 0; i < 10 && result is null; i++)
-        {
-            try
-            {
-                result = await _webhooksApi.RetryWebhookAsync(original!.Id, TestContext.Current.CancellationToken);
-            }
-            catch (ApiException e) when (e.ErrorCode == 409)
-            {
-                await Task.Delay(300, TestContext.Current.CancellationToken);
-            }
-        }
-
-        result.Should().NotBeNull("the automatic attempts in between take well under a second each");
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        var result = await _webhooksApi.RetryWebhookAsync(original.Id, TestContext.Current.CancellationToken);
 
         // Assert: the failed record keeps its answer, and its automatic retries give way to the manual one
         var records = await GetDeliveryRecordsAsync(subscription.Id);
 
-        var earlier = records.Should().ContainSingle(r => r.Id == original!.Id).Subject;
+        var earlier = records.Should().ContainSingle(r => r.Id == original.Id).Subject;
         earlier.Status.Should().Be(500);
-        earlier.EventId.Should().Be(original!.Id);
+        earlier.EventId.Should().Be(original.Id);
         earlier.RetriedBy.Should().BeNull();
         earlier.NextAttemptOn.Should().BeNull();
 
-        var retry = records.Should().ContainSingle(r => r.Id == result!.Response.Id).Subject;
+        var retry = records.Should().ContainSingle(r => r.Id == result.Response.Id).Subject;
         retry.EventId.Should().Be(original.Id);
         retry.RetriedBy.Should().NotBeNull();
         retry.RetriedBy!.Id.Should().Be(Owner.Id);
@@ -179,14 +170,15 @@ public class RetryWebhookTests(
     [Fact]
     public async Task RetryWebhook_DeliveryBeingSent_ThrowsConflict()
     {
-        // Arrange: a receiver slow enough to keep the attempt in flight while the retry is asked for
-        var receiver = await CreateReceiverAsync(delayMilliseconds: 15_000);
+        // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
+        var receiver = await CreateReceiverAsync();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
-        await receiver.WaitForDeliveriesAsync(1);
-        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await PlantInFlightAsync(record!.Id);
 
         // Act
+        await _webApiClient.Authenticate(Owner);
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken));
 

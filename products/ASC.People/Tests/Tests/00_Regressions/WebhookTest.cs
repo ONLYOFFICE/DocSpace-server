@@ -82,6 +82,8 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         InternalWebhookTrigger.FormStopped,
         InternalWebhookTrigger.AgentUpdated,
         InternalWebhookTrigger.AgentDeleted,
+        InternalWebhookTrigger.FileDownloaded,
+        InternalWebhookTrigger.FolderDownloaded,
     ];
 
     [Theory]
@@ -114,6 +116,20 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
     public void IsAvailableFor_AllRolesTrigger_User_ReturnsTrue(InternalWebhookTrigger trigger)
         => trigger.IsAvailableFor(InternalEmployeeType.User).Should().BeTrue();
 
+    /// <summary>
+    /// Every trigger sits in exactly one of the two lists above, so a trigger added later cannot go untested by
+    /// the role checks: it fails here until it is classified.
+    /// </summary>
+    [Fact]
+    public void AllTriggers_AreClassifiedInExactlyOneList()
+    {
+        var adminOnly = AdminOnlyTriggers.Select(row => row.Data).ToList();
+        var allRoles = AllRolesTriggers.Select(row => row.Data).ToList();
+
+        adminOnly.Should().NotIntersectWith(allRoles);
+        adminOnly.Concat(allRoles).Should().BeEquivalentTo(Enum.GetValues<InternalWebhookTrigger>());
+    }
+
     [Fact]
     public void AllTriggers_HaveAvailableForAttribute()
     {
@@ -143,16 +159,19 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         triggers.Should().NotBeNull();
         triggers.Response.Should().NotBeNull();
 
-        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == (long)WebhookTrigger.UserCreated);
-        //trigger.Should().NotBeNull();
-        //trigger!.Available.Should().Be(false);
+        var trigger = triggers.Response.FirstOrDefault(x => x.Id == (long)WebhookTrigger.UserCreated);
+        trigger.Should().NotBeNull();
+        trigger!.Available.Should().BeFalse("a User may not subscribe to the creation of users");
 
+        // The triggers are checked before the target is probed, so this address is never contacted; were the
+        // trigger check gone, the blacklisted localhost would answer the request with a 400 of its own, which
+        // is why the message is asserted and not only the status.
         var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestDto(
             "test",
-            "https://onlyoffice.com",
+            "http://localhost",
             "test123!@#%ABC",
             true,
-            true,
+            false,
             WebhookTrigger.UserCreated
             );
 
@@ -162,6 +181,7 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("Trigger is not available");
     }
 
     [Fact]

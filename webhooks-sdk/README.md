@@ -9,9 +9,10 @@ payload to the right type.
 ```
 webhooks-sdk/
 ├── openapitools.json    pins the generator (7.25.0) for reproducible output
-├── samples/             shared fixture: a real delivery, its signature, its key
+├── samples/             shared fixtures: deliveries, their signatures, the key
+│   └── negative/        deliveries every sample must refuse
 ├── tools/
-│   └── gen-trigger-map.py   emits the trigger→payload dispatch table
+│   └── gen-trigger-map.py   emits the trigger→payload table for every language
 └── <language>/
     ├── generated/       openapi-generator output — DO NOT EDIT, wiped on regen
     │   └── docs/        per-model Markdown reference, same as the API SDKs
@@ -163,8 +164,9 @@ next to it.
 
 Needs `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), a
 JDK, and `python` with PyYAML (`pip install pyyaml`) for the trigger tables; the
-skill checks for both before it wipes anything. Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
-touched.
+skill checks for both before it wipes anything. Generating all nine takes ~25 s;
+with verification the run takes four to five minutes, most of it Maven. `generated/` is
+wiped and rewritten; `src/` is never touched.
 
 After generating, each language is built and its sample is run over every
 fixture in `samples/` (see *Samples*); the outcome is in
@@ -210,6 +212,15 @@ The pairing above is declared once, in the trigger table of
 `x-docspace-trigger-payloads` block of the contract. A trigger whose family the table does
 not know stops the generator.
 
+Every SDK carries that map as code, written by `tools/gen-trigger-map.py` after each
+generation: `Triggers.cs` (C#), `triggers.ts` (TypeScript), `WebhookTriggers.java`,
+`WebhookTriggers.kt`, `triggers.go`, `triggers.py`, `WebhookTriggers.php`,
+`webhook_triggers.rb` and `WebhookTriggers.swift`. Each names the payload model of every
+trigger with a typed body, marks the untyped catch-all `*`, and tells whether a trigger is
+in the contract at all. The samples choose their model only through it, so a trigger
+added on the server later is acknowledged with its raw payload, never parsed with some
+other model.
+
 ## Receiving: the parts a runtime has to get right
 
 - **Signature.** `x-docspace-signature-256: sha256=<hex>`, HMAC-SHA256 over the
@@ -250,10 +261,20 @@ not know stops the generator.
 
 ## Samples
 
-Every sample verifies the signature, parses with the generated models and logs
-the delivery. They all replay the same fixture — `samples/file.created.json`, a
-`file.created` delivery captured from a test portal with its addresses replaced by
-`docspace.example.com` — and print identical output.
+Every sample verifies the signature, picks the payload model through its
+language's trigger table, parses with the generated models and logs the delivery.
+Each prints a `model: <name>` line — the schema name, `untyped` for `*`, `unknown`
+for a trigger the contract does not list — and exits non-zero when the signature is
+rejected or the body does not parse. Run without arguments, each replays
+`samples/file.created.json`.
+
+The C# and TypeScript samples also show the duplicate check every receiver needs:
+DocSpace delivers at least once, a retry carries the same `event.id`, and the
+signature does not prove when a request was sent. They keep the processed ids in an
+in-memory set; a real receiver persists them for as long as an event can still
+arrive (about 18 hours of automatic retries on the default schedule, and a manual
+retry at any time later), and may drop on the unsigned `x-docspace-event-id` header
+as a cheap pre-check, but never accept on it.
 
 | Language | Run from | Command | Status |
 |---|---|---|---|
@@ -276,15 +297,33 @@ in `samples/`:
 
 | Fixture | What it exercises |
 |---|---|
-| `file.created` | a captured delivery: integer ids, file fields beyond the shared entry part, user summaries with absolute avatar URLs |
-| `file.created.retry` | the same delivery as its first retry: `webhook` carries `retryCount`, `retryOn`, `lastFailureOn`, `lastFailureContent` and `lastSuccessOn`, every date with its `Z` — the strict `date-time` parsers (Java, Kotlin, Go) reject the whole envelope without it |
-| `user.updated` | a user payload (`usedSpace`, `hasAvatar`, groups) on a subscription scoped to that user, so `webhook.target` carries a string id and a type |
-| `unknown.trigger` | a trigger family and target type this contract does not know, as after a server upgrade |
+| `user.created`, `user.invited`, `user.updated`, `user.deleted` | `UserPayload` in its states: a new member, a pending invitation, an update, a removal; `user.updated` comes from a subscription scoped to that member, so `webhook.target` carries its id and type |
+| `group.created`, `group.updated`, `group.deleted` | `GroupPayload`, with the manager as a user summary |
+| `room.created`, `agent.created` | `RoomPayload` of an ordinary room and of an AI agent |
+| `folder.created` | `FolderPayload` inside a room |
+| `file.created` | `FilePayload`: integer ids, the file fields beyond the shared entry part, user summaries with absolute avatar URLs |
+| `file.created.retry` | an automatic retry: `webhook` carries `retryCount`, `retryOn`, `lastFailureOn`, `lastFailureContent` and `lastSuccessOn`. Every timestamp is whole-second UTC with its `Z`: the strict `date-time` parsers (Java, Kotlin, Go) reject the whole envelope without the `Z`, and Swift's decoder a fraction |
+| `unknown.trigger` | written by hand: a trigger family and target type this contract does not know, as after a server upgrade; every sample must report `model: unknown` and not parse it as a file |
+| `form.submit` | written by hand, since the integration-test profile runs no Document Server to submit a form: the one wrapper payload, `originalForm` plus `submittedForm` |
+
+Every fixture except the two hand-written ones is captured from a running server by an on-demand
+integration test, which writes the bodies and signature headers byte for byte as the receiver got
+them. Re-capture after a payload change, then re-run the skill's verification:
+
+```
+dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-class "*WebhookFixtureCaptureTests" --explicit only
+```
+
+The captured bodies carry the test portal's address and the fake names and emails the suite generates.
+
+The run also checks the model each sample reports against the contract's map, and
+replays `samples/negative/` (see its README): a wrong signature, and a signed
+envelope with no trigger. A sample that exits 0 on either fails the run.
 
 A language whose toolchain is missing is reported as `NOT VERIFIED` at the end
-rather than passed; a generate-only run skips the check. Ruby and Swift
-have no toolchain on the machine this was last run on and were checked in the
-`ruby:3.4-slim` and `swift:6.1` images instead. Kotlin was also checked on
+rather than passed; a generate-only run skips the check. The skill verifies PHP,
+Ruby and Swift in the `php:8.3-cli`, `ruby:3.4-slim` and `swift:6.1` images when
+the machine has Docker but not the toolchain (stage A5). Kotlin was also checked on
 `maven:3-eclipse-temurin-25`.
 
 A fixture is the raw body plus `<name>.sig`, the signature over those exact

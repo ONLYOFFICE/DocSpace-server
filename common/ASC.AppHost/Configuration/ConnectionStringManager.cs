@@ -675,25 +675,21 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (WebhookReceiverResource != null)
         {
-            // UrlValidator's default blacklist with 127.0.0.0/8 narrowed to 127.0.0.1: the receiver is reached
-            // as Constants.WebhookReceiverHost, while localhost stays refused (bug 80980). Keep in sync
-            // with the default list. A non-empty list replaces the default as a whole.
-            string[] blacklist =
-            [
-                "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
-                "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
-            ];
+            // a blacklist the receiver passes (Constants.WebhookTestBlacklist). It reaches every UrlValidator caller
+            // of the services in this profile, not only the webhook sender
+            var blacklist = Constants.WebhookTestBlacklist;
 
-            for (var i = 0; i < blacklist.Length; i++)
+            for (var i = 0; i < blacklist.Count; i++)
             {
                 resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
             }
 
-            // Retries due within seconds rather than minutes to hours, so the tests can watch a delivery
-            // being retried and given up on: four attempts in all.
+            // Retries due at once rather than after minutes to hours, so the tests can watch a delivery being
+            // retried and given up on: four attempts in all. The sender still notices a due retry only on its
+            // next poll (every 5 seconds), so a shorter interval would gain nothing.
             for (var i = 0; i < 3; i++)
             {
-                resourceBuilder.WithEnvironment($"webhooks:retryIntervals:{i}", "00:00:03");
+                resourceBuilder.WithEnvironment($"webhooks:retryIntervals:{i}", "00:00:00.500");
             }
         }
 

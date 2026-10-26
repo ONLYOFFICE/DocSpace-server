@@ -2644,6 +2644,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The webhook target is not an existing user or group.
+        /// </summary>
+        public static string ErrorWebhookTargetNotFound {
+            get {
+                return ResourceManager.GetString("ErrorWebhookTargetNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The webhook is disabled. Enable it before retrying its deliveries.
         /// </summary>
         public static string ErrorWebhookRetryDisabled {
