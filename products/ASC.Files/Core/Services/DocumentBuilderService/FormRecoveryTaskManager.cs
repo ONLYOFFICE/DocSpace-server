@@ -79,11 +79,7 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
     /// </summary>
     public async Task<bool> IsRecoveringAsync(int tenantId, int originalFormId)
     {
-        var prefix = $"{TaskIdPrefix}_{tenantId}_";
-        var suffix = $"_{originalFormId}";
-
-        return (await _queue.GetAllTasks())
-            .Any(t => !t.IsCompleted && t.Id.StartsWith(prefix, StringComparison.Ordinal) && t.Id.EndsWith(suffix, StringComparison.Ordinal));
+        return (await _queue.GetAllTasks()).Any(t => !t.IsCompleted && t.TenantId == tenantId && t.OriginalFormId == originalFormId);
     }
 
     public void Dispose()

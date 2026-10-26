@@ -42,7 +42,6 @@ public class FormRecoveryTask : DistributedTaskProgress
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private string _baseUri;
-    private int _tenantId;
     private Guid _userId;
     private FormFillingReportTaskData _reportData;
 
@@ -58,6 +57,10 @@ public class FormRecoveryTask : DistributedTaskProgress
     private DistributedTaskQueue<FormFillingReportTask> _reportQueue;
     private ILogger<FormRecoveryTask> _logger;
 
+    public int TenantId { get; set; }
+
+    public int OriginalFormId { get; set; }
+
     public FormRecoveryTask() { }
 
     public FormRecoveryTask(IServiceScopeFactory serviceScopeFactory)
@@ -68,7 +71,8 @@ public class FormRecoveryTask : DistributedTaskProgress
     public void Init(string baseUri, int tenantId, Guid userId, FormFillingReportTaskData reportData)
     {
         _baseUri = baseUri;
-        _tenantId = tenantId;
+        TenantId = tenantId;
+        OriginalFormId = reportData.OriginalFormId;
         _userId = userId;
         _reportData = reportData;
         Id = FormRecoveryTaskManager.GetTaskId(tenantId, userId, reportData.OriginalFormId);
@@ -87,7 +91,7 @@ public class FormRecoveryTask : DistributedTaskProgress
                 scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().ServerUri = _baseUri;
             }
 
-            await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(_tenantId);
+            await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(TenantId);
             await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(_userId);
 
             _reportQueue = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>().CreateQueue<FormFillingReportTask>();
@@ -131,7 +135,7 @@ public class FormRecoveryTask : DistributedTaskProgress
             try
             {
                 var reportTask = scope.ServiceProvider.GetRequiredService<FormFillingReportTask>();
-                reportTask.Init(_baseUri, _tenantId, _userId, _reportData, DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
+                reportTask.Init(_baseUri, TenantId, _userId, _reportData, DocumentBuilderTaskManager.GetTaskId(TenantId, _userId, _reportData.OriginalFormId));
 
                 // Queued with the progress shown so far, so that the client does not see it fall back to 0.
                 reportTask.Percentage = Percentage;
@@ -209,7 +213,7 @@ public class FormRecoveryTask : DistributedTaskProgress
     private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version)
     {
         var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
-        reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
+        reportTask.Init(_baseUri, TenantId, _userId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
         reportTask.Publication = _ => Task.CompletedTask;
         try
         {
@@ -250,7 +254,7 @@ public class FormRecoveryTask : DistributedTaskProgress
         {
             await PublishChanges();
 
-            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(_tenantId, _userId, _reportData.OriginalFormId));
+            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(TenantId, _userId, _reportData.OriginalFormId));
             if (report is { IsCompleted: false, Status: DistributedTaskStatus.Created })
             {
                 report.Percentage = Percentage;
