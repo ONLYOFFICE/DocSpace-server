@@ -1,0 +1,203 @@
+using System.Security;
+using System.Linq.Expressions;
+
+enum EmployeeStatus { Active = 1, Terminated = 2 }
+record UserInfo
+{
+    public Guid Id { get; set; }
+    public string UserName { get; set; }
+    public string Email { get; set; }
+    public string Sid { get; set; }
+    public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
+    public bool Removed { get; set; }
+    public bool Paid { get; set; }
+}
+static class Constants
+{
+    public static UserInfo LostUser = new() { Id = Guid.Empty };
+    public const string Action_AddRemoveUser = "AddRemove";
+    public const string Action_EditUser = "Edit";
+}
+record UserSecurityProvider(Guid Id, object Type = null);
+record Tenant(int Id, Guid OwnerId);
+class TenantManager(Tenant tenant) { public Tenant GetCurrentTenant() => tenant; }
+class PermissionContext
+{
+    public bool Allowed = true;
+    public string LastAction;
+    public Task DemandPermissionsAsync(UserSecurityProvider provider, string action)
+    {
+        LastAction = action;
+        if (!Allowed) throw new SecurityException("Denied");
+        return Task.CompletedTask;
+    }
+}
+class CountPaidUserFeature;
+class TenantQuotaFeatureStatHelper
+{
+    public Task<(string, int)> GetStatAsync<TFeature, TValue>() => Task.FromResult(("paid", 2));
+}
+class QuotaSocketManager
+{
+    public int Calls;
+    public Task ChangeQuotaUsedValueAsync(string name, int value) { Calls++; return Task.CompletedTask; }
+}
+class UserService
+{
+    public Dictionary<(int, Guid), UserInfo> Rows = new();
+    public int SaveCalls;
+    public string Lookup;
+    public bool CachedLookupWouldReturnUpdatedStatus;
+    public Task<UserInfo> GetUserByUserName(int tenant, string name)
+    {
+        Lookup = "name";
+        return Task.FromResult(Rows.Values.FirstOrDefault(x => Rows.ContainsKey((tenant, x.Id)) && x.UserName == name) is {} u ? u with {} : null);
+    }
+    public Task<UserInfo> GetUserAsync(int tenant, Guid id)
+    {
+        Lookup = "id";
+        var u = Rows.TryGetValue((tenant, id), out var row) ? row with {} : null;
+        if (u != null && CachedLookupWouldReturnUpdatedStatus) u.Status = EmployeeStatus.Terminated;
+        return Task.FromResult(u);
+    }
+    public Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<UserInfo, UserInfo>> projection)
+    {
+        Lookup = "persisted-id";
+        return Task.FromResult(Rows.TryGetValue((tenant, id), out var u) ? projection.Compile()(u) : null);
+    }
+    public Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
+    {
+        SaveCalls++;
+        if (!Rows.ContainsKey((tenant, user.Id))) throw new Exception("Unexpected insertion");
+        if (Rows.Any(x => x.Key.Item1 == tenant && x.Key.Item2 != user.Id && x.Value.UserName == user.UserName))
+            throw new InvalidOperationException("Duplicate login");
+        Rows[(tenant, user.Id)] = user with {};
+        return Task.FromResult(user with {});
+    }
+}
+class UserManager(UserService userService, TenantManager tenantManager,
+    PermissionContext permissionContext, TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager)
+{
+    public Dictionary<Guid, UserInfo> SystemUsers = new();
+    private bool IsSystemUser(Guid id) => SystemUsers.ContainsKey(id);
+    public Task<object> GetUserTypeAsync(Guid id) => Task.FromResult<object>("Owner");
+    private Task<bool> IsPaidUserAsync(UserInfo user) => Task.FromResult(
+        userService.Rows.TryGetValue((tenantManager.GetCurrentTenant().Id, user.Id), out var row) && row.Paid);
+    /* ACTUAL_METHOD */
+}
+class Fixture
+{
+    public readonly Guid OwnerId = Guid.NewGuid();
+    public readonly UserService Store = new();
+    public readonly PermissionContext Permissions = new();
+    public readonly QuotaSocketManager Quota = new();
+    public readonly UserManager Manager;
+    // Files and room ownership are referenced by the immutable user ID.
+    public readonly Dictionary<string, Guid> Resources;
+    public Fixture()
+    {
+        Store.Rows[(7, OwnerId)] = new UserInfo { Id = OwnerId, UserName = "administrator", Email = "owner@example.invalid" };
+        Resources = new() { ["document"] = OwnerId, ["room"] = OwnerId };
+        Manager = new(Store, new(new Tenant(7, OwnerId)), Permissions, new(), Quota);
+    }
+    public UserInfo Owner => Store.Rows[(7, OwnerId)] with {};
+}
+class Program
+{
+    static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+    static async Task Expect<T>(Func<Task> action) where T : Exception
+    {
+        try { await action(); } catch (T) { return; }
+        throw new Exception("Expected " + typeof(T).Name);
+    }
+    static async Task<int> Main()
+    {
+        var tests = new (string, Func<Task>)[]
+        {
+            ("LDAP rename preserves owner ID, email, rows and resource links", async () => {
+                var f = new Fixture(); var update = f.Owner;
+                update.UserName = "domain.owner"; update.Sid = "S-1-5-21-1-2-3-6001";
+                var saved = await f.Manager.UpdateUserInfoAsync(update);
+                Check(saved.Id == f.OwnerId && saved.Sid == update.Sid && saved.Email == update.Email, "Identity lost");
+                Check(f.Store.Rows.Count == 1 && f.Store.SaveCalls == 1, "Duplicate or missing save");
+                Check(f.Resources.Values.All(id => id == saved.Id), "Resource owner changed");
+                Check(f.Permissions.LastAction == Constants.Action_EditUser, "Permissions bypassed");
+            }),
+            ("unchanged login still updates", async () => {
+                var f = new Fixture(); var u = f.Owner; u.Sid = "test-sid";
+                Check((await f.Manager.UpdateUserInfoAsync(u)).Sid == "test-sid", "Not updated");
+            }),
+            ("second run does not create duplicates", async () => {
+                var f = new Fixture(); var u = f.Owner; u.UserName = "domain.owner"; u.Sid = "test-sid";
+                await f.Manager.UpdateUserInfoAsync(u); await f.Manager.UpdateUserInfoAsync(u);
+                Check(f.Store.Rows.Count == 1 && f.Store.SaveCalls == 2, "Non-idempotent identity");
+            }),
+            ("owner cannot be disabled", async () => {
+                var f = new Fixture(); var u = f.Owner; u.Status = EmployeeStatus.Terminated;
+                await Expect<InvalidOperationException>(() => f.Manager.UpdateUserInfoAsync(u));
+                Check(f.Store.SaveCalls == 0, "Disabled owner");
+            }),
+            ("permission refusal prevents saving", async () => {
+                var f = new Fixture(); f.Permissions.Allowed = false;
+                await Expect<SecurityException>(() => f.Manager.UpdateUserInfoAsync(f.Owner));
+                Check(f.Store.SaveCalls == 0, "Unauthorized save");
+            }),
+            ("invitation permission is still required", async () => {
+                var f = new Fixture(); await f.Manager.UpdateUserInfoAsync(f.Owner, afterInvite: true);
+                Check(f.Permissions.LastAction == Constants.Action_AddRemoveUser, "Wrong permission");
+            }),
+            ("missing ID cannot update another user with the same login", async () => {
+                var f = new Fixture(); var u = f.Owner; u.Id = Guid.NewGuid();
+                await Expect<InvalidOperationException>(() => f.Manager.UpdateUserInfoAsync(u));
+                Check(f.Store.SaveCalls == 0, "Tried saving unknown ID");
+            }),
+            ("removed record cannot be revived", async () => {
+                var f = new Fixture(); f.Store.Rows[(7, f.OwnerId)].Removed = true;
+                await Expect<InvalidOperationException>(() => f.Manager.UpdateUserInfoAsync(f.Owner));
+                Check(f.Store.SaveCalls == 0, "Tried reviving removed user");
+            }),
+            ("tenant isolation retained", async () => {
+                var f = new Fixture(); var u = f.Owner; f.Store.Rows.Remove((7, f.OwnerId)); f.Store.Rows[(8, f.OwnerId)] = u;
+                await Expect<InvalidOperationException>(() => f.Manager.UpdateUserInfoAsync(u));
+                Check(f.Store.SaveCalls == 0, "Cross-tenant save");
+            }),
+            ("duplicate login still refused by storage", async () => {
+                var f = new Fixture(); var other = Guid.NewGuid();
+                f.Store.Rows[(7, other)] = new UserInfo { Id = other, UserName = "taken" };
+                var u = f.Owner; u.UserName = "taken";
+                await Expect<InvalidOperationException>(() => f.Manager.UpdateUserInfoAsync(u));
+                Check(f.Store.Rows[(7, f.OwnerId)].UserName == "administrator", "Owner changed on conflict");
+            }),
+            ("system account remains untouched", async () => {
+                var f = new Fixture(); var u = f.Owner; f.Manager.SystemUsers[u.Id] = u;
+                await f.Manager.UpdateUserInfoAsync(u);
+                Check(f.Store.SaveCalls == 0 && f.Permissions.LastAction == null, "System path changed");
+            }),
+            ("paid-user notification preserved", async () => {
+                var f = new Fixture(); var id = Guid.NewGuid();
+                var old = new UserInfo { Id = id, UserName = "staff", Paid = true };
+                f.Store.Rows[(7, id)] = old;
+                var update = old with { Status = EmployeeStatus.Terminated };
+                await f.Manager.UpdateUserInfoAsync(update);
+                Check(f.Quota.Calls == 1, "Quota notification lost");
+            }),
+            ("quota uses persisted status even when a cached user is modified", async () => {
+                var f = new Fixture(); var id = Guid.NewGuid();
+                f.Store.Rows[(7, id)] = new UserInfo { Id = id, UserName = "staff", Paid = true };
+                f.Store.CachedLookupWouldReturnUpdatedStatus = true;
+                var update = f.Store.Rows[(7, id)] with { Status = EmployeeStatus.Terminated };
+                await f.Manager.UpdateUserInfoAsync(update);
+                Check(f.Quota.Calls == 1, "Mutated cache masked status transition");
+            })
+        };
+        int failed = 0;
+        foreach (var (name, run) in tests)
+        {
+            try { await run(); Console.WriteLine("PASS: " + name); }
+            catch (Exception e) { failed++; Console.WriteLine("FAIL: " + name + " :: " + e.Message); }
+        }
+        Console.WriteLine($"{tests.Length - failed}/{tests.Length} passed");
+        return failed == 0 ? 0 : 1;
+    }
+}
