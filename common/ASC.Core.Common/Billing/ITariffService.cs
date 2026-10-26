@@ -76,7 +76,7 @@ public interface ITariffService
     IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter, CancellationToken cancellationToken = default);
     IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter, CancellationToken cancellationToken = default);
     Task<DepositReport> GetCustomerDepositsAsync(int tenantId, DepositFilter filter);
-    Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, CancellationToken cancellationToken = default);
+    Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, DateTime utcStartDate, DateTime utcEndDate, CancellationToken cancellationToken = default);
     Task<string> GetInvoiceLinkAsync(int tenantId, string paymentRef);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();

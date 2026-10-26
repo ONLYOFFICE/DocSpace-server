@@ -1801,14 +1801,21 @@ public class TariffService(
 
     /// <summary>
     /// The balance top-up of the portal with the given operation ID, or null when the portal has none with it. The
-    /// accounting service looks top-ups up by filter only, so the pages are walked until the ID turns up. Failures
-    /// are not caught: a lookup that could not finish must not be taken for a missing top-up.
+    /// accounting service looks top-ups up by filter only, so the pages of the given period are walked until the ID
+    /// turns up; the period is always passed, as with every other accounting read, rather than left to the accounting
+    /// service's default. Failures are not caught: a lookup that could not finish must not be taken for a missing
+    /// top-up.
     /// </summary>
-    public async Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, CancellationToken cancellationToken = default)
+    public async Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, DateTime utcStartDate, DateTime utcEndDate, CancellationToken cancellationToken = default)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-        var filter = new DepositFilter { Limit = 100 };
+        var filter = new DepositFilter
+        {
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            Limit = 1000
+        };
 
         await foreach (var deposit in accountingClient.GetCustomerDepositPages(portalId, filter).WithCancellation(cancellationToken))
         {

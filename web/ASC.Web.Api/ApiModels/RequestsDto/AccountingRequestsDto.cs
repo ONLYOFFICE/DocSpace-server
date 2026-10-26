@@ -390,16 +390,16 @@ public class CustomerServiceUsageRequestDto
 public class GetCustomerDepositsRequestDto
 {
     /// <summary>
-    /// The beginning of the period, inclusive. Read in the portal time zone rather than in UTC, so a top-up at the
-    /// edge of the period falls where the portal sees it; defaults to the portal creation date.
+    /// The beginning of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is
+    /// read in the portal time zone, not in the caller's; defaults to the portal creation date.
     /// </summary>
     /// <example>2025-01-01T00:00:00Z</example>
     [FromQuery(Name = "startDate")]
     public DateTime? StartDate { get; set; }
 
     /// <summary>
-    /// The end of the period, inclusive. Read in the portal time zone rather than in UTC, and defaults to the moment
-    /// the call is made.
+    /// The end of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is read in
+    /// the portal time zone, not in the caller's; defaults to the moment the call is made.
     /// </summary>
     /// <example>2025-12-31T23:59:59Z</example>
     [FromQuery(Name = "endDate")]

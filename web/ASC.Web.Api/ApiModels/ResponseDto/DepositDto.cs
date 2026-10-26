@@ -38,7 +38,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "collection": [{"id": 15342, "amount": 100.0, "currency": "USD", "hasInvoice": true}],
+///   "collection": [{"id": 15342, "date": "2025-03-14T10:30:00Z", "amount": 100.0, "currency": "USD", "status": "Completed", "hasInvoice": true}],
 ///   "offset": 0,
 ///   "limit": 25,
 ///   "totalQuantity": 12,
@@ -52,7 +52,7 @@ public class DepositReportDto
     /// The top-ups on this page. It is empty for a page past the end of the list as well as for a period in which
     /// nothing was paid into the wallet.
     /// </summary>
-    /// <example>[{"id": 15342, "amount": 100.0, "currency": "USD", "hasInvoice": true}]</example>
+    /// <example>[{"id": 15342, "date": "2025-03-14T10:30:00Z", "amount": 100.0, "currency": "USD", "status": "Completed", "hasInvoice": true}]</example>
     public List<DepositDto> Collection { get; init; }
 
     /// <summary>
@@ -103,10 +103,11 @@ public class DepositDto
     public long Id { get; init; }
 
     /// <summary>
-    /// When the top-up was booked, written with the offset of the portal's time zone rather than as plain UTC - the
-    /// same zone the `startDate` and `endDate` filters are read in.
+    /// When the top-up was booked, as an ISO 8601 timestamp that carries its own offset: that of the portal's time
+    /// zone, written as `Z` for a portal in UTC - the zone in which `startDate` and `endDate` without an offset are
+    /// read.
     /// </summary>
-    /// <example>2025-03-14T10:30:00.0000000+02:00</example>
+    /// <example>2025-03-14T10:30:00Z</example>
     public ApiDateTime Date { get; init; }
 
     /// <summary>

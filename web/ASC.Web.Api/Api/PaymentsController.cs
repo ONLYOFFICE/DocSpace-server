@@ -1042,30 +1042,39 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists the payments into the portal's wallet - its top-ups - one page at a time, which is what a list of
-    /// payments with their invoices is built from. Only a DocSpace administrator may read it, the portal has to be a
-    /// billing customer already - one that is not answers 404 - and the call is read-only. Every filter is optional:
-    /// `startDate` and `endDate` are read in the portal time zone and default to the portal creation date and the
-    /// present moment, and `status` narrows to how a top-up ended. `offset` and `limit` page through the result and
-    /// default to 0 and 25, and the answer repeats them next to `totalQuantity`, `totalPage` and `currentPage` so a
-    /// client can page without counting. A top-up whose `hasInvoice` is true has an invoice behind it, opened with
-    /// `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. Only top-ups are listed here; the full wallet
-    /// history, charges and refunds included, is `GET api/2.0/portal/payment/customer/operations`.
+    /// Lists the top-ups of the portal's wallet - the payments into it - one page at a time, which is what a list of
+    /// payments with their invoices is built from. The portal has to be a billing customer already, otherwise the
+    /// call answers 404. Only the payer or the portal owner may read it, as with the invoices, and the call is
+    /// read-only. Every filter is optional: `startDate` and `endDate` default to the portal creation date and the
+    /// present moment, a value without `Z` or an offset is read in the portal time zone, and `status` narrows to how
+    /// a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next to `totalQuantity`, `totalPage`
+    /// and `currentPage`. An empty result means the portal has no wallet at the accounting service yet or that
+    /// service could not be read; a period without top-ups gives an empty `collection`. A top-up with `hasInvoice`
+    /// true has an invoice, opened with `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. For the full
+    /// wallet history, charges and refunds included, use `GET api/2.0/portal/payment/customer/operations`.
     /// </remarks>
     /// <summary>
     /// Get the wallet top-ups
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/deposits</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the accounting service could not be read", typeof(DepositReportDto))]
-    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal has no wallet at the accounting service yet or that service could not be read", typeof(DepositReportDto))]
+    [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer")]
     [HttpGet("customer/deposits")]
     public async Task<DepositReportDto> GetCustomerDeposits(GetCustomerDepositsRequestDto inDto)
     {
-        await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+        paymentHelper.DemandConfigured();
 
         var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         var filter = new DepositFilter
         {
@@ -1093,8 +1102,8 @@ public class PaymentController(
     /// call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
     /// it is asked for anew on every call, so request it when the user is about to open the invoice instead of
     /// storing it. A top-up this portal does not have, one without an invoice, or a portal that is not a billing
-    /// customer answers 404. An installation without a billing service answers 403, and 402 means the billing
-    /// service rejected the request or did not answer, which a later retry may get past.
+    /// customer answers 404. An installation without a billing service answers 403, and 402 means the billing or the
+    /// accounting service rejected the request or did not answer, which a later retry may get past.
     /// </remarks>
     /// <summary>
     /// Get the top-up invoice
@@ -1102,7 +1111,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/deposits/{id}/invoice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute address of the hosted invoice page for the top-up", typeof(string))]
-    [SwaggerResponse(402, "The billing service rejected the request for the invoice link or did not answer")]
+    [SwaggerResponse(402, "The billing or the accounting service rejected the request for the top-up or its invoice link, or did not answer")]
     [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, no top-up with this ID, or the top-up has no invoice")]
     [HttpGet("customer/deposits/{id}/invoice")]
@@ -1120,15 +1129,25 @@ public class PaymentController(
 
         await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
+        // The default window of the top-up list, so every top-up the list can show is found here as well.
+        var utcStartDate = tenantUtil.DateTimeToUtc(tenant.CreationDateTime);
+        var utcEndDate = DateTime.UtcNow;
+
         Deposit deposit;
 
         try
         {
-            deposit = await tariffService.FindCustomerDepositAsync(tenant.Id, inDto.Id, HttpContext.RequestAborted);
+            deposit = await tariffService.FindCustomerDepositAsync(tenant.Id, inDto.Id, utcStartDate, utcEndDate, HttpContext.RequestAborted);
         }
         catch (AccountingCustomerNotFoundException)
         {
             throw new ItemNotFoundException("Customer could not be found");
+        }
+        catch (AccountingException exception)
+        {
+            // A failed accounting read is answered like a failed billing request, with the retryable 402, rather
+            // than taken for a missing top-up.
+            throw new BillingException("The top-up could not be read from the accounting service", exception);
         }
 
         if (deposit is not { HasInvoice: true })
