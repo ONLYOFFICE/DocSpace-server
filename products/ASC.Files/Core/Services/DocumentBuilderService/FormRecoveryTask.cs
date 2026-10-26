@@ -114,7 +114,7 @@ public class FormRecoveryTask : DistributedTaskProgress
 
             Status = DistributedTaskStatus.Completed;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (CancellationToken.IsCancellationRequested)
         {
             Status = DistributedTaskStatus.Canceled;
             throw;
@@ -178,7 +178,6 @@ public class FormRecoveryTask : DistributedTaskProgress
         // The first report fills the empty file made for it, and each next one adds a version.
         await recoveryService.SetReportVersionChangedAsync(_reportData.RoomId, _reportData.OriginalFormId, false);
 
-        var isNewFile = true;
         for (var i = 0; i < olderVersions.Count; i++)
         {
             CancellationToken.ThrowIfCancellationRequested();
@@ -187,10 +186,10 @@ public class FormRecoveryTask : DistributedTaskProgress
             var version = olderVersions[i];
 
             // A failure of the builder is mostly a passing one, so a report is tried twice before the history stops.
-            var reportTask = await RunReportAsync(serviceProvider, version, isNewFile);
+            var reportTask = await RunReportAsync(serviceProvider, version);
             if (reportTask.Status != DistributedTaskStatus.Completed)
             {
-                reportTask = await RunReportAsync(serviceProvider, version, isNewFile);
+                reportTask = await RunReportAsync(serviceProvider, version);
             }
 
             if (reportTask.Status != DistributedTaskStatus.Completed)
@@ -199,21 +198,27 @@ public class FormRecoveryTask : DistributedTaskProgress
                 break;
             }
 
-            isNewFile = false;
+            // At once, so that the requested report never takes the file for a new one once a version is in it.
+            _reportData = _reportData with { IsNewFile = false };
             await recoveryService.SetReportVersionChangedAsync(_reportData.RoomId, _reportData.OriginalFormId, true);
         }
-
-        _reportData = _reportData with { IsNewFile = isNewFile };
     }
 
     // Run here, one after another, since the versions of the file follow the order of the runs. The client follows only the
     // requested report, so these publish nothing: the heartbeat keeps this task alive meanwhile.
-    private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version, bool isNewFile)
+    private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version)
     {
         var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
-        reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version, IsNewFile = isNewFile }, $"{Id}_v{version}");
+        reportTask.Init(_baseUri, _tenantId, _userId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
         reportTask.Publication = _ => Task.CompletedTask;
-        await reportTask.RunJob(CancellationToken);
+        try
+        {
+            await reportTask.RunJob(CancellationToken);
+        }
+        catch (OperationCanceledException) when (!CancellationToken.IsCancellationRequested)
+        {
+            // A timeout of a request inside the build, reported as cancelled: a failed run, tried again by the caller.
+        }
 
         return reportTask;
     }
@@ -233,7 +238,7 @@ public class FormRecoveryTask : DistributedTaskProgress
                 await HeartbeatAsync();
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
         }
     }
@@ -252,7 +257,7 @@ public class FormRecoveryTask : DistributedTaskProgress
                 await _reportQueue.PublishTask(report);
             }
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e)
         {
             _logger.WarnRecoveryHeartbeatFailed(e, _reportData.OriginalFormId);
         }

@@ -53,6 +53,9 @@ public class FormRecoveryService(
     // A file that fails this often is not read through the builder again until it gets a new version.
     private const int MaxRecoveryAttempts = 3;
 
+    // Passing failures on this many forms in a row mean the builder or the network is down, not that the forms are bad.
+    private const int MaxPassingFailuresInRow = 3;
+
     // The key a form submission takes in EntryManager: the recovery is safe only while the two are the same.
     private static string GetSubmissionLockKey(int roomId, int originalFormId) => $"fillform_{roomId}_{originalFormId}";
 
@@ -198,6 +201,7 @@ public class FormRecoveryService(
             .Select(v => new FormVersion(v))
             .ToList();
         var recoveredVersions = new HashSet<int>();
+        var passingFailures = 0;
 
         for (var i = 0; i < orphans.Count; i++)
         {
@@ -217,15 +221,23 @@ public class FormRecoveryService(
             }
             catch (Exception e) when (IsPassingFailure(e))
             {
-                // The builder or the network failed, not the file: the rest is left for the next report, uncounted, rather
-                // than have every form fail the same way and run out of attempts.
-                logger.WarnRecoveryStopped(e, originalFormId, i, orphans.Count);
-                break;
+                // Not the file's fault: it is left for the next report, uncounted, so that an outage does not use up the
+                // attempts of every form, and the forms after it are still read.
+                logger.WarnRecoverySubmissionPostponed(e, orphan.Id, originalFormId);
+                if (++passingFailures >= MaxPassingFailuresInRow)
+                {
+                    logger.WarnRecoveryStopped(e, originalFormId, i + 1, orphans.Count);
+                    break;
+                }
+
+                continue;
             }
             catch (Exception e)
             {
                 logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
             }
+
+            passingFailures = 0;
 
             if (outcome == RecoveryOutcome.Recovered)
             {
@@ -311,7 +323,8 @@ public class FormRecoveryService(
     // A failure of the builder, the network or a lock, which passes. Anything else, a defect included, counts as an
     // attempt on the file, so that it cannot hold back the forms after it for good.
     private static bool IsPassingFailure(Exception e) =>
-        e is HttpRequestException or TimeoutException or TaskCanceledException or IOException or DistributedLockException
+        e is HttpRequestException or TimeoutException or TaskCanceledException or DistributedLockException
+        || e is IOException and not (FileNotFoundException or DirectoryNotFoundException)
         || e is DocumentServiceException
         {
             Code: not (DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword)
@@ -360,7 +373,9 @@ public class FormRecoveryService(
         IFileDao<int> fileDao,
         CancellationToken cancellationToken)
     {
-        var formsDataJson = await formFieldsExtractor.ExtractFieldsJsonAsync(orphan, cancellationToken);
+        // The first version is what was submitted: a later one is an edit of the completed form, not the filler's answers.
+        var submitted = orphan.Version > 1 ? await fileDao.GetFileAsync(orphan.Id, 1) ?? orphan : orphan;
+        var formsDataJson = await formFieldsExtractor.ExtractFieldsJsonAsync(submitted, cancellationToken);
         var keys = formFillingReportCreator.GetFieldKeys(formsDataJson);
         if (keys.Count == 0)
         {
