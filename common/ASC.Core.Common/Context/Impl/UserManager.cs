@@ -325,9 +325,18 @@ public class UserManager(
             throw new InvalidOperationException("Can not disable tenant owner.");
         }
 
-        var oldUserData = await userService.GetUserByUserName(tenant.Id, u.UserName);
+        // LDAP may change the login before saving an existing account.
+        // Resolve its persisted identity by ID, not by the new login.
+        // A projection reads persisted state instead of a cached UserInfo that
+        // the caller may already have modified (including its status).
+        var oldUserData = await userService.GetUserAsync(tenant.Id, u.Id, user => new UserInfo
+        {
+            Id = user.Id,
+            Status = user.Status,
+            Removed = user.Removed
+        });
 
-        if (oldUserData == null || Equals(oldUserData, Constants.LostUser))
+        if (oldUserData == null || oldUserData.Removed || Equals(oldUserData, Constants.LostUser))
         {
             throw new InvalidOperationException("User not found.");
         }
