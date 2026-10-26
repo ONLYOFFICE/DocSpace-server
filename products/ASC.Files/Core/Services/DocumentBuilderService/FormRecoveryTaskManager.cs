@@ -73,6 +73,19 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
         }
     }
 
+    /// <summary>
+    /// Whether a recovery of the form runs or waits, for any user. It starts a report when done, which takes in every
+    /// response indexed meanwhile.
+    /// </summary>
+    public async Task<bool> IsRecoveringAsync(int tenantId, int originalFormId)
+    {
+        var prefix = $"{TaskIdPrefix}_{tenantId}_";
+        var suffix = $"_{originalFormId}";
+
+        return (await _queue.GetAllTasks())
+            .Any(t => !t.IsCompleted && t.Id.StartsWith(prefix, StringComparison.Ordinal) && t.Id.EndsWith(suffix, StringComparison.Ordinal));
+    }
+
     public void Dispose()
     {
         _semaphore.Dispose();

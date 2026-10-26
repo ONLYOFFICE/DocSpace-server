@@ -80,6 +80,13 @@ public class FormFillingReportIntegrationEventHandler(
                     return;
                 }
 
+                // A report started meanwhile would take the place of the one the client waits for and show a part of the
+                // responses; the recovery's report takes this response in.
+                if (!@event.Recover && await formRecoveryTaskManager.IsRecoveringAsync(@event.TenantId, @event.OriginalFormId))
+                {
+                    return;
+                }
+
                 var task = serviceProvider.GetService<FormFillingReportTask>();
 
                 var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, @event.OriginalFormId);
