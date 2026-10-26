@@ -210,14 +210,50 @@ describe("the model round's failures", () => {
     expect(classifyModelError(new Error("x"), aborted)).toMatchObject({ status: 504 });
     const abortError = Object.assign(new Error("aborted"), { name: "AbortError" });
     expect(classifyModelError(abortError, live)).toMatchObject({ status: 504 });
-    expect(classifyModelError({ status: 429, message: "slow down" }, live)).toMatchObject({
+    expect(classifyModelError(new Error("x"), aborted)).toMatchObject({ code: "timeout" });
+    const throttled = Object.assign(new Error("429 Rate limit reached"), { status: 429 });
+    expect(classifyModelError(throttled, live)).toMatchObject({
       status: 429,
+      code: "rate_limit",
+      message: "The model provider is rate-limiting requests",
+      providerMessage: "429 Rate limit reached",
     });
     expect(classifyModelError(new Error("ECONNRESET"), live)).toMatchObject({
       status: 502,
+      code: "unknown",
       message: "The model request failed",
+      providerMessage: "ECONNRESET",
     });
     expect(classifyModelError("odd", live)).toBeInstanceOf(ModelCallError);
+    expect(classifyModelError("odd", live).providerMessage).toBeUndefined();
+  });
+
+  // The provider's answer, not a bare 502: DeepSeek answers an empty balance
+  // with 402, an unknown model is a 404 with the model named, a bad key a 401.
+  it("relays the provider's classification and its own words", () => {
+    const live = new AbortController().signal;
+    const broke = Object.assign(new Error("402 Insufficient Balance"), { status: 402 });
+    expect(classifyModelError(broke, live)).toMatchObject({
+      status: 402,
+      code: "insufficient_funds",
+      providerMessage: "402 Insufficient Balance",
+    });
+    const noModel = Object.assign(new Error("404 The model `x` does not exist"), { status: 404 });
+    expect(classifyModelError(noModel, live)).toMatchObject({
+      status: 502,
+      code: "model_not_found",
+      providerMessage: "404 The model `x` does not exist",
+    });
+    const badKey = Object.assign(new Error("401 Incorrect API key provided"), { status: 401 });
+    expect(classifyModelError(badKey, live)).toMatchObject({ status: 502, code: "auth" });
+    // Anthropic nests the message three levels deep; the relayed text is the inner one.
+    const anthropic = Object.assign(new Error("400 {...}"), {
+      status: 400,
+      error: { error: { message: "credit balance is too low" } },
+    });
+    expect(classifyModelError(anthropic, live).providerMessage).toBe("credit balance is too low");
+    const long = Object.assign(new Error("x".repeat(600)), { status: 500 });
+    expect(classifyModelError(long, live).providerMessage).toBe(`${"x".repeat(500)}...`);
   });
 
   it("runs one round and wraps a provider failure", async () => {

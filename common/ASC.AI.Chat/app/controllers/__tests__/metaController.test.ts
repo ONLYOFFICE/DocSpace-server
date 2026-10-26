@@ -46,7 +46,9 @@ vi.mock("../../meta/generateMeta.js", () => ({
   ModelCallError: class ModelCallError extends Error {
     constructor(
       public readonly status: number,
+      public readonly code: string,
       message: string,
+      public readonly providerMessage?: string,
     ) {
       super(message);
     }
@@ -99,16 +101,28 @@ describe("metaController.generate", () => {
     expect(primeSourceMeta).not.toHaveBeenCalled();
   });
 
-  it("relays the model-call outcomes with their own statuses", async () => {
-    for (const [status, message] of [
-      [429, "The model provider is rate-limiting requests"],
-      [502, "The model request failed"],
-      [504, "The model did not answer within the time budget"],
+  it("relays the model-call outcomes with their status, code and the provider's words", async () => {
+    for (const [status, code, message, providerMessage] of [
+      [429, "rate_limit", "The model provider is rate-limiting requests", "429 Rate limit reached"],
+      [
+        402,
+        "insufficient_funds",
+        "The model provider refused the request for lack of credit",
+        "402 Insufficient Balance",
+      ],
+      [502, "auth", "The model request failed", "401 Incorrect API key provided"],
+      [504, "timeout", "The model did not answer within the time budget", undefined],
     ] as const) {
-      generateMeta.mockRejectedValueOnce(new ModelCallError(status, message));
+      generateMeta.mockRejectedValueOnce(
+        new ModelCallError(status, code, message, providerMessage),
+      );
       const res = await run(metaController.generate, { kind: "file", id: 1 });
       expect(res.statusCode).toBe(status);
-      expect(res.body).toEqual({ error: message });
+      expect(res.body).toEqual(
+        providerMessage === undefined
+          ? { error: message, code }
+          : { error: message, code, providerMessage },
+      );
     }
   });
 
@@ -246,7 +260,7 @@ describe("metaController.fill", () => {
     expect(res.statusCode).toBe(503);
     expect(res.body).toEqual({ error: "No model is configured" });
 
-    fillMeta.mockRejectedValueOnce(new ModelCallError(504, "late"));
+    fillMeta.mockRejectedValueOnce(new ModelCallError(504, "timeout", "late"));
     res = await run(metaController.fill, { kind: "file", id: 3 });
     expect(res.statusCode).toBe(504);
 

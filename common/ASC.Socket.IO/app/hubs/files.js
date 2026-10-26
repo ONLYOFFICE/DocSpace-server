@@ -102,6 +102,14 @@ module.exports = (io) => {
 
     logger.info(connectMessage);
 
+    // A room only the server puts a connection into: events addressed to one user (plugin modules today)
+    // go here. Clients cannot join it themselves - every subscribe path drops "private-" parts below.
+    if (session.user && !session.anonymous) {
+      const privateRoom = `${tenantId()}-private-${userId()}`;
+      logger.info(`client ${socket.id} join private room ${privateRoom}`);
+      socket.join(privateRoom);
+    }
+
     socket.on("disconnect", (reason) => {
       const disconnectMessage = !session.anonymous ? 
         `disconnect user='${userId()}' on tenant='${tenantId()}' socketId='${socket.id}' due to ${reason}` :
@@ -156,8 +164,23 @@ module.exports = (io) => {
       socket.to(room).emit("storage-encryption");
     });
 
+    // subscribe takes a part ("private-x"), subscribeInSpaces a full name ("1-private-x"): anchor on both, so a
+    // module room such as "plugin-mail-inbox-private-x" stays allowed
+    const isPrivateRoomPart = (part) => typeof part === "string" && /^(\d+-)?private-/.test(part);
+    // module rooms carry what a module chose to show the portal's users; a share-link visitor is not one of them
+    const isModuleRoomPart = (part) => typeof part === "string" && /^(\d+-)?plugin-/.test(part);
+    const isRefusedRoomPart = (part) => isPrivateRoomPart(part) || (session.anonymous && isModuleRoomPart(part));
+
     function changeSubscription(roomParts, individual, changeFunc) {
       if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) {
+        roomParts = roomParts.filter((p) => !isRefusedRoomPart(p));
+        if (roomParts.length === 0) return;
+      } else if (isRefusedRoomPart(roomParts)) {
+        logger.warn(`client ${socket.id} tried to change a refused room subscription: ${roomParts}`);
+        return;
+      }
 
       changeFunc(roomParts);
 
@@ -441,6 +464,21 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:wallet-low-balance", {});
   }
 
+  // A personal limit goes to the personal room of each of its users (`${room}-${userId}`, where room is the tenant ID),
+  // a limit of the whole portal to the quota room.
+  function changeServiceLimits({ room, serviceName, id, userIds } = {}) {
+    logger.info(`change service limits of ${serviceName} in room ${room}${userIds ? ` for ${userIds.length} users` : ""}`);
+
+    const data = { serviceName, id };
+
+    if (userIds) {
+      userIds.forEach((userId) => filesIO.to(`${room}-${userId}`).emit("s:change-service-limits", data));
+      return;
+    }
+
+    filesIO.to(room).emit("s:change-service-limits", data);
+  }
+
   function updateHistory({ room, id, type } = {}) {
     logger.info(`update ${type} history ${id} in room ${room}`);
     filesIO.to(room).emit("s:update-history", { id, type });
@@ -651,6 +689,30 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:form-suggested-questions", { attachmentId, questions });
   }
 
+  // Events pushed by integration modules (POST api/2.0/portal/moduleEvents, forwarded by ModuleEventsController
+  // in ASC.Web.Api). tenantId is the one the sender was checked against, module is the sender itself. A module
+  // only reaches its own namespace: events "plugin:{module}:{event}", rooms "{tenantId}-plugin-{module}-{room}"
+  // (clients subscribe to "plugin-{module}-{room}") or, addressed to one user, that user's private room.
+  const pluginName = /^[A-Za-z0-9_.:-]{1,128}$/;
+  const pluginModule = /^[A-Za-z0-9_.-]{1,64}$/;
+  const guid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  function pluginEvent({ tenantId, module, room, userId, event, message } = {}) {
+    const valid =
+      Number.isInteger(tenantId) && tenantId > 0 &&
+      pluginModule.test(module ?? "") && pluginName.test(event ?? "") &&
+      (userId ? guid.test(userId) && !room : pluginName.test(room ?? ""));
+
+    if (!valid) {
+      logger.warn(`plugin event skipped: tenantId=${tenantId}, module=${module}, room=${room}, userId=${userId}, event=${event}`);
+      return;
+    }
+
+    const target = userId ? `${tenantId}-private-${userId}` : `${tenantId}-plugin-${module}-${room}`;
+    logger.info(`plugin event plugin:${module}:${event} in room ${target}`);
+    filesIO.to(target).emit(`plugin:${module}:${event}`, { message });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -671,6 +733,7 @@ module.exports = (io) => {
     changeAppEnabled,
     topUpWallet,
     walletLowBalance,
+    changeServiceLimits,
     updateHistory,
     logoutSession,
     changeMyType,
@@ -702,6 +765,7 @@ module.exports = (io) => {
     changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings,
-    formSuggestedQuestions
+    formSuggestedQuestions,
+    pluginEvent
   };
 };

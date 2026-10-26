@@ -228,6 +228,14 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
+    /// The spending limit on the AI services in force for this user - the personal one, or else the limit for every
+    /// user - with what the user spent against it. Null when no such limit applies to the user, when the portal has no
+    /// billing service, or when the caller is neither a DocSpace administrator nor the user; the limit of the portal as
+    /// a whole is not reflected here. The value, and the spending in particular, can lag by a few minutes.
+    /// </summary>
+    public UserServiceLimitDto AiServicesLimit { get; set; }
+
+    /// <summary>
     /// The current login event ID.
     /// </summary>
     /// <example>123</example>
@@ -279,6 +287,7 @@ public class EmployeeFullDtoHelper(
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+        ITariffService tariffService,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
@@ -394,6 +403,11 @@ public class EmployeeFullDtoHelper(
                                     userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
                                     : quotaSettings.DefaultQuota;
             }
+        }
+
+        if (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID)
+        {
+            result.AiServicesLimit = (await tariffService.GetCachedUserServiceLimitAsync(tenant.Id, ServiceLimitGroups.AiServices, userInfo.Id))?.ToUserServiceLimitDto();
         }
 
         // if (userInfo.Sex.HasValue)

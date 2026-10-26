@@ -72,6 +72,19 @@ public class TariffService(
 
     private const int DefaultTrialPeriod = 30;
     private const int MaxTopUpAttempts = 5;
+
+    private static readonly TimeSpan _participantServiceLimitsCacheDuration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _participantServiceLimitsFailureCacheDuration = TimeSpan.FromMinutes(1);
+    // The user lists wait this long for the limits before they are shown with the last ones known, and at most the hard
+    // timeout when none are known yet; the read then finishes in the background and fills the cache.
+    private static readonly TimeSpan _serviceLimitsFactorySoftTimeout = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan _serviceLimitsFactoryHardTimeout = TimeSpan.FromSeconds(3);
+    // How long the last limits known stay usable while the accounting service cannot be reached.
+    private static readonly TimeSpan _serviceLimitsFailSafeMaxDuration = TimeSpan.FromHours(1);
+    // Outlives every entry of a version; when it expires anyway, the next read simply starts a new one.
+    private static readonly TimeSpan _serviceLimitsCacheVersionDuration = TimeSpan.FromDays(1);
+    private const int ParticipantServiceLimitsPageSize = 100;
+    private const int ParticipantServiceLimitsDefaultPageSize = 25;
     private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan _productPriceCacheDuration = TimeSpan.FromHours(1);
     private static readonly TimeSpan _productPriceMemoryCacheDuration = TimeSpan.FromMinutes(5);
@@ -1770,6 +1783,380 @@ public class TariffService(
     public async Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false)
     {
         return await accountingClient.GetServicePricesAsync(serviceName, active);
+    }
+
+    /// <summary>
+    /// Returns the service limit only when it is a limit on the service group and belongs to the tenant: the accounting
+    /// service addresses a limit by its global ID, so the owner is checked against the account number of the tenant's
+    /// customer, and a limit the customer has on another group is left to the operations of that group.
+    /// </summary>
+    public async Task<ServiceLimit> GetServiceLimitAsync(int tenantId, string groupName, int id)
+    {
+        ServiceLimit serviceLimit;
+        try
+        {
+            serviceLimit = await accountingClient.GetServiceLimitAsync(id);
+        }
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+
+        if (serviceLimit == null || !string.Equals(serviceLimit.ServiceGroupName, groupName, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var accountNumber = await GetCustomerAccountNumberAsync(tenantId);
+        if (accountNumber != serviceLimit.CustomerAccountNumber)
+        {
+            return null;
+        }
+
+        return serviceLimit;
+    }
+
+    // The account number of the tenant's customer, null when the portal is not a customer. The cached balance is empty
+    // both for a portal that is not a customer and for a while after a failed read, so an empty one is read again
+    // straight from the accounting service: a failure then surfaces as one instead of making an existing limit look
+    // like one of another portal.
+    private async Task<int?> GetCustomerAccountNumberAsync(int tenantId)
+    {
+        var balance = await GetCustomerBalanceAsync(tenantId);
+        if (balance != null)
+        {
+            return balance.AccountNumber;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return (await accountingClient.GetCustomerBalanceAsync(portalId)).AccountNumber;
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Returns the limit of the portal as a whole on the service group, with its spending in the current period, or
+    /// null when none is set - including for a portal the accounting service does not know yet.
+    /// </summary>
+    public async Task<ServiceLimit> GetTotalServiceLimitAsync(int tenantId, string groupName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        try
+        {
+            return await accountingClient.GetTotalServiceLimitAsync(portalId, groupName, includeUsage: true);
+        }
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Returns the limit for every user on the service group, or null when none is set - including for a portal the
+    /// accounting service does not know yet. It carries no spending: that is counted per user and comes with
+    /// <see cref="GetParticipantServiceLimitsAsync"/>.
+    /// </summary>
+    public async Task<ServiceLimit> GetGlobalServiceLimitAsync(int tenantId, string groupName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        try
+        {
+            return await accountingClient.GetGlobalServiceLimitAsync(portalId, groupName);
+        }
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Returns a page of the limits in force for the users of the tenant on the service group. A portal the accounting
+    /// service does not know yet has no limits, so it gets an empty page, as the accounting service answers when no limit
+    /// is set.
+    /// </summary>
+    public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string groupName, ServiceLimitFilter filter)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        try
+        {
+            return await accountingClient.GetParticipantServiceLimitsAsync(portalId, groupName, filter);
+        }
+        // AccountingNotFoundException is left to fail on purpose: with no limits this route answers an empty page, so a
+        // 404 means a route the accounting service does not have, which must not be shown as "no limits".
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+
+            return new ServiceLimitReport
+            {
+                Collection = [],
+                Offset = filter?.Offset ?? 0,
+                Limit = filter?.Limit ?? ParticipantServiceLimitsDefaultPageSize,
+                CurrentPage = 1
+            };
+        }
+    }
+
+    /// <summary>
+    /// The limit in force for each user of the tenant on the service group - the personal one, or else the one for every
+    /// user - with its spending in the current period, read in full from the accounting service and cached for a few
+    /// minutes. It backs per-user lists, which would otherwise ask the accounting service once per user. The service
+    /// limit operations of this class drop the cache, but a change made outside the portal, and the spending, show up
+    /// only when the cache expires. A user the accounting service has not met yet is not in it. Keyed by the user ID, so
+    /// a list of users looks each one up instead of scanning the whole set, and holding only what the lists show, since
+    /// the whole set goes to the distributed cache; a switched-off limit is left out. While the
+    /// accounting service is slow or cannot be reached, the last list known is used. Empty when the accounting service is
+    /// not configured or the portal is not its customer; null when the list cannot be read and none is known yet, since
+    /// an empty list would claim that no user has a personal limit.
+    /// </summary>
+    public async Task<Dictionary<Guid, UserServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName)
+    {
+        if (!accountingClient.Configured)
+        {
+            return [];
+        }
+
+        var version = await GetServiceLimitsCacheVersionAsync(tenantId, groupName);
+
+        return await GetOrSetServiceLimitsAsync<Dictionary<Guid, UserServiceLimit>>(tenantId, GetParticipantServiceLimitsCacheKey(tenantId, groupName, version), async token =>
+        {
+            try
+            {
+                var portalId = await coreSettings.GetKeyAsync(tenantId);
+                var filter = new ServiceLimitFilter { Limit = ParticipantServiceLimitsPageSize, IncludeUsage = true };
+
+                var serviceLimits = new Dictionary<Guid, UserServiceLimit>();
+                await foreach (var page in accountingClient.GetParticipantServiceLimitPages(portalId, groupName, filter).AsPages().WithCancellation(token))
+                {
+                    // The accounting service leaves switched-off limits out of this list; the check keeps a switched-off
+                    // personal limit from hiding the limit for every user should one ever come back in it.
+                    foreach (var serviceLimit in page.Collection ?? [])
+                    {
+                        if (serviceLimit.Enabled && Guid.TryParse(serviceLimit.Participant, out var userId))
+                        {
+                            serviceLimits.TryAdd(userId, serviceLimit.ToUserServiceLimit());
+                        }
+                    }
+                }
+
+                return serviceLimits;
+            }
+            catch (AccountingCustomerNotFoundException exception)
+            {
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+                return [];
+            }
+        }, null);
+    }
+
+    /// <summary>
+    /// The limit in force for the user on the service group: the user's personal limit, or else the one for every user,
+    /// both from the caches of <see cref="GetCachedParticipantServiceLimitsAsync"/>. The personal limit and the one for
+    /// every user found in the list of the users come with the user's spending; the one for every user applied to a
+    /// user the accounting service has not met yet comes without it. Null when no limit applies to the user, and when
+    /// the list of the users cannot be read: the user may have a personal limit then, so the one for every user is not
+    /// shown in its place.
+    /// </summary>
+    public async Task<UserServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        // A portal that is not a billing customer cannot have limits - the limit operations refuse it - so the lists of
+        // its users do not ask the accounting service for it. Only what is cached decides: the billing service has no
+        // short timeout, and every list of users and every sign-in would wait for it. With nothing cached, the limits
+        // are read as usual, with the timeouts and fallbacks of their own caches.
+        var customerInfo = await GetFromCache<CustomerInfo>(GetBillingCustomerCacheKey(tenantId));
+        if (customerInfo != null && customerInfo.IsDefault())
+        {
+            return null;
+        }
+
+        var serviceLimits = await GetCachedParticipantServiceLimitsAsync(tenantId, groupName);
+        if (serviceLimits == null)
+        {
+            return null;
+        }
+
+        if (serviceLimits.TryGetValue(userId, out var serviceLimit))
+        {
+            return serviceLimit;
+        }
+
+        var globalServiceLimit = await GetCachedGlobalServiceLimitAsync(tenantId, groupName);
+
+        return globalServiceLimit is { Enabled: true } ? globalServiceLimit.ToUserServiceLimit() : null;
+    }
+
+    // The limit for every user, cached like the list of the users: a user missing from that list falls back to it.
+    private async Task<ServiceLimit> GetCachedGlobalServiceLimitAsync(int tenantId, string groupName)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        // A portal the accounting service does not know, or one without the limit, gets null from the read itself.
+        var version = await GetServiceLimitsCacheVersionAsync(tenantId, groupName);
+
+        return await GetOrSetServiceLimitsAsync<ServiceLimit>(tenantId, GetGlobalServiceLimitCacheKey(tenantId, groupName, version),
+            _ => GetGlobalServiceLimitAsync(tenantId, groupName), null);
+    }
+
+    // The caches behind the user lists, which every page of users and every sign-in reads, so a slow or unreachable
+    // accounting service must neither fail nor stall them. A read that fails or runs past the timeouts falls back to the
+    // last value known; with none known yet, the lists get the fallback, kept for a minute so that every request does
+    // not wait again. A 404 lands here too: a portal without limits gets an empty page, so a 404 means a route the
+    // accounting service does not have, which has to be logged as an error rather than cached as "no limits".
+    private async Task<T> GetOrSetServiceLimitsAsync<T>(int tenantId, string cacheKey, Func<CancellationToken, Task<T>> factory, T fallback)
+    {
+        try
+        {
+            return await hybridCache.GetOrSetAsync<T>(cacheKey, async (_, token) => await factory(token), opt => opt
+                .SetDuration(_participantServiceLimitsCacheDuration)
+                .SetFailSafe(true, _serviceLimitsFailSafeMaxDuration, _participantServiceLimitsFailureCacheDuration)
+                .SetFactoryTimeouts(_serviceLimitsFactorySoftTimeout, _serviceLimitsFactoryHardTimeout));
+        }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            LogError(error, tenantId.ToString());
+            await hybridCache.SetAsync(cacheKey, fallback, _participantServiceLimitsFailureCacheDuration);
+
+            return fallback;
+        }
+    }
+
+    internal static string GetParticipantServiceLimitsCacheKey(int tenantId, string groupName, string version)
+    {
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:userlimits";
+    }
+
+    internal static string GetGlobalServiceLimitCacheKey(int tenantId, string groupName, string version)
+    {
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:{version}:global";
+    }
+
+    internal static string GetServiceLimitsCacheVersionKey(int tenantId, string groupName)
+    {
+        return $"{tenantId}:accounting:servicelimits:{groupName?.ToLowerInvariant()}:version";
+    }
+
+    // A change of the limits starts a new version of their caches instead of removing the entries. A read that began
+    // before the change and ends after it - a timed-out one completes in the background - stores the old limits under
+    // the old version, which nobody reads any more; with the entries removed it would put them back for minutes.
+    private async Task<string> GetServiceLimitsCacheVersionAsync(int tenantId, string groupName)
+    {
+        return await hybridCache.GetOrSetAsync<string>(GetServiceLimitsCacheVersionKey(tenantId, groupName),
+            (_, _) => Task.FromResult(Guid.NewGuid().ToString("N")), opt => opt.SetDuration(_serviceLimitsCacheVersionDuration));
+    }
+
+    private async Task ClearServiceLimitsCacheAsync(int tenantId, string groupName)
+    {
+        await hybridCache.SetAsync(GetServiceLimitsCacheVersionKey(tenantId, groupName), Guid.NewGuid().ToString("N"), _serviceLimitsCacheVersionDuration);
+    }
+
+    public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period);
+
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
+
+        return serviceLimit;
+    }
+
+    /// <summary>
+    /// Updates the service limit only when it is a limit on the service group and belongs to the tenant; returns null
+    /// otherwise.
+    /// </summary>
+    public async Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, string groupName, int id, decimal? amountValue, int? quantityValue, bool? enabled)
+    {
+        var serviceLimit = await GetServiceLimitAsync(tenantId, groupName, id);
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
+        }
+        catch (AccountingNotFoundException exception)
+        {
+            // Deleted by a concurrent request between the owner check and the update. A threshold the accounting service
+            // rejects is a mistake of the caller and is not caught here.
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+        finally
+        {
+            await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
+        }
+    }
+
+    public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period);
+
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
+
+        return count;
+    }
+
+    public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName);
+
+        await ClearServiceLimitsCacheAsync(tenantId, groupName);
+
+        return count;
+    }
+
+    /// <summary>
+    /// Deletes the service limit only when it is a limit on the service group and belongs to the tenant, and returns
+    /// the limit as it was before the deletion; returns null when there is no such limit of the tenant.
+    /// </summary>
+    public async Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, string groupName, int id)
+    {
+        var serviceLimit = await GetServiceLimitAsync(tenantId, groupName, id);
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            await accountingClient.DeleteServiceLimitAsync(id);
+        }
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
+        {
+            // Deleted by a concurrent request between the owner check and the deletion.
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+        finally
+        {
+            await ClearServiceLimitsCacheAsync(tenantId, serviceLimit.ServiceGroupName);
+        }
+
+        return serviceLimit;
     }
 
     #endregion
