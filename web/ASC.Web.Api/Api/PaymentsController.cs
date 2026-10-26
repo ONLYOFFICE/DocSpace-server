@@ -1100,8 +1100,9 @@ public class PaymentController(
     /// call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
     /// it is asked for anew on every call, so request it when the user is about to open the invoice instead of
     /// storing it. A top-up this portal does not have, one without an invoice, or a portal that is not a billing
-    /// customer answers 404. An installation without a billing service answers 403, and 402 means the billing or the
-    /// accounting service rejected the request or did not answer, which a later retry may get past.
+    /// customer answers 404, and an `id` that is not a number fails with 400. An installation without a billing
+    /// service answers 403, and 402 means the billing or the accounting service rejected the request or did not
+    /// answer, which a later retry may get past.
     /// </remarks>
     /// <summary>
     /// Get the top-up invoice
@@ -1109,6 +1110,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/deposits/{id}/invoice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute address of the hosted invoice page for the top-up", typeof(string))]
+    [SwaggerResponse(400, "`id` is not a number")]
     [SwaggerResponse(402, "The billing or the accounting service rejected the request for the top-up or its invoice link, or did not answer")]
     [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, no top-up with this ID, or the top-up has no invoice")]
