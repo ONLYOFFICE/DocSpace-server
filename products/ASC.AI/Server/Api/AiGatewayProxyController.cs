@@ -41,6 +41,7 @@ namespace ASC.AI.Api;
 public class AiGatewayProxyController(
     IHttpClientFactory httpClientFactory,
     AiGateway aiGateway,
+    ProfileStorageService profileStorageService,
     UserManager userManager,
     AuthContext authContext) : ControllerBase
 {
@@ -59,31 +60,59 @@ public class AiGatewayProxyController(
     [HttpPost("gateway/{*path}")]
     public async Task<IActionResult> ProxyRequest([FromRoute] string path)
     {
-        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        if (userType is EmployeeType.Guest)
-        {
-            throw new SecurityException();
-        }
+        await AssertNotGuestAsync();
 
         if (!IsPathAllowed(path))
         {
             return NotFound();
         }
 
-        var isModelsPath = path == "models";
+        var key = await IssueKeyAsync(() => aiGateway.GetKeyAsync(path == "models"));
 
-        string key;
+        return await ForwardAsync(path, key);
+    }
 
+    [HttpGet("gateway/byok/{profileId:guid}/{*path}")]
+    [HttpPost("gateway/byok/{profileId:guid}/{*path}")]
+    public async Task<IActionResult> ProxyByokRequest([FromRoute] Guid profileId, [FromRoute] string path)
+    {
+        await AssertNotGuestAsync();
+
+        if (!IsPathAllowed(path))
+        {
+            return NotFound();
+        }
+
+        var (provider, apiKey) = await profileStorageService.ReadByokCredentialsAsync(profileId);
+        var key = await IssueKeyAsync(() => aiGateway.GetByokKeyAsync(provider, apiKey));
+
+        return await ForwardAsync(path, key);
+    }
+
+    private async Task AssertNotGuestAsync()
+    {
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is EmployeeType.Guest)
+        {
+            throw new SecurityException();
+        }
+    }
+
+    private static async Task<string> IssueKeyAsync(Func<Task<string>> issue)
+    {
         try
         {
-            key = await aiGateway.GetKeyAsync(isModelsPath);
+            return await issue();
         }
         catch (AiServiceDisabledException)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_AiServicesDisabled);
         }
+    }
 
-        if (isModelsPath && !string.IsNullOrEmpty(key))
+    private async Task<IActionResult> ForwardAsync(string path, string key)
+    {
+        if (path == "models" && !string.IsNullOrEmpty(key))
         {
             path = "customer/models";
         }
