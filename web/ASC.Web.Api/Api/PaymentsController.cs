@@ -1005,7 +1005,7 @@ public class PaymentController(
 
         inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcStartDate = GetUtcStartDate(inDto.StartDate, tenant);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new OperationFilter
@@ -1076,7 +1076,7 @@ public class PaymentController(
 
         var filter = new DepositFilter
         {
-            UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
+            UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
             Status = inDto.Status,
             Offset = offset,
@@ -1130,7 +1130,7 @@ public class PaymentController(
         await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         // The default window of the top-up list, so every top-up the list can show is found here as well.
-        var utcStartDate = tenantUtil.DateTimeToUtc(tenant.CreationDateTime);
+        var utcStartDate = GetUtcStartDate(null, tenant);
         var utcEndDate = DateTime.UtcNow;
 
         Deposit deposit;
@@ -1163,6 +1163,15 @@ public class PaymentController(
         {
             throw new ItemNotFoundException("Invoice could not be found");
         }
+    }
+
+    // A requested start is read in the portal time zone. The creation date is stored in UTC but read back without a
+    // kind, so it is marked as UTC rather than converted, which would move the start by the portal's offset.
+    private DateTime GetUtcStartDate(DateTime? startDate, Tenant tenant)
+    {
+        return startDate.HasValue
+            ? tenantUtil.DateTimeToUtc(startDate.Value)
+            : DateTime.SpecifyKind(tenant.CreationDateTime, DateTimeKind.Utc);
     }
 
     /// <remarks>
@@ -1200,7 +1209,7 @@ public class PaymentController(
 
         var filter = new MonthlyUsageFilter
         {
-            UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
+            UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
             TimeZome = tenant.TimeZone ?? "UTC"
         };
@@ -1247,7 +1256,7 @@ public class PaymentController(
 
         inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcStartDate = GetUtcStartDate(inDto.StartDate, tenant);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new UsageFilter
