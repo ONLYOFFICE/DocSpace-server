@@ -270,8 +270,7 @@ public class ProfileStorageService(
     {
         var models = (await _aiGateway.GetAllModelsAsync()).Data;
 
-        return models.FirstOrDefault(m => IsNotEmbedding(m) && m.Id == modelId && SupportsByok(m, provider))
-               ?? throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
+        return FindByokModel(models, provider, modelId) ?? throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
     }
 
     private async Task AssertByokKeyValidAsync(string provider, string key)
@@ -291,7 +290,7 @@ public class ProfileStorageService(
 
     private Profile? MapByokProfile(Profile stored, IEnumerable<Model> models)
     {
-        var model = models.FirstOrDefault(m => IsNotEmbedding(m) && m.Id == stored.ModelId && SupportsByok(m, stored.ProviderType));
+        var model = FindByokModel(models, stored.ProviderType, stored.ModelId);
 
         return model is null ? null : MapByokProfile(stored, model);
     }
@@ -325,9 +324,9 @@ public class ProfileStorageService(
         return !string.Equals(model.Type, "embedding", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool SupportsByok(Model model, string provider)
+    internal static Model? FindByokModel(IEnumerable<Model> models, string provider, string modelId)
     {
-        return model.ByokProviders?.Any(p => p.Id == provider) == true;
+        return models.FirstOrDefault(m => IsNotEmbedding(m) && m.Id == modelId && m.ByokProviders?.Any(p => p.Id == provider) == true);
     }
 
     private static ReasoningConfig MapReasoning(Model model)

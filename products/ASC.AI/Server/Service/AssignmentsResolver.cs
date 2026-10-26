@@ -42,7 +42,12 @@ public record AssignmentPolicy
 }
 
 [Scope]
-public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfiguration, ILogger<AssignmentsResolver> logger)
+public class AssignmentsResolver(
+    AiGateway gateway,
+    ProfileStorage profileStorage,
+    TenantManager tenantManager,
+    AiConfiguration aiConfiguration,
+    ILogger<AssignmentsResolver> logger)
 {
     private static readonly AssignmentPolicy[] _policies =
     [
@@ -84,7 +89,7 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
         }
 
         var models = await GetModelsAsync();
-        if (models == null || stored.HasValue && models.Any(m => m.RevisionId == stored.Value))
+        if (models == null || stored.HasValue && await IsAliveAsync(stored.Value, models))
         {
             return stored;
         }
@@ -97,16 +102,29 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
         var policy = Array.Find(_policies, p => p.ActionType == actionType);
 
         return policy != null ? PickDefault(policy, models) : null;
+
+        async Task<bool> IsAliveAsync(Guid profileId, List<Model> catalogue)
+        {
+            if (catalogue.Any(m => m.RevisionId == profileId))
+            {
+                return true;
+            }
+
+            var byokIds = await ReadByokIdsAsync([profileId], catalogue);
+
+            return byokIds.Contains(profileId);
+        }
     }
 
     public async Task<Dictionary<ActionType, Guid>> ResolveAsync(Dictionary<ActionType, Guid> stored, bool applyDefaults)
     {
         var models = gateway.Configured ? await GetModelsAsync() : null;
+        var byokIds = await ReadByokIdsAsync(stored.Values, models);
 
-        return Resolve(stored, applyDefaults, models);
+        return Resolve(stored, applyDefaults, models, byokIds);
     }
 
-    internal Dictionary<ActionType, Guid> Resolve(Dictionary<ActionType, Guid> stored, bool applyDefaults, List<Model>? models)
+    internal Dictionary<ActionType, Guid> Resolve(Dictionary<ActionType, Guid> stored, bool applyDefaults, List<Model>? models, IReadOnlySet<Guid> byokIds)
     {
         var unassigned = stored
             .Where(a => a.Value == AssignmentsStorage.UnassignedProfileId)
@@ -122,7 +140,7 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
             return assigned;
         }
 
-        var alive = models.Select(m => m.RevisionId).ToHashSet();
+        var alive = models.Select(m => m.RevisionId).Concat(byokIds).ToHashSet();
 
         var resolved = assigned
             .Where(a => alive.Contains(a.Value))
@@ -161,6 +179,47 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
         {
             logger.WarningModelsUnavailable(e);
             return null;
+        }
+    }
+
+    internal async Task<HashSet<Guid>> ReadByokIdsAsync(IEnumerable<Guid> assigned, List<Model>? models)
+    {
+        if (models == null)
+        {
+            return [];
+        }
+
+        var candidates = assigned
+            .Where(id => id != AssignmentsStorage.UnassignedProfileId && models.All(m => m.RevisionId != id))
+            .Distinct()
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var refs = await profileStorage.ReadModelRefsAsync(tenantManager.GetCurrentTenantId(), candidates);
+        if (refs.Count == 0)
+        {
+            return [];
+        }
+
+        try
+        {
+            var allModels = (await gateway.GetAllModelsAsync()).Data.ToList();
+
+            return
+            [
+                .. refs
+                    .Where(p => ProfileStorageService.FindByokModel(allModels, p.ProviderType, p.ModelId) is not null)
+                    .Select(p => p.Id)
+            ];
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
+        {
+            logger.WarningModelsUnavailable(e);
+            return [];
         }
     }
 

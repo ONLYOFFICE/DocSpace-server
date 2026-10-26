@@ -113,6 +113,18 @@ public class ProfileStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return result;
     }
 
+    public async Task<List<ProfileModelRef>> ReadModelRefsAsync(int tenantId, IReadOnlyCollection<Guid> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetProfileModelRefsAsync(tenantId, ids).ToListAsync();
+    }
+
     public async Task<bool> AnyAsync(int tenantId)
     {
         return await fusionCache.GetOrSetAsync<bool>(

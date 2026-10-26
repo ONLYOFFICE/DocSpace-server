@@ -71,7 +71,6 @@ public class ChatContextService(
 
         var modelsTask = ReadModelsAsync();
         var configTask = ReadConfigAsync();
-        var profilesTask = ReadProfilesAsync(modelsTask);
         var threadTask = ReadThreadAsync(threadId, includeMessages);
         var webSearchTask = webSearchStorageService.ReadVerifiedAsync();
         var entityFolderTask = TryReadFolderAsync(entityId);
@@ -79,9 +78,11 @@ public class ChatContextService(
             ? TryReadFolderAsync(contextEntityId)
             : Task.FromResult<Folder<int>?>(null);
 
+        var models = await modelsTask;
+        var profilesTask = ReadProfilesAsync(models);
+
         var entityFolder = await entityFolderTask;
         var contextFolder = await contextFolderTask;
-        var models = await modelsTask;
 
         var assignmentsTask = assignmentsStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id, models);
         var preferencesTask = preferencesStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id);
@@ -126,9 +127,9 @@ public class ChatContextService(
         return (await aiSettingsService.GetAiSettingsAsync()).MapToDto();
     }
 
-    private async Task<List<ProfileDto>> ReadProfilesAsync(Task<List<Model>?> modelsTask)
+    private async Task<List<ProfileDto>> ReadProfilesAsync(List<Model>? models)
     {
-        return (await profileStorageService.ReadAllVerifiedAsync(await modelsTask)).Select(ProfileMapper.MapToDto).ToList();
+        return (await profileStorageService.ReadAllVerifiedAsync(models)).Select(ProfileMapper.MapToDto).ToList();
     }
 
     private async Task<(ThreadDto? Thread, List<MessageDto>? Messages)> ReadThreadAsync(Guid? threadId, bool includeMessages)
