@@ -1157,7 +1157,8 @@ public abstract class FilesController<T>(
     /// editing, closing it for filling and remembering the version it was edited from. The file has to be a PDF form
     /// lying in a room. Starting needs the right to start the filling, which the room admin and a member with
     /// content-creator rights have, while stopping a filling that somebody else started belongs to room managers
-    /// alone, so a content creator is refused with 403 there. The call is mutating; the state that resulted is read
+    /// alone, so a content creator is refused with 403 there. In a form-filling room action 3 needs the right to
+    /// edit the form. The call is mutating; the state that resulted is read
     /// with `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
@@ -1167,7 +1168,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
-    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
     [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.

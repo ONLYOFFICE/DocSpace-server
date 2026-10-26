@@ -5809,12 +5809,13 @@ public class FileStorageService //: IFileStorageService
                 break;
 
             case FormFillingManageAction.Edit:
-                if (!await fileSecurity.CanEditAsync(form, authContext.CurrentAccount.ID))
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-                }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    if (!await fileSecurity.CanEditAsync(form, authContext.CurrentAccount.ID))
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                    }
+
                     var wasFilling = properties.FormFilling.StartFilling;
 
                     properties.FormFilling.StartFilling = false;
