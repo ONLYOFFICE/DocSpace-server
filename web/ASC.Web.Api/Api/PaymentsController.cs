@@ -1070,13 +1070,16 @@ public class PaymentController(
 
         await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
+        var offset = inDto.Offset ?? 0;
+        var limit = inDto.Limit ?? 25;
+
         var filter = new DepositFilter
         {
             UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
             Status = inDto.Status,
-            Offset = inDto.Offset ?? 0,
-            Limit = inDto.Limit ?? 25
+            Offset = offset,
+            Limit = limit
         };
 
         var report = await tariffService.GetCustomerDepositsAsync(tenant.Id, filter);
@@ -1085,7 +1088,7 @@ public class PaymentController(
             return null;
         }
 
-        return depositDtoMapper.Map(report, filter);
+        return depositDtoMapper.Map(report, offset, limit);
     }
 
     /// <remarks>

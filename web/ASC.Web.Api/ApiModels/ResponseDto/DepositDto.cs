@@ -143,7 +143,10 @@ public class DepositDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public partial class DepositDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
-    public DepositReportDto Map(DepositReport source, DepositFilter filter)
+    /// <param name="source">The page the accounting service answered with.</param>
+    /// <param name="offset">The offset asked for, with the default already applied.</param>
+    /// <param name="limit">The page size asked for, with the default already applied.</param>
+    public DepositReportDto Map(DepositReport source, int offset, int limit)
     {
         var result = Map(source);
 
@@ -154,8 +157,8 @@ public partial class DepositDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
         // echoed instead; a page with items keeps the one the accounting service applied.
         if (result.TotalQuantity == 0)
         {
-            result.Offset = filter.Offset ?? 0;
-            result.Limit = filter.Limit ?? 0;
+            result.Offset = offset;
+            result.Limit = limit;
         }
 
         return result;
