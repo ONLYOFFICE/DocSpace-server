@@ -246,7 +246,8 @@ other model.
   `eventId` of the first record and the member who asked for it in `retriedBy`),
   but it still sends the `event.id` of the first one, so the same logical event
   always arrives with the same key, possibly days later.
-- **Answer fast.** The server waits 30 s for a response; a timeout, network error
+- **Answer fast.** The server waits 30 s for a response by default
+  (`webhooks:requestTimeout` in the server config); a timeout, network error
   or non-2xx status is a failed attempt. A failed delivery is retried after
   ~1 min, 5 min, 30 min, 2 h, 5 h and 10 h (±10% jitter) — 7 attempts over
   roughly 18 hours by default (`webhooks:retryIntervals` in the server config) —
@@ -415,6 +416,57 @@ location /webhook {
 The alternative is `--host +`, which accepts any Host header. On Windows that
 needs a one-off URL reservation or an elevated shell; the app prints the exact
 `netsh http add urlacl` command if the binding is refused.
+
+## Upgrading from the previous payload format
+
+### For receivers: the payload changed
+
+Before the webhook SDK, the publisher serialized the server's own domain objects into
+`payload`. From this version on, `payload` is one of the webhook DTOs above, so several
+fields were renamed or changed type. There are no aliases for the old names: a receiver
+written against the old payload has to move to the new ones, and the deliveries do not
+carry a payload version to branch on. What changed:
+
+| Payload | Before | Now |
+|---|---|---|
+| file, folder, room | `createBy` (user id) | `createdBy` (user summary object) |
+| file, folder, room | `createOn` | `created` |
+| file, folder, room | `rootId` | `rootFolderId` |
+| user | `contacts` (string) | `contacts` (array of `{type, value}`) |
+| user | `createDate` | `registrationDate` |
+| user | `terminatedDate` | `terminated` |
+| group | `parent` (group object) | `parent` (group id) |
+| group | `categoryID` | `category` |
+
+Every timestamp is now whole-second UTC with its `Z`, and the server-internal parts of the
+old objects, such as the share record of an entry, are gone.
+
+The delivery log changed meaning as well. `GET api/2.0/settings/webhooks/log?eventId=X`
+returns the record `X` together with its manual retries, newest first; pick the record
+whose `id` is `X` to get that one alone. A manual retry is a record of its own, but the
+receiver sees the `event.id` (and `x-docspace-event-id`) of the first record of the event,
+so deduplicating on it keeps working across retries.
+
+### For administrators: update the services together
+
+Web.Studio, which sends the deliveries, and every service that publishes them (Web.Api,
+People and Files among them) have to run this version together. During a rolling update:
+
+- a Web.Studio of the previous version still sends the deliveries a new publisher writes
+  as soon as their event arrives, while the new Web.Studio sends them from the schedule as
+  well, so a receiver can get such an event twice (deduplication on `event.id` absorbs it);
+- an event a publisher of the previous version writes carries the old payload, which held
+  the full server-side objects, the password of a shared link among them. The new
+  Web.Studio never sends it: the record stays in the log as not sent, with a note in its
+  response, and a manual retry of it is refused, like the retry of any record written
+  before this version.
+
+So stop every Web.Studio of the previous version before the new publishers start, and
+update all of them in one window.
+
+The delivery log keeps every record unless `webhooks:journalRetentionDays` is set: then
+each Web.Studio deletes the records older than that, once nothing will send them any more.
+Each manual retry adds a record with a copy of the body, so set it on a busy portal.
 
 ## Known gaps
 
