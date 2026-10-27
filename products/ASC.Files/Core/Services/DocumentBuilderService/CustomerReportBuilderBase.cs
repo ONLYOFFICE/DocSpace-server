@@ -159,7 +159,9 @@ public abstract class CustomerReportBuilderBase(
     // every flavour shares one instance.
     private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData, CancellationToken cancellationToken)
     {
-        var utcStartDate = TenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcStartDate = taskData.StartDate.HasValue
+            ? TenantUtil.DateTimeToUtc(taskData.StartDate.Value)
+            : TenantUtil.GetUtcCreationDate(tenant);
         var utcEndDate = TenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var header = await reportHeaderService.BuildAsync(userCulture);
