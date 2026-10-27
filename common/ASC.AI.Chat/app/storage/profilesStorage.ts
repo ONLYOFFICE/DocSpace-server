@@ -57,15 +57,22 @@ import {
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
+export type DocspaceProfile = Profile & { byokProvider?: string };
+
+function gatewayBaseUrl(profile: DocspaceProfile): string {
+  const gateway = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
+  return profile.byokProvider ? `${gateway}/byok/${encodeURIComponent(profile.id)}` : gateway;
+}
+
 export function withOnlyofficeProviderOverrides(
-  profile: Profile | undefined,
-): Profile | undefined {
+  profile: DocspaceProfile | undefined,
+): DocspaceProfile | undefined {
   if (!profile || profile.providerType !== "onlyoffice") {
     return profile;
   }
-  const resolved: Profile = {
+  const resolved: DocspaceProfile = {
     ...profile,
-    baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`,
+    baseUrl: gatewayBaseUrl(profile),
   };
   if (shouldForwardHeadersToProvider()) {
     resolved.headers = { ...getForwardedHeaders(), ...(profile.headers ?? {}) };
@@ -73,7 +80,7 @@ export function withOnlyofficeProviderOverrides(
   return resolved;
 }
 
-export function dtoToProfile(raw: unknown): Profile | undefined {
+export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   if (!isObject(raw)) {
     return undefined;
   }
@@ -93,7 +100,7 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   ) {
     return undefined;
   }
-  const profile: Profile = {
+  const profile: DocspaceProfile = {
     id,
     name,
     providerType,
@@ -101,6 +108,10 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
     modelId,
     createdAt,
   };
+  const byokProvider = getString(raw, "byokProvider");
+  if (byokProvider !== undefined) {
+    profile.byokProvider = byokProvider;
+  }
   const key = getString(raw, "key");
   if (key !== undefined) {
     profile.key = key;

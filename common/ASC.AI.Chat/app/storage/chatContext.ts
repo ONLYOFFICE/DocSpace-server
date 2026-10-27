@@ -31,10 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { McpServerConfig, Profile, Thread } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Thread } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { dtoToProfile } from "./profilesStorage.js";
+import type { DocspaceProfile } from "./profilesStorage.js";
 import { dtoToThread } from "./threadsStorage.js";
 import { dtoToMessage } from "./messagesStorage.js";
 import { parseMcpServerConfig } from "./mcpServersStorage.js";
@@ -162,8 +163,8 @@ function parseScope(raw: unknown, entityId: string | undefined): ChatContextScop
   };
 }
 
-function parseProfiles(raw: unknown): Profile[] {
-  const result: Profile[] = [];
+function parseProfiles(raw: unknown): DocspaceProfile[] {
+  const result: DocspaceProfile[] = [];
   if (!Array.isArray(raw)) {
     return result;
   }
