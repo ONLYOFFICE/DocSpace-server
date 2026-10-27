@@ -81,6 +81,16 @@ public interface IAccountingApi
     [Paged(Items = nameof(UsageReport.Collection), Total = nameof(UsageReport.TotalQuantity))]
     PagedEnumerable<UsageReport, CustomerServiceUsage> GetCustomerServiceUsagePages(string portalId, UsageFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
 
+    [Get("/customer/{portalId}/deposits")]
+    Task<DepositReport> GetCustomerDepositsAsync(string portalId, [Query] DepositFilter filter);
+
+    /// <summary>
+    /// All balance top-ups matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    [Get("/customer/{portalId}/deposits")]
+    [Paged(Items = nameof(DepositReport.Collection), Total = nameof(DepositReport.TotalQuantity))]
+    PagedEnumerable<DepositReport, Deposit> GetCustomerDepositPages(string portalId, [Query] DepositFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();
 
