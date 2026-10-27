@@ -205,11 +205,14 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             return success;
         }
 
-        if (relation.ChildTable == "webhooks_logs" && relation.ChildColumn == "retry_of")
+        if (relation.ChildTable == "webhooks_logs" && relation.ChildColumn is "retry_of" or "config_id")
         {
-            // the original row of an event has a lower id than its retries and is normally restored first. Should it
-            // not be mapped yet, the retry is dropped: the generic rule would keep the old id, which in the new tenant
-            // points to no row or to an unrelated one, and the receiver would get that id as event.id
+            // A row whose parent has no mapping is dropped: the generic rule would keep the old id, which in the new
+            // tenant points to no row (a foreign key error on insert) or to an unrelated one. For config_id, that is a
+            // subscription dropped with its creator who could not be mapped, and its delivery records go with it. For
+            // retry_of, the receiver would get that id as event.id; the original row of an event is always restored
+            // before its retries, since RestoreDbModuleTask orders the rows of a self relation as a tree, parents first,
+            // whatever order the archive holds them in
             if (value == null || value == DBNull.Value)
             {
                 return true;

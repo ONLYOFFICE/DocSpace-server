@@ -140,6 +140,26 @@ public class WebStudioModuleSpecificsTests
     }
 
     [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_OfAnUnmappedSubscription_IsDropped()
+    {
+        // Arrange — a delivery record of a subscription that was not restored, dropped with its unmapped creator
+        var specifics = CreateSpecifics();
+
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", 330);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", 99);
+        row.SetValue("retry_of", null);
+        row.SetValue("uid", _oldUser);
+
+        // Act
+        var (prepared, _) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — the old config_id would point to no subscription, or to another subscription of the new tenant
+        prepared.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task TryPrepareRow_WebhooksLogs_PendingAttempt_IsNotScheduledAgain()
     {
         // Arrange — a record that was due for its next attempt, and leased by a sender, when the backup was taken
