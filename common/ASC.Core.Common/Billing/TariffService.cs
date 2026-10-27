@@ -1692,6 +1692,14 @@ public class TariffService(
         return true;
     }
 
+    public async Task<OperationResult> CreditBonusAsync(int tenantId, decimal sum, string currency, string externalRef, DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await accountingClient.CreditBonusAsync(portalId, sum, currency, externalRef, utcExpiresAt, metadata);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return result;
+    }
+
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try

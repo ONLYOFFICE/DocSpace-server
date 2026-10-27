@@ -70,6 +70,12 @@ public interface ITariffService
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
+
+    /// <summary>
+    /// Credits a bonus to the portal's wallet at once and drops the cached balance, so the next read shows it.
+    /// Failures are not caught: the caller decides what a bonus that was not credited means.
+    /// </summary>
+    Task<OperationResult> CreditBonusAsync(int tenantId, decimal sum, string currency, string externalRef, DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null);
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
     Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter);
     Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);
