@@ -1,5 +1,6 @@
 package com.onlyoffice.docspace.webhooks.samples;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -102,7 +103,8 @@ public final class LogWebhook {
         }
 
         String trigger = envelope.getAsJsonObject("event").get("trigger").getAsString();
-        String payloadJson = envelope.get("payload").toString();
+        JsonElement payloadElement = envelope.get("payload");
+        String payloadJson = payloadElement == null ? "null" : payloadElement.toString();
 
         WebhookEventInfo event =
                 WebhookEventInfo.fromJson(envelope.get("event").toString());
@@ -124,6 +126,12 @@ public final class LogWebhook {
                 payload = JSON.getGson().fromJson(payloadJson, model);
             } catch (RuntimeException e) {
                 System.err.printf("unparseable %s payload: %s%n", trigger, e.getMessage());
+                System.exit(1);
+            }
+            // A typed trigger always carries its payload; Gson reads a missing
+            // or null one as null rather than failing.
+            if (payload == null) {
+                System.err.printf("unparseable %s payload: no %s object%n", trigger, modelName(trigger));
                 System.exit(1);
             }
         }

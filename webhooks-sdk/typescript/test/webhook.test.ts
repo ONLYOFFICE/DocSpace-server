@@ -203,6 +203,17 @@ test('parseWebhook rejects bodies that are not envelopes', () => {
     assert.throws(() => parseWebhook('{"event":{}}'), WebhookParseError);
 });
 
+test('parseWebhook rejects a typed trigger without its payload', () => {
+    const envelope = JSON.parse(REAL) as Record<string, unknown>;
+    delete envelope.payload;
+    assert.throws(() => parseWebhook(JSON.stringify(envelope)), WebhookParseError);
+    assert.throws(() => parseWebhook(JSON.stringify({ ...envelope, payload: null })), WebhookParseError);
+
+    // the untyped catch-all stays opaque, with or without a payload
+    const untyped = { ...envelope, event: { ...(envelope.event as object), trigger: '*' } };
+    assert.equal(parseWebhook(JSON.stringify(untyped)).trigger, '*');
+});
+
 test('payloadModelName names the model from the generated table', () => {
     assert.equal(payloadModelName('file.created'), 'FilePayload');
     assert.equal(payloadModelName('form.filled.out'), 'FilePayload');

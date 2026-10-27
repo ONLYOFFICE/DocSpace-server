@@ -89,6 +89,15 @@ export function parseWebhook(body: RawBody): AnyWebhook {
         throw new WebhookParseError('envelope has no event.trigger');
     }
 
+    // A typed trigger always carries its payload object; the generated deserializers
+    // pass null and undefined through, which would hand the caller a missing typed
+    // payload. The untyped '*' stays opaque, whatever it carries.
+    const model = isKnownTrigger(trigger) ? PAYLOAD_MODEL_NAMES[trigger] : null;
+    if (model !== null
+        && (json.payload === null || typeof json.payload !== 'object' || Array.isArray(json.payload))) {
+        throw new WebhookParseError(`no ${model} payload for '${trigger}'`);
+    }
+
     const payload = isKnownTrigger(trigger)
         ? PAYLOAD_DESERIALIZERS[trigger](json.payload)
         : (json.payload as unknown);

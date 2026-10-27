@@ -90,8 +90,14 @@ def main() -> int:
     event = WebhookEventInfo.from_dict(envelope.get("event") or {})
     config = WebhookConfigInfo.from_dict(envelope.get("webhook") or {})
     model = payload_type(trigger)
+    raw_payload = envelope.get("payload")
+    # A typed trigger always carries its payload. Building an empty model in its
+    # place would accept a delivery the other samples refuse.
+    if model is not None and not isinstance(raw_payload, dict):
+        print(f"unparseable {trigger} payload: no {model.__name__} object", file=sys.stderr)
+        return 1
     try:
-        payload = model.from_dict(envelope.get("payload") or {}) if model else None
+        payload = model.from_dict(raw_payload) if model else None
     except Exception as err:  # pydantic's ValidationError, or a bad value
         print(f"unparseable {trigger} payload: {err}", file=sys.stderr)
         return 1

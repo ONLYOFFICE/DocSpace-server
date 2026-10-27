@@ -317,8 +317,9 @@ dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-class "*W
 The captured bodies carry the test portal's address and the fake names and emails the suite generates.
 
 The run also checks the model each sample reports against the contract's map, and
-replays `samples/negative/` (see its README): a wrong signature, and a signed
-envelope with no trigger. A sample that exits 0 on either fails the run.
+replays `samples/negative/` (see its README): a wrong signature, a signed
+envelope with no trigger, and a typed trigger with no payload. A sample that exits 0
+on any of them fails the run.
 
 A language whose toolchain is missing is reported as `NOT VERIFIED` at the end
 rather than passed; a generate-only run skips the check. The skill verifies PHP,

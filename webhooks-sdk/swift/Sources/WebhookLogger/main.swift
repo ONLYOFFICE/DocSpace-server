@@ -117,6 +117,13 @@ else {
 
 let envelope = try decoder.decode(Envelope.self, from: body)
 
+// A typed trigger always carries its payload object. Without one there is nothing
+// to decode; re-encoding a missing payload below would not even be valid JSON.
+if WebhookTriggers.payloadModels[trigger] != nil, !(root["payload"] is [String: Any]) {
+    FileHandle.standardError.write(Data("unparseable \(trigger) payload: no payload object\n".utf8))
+    exit(1)
+}
+
 // Re-encode the payload subtree so it can go through the typed decoder.
 let payloadData = try JSONSerialization.data(
     withJSONObject: root["payload"] ?? NSNull(), options: [])
