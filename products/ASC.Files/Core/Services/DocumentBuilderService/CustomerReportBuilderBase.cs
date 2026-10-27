@@ -159,11 +159,9 @@ public abstract class CustomerReportBuilderBase(
     // every flavour shares one instance.
     private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData, CancellationToken cancellationToken)
     {
-        // The creation date is stored in UTC but read back without a kind: it is marked as UTC rather than converted
-        // from the portal time zone as a requested date is.
         var utcStartDate = taskData.StartDate.HasValue
             ? TenantUtil.DateTimeToUtc(taskData.StartDate.Value)
-            : DateTime.SpecifyKind(tenant.CreationDateTime, DateTimeKind.Utc);
+            : TenantUtil.GetUtcCreationDate(tenant);
         var utcEndDate = TenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var header = await reportHeaderService.BuildAsync(userCulture);

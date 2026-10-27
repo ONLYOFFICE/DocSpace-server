@@ -1165,13 +1165,12 @@ public class PaymentController(
         }
     }
 
-    // A requested start is read in the portal time zone. The creation date is stored in UTC but read back without a
-    // kind, so it is marked as UTC rather than converted, which would move the start by the portal's offset.
+    // A requested start is read in the portal time zone; without one the period starts at the portal creation date.
     private DateTime GetUtcStartDate(DateTime? startDate, Tenant tenant)
     {
         return startDate.HasValue
             ? tenantUtil.DateTimeToUtc(startDate.Value)
-            : DateTime.SpecifyKind(tenant.CreationDateTime, DateTimeKind.Utc);
+            : TenantUtil.GetUtcCreationDate(tenant);
     }
 
     /// <remarks>
