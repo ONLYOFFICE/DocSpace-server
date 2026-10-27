@@ -64,22 +64,24 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
                 await _queue.DequeueTask(task.Id);
             }
 
-            // Stamped here, under the semaphore, so that on this worker the order of the queue is the order of the times:
-            // a recovery never waits behind the later one that waits for it. Kept growing when the clock is set back.
+            // The order the recoveries of a form run in; kept growing when the clock is set back.
             var now = DateTime.UtcNow;
             newTask.QueuedOn = _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
 
-            // Before the queue gets the task, since a free reader may start it at once and stop the heartbeat.
+            // Published at once, so that the task is seen as running, and queued once the earlier recoveries of the form are
+            // done. The heartbeat starts first, since a free reader may start the task as soon as it is queued and stop it.
             newTask.StartQueuedHeartbeat();
             try
             {
-                await _queue.EnqueueTask(newTask);
+                await _queue.PublishTask(newTask);
             }
             catch
             {
                 await newTask.StopQueuedHeartbeatAsync();
                 throw;
             }
+
+            _ = newTask.QueueWhenFreeAsync(this, _queue);
 
             return true;
         }

@@ -68,6 +68,9 @@ internal static partial class FormRecoveryServiceLogger
     [LoggerMessage(LogLevel.Warning, "Form recovery: the report of form {formId} version {version} could not be built, the new report keeps the older versions before it; delete the report and generate it again to build them")]
     public static partial void WarnReportHistoryStopped(this ILogger<FormRecoveryTask> logger, Exception exception, int formId, int version);
 
+    [LoggerMessage(LogLevel.Warning, "Form recovery: a recovery of form {formId} has waited over {minutes} minutes for the earlier recoveries {taskIds} of the form, it goes on waiting")]
+    public static partial void WarnRecoveryWaitingLong(this ILogger<FormRecoveryTask> logger, int formId, int minutes, string taskIds);
+
     [LoggerMessage(LogLevel.Warning, "Form recovery: failed to check the earlier recoveries of form {formId}, the recovery goes on without waiting for them")]
     public static partial void WarnRecoveryWaitFailed(this ILogger<FormRecoveryTask> logger, Exception exception, int formId);
 

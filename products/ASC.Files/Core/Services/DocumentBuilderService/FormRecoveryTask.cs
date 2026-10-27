@@ -52,6 +52,10 @@ public class FormRecoveryTask : DistributedTaskProgress
     // build: the builder is polled with no limit of its own.
     private static readonly TimeSpan _maxReportBuildTime = TimeSpan.FromMinutes(10);
 
+    // A wait for the earlier recoveries of the form this long is past what a recovery of a large form takes: it is logged,
+    // though the wait goes on, since giving up would let two reports write the file at once.
+    private static readonly TimeSpan _longWaitWarning = TimeSpan.FromHours(1);
+
     // The report the client polls waits in its own queue, under the same window, until the recovery starts it, and shows
     // the progress of the recovery. The report then publishes its own from 30 on, so the recovery and the older versions
     // of the report share the part below it.
@@ -89,13 +93,33 @@ public class FormRecoveryTask : DistributedTaskProgress
     }
 
     /// <summary>
-    /// Publishes the task and the status the client polls while the task waits for a reader of its queue: the readers take
-    /// tasks in turn, so it may wait behind a long recovery, and the queue drops what publishes nothing for a minute.
+    /// Publishes the task and the status the client polls until the job starts: while the task waits for the earlier
+    /// recoveries of the form and then for a reader of its queue, which may be busy with a long recovery. The queue drops
+    /// what publishes nothing for a minute.
     /// </summary>
     public void StartQueuedHeartbeat()
     {
         _queuedHeartbeatStop = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _queuedHeartbeat = KeepAliveQueuedAsync(_queuedHeartbeatStop.Task);
+    }
+
+    /// <summary>
+    /// Waits for the earlier recoveries of the form outside the queue, then queues the task: a reader of the queue only
+    /// ever takes work, so a wait never holds it. A failure leaves the task unqueued, and the queue drops its records once
+    /// the heartbeat stops.
+    /// </summary>
+    public async Task QueueWhenFreeAsync(FormRecoveryTaskManager recoveryTaskManager, DistributedTaskQueue<FormRecoveryTask> queue)
+    {
+        try
+        {
+            await WaitForEarlierRecoveriesAsync(recoveryTaskManager);
+            await queue.EnqueueTask(this);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorWithException(e);
+            await StopQueuedHeartbeatAsync();
+        }
     }
 
     protected override async Task DoJob()
@@ -121,8 +145,6 @@ public class FormRecoveryTask : DistributedTaskProgress
             var heartbeat = KeepAliveAsync(heartbeatStop.Token);
             try
             {
-                await WaitForEarlierRecoveriesAsync(scope.ServiceProvider.GetRequiredService<FormRecoveryTaskManager>());
-
                 var recoveryService = scope.ServiceProvider.GetRequiredService<FormRecoveryService>();
                 await recoveryService.RecoverAsync(_reportData.RoomId, _reportData.OriginalFormId, share => Progress(share * RecoveryShare), CancellationToken);
                 Progress(RecoveryShare);
@@ -258,6 +280,8 @@ public class FormRecoveryTask : DistributedTaskProgress
     private async Task WaitForEarlierRecoveriesAsync(FormRecoveryTaskManager recoveryTaskManager)
     {
         var earlierUsers = new HashSet<Guid>();
+        var waitingSince = DateTime.UtcNow;
+        var warned = false;
         try
         {
             while (true)
@@ -270,10 +294,16 @@ public class FormRecoveryTask : DistributedTaskProgress
                     return;
                 }
 
-                await Task.Delay(_heartbeatInterval, CancellationToken);
+                if (!warned && DateTime.UtcNow - waitingSince > _longWaitWarning)
+                {
+                    _logger.WarnRecoveryWaitingLong(OriginalFormId, (int)_longWaitWarning.TotalMinutes, string.Join(", ", earlier.Select(t => t.Id)));
+                    warned = true;
+                }
+
+                await Task.Delay(_heartbeatInterval);
             }
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e)
         {
             // The queue could not be read: the recovery goes on as it did before it waited for others.
             _logger.WarnRecoveryWaitFailed(e, OriginalFormId);

@@ -332,13 +332,25 @@ public class FormRecoveryService(
 
     // A failure of the builder, the network or a lock, which passes. Anything else, a defect included, counts as an
     // attempt on the file, so that it cannot hold back the forms after it for good.
-    private static bool IsPassingFailure(Exception e) =>
-        e is HttpRequestException or TimeoutException or TaskCanceledException or DistributedLockException
-        || e is IOException and not (FileNotFoundException or DirectoryNotFoundException)
-        || e is DocumentServiceException
+    // The document service connector wraps what the service or the network threw in an exception of its own, so the
+    // causes are looked at too.
+    private static bool IsPassingFailure(Exception e)
+    {
+        for (; e != null; e = e.InnerException)
         {
-            Code: not (DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword)
-        };
+            if (e is HttpRequestException or TimeoutException or TaskCanceledException or DistributedLockException
+                || e is IOException and not (FileNotFoundException or DirectoryNotFoundException)
+                || e is DocumentServiceException
+                {
+                    Code: not (DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword)
+                })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // From the index, or from that version of the form file; read once per run.
     private async Task<HashSet<string>> GetVersionKeysAsync(FormVersion version, CancellationToken cancellationToken)
