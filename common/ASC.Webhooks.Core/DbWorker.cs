@@ -390,10 +390,27 @@ public class DbWorker(
 
             await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
 
-            var now = DateTime.UtcNow;
             var eventId = source.EventId;
 
-            await webhooksDbContext.LockWebhooksEventAsync(source.TenantId, eventId);
+            // the original row first: every manual retry of the event queues up on it, so the set of its retry rows
+            // cannot change until the commit, and the order matches the one a claim locks rows in (by id)
+            await webhooksDbContext.LockWebhooksLogsAsync(source.TenantId, [eventId]);
+
+            // read on a connection of its own: a read in this transaction would fix its MySQL snapshot here, before the
+            // retry rows are locked, and the checks below would miss a claim committed in between
+            List<int> retryIds;
+
+            await using (var readContext = await dbContextFactory.CreateDbContextAsync())
+            {
+                retryIds = await readContext.WebhooksEventRetryIdsAsync(source.TenantId, eventId).ToListAsync();
+            }
+
+            if (retryIds.Count > 0)
+            {
+                await webhooksDbContext.LockWebhooksLogsAsync(source.TenantId, retryIds);
+            }
+
+            var now = DateTime.UtcNow;
 
             // the rows go together with their subscription, which may have been removed since the caller read them
             if (!await webhooksDbContext.WebhooksEventExistsAsync(source.TenantId, eventId))
@@ -412,7 +429,7 @@ public class DbWorker(
                 return new WebhookRetryResult(WebhookRetryStatus.InProgress);
             }
 
-            await webhooksDbContext.StopWebhooksEventAttemptsAsync(source.TenantId, eventId);
+            await webhooksDbContext.StopWebhooksLogsAttemptsAsync(source.TenantId, [eventId, .. retryIds]);
 
             var retry = new DbWebhooksLog
             {
