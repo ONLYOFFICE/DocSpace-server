@@ -57,7 +57,7 @@ class RoomPayload(BaseModel):
     indexing: Optional[StrictBool] = Field(default=None, description="Specifies whether the room is indexed or not.")
     deny_download: Optional[StrictBool] = Field(default=None, description="Specifies whether downloading from the room is denied or not.", alias="denyDownload")
     pinned: Optional[StrictBool] = Field(default=None, description="Specifies whether the room is pinned or not.")
-    quota_limit: Optional[StrictInt] = Field(default=None, description="The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.", alias="quotaLimit")
+    quota_limit: Optional[StrictInt] = Field(default=None, description="The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's creator may not edit the room: as in the REST API, only those who may edit a room see its quota.", alias="quotaLimit")
     used_space: Optional[StrictInt] = Field(default=None, description="The space used by the room in bytes.", alias="usedSpace")
     color: Optional[StrictStr] = Field(default=None, description="The room cover colour.")
     cover: Optional[StrictStr] = Field(default=None, description="The room cover name.")

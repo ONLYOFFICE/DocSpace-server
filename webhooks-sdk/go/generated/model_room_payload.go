@@ -67,7 +67,7 @@ type RoomPayload struct {
 	DenyDownload *bool `json:"denyDownload,omitempty"`
 	// Specifies whether the room is pinned or not.
 	Pinned *bool `json:"pinned,omitempty"`
-	// The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.
+	// The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's creator may not edit the room: as in the REST API, only those who may edit a room see its quota.
 	QuotaLimit *int64 `json:"quotaLimit,omitempty"`
 	// The space used by the room in bytes.
 	UsedSpace *int64 `json:"usedSpace,omitempty"`

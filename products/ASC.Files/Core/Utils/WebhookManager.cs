@@ -59,7 +59,8 @@ public class WebhookManager(
 
         var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
 
-        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync<T>);
+        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
+            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
@@ -99,12 +100,13 @@ public class WebhookManager(
 
         var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
 
-        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync<T>);
+        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
+            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, pureFileEntry, subscriberId));
     }
 
     /// <summary>
     /// The payload is built once per event, but what it may show depends on the subscription owner (the profile
-    /// links of the users in it), so each owner's subscriptions get the payload cut for that owner.
+    /// links of the users in it, the quota of a room), so each owner's subscriptions get the payload cut for that owner.
     /// </summary>
     private async Task PublishForSubscribersAsync<TPayload, TId>(
         WebhookTrigger trigger,

@@ -62,7 +62,7 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <param name="indexing">Specifies whether the room is indexed or not..</param>
         /// <param name="denyDownload">Specifies whether downloading from the room is denied or not..</param>
         /// <param name="pinned">Specifies whether the room is pinned or not..</param>
-        /// <param name="quotaLimit">The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event..</param>
+        /// <param name="quotaLimit">The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on, and absent as well when the subscription&#39;s creator may not edit the room: as in the REST API, only those who may edit a room see its quota..</param>
         /// <param name="usedSpace">The space used by the room in bytes..</param>
         /// <param name="color">The room cover colour..</param>
         /// <param name="cover">The room cover name..</param>
@@ -284,9 +284,9 @@ namespace DocSpace.Webhooks.SDK.Model
         public bool Pinned { get; set; }
 
         /// <summary>
-        /// The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.
+        /// The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on, and absent as well when the subscription&#39;s creator may not edit the room: as in the REST API, only those who may edit a room see its quota.
         /// </summary>
-        /// <value>The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.</value>
+        /// <value>The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on, and absent as well when the subscription&#39;s creator may not edit the room: as in the REST API, only those who may edit a room see its quota.</value>
         [DataMember(Name = "quotaLimit", EmitDefaultValue = false)]
         public long QuotaLimit { get; set; }
 

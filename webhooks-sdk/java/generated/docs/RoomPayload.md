@@ -35,7 +35,7 @@ The room carried by a room.* webhook, and by every agent.* webhook.  A copy of t
 |**indexing** | **Boolean** | Specifies whether the room is indexed or not. |  [optional] |
 |**denyDownload** | **Boolean** | Specifies whether downloading from the room is denied or not. |  [optional] |
 |**pinned** | **Boolean** | Specifies whether the room is pinned or not. |  [optional] |
-|**quotaLimit** | **Long** | The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event. |  [optional] |
+|**quotaLimit** | **Long** | The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on, and absent as well when the subscription&#39;s creator may not edit the room: as in the REST API, only those who may edit a room see its quota. |  [optional] |
 |**usedSpace** | **Long** | The space used by the room in bytes. |  [optional] |
 |**color** | **String** | The room cover colour. |  [optional] |
 |**cover** | **String** | The room cover name. |  [optional] |

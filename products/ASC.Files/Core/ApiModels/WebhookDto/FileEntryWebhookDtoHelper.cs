@@ -48,7 +48,8 @@ public class FileEntryWebhookDtoHelper(
     UserWebhookDtoHelper userWebhookDtoHelper,
     CommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FileUtility fileUtility,
+    FileSecurity fileSecurity)
 {
     /// <summary>
     /// Maps any entry to the payload its trigger expects: a file, a room or a plain folder.
@@ -72,21 +73,34 @@ public class FileEntryWebhookDtoHelper(
     }
 
     /// <summary>
-    /// Cuts a payload built by <see cref="GetAsync{T}"/> for one subscription owner: a User or a Guest gets the
-    /// author and the last editor without the profile link, as the REST API shows them to them.
+    /// Cuts a payload built by <see cref="GetAsync{T}"/> from <paramref name="source"/> for one subscription owner, as
+    /// the REST API shows the entry to them: a User or a Guest gets the author and the last editor without the profile
+    /// link, and the quota of a room goes only to an owner who may edit the room.
     /// </summary>
-    public async Task<object> RestrictForSubscriberAsync<T>(object payload, Guid? subscriberId)
+    public async Task<object> RestrictForSubscriberAsync<T>(object payload, FileEntry<T> source, Guid? subscriberId)
     {
-        if (payload is not FileEntryWebhookDto<T> entry || !await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId))
+        if (payload is not FileEntryWebhookDto<T> entry || !subscriberId.HasValue)
         {
             return payload;
         }
 
-        return RestrictForSubscriber(entry, subscriberId.Value);
+        var result = await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId)
+            ? RestrictForSubscriber(entry, subscriberId.Value)
+            : entry;
+
+        if (result is RoomWebhookDto<T> { QuotaLimit: not null } room && !await fileSecurity.CanEditRoomAsync(source, subscriberId.Value))
+        {
+            var withoutQuota = (RoomWebhookDto<T>)(ReferenceEquals(room, entry) ? room.Clone() : room);
+
+            withoutQuota.QuotaLimit = null;
+            result = withoutQuota;
+        }
+
+        return result;
     }
 
     /// <summary>
-    /// The form.submit counterpart of <see cref="RestrictForSubscriberAsync{T}(object, Guid?)"/>.
+    /// The form.submit counterpart of <see cref="RestrictForSubscriberAsync{T}(object, FileEntry{T}, Guid?)"/>.
     /// </summary>
     public async Task<FormSubmitWebhookDto<T>> RestrictForSubscriberAsync<T>(FormSubmitWebhookDto<T> payload, Guid? subscriberId)
     {

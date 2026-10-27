@@ -36,8 +36,9 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <summary>
 /// The users a file event refers to (<c>createdBy</c>, <c>updatedBy</c>) are cut for each subscription owner
 /// by the rule the REST API applies to a reader: a <c>User</c> or a <c>Guest</c> gets no profile link of
-/// another user, because the link is a people search by email (bug 81093). The payload is read from the
-/// delivery record, which holds the body exactly as the subscription gets it.
+/// another user, because the link is a people search by email (bug 81093). The quota of a room goes only to an
+/// owner who may edit the room, as in the REST API. The payload is read from the delivery record, which holds the
+/// body exactly as the subscription gets it.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookFilePayloadTests(
@@ -71,6 +72,41 @@ public class WebhookFilePayloadTests(
         createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
         createdBy.TryGetProperty("profileUrl", out _).Should().BeFalse("the profile link carries the email of the author");
         memberPayload.Value.GetProperty("updatedBy").TryGetProperty("profileUrl", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task RoomUpdated_QuotaLimit_GoesOnlyToASubscriberWhoMayEditTheRoom()
+    {
+        // Arrange: room quotas on, and a member who may only read the room
+        const int defaultQuota = 512 * 1024 * 1024;
+        const long quota = 1024L * 1024 * 1024;
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await _webApiClient.Authenticate(Owner);
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
+            new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(defaultQuota)), cancellationToken);
+
+        var member = await InviteContact(EmployeeType.User);
+        var roomId = await CreateRoomSharedWithAsync(member);
+        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated);
+
+        // Act: a quota of the room's own, set together with a new title, which publishes room.updated
+        var title = $"room-{Guid.NewGuid():N}";
+
+        await _filesClient.Authenticate(Owner);
+        await _roomsApi.UpdateRoomAsync(roomId, new UpdateRoomRequest(title: title, quota: quota), cancellationToken);
+
+        // Assert: the REST API shows the quota only to those who may edit the room, and so does the payload
+        var ownerPayload = await WaitForFilePayloadAsync(ownerSubscription.Id, title);
+
+        ownerPayload.Should().NotBeNull("the owner may read every room");
+        ownerPayload!.Value.GetProperty("quotaLimit").GetInt64().Should().Be(quota);
+
+        var memberPayload = await WaitForFilePayloadAsync(memberSubscription.Id, title);
+
+        memberPayload.Should().NotBeNull("the member may read the room");
+        memberPayload!.Value.TryGetProperty("quotaLimit", out _).Should().BeFalse("the member may not edit the room");
     }
 
     private async Task<int> CreateRoomSharedWithAsync(User member)

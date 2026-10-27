@@ -58,7 +58,7 @@ import com.squareup.moshi.JsonClass
  * @param indexing Specifies whether the room is indexed or not.
  * @param denyDownload Specifies whether downloading from the room is denied or not.
  * @param pinned Specifies whether the room is pinned or not.
- * @param quotaLimit The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.
+ * @param quotaLimit The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's creator may not edit the room: as in the REST API, only those who may edit a room see its quota.
  * @param usedSpace The space used by the room in bytes.
  * @param color The room cover colour.
  * @param cover The room cover name.
@@ -168,7 +168,7 @@ data class RoomPayload (
     @Json(name = "pinned")
     val pinned: kotlin.Boolean? = null,
 
-    /* The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event. */
+    /* The room's own quota in bytes, -1 for an explicit \"no limit\". Absent when the room has no quota of its own, so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's creator may not edit the room: as in the REST API, only those who may edit a room see its quota. */
     @Json(name = "quotaLimit")
     val quotaLimit: kotlin.Long? = null,
 

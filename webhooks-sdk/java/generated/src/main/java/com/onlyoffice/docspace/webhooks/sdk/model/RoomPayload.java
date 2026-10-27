@@ -731,7 +731,7 @@ public class RoomPayload {
   }
 
   /**
-   * The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on. Unlike the REST API, which shows the effective limit only to members who may edit the room, the value goes to every subscriber that gets the event.
+   * The room&#39;s own quota in bytes, -1 for an explicit \&quot;no limit\&quot;. Absent when the room has no quota of its own, so the portal&#39;s default room quota applies, if room quotas are on, and absent as well when the subscription&#39;s creator may not edit the room: as in the REST API, only those who may edit a room see its quota.
    * @return quotaLimit
    */
   @javax.annotation.Nullable
