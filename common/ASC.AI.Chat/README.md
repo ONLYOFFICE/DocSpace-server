@@ -65,6 +65,23 @@ While the task runs the agent's steps (its one-line intent before every tool cal
 under the tool card: each becomes an MCP-shaped progress notification of the tool call, which the
 engine streams (`toolProgress`) until the result replaces it; nothing of it is persisted.
 
+### AI projects (mock)
+
+`/api/2.0/ai/projects/*` (`app/controllers/projectsController.ts`) serves the AI Projects page: a
+project is a room of type 12 that binds a model, Instructions rooms (type 10) and Knowledge rooms
+(type 11) and shares them with a team under three roles — owner (`access` 1), project manager (9)
+and member (11). The routes answer in the Files API's shapes (the DocSpace envelope, `FolderDto`
+with an `aiProject` block, `FileShareDto` members) so the client can later be pointed at
+`files/rooms` without changes.
+
+For now the data is an in-memory mock (`app/storage/aiProjectsMockStorage.ts`): it is seeded on
+start, lost on restart, and the caller is always the seeded portal administrator, who holds each
+role once (owner of "Marketing copy", manager of "Legal review", member of "Support answers").
+The mock enforces the access rules of the spec, including the one the real service will
+implement in `files_security`: every member added to a project, and every member of a project a
+room is added to, gets Viewer on that room unless they already have a share on it. Nothing is
+revoked on removal.
+
 ### License
 
 [GNU AGPL V3](LICENSE)

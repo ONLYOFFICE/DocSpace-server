@@ -86,6 +86,11 @@
       "x-displayName": "Profiles"
     },
     {
+      "name": "AI / Projects",
+      "description": "AI projects: a model, Instructions rooms and Knowledge rooms shared with a team (mock-backed).",
+      "x-displayName": "Projects"
+    },
+    {
       "name": "AI / Prompts",
       "description": "Saved prompts and prompt folders.",
       "x-displayName": "Prompts"
@@ -130,6 +135,7 @@
         "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
+        "AI / Projects",
         "AI / Prompts",
         "AI / Settings",
         "AI / Threads",
@@ -10077,6 +10083,1572 @@
           "x-codegen-request-body-name": "AiWebSearchPassthroughContentsRequest"
         }
       }
+    },
+    "/api/2.0/ai/projects": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsList",
+        "summary": "List projects",
+        "description": "Lists the AI projects the caller may see: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The answer is a folder-content payload of the projects root, one folder per project with its `aiProject` block (model, Instructions rooms, Knowledge rooms) and the caller's `security`. Pinned projects come first; `filterValue` narrows by title, `sortBy` takes `DateAndTime` (default), `AZ` or `DateAndTimeCreation`, `sortOrder` `ascending` or `descending`, `role` / `hasInstructions` / `hasKnowledge` filter by the caller's role and the linked rooms, and `startIndex`/`count` page the list. Currently served from an in-memory mock whose caller is a fixed portal administrator.",
+        "responses": {
+          "200": {
+            "description": "The projects the caller may see, in the folder-content envelope of the projects root.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectsPageWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Keep only the projects whose title contains this text.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "marketing"
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The sort field: `DateAndTime` (last change, the default), `AZ` or `DateAndTimeCreation`.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "DateAndTime"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "`ascending` or `descending` (the default).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "descending"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Keep only the projects the caller holds this role in: `1` owner, `9` project manager, `11` member. Omitted or `0`: every role.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "examples": [
+                1
+              ]
+            }
+          },
+          {
+            "name": "hasInstructions",
+            "in": "query",
+            "description": "`true` keeps only the projects with at least one Instructions room.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "examples": [
+                true
+              ]
+            }
+          },
+          {
+            "name": "hasKnowledge",
+            "in": "query",
+            "description": "`true` keeps only the projects with at least one Knowledge room.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "examples": [
+                true
+              ]
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The zero-based index of the first item to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "examples": [
+                0
+              ]
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The maximum number of items to return in one page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "examples": [
+                25
+              ]
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsCreate",
+        "summary": "Create a project",
+        "description": "Creates an AI project. The caller becomes its owner and the only member; only the portal owner, DocSpace admins and room admins may create. `title` is required. The optional `aiProject` block sets the model (`profileId`, a UUID of an enabled chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10, `knowledgeRoomIds` rooms of type 11, each readable by the caller. The caller is granted Viewer on every linked room they are not yet in. A project holds no files of its own.",
+        "responses": {
+          "200": {
+            "description": "The created project, with the caller as its owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`title` is missing or too long, `aiProject.profileId` is not a UUID, or a room id is not an accessible room of the required type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is a user or a guest, who cannot create projects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiProjectsCreateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/projects/rooms": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsLinkableRooms",
+        "summary": "List rooms a project can link",
+        "description": "Lists the rooms a project may link, for the room selector: `type` is required and is `10` for Instructions rooms or `11` for Knowledge rooms; `filterValue` narrows by title. Only rooms the caller can read are returned, each with its skills count (type 10) or indexed/total file counts (type 11).",
+        "responses": {
+          "200": {
+            "description": "The rooms of the requested type the caller can read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectLinkableRoomsWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`type` is neither 10 nor 11.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The room type to list: `10` for Instructions rooms, `11` for Knowledge rooms.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "examples": [
+                10
+              ]
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Keep only the rooms whose title contains this text.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "brand"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/users": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsUsers",
+        "summary": "List users a project can invite",
+        "description": "Lists the portal users the invite and change-owner panels can pick from, with `canOwnProject` saying who may hold the owner or project manager role. `filterValue` narrows by name or email. Mock data standing in for the People API.",
+        "responses": {
+          "200": {
+            "description": "The users, with `canOwnProject` per entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectUsersWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Keep only the users whose name or email contains this text.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "anna"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/profiles": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsProfiles",
+        "summary": "List models a project can use",
+        "description": "Lists the AI profiles a project can be bound to, as the model picker of the project dialog shows them: id, name, provider and whether the profile is enabled. Mock data; a project may also be bound to any profile of the portal by its id (the mock answers `available: false` and no name until the real profile storage lists it).",
+        "responses": {
+          "200": {
+            "description": "The profiles, with `available` per entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectProfilesWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/projects/{id}": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsGet",
+        "summary": "Get a project",
+        "description": "Returns one AI project with its `aiProject` block, the caller's `access` and `security`. A project the caller is not a member of answers 404, unless the caller is the portal owner or a DocSpace admin, who see every project.",
+        "responses": {
+          "200": {
+            "description": "The project, with its `aiProject` block and the caller's `security`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The project id is not a positive integer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsUpdate",
+        "summary": "Update a project",
+        "description": "Changes an AI project: `title`, `logo.color` and the `aiProject` block. Owner and project manager only. In `aiProject` an absent field keeps its value and `profileId: null` returns the project to the portal default model; the room lists replace the current ones and are validated as on create. Every member who is not yet in a newly linked room is granted Viewer on it; removing a room from the project does not revoke anything.",
+        "responses": {
+          "200": {
+            "description": "The updated project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The project id is not a positive integer, `title` is empty or too long, or the `aiProject` block fails the checks of create.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is neither the owner nor a project manager.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiProjectsUpdateRequest"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsDelete",
+        "summary": "Delete a project",
+        "description": "Deletes an AI project. Owner only. Members lose the project; the linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched. The answer is a finished file-operation entry, so a client written against the asynchronous room delete can poll it once and stop.",
+        "responses": {
+          "200": {
+            "description": "A finished file-operation entry for the deleted project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectDeleteWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The project id is not a positive integer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/{id}/pin": {
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsPin",
+        "summary": "Pin a project",
+        "description": "Pins the project at the top of the caller's list. Members only; pinning is per user, as for rooms.",
+        "responses": {
+          "200": {
+            "description": "The project, now pinned for the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not a member of the project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/{id}/unpin": {
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsUnpin",
+        "summary": "Unpin a project",
+        "description": "Removes the caller's pin from the project.",
+        "responses": {
+          "200": {
+            "description": "The project, no longer pinned for the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/{id}/share": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsGetMembers",
+        "summary": "List project members",
+        "description": "Lists the members of the project with their roles, owner first, as file-share entries: `access` 1 is the owner, 9 a project manager, 11 a member. `canEditAccess` tells whether the caller may change that entry.",
+        "responses": {
+          "200": {
+            "description": "The members with their roles, owner first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectMembersWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsSetMembers",
+        "summary": "Invite, re-role or remove members",
+        "description": "Invites, re-roles or removes members. Owner and project manager only. Each invitation names a user by `id` or an outsider by `email` (who becomes a pending guest), and an `access`: 9 project manager, allowed for the portal owner, DocSpace admins and room admins only; 11 member, allowed for everyone; 0 removes. The owner cannot be re-roled or removed here - use the change-owner operation. Every member added is granted Viewer on each linked Instructions and Knowledge room they are not yet in; an existing share on a room is never downgraded. Removal does not revoke those shares.",
+        "responses": {
+          "200": {
+            "description": "The members after the change, and a warning when something could not be applied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectMembersResultWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`invitations` is empty, an entry has neither id nor email, names no user, asks a role the user cannot hold, or targets the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is neither the owner nor a project manager.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiProjectsSetMembersRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/projects/{id}/leave": {
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsLeave",
+        "summary": "Leave a project",
+        "description": "Removes the caller from the project. Project managers and members only: the owner has to hand the project over first with the change-owner operation. The Viewer shares the project granted on its rooms are kept.",
+        "responses": {
+          "200": {
+            "description": "The caller has left the project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectSuccessWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The caller is not a member, or is the owner and has to hand the project over first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/{id}/owner": {
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsChangeOwner",
+        "summary": "Change the project owner",
+        "description": "Hands the project to another user. Owner only. `userId` has to name a user who may own a project (the portal owner, a DocSpace admin or a room admin); users and guests are refused. With `keepAsManager` (default true) the previous owner stays as a project manager, otherwise they leave the project. The new owner is granted Viewer on the linked rooms they are not yet in.",
+        "responses": {
+          "200": {
+            "description": "The project under its new owner, as the previous owner sees it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`userId` is not a UUID, names no user, names the current owner, or names a user or guest.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiProjectsChangeOwnerRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/projects/{id}/links": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsGetLinks",
+        "summary": "Get the invitation link",
+        "description": "Returns the project's invitation link as a file-share entry when it is switched on, else an empty list. Anyone who joins through the link becomes a member (access 11).",
+        "responses": {
+          "200": {
+            "description": "The invitation link, or an empty list when it is off.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectMembersWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsSetLink",
+        "summary": "Switch the invitation link",
+        "description": "Switches the invitation link on or off (`enabled`) and optionally renames it (`title`). Owner and project manager only. Switching the link off and on again issues a new token, so a leaked link stops working. The answer is the link entry, or `null` once it is off.",
+        "responses": {
+          "200": {
+            "description": "The invitation link, or `null` once it is off.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectLinkWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`enabled` is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is neither the owner nor a project manager.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiProjectsSetLinkRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/projects/{id}/skills": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsSkills",
+        "summary": "List the project's skills",
+        "description": "Lists the skills of every Instructions room linked to the project, grouped by room, for the skills panel: each skill is a Markdown file with its frontmatter name and description. Which skills a chat round uses is the user's per-session choice and is not stored.",
+        "responses": {
+          "200": {
+            "description": "The skills of the linked Instructions rooms, grouped by room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectSkillsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/projects/{id}/knowledge": {
+      "get": {
+        "tags": [
+          "AI / Projects"
+        ],
+        "operationId": "aiProjectsKnowledge",
+        "summary": "List the project's knowledge files",
+        "description": "Lists the files of every Knowledge room linked to the project, grouped by room, with the room's indexed and total counts and each file's indexing state, for the files panel.",
+        "responses": {
+          "200": {
+            "description": "The files of the linked Knowledge rooms, grouped by room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectKnowledgeWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist or the caller is not a member of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The project identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "900001"
+              ]
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -11968,6 +13540,1353 @@
         },
         "required": [
           "success"
+        ]
+      },
+      "AiProjectProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The AI profile id."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The profile's display name; `null` when the profile no longer exists."
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The provider name; `null` when the profile no longer exists."
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether the profile exists and is enabled."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "provider",
+          "available"
+        ],
+        "additionalProperties": false,
+        "description": "The model of a project as the list and card show it. `available` is false when the profile was disabled or deleted after it was chosen."
+      },
+      "AiProjectSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The room id."
+          },
+          "title": {
+            "type": "string",
+            "description": "The room title."
+          },
+          "roomType": {
+            "type": "number",
+            "description": "The room type: 10 Instructions, 11 Knowledge."
+          },
+          "logo": {
+            "$ref": "#/components/schemas/AiProjectLogo",
+            "description": "The room logo, as the room DTO carries it."
+          },
+          "skillsCount": {
+            "type": "number",
+            "description": "Instructions rooms: the number of Markdown skills in the room."
+          },
+          "indexedFiles": {
+            "type": "number",
+            "description": "Knowledge rooms: the number of files already indexed."
+          },
+          "totalFiles": {
+            "type": "number",
+            "description": "Knowledge rooms: the number of files in the room."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "roomType",
+          "logo"
+        ],
+        "additionalProperties": false,
+        "description": "A room linked to a project: an Instructions room (type 10) or a Knowledge room (type 11)."
+      },
+      "AiProjectLogo": {
+        "type": "object",
+        "properties": {
+          "original": {
+            "type": "string"
+          },
+          "large": {
+            "type": "string"
+          },
+          "medium": {
+            "type": "string"
+          },
+          "small": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "cover": {
+            "$ref": "#/components/schemas/AiProjectCover",
+            "description": "The built-in cover drawn in `color`, as a room carries it; absent when the initials are drawn. The mock answers with an empty `data`."
+          }
+        },
+        "required": [
+          "original",
+          "large",
+          "medium",
+          "small",
+          "color"
+        ],
+        "additionalProperties": false,
+        "description": "A room logo: no uploaded sizes in the mock, the colour and the built-in cover."
+      },
+      "AiProjectCover": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "data"
+        ],
+        "additionalProperties": false,
+        "description": "A built-in room cover: its id and the SVG it is drawn from."
+      },
+      "AiProjectSettings": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiProjectProfile"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The project's model; `null` means the portal default."
+          },
+          "instructionsRooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectSource"
+            },
+            "description": "The linked Instructions rooms, in the order they were added."
+          },
+          "knowledgeRooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectSource"
+            },
+            "description": "The linked Knowledge rooms, in the order they were added."
+          },
+          "canEditSettings": {
+            "type": "boolean",
+            "description": "Whether the caller may change the settings: the owner and project managers."
+          }
+        },
+        "required": [
+          "profile",
+          "instructionsRooms",
+          "knowledgeRooms",
+          "canEditSettings"
+        ],
+        "additionalProperties": false,
+        "description": "The settings block of a project (`AiProjectSettingsDto` on the C# side)."
+      },
+      "AiProjectSecurity": {
+        "type": "object",
+        "properties": {
+          "Read": {
+            "type": "boolean"
+          },
+          "Rename": {
+            "type": "boolean"
+          },
+          "EditRoom": {
+            "type": "boolean"
+          },
+          "EditAccess": {
+            "type": "boolean"
+          },
+          "ChangeOwner": {
+            "type": "boolean"
+          },
+          "Delete": {
+            "type": "boolean"
+          },
+          "Pin": {
+            "type": "boolean"
+          },
+          "Leave": {
+            "type": "boolean"
+          },
+          "Create": {
+            "type": "boolean"
+          },
+          "CopyTo": {
+            "type": "boolean"
+          },
+          "MoveTo": {
+            "type": "boolean"
+          },
+          "Download": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Read",
+          "Rename",
+          "EditRoom",
+          "EditAccess",
+          "ChangeOwner",
+          "Delete",
+          "Pin",
+          "Leave",
+          "Create",
+          "CopyTo",
+          "MoveTo",
+          "Download"
+        ],
+        "additionalProperties": false,
+        "description": "What the caller may do with the project."
+      },
+      "AiProjectUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarSmall": {
+            "type": "string"
+          },
+          "hasAvatar": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean",
+            "description": "The portal owner."
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "description": "A DocSpace admin."
+          },
+          "isRoomAdmin": {
+            "type": "boolean",
+            "description": "A room admin."
+          },
+          "isCollaborator": {
+            "type": "boolean",
+            "description": "A user (the \"collaborator\" employee type)."
+          },
+          "isVisitor": {
+            "type": "boolean",
+            "description": "A guest."
+          },
+          "status": {
+            "type": "number",
+            "description": "`EmployeeStatus`: 1 active, 2 pending."
+          },
+          "avatarColor": {
+            "type": "string",
+            "description": "The colour of the generated avatar."
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "avatarSmall",
+          "hasAvatar",
+          "isOwner",
+          "isAdmin",
+          "isRoomAdmin",
+          "isCollaborator",
+          "isVisitor",
+          "status",
+          "avatarColor"
+        ],
+        "additionalProperties": false,
+        "description": "A user as the project endpoints show one (a subset of `EmployeeFullDto`)."
+      },
+      "AiProject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "parentId": {
+            "type": "number"
+          },
+          "rootFolderId": {
+            "type": "number"
+          },
+          "rootFolderType": {
+            "type": "number",
+            "description": "`FolderType.AiProjects`, the projects root."
+          },
+          "type": {
+            "type": "number",
+            "description": "`FolderType.AiProjectRoom`."
+          },
+          "roomType": {
+            "type": "number",
+            "description": "`RoomType.AiProjectRoom` (12)."
+          },
+          "title": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "string"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiProjectUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filesCount": {
+            "type": "number",
+            "description": "Always 0: a project holds no files."
+          },
+          "foldersCount": {
+            "type": "number",
+            "description": "Always 0: a project holds no folders."
+          },
+          "new": {
+            "type": "number"
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "Whether the caller pinned the project."
+          },
+          "inRoom": {
+            "type": "boolean",
+            "description": "Whether the caller is a member."
+          },
+          "access": {
+            "type": "number",
+            "description": "The caller's role: 1 owner, 9 project manager, 11 member, 0 none (admins outside the project)."
+          },
+          "logo": {
+            "$ref": "#/components/schemas/AiProjectLogo"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "security": {
+            "$ref": "#/components/schemas/AiProjectSecurity"
+          },
+          "aiProject": {
+            "$ref": "#/components/schemas/AiProjectSettings"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "rootFolderId",
+          "rootFolderType",
+          "type",
+          "roomType",
+          "title",
+          "created",
+          "updated",
+          "createdBy",
+          "filesCount",
+          "foldersCount",
+          "new",
+          "pinned",
+          "inRoom",
+          "access",
+          "logo",
+          "tags",
+          "security",
+          "aiProject"
+        ],
+        "additionalProperties": false,
+        "description": "A project as a room folder (`FolderDto` of room type 12) with its `aiProject` block."
+      },
+      "AiProjectsPage": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "not": {}
+            },
+            "description": "Always empty: the root holds no files."
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProject"
+            },
+            "description": "One folder per project on the page."
+          },
+          "current": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "parentId": {
+                "type": "number"
+              },
+              "rootFolderType": {
+                "type": "number"
+              },
+              "title": {
+                "type": "string"
+              },
+              "filesCount": {
+                "type": "number"
+              },
+              "foldersCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "parentId",
+              "rootFolderType",
+              "title",
+              "filesCount",
+              "foldersCount"
+            ],
+            "additionalProperties": false
+          },
+          "pathParts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "startIndex": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number",
+            "description": "The number of projects on this page."
+          },
+          "total": {
+            "type": "number",
+            "description": "The number of projects that match the filter."
+          },
+          "new": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "files",
+          "folders",
+          "current",
+          "pathParts",
+          "startIndex",
+          "count",
+          "total",
+          "new"
+        ],
+        "additionalProperties": false,
+        "description": "The folder-content payload of the projects root."
+      },
+      "AiProjectWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiProject"
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectsPageWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiProjectsPage"
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectMember": {
+        "type": "object",
+        "properties": {
+          "access": {
+            "type": "number",
+            "description": "1 owner, 9 project manager, 11 member (also the link's role)."
+          },
+          "sharedTo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiProjectUser"
+              },
+              {
+                "$ref": "#/components/schemas/AiProjectInviteLink"
+              }
+            ]
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "isLocked": {
+            "type": "boolean"
+          },
+          "canEditAccess": {
+            "type": "boolean",
+            "description": "Whether the caller may change this entry's role."
+          },
+          "subjectType": {
+            "type": "number",
+            "description": "0 a user, 1 an invitation link."
+          }
+        },
+        "required": [
+          "access",
+          "sharedTo",
+          "isOwner",
+          "isLocked",
+          "canEditAccess",
+          "subjectType"
+        ],
+        "additionalProperties": false,
+        "description": "A project member or the invitation link, as a file-share entry."
+      },
+      "AiProjectInviteLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "shareLink": {
+            "type": "string",
+            "description": "The portal-relative link to share."
+          },
+          "linkType": {
+            "type": "number"
+          },
+          "primary": {
+            "type": "boolean"
+          },
+          "internal": {
+            "type": "boolean"
+          },
+          "requestToken": {
+            "type": "string"
+          },
+          "isExpired": {
+            "type": "boolean"
+          },
+          "expirationDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "denyDownload": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "shareLink",
+          "linkType",
+          "primary",
+          "internal",
+          "requestToken",
+          "isExpired",
+          "expirationDate",
+          "password",
+          "denyDownload"
+        ],
+        "additionalProperties": false
+      },
+      "AiProjectSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The model: a UUID of an enabled chat profile, or `null` for the portal default."
+          },
+          "instructionsRoomIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "The Instructions rooms (type 10) to link; replaces the current list."
+          },
+          "knowledgeRoomIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "The Knowledge rooms (type 11) to link; replaces the current list."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The `aiProject` block of a create or update body (`AiProjectSettingsRequestDto` on the C# side). An absent field keeps the current value."
+      },
+      "AiProjectLinkableRoom": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "createdBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiProjectUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "number",
+            "description": "The room id."
+          },
+          "title": {
+            "type": "string",
+            "description": "The room title."
+          },
+          "roomType": {
+            "type": "number",
+            "description": "The room type: 10 Instructions, 11 Knowledge."
+          },
+          "logo": {
+            "$ref": "#/components/schemas/AiProjectLogo",
+            "description": "The room logo, as the room DTO carries it."
+          },
+          "skillsCount": {
+            "type": "number",
+            "description": "Instructions rooms: the number of Markdown skills in the room."
+          },
+          "indexedFiles": {
+            "type": "number",
+            "description": "Knowledge rooms: the number of files already indexed."
+          },
+          "totalFiles": {
+            "type": "number",
+            "description": "Knowledge rooms: the number of files in the room."
+          }
+        },
+        "required": [
+          "createdBy",
+          "id",
+          "logo",
+          "roomType",
+          "title"
+        ],
+        "description": "A room the selector offers, with its creator."
+      },
+      "AiProjectLinkableRoomsWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectLinkableRoom"
+            }
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectDeleteOperation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "number"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "finished": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "operation",
+          "progress",
+          "finished",
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "A finished file operation, the shape the asynchronous room delete answers."
+      },
+      "AiProjectDeleteWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectDeleteOperation"
+            }
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectMembersWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectMember"
+            }
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectInvitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The user id; leave it out and give `email` to invite someone without an account."
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of someone without an account; they are added as a pending guest."
+          },
+          "access": {
+            "type": "number",
+            "description": "9 project manager (owner, DocSpace admins and room admins only), 11 member, 0 remove."
+          }
+        },
+        "required": [
+          "access"
+        ],
+        "additionalProperties": false,
+        "description": "One membership change: a user by `id` or an outsider by `email`, and the role."
+      },
+      "AiProjectMembersResult": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectMember"
+            }
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "members",
+          "warning"
+        ],
+        "additionalProperties": false,
+        "description": "The members after a change, and a warning when something could not be applied."
+      },
+      "AiProjectMembersResultWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiProjectMembersResult"
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectSuccessWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiSuccessResponse"
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectLinkWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AiProjectMember"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectSkill": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "The file id."
+          },
+          "title": {
+            "type": "string",
+            "description": "The file title, e.g. `tone-of-voice.md`."
+          },
+          "name": {
+            "type": "string",
+            "description": "The frontmatter name, what the model sees."
+          },
+          "description": {
+            "type": "string",
+            "description": "The frontmatter description."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "name",
+          "description"
+        ],
+        "additionalProperties": false,
+        "description": "A skill: a Markdown file of an Instructions room."
+      },
+      "AiProjectSkillsRoom": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "logo": {
+            "$ref": "#/components/schemas/AiProjectLogo"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectSkill"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "logo",
+          "skills"
+        ],
+        "additionalProperties": false,
+        "description": "An Instructions room with its skills."
+      },
+      "AiProjectSkillsWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AiProjectSkillsRoom"
+                }
+              }
+            },
+            "required": [
+              "rooms"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectKnowledgeFile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileExst": {
+            "type": "string"
+          },
+          "indexed": {
+            "type": "boolean",
+            "description": "Whether the file is already indexed for search."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "fileExst",
+          "indexed"
+        ],
+        "additionalProperties": false,
+        "description": "A file of a Knowledge room with its indexing state."
+      },
+      "AiProjectKnowledgeRoom": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "logo": {
+            "$ref": "#/components/schemas/AiProjectLogo"
+          },
+          "totalFiles": {
+            "type": "number"
+          },
+          "indexedFiles": {
+            "type": "number"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectKnowledgeFile"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "logo",
+          "totalFiles",
+          "indexedFiles",
+          "files"
+        ],
+        "additionalProperties": false,
+        "description": "A Knowledge room with its files and indexing counts."
+      },
+      "AiProjectKnowledgeWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AiProjectKnowledgeRoom"
+                }
+              }
+            },
+            "required": [
+              "rooms"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectPickableUser": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "employeeType": {
+            "type": "number",
+            "description": "`EmployeeType`: 1 room admin, 2 guest, 3 DocSpace admin, 4 user."
+          },
+          "canOwnProject": {
+            "type": "boolean",
+            "description": "Whether the user may hold the owner or project manager role."
+          },
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarSmall": {
+            "type": "string"
+          },
+          "hasAvatar": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean",
+            "description": "The portal owner."
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "description": "A DocSpace admin."
+          },
+          "isRoomAdmin": {
+            "type": "boolean",
+            "description": "A room admin."
+          },
+          "isCollaborator": {
+            "type": "boolean",
+            "description": "A user (the \"collaborator\" employee type)."
+          },
+          "isVisitor": {
+            "type": "boolean",
+            "description": "A guest."
+          },
+          "status": {
+            "type": "number",
+            "description": "`EmployeeStatus`: 1 active, 2 pending."
+          },
+          "avatarColor": {
+            "type": "string",
+            "description": "The colour of the generated avatar."
+          }
+        },
+        "required": [
+          "avatarColor",
+          "avatarSmall",
+          "canOwnProject",
+          "displayName",
+          "email",
+          "employeeType",
+          "hasAvatar",
+          "id",
+          "isAdmin",
+          "isCollaborator",
+          "isOwner",
+          "isRoomAdmin",
+          "isVisitor",
+          "status"
+        ],
+        "description": "A user the invite and change-owner panels can pick."
+      },
+      "AiProjectUsersWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectPickableUser"
+            }
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
+      },
+      "AiProjectProfilesWrapper": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectProfile"
+            }
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          },
+          "count": {
+            "type": "number",
+            "description": "List answers: the number of entries returned."
+          },
+          "total": {
+            "type": "number",
+            "description": "List answers: the number of entries that match."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
         ]
       },
       "AiUserSettingsWrapper": {
@@ -15290,6 +18209,118 @@
             "entityId": "1234"
           }
         ]
+      },
+      "AiProjectsCreateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The project title, 1 to 170 characters."
+          },
+          "logo": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "cover": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), \"\" for the initials."
+          },
+          "aiProject": {
+            "$ref": "#/components/schemas/AiProjectSettingsRequest"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "AiProjectsUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The new title, 1 to 170 characters."
+          },
+          "logo": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "cover": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), \"\" for the initials."
+          },
+          "aiProject": {
+            "$ref": "#/components/schemas/AiProjectSettingsRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiProjectsSetMembersRequest": {
+        "type": "object",
+        "properties": {
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectInvitation"
+            }
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Whether to notify the invited users."
+          },
+          "message": {
+            "type": "string",
+            "description": "The text of the notification."
+          }
+        },
+        "required": [
+          "invitations"
+        ],
+        "additionalProperties": false
+      },
+      "AiProjectsChangeOwnerRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "The new owner: the portal owner, a DocSpace admin or a room admin."
+          },
+          "keepAsManager": {
+            "type": "boolean",
+            "description": "Keep the previous owner as a project manager (default true); otherwise they leave."
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "additionalProperties": false
+      },
+      "AiProjectsSetLinkRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Switch the invitation link on or off."
+          },
+          "title": {
+            "type": "string",
+            "description": "Rename the link."
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false
       }
     }
   }

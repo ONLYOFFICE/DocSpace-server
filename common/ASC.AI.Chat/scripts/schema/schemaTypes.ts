@@ -630,3 +630,368 @@ export type Req_aiAgentsResetQuota = {
   /** Agent (room) ids to reset to the tenant default quota. */
   roomIds: RoomId[];
 };
+
+/* ----------------------------- Projects --------------------------------- */
+
+/**
+ * The model of a project as the list and card show it. `available` is false
+ * when the profile was disabled or deleted after it was chosen.
+ */
+export type AiProjectProfile = {
+  /** The AI profile id. */
+  id: string;
+  /** The profile's display name; `null` when the profile no longer exists. */
+  name: string | null;
+  /** The provider name; `null` when the profile no longer exists. */
+  provider: string | null;
+  /** Whether the profile exists and is enabled. */
+  available: boolean;
+};
+
+/** A room linked to a project: an Instructions room (type 10) or a Knowledge room (type 11). */
+export type AiProjectSource = {
+  /** The room id. */
+  id: number;
+  /** The room title. */
+  title: string;
+  /** The room type: 10 Instructions, 11 Knowledge. */
+  roomType: number;
+  /** The room logo, as the room DTO carries it. */
+  logo: AiProjectLogo;
+  /** Instructions rooms: the number of Markdown skills in the room. */
+  skillsCount?: number;
+  /** Knowledge rooms: the number of files already indexed. */
+  indexedFiles?: number;
+  /** Knowledge rooms: the number of files in the room. */
+  totalFiles?: number;
+};
+
+/** The settings block of a project (`AiProjectSettingsDto` on the C# side). */
+export type AiProjectSettings = {
+  /** The project's model; `null` means the portal default. */
+  profile: AiProjectProfile | null;
+  /** The linked Instructions rooms, in the order they were added. */
+  instructionsRooms: AiProjectSource[];
+  /** The linked Knowledge rooms, in the order they were added. */
+  knowledgeRooms: AiProjectSource[];
+  /** Whether the caller may change the settings: the owner and project managers. */
+  canEditSettings: boolean;
+};
+
+/** What the caller may do with the project. */
+export type AiProjectSecurity = {
+  Read: boolean;
+  Rename: boolean;
+  EditRoom: boolean;
+  EditAccess: boolean;
+  ChangeOwner: boolean;
+  Delete: boolean;
+  Pin: boolean;
+  Leave: boolean;
+  Create: boolean;
+  CopyTo: boolean;
+  MoveTo: boolean;
+  Download: boolean;
+};
+
+/** A user as the project endpoints show one (a subset of `EmployeeFullDto`). */
+export type AiProjectUser = {
+  id: string;
+  displayName: string;
+  email: string;
+  avatarSmall: string;
+  hasAvatar: boolean;
+  /** The portal owner. */
+  isOwner: boolean;
+  /** A DocSpace admin. */
+  isAdmin: boolean;
+  /** A room admin. */
+  isRoomAdmin: boolean;
+  /** A user (the "collaborator" employee type). */
+  isCollaborator: boolean;
+  /** A guest. */
+  isVisitor: boolean;
+  /** `EmployeeStatus`: 1 active, 2 pending. */
+  status: number;
+  /** The colour of the generated avatar. */
+  avatarColor: string;
+};
+
+/** A project as a room folder (`FolderDto` of room type 12) with its `aiProject` block. */
+export type AiProject = {
+  id: number;
+  parentId: number;
+  rootFolderId: number;
+  /** `FolderType.AiProjects`, the projects root. */
+  rootFolderType: number;
+  /** `FolderType.AiProjectRoom`. */
+  type: number;
+  /** `RoomType.AiProjectRoom` (12). */
+  roomType: number;
+  title: string;
+  created: string;
+  updated: string;
+  createdBy: AiProjectUser | null;
+  /** Always 0: a project holds no files. */
+  filesCount: number;
+  /** Always 0: a project holds no folders. */
+  foldersCount: number;
+  new: number;
+  /** Whether the caller pinned the project. */
+  pinned: boolean;
+  /** Whether the caller is a member. */
+  inRoom: boolean;
+  /** The caller's role: 1 owner, 9 project manager, 11 member, 0 none (admins outside the project). */
+  access: number;
+  logo: AiProjectLogo;
+  tags: string[];
+  security: AiProjectSecurity;
+  aiProject: AiProjectSettings;
+};
+
+/** A room logo: no uploaded sizes in the mock, the colour and the built-in cover. */
+export type AiProjectLogo = {
+  original: string;
+  large: string;
+  medium: string;
+  small: string;
+  color: string;
+  /** The built-in cover drawn in `color`, as a room carries it; absent when the initials are drawn. The mock answers with an empty `data`. */
+  cover?: AiProjectCover;
+};
+
+/** A built-in room cover: its id and the SVG it is drawn from. */
+export type AiProjectCover = {
+  id: string;
+  data: string;
+};
+
+/** The folder-content payload of the projects root. */
+export type AiProjectsPage = {
+  /** Always empty: the root holds no files. */
+  files: never[];
+  /** One folder per project on the page. */
+  folders: AiProject[];
+  current: {
+    id: number;
+    parentId: number;
+    rootFolderType: number;
+    title: string;
+    filesCount: number;
+    foldersCount: number;
+  };
+  pathParts: { id: number; title: string }[];
+  startIndex: number;
+  /** The number of projects on this page. */
+  count: number;
+  /** The number of projects that match the filter. */
+  total: number;
+  new: number;
+};
+
+/**
+ * The DocSpace envelope the project operations answer in: `response` carries
+ * the payload. Spelled out per payload rather than as a generic, so the SDK
+ * generators get one named model each.
+ */
+type AiProjectEnvelopeBase = {
+  /** 0 on success. */
+  status: number;
+  /** The HTTP status, 200 on success. */
+  statusCode: number;
+  /** List answers: the number of entries returned. */
+  count?: number;
+  /** List answers: the number of entries that match. */
+  total?: number;
+};
+
+export type AiProjectWrapper = AiProjectEnvelopeBase & { response: AiProject };
+export type AiProjectsPageWrapper = AiProjectEnvelopeBase & { response: AiProjectsPage };
+
+/** A project member or the invitation link, as a file-share entry. */
+export type AiProjectMember = {
+  /** 1 owner, 9 project manager, 11 member (also the link's role). */
+  access: number;
+  sharedTo: AiProjectUser | AiProjectInviteLink;
+  isOwner: boolean;
+  isLocked: boolean;
+  /** Whether the caller may change this entry's role. */
+  canEditAccess: boolean;
+  /** 0 a user, 1 an invitation link. */
+  subjectType: number;
+};
+
+export type AiProjectInviteLink = {
+  id: string;
+  title: string;
+  /** The portal-relative link to share. */
+  shareLink: string;
+  linkType: number;
+  primary: boolean;
+  internal: boolean;
+  requestToken: string;
+  isExpired: boolean;
+  expirationDate: string | null;
+  password: string | null;
+  denyDownload: boolean;
+};
+
+/**
+ * The `aiProject` block of a create or update body
+ * (`AiProjectSettingsRequestDto` on the C# side). An absent field keeps the
+ * current value.
+ */
+export type AiProjectSettingsRequest = {
+  /** The model: a UUID of an enabled chat profile, or `null` for the portal default. */
+  profileId?: string | null;
+  /** The Instructions rooms (type 10) to link; replaces the current list. */
+  instructionsRoomIds?: number[];
+  /** The Knowledge rooms (type 11) to link; replaces the current list. */
+  knowledgeRoomIds?: number[];
+};
+
+export type Req_aiProjectsCreate = {
+  /** The project title, 1 to 170 characters. */
+  title: string;
+  /** The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), "" for the initials. */
+  logo?: { color?: string; cover?: string };
+  aiProject?: AiProjectSettingsRequest;
+};
+export type Res_aiProjectsCreate = AiProjectWrapper;
+
+export type Req_aiProjectsUpdate = {
+  /** The new title, 1 to 170 characters. */
+  title?: string;
+  /** The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), "" for the initials. */
+  logo?: { color?: string; cover?: string };
+  aiProject?: AiProjectSettingsRequest;
+};
+export type Res_aiProjectsUpdate = AiProjectWrapper;
+
+export type Res_aiProjectsList = AiProjectsPageWrapper;
+export type Res_aiProjectsGet = AiProjectWrapper;
+export type Res_aiProjectsPin = AiProjectWrapper;
+export type Res_aiProjectsUnpin = AiProjectWrapper;
+
+/** A room the selector offers, with its creator. */
+export type AiProjectLinkableRoom = AiProjectSource & { createdBy: AiProjectUser | null };
+export type AiProjectLinkableRoomsWrapper = AiProjectEnvelopeBase & {
+  response: AiProjectLinkableRoom[];
+};
+export type Res_aiProjectsLinkableRooms = AiProjectLinkableRoomsWrapper;
+
+/** A finished file operation, the shape the asynchronous room delete answers. */
+export type AiProjectDeleteOperation = {
+  id: string;
+  operation: number;
+  progress: number;
+  finished: boolean;
+  error: string;
+};
+export type AiProjectDeleteWrapper = AiProjectEnvelopeBase & {
+  response: AiProjectDeleteOperation[];
+};
+export type Res_aiProjectsDelete = AiProjectDeleteWrapper;
+
+export type AiProjectMembersWrapper = AiProjectEnvelopeBase & { response: AiProjectMember[] };
+export type Res_aiProjectsGetMembers = AiProjectMembersWrapper;
+
+/** One membership change: a user by `id` or an outsider by `email`, and the role. */
+export type AiProjectInvitation = {
+  /** The user id; leave it out and give `email` to invite someone without an account. */
+  id?: string;
+  /** The email of someone without an account; they are added as a pending guest. */
+  email?: string;
+  /** 9 project manager (owner, DocSpace admins and room admins only), 11 member, 0 remove. */
+  access: number;
+};
+export type Req_aiProjectsSetMembers = {
+  invitations: AiProjectInvitation[];
+  /** Whether to notify the invited users. */
+  notify?: boolean;
+  /** The text of the notification. */
+  message?: string;
+};
+/** The members after a change, and a warning when something could not be applied. */
+export type AiProjectMembersResult = {
+  members: AiProjectMember[];
+  warning: string | null;
+};
+export type AiProjectMembersResultWrapper = AiProjectEnvelopeBase & {
+  response: AiProjectMembersResult;
+};
+export type Res_aiProjectsSetMembers = AiProjectMembersResultWrapper;
+
+export type AiProjectSuccessWrapper = AiProjectEnvelopeBase & { response: SuccessResponse };
+export type Res_aiProjectsLeave = AiProjectSuccessWrapper;
+
+export type Req_aiProjectsChangeOwner = {
+  /** The new owner: the portal owner, a DocSpace admin or a room admin. */
+  userId: string;
+  /** Keep the previous owner as a project manager (default true); otherwise they leave. */
+  keepAsManager?: boolean;
+};
+export type Res_aiProjectsChangeOwner = AiProjectWrapper;
+
+export type Res_aiProjectsGetLinks = AiProjectMembersWrapper;
+export type Req_aiProjectsSetLink = {
+  /** Switch the invitation link on or off. */
+  enabled: boolean;
+  /** Rename the link. */
+  title?: string;
+};
+export type AiProjectLinkWrapper = AiProjectEnvelopeBase & { response: AiProjectMember | null };
+export type Res_aiProjectsSetLink = AiProjectLinkWrapper;
+
+/** A skill: a Markdown file of an Instructions room. */
+export type AiProjectSkill = {
+  /** The file id. */
+  id: number;
+  /** The file title, e.g. `tone-of-voice.md`. */
+  title: string;
+  /** The frontmatter name, what the model sees. */
+  name: string;
+  /** The frontmatter description. */
+  description: string;
+};
+/** An Instructions room with its skills. */
+export type AiProjectSkillsRoom = { id: number; title: string; logo: AiProjectLogo; skills: AiProjectSkill[] };
+export type AiProjectSkillsWrapper = AiProjectEnvelopeBase & {
+  response: { rooms: AiProjectSkillsRoom[] };
+};
+export type Res_aiProjectsSkills = AiProjectSkillsWrapper;
+
+/** A file of a Knowledge room with its indexing state. */
+export type AiProjectKnowledgeFile = {
+  id: number;
+  title: string;
+  fileExst: string;
+  /** Whether the file is already indexed for search. */
+  indexed: boolean;
+};
+/** A Knowledge room with its files and indexing counts. */
+export type AiProjectKnowledgeRoom = {
+  id: number;
+  title: string;
+  logo: AiProjectLogo;
+  totalFiles: number;
+  indexedFiles: number;
+  files: AiProjectKnowledgeFile[];
+};
+export type AiProjectKnowledgeWrapper = AiProjectEnvelopeBase & {
+  response: { rooms: AiProjectKnowledgeRoom[] };
+};
+export type Res_aiProjectsKnowledge = AiProjectKnowledgeWrapper;
+
+/** A user the invite and change-owner panels can pick. */
+export type AiProjectPickableUser = AiProjectUser & {
+  /** `EmployeeType`: 1 room admin, 2 guest, 3 DocSpace admin, 4 user. */
+  employeeType: number;
+  /** Whether the user may hold the owner or project manager role. */
+  canOwnProject: boolean;
+};
+export type AiProjectUsersWrapper = AiProjectEnvelopeBase & { response: AiProjectPickableUser[] };
+export type Res_aiProjectsUsers = AiProjectUsersWrapper;
+
+export type AiProjectProfilesWrapper = AiProjectEnvelopeBase & { response: AiProjectProfile[] };
+export type Res_aiProjectsProfiles = AiProjectProfilesWrapper;

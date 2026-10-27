@@ -58,6 +58,7 @@ export const EXAMPLE_IDS = {
   attachment: "55555555-5555-5555-5555-555555555555",
   attachmentSecond: "66666666-6666-6666-6666-666666666666",
   room: "1234",
+  project: "900001",
 } as const;
 
 // Epoch milliseconds and the same instant in ISO-8601, so a payload carrying
