@@ -308,9 +308,12 @@ in `samples/`:
 
 Every fixture except the two hand-written ones is captured from a running server by an on-demand
 integration test, which writes the bodies and signature headers byte for byte as the receiver got
-them. Re-capture after a payload change, then re-run the skill's verification:
+them. Re-capture after a payload change, then re-run the skill's verification. Build the whole
+solution first: the test project does not reference the Files service or Web.Studio, which the test
+host starts from their last build, so a capture without the build can record the old payloads:
 
 ```
+dotnet build ASC.Web.slnx
 dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-class "*WebhookFixtureCaptureTests" --explicit only
 ```
 

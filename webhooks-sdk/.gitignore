@@ -45,7 +45,8 @@ venv/
 typescript/node_modules/
 typescript/dist/
 *.tsbuildinfo
-# package-lock.json is already excluded repo-wide by the root *-lock.json rule.
+# typescript/package-lock.json IS committed, despite the root *-lock.json rule: the skill's
+# verification installs it with `npm ci`, so the SDK is checked against locked versions.
 
 # --- Go ----------------------------------------------------------------------
 go/vendor/

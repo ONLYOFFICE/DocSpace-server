@@ -59,6 +59,8 @@ The skill does three things:
 
 1. **Contract** (below): regenerate it and review its diff. A change in it that the code change does
    not explain is a finding — report it before generating the SDKs.
+   **Fixtures** (below) next, whenever a payload DTO or the envelope changed: the verification in A4
+   replays them, and a capture from stale binaries replays the old wire format.
 2. **Languages** — from the request; if none named, ask (`AskUserQuestion`, multiSelect) out of the
    targets read from `targets.conf`, plus "all". A contract change normally means **all**: every
    language carries the same models.
@@ -107,6 +109,30 @@ How the generator reads the code, so that its output can be predicted:
 
 A trigger whose family the table does not know stops the generator: add the family, or an
 exception for the trigger, to the table.
+
+### Fixtures
+
+The signed deliveries in `webhooks-sdk/samples/` are captured from a running server by
+`WebhookFixtureCaptureTests`, an explicit integration test that writes the bodies and signature
+headers byte for byte as the receiver got them. Re-capture them whenever a payload DTO or the
+envelope changed, before A4, or A4 checks the SDKs against the old wire format. Skip this only when
+the contract diff above touched nothing but descriptions.
+
+Build the whole solution first. `dotnet test` on `ASC.Web.Api.Tests` builds only that project and
+its references, which do not include the Files service or Web.Studio, while the AppHost starts them
+from their last build output: a payload DTO of files or rooms changed since then would be captured
+from the old binaries. From the repository root:
+
+```bash
+dotnet build ASC.Web.slnx
+dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-class "*WebhookFixtureCaptureTests" --explicit only
+git status --short webhooks-sdk/samples
+```
+
+The test needs the integration-test stack (Docker, the Aspire host); where tests run on another
+machine, run it there and bring back `webhooks-sdk/samples/`. `unknown.trigger.json`,
+`form.submit.json` and `samples/negative/` are written by hand and left alone; their `.sig` files
+are re-signed only when their body changes.
 
 ## Stage A — generate and verify
 
@@ -201,16 +227,17 @@ an LF file and a clean status. A manifest whose content really changed (a model 
 fails the comparison and stays as generated.
 
 ```bash
-# POSIX shell, from the repository root
-for f in webhooks-sdk/*/generated/.openapi-generator/FILES; do git diff --ignore-cr-at-eol --quiet -- "$f" && git checkout -- "$f"; done
+# POSIX shell, from webhooks-sdk/
+for f in */generated/.openapi-generator/FILES; do git diff --ignore-cr-at-eol --quiet -- "$f" && git checkout -- "$f"; done
 ```
 
 ```powershell
-# PowerShell, from the repository root
-Get-ChildItem webhooks-sdk/*/generated/.openapi-generator/FILES | ForEach-Object { git diff --ignore-cr-at-eol --quiet -- $_.FullName; if ($LASTEXITCODE -eq 0) { git checkout -- $_.FullName } }
+# PowerShell, from webhooks-sdk/
+Get-ChildItem */generated/.openapi-generator/FILES | ForEach-Object { git diff --ignore-cr-at-eol --quiet -- $_.FullName; if ($LASTEXITCODE -eq 0) { git checkout -- $_.FullName } }
 ```
 
-These two run from the repository root rather than `webhooks-sdk/`, the one exception in stage A.
+`git diff` and `git checkout` take paths relative to the current directory, so these run from
+`webhooks-sdk/` like the rest of stage A.
 
 Then, per language (`<spec>` is `../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`):
 
@@ -255,7 +282,17 @@ what a receiver must refuse, so the run checks both: the model each sample repor
 code on the negative fixtures in `samples/negative/`.
 
 Append the output of every command for a language to `<lang>/generated/.verify.log`
-(`>> <lang>/generated/.verify.log 2>&1`, the same in both shells), starting from an empty file.
+(`>> <lang>/generated/.verify.log 2>&1`, the same in both shells), starting from an empty file. A
+run that generated the language has one already (A1 wiped the directory); a verify-only run empties
+it first:
+
+```bash
+: > <lang>/generated/.verify.log            # POSIX shell
+```
+
+```powershell
+Set-Content <lang>/generated/.verify.log '' # PowerShell
+```
 
 **Toolchain first.** If the tool in the *Needs* column is not on PATH (`command -v <tool>` /
 `Get-Command <tool>`), the language is **NOT VERIFIED**. Record it and move on. That is not a failure,
@@ -271,10 +308,13 @@ and it must never be reported as a pass.
 | `python` | `python` | `python -m compileall -q python/generated` | `python python/samples/log_webhook.py <body> <secret> <sig>` |
 | `ruby` | `ruby` | — | `ruby ruby/samples/log_webhook.rb <body> <secret> <sig>` |
 | `swift` | `swift` | `swift build --package-path swift` | `swift run --package-path swift WebhookLogger <body> <secret> <sig>` |
-| `typescript` | `npm` | if `typescript/node_modules` is missing: `npm --prefix typescript ci --silent` (if that fails: `npm --prefix typescript install --silent`); then `npm --prefix typescript run -s build` | `node typescript/dist/samples/log-webhook.js <body> <secret> <sig>` |
+| `typescript` | `npm` | if `typescript/node_modules` is missing: `npm --prefix typescript ci --silent`; then `npm --prefix typescript run -s build` | `node typescript/dist/samples/log-webhook.js <body> <secret> <sig>` |
 
 - The `-Dexec.args=…` argument is quoted as a whole on purpose: PowerShell splits an unquoted `-D`
   argument at the first dot.
+- `typescript/package-lock.json` is committed, so `npm ci` installs exactly the locked versions. A
+  failing `npm ci` is **BUILD FAILED**: never fall back to `npm install`, which resolves the ranges
+  afresh and would verify the SDK against dependencies nobody locked.
 - Fixtures: Glob `samples/*.json`. `<body>` is the fixture's **absolute** path (`cygpath -m` in a
   POSIX shell on Windows, see above). `<sig>` is the content of the `.sig` file with the same name
   (`sha256=…`). `<secret>` is the content of `samples/SECRET`. Read both files and pass the values
@@ -340,7 +380,7 @@ and the model check are as in A4. A language verified this way counts as verifie
 so, with the image and the Docker host it ran on.
 
 ```bash
-# POSIX shell, from webhooks-sdk/; --user keeps the files the build writes owned by you
+# POSIX shell on Linux or macOS, from webhooks-sdk/; --user keeps the files the build writes owned by you
 D="docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v $PWD:/w -w /w"
 $D php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
 $D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
@@ -350,14 +390,37 @@ $D ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret
 $D swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "<secret>" "$(cat "${f%.json}.sig")"; echo "exit $?"; done'
 ```
 
+In Git Bash (MSYS) on Windows the lines above do not work as they are: MSYS rewrites every argument
+that looks like a POSIX path for the native `docker.exe`, so `-v $PWD:/w`, `-w /w` and
+`/w/samples/...` reach Docker as Windows paths. Switch the rewriting off for these commands and give
+the mount a Windows source path (`cygpath -m`, `W:/Work/...`); Docker Desktop maps file ownership
+itself, so drop `--user` too. This is for a local Docker Desktop only: with `DOCKER_HOST` set to a
+remote daemon the Windows path means nothing to it (`invalid mode: /w`), see the note below.
+
+```bash
+# Git Bash on Windows with a local Docker Desktop, from webhooks-sdk/
+D="docker run --rm -v $(cygpath -m "$PWD"):/w -w /w"
+MSYS_NO_PATHCONV=1 $D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
+```
+
+The same prefix goes before every `$D` line: `MSYS_NO_PATHCONV=1 $D ruby:3.4-slim ...`,
+`MSYS_NO_PATHCONV=1 $D swift:6.1 bash -c '...'`.
+
 ```powershell
 # PowerShell, from webhooks-sdk/ (Docker Desktop maps file ownership itself, so no --user)
+docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
+docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
 docker run --rm -v "${PWD}:/w" -w /w ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
+docker run --rm -v "${PWD}:/w" -w /w swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "<secret>" "$(cat "${f%.json}.sig")"; echo "exit $?"; done'
 ```
+
+The Swift command is one single-quoted argument in both shells, so `$f` and `$(cat ...)` are left to
+`bash` inside the container.
 
 - `-v $PWD:/w` mounts a path of the machine the Docker **daemon** runs on. With `DOCKER_HOST`
   pointing at a remote daemon, the mount works only when `webhooks-sdk/` exists at that same path on
-  that host, so sync the tree there first and run the commands on that host.
+  that host, so sync the tree there first and run the commands on that host (over `ssh`, with the
+  POSIX form above); a mount from Windows fails there with `invalid mode: /w`.
 - The images: `php:8.3-cli`, `ruby:3.4-slim`, `swift:6.1`. The Swift package needs network access
   for swift-crypto on its first build.
 
