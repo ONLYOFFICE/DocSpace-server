@@ -691,6 +691,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             {
                 resourceBuilder.WithEnvironment($"webhooks:retryIntervals:{i}", "00:00:00.500");
             }
+
+            // An attempt gives up on a silent target after 12 seconds rather than 30, so the test of a body that
+            // arrives after the limit waits that much less. It stays above the 8-second answer the slowest stubbed
+            // receiver gives (WebhookDeliveryStateTests), which has to arrive within the limit
+            resourceBuilder.WithEnvironment("webhooks:requestTimeout", "00:00:12");
         }
 
         if (isDocker)

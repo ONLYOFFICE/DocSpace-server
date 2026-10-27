@@ -60,7 +60,7 @@ public class WebhookSender(
     public const string WebhookHttpClient = "webhookHttpClient";
     public const string WebhookHttpClientSslIgnore = "webhookHttpClientSslIgnore";
 
-    private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(30);
+    private readonly TimeSpan _requestTimeout = settings.RequestTimeout ?? Settings.DefaultRequestTimeout;
 
     private const int MaxRequestPayloadLength = ushort.MaxValue;
     private const int MaxResponsePayloadBytes = 8 * 1024;

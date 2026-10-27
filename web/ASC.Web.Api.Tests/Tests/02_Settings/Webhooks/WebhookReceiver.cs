@@ -125,6 +125,55 @@ public sealed class WebhookReceiver
         return receiver;
     }
 
+    /// <summary>
+    /// A new endpoint whose first delivery is answered with a 302 to <see cref="RedirectPath"/>, a path of the same
+    /// receiver that answers 200 to any method, and every later delivery with 200. A sender that followed the
+    /// redirect would leave a request there.
+    /// </summary>
+    public static async Task<WebhookReceiver> CreateRedirectAsync(HttpClient admin)
+    {
+        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
+        var scenario = receiver._path;
+
+        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
+        await receiver.StubAsync(new { method = "ANY", urlPath = receiver.RedirectPath }, new { status = 200, body = "redirected" });
+
+        await receiver.PostMappingAsync(new Dictionary<string, object>
+        {
+            ["scenarioName"] = scenario,
+            ["requiredScenarioState"] = "Started",
+            ["newScenarioState"] = "answer-1",
+            ["request"] = new { method = "POST", urlPath = receiver._path },
+            ["response"] = new { status = 302, headers = new Dictionary<string, string> { ["Location"] = receiver.RedirectPath } }
+        });
+
+        await receiver.PostMappingAsync(new Dictionary<string, object>
+        {
+            ["scenarioName"] = scenario,
+            ["requiredScenarioState"] = "answer-1",
+            ["request"] = new { method = "POST", urlPath = receiver._path },
+            ["response"] = new { status = 200, body = "ok" }
+        });
+
+        return receiver;
+    }
+
+    /// <summary>Where the endpoint of <see cref="CreateRedirectAsync"/> redirects its first delivery to.</summary>
+    public string RedirectPath => $"{_path}/moved";
+
+    /// <summary>The requests of any method that reached <see cref="RedirectPath"/>.</summary>
+    public async Task<int> CountRedirectedRequestsAsync()
+    {
+        using var content = new StringContent(JsonSerializer.Serialize(new { url = RedirectPath }), Encoding.UTF8, "application/json");
+        using var response = await _admin.PostAsync("__admin/requests/count", content, TestContext.Current.CancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        using var result = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        return result.RootElement.GetProperty("count").GetInt32();
+    }
+
     /// <summary>The deliveries received so far, oldest first.</summary>
     public async Task<List<ReceivedDelivery>> GetDeliveriesAsync()
     {

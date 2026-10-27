@@ -46,13 +46,11 @@ public class WebhookDeliveryEdgeTests(
     /// <summary>The longest response body the sender keeps (WebhookSender.MaxResponsePayloadBytes).</summary>
     private const int MaxStoredResponseBytes = 8 * 1024;
 
-    [Theory]
-    [InlineData(404)]
-    [InlineData(302)]
-    public async Task Delivery_TargetAnswersNeither2xxNor410_IsAFailureAndRetried(int status)
+    [Fact]
+    public async Task Delivery_TargetAnswers404_IsAFailureAndRetried()
     {
         // Arrange: the first answer is the one under test, the retry gets 200
-        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, status, 200);
+        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 404, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -63,10 +61,29 @@ public class WebhookDeliveryEdgeTests(
 
         record.Should().NotBeNull();
         record!.Status.Should().Be(200);
-        record.Attempts.Should().Be(2, "{0} failed the first attempt", status);
-
-        // a redirect is not followed: the receiver saw the two POSTs and nothing else
+        record.Attempts.Should().Be(2, "404 failed the first attempt");
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task Delivery_TargetRedirects_IsAFailureAndTheRedirectIsNotFollowed()
+    {
+        // Arrange: the first answer is a 302 to another path of the receiver, which would answer 200; the retry
+        // gets 200 where it was sent
+        var receiver = await WebhookReceiver.CreateRedirectAsync(_webhookReceiverClient);
+        var subscription = await CreateSubscriptionAsync(receiver);
+
+        // Act
+        await FireEventAsync();
+
+        // Assert
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        record.Should().NotBeNull();
+        record!.Status.Should().Be(200);
+        record.Attempts.Should().Be(2, "the redirect failed the first attempt");
+        (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
+        (await receiver.CountRedirectedRequestsAsync()).Should().Be(0, "a sender that followed the redirect would have asked there");
     }
 
     [Fact]
@@ -127,10 +144,10 @@ public class WebhookDeliveryEdgeTests(
     [Fact]
     public async Task Delivery_2xxWhoseBodyArrivesAfterTheTimeout_IsADelivery()
     {
-        // Arrange: the status and headers come at once, the body is dribbled out over longer than the 30-second
-        // limit of an attempt. This test takes that long by design: nothing shorter crosses the limit
+        // Arrange: the status and headers come at once, the body is dribbled out over longer than the limit of an
+        // attempt. This test takes that long by design: nothing shorter crosses the limit
         var receiver = await WebhookReceiver.CreateSlowBodyAsync(
-            _webhookReceiverClient, 200, "accepted, slowly", chunks: 4, bodyDuration: TimeSpan.FromSeconds(36));
+            _webhookReceiverClient, 200, "accepted, slowly", chunks: 4, bodyDuration: ProfileRequestTimeout + TimeSpan.FromSeconds(4));
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act

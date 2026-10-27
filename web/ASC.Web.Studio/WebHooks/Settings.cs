@@ -54,7 +54,14 @@ public class Settings
         ThreadCount = cfg.ThreadCount ?? 10;
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
+        RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : DefaultRequestTimeout;
     }
+
+    /// <summary>
+    /// How long one attempt waits for the target's answer, and then for the start of its body, unless
+    /// webhooks:requestTimeout says otherwise.
+    /// </summary>
+    public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(30);
 
     private static readonly TimeSpan[] _defaultRetryIntervals =
     [
@@ -70,4 +77,5 @@ public class Settings
     public int? ThreadCount { get; init; }
     public int? TrustedDaysCount { get; init; }
     public string[] Blacklist { get; init; }
+    public TimeSpan? RequestTimeout { get; init; }
 }

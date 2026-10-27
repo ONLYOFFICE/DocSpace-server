@@ -61,10 +61,11 @@ public class WebhookDevToolsRestrictionTests(
     [MemberData(nameof(RestrictedEndpoints))]
     public async Task RestrictedDevTools_User_IsRefused(string endpoint)
     {
-        // Arrange: the member's own subscription and a delivery record exist before the restriction is switched on
+        // Arrange: the member's own subscription and a delivery record of it exist before the restriction is switched
+        // on, so that the record endpoints would accept the member without it
         var member = await InviteContact(EmployeeType.User);
         var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var recordId = await CreateRecordAsync();
+        var recordId = await CreateRecordAsync(member, memberSubscription);
 
         await RestrictDevToolsAsync();
 
@@ -132,16 +133,30 @@ public class WebhookDevToolsRestrictionTests(
             new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
     }
 
-    /// <summary>A delivery record of a subscription of the owner, for the endpoints that act on a record.</summary>
-    private async Task<int> CreateRecordAsync()
+    /// <summary>
+    /// A delivery record of <paramref name="subscription"/>, the member's own, for the endpoints that act on a
+    /// record: a record of someone else's subscription would be refused to the member with 403 anyway, restriction or
+    /// not. The owner creates a file in a room the member may read, which publishes <c>file.created</c> to it.
+    /// </summary>
+    private async Task<int> CreateRecordAsync(User member, WebhookSubscription subscription)
     {
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserCreated);
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        await FireEventAsync();
+        await _filesClient.Authenticate(Owner);
+
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
+
+        await _roomsApi.SetRoomSecurityAsync(
+            room.Id,
+            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.Read)], notify: false),
+            cancellationToken);
+
+        await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest($"file-{Guid.NewGuid():N}.docx"), cancellationToken);
 
         var record = await WaitForRecordAsync(subscription.Id, _ => true);
 
-        record.Should().NotBeNull("the event is written to the log while the request that caused it runs");
+        record.Should().NotBeNull("the member may read the room the file is in");
 
         return record!.Id;
     }

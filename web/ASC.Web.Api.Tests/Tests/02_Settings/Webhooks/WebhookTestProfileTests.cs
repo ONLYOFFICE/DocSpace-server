@@ -35,7 +35,10 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
-/// The webhook settings the integration-test profile of the AppHost gives the services. No portal is involved.
+/// The webhook settings the integration-test profile of the AppHost gives the services. No portal is involved, and
+/// the test needs no running host: it lives here only because the profile's constants are in the AppHost project,
+/// which no unit-test project references. Run on its own, it still waits for the Aspire host that the assembly
+/// fixture of this suite starts for every test.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookTestProfileTests

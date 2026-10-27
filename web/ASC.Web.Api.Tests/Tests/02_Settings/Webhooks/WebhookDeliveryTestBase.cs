@@ -54,6 +54,12 @@ public abstract class WebhookDeliveryTestBase(
     protected static TimeSpan ProfileRetryInterval { get; } = TimeSpan.FromMilliseconds(500);
 
     /// <summary>
+    /// How long one attempt waits for the target in the integration-test profile (<c>webhooks:requestTimeout</c> in
+    /// ConnectionStringManager.AddBaseConfig), instead of the production 30 seconds.
+    /// </summary>
+    protected static TimeSpan ProfileRequestTimeout { get; } = TimeSpan.FromSeconds(12);
+
+    /// <summary>
     /// How long the sender in Web.Studio sleeps between two polls when nothing is due (the waiting period of
     /// WorkerService): a due retry can wait that long before it is claimed.
     /// </summary>
