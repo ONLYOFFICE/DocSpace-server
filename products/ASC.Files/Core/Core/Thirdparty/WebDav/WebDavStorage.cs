@@ -58,7 +58,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         // UriFormatException, which reaches the caller as a server error
         if (!Uri.TryCreate(authData.Url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
-            throw new ArgumentException(FilesCommonResource.ErrorMessage_InvalidThirdPartyUrl, nameof(authData));
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InvalidThirdPartyUrl);
         }
 
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;

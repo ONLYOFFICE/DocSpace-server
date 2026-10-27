@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Δεν είναι δυνατή η χρήση αυτού του φακέλου για την αποθήκευση του δωματίου</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Μη έγκυρη διεύθυνση URL σύνδεσης</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Εσφαλμένος τίτλος</value>
   </data>
