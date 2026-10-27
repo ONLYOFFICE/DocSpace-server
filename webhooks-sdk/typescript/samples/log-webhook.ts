@@ -7,103 +7,95 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { DELIVERY_MODEL_NAMES, TypedTriggerName, hasDeliveryModel } from '../generated/triggers';
 import {
-    verifySignature,
-    parseWebhook,
-    isKnownWebhook,
+    InMemoryWebhookEventStore,
+    WebhookRouter,
+    deliveryModelName,
     payloadModelName,
-    WebhookParseError,
+    type AnyWebhook,
+    type WebhookConfigInfo,
+    type WebhookEventInfo,
 } from '../src';
 
-/**
- * The events already handled. DocSpace delivers at least once: an automatic
- * retry, or a manual retry from the delivery log, sends the same event.id
- * again, and the signature does not prove when a request was sent. So the id is
- * the replay and duplicate defence. This set lives in memory for the sake of the
- * sample; a real receiver persists the ids for as long as an event can still
- * arrive -- the automatic retries span about 18 hours on the default schedule,
- * and a manual retry can come at any time later.
- */
-const processedEvents = new Set<number>();
-
-/**
- * A cheap pre-check on the `x-docspace-event-id` header, before verifying or
- * parsing anything. The header is not signed, so it may only ever make the
- * receiver DROP a delivery (fail-safe: whoever can rewrite a header can drop the
- * request anyway), never accept one. In an HTTP handler:
- *
- *     if (seenByHeader(req.headers['x-docspace-event-id'])) return res.status(200).end();
- */
-function seenByHeader(header: string | string[] | undefined): boolean {
-    const id = Number(Array.isArray(header) ? header[0] : header);
-    return Number.isInteger(id) && processedEvents.has(id);
-}
-
 const fixtures = resolve(__dirname, '../../../samples');
-const [bodyPath, secret, signature] = [
+const [bodyPath, secret, signature, eventIdHeader] = [
     process.argv[2] ?? resolve(fixtures, 'file.created.json'),
     process.argv[3] ?? readFileSync(resolve(fixtures, 'SECRET'), 'utf8').trim(),
     process.argv[4] ?? readFileSync(resolve(fixtures, 'file.created.sig'), 'utf8').trim(),
+    process.argv[5],
 ];
 
-// The header pre-check comes first: dropping on it costs nothing.
-if (seenByHeader(process.argv[5])) {
-    console.log(`duplicate of event #${process.argv[5]} (header pre-check), skipped`);
-    process.exit(0);
+/**
+ * The router this sample hands the delivery to. It checks the signature, drops
+ * an event it has processed before (DocSpace delivers at least once, and a retry
+ * carries the same event.id), reads the body into the delivery model of its
+ * trigger and awaits the handlers. The store lives in memory for the sake of
+ * the sample; a real receiver persists the ids for as long as an event can still
+ * arrive -- the automatic retries span about 18 hours on the default schedule,
+ * and a manual retry can come at any time later.
+ */
+const router = new WebhookRouter({ secret, store: new InMemoryWebhookEventStore() });
+
+// One handler for every trigger with a typed body, from the generated table. A
+// receiver normally registers only the triggers it cares about.
+const typedTriggers = Object.keys(DELIVERY_MODEL_NAMES).filter(hasDeliveryModel) as TypedTriggerName[];
+
+router.on(typedTriggers, (delivery, trigger) => {
+    printHeader(trigger, delivery.event, delivery.webhook, deliveryModelName(trigger));
+    printPayload(delivery.payload);
+});
+
+// A handler for one trigger: its argument is a FileDelivery, typed by the name.
+router.on('file.created', d => {
+    console.log(`  on('file.created'): "${d.payload?.title}" in folder ${d.payload?.parentId}`);
+});
+
+// Whatever has no handler: the catch-all '*', and triggers newer than this SDK.
+router.onOther((hook: AnyWebhook) => {
+    printHeader(hook.trigger, hook.event, hook.webhook, 'none');
+    printPayload(hook.payload);
+});
+
+function printHeader(trigger: string, event: WebhookEventInfo | undefined, webhook: WebhookConfigInfo | undefined, delivery: string) {
+    const known = payloadModelName(trigger) === 'unknown' ? '  (unknown to this build)' : '';
+    console.log(`${trigger}${known}`);
+    console.log('  signature ok');
+    console.log(`  model: ${payloadModelName(trigger)}`);
+    console.log(`  delivery: ${delivery}`);
+    console.log(`  event #${event?.id}  at ${event?.createOn?.toISOString()}  by ${event?.createBy}`);
+    console.log(`  subscription #${webhook?.id} "${webhook?.name}"`);
 }
 
-// Read as bytes, never as a parsed object: the signature covers the raw body.
-const body = readFileSync(bodyPath);
-
-if (!verifySignature(body, secret, signature)) {
-    console.error('REJECTED: signature does not match');
-    process.exit(1);
+function printPayload(payload: unknown) {
+    console.log();
+    console.log(JSON.stringify(payload, null, 2).split('\n').map(l => '  ' + l).join('\n'));
 }
 
-let hook;
-try {
-    hook = parseWebhook(body);
-} catch (err) {
-    if (err instanceof WebhookParseError) {
-        console.error(`unparseable body: ${err.message}`);
-        process.exit(1);
+async function main(): Promise<number> {
+    // Read as bytes, never as a parsed object: the signature covers the raw body.
+    const body = readFileSync(bodyPath);
+
+    // In an HTTP handler, answer with result.statusCode once this resolves: a 2xx
+    // acknowledges the delivery, anything else makes DocSpace send it again.
+    const result = await router.handle(body, signature, eventIdHeader);
+
+    switch (result.outcome) {
+        case 'rejected':
+            console.error('REJECTED: signature does not match');
+            break;
+        case 'invalid':
+            console.error(`unparseable body: ${result.error}`);
+            break;
+        case 'failed':
+            console.error(`a handler failed: ${result.error}`);
+            break;
+        case 'duplicate':
+            console.log(`duplicate of event #${result.eventId}, already processed; skipped`);
+            break;
     }
-    throw err;
+
+    return result.statusCode >= 200 && result.statusCode < 300 ? 0 : 1;
 }
 
-// The authoritative duplicate check, on the id from the verified body.
-if (processedEvents.has(hook.event.id!)) {
-    console.log(`${hook.trigger}  duplicate of event #${hook.event.id}, already processed; skipped`);
-    process.exit(0);
-}
-processedEvents.add(hook.event.id!);
-
-console.log(`${hook.trigger}${isKnownWebhook(hook) ? '' : '  (unknown to this build)'}`);
-console.log('  signature ok');
-console.log(`  model: ${payloadModelName(hook.trigger)}`);
-console.log(`  event #${hook.event.id}  at ${hook.event.createOn?.toISOString()}  by ${hook.event.createBy}`);
-console.log(`  subscription #${hook.webhook.id} "${hook.webhook.name}"`);
-
-if (isKnownWebhook(hook)) {
-    switch (hook.trigger) {
-        case 'user.created':
-        case 'user.updated':
-            console.log(`  user: ${hook.payload.userName} <${hook.payload.email}>`);
-            break;
-        case 'file.created':
-            // FilePayload: the file fields, not just the ones files, folders
-            // and rooms share.
-            console.log(`  file: ${hook.payload.title}  id=${hook.payload.id}  parent=${hook.payload.parentId}`);
-            break;
-        case 'folder.created':
-            console.log(`  folder: ${hook.payload.title}  id=${hook.payload.id}  parent=${hook.payload.parentId}`);
-            break;
-        case 'room.created':
-            console.log(`  room: ${hook.payload.title}  id=${hook.payload.id}  roomType=${hook.payload.roomType}`);
-            break;
-    }
-}
-
-console.log();
-console.log(JSON.stringify((hook.raw as { payload: unknown }).payload, null, 2)
-    .split('\n').map(l => '  ' + l).join('\n'));
+main().then(code => process.exit(code));

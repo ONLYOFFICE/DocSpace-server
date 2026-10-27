@@ -120,9 +120,14 @@ public static class WebhookContractGenerator
         schemas.Add(typeof(WebhookPayload<,>));
 
         var triggerMap = new YamlMappingNode();
+        var webhooks = new YamlMappingNode();
+        var families = new List<string>();
+
+        // the payload schemas in the order the triggers first use them, each with its delivery schema
+        var payloadSchemas = new List<string>();
 
         // Every trigger in the order the portal lists them; the catch-all, which carries no payload of its own, goes
-        // last with null.
+        // last with null and is not a webhook of its own.
         var triggers = Enum.GetValues<WebhookTrigger>()
             .OrderBy(t => t == WebhookTrigger.All)
             .ThenBy(t => t.GetOrder())
@@ -130,11 +135,26 @@ public static class WebhookContractGenerator
 
         foreach (var trigger in triggers)
         {
-            var value = trigger == WebhookTrigger.All
-                ? new YamlScalarNode("null") { Style = ScalarStyle.Plain }
-                : new YamlScalarNode(schemas.Add(GetPayloadType(trigger)));
+            if (trigger == WebhookTrigger.All)
+            {
+                triggerMap.Add(trigger.ToCustomString(), new YamlScalarNode("null") { Style = ScalarStyle.Plain });
+                continue;
+            }
 
-            triggerMap.Add(trigger.ToCustomString(), value);
+            var payloadSchema = schemas.Add(GetPayloadType(trigger));
+
+            triggerMap.Add(trigger.ToCustomString(), payloadSchema);
+            webhooks.Add(trigger.ToCustomString(), ContractHeader.GetWebhook(trigger, payloadSchema));
+
+            if (!payloadSchemas.Contains(payloadSchema))
+            {
+                payloadSchemas.Add(payloadSchema);
+            }
+
+            if (!families.Contains(trigger.GetTargetType()))
+            {
+                families.Add(trigger.GetTargetType());
+            }
         }
 
         if (schemas.Undocumented.Count > 0)
@@ -148,11 +168,30 @@ public static class WebhookContractGenerator
 
         ((YamlMappingNode)root[ContractHeader.TriggerMapKey]).Add("map", triggerMap);
 
+        var tags = (YamlSequenceNode)root["tags"];
+
+        foreach (var family in families)
+        {
+            tags.Add(ContractHeader.GetTag(family));
+        }
+
+        var webhookEntries = (YamlMappingNode)root["webhooks"];
+
+        foreach (var (name, webhook) in webhooks)
+        {
+            webhookEntries.Add(name, webhook);
+        }
+
         var componentSchemas = (YamlMappingNode)root["components"]["schemas"];
 
         foreach (var (name, schema) in schemas.Schemas)
         {
             componentSchemas.Add(name, schema);
+        }
+
+        foreach (var payloadSchema in payloadSchemas)
+        {
+            componentSchemas.Add(ContractHeader.GetDeliveryName(payloadSchema), ContractHeader.GetDeliverySchema(payloadSchema));
         }
 
         return ContractYamlWriter.Write(root, GeneratedComment);

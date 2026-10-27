@@ -3,16 +3,14 @@
  * Logs a DocSpace webhook delivery to the console.
  *
  *   php log_webhook.php                          # replay the shared fixture
- *   php log_webhook.php <body> <secret> <sig>
- *
- * PHP has no src/ runtime yet, so signature checking lives here.
+ *   php log_webhook.php <body> <secret> <sig> [<x-docspace-event-id>]
  */
 
 declare(strict_types=1);
 
-// Map only the classes this sample touches, so it runs straight from the
-// generated tree without `composer install`. A real receiver requires
-// onlyoffice/docspace-webhooks-sdk and uses Composer's autoloader instead.
+// Map the SDK's classes onto the generated tree, so the sample runs without
+// `composer install`. A real receiver requires onlyoffice/docspace-webhooks-sdk
+// and uses Composer's autoloader instead.
 spl_autoload_register(static function (string $class): void {
     $prefix = 'OnlyOffice\\DocSpace\\Webhooks\\Sdk\\';
     if (!str_starts_with($class, $prefix)) {
@@ -25,6 +23,8 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
+use OnlyOffice\DocSpace\Webhooks\Sdk\InMemoryWebhookEventStore;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FilePayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FormSubmitPayload;
@@ -32,32 +32,11 @@ use OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookConfigInfo;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEnvelope;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEventInfo;
-use OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
+use OnlyOffice\DocSpace\Webhooks\Sdk\WebhookOutcome;
+use OnlyOffice\DocSpace\Webhooks\Sdk\WebhookRouter;
 use OnlyOffice\DocSpace\Webhooks\Sdk\WebhookTriggers;
-
-const SIGNATURE_HEADER = 'x-docspace-signature-256';
-
-/** `sha256=` + UPPERCASE hex, mirroring WebhookSender.GetSecretHash. */
-function compute_signature(string $body, string $secret): string
-{
-    return 'sha256=' . strtoupper(hash_hmac('sha256', $body, $secret));
-}
-
-/**
- * Constant-time, case-insensitive check over the RAW body. DocSpace emits
- * uppercase hex where GitHub emits lowercase, so the comparison must fold case.
- */
-function verify_signature(string $body, string $secret, ?string $signature): bool
-{
-    if ($signature === null || $signature === '') {
-        return false;
-    }
-    return hash_equals(
-        strtolower(compute_signature($body, $secret)),
-        strtolower(trim($signature))
-    );
-}
 
 /**
  * The payload model the generated trigger table names: "untyped" for the legacy
@@ -67,84 +46,124 @@ function model_name(string $trigger): string
 {
     $class = WebhookTriggers::payloadType($trigger);
     if ($class !== null) {
-        return substr($class, strrpos($class, '\\') + 1);
+        return short_name($class);
     }
     return in_array($trigger, WebhookTriggers::UNTYPED_TRIGGERS, true) ? 'untyped' : 'unknown';
 }
 
-$fixtures  = __DIR__ . '/../../samples';
-$bodyPath  = $argv[1] ?? $fixtures . '/file.created.json';
-$secret    = $argv[2] ?? trim((string) file_get_contents($fixtures . '/SECRET'));
-$signature = $argv[3] ?? trim((string) file_get_contents($fixtures . '/file.created.sig'));
+function short_name(string $class): string
+{
+    return substr($class, strrpos($class, '\\') + 1);
+}
+
+function print_header(string $trigger, ?WebhookEventInfo $event, ?WebhookConfigInfo $config, string $delivery): void
+{
+    $known = model_name($trigger) === 'unknown' ? '  (unknown to this build)' : '';
+    echo $trigger, $known, PHP_EOL;
+    echo '  signature ok', PHP_EOL;
+    echo '  model: ', model_name($trigger), PHP_EOL;
+    echo '  delivery: ', $delivery, PHP_EOL;
+    printf("  event #%d  at %s  by %s\n",
+        $event?->getId(),
+        $event?->getCreateOn()?->format('Y-m-d\TH:i:s\Z'),
+        $event?->getCreateBy());
+    printf("  subscription #%d \"%s\"\n", $config?->getId(), $config?->getName());
+}
+
+function print_payload(mixed $payload): void
+{
+    if ($payload instanceof FilePayload || $payload instanceof FolderPayload || $payload instanceof RoomPayload) {
+        // Ids are an int for DocSpace storage and a string for third-party entries.
+        $kind = match (true) {
+            $payload instanceof RoomPayload => 'room',
+            $payload instanceof FolderPayload => 'folder',
+            default => 'file',
+        };
+        printf("  %s: %s  id=%s  parent=%s\n",
+            $kind,
+            $payload->getTitle(),
+            var_export($payload->getId(), true),
+            var_export($payload->getParentId(), true));
+    } elseif ($payload instanceof FormSubmitPayload) {
+        printf("  form: %s  submitted as %s\n",
+            $payload->getOriginalForm()?->getTitle(),
+            $payload->getSubmittedForm()?->getTitle());
+    } elseif ($payload instanceof UserPayload) {
+        printf("  user: %s <%s>\n", $payload->getUserName(), $payload->getEmail());
+    } elseif ($payload instanceof GroupPayload) {
+        printf("  group: %s\n", $payload->getName());
+    } else {
+        echo '  no payload model for this trigger; raw payload below', PHP_EOL;
+    }
+}
+
+$fixtures      = __DIR__ . '/../../samples';
+$bodyPath      = $argv[1] ?? $fixtures . '/file.created.json';
+$secret        = $argv[2] ?? trim((string) file_get_contents($fixtures . '/SECRET'));
+$signature     = $argv[3] ?? trim((string) file_get_contents($fixtures . '/file.created.sig'));
+$eventIdHeader = $argv[4] ?? null;
 
 // Raw bytes: the signature covers exactly what arrived.
 $body = (string) file_get_contents($bodyPath);
 
-if (!verify_signature($body, $secret, $signature)) {
-    fwrite(STDERR, "REJECTED: signature does not match\n");
-    exit(1);
+// The raw payload, printed after the summary as it arrived.
+$print_raw = static function () use ($body): void {
+    $pretty = json_encode(json_decode($body)?->payload ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    echo PHP_EOL, '  ' . str_replace("\n", "\n  ", (string) $pretty), PHP_EOL;
+};
+
+/*
+ * The router checks the signature, drops an event it has processed before
+ * (DocSpace delivers at least once, and a retry carries the same event.id),
+ * reads the body into the delivery model of its trigger and calls the handlers.
+ * The store lives in memory for the sake of the sample; a real receiver persists
+ * the ids for as long as an event can still arrive -- the automatic retries span
+ * about 18 hours on the default schedule, and a manual retry can come at any
+ * time later.
+ */
+$router = new WebhookRouter($secret, new InMemoryWebhookEventStore());
+
+// One handler for every trigger with a typed body, from the generated table. A
+// receiver normally registers only the triggers it cares about.
+$router->on(array_keys(WebhookTriggers::DELIVERY_TYPES), static function (object $delivery, string $trigger) use ($print_raw): void {
+    print_header($trigger, $delivery->getEvent(), $delivery->getWebhook(), short_name($delivery::class));
+    print_payload($delivery->getPayload());
+    $print_raw();
+});
+
+// A handler for one trigger, which gets that trigger's delivery model.
+$router->on('file.created', static function (FileDelivery $d): void {
+    printf("  on('file.created'): \"%s\" in folder %s\n",
+        $d->getPayload()?->getTitle(),
+        var_export($d->getPayload()?->getParentId(), true));
+});
+
+// Whatever has no handler: the catch-all '*', and triggers newer than this SDK.
+$router->onOther(static function (WebhookEnvelope $envelope, string $trigger) use ($print_raw): void {
+    print_header($trigger, $envelope->getEvent(), $envelope->getWebhook(), 'none');
+    print_payload(null);
+    $print_raw();
+});
+
+// In an HTTP endpoint, answer with $result->statusCode: a 2xx acknowledges the
+// delivery, anything else makes DocSpace send it again.
+$result = $router->handle($body, $signature, $eventIdHeader);
+
+switch ($result->outcome) {
+    case WebhookOutcome::Rejected:
+        fwrite(STDERR, "REJECTED: signature does not match\n");
+        break;
+    case WebhookOutcome::Invalid:
+        fwrite(STDERR, "unparseable body: {$result->error}\n");
+        break;
+    case WebhookOutcome::Failed:
+        fwrite(STDERR, "a handler failed: {$result->error}\n");
+        break;
+    case WebhookOutcome::Duplicate:
+        echo "duplicate of event #{$result->eventId}, already processed; skipped", PHP_EOL;
+        break;
+    default:
+        break;
 }
 
-$envelope = json_decode($body);
-if (!is_object($envelope) || !isset($envelope->event->trigger)) {
-    fwrite(STDERR, "envelope has no event.trigger\n");
-    exit(1);
-}
-
-$trigger = (string) $envelope->event->trigger;
-if ($trigger === '') {
-    fwrite(STDERR, "envelope has no event.trigger\n");
-    exit(1);
-}
-$event   = ObjectSerializer::deserialize($envelope->event, WebhookEventInfo::class);
-$config  = ObjectSerializer::deserialize($envelope->webhook, WebhookConfigInfo::class);
-// The catch-all, or a trigger added on the server after this SDK was generated,
-// is acknowledged with its raw payload and never parsed with some other model.
-$model = WebhookTriggers::payloadType($trigger);
-try {
-    $payload = $model === null ? null : ObjectSerializer::deserialize($envelope->payload ?? null, $model);
-} catch (\Throwable $e) {
-    fwrite(STDERR, "unparseable {$trigger} payload: {$e->getMessage()}\n");
-    exit(1);
-}
-if ($model !== null && !($payload instanceof $model)) {
-    fwrite(STDERR, "unparseable {$trigger} payload: not a " . model_name($trigger) . "\n");
-    exit(1);
-}
-
-echo $trigger, PHP_EOL;
-echo '  signature ok', PHP_EOL;
-echo '  model: ', model_name($trigger), PHP_EOL;
-printf("  event #%d  at %s  by %s\n",
-    $event->getId(),
-    $event->getCreateOn()?->format('Y-m-d\TH:i:s\Z'),
-    $event->getCreateBy());
-printf("  subscription #%d \"%s\"\n", $config->getId(), $config->getName());
-
-if ($payload instanceof FilePayload || $payload instanceof FolderPayload || $payload instanceof RoomPayload) {
-    // Ids are an int for DocSpace storage and a string for third-party entries.
-    $kind = match (true) {
-        $payload instanceof RoomPayload => 'room',
-        $payload instanceof FolderPayload => 'folder',
-        default => 'file',
-    };
-    printf("  %s: %s  id=%s  parent=%s\n",
-        $kind,
-        $payload->getTitle(),
-        var_export($payload->getId(), true),
-        var_export($payload->getParentId(), true));
-} elseif ($payload instanceof FormSubmitPayload) {
-    printf("  form: %s  submitted as %s\n",
-        $payload->getOriginalForm()?->getTitle(),
-        $payload->getSubmittedForm()?->getTitle());
-} elseif ($payload instanceof UserPayload) {
-    printf("  user: %s <%s>\n", $payload->getUserName(), $payload->getEmail());
-} elseif ($payload instanceof GroupPayload) {
-    printf("  group: %s\n", $payload->getName());
-} else {
-    echo '  no payload model for this trigger; raw payload below', PHP_EOL;
-}
-
-echo PHP_EOL;
-$pretty = json_encode($envelope->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-echo '  ' . str_replace("\n", "\n  ", (string) $pretty), PHP_EOL;
+exit($result->isSuccess() ? 0 : 1);

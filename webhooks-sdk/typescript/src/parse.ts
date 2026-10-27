@@ -5,16 +5,21 @@ import {
     WebhookEventInfoFromJSON,
 } from '../generated/models';
 import {
+    DELIVERY_DESERIALIZERS,
+    DELIVERY_MODEL_NAMES,
     PAYLOAD_DESERIALIZERS,
     PAYLOAD_MODEL_NAMES,
+    TriggerDeliveryMap,
     TriggerPayloadMap,
+    TypedTriggerName,
     WebhookTriggerName,
+    hasDeliveryModel,
     isKnownTrigger,
 } from '../generated/triggers';
 import type { RawBody } from './verify';
 
-export type { WebhookTriggerName, TriggerPayloadMap };
-export { isKnownTrigger };
+export type { WebhookTriggerName, TriggerPayloadMap, TypedTriggerName, TriggerDeliveryMap };
+export { isKnownTrigger, hasDeliveryModel };
 
 /**
  * A delivery whose trigger this build of the SDK does not recognise, so the
@@ -71,23 +76,7 @@ export class WebhookParseError extends Error {}
  * receiver survive triggers added after this SDK was built.
  */
 export function parseWebhook(body: RawBody): AnyWebhook {
-    const text = typeof body === 'string' ? body : Buffer.from(body).toString('utf8');
-
-    let json: any;
-    try {
-        json = JSON.parse(text);
-    } catch (cause) {
-        throw new WebhookParseError(`body is not JSON: ${(cause as Error).message}`);
-    }
-
-    if (json === null || typeof json !== 'object' || Array.isArray(json)) {
-        throw new WebhookParseError('body is not a webhook envelope');
-    }
-
-    const trigger: unknown = json.event?.trigger;
-    if (typeof trigger !== 'string') {
-        throw new WebhookParseError('envelope has no event.trigger');
-    }
+    const { json, trigger } = readEnvelope(body);
 
     // A typed trigger always carries its payload object; the generated deserializers
     // pass null and undefined through, which would hand the caller a missing typed
@@ -126,4 +115,67 @@ export function payloadModelName(trigger: string): string {
  */
 export function isKnownWebhook(hook: AnyWebhook): hook is DocSpaceWebhook {
     return isKnownTrigger(hook.trigger);
+}
+
+/**
+ * A delivery read whole into the model its trigger carries: `FileDelivery` for
+ * `'file.created'`, and so on. Narrowing on `trigger` narrows `delivery`.
+ */
+export type DocSpaceDelivery = {
+    [K in TypedTriggerName]: {
+        trigger: K;
+        delivery: TriggerDeliveryMap[K];
+    };
+}[TypedTriggerName];
+
+/**
+ * Parse a verified body into the delivery model of its trigger.
+ *
+ * Returns `null` when the trigger has no typed body: the untyped `'*'`, or a
+ * trigger added after this build -- not an error, for the same reason as in
+ * `parseWebhook`. Throws `WebhookParseError` when the body is not an envelope or
+ * a typed trigger arrives without its payload object.
+ */
+export function parseDelivery(body: RawBody): DocSpaceDelivery | null {
+    const { json, trigger } = readEnvelope(body);
+
+    if (!hasDeliveryModel(trigger)) {
+        return null;
+    }
+
+    if (json.payload === null || typeof json.payload !== 'object' || Array.isArray(json.payload)) {
+        throw new WebhookParseError(`no payload object for '${trigger}'`);
+    }
+
+    return { trigger, delivery: DELIVERY_DESERIALIZERS[trigger](json) } as DocSpaceDelivery;
+}
+
+/**
+ * The name of the delivery model the trigger carries (`FileDelivery`, ...);
+ * `'none'` when it has no typed body.
+ */
+export function deliveryModelName(trigger: string): string {
+    return isKnownTrigger(trigger) ? (DELIVERY_MODEL_NAMES[trigger] ?? 'none') : 'none';
+}
+
+function readEnvelope(body: RawBody): { json: any; trigger: string } {
+    const text = typeof body === 'string' ? body : Buffer.from(body).toString('utf8');
+
+    let json: any;
+    try {
+        json = JSON.parse(text);
+    } catch (cause) {
+        throw new WebhookParseError(`body is not JSON: ${(cause as Error).message}`);
+    }
+
+    if (json === null || typeof json !== 'object' || Array.isArray(json)) {
+        throw new WebhookParseError('body is not a webhook envelope');
+    }
+
+    const trigger: unknown = json.event?.trigger;
+    if (typeof trigger !== 'string') {
+        throw new WebhookParseError('envelope has no event.trigger');
+    }
+
+    return { json, trigger };
 }

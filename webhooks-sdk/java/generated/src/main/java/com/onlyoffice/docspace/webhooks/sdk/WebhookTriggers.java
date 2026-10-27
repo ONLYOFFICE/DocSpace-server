@@ -3,11 +3,17 @@ package com.onlyoffice.docspace.webhooks.sdk;
 // Trigger -> payload dispatch, generated from docspace-webhooks.yaml by
 // tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead.
 
+import com.onlyoffice.docspace.webhooks.sdk.model.FileDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.FilePayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FolderDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.FolderPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FormSubmitDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.FormSubmitPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.GroupDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.GroupPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.RoomDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.RoomPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.UserDelivery;
 import com.onlyoffice.docspace.webhooks.sdk.model.UserPayload;
 
 import java.util.Collections;
@@ -62,6 +68,50 @@ public final class WebhookTriggers {
         PAYLOAD_TYPES = Collections.unmodifiableMap(types);
     }
 
+    /** Trigger name to the model of the whole delivery (the envelope with payload typed), for every typed trigger. */
+    public static final Map<String, Class<?>> DELIVERY_TYPES;
+
+    static {
+        Map<String, Class<?>> deliveries = new LinkedHashMap<>();
+        deliveries.put("user.created", UserDelivery.class);
+        deliveries.put("user.invited", UserDelivery.class);
+        deliveries.put("user.updated", UserDelivery.class);
+        deliveries.put("user.deleted", UserDelivery.class);
+        deliveries.put("group.created", GroupDelivery.class);
+        deliveries.put("group.updated", GroupDelivery.class);
+        deliveries.put("group.deleted", GroupDelivery.class);
+        deliveries.put("file.created", FileDelivery.class);
+        deliveries.put("file.uploaded", FileDelivery.class);
+        deliveries.put("file.updated", FileDelivery.class);
+        deliveries.put("file.trashed", FileDelivery.class);
+        deliveries.put("file.deleted", FileDelivery.class);
+        deliveries.put("file.restored", FileDelivery.class);
+        deliveries.put("file.copied", FileDelivery.class);
+        deliveries.put("file.moved", FileDelivery.class);
+        deliveries.put("file.downloaded", FileDelivery.class);
+        deliveries.put("folder.created", FolderDelivery.class);
+        deliveries.put("folder.updated", FolderDelivery.class);
+        deliveries.put("folder.trashed", FolderDelivery.class);
+        deliveries.put("folder.deleted", FolderDelivery.class);
+        deliveries.put("folder.restored", FolderDelivery.class);
+        deliveries.put("folder.copied", FolderDelivery.class);
+        deliveries.put("folder.moved", FolderDelivery.class);
+        deliveries.put("folder.downloaded", FolderDelivery.class);
+        deliveries.put("room.created", RoomDelivery.class);
+        deliveries.put("room.updated", RoomDelivery.class);
+        deliveries.put("room.archived", RoomDelivery.class);
+        deliveries.put("room.deleted", RoomDelivery.class);
+        deliveries.put("room.restored", RoomDelivery.class);
+        deliveries.put("room.copied", RoomDelivery.class);
+        deliveries.put("form.submit", FormSubmitDelivery.class);
+        deliveries.put("form.filled.out", FileDelivery.class);
+        deliveries.put("form.stopped", FileDelivery.class);
+        deliveries.put("agent.created", RoomDelivery.class);
+        deliveries.put("agent.updated", RoomDelivery.class);
+        deliveries.put("agent.deleted", RoomDelivery.class);
+        DELIVERY_TYPES = Collections.unmodifiableMap(deliveries);
+    }
+
     /** The legacy catch-all: sent only when the server cannot read a stored payload; no typed body. */
     public static final Set<String> UNTYPED_TRIGGERS = Set.of("*");
 
@@ -76,5 +126,10 @@ public final class WebhookTriggers {
     /** The payload model of the trigger, or null when it has no typed body. */
     public static Class<?> payloadType(String trigger) {
         return trigger == null ? null : PAYLOAD_TYPES.get(trigger);
+    }
+
+    /** The delivery model of the trigger, or null when it has no typed body. */
+    public static Class<?> deliveryType(String trigger) {
+        return trigger == null ? null : DELIVERY_TYPES.get(trigger);
     }
 }

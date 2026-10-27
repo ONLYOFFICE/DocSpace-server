@@ -26,3 +26,7 @@ require '{{gemName}}/{{modelPackage}}/{{classFilename}}'
 # Trigger -> payload model table, written by tools/gen-trigger-map.py in the
 # post-step of the generate-webhook-sdk skill.
 require '{{gemName}}/webhook_triggers'
+
+# The webhook router, hand-written in ruby/shim/ and copied in by the same
+# post-step.
+require '{{gemName}}/webhook_router'

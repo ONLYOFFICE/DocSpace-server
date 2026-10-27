@@ -40,6 +40,7 @@ global using System.Text.Json.Serialization.Metadata;
 global using System.Xml.Linq;
 
 global using ASC.Api.Core.Webhook.Payloads;
+global using ASC.Core.Users;
 global using ASC.Files.Core.ApiModels.WebhookDto;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;

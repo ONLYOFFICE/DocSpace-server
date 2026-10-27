@@ -4,6 +4,8 @@ using System.Text;
 using DocSpace.Webhooks.SDK;
 using DocSpace.Webhooks.SDK.Model;
 
+using Newtonsoft.Json;
+
 // ---------------------------------------------------------------- arguments
 
 var host = "localhost";
@@ -51,7 +53,10 @@ if (file is not null)
     // verification is skipped rather than failing a replay that never had a
     // header to begin with. A rejected signature or a body that does not parse
     // exits 1, so a script (the SDK's own verification among them) can tell.
-    return Log(await File.ReadAllBytesAsync(file), signature, signature is null ? null : secret, null) ? 0 : 1;
+    var replay = CreateRouter(signature is null ? null : secret);
+    var replayed = await LogAsync(replay, await File.ReadAllBytesAsync(file), signature, null);
+
+    return replayed.StatusCode is >= 200 and < 300 ? 0 : 1;
 }
 
 // ------------------------------------------------------------------ listener
@@ -115,6 +120,8 @@ if (host is "localhost")
 }
 Console.WriteLine(new string('-', 72));
 
+var router = CreateRouter(secret);
+
 using var cancel = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) => { e.Cancel = true; cancel.Cancel(); listener.Stop(); };
 
@@ -142,111 +149,132 @@ while (!cancel.IsCancellationRequested)
     await context.Request.InputStream.CopyToAsync(ms);
     var body = ms.ToArray();
 
-    // Acknowledge first. DocSpace waits 30 seconds for a response and treats a
-    // timeout as a failed attempt, so anything slow belongs after the response.
-    response.StatusCode = 200;
-    response.Close();
+    // Answer only once the handlers are done: a 2xx tells DocSpace the delivery is
+    // handled, anything else makes it retry. It waits 30 seconds for the answer and
+    // treats a timeout as a failed attempt, so a slow handler belongs in a queue.
+    var result = await LogAsync(
+        router, body, context.Request.Headers[WebhookSignature.HeaderName], context.Request.Headers[Receiver.EventIdHeader]);
 
-    Log(body, context.Request.Headers[WebhookSignature.HeaderName], secret, context.Request.Headers[ProcessedEvents.EventIdHeader]);
+    response.StatusCode = result.StatusCode;
+    response.Close();
 }
 
 return 0;
 
 // ------------------------------------------------------------------ logging
 
-// True when the delivery was accepted (logged, or dropped as a duplicate); false
-// when the signature was rejected or the body did not parse.
-static bool Log(byte[] body, string? signature, string? secret, string? eventIdHeader)
+// The router this sample hands every delivery to. On<TDelivery> takes every
+// trigger delivered as that type; OnFileCreated, one of the generated
+// On<Trigger> methods, adds a handler for one trigger next to it; OnOther takes
+// what has no handler: the catch-all and triggers newer than this SDK.
+static WebhookRouter CreateRouter(string? secret)
 {
-    var now = DateTime.Now.ToString("HH:mm:ss");
+    var router = string.IsNullOrEmpty(secret)
+        ? WebhookRouter.ForUnsignedReplay(Receiver.Store)
+        : new WebhookRouter(secret, Receiver.Store);
 
-    // A cheap pre-check before any work: the header is not signed, so it may
-    // only ever make us DROP a delivery (which is fail-safe -- whoever can
-    // rewrite a header can drop the request anyway), never accept one.
-    if (ProcessedEvents.WasSeen(eventIdHeader))
-    {
-        Console.WriteLine($"[{now}] duplicate of event #{eventIdHeader} (header pre-check), skipped");
-        Console.WriteLine(new string('-', 72));
-        return true;
-    }
+    var signatureNote = string.IsNullOrEmpty(secret) ? "signature NOT checked (no secret)" : "signature ok";
 
-    string signatureNote;
-    if (string.IsNullOrEmpty(secret))
-    {
-        signatureNote = "signature UNCHECKED (no secret)";
-    }
-    else if (WebhookSignature.Verify(body, secret, signature))
-    {
-        signatureNote = "signature ok";
-    }
-    else
-    {
-        Console.WriteLine($"[{now}] REJECTED: bad or missing signature ({body.Length} bytes)");
-        Console.WriteLine(new string('-', 72));
-        return false;
-    }
+    router.On<UserDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(UserDelivery), signatureNote));
+    router.On<GroupDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(GroupDelivery), signatureNote));
+    router.On<FileDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(FileDelivery), signatureNote));
+    router.On<FolderDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(FolderDelivery), signatureNote));
+    router.On<RoomDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(RoomDelivery), signatureNote));
+    router.On<FormSubmitDelivery>((d, _) => Print(d.Event, d.Webhook, d.Payload, nameof(FormSubmitDelivery), signatureNote));
 
-    DocSpaceWebhook hook;
-    try
+    router.OnFileCreated((d, _) =>
     {
-        hook = WebhookParser.Parse(body);
-    }
-    catch (WebhookParseException ex)
-    {
-        Console.WriteLine($"[{now}] unparseable body: {ex.Message}");
-        Console.WriteLine(new string('-', 72));
-        return false;
-    }
+        Console.WriteLine($"         OnFileCreated: \"{d.Payload?.Title}\" in folder {d.Payload?.ParentId?.ActualInstance}");
+        return Task.CompletedTask;
+    });
 
-    // The model the generated table names for this trigger: "untyped" for the
-    // legacy catch-all, "unknown" for a trigger newer than this build.
-    var model = WebhookTriggers.PayloadTypes.TryGetValue(hook.Trigger, out var payloadType)
-        ? payloadType.Name
-        : WebhookTriggers.UntypedTriggers.Contains(hook.Trigger) ? "untyped" : "unknown";
-
-    if (payloadType is not null && hook.Payload is null)
+    router.OnOther((hook, _) =>
     {
-        Console.WriteLine($"[{now}] unparseable body: no {model} payload for '{hook.Trigger}'");
-        Console.WriteLine(new string('-', 72));
-        return false;
-    }
+        var known = hook.IsKnownTrigger ? "" : "  (trigger unknown to this build)";
+        Console.WriteLine($"[{Now()}] {hook.Trigger}{known}");
+        Console.WriteLine($"         {signatureNote}");
+        Console.WriteLine($"         model: {ModelName(hook.Trigger)}");
+        Console.WriteLine("         delivery: none");
+        PrintEnvelope(hook.Event, hook.Webhook);
+        Console.WriteLine();
+        Console.WriteLine(Indent(hook.RawPayloadJson));
+        return Task.CompletedTask;
+    });
 
-    // The authoritative duplicate check, on the id from the verified body.
-    if (hook.Event is { } seen && !ProcessedEvents.Add(seen.Id))
+    return router;
+}
+
+// Hands the delivery to the router and logs what it did; the result carries the
+// status to answer DocSpace with.
+static async Task<WebhookHandleResult> LogAsync(WebhookRouter router, byte[] body, string? signature, string? eventIdHeader)
+{
+    var result = await router.HandleAsync(body, signature, eventIdHeader);
+
+    switch (result.Outcome)
     {
-        Console.WriteLine($"[{now}] duplicate of event #{seen.Id}, already processed; skipped");
-        Console.WriteLine(new string('-', 72));
-        return true;
+        case WebhookOutcome.Rejected:
+            Console.WriteLine($"[{Now()}] REJECTED: bad or missing signature ({body.Length} bytes)");
+            break;
+        case WebhookOutcome.Invalid:
+            Console.WriteLine($"[{Now()}] unparseable body: {result.Error}");
+            break;
+        case WebhookOutcome.Failed:
+            Console.WriteLine($"[{Now()}] a handler failed: {result.Error}");
+            break;
+        case WebhookOutcome.Duplicate:
+            Console.WriteLine($"[{Now()}] duplicate of event #{result.EventId}, already processed; skipped");
+            break;
     }
 
-    var known = hook.IsKnownTrigger ? "" : "  (trigger unknown to this build)";
-    Console.WriteLine($"[{now}] {hook.Trigger}{known}");
+    Console.WriteLine(new string('-', 72));
+
+    return result;
+}
+
+static Task Print(WebhookEventInfo? ev, WebhookConfigInfo? cfg, object? payload, string delivery, string signatureNote)
+{
+    var trigger = ev?.Trigger ?? "";
+
+    Console.WriteLine($"[{Now()}] {trigger}");
     Console.WriteLine($"         {signatureNote}");
-    Console.WriteLine($"         model: {model}");
+    Console.WriteLine($"         model: {ModelName(trigger)}");
+    Console.WriteLine($"         delivery: {delivery}");
+    PrintEnvelope(ev, cfg);
 
-    if (hook.Event is { } ev)
-    {
-        Console.WriteLine($"         event #{ev.Id}  at {ev.CreateOn:u}  by {ev.CreateBy}");
-    }
-
-    if (hook.Webhook is { } cfg)
-    {
-        var retry = cfg.RetryCount > 0 ? $"  retry #{cfg.RetryCount}" : "";
-        Console.WriteLine($"         subscription #{cfg.Id} \"{cfg.Name}\"{retry}");
-    }
-
-    var summary = Summarize(hook.Payload);
+    var summary = Summarize(payload);
     if (summary is not null)
     {
         Console.WriteLine($"         {summary}");
     }
 
     Console.WriteLine();
-    Console.WriteLine(Indent(hook.RawPayloadJson));
-    Console.WriteLine(new string('-', 72));
+    Console.WriteLine(Indent(JsonConvert.SerializeObject(payload, Formatting.Indented)));
 
-    return true;
+    return Task.CompletedTask;
 }
+
+static void PrintEnvelope(WebhookEventInfo? ev, WebhookConfigInfo? cfg)
+{
+    if (ev is not null)
+    {
+        Console.WriteLine($"         event #{ev.Id}  at {ev.CreateOn:u}  by {ev.CreateBy}");
+    }
+
+    if (cfg is not null)
+    {
+        var retry = cfg.RetryCount > 0 ? $"  retry #{cfg.RetryCount}" : "";
+        Console.WriteLine($"         subscription #{cfg.Id} \"{cfg.Name}\"{retry}");
+    }
+}
+
+// The model the generated table names for this trigger: "untyped" for the
+// legacy catch-all, "unknown" for a trigger newer than this build.
+static string ModelName(string trigger) =>
+    WebhookTriggers.PayloadTypes.TryGetValue(trigger, out var payloadType)
+        ? payloadType.Name
+        : WebhookTriggers.UntypedTriggers.Contains(trigger) ? "untyped" : "unknown";
+
+static string Now() => DateTime.Now.ToString("HH:mm:ss");
 
 // A typed line per payload kind, to show the models actually being used.
 static string? Summarize(object? payload) => payload switch
@@ -275,24 +303,17 @@ static string Indent(string text) =>
         text.Split('\n').Select(l => "         " + l.TrimEnd('\r')));
 
 /// <summary>
-/// The events already handled. DocSpace delivers at least once: an automatic
-/// retry, or a manual retry from the delivery log, sends the same event.id
-/// again, and the signature does not prove when a request was sent. So the
-/// id is the replay and duplicate defence. This set lives in memory for the
-/// sake of the sample; a real receiver persists the ids for as long as an event
-/// can still arrive -- the automatic retries span about 18 hours on the default
-/// schedule, and a manual retry can come at any time later.
+/// The events already handled, for the router's duplicate check. DocSpace
+/// delivers at least once: an automatic retry, or a manual retry from the
+/// delivery log, sends the same event.id again. The store lives in memory for
+/// the sake of the sample; a real receiver persists the ids for as long as an
+/// event can still arrive (see IWebhookEventStore).
 /// </summary>
-internal static class ProcessedEvents
+internal static class Receiver
 {
     internal const string EventIdHeader = "x-docspace-event-id";
 
-    private static readonly HashSet<int> _ids = [];
-
-    internal static bool Add(int id) => _ids.Add(id);
-
-    internal static bool WasSeen(string? header) =>
-        int.TryParse(header, out var id) && _ids.Contains(id);
+    internal static readonly InMemoryWebhookEventStore Store = new();
 }
 
 internal static class HttpMethods

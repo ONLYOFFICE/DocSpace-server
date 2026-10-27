@@ -47,11 +47,13 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
 {
     public const string EntryIdSchema = "EntryId";
 
+    public const string EnvelopeSchema = "WebhookEnvelope";
+
     private const string PayloadSuffix = "WebhookDto";
 
     private static readonly Dictionary<Type, string> _envelopeNames = new()
     {
-        [typeof(WebhookPayload<,>)] = "WebhookEnvelope",
+        [typeof(WebhookPayload<,>)] = EnvelopeSchema,
         [typeof(WebhookPayloadEventInfo)] = "WebhookEventInfo",
         [typeof(WebhookPayloadTargetInfo<>)] = "WebhookTargetInfo",
         [typeof(WebhookPayloadConfigInfo<>)] = "WebhookConfigInfo"

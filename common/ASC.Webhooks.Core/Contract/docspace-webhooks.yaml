@@ -12,7 +12,9 @@ info:
     payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto,
     FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).
 
-    Which trigger sends which payload is the map below, x-docspace-trigger-payloads.
+    Every trigger is an entry of `webhooks` below, and its body is the *Delivery
+    schema of its payload: the envelope with `payload` typed. The same mapping, in
+    machine-readable form, is x-docspace-trigger-payloads.
 
     SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)
       1. PropertyNamingPolicy = CamelCase.
@@ -45,7 +47,7 @@ info:
                                   body>. GitHub emits lowercase hex, so compare
                                   case-insensitively. This is the only header
                                   that is authenticated.
-        x-docspace-event-id       Copy of event.id.
+    { { name, x-docspace-event-id }, { in, header }, { required, true }, { description, Copy of event.id. }, { schema, { { type, string } } } }
         x-docspace-event-timestamp
                                   Copy of event.createOn, same ISO-8601 UTC
                                   spelling, e.g. 2026-09-17T10:22:56Z.
@@ -66,7 +68,1751 @@ info:
       retries. Deduplicate on event.id instead: keep the ids already processed
       and drop a delivery whose id is among them. That is the replay defence.
   version: 1.0.0
+tags:
+  - name: user
+    description: 'Members of the portal: added, invited, changed or removed.'
+  - name: group
+    description: Groups of members.
+  - name: file
+    description: Files, in rooms and in the personal section alike.
+  - name: folder
+    description: Folders, in rooms and in the personal section alike.
+  - name: room
+    description: Rooms.
+  - name: form
+    description: 'PDF forms: submitted, filled out by everyone, or stopped.'
+  - name: agent
+    description: AI agents, which are rooms of their own kind and are delivered as rooms.
 paths: {}
+webhooks:
+  user.created:
+    post:
+      operationId: userCreated
+      summary: user.created
+      description: >-
+        Sent on the `user.created` event. The body is a UserDelivery, whose `payload` is a UserPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - user
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  user.invited:
+    post:
+      operationId: userInvited
+      summary: user.invited
+      description: >-
+        Sent on the `user.invited` event. The body is a UserDelivery, whose `payload` is a UserPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - user
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  user.updated:
+    post:
+      operationId: userUpdated
+      summary: user.updated
+      description: >-
+        Sent on the `user.updated` event. The body is a UserDelivery, whose `payload` is a UserPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - user
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  user.deleted:
+    post:
+      operationId: userDeleted
+      summary: user.deleted
+      description: >-
+        Sent on the `user.deleted` event. The body is a UserDelivery, whose `payload` is a UserPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - user
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  group.created:
+    post:
+      operationId: groupCreated
+      summary: group.created
+      description: >-
+        Sent on the `group.created` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - group
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  group.updated:
+    post:
+      operationId: groupUpdated
+      summary: group.updated
+      description: >-
+        Sent on the `group.updated` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - group
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  group.deleted:
+    post:
+      operationId: groupDeleted
+      summary: group.deleted
+      description: >-
+        Sent on the `group.deleted` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - group
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.created:
+    post:
+      operationId: fileCreated
+      summary: file.created
+      description: >-
+        Sent on the `file.created` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.uploaded:
+    post:
+      operationId: fileUploaded
+      summary: file.uploaded
+      description: >-
+        Sent on the `file.uploaded` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.updated:
+    post:
+      operationId: fileUpdated
+      summary: file.updated
+      description: >-
+        Sent on the `file.updated` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.trashed:
+    post:
+      operationId: fileTrashed
+      summary: file.trashed
+      description: >-
+        Sent on the `file.trashed` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.deleted:
+    post:
+      operationId: fileDeleted
+      summary: file.deleted
+      description: >-
+        Sent on the `file.deleted` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.restored:
+    post:
+      operationId: fileRestored
+      summary: file.restored
+      description: >-
+        Sent on the `file.restored` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.copied:
+    post:
+      operationId: fileCopied
+      summary: file.copied
+      description: >-
+        Sent on the `file.copied` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.moved:
+    post:
+      operationId: fileMoved
+      summary: file.moved
+      description: >-
+        Sent on the `file.moved` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  file.downloaded:
+    post:
+      operationId: fileDownloaded
+      summary: file.downloaded
+      description: >-
+        Sent on the `file.downloaded` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - file
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.created:
+    post:
+      operationId: folderCreated
+      summary: folder.created
+      description: >-
+        Sent on the `folder.created` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.updated:
+    post:
+      operationId: folderUpdated
+      summary: folder.updated
+      description: >-
+        Sent on the `folder.updated` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.trashed:
+    post:
+      operationId: folderTrashed
+      summary: folder.trashed
+      description: >-
+        Sent on the `folder.trashed` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.deleted:
+    post:
+      operationId: folderDeleted
+      summary: folder.deleted
+      description: >-
+        Sent on the `folder.deleted` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.restored:
+    post:
+      operationId: folderRestored
+      summary: folder.restored
+      description: >-
+        Sent on the `folder.restored` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.copied:
+    post:
+      operationId: folderCopied
+      summary: folder.copied
+      description: >-
+        Sent on the `folder.copied` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.moved:
+    post:
+      operationId: folderMoved
+      summary: folder.moved
+      description: >-
+        Sent on the `folder.moved` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  folder.downloaded:
+    post:
+      operationId: folderDownloaded
+      summary: folder.downloaded
+      description: >-
+        Sent on the `folder.downloaded` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - folder
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.created:
+    post:
+      operationId: roomCreated
+      summary: room.created
+      description: >-
+        Sent on the `room.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.updated:
+    post:
+      operationId: roomUpdated
+      summary: room.updated
+      description: >-
+        Sent on the `room.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.archived:
+    post:
+      operationId: roomArchived
+      summary: room.archived
+      description: >-
+        Sent on the `room.archived` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.deleted:
+    post:
+      operationId: roomDeleted
+      summary: room.deleted
+      description: >-
+        Sent on the `room.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.restored:
+    post:
+      operationId: roomRestored
+      summary: room.restored
+      description: >-
+        Sent on the `room.restored` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  room.copied:
+    post:
+      operationId: roomCopied
+      summary: room.copied
+      description: >-
+        Sent on the `room.copied` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - room
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  form.submit:
+    post:
+      operationId: formSubmit
+      summary: form.submit
+      description: >-
+        Sent on the `form.submit` event. The body is a FormSubmitDelivery, whose `payload` is a FormSubmitPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - form
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormSubmitDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  form.filled.out:
+    post:
+      operationId: formFilledOut
+      summary: form.filled.out
+      description: >-
+        Sent on the `form.filled.out` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - form
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  form.stopped:
+    post:
+      operationId: formStopped
+      summary: form.stopped
+      description: >-
+        Sent on the `form.stopped` event. The body is a FileDelivery, whose `payload` is a FilePayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - form
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  agent.created:
+    post:
+      operationId: agentCreated
+      summary: agent.created
+      description: >-
+        Sent on the `agent.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      tags:
+        - agent
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  agent.updated:
+    post:
+      operationId: agentUpdated
+      summary: agent.updated
+      description: >-
+        Sent on the `agent.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - agent
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
+  agent.deleted:
+    post:
+      operationId: agentDeleted
+      summary: agent.deleted
+      description: >-
+        Sent on the `agent.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
+        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      tags:
+        - agent
+      parameters:
+        - name: x-docspace-signature-256
+          in: header
+          required: true
+          description: >-
+            `sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret.
+            The only header that is authenticated; compare it case-insensitively.
+          schema:
+            type: string
+        - name: x-docspace-event-id
+          in: header
+          required: true
+          description: >-
+            A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not
+            covered by the signature.
+          schema:
+            type: string
+        - name: x-docspace-event-timestamp
+          in: header
+          required: true
+          description: A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the
+            signature.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDelivery'
+      responses:
+        2XX:
+          description: Acknowledges the delivery. The answer's body is kept in the delivery log, not interpreted.
+        '410':
+          description: Deletes the subscription at once; nothing is retried or sent to it any more.
+        default:
+          description: >-
+            Any other status, a redirect, a timeout or a network error fails the attempt, which is retried
+            on the schedule the description of this document gives.
 x-docspace-trigger-payloads:
   description: >
     Machine-readable trigger -> payload schema map. Source of truth for the SDK dispatch layer. Generated
@@ -728,3 +2474,51 @@ components:
           $ref: '#/components/schemas/FilePayload'
         submittedForm:
           $ref: '#/components/schemas/FilePayload'
+    UserDelivery:
+      description: 'A delivery whose payload is a UserPayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/UserPayload'
+    GroupDelivery:
+      description: 'A delivery whose payload is a GroupPayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/GroupPayload'
+    FileDelivery:
+      description: 'A delivery whose payload is a FilePayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/FilePayload'
+    FolderDelivery:
+      description: 'A delivery whose payload is a FolderPayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/FolderPayload'
+    RoomDelivery:
+      description: 'A delivery whose payload is a RoomPayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/RoomPayload'
+    FormSubmitDelivery:
+      description: 'A delivery whose payload is a FormSubmitPayload: WebhookEnvelope with `payload` typed.'
+      allOf:
+        - $ref: '#/components/schemas/WebhookEnvelope'
+        - type: object
+          properties:
+            payload:
+              $ref: '#/components/schemas/FormSubmitPayload'

@@ -222,6 +222,111 @@ in the contract at all. The samples choose their model only through it, so a tri
 added on the server later is acknowledged with its raw payload, never parsed with some
 other model.
 
+The contract also describes every trigger as an entry of the OpenAPI 3.1 `webhooks`
+section, so that Scalar, Redoc and other viewers list the deliveries with their headers,
+body and the meaning of the receiver's answer. The body of each entry is a `*Delivery`
+schema: `WebhookEnvelope` with `payload` typed (`FileDelivery`, `FolderDelivery`,
+`RoomDelivery`, `UserDelivery`, `GroupDelivery`, `FormSubmitDelivery`). Every SDK has
+these as models too, and its trigger table pairs each trigger with its delivery model
+as well as with its payload model, so the whole body can be read into the right type
+by the trigger alone:
+
+```csharp
+// C#: a switch on the type, or one expected kind
+switch (WebhookParser.ParseDelivery(body))
+{
+    case FileDelivery file: Handle(file.Payload.Title); break;
+    case null: break; // '*' or a trigger newer than this SDK
+}
+var room = WebhookParser.ParseDelivery<RoomDelivery>(body); // throws for any other kind
+```
+
+```ts
+// TypeScript: narrowing on the trigger narrows the delivery
+const d = parseDelivery(body);
+if (d?.trigger === 'file.created') {
+    console.log(d.delivery.payload?.title); // d.delivery is a FileDelivery
+}
+```
+
+The other languages have the table (`DeliveryTypes`, `deliveryType(trigger)`,
+`NewDelivery`, `decodeDelivery` and the like, named as the payload lookups beside them),
+and every language has the router below, which uses it.
+
+### Handlers per event
+
+Instead of parsing and switching, a receiver can register handlers with a router and
+hand it each request. The router checks the signature, drops an event it has processed
+before, reads the body into the delivery model of its trigger, awaits every handler of
+that trigger and returns the status to answer DocSpace with: a 2xx only after all of
+them completed, a 500 when one threw, so that DocSpace retries. Handlers therefore have
+to be idempotent. Any number of handlers can be registered for one trigger, and each
+registration can be removed again.
+
+```csharp
+var router = new WebhookRouter(secret, store);              // store: IWebhookEventStore, for duplicates
+
+using var onUpload = router.OnFileCreated(async (FileDelivery d, CancellationToken ct) =>
+    await search.IndexAsync(d.Payload, ct));                // generated: one On<Trigger> per trigger
+router.OnFileCreated(async (d, ct) => await audit.LogAsync(d.Event, ct));   // a second handler
+router.On<RoomDelivery>(async (d, ct) => await sync.RoomAsync(d, ct));      // every room trigger
+router.OnOther(async (hook, ct) => await raw.KeepAsync(hook, ct));          // '*' and newer triggers
+
+// in the HTTP endpoint, e.g. minimal API
+var result = await router.HandleAsync(body, request.Headers["x-docspace-signature-256"],
+    request.Headers["x-docspace-event-id"], ct);
+return Results.StatusCode(result.StatusCode);
+```
+
+Disposing a registration removes that handler, as `-=` does for an event. A C# `event`
+is not used on purpose: its handlers return `void`, so an `async` one could not be
+awaited, its failure would never reach the router, and DocSpace would get its 200 before
+the work was done.
+
+```ts
+const router = new WebhookRouter({ secret, store });       // store: WebhookEventStore
+
+const off = router.on('file.created', async d => {         // d: FileDelivery, typed by the name
+    await search.index(d.payload);
+});
+router.on(['room.created', 'room.archived'], d => sync(d)); // d: RoomDelivery
+router.onOther(hook => keepRaw(hook));                       // '*' and newer triggers
+off();                                                       // or router.off('file.created', handler)
+
+const result = await router.handle(rawBody, req.headers['x-docspace-signature-256'],
+    req.headers['x-docspace-event-id']);
+res.status(result.statusCode).end();
+```
+
+The router works with any HTTP framework: it takes the raw body and the two headers,
+and leaves the request and response to the framework. Keep the handlers quick: DocSpace
+waits 30 seconds for the answer by default, so slow work belongs in a queue of your own,
+and a handler that only enqueues it makes the 2xx mean "accepted".
+
+Every SDK has the same router, in its own idiom. The typed languages get one generated
+method per trigger; the dynamic ones register by name:
+
+| Language | Create | One trigger | Remove | Anything else | Handle |
+|---|---|---|---|---|---|
+| C# | `new WebhookRouter(secret, store)` | `OnFileCreated(h)`, `On<FileDelivery>(h)` for a whole kind | `Dispose()` the result | `OnOther(h)` | `await HandleAsync(body, sig, id)` |
+| TypeScript | `new WebhookRouter({ secret, store })` | `on('file.created', h)`, or a list of triggers | the returned function, `off()` | `onOther(h)` | `await handle(body, sig, id)` |
+| Go | `NewWebhookRouter(secret, store)` | `r.OnFileCreated(h)`, `On[FileDelivery](r, trigger, h)` | the returned func | `OnOther(h)` | `Handle(ctx, body, sig, id)` |
+| Java | `new WebhookRouter(secret, store)` | `onFileCreated(h)`, `on(trigger, FileDelivery.class, h)` | `close()` the result, `off()` | `onOther(h)` | `handle(body, sig, id)` |
+| Kotlin | `WebhookRouter(secret, store)` | `onFileCreated { }`, `on(trigger, FileDelivery::class.java, h)` | `close()` the result, `off()` | `onOther { }` | `handle(body, sig, id)` |
+| Swift | `try WebhookRouter(secret:store:)` | `onFileCreated { }`, `on(trigger, FileDelivery.self, h)` | `cancel()` the result | `onOther { }` | `await handle(body:signature:eventIdHeader:)` |
+| Python | `WebhookRouter(secret, store)` | `on("file.created", h)` or `@router.on("file.created")` | the returned callable, `off()` | `on_other(h)` | `handle(body, sig, id)` |
+| PHP | `new WebhookRouter($secret, $store)` | `on('file.created', $h)` | the returned closure, `off()` | `onOther($h)` | `handle($body, $sig, $id)` |
+| Ruby | `WebhookRouter.new(secret, store:)` | `on('file.created') { }` | the returned lambda, `off()` | `on_other { }` | `handle(body, sig, id)` |
+
+All of them return the outcome (`handled`, `duplicate`, `unhandled`, `rejected`,
+`invalid`, `failed`) with the status to answer: 200 for the first three, 401, 400 and
+500 for the others. Each has an in-memory event store for samples and tests, and an
+explicitly named unsigned-replay router (`ForUnsignedReplay`, `{ unsignedReplay: true }`,
+`NewUnsignedReplayRouter`, `forUnsignedReplay`, `for_unsigned_replay`) that skips the
+signature check for replaying saved bodies during development; never put such a router
+behind a reachable endpoint. Every sample in this directory runs on its language's
+router.
+
 ## Receiving: the parts a runtime has to get right
 
 - **Signature.** `x-docspace-signature-256: sha256=<hex>`, HMAC-SHA256 over the
@@ -263,20 +368,22 @@ other model.
 
 ## Samples
 
-Every sample verifies the signature, picks the payload model through its
-language's trigger table, parses with the generated models and logs the delivery.
-Each prints a `model: <name>` line — the schema name, `untyped` for `*`, `unknown`
-for a trigger the contract does not list — and exits non-zero when the signature is
-rejected or the body does not parse. Run without arguments, each replays
-`samples/file.created.json`.
+Every sample hands the delivery to its language's router: one handler for every
+trigger with a delivery model, a second one for `file.created` (through the typed
+`OnFileCreated` where the language has it), and an "other" handler for `*` and
+unknown triggers. Each prints a `model: <name>` line — the schema name, `untyped` for
+`*`, `unknown` for a trigger the contract does not list — and a `delivery: <name>`
+line (`FileDelivery`, …, `none` for `*` and unknown triggers), and exits non-zero
+when the router rejects the signature, cannot parse the body or a handler fails. Run
+without arguments, each replays `samples/file.created.json`.
 
-The C# and TypeScript samples also show the duplicate check every receiver needs:
-DocSpace delivers at least once, a retry carries the same `event.id`, and the
-signature does not prove when a request was sent. They keep the processed ids in an
-in-memory set; a real receiver persists them for as long as an event can still
-arrive (about 18 hours of automatic retries on the default schedule, and a manual
-retry at any time later), and may drop on the unsigned `x-docspace-event-id` header
-as a cheap pre-check, but never accept on it.
+The router's event store is the duplicate check every receiver needs: DocSpace
+delivers at least once, a retry carries the same `event.id`, and the signature does
+not prove when a request was sent. The samples use the in-memory store; a real
+receiver persists the ids for as long as an event can still arrive (about 18 hours of
+automatic retries on the default schedule, and a manual retry at any time later). The
+unsigned `x-docspace-event-id` header, passed to the router as well, is a cheap
+pre-check that may drop a delivery but never accept one.
 
 | Language | Run from | Command | Status |
 |---|---|---|---|

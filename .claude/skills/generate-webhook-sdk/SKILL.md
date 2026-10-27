@@ -39,8 +39,8 @@ The skill does three things:
   tool's own directory flag (`go -C`, `mvn -f`, `npm --prefix`, `swift --package-path`,
   `dotnet --project`) for the commands that need another one.
 - **Never edit `<lang>/generated/`.** It is wiped on every run. A fix belongs in the contract, in
-  `targets.conf` (generator flags), in `templates/<lang>/`, in a shim (`go/shim`, `java/shim`,
-  `kotlin/docs`), or in the hand-written runtime `<lang>/src/`.
+  `targets.conf` (generator flags), in `templates/<lang>/`, in a shim (`go/shim`, `java/shim`, `python/shim`,
+  `php/shim`, `ruby/shim`, `swift/shim`, `kotlin/docs`), or in the hand-written runtime `<lang>/src/`.
 - **`generated/` is committed** (see `webhooks-sdk/.gitignore`): its diff is part of the change and
   goes into the same commit as the contract change that caused it. Only `.generate.log` and
   `.verify.log` are ignored.
@@ -110,6 +110,7 @@ comes from — and therefore where a change to it belongs:
 | a schema `description` | the type's `<summary>` and `<remarks>` |
 | a property `description` | the property's `<summary>`; for an enum the generator appends its members |
 | `x-docspace-trigger-payloads.map` | the trigger table in `WebhookContractGenerator` (by trigger family, with per-trigger exceptions), in `[Order]` order |
+| `webhooks` (one POST per trigger: headers, body, answers), `tags` (one per trigger family) and the `*Delivery` schemas (`WebhookEnvelope` with `payload` typed, one per payload schema) | the same trigger table, with the texts in `ContractHeader` (`GetWebhook`, `GetTag`, `GetDeliverySchema`); a family without a tag description stops the generator |
 | `info`, the transport and serialization notes, `EntryId`, the map's description | `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs` (prose, `OpenApiInfo`, the `EntryId` `OpenApiSchema`) |
 | the numbers and names in the transport notes: request timeout, retry intervals and jitter, header names, config keys | `common/ASC.Webhooks.Core/WebhookDelivery.cs`, which the sender reads as well |
 
@@ -267,14 +268,14 @@ Then, per language (`<spec>` is `../common/ASC.Webhooks.Core/Contract/docspace-w
 
 | Language | Post-step |
 | --- | --- |
-| `java` | copy the contents of `java/shim/` into `java/generated/src/main/java/` (merging directories); then `python tools/gen-trigger-map.py --lang java --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java`; then `python tools/gen-trigger-map.py --lang java-triggers --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.java` |
+| `java` | copy the contents of `java/shim/` into `java/generated/src/main/java/` (merging directories); then `python tools/gen-trigger-map.py --lang java --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java`; then `python tools/gen-trigger-map.py --lang java-triggers --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.java`; then `python tools/gen-trigger-map.py --lang java-router --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookRouter.java` (the router's typed `on<Trigger>` methods) |
 | `kotlin` | copy `kotlin/docs/*.md` into `kotlin/generated/docs/`; then `python tools/gen-trigger-map.py --lang kotlin --spec <spec> --package onlyoffice.docspace.webhooks.sdk --model-package onlyoffice.docspace.webhooks.sdk.models --out kotlin/generated/src/main/kotlin/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.kt` |
 | `go` | copy `go/shim/*.go` into `go/generated/`; then `python tools/gen-trigger-map.py --lang go --spec <spec> --package docspace_webhooks_sdk --out go/generated/triggers.go` |
-| `csharp` | `python tools/gen-trigger-map.py --lang csharp --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python tools/gen-trigger-map.py --lang markdown --spec <spec> --doc-path docs/ --out csharp/generated/TRIGGERS.md` |
-| `php` | `python tools/gen-trigger-map.py --lang php --spec <spec> --package "OnlyOffice\DocSpace\Webhooks\Sdk" --model-package "OnlyOffice\DocSpace\Webhooks\Sdk\Model" --out php/generated/lib/WebhookTriggers.php` |
-| `python` | `python tools/gen-trigger-map.py --lang python --spec <spec> --package docspace_webhooks_sdk --out python/generated/docspace_webhooks_sdk/triggers.py` |
-| `ruby` | `python tools/gen-trigger-map.py --lang ruby --spec <spec> --package DocspaceWebhooksSdk --out ruby/generated/lib/docspace-webhooks-sdk/webhook_triggers.rb` (the gem entry point from `templates/ruby/gem.mustache` requires it) |
-| `swift` | `python tools/gen-trigger-map.py --lang swift --spec <spec> --out swift/generated/Sources/DocSpaceWebhooksSDK/WebhookTriggers.swift` |
+| `csharp` | `python tools/gen-trigger-map.py --lang csharp --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python tools/gen-trigger-map.py --lang markdown --spec <spec> --doc-path docs/ --out csharp/generated/TRIGGERS.md`; then `python tools/gen-trigger-map.py --lang csharp-router --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/WebhookRouter.Triggers.cs` (the `On<Trigger>` methods of `WebhookRouter`) |
+| `php` | copy `php/shim/*.php` into `php/generated/lib/` (the router); then `python tools/gen-trigger-map.py --lang php --spec <spec> --package "OnlyOffice\DocSpace\Webhooks\Sdk" --model-package "OnlyOffice\DocSpace\Webhooks\Sdk\Model" --out php/generated/lib/WebhookTriggers.php` |
+| `python` | copy `python/shim/*.py` into `python/generated/docspace_webhooks_sdk/` (the router); then `python tools/gen-trigger-map.py --lang python --spec <spec> --package docspace_webhooks_sdk --out python/generated/docspace_webhooks_sdk/triggers.py` |
+| `ruby` | copy `ruby/shim/*.rb` into `ruby/generated/lib/docspace-webhooks-sdk/` (the router, which the gem entry requires); then `python tools/gen-trigger-map.py --lang ruby --spec <spec> --package DocspaceWebhooksSdk --out ruby/generated/lib/docspace-webhooks-sdk/webhook_triggers.rb` (the gem entry point from `templates/ruby/gem.mustache` requires it) |
+| `swift` | copy `swift/shim/*.swift` into `swift/generated/Sources/DocSpaceWebhooksSDK/` (the router); then `python tools/gen-trigger-map.py --lang swift --spec <spec> --out swift/generated/Sources/DocSpaceWebhooksSDK/WebhookTriggers.swift` |
 | `typescript` | `python tools/gen-trigger-map.py --lang typescript --spec <spec> --out typescript/generated/triggers.ts` |
 
 The PHP namespaces are quoted: both shells keep backslashes inside double quotes.
@@ -286,6 +287,10 @@ The copies:
 cp -r java/shim/. java/generated/src/main/java/
 cp kotlin/docs/*.md kotlin/generated/docs/
 cp go/shim/*.go go/generated/
+cp python/shim/*.py python/generated/docspace_webhooks_sdk/
+cp php/shim/*.php php/generated/lib/
+cp ruby/shim/*.rb ruby/generated/lib/docspace-webhooks-sdk/
+cp swift/shim/*.swift swift/generated/Sources/DocSpaceWebhooksSDK/
 ```
 
 ```powershell
@@ -293,6 +298,10 @@ cp go/shim/*.go go/generated/
 Copy-Item java/shim/* java/generated/src/main/java/ -Recurse -Force
 Copy-Item kotlin/docs/*.md kotlin/generated/docs/ -Force
 Copy-Item go/shim/*.go go/generated/ -Force
+Copy-Item python/shim/*.py python/generated/docspace_webhooks_sdk/ -Force
+Copy-Item php/shim/*.php php/generated/lib/ -Force
+Copy-Item ruby/shim/*.rb ruby/generated/lib/docspace-webhooks-sdk/ -Force
+Copy-Item swift/shim/*.swift swift/generated/Sources/DocSpaceWebhooksSDK/ -Force
 ```
 
 ### A4. Verify
@@ -356,6 +365,20 @@ and it must never be reported as a pass.
   A run whose output has no line that, trimmed, equals `model: <expected>` is **FAILED (wrong
   model)**, even with exit code 0: the sample parsed the delivery with a model the contract does not
   give its trigger (a hand-written prefix rule that drifted, an unknown trigger read as a file).
+- **The delivery check.** Every sample also reads the whole body into the delivery model of its
+  trigger, through the generated trigger table, and prints one line `delivery: <name>`: the
+  `*Delivery` schema (`FileDelivery`, `UserDelivery`, …), or `none` for the catch-all `*` and for a
+  trigger the contract does not list. The expected name is the body of the trigger's entry in the
+  contract's `webhooks` section, read with a one-liner (from `webhooks-sdk/`, the same in both
+  shells; `chr(36)` spells the `$` of `$ref`, which both shells would expand inside the quotes):
+
+  ```
+  python -c "import json,sys,yaml; w=yaml.safe_load(open(sys.argv[1],encoding='utf-8')).get('webhooks') or {}; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print(w[t]['post']['requestBody']['content']['application/json']['schema'][chr(36)+'ref'].rsplit('/',1)[1] if t in w else 'none')" ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml samples/<name>.json
+  ```
+
+  A run whose output has no line that, trimmed, equals `delivery: <expected>` is **FAILED (wrong
+  delivery)**, even with exit code 0: the delivery table of that language no longer follows the
+  contract's `webhooks` section, or the sample stopped going through it.
 - **The negative fixtures.** Glob `samples/negative/*.json` and run each sample over them exactly as
   over the positive ones (their `.sig` sits next to them; `samples/negative/README.md` says what is
   wrong with each). Every sample must exit **non-zero** on each of them; one that exits 0 is
@@ -388,6 +411,7 @@ Outcomes, per language — use these words in the report:
 | `BUILD FAILED — see <lang>/generated/.verify.log` | generated, but the language does not build — the most common real failure |
 | `<fixture>: ok` / `FAILED` | the sample parsed (or did not parse) that real delivery |
 | `<fixture>: FAILED (wrong model)` | it parsed, but with another model than the contract gives its trigger |
+| `<fixture>: FAILED (wrong delivery)` | the whole body went into another delivery model than the trigger's `webhooks` entry names |
 | `negative/<fixture>: ok` / `FAILED (accepted a negative fixture)` | the sample refused (or accepted) a delivery it must refuse |
 | `NOT VERIFIED (toolchain missing): …` | the language was generated but **not** checked |
 
@@ -400,7 +424,7 @@ PHP, Ruby and Swift are the toolchains a machine most often lacks. When Docker i
 them in a container instead of reporting them `NOT VERIFIED`: the same build and sample commands,
 over the same fixtures, with `webhooks-sdk/` mounted at `/w`. Inside the container a fixture is
 `/w/samples/<name>.json` (`/w/samples/negative/<name>.json`), not the host path; secret, signature
-and the model check are as in A4. A language verified this way counts as verified; the report says
+and the model and delivery checks are as in A4. A language verified this way counts as verified; the report says
 so, with the image and the Docker host it ran on.
 
 ```bash
@@ -411,7 +435,7 @@ $D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <
 $D ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
 # Swift: build once, then run the built sample per fixture in the same container -- a fresh container
 # per fixture would resolve swift-crypto and compile from scratch each time
-$D swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "<secret>" "$(cat "${f%.json}.sig")"; echo "exit $?"; done'
+$D swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "$(tr -d "\r\n" < samples/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
 ```
 
 In Git Bash (MSYS) on Windows the lines above do not work as they are: MSYS rewrites every argument
@@ -429,16 +453,21 @@ MSYS_NO_PATHCONV=1 $D php:8.3-cli php php/samples/log_webhook.php /w/samples/<na
 
 The same prefix goes before every `$D` line: `MSYS_NO_PATHCONV=1 $D ruby:3.4-slim ...`,
 `MSYS_NO_PATHCONV=1 $D swift:6.1 bash -c '...'`.
+Set it on each Docker command only and never `export` it: with it in the environment the
+Git Bash `mvn` launcher fails to start (`Could not find or load main class
+...plexus.classworlds.launcher.Launcher`), so a scripted run of A4 and A5 together breaks Java and
+Kotlin.
 
 ```powershell
 # PowerShell, from webhooks-sdk/ (Docker Desktop maps file ownership itself, so no --user)
 docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
 docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
 docker run --rm -v "${PWD}:/w" -w /w ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
-docker run --rm -v "${PWD}:/w" -w /w swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "<secret>" "$(cat "${f%.json}.sig")"; echo "exit $?"; done'
+docker run --rm -v "${PWD}:/w" -w /w swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "$(tr -d "\r\n" < samples/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
 ```
 
-The Swift command is one single-quoted argument in both shells, so `$f` and `$(cat ...)` are left to
+The Swift command reads the secret and each signature inside the container, so it runs as it
+stands. It is one single-quoted argument in both shells, so `$f` and `$(tr ...)` are left to
 `bash` inside the container.
 
 - `-v $PWD:/w` mounts a path of the machine the Docker **daemon** runs on. With `DOCKER_HOST`
@@ -522,7 +551,7 @@ install — it writes a stray `openapitools.json` into the current directory. Ru
   in `targets.conf` were changed; see README, *oneOf support varies sharply by generator*.
 - Trigger tables (`Triggers.cs`, `triggers.ts`, `JSON.java`, `WebhookTriggers.java`,
   `WebhookTriggers.kt`, `triggers.go`, `triggers.py`, `WebhookTriggers.php`, `webhook_triggers.rb`,
-  `WebhookTriggers.swift`, `TRIGGERS.md`) did not pick up a new trigger — the contract's
+  `WebhookTriggers.swift`, `TRIGGERS.md`, `WebhookRouter.Triggers.cs`) did not pick up a new trigger — the contract's
   `x-docspace-trigger-payloads` was not updated, or the post-step was skipped (no `python`). A
   skipped post-step also breaks the build: every sample imports its language's table.
 - `FAILED (wrong model)` for one language only — its sample stopped going through the generated

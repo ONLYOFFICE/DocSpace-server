@@ -1,29 +1,27 @@
 package com.onlyoffice.docspace.webhooks.samples
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-
-import onlyoffice.docspace.webhooks.sdk.EntryIdAdapter
+import onlyoffice.docspace.webhooks.sdk.InMemoryWebhookEventStore
+import onlyoffice.docspace.webhooks.sdk.WebhookJson
+import onlyoffice.docspace.webhooks.sdk.WebhookOutcome
+import onlyoffice.docspace.webhooks.sdk.WebhookRouter
 import onlyoffice.docspace.webhooks.sdk.WebhookTriggers
+import onlyoffice.docspace.webhooks.sdk.models.FileDelivery
 import onlyoffice.docspace.webhooks.sdk.models.FilePayload
+import onlyoffice.docspace.webhooks.sdk.models.FolderDelivery
 import onlyoffice.docspace.webhooks.sdk.models.FolderPayload
+import onlyoffice.docspace.webhooks.sdk.models.FormSubmitDelivery
 import onlyoffice.docspace.webhooks.sdk.models.FormSubmitPayload
+import onlyoffice.docspace.webhooks.sdk.models.GroupDelivery
 import onlyoffice.docspace.webhooks.sdk.models.GroupPayload
+import onlyoffice.docspace.webhooks.sdk.models.RoomDelivery
 import onlyoffice.docspace.webhooks.sdk.models.RoomPayload
+import onlyoffice.docspace.webhooks.sdk.models.UserDelivery
 import onlyoffice.docspace.webhooks.sdk.models.UserPayload
 import onlyoffice.docspace.webhooks.sdk.models.WebhookConfigInfo
 import onlyoffice.docspace.webhooks.sdk.models.WebhookEventInfo
+import onlyoffice.docspace.webhooks.sdk.onFileCreated
 
 import java.io.File
-import java.security.MessageDigest
-import java.time.OffsetDateTime
-import java.util.HexFormat
-import java.util.UUID
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * Logs a DocSpace webhook delivery to the console.
@@ -31,57 +29,9 @@ import javax.crypto.spec.SecretKeySpec
  *     mvn -q compile exec:java                                   # shared fixture
  *     mvn -q compile exec:java -Dexec.args="<body> <secret> <sig>"
  *
- * Kotlin has no src/ runtime yet, so signature checking lives here.
+ * The delivery goes through the SDK's WebhookRouter, which checks the signature,
+ * drops a duplicate and hands the delivery model of the trigger to its handlers.
  */
-
-const val SIGNATURE_HEADER = "x-docspace-signature-256"
-
-/** `sha256=` + UPPERCASE hex, mirroring WebhookSender.GetSecretHash. */
-fun computeSignature(body: ByteArray, secret: String): String {
-    val mac = Mac.getInstance("HmacSHA256")
-    mac.init(SecretKeySpec(secret.toByteArray(Charsets.UTF_8), "HmacSHA256"))
-    return "sha256=" + HexFormat.of().withUpperCase().formatHex(mac.doFinal(body))
-}
-
-/**
- * Constant-time, case-insensitive check over the RAW body. DocSpace emits
- * uppercase hex where GitHub emits lowercase, so the comparison folds case.
- */
-fun verifySignature(body: ByteArray, secret: String, signature: String?): Boolean {
-    if (signature.isNullOrBlank()) return false
-    return MessageDigest.isEqual(
-        computeSignature(body, secret).lowercase().toByteArray(Charsets.UTF_8),
-        signature.trim().lowercase().toByteArray(Charsets.UTF_8),
-    )
-}
-
-private class TimeAdapters {
-    @com.squareup.moshi.FromJson
-    fun dateFromJson(value: String): OffsetDateTime = OffsetDateTime.parse(value)
-
-    @com.squareup.moshi.ToJson
-    fun dateToJson(value: OffsetDateTime): String = value.toString()
-
-    @com.squareup.moshi.FromJson
-    fun uuidFromJson(value: String): UUID = UUID.fromString(value)
-
-    @com.squareup.moshi.ToJson
-    fun uuidToJson(value: UUID): String = value.toString()
-}
-
-private val moshi: Moshi = Moshi.Builder()
-    // Ids are a number or a string on the wire; see EntryId.
-    .add(EntryIdAdapter())
-    .add(TimeAdapters())
-    // Reflection-based: the models carry no @JsonClass(generateAdapter = true),
-    // so no kapt/KSP codegen step is needed.
-    .add(KotlinJsonAdapterFactory())
-    .build()
-
-private val mapAdapter: JsonAdapter<Map<String, Any?>> = moshi.adapter(
-    Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java)
-)
-
 fun main(args: Array<String>) {
     val fixtures = File("..", "samples")
 
@@ -93,53 +43,76 @@ fun main(args: Array<String>) {
     // Bytes, not a re-encoded object: the signature covers what arrived.
     val body = bodyFile.readBytes()
 
-    if (!verifySignature(body, secret, signature)) {
-        System.err.println("REJECTED: signature does not match")
-        kotlin.system.exitProcess(1)
+    // A receiver keeps the store for as long as an event can still arrive (see
+    // WebhookEventStore); in memory it is enough for one replay.
+    val router = WebhookRouter(secret, InMemoryWebhookEventStore())
+
+    // One handler for every trigger with a delivery model, from the generated table.
+    for ((trigger, type) in WebhookTriggers.deliveryTypes) {
+        @Suppress("UNCHECKED_CAST")
+        router.on(trigger, type as Class<Any>) { delivery -> logDelivery(delivery) }
     }
 
-    val envelope = mapAdapter.fromJson(String(body, Charsets.UTF_8))
-        ?: run {
-            System.err.println("body is not a webhook envelope")
-            kotlin.system.exitProcess(1)
-        }
-
-    @Suppress("UNCHECKED_CAST")
-    val eventMap = envelope["event"] as? Map<String, Any?>
-    val trigger = eventMap?.get("trigger") as? String
-    if (trigger == null) {
-        System.err.println("envelope has no event.trigger")
-        kotlin.system.exitProcess(1)
+    // A second handler for one trigger, through its generated method: it runs after
+    // the one above, and only once that one has completed.
+    router.onFileCreated { delivery ->
+        println("  onFileCreated: \"${delivery.payload?.title}\" in folder ${delivery.payload?.parentId ?: "<none>"}")
     }
 
-    val event = moshi.adapter(WebhookEventInfo::class.java).fromJsonValue(envelope["event"])
-    val config = moshi.adapter(WebhookConfigInfo::class.java).fromJsonValue(envelope["webhook"])
-    val payloadValue = envelope["payload"]
+    // What has no delivery model: the catch-all and triggers newer than this SDK.
+    router.onOther { hook ->
+        println(hook.trigger)
+        println("  signature ok")
+        println("  model: ${modelName(hook.trigger)}")
+        println("  delivery: none")
+        printEnvelope(hook.event, hook.webhook)
+        // The catch-all, or a trigger added on the server after this SDK was
+        // generated: acknowledge it and keep the raw payload rather than
+        // parsing it with some other model.
+        println("  no payload model for this trigger; raw payload below")
+        printJson(hook.rawPayload)
+    }
+
+    val result = router.handle(body, signature)
+
+    when (result.outcome) {
+        WebhookOutcome.HANDLED, WebhookOutcome.UNHANDLED, WebhookOutcome.DUPLICATE -> Unit
+        WebhookOutcome.REJECTED -> fail("REJECTED: ${result.error}")
+        WebhookOutcome.INVALID -> fail("unparseable body: ${result.error}")
+        WebhookOutcome.FAILED -> fail("a handler failed: ${result.error}")
+    }
+}
+
+private fun fail(message: String): Nothing {
+    System.err.println(message)
+    kotlin.system.exitProcess(1)
+}
+
+/** Prints a delivery read into its model: envelope lines, a payload summary and the payload. */
+private fun logDelivery(delivery: Any) {
+    val (event, config, payload) = when (delivery) {
+        is UserDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        is GroupDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        is FileDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        is FolderDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        is RoomDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        is FormSubmitDelivery -> Triple(delivery.event, delivery.webhook, delivery.payload)
+        else -> error("no summary for ${delivery.javaClass.simpleName}")
+    }
+    val trigger = event?.trigger.orEmpty()
 
     println(trigger)
     println("  signature ok")
     println("  model: ${modelName(trigger)}")
+    println("  delivery: ${delivery.javaClass.simpleName}")
+    printEnvelope(event, config)
+    println(summarize(payload))
+    printJson(payload)
+}
+
+private fun printEnvelope(event: WebhookEventInfo?, config: WebhookConfigInfo?) {
     println("  event #${event?.id}  at ${event?.createOn}  by ${event?.createBy}")
     println("  subscription #${config?.id} \"${config?.name}\"")
-
-    @Suppress("UNCHECKED_CAST")
-    val payloadMap = payloadValue as? Map<String, Any?> ?: emptyMap()
-
-    // A parse error stops the sample with a non-zero exit instead of being
-    // skipped: a sample that prints "ok" over a payload its model cannot read
-    // hides a broken SDK.
-    try {
-        logPayload(trigger, payloadValue)
-    } catch (e: JsonDataException) {
-        System.err.println("unparseable $trigger payload: ${e.message}")
-        kotlin.system.exitProcess(1)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    val printable = normalize(payloadMap) as Map<String, Any?>
-
-    println()
-    println("  " + mapAdapter.indent("  ").toJson(printable).replace("\n", "\n  "))
 }
 
 /**
@@ -150,36 +123,19 @@ fun modelName(trigger: String): String =
     WebhookTriggers.payloadType(trigger)?.simpleName
         ?: if (trigger in WebhookTriggers.untypedTriggers) "untyped" else "unknown"
 
-/** Parses the payload with the model of its trigger and prints a one-line summary. */
-private fun logPayload(trigger: String, payloadValue: Any?) {
-    val model = WebhookTriggers.payloadType(trigger)
-    if (model == null) {
-        // The catch-all, or a trigger added on the server after this SDK was
-        // generated: acknowledge it and keep the raw payload rather than
-        // parsing it with some other model.
-        println("  no payload model for this trigger; raw payload below")
-        return
-    }
-
-    when (val payload = moshi.adapter(model).fromJsonValue(payloadValue)) {
-        is UserPayload -> println("  user: ${payload.userName} <${payload.email}>")
-        is GroupPayload -> println("  group: ${payload.name}")
-        is FilePayload -> println("  file: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
-        is FolderPayload -> println("  folder: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
-        is RoomPayload -> println("  room: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}")
-        is FormSubmitPayload -> println("  form: ${payload.originalForm?.title}  submitted as ${payload.submittedForm?.title}")
-        else -> throw JsonDataException("the payload is empty")
-    }
+/** A typed one-line summary per payload kind, to show the models actually being used. */
+private fun summarize(payload: Any?): String = when (payload) {
+    is UserPayload -> "  user: ${payload.userName} <${payload.email}>"
+    is GroupPayload -> "  group: ${payload.name}"
+    is FilePayload -> "  file: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}"
+    is FolderPayload -> "  folder: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}"
+    is RoomPayload -> "  room: ${payload.title}  id=${payload.id ?: "<none>"}  parent=${payload.parentId ?: "<none>"}"
+    is FormSubmitPayload -> "  form: ${payload.originalForm?.title}  submitted as ${payload.submittedForm?.title}"
+    else -> "  (no payload)"
 }
 
-/**
- * Moshi decodes every JSON number as Double, so an id round-trips as 3358285.0.
- * Walk the tree and put integral values back to Long before printing.
- */
-private fun normalize(value: Any?): Any? = when (value) {
-    is Map<*, *> -> value.entries.associate { (k, v) -> k.toString() to normalize(v) }
-    is List<*> -> value.map { normalize(it) }
-    is Double -> if (value == Math.floor(value) && !value.isInfinite()) value.toLong() else value
-    else -> value
+private fun printJson(value: Any?) {
+    val json = WebhookJson.moshi.adapter(Any::class.java).indent("  ").toJson(value)
+    println()
+    println("  " + json.replace("\n", "\n  "))
 }
-

@@ -63,4 +63,50 @@ final class WebhookTriggers
     {
         return self::PAYLOAD_TYPES[$trigger] ?? null;
     }
+
+    /** Trigger name to the model of the whole delivery (the envelope with payload typed), for every typed trigger. */
+    public const DELIVERY_TYPES = [
+        'user.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserDelivery::class,
+        'user.invited' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserDelivery::class,
+        'user.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserDelivery::class,
+        'user.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserDelivery::class,
+        'group.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupDelivery::class,
+        'group.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupDelivery::class,
+        'group.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupDelivery::class,
+        'file.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.uploaded' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.trashed' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.restored' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.copied' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.moved' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'file.downloaded' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'folder.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.trashed' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.restored' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.copied' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.moved' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'folder.downloaded' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderDelivery::class,
+        'room.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'room.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'room.archived' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'room.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'room.restored' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'room.copied' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'form.submit' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FormSubmitDelivery::class,
+        'form.filled.out' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'form.stopped' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileDelivery::class,
+        'agent.created' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'agent.updated' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+        'agent.deleted' => \OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomDelivery::class,
+    ];
+
+    /** The delivery model class of the trigger, or null when it has no typed body. */
+    public static function deliveryType(string $trigger): ?string
+    {
+        return self::DELIVERY_TYPES[$trigger] ?? null;
+    }
 }

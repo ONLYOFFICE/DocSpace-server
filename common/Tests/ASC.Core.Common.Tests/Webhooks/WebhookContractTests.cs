@@ -56,4 +56,18 @@ public class WebhookContractTests
             "{0} must be regenerated from the code: run `dotnet run --project common/Tools/ASC.Webhooks.Contract` from the " +
             "server repository root, commit the result and regenerate the webhook SDKs from it", contractPath);
     }
+
+    [Fact]
+    public void EmbeddedContract_IsTheCommittedOne()
+    {
+        var directory = WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory);
+        var committed = File.ReadAllText(Path.Combine(directory, WebhookContractGenerator.ContractFileName)).ReplaceLineEndings("\n");
+
+        using var reader = new StreamReader(WebhookContract.OpenRead());
+        var embedded = reader.ReadToEnd().ReplaceLineEndings("\n");
+
+        embedded.Should().Be(committed,
+            "Web.Studio serves the contract built into ASC.Webhooks.Core at {0}, so the build must embed the file itself",
+            WebhookContract.Route);
+    }
 }

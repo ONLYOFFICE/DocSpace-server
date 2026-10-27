@@ -110,15 +110,17 @@ internal static class ContractYamlWriter
     }
 
     /// <summary>
-    /// A block scalar (<c>|</c> or <c>&gt;</c>), as <see cref="Text"/> chooses it, keeps that style, and the plain
-    /// <c>null</c> of the catch-all trigger stays a null; everything else is quoted only when YAML needs it.
+    /// A block scalar (<c>|</c> or <c>&gt;</c>), as <see cref="Text"/> chooses it, keeps that style, a plain
+    /// scalar (the <c>null</c> of the catch-all trigger, a boolean, a number) stays plain; everything else is quoted
+    /// only when YAML needs it, unless it was made single-quoted on purpose (a status code, which YAML would read as
+    /// a number).
     /// </summary>
     private static ScalarStyle GetStyle(YamlScalarNode scalar)
     {
         return scalar.Style switch
         {
             ScalarStyle.Literal or ScalarStyle.Folded => scalar.Style,
-            ScalarStyle.Plain when scalar.Value == "null" => ScalarStyle.Plain,
+            ScalarStyle.Plain or ScalarStyle.SingleQuoted => scalar.Style,
             _ => ScalarStyle.Any
         };
     }

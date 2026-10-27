@@ -61,5 +61,52 @@ module DocspaceWebhooksSdk
       name = PAYLOAD_TYPES[trigger]
       name && DocspaceWebhooksSdk.const_get(name)
     end
+
+    # Trigger name to the model name of the whole delivery (the envelope with
+    # payload typed), for every trigger with a typed body.
+    DELIVERY_TYPES = {
+      'user.created' => 'UserDelivery',
+      'user.invited' => 'UserDelivery',
+      'user.updated' => 'UserDelivery',
+      'user.deleted' => 'UserDelivery',
+      'group.created' => 'GroupDelivery',
+      'group.updated' => 'GroupDelivery',
+      'group.deleted' => 'GroupDelivery',
+      'file.created' => 'FileDelivery',
+      'file.uploaded' => 'FileDelivery',
+      'file.updated' => 'FileDelivery',
+      'file.trashed' => 'FileDelivery',
+      'file.deleted' => 'FileDelivery',
+      'file.restored' => 'FileDelivery',
+      'file.copied' => 'FileDelivery',
+      'file.moved' => 'FileDelivery',
+      'file.downloaded' => 'FileDelivery',
+      'folder.created' => 'FolderDelivery',
+      'folder.updated' => 'FolderDelivery',
+      'folder.trashed' => 'FolderDelivery',
+      'folder.deleted' => 'FolderDelivery',
+      'folder.restored' => 'FolderDelivery',
+      'folder.copied' => 'FolderDelivery',
+      'folder.moved' => 'FolderDelivery',
+      'folder.downloaded' => 'FolderDelivery',
+      'room.created' => 'RoomDelivery',
+      'room.updated' => 'RoomDelivery',
+      'room.archived' => 'RoomDelivery',
+      'room.deleted' => 'RoomDelivery',
+      'room.restored' => 'RoomDelivery',
+      'room.copied' => 'RoomDelivery',
+      'form.submit' => 'FormSubmitDelivery',
+      'form.filled.out' => 'FileDelivery',
+      'form.stopped' => 'FileDelivery',
+      'agent.created' => 'RoomDelivery',
+      'agent.updated' => 'RoomDelivery',
+      'agent.deleted' => 'RoomDelivery',
+    }.freeze
+
+    # The delivery model class of the trigger, or nil when it has no typed body.
+    def self.delivery_type(trigger)
+      name = DELIVERY_TYPES[trigger]
+      name && DocspaceWebhooksSdk.const_get(name)
+    end
   end
 end

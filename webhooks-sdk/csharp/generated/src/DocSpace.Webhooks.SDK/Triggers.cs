@@ -70,4 +70,50 @@ public static class WebhookTriggers
     /// </summary>
     public static bool IsKnown(string trigger) =>
         trigger is not null && (PayloadTypes.ContainsKey(trigger) || UntypedTriggers.Contains(trigger));
+
+    /// <summary>
+    /// Trigger name to the model of the whole delivery -- the envelope with
+    /// <c>payload</c> typed -- for every trigger with a typed body, as the
+    /// contract's <c>webhooks</c> section gives it.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, Type> DeliveryTypes =
+        new Dictionary<string, Type>(StringComparer.Ordinal)
+        {
+            ["user.created"] = typeof(UserDelivery),
+            ["user.invited"] = typeof(UserDelivery),
+            ["user.updated"] = typeof(UserDelivery),
+            ["user.deleted"] = typeof(UserDelivery),
+            ["group.created"] = typeof(GroupDelivery),
+            ["group.updated"] = typeof(GroupDelivery),
+            ["group.deleted"] = typeof(GroupDelivery),
+            ["file.created"] = typeof(FileDelivery),
+            ["file.uploaded"] = typeof(FileDelivery),
+            ["file.updated"] = typeof(FileDelivery),
+            ["file.trashed"] = typeof(FileDelivery),
+            ["file.deleted"] = typeof(FileDelivery),
+            ["file.restored"] = typeof(FileDelivery),
+            ["file.copied"] = typeof(FileDelivery),
+            ["file.moved"] = typeof(FileDelivery),
+            ["file.downloaded"] = typeof(FileDelivery),
+            ["folder.created"] = typeof(FolderDelivery),
+            ["folder.updated"] = typeof(FolderDelivery),
+            ["folder.trashed"] = typeof(FolderDelivery),
+            ["folder.deleted"] = typeof(FolderDelivery),
+            ["folder.restored"] = typeof(FolderDelivery),
+            ["folder.copied"] = typeof(FolderDelivery),
+            ["folder.moved"] = typeof(FolderDelivery),
+            ["folder.downloaded"] = typeof(FolderDelivery),
+            ["room.created"] = typeof(RoomDelivery),
+            ["room.updated"] = typeof(RoomDelivery),
+            ["room.archived"] = typeof(RoomDelivery),
+            ["room.deleted"] = typeof(RoomDelivery),
+            ["room.restored"] = typeof(RoomDelivery),
+            ["room.copied"] = typeof(RoomDelivery),
+            ["form.submit"] = typeof(FormSubmitDelivery),
+            ["form.filled.out"] = typeof(FileDelivery),
+            ["form.stopped"] = typeof(FileDelivery),
+            ["agent.created"] = typeof(RoomDelivery),
+            ["agent.updated"] = typeof(RoomDelivery),
+            ["agent.deleted"] = typeof(RoomDelivery),
+        };
 }

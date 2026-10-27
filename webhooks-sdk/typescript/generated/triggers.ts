@@ -4,16 +4,28 @@
  * tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead.
  */
 import {
+    FileDelivery,
+    FileDeliveryFromJSON,
     FilePayload,
     FilePayloadFromJSON,
+    FolderDelivery,
+    FolderDeliveryFromJSON,
     FolderPayload,
     FolderPayloadFromJSON,
+    FormSubmitDelivery,
+    FormSubmitDeliveryFromJSON,
     FormSubmitPayload,
     FormSubmitPayloadFromJSON,
+    GroupDelivery,
+    GroupDeliveryFromJSON,
     GroupPayload,
     GroupPayloadFromJSON,
+    RoomDelivery,
+    RoomDeliveryFromJSON,
     RoomPayload,
     RoomPayloadFromJSON,
+    UserDelivery,
+    UserDeliveryFromJSON,
     UserPayload,
     UserPayloadFromJSON,
 } from './models';
@@ -161,4 +173,142 @@ export const PAYLOAD_MODEL_NAMES: { [K in WebhookTriggerName]: string | null } =
  */
 export function isKnownTrigger(trigger: string): trigger is WebhookTriggerName {
     return Object.prototype.hasOwnProperty.call(PAYLOAD_DESERIALIZERS, trigger);
+}
+
+/**
+ * Every trigger with a typed body, mapped to the model of the whole delivery:
+ * the envelope with `payload` typed, as the contract's `webhooks` section gives
+ * it. The untyped `'*'` has none.
+ */
+export interface TriggerDeliveryMap {
+    'user.created': UserDelivery;
+    'user.invited': UserDelivery;
+    'user.updated': UserDelivery;
+    'user.deleted': UserDelivery;
+    'group.created': GroupDelivery;
+    'group.updated': GroupDelivery;
+    'group.deleted': GroupDelivery;
+    'file.created': FileDelivery;
+    'file.uploaded': FileDelivery;
+    'file.updated': FileDelivery;
+    'file.trashed': FileDelivery;
+    'file.deleted': FileDelivery;
+    'file.restored': FileDelivery;
+    'file.copied': FileDelivery;
+    'file.moved': FileDelivery;
+    'file.downloaded': FileDelivery;
+    'folder.created': FolderDelivery;
+    'folder.updated': FolderDelivery;
+    'folder.trashed': FolderDelivery;
+    'folder.deleted': FolderDelivery;
+    'folder.restored': FolderDelivery;
+    'folder.copied': FolderDelivery;
+    'folder.moved': FolderDelivery;
+    'folder.downloaded': FolderDelivery;
+    'room.created': RoomDelivery;
+    'room.updated': RoomDelivery;
+    'room.archived': RoomDelivery;
+    'room.deleted': RoomDelivery;
+    'room.restored': RoomDelivery;
+    'room.copied': RoomDelivery;
+    'form.submit': FormSubmitDelivery;
+    'form.filled.out': FileDelivery;
+    'form.stopped': FileDelivery;
+    'agent.created': RoomDelivery;
+    'agent.updated': RoomDelivery;
+    'agent.deleted': RoomDelivery;
+}
+
+/** Triggers whose body has a delivery model of its own. */
+export type TypedTriggerName = keyof TriggerDeliveryMap;
+
+/** Runtime deserializers of the whole body, keyed like `TriggerDeliveryMap`. */
+export const DELIVERY_DESERIALIZERS: {
+    [K in TypedTriggerName]: (json: any) => TriggerDeliveryMap[K];
+} = {
+    'user.created': UserDeliveryFromJSON,
+    'user.invited': UserDeliveryFromJSON,
+    'user.updated': UserDeliveryFromJSON,
+    'user.deleted': UserDeliveryFromJSON,
+    'group.created': GroupDeliveryFromJSON,
+    'group.updated': GroupDeliveryFromJSON,
+    'group.deleted': GroupDeliveryFromJSON,
+    'file.created': FileDeliveryFromJSON,
+    'file.uploaded': FileDeliveryFromJSON,
+    'file.updated': FileDeliveryFromJSON,
+    'file.trashed': FileDeliveryFromJSON,
+    'file.deleted': FileDeliveryFromJSON,
+    'file.restored': FileDeliveryFromJSON,
+    'file.copied': FileDeliveryFromJSON,
+    'file.moved': FileDeliveryFromJSON,
+    'file.downloaded': FileDeliveryFromJSON,
+    'folder.created': FolderDeliveryFromJSON,
+    'folder.updated': FolderDeliveryFromJSON,
+    'folder.trashed': FolderDeliveryFromJSON,
+    'folder.deleted': FolderDeliveryFromJSON,
+    'folder.restored': FolderDeliveryFromJSON,
+    'folder.copied': FolderDeliveryFromJSON,
+    'folder.moved': FolderDeliveryFromJSON,
+    'folder.downloaded': FolderDeliveryFromJSON,
+    'room.created': RoomDeliveryFromJSON,
+    'room.updated': RoomDeliveryFromJSON,
+    'room.archived': RoomDeliveryFromJSON,
+    'room.deleted': RoomDeliveryFromJSON,
+    'room.restored': RoomDeliveryFromJSON,
+    'room.copied': RoomDeliveryFromJSON,
+    'form.submit': FormSubmitDeliveryFromJSON,
+    'form.filled.out': FileDeliveryFromJSON,
+    'form.stopped': FileDeliveryFromJSON,
+    'agent.created': RoomDeliveryFromJSON,
+    'agent.updated': RoomDeliveryFromJSON,
+    'agent.deleted': RoomDeliveryFromJSON,
+};
+
+/**
+ * The name of the delivery model of each trigger, as the contract names the
+ * schema; `null` for the untyped `'*'`.
+ */
+export const DELIVERY_MODEL_NAMES: { [K in WebhookTriggerName]: string | null } = {
+    'user.created': 'UserDelivery',
+    'user.invited': 'UserDelivery',
+    'user.updated': 'UserDelivery',
+    'user.deleted': 'UserDelivery',
+    'group.created': 'GroupDelivery',
+    'group.updated': 'GroupDelivery',
+    'group.deleted': 'GroupDelivery',
+    'file.created': 'FileDelivery',
+    'file.uploaded': 'FileDelivery',
+    'file.updated': 'FileDelivery',
+    'file.trashed': 'FileDelivery',
+    'file.deleted': 'FileDelivery',
+    'file.restored': 'FileDelivery',
+    'file.copied': 'FileDelivery',
+    'file.moved': 'FileDelivery',
+    'file.downloaded': 'FileDelivery',
+    'folder.created': 'FolderDelivery',
+    'folder.updated': 'FolderDelivery',
+    'folder.trashed': 'FolderDelivery',
+    'folder.deleted': 'FolderDelivery',
+    'folder.restored': 'FolderDelivery',
+    'folder.copied': 'FolderDelivery',
+    'folder.moved': 'FolderDelivery',
+    'folder.downloaded': 'FolderDelivery',
+    'room.created': 'RoomDelivery',
+    'room.updated': 'RoomDelivery',
+    'room.archived': 'RoomDelivery',
+    'room.deleted': 'RoomDelivery',
+    'room.restored': 'RoomDelivery',
+    'room.copied': 'RoomDelivery',
+    'form.submit': 'FormSubmitDelivery',
+    'form.filled.out': 'FileDelivery',
+    'form.stopped': 'FileDelivery',
+    'agent.created': 'RoomDelivery',
+    'agent.updated': 'RoomDelivery',
+    'agent.deleted': 'RoomDelivery',
+    '*': null,
+};
+
+/** True when `trigger` has a delivery model in this build. */
+export function hasDeliveryModel(trigger: string): trigger is TypedTriggerName {
+    return Object.prototype.hasOwnProperty.call(DELIVERY_DESERIALIZERS, trigger);
 }

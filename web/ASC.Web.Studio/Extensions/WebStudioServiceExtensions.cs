@@ -78,6 +78,16 @@ public static class WebStudioServiceExtensions
         {
             var endpoints = new Dictionary<string, string>();
             configuration.Bind("openApi:endpoints", endpoints);
+
+            // The webhook contract ships with the code rather than with a service of its own, so it is listed here and
+            // not in openApi:endpoints, and served from the copy built into ASC.Webhooks.Core.
+            endpoints[WebhookContract.DocumentName] = WebhookContract.Route;
+
+            app.UseEndpoints(endpointRouteBuilder => endpointRouteBuilder
+                .MapGet(WebhookContract.Route, () => Results.Stream(WebhookContract.OpenRead(), WebhookContract.ContentType))
+                .AllowAnonymous()
+                .ExcludeFromDescription());
+
             app.UseOpenApiUI(endpoints);
         }
 

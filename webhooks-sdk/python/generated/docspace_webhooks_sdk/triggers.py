@@ -2,11 +2,17 @@
 # tools/gen-trigger-map.py. Do not edit; regenerate the webhook SDKs instead.
 """Which payload model each DocSpace trigger carries."""
 
+from docspace_webhooks_sdk.models.file_delivery import FileDelivery
 from docspace_webhooks_sdk.models.file_payload import FilePayload
+from docspace_webhooks_sdk.models.folder_delivery import FolderDelivery
 from docspace_webhooks_sdk.models.folder_payload import FolderPayload
+from docspace_webhooks_sdk.models.form_submit_delivery import FormSubmitDelivery
 from docspace_webhooks_sdk.models.form_submit_payload import FormSubmitPayload
+from docspace_webhooks_sdk.models.group_delivery import GroupDelivery
 from docspace_webhooks_sdk.models.group_payload import GroupPayload
+from docspace_webhooks_sdk.models.room_delivery import RoomDelivery
 from docspace_webhooks_sdk.models.room_payload import RoomPayload
+from docspace_webhooks_sdk.models.user_delivery import UserDelivery
 from docspace_webhooks_sdk.models.user_payload import UserPayload
 
 #: Trigger name to payload model, for every trigger with a typed body.
@@ -62,3 +68,50 @@ def is_known_trigger(trigger):
 def payload_type(trigger):
     """The payload model of the trigger, or None when it has no typed body."""
     return PAYLOAD_TYPES.get(trigger)
+
+
+#: Trigger name to the model of the whole delivery (the envelope with payload
+#: typed), for every trigger with a typed body.
+DELIVERY_TYPES = {
+    "user.created": UserDelivery,
+    "user.invited": UserDelivery,
+    "user.updated": UserDelivery,
+    "user.deleted": UserDelivery,
+    "group.created": GroupDelivery,
+    "group.updated": GroupDelivery,
+    "group.deleted": GroupDelivery,
+    "file.created": FileDelivery,
+    "file.uploaded": FileDelivery,
+    "file.updated": FileDelivery,
+    "file.trashed": FileDelivery,
+    "file.deleted": FileDelivery,
+    "file.restored": FileDelivery,
+    "file.copied": FileDelivery,
+    "file.moved": FileDelivery,
+    "file.downloaded": FileDelivery,
+    "folder.created": FolderDelivery,
+    "folder.updated": FolderDelivery,
+    "folder.trashed": FolderDelivery,
+    "folder.deleted": FolderDelivery,
+    "folder.restored": FolderDelivery,
+    "folder.copied": FolderDelivery,
+    "folder.moved": FolderDelivery,
+    "folder.downloaded": FolderDelivery,
+    "room.created": RoomDelivery,
+    "room.updated": RoomDelivery,
+    "room.archived": RoomDelivery,
+    "room.deleted": RoomDelivery,
+    "room.restored": RoomDelivery,
+    "room.copied": RoomDelivery,
+    "form.submit": FormSubmitDelivery,
+    "form.filled.out": FileDelivery,
+    "form.stopped": FileDelivery,
+    "agent.created": RoomDelivery,
+    "agent.updated": RoomDelivery,
+    "agent.deleted": RoomDelivery,
+}
+
+
+def delivery_type(trigger):
+    """The delivery model of the trigger, or None when it has no typed body."""
+    return DELIVERY_TYPES.get(trigger)

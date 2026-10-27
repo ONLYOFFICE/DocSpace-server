@@ -1,67 +1,13 @@
 // Logs a DocSpace webhook delivery to the console.
 //
 //     swift run WebhookLogger                          # replay the shared fixture
-//     swift run WebhookLogger <body> <secret> <sig>
-//
-// Swift has no src/ runtime yet, so signature checking lives here.
+//     swift run WebhookLogger <body> <secret> <sig> [<x-docspace-event-id>]
 //
 // Regeneration (the generate-webhook-sdk skill) builds this and runs it over
 // every fixture in ../samples after each generation.
 
 import Foundation
-import Crypto
 import DocSpaceWebhooksSDK
-
-let signatureHeader = "x-docspace-signature-256"
-
-/// `sha256=` + UPPERCASE hex, mirroring `WebhookSender.GetSecretHash`.
-func computeSignature(body: Data, secret: String) -> String {
-    let key = SymmetricKey(data: Data(secret.utf8))
-    let mac = HMAC<SHA256>.authenticationCode(for: body, using: key)
-    return "sha256=" + mac.map { String(format: "%02X", $0) }.joined()
-}
-
-private func hexToData(_ hex: String) -> Data? {
-    guard hex.count % 2 == 0 else { return nil }
-    var out = Data(capacity: hex.count / 2)
-    var index = hex.startIndex
-    while index < hex.endIndex {
-        let next = hex.index(index, offsetBy: 2)
-        guard let byte = UInt8(hex[index..<next], radix: 16) else { return nil }
-        out.append(byte)
-        index = next
-    }
-    return out
-}
-
-/// Checks the header against the RAW body.
-///
-/// Comparing the decoded bytes rather than the strings gets both awkward parts
-/// for free: `isValidAuthenticationCode` is constant-time, and hex parsing is
-/// case-insensitive -- which matters because DocSpace emits uppercase hex where
-/// GitHub emits lowercase.
-func verifySignature(body: Data, secret: String, signature: String?) -> Bool {
-    guard let signature, !signature.isEmpty else { return false }
-
-    let trimmed = signature.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard trimmed.lowercased().hasPrefix("sha256=") else { return false }
-
-    let hex = String(trimmed.dropFirst("sha256=".count))
-    guard let expected = hexToData(hex) else { return false }
-
-    return HMAC<SHA256>.isValidAuthenticationCode(
-        expected,
-        authenticating: body,
-        using: SymmetricKey(data: Data(secret.utf8))
-    )
-}
-
-/// Minimal shape of the envelope; `payload` stays raw so it can be decoded
-/// against whichever model the trigger calls for.
-struct Envelope: Decodable {
-    let event: WebhookEventInfo?
-    let webhook: WebhookConfigInfo?
-}
 
 func describe(_ id: EntryId?) -> String {
     switch id {
@@ -69,6 +15,68 @@ func describe(_ id: EntryId?) -> String {
     case .some(.typeString(let value)): return value
     case .none: return "<none>"
     }
+}
+
+// The payload model the generated trigger table names: "untyped" for the legacy
+// catch-all, "unknown" for a trigger newer than this SDK.
+func modelName(_ trigger: String) -> String {
+    WebhookTriggers.payloadModels[trigger]
+        ?? (WebhookTriggers.untypedTriggers.contains(trigger) ? "untyped" : "unknown")
+}
+
+func printHeader(_ trigger: String, _ event: WebhookEventInfo?, _ webhook: WebhookConfigInfo?, delivery: String) {
+    // Spelled out rather than chained through `.map(String.init)`: that form is a
+    // reliable source of "ambiguous use of 'init'" errors, since String has many
+    // initialisers and the optional chain gives the compiler nothing to pin on.
+    let eventId: String = event?.id.flatMap { String($0) } ?? "?"
+    let eventAt: String = event?.createOn.flatMap { ISO8601DateFormatter().string(from: $0) } ?? "?"
+    let eventBy: String = event?.createBy?.uuidString ?? "?"
+    let configId: String = webhook?.id.flatMap { String($0) } ?? "?"
+    let known = modelName(trigger) == "unknown" ? "  (unknown to this build)" : ""
+
+    print("\(trigger)\(known)")
+    print("  signature ok")
+    print("  model: \(modelName(trigger))")
+    print("  delivery: \(delivery)")
+    print("  event #\(eventId)  at \(eventAt)  by \(eventBy)")
+    print("  subscription #\(configId) \"\(webhook?.name ?? "")\"")
+}
+
+// A typed line per payload kind, to show the models actually being used.
+func summarize(_ payload: Any?) -> String? {
+    switch payload {
+    case let user as UserPayload:
+        return "user: \(user.userName ?? "") <\(user.email ?? "")>"
+    case let group as GroupPayload:
+        return "group: \(group.name ?? "")"
+    case let form as FormSubmitPayload:
+        // The one wrapper payload: the original form and the submitted copy.
+        return "form: \(form.originalForm?.title ?? "")  submitted as \(form.submittedForm?.title ?? "")"
+    case let folder as FolderPayload:
+        return "folder: \(folder.title ?? "")  id=\(describe(folder.id))  parent=\(describe(folder.parentId))"
+    case let room as RoomPayload:
+        return "room: \(room.title ?? "")  id=\(describe(room.id))  parent=\(describe(room.parentId))"
+    case let file as FilePayload:
+        return "file: \(file.title ?? "")  id=\(describe(file.id))  parent=\(describe(file.parentId))"
+    default:
+        return nil
+    }
+}
+
+func printPayload<P: Encodable>(_ payload: P?) {
+    if let summary = summarize(payload) {
+        print("  \(summary)")
+    } else {
+        print("  no payload model for this trigger; raw payload below")
+    }
+
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+    encoder.dateEncodingStrategy = .iso8601
+    let pretty = payload.flatMap { try? encoder.encode($0) }.flatMap { String(data: $0, encoding: .utf8) } ?? "null"
+
+    print()
+    print("  " + pretty.replacingOccurrences(of: "\n", with: "\n  "))
 }
 
 // ---------------------------------------------------------------- arguments
@@ -93,95 +101,83 @@ let signature = args.count > 2
                    encoding: .utf8))
         .trimmingCharacters(in: .whitespacesAndNewlines)
 
+let eventIdHeader = args.count > 3 ? args[3] : nil
+
+// ------------------------------------------------------------------- router
+
+// The router this sample hands the delivery to. It checks the signature, drops
+// an event it has processed before (DocSpace delivers at least once, and a retry
+// carries the same event.id), reads the body into the delivery model of its
+// trigger and awaits the handlers. The store lives in memory for the sake of the
+// sample; a real receiver persists the ids for as long as an event can still
+// arrive (see WebhookEventStore).
+let router = try WebhookRouter(secret: secret, store: InMemoryWebhookEventStore())
+
+// One handler for every trigger with a typed body, from the generated table. A
+// receiver normally registers only the triggers it cares about, through the
+// generated on<Trigger> methods.
+for (trigger, model) in WebhookTriggers.deliveryModels.sorted(by: { $0.key < $1.key }) {
+    switch model {
+    case "UserDelivery":
+        router.on(trigger, UserDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    case "GroupDelivery":
+        router.on(trigger, GroupDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    case "FileDelivery":
+        router.on(trigger, FileDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    case "FolderDelivery":
+        router.on(trigger, FolderDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    case "RoomDelivery":
+        router.on(trigger, RoomDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    case "FormSubmitDelivery":
+        router.on(trigger, FormSubmitDelivery.self) { d in
+            printHeader(trigger, d.event, d.webhook, delivery: model); printPayload(d.payload)
+        }
+    default:
+        FileHandle.standardError.write(Data("no sample handler for \(model) (\(trigger))\n".utf8))
+    }
+}
+
+// A handler for one trigger, through its generated method: the argument is a FileDelivery.
+router.onFileCreated { d in
+    print("  onFileCreated: \"\(d.payload?.title ?? "")\" in folder \(describe(d.payload?.parentId))")
+}
+
+// Whatever has no handler: the catch-all '*', and triggers newer than this SDK.
+router.onOther { hook in
+    printHeader(hook.trigger, hook.event, hook.webhook, delivery: "none")
+    printPayload(hook.payload)
+}
+
+// ------------------------------------------------------------------ handling
+
 // Bytes, not a re-encoded object: the signature covers what arrived.
 let body = try Data(contentsOf: bodyURL)
 
-guard verifySignature(body: body, secret: secret, signature: signature) else {
+// In an HTTP handler, answer with result.statusCode once this returns: a 2xx
+// acknowledges the delivery, anything else makes DocSpace send it again.
+let result = await router.handle(body: body, signature: signature, eventIdHeader: eventIdHeader)
+
+switch result.outcome {
+case .rejected:
     FileHandle.standardError.write(Data("REJECTED: signature does not match\n".utf8))
-    exit(1)
+case .invalid:
+    FileHandle.standardError.write(Data("unparseable body: \(result.error ?? "")\n".utf8))
+case .failed:
+    FileHandle.standardError.write(Data("a handler failed: \(result.error ?? "")\n".utf8))
+case .duplicate:
+    print("duplicate of event #\(result.eventId.map { String($0) } ?? "?"), already processed; skipped")
+case .handled, .unhandled:
+    break
 }
 
-// ------------------------------------------------------------------ parsing
-
-let decoder = JSONDecoder()
-// The contract emits UTC ISO-8601; Date properties will not decode without this.
-decoder.dateDecodingStrategy = .iso8601
-
-guard let root = try JSONSerialization.jsonObject(with: body) as? [String: Any],
-      let eventObject = root["event"] as? [String: Any],
-      let trigger = eventObject["trigger"] as? String
-else {
-    FileHandle.standardError.write(Data("envelope has no event.trigger\n".utf8))
-    exit(1)
-}
-
-let envelope = try decoder.decode(Envelope.self, from: body)
-
-// A typed trigger always carries its payload object. Without one there is nothing
-// to decode; re-encoding a missing payload below would not even be valid JSON.
-if WebhookTriggers.payloadModels[trigger] != nil, !(root["payload"] is [String: Any]) {
-    FileHandle.standardError.write(Data("unparseable \(trigger) payload: no payload object\n".utf8))
-    exit(1)
-}
-
-// Re-encode the payload subtree so it can go through the typed decoder.
-let payloadData = try JSONSerialization.data(
-    withJSONObject: root["payload"] ?? NSNull(), options: [])
-
-// Spelled out rather than chained through `.map(String.init)`: that form is a
-// reliable source of "ambiguous use of 'init'" errors, since String has many
-// initialisers and the optional chain gives the compiler nothing to pin on.
-let eventId: String = envelope.event?.id.flatMap { String($0) } ?? "?"
-let eventAt: String = envelope.event?.createOn.flatMap { ISO8601DateFormatter().string(from: $0) } ?? "?"
-let eventBy: String = envelope.event?.createBy?.uuidString ?? "?"
-let configId: String = envelope.webhook?.id.flatMap { String($0) } ?? "?"
-let configName: String = envelope.webhook?.name ?? ""
-
-// The payload model the generated trigger table names: "untyped" for the legacy
-// catch-all, "unknown" for a trigger newer than this SDK.
-let modelName = WebhookTriggers.payloadModels[trigger]
-    ?? (WebhookTriggers.untypedTriggers.contains(trigger) ? "untyped" : "unknown")
-
-// The catch-all, or a trigger added on the server after this SDK was generated,
-// is acknowledged with its raw payload and never parsed with some other model.
-let payload: Any?
-do {
-    payload = try WebhookTriggers.decodePayload(trigger: trigger, from: payloadData, decoder: decoder)
-} catch {
-    FileHandle.standardError.write(Data("unparseable \(trigger) payload: \(error)\n".utf8))
-    exit(1)
-}
-
-print(trigger)
-print("  signature ok")
-print("  model: \(modelName)")
-print("  event #\(eventId)  at \(eventAt)  by \(eventBy)")
-print("  subscription #\(configId) \"\(configName)\"")
-
-switch payload {
-case let user as UserPayload:
-    print("  user: \(user.userName ?? "") <\(user.email ?? "")>")
-case let group as GroupPayload:
-    print("  group: \(group.name ?? "")")
-case let form as FormSubmitPayload:
-    // The one wrapper payload: the original form and the submitted copy.
-    print("  form: \(form.originalForm?.title ?? "")  submitted as \(form.submittedForm?.title ?? "")")
-case let folder as FolderPayload:
-    print("  folder: \(folder.title ?? "")"
-          + "  id=\(describe(folder.id))  parent=\(describe(folder.parentId))")
-case let room as RoomPayload:
-    print("  room: \(room.title ?? "")"
-          + "  id=\(describe(room.id))  parent=\(describe(room.parentId))")
-case let file as FilePayload:
-    print("  file: \(file.title ?? "")"
-          + "  id=\(describe(file.id))  parent=\(describe(file.parentId))")
-default:
-    print("  no payload model for this trigger; raw payload below")
-}
-
-print()
-let pretty = try JSONSerialization.data(
-    withJSONObject: root["payload"] ?? NSNull(),
-    options: [.prettyPrinted, .sortedKeys])
-print("  " + (String(data: pretty, encoding: .utf8) ?? "")
-    .replacingOccurrences(of: "\n", with: "\n  "))
+exit((200..<300).contains(result.statusCode) ? 0 : 1)
