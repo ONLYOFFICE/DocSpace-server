@@ -35,9 +35,10 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
 /// A subscription narrowed to one entity by <c>targetId</c>: it gets the events about that entity only, and every
-/// delivery names the entity in <c>webhook.target</c>. For user and group events the target has to be an existing
-/// user or group, by GUID, and anything else is refused with 400 on create and on update. Targets of the file
-/// family are not checked when the subscription is saved: every event is checked against read access instead.
+/// delivery names the entity in <c>webhook.target</c>. For user and group events the target has to be a user or
+/// group the creator may see, by GUID, and anything else is refused with 400 on create and on update, a hidden one
+/// with the same answer as an unknown one. Targets of the file family are not checked when the subscription is
+/// saved: every event is checked against read access instead, and a subscription that mixes the two takes any target.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookTargetTests(
@@ -168,6 +169,43 @@ public class WebhookTargetTests(
     }
 
     [Fact]
+    public async Task CreateWebhook_UserAndFileTriggersWithAnEntryId_IsAccepted()
+    {
+        // Arrange: a subscription that mixes families may be narrowed to an entry, as before the target was checked;
+        // the user events then never match it
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(
+            _webhookReceiverClient, triggers: WebhookTrigger.UserUpdated | WebhookTrigger.FileCreated, targetId: "987654321");
+
+        // Act
+        var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
+
+        // Assert
+        created.Response.TargetId.Should().Be("987654321");
+    }
+
+    [Fact]
+    public async Task CreateWebhook_UserTargetTheCreatorMayNotSee_IsRefusedLikeAnUnknownUser()
+    {
+        // Arrange: a User sees no other member, so the owner is hidden from them
+        var member = await InviteContact(EmployeeType.User);
+        await _webApiClient.Authenticate(member);
+        var hidden = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.UserUpdated, targetId: Owner.Id.ToString());
+        var unknown = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.UserUpdated, targetId: Guid.NewGuid().ToString());
+
+        // Act
+        var hiddenException = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.CreateWebhookAsync(hidden, TestContext.Current.CancellationToken));
+        var unknownException = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.CreateWebhookAsync(unknown, TestContext.Current.CancellationToken));
+
+        // Assert: the answers are the same, so they do not tell whether the GUID exists
+        hiddenException.ErrorCode.Should().Be(400);
+        unknownException.ErrorCode.Should().Be(400);
+        ErrorMessageOf(hiddenException).Should().NotBeNullOrEmpty().And.Be(ErrorMessageOf(unknownException));
+    }
+
+    [Fact]
     public async Task UpdateWebhook_UserTriggerWithATargetThatIsNotThere_ThrowsBadRequest()
     {
         // Arrange
@@ -211,6 +249,16 @@ public class WebhookTargetTests(
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
+    }
+
+    /// <summary>The <c>error.message</c> of an error response, without the parts that differ per request.</summary>
+    private static string? ErrorMessageOf(ApiException exception)
+    {
+        using var document = JsonDocument.Parse(exception.ErrorContent?.ToString() ?? "{}");
+
+        return document.RootElement.TryGetProperty("error", out var error) && error.TryGetProperty("message", out var message)
+            ? message.GetString()
+            : null;
     }
 
     private static string Resolve(string targetId)

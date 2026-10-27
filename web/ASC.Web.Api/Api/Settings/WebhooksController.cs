@@ -51,7 +51,9 @@ public class WebhooksController(
     PasswordSettingsManager passwordSettingsManager,
     WebhooksConfigDtoHelper webhooksConfigDtoHelper,
     IUrlValidator urlValidator,
-    IHttpClientFactory clientFactory)
+    IHttpClientFactory clientFactory,
+    WebhookUserAccessChecker webhookUserAccessChecker,
+    WebhookGroupAccessChecker webhookGroupAccessChecker)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -93,10 +95,11 @@ public class WebhooksController(
     /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
     /// of the subscribed events, 0 standing for all of them; a flag the caller's role may not use is rejected, so take
     /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl=true` demands an `https` target with a valid
-    /// certificate, `ssl=false` leaves the certificate unchecked. `targetId` limits the events to one entity; for user
-    /// or group events it must be the ID of an existing user or group. A subscription fires only while it is enabled,
-    /// for events its creator may see and their current role may subscribe to. Any role except `Guest` may create one,
-    /// and each call adds another subscription.
+    /// certificate, `ssl=false` leaves the certificate unchecked. `targetId` limits the events to one entity; when
+    /// every trigger is a user or group event it must be the ID of a user or group the creator may see, and when
+    /// other events are mixed in, an entry ID is accepted too and the user and group events then never match. A
+    /// subscription fires only while it is enabled, for events its creator may see and their current role may
+    /// subscribe to. Any role except `Guest` may create one, and each call adds another subscription.
     /// </remarks>
     /// <summary>
     /// Create a webhook
@@ -104,7 +107,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPost("webhook")]
@@ -139,7 +142,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The updated webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the subscription's creator may see has that ID")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
     [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
@@ -454,11 +457,11 @@ public class WebhooksController(
     /// subscription, and `available`, telling whether the caller's own role may subscribe to that event at all: a
     /// `User` cannot subscribe to the creation of users, groups or rooms, for instance, while a `RoomAdmin` can. Add
     /// the bit values of the wanted events together to build `triggers`; the entry named `*` has the value 0 and
-    /// stands for every event the creator's role may subscribe to, so it is used on its own rather than added. Events unavailable to the caller are
-    /// listed all the same, but passing one to `POST api/2.0/settings/webhook` or `PUT api/2.0/settings/webhook` is
-    /// rejected as an invalid request. This is fixed reference data: the same for every portal, not paginated,
-    /// changing only with the product version, and readable by any authenticated caller, a `Guest` included. Nothing
-    /// is written.
+    /// stands for every event the subscription creator's current role may subscribe to, so it is used on its own
+    /// rather than added. Events unavailable to the caller are listed all the same, but passing one to `POST
+    /// api/2.0/settings/webhook` or `PUT api/2.0/settings/webhook` is rejected as an invalid request. This is fixed
+    /// reference data: the same for every portal, not paginated, changing only with the product version, and readable
+    /// by any authenticated caller, a `Guest` included. Nothing is written.
     /// </remarks>
     /// <summary>
     /// Get the webhook triggers
@@ -567,15 +570,19 @@ public class WebhooksController(
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }
 
-        return await CheckTargetAsync(targetId, triggers);
+        return await CheckTargetAsync(targetId, triggers, ownerId);
     }
 
     /// <summary>
-    /// A target of user or group events has to name an existing user or group; it is returned as the lowercase GUID
-    /// the checkers compare with. A target of file, folder, room, agent or form events is not looked up here: the
-    /// Files service owns those entries, and the creator's read access to the entry is checked on every event anyway.
+    /// A target of user or group events has to name a user or group <paramref name="ownerId"/> may see, by the same
+    /// rules the events are filtered with when they are published; it is returned as the lowercase GUID the checkers
+    /// compare with. One that does not exist and one the owner may not see are refused alike, so the answer tells
+    /// nothing about who is in the portal. A target of file, folder, room, agent or form events is not looked up
+    /// here: the Files service owns those entries, and the creator's read access to the entry is checked on every
+    /// event anyway. When such events are mixed with user or group ones, any target is accepted as it was before
+    /// the check existed: an entry ID then simply never matches the user and group events.
     /// </summary>
-    private async Task<string> CheckTargetAsync(string targetId, WebhookTrigger triggers)
+    private async Task<string> CheckTargetAsync(string targetId, WebhookTrigger triggers, Guid ownerId)
     {
         if (string.IsNullOrEmpty(targetId) || triggers == WebhookTrigger.All)
         {
@@ -597,15 +604,30 @@ public class WebhooksController(
 
         if (Guid.TryParse(targetId, out var id))
         {
-            if (forUsers && !(await userManager.GetUsersAsync(id)).Equals(ASC.Core.Users.Constants.LostUser))
+            if (forUsers)
             {
-                return id.ToString();
+                var user = await userManager.GetUsersAsync(id);
+
+                if (!user.Equals(ASC.Core.Users.Constants.LostUser) && await webhookUserAccessChecker.CheckAccessAsync(user, ownerId))
+                {
+                    return id.ToString();
+                }
             }
 
-            if (forGroups && (await userManager.GetGroupInfoAsync(id)).ID != ASC.Core.Users.Constants.LostGroupInfo.ID)
+            if (forGroups)
             {
-                return id.ToString();
+                var group = await userManager.GetGroupInfoAsync(id);
+
+                if (group.ID != ASC.Core.Users.Constants.LostGroupInfo.ID && await webhookGroupAccessChecker.CheckAccessAsync(group, ownerId))
+                {
+                    return id.ToString();
+                }
             }
+        }
+
+        if (families.Any(family => family is not "user" and not "group"))
+        {
+            return targetId;
         }
 
         throw new ArgumentException(Resource.ErrorWebhookTargetNotFound);
