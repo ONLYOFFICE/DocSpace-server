@@ -65,63 +65,12 @@ internal static class ContractYamlWriter
 
         writer.WriteLine();
 
+        // the nodes carry their own scalar styles (Text, the plain numbers and booleans, the single-quoted status
+        // codes); the serializer keeps them, writes empty collections as {} and [], and adds no document markers
         var emitter = new Emitter(writer, new EmitterSettings(2, LineWidth, false, 1024, false, true, "\n"));
 
-        emitter.Emit(new StreamStart());
-        emitter.Emit(new DocumentStart(null, null, true));
-        Emit(emitter, root);
-        emitter.Emit(new DocumentEnd(true));
-        emitter.Emit(new StreamEnd());
+        new SerializerBuilder().Build().Serialize(emitter, root);
 
         return writer.ToString();
-    }
-
-    private static void Emit(IEmitter emitter, YamlNode node)
-    {
-        switch (node)
-        {
-            case YamlMappingNode mapping:
-                emitter.Emit(new MappingStart(null, null, true, mapping.Children.Count == 0 ? MappingStyle.Flow : MappingStyle.Block));
-
-                foreach (var (key, value) in mapping.Children)
-                {
-                    Emit(emitter, key);
-                    Emit(emitter, value);
-                }
-
-                emitter.Emit(new MappingEnd());
-                break;
-
-            case YamlSequenceNode sequence:
-                emitter.Emit(new SequenceStart(null, null, true, sequence.Children.Count == 0 ? SequenceStyle.Flow : SequenceStyle.Block));
-
-                foreach (var item in sequence.Children)
-                {
-                    Emit(emitter, item);
-                }
-
-                emitter.Emit(new SequenceEnd());
-                break;
-
-            case YamlScalarNode scalar:
-                emitter.Emit(new YamlDotNet.Core.Events.Scalar(null, null, scalar.Value ?? "", GetStyle(scalar), true, true));
-                break;
-        }
-    }
-
-    /// <summary>
-    /// A block scalar (<c>|</c> or <c>&gt;</c>), as <see cref="Text"/> chooses it, keeps that style, a plain
-    /// scalar (the <c>null</c> of the catch-all trigger, a boolean, a number) stays plain; everything else is quoted
-    /// only when YAML needs it, unless it was made single-quoted on purpose (a status code, which YAML would read as
-    /// a number).
-    /// </summary>
-    private static ScalarStyle GetStyle(YamlScalarNode scalar)
-    {
-        return scalar.Style switch
-        {
-            ScalarStyle.Literal or ScalarStyle.Folded => scalar.Style,
-            ScalarStyle.Plain or ScalarStyle.SingleQuoted => scalar.Style,
-            _ => ScalarStyle.Any
-        };
     }
 }

@@ -48,5 +48,5 @@ global using ASC.Webhooks.Core;
 global using Microsoft.OpenApi;
 
 global using YamlDotNet.Core;
-global using YamlDotNet.Core.Events;
 global using YamlDotNet.RepresentationModel;
+global using YamlDotNet.Serialization;
