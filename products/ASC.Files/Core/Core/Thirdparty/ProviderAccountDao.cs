@@ -198,7 +198,7 @@ internal class ProviderAccountDao(
         {
             ProviderTypesExtensions.TryParse(forUpdate.Provider, true, out var key);
             var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
-            updatedAuthData.Url = forUpdate.Url;
+            updatedAuthData.Url = StoredUrlOrKDriveLegacy(key, forUpdate.Url);
 
             if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType,
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
@@ -312,7 +312,7 @@ internal class ProviderAccountDao(
             }
 
             authData = new AuthData(
-                !string.IsNullOrEmpty(newAuthData.Url) ? newAuthData.Url : input.Url,
+                !string.IsNullOrEmpty(newAuthData.Url) ? newAuthData.Url : StoredUrlOrKDriveLegacy(key, input.Url),
                 input.UserName,
                 !string.IsNullOrEmpty(newAuthData.Password) ? newAuthData.Password : DecryptPassword(input.Password, linkId),
                 newAuthData.RawToken);
@@ -497,12 +497,12 @@ internal class ProviderAccountDao(
         var color = input.Color;
         var cover = input.Cover;
 
-        // Connections saved before the address was required have none, so they keep the legacy shared host: it still
-        // signs them in, but its root only lists the account's drives, and nothing can be created there.
-        // A connection checked before it is saved (id 0) gets no fallback and, like any WebDAV one, is refused without one.
-        if (key == ProviderTypes.kDrive && id != 0 && string.IsNullOrEmpty(authData.Url))
+        // A connection checked before it is saved (id 0) gets no fallback and, like any WebDAV one, is refused without
+        // an address. Re-authentication of a saved connection is checked with id 0 too, so it resolves the stored
+        // address itself before the check.
+        if (id != 0)
         {
-            authData.Url = KDriveLegacyUrl;
+            authData.Url = StoredUrlOrKDriveLegacy(key, authData.Url);
         }
 
         if (key == ProviderTypes.Box)
@@ -667,6 +667,16 @@ internal class ProviderAccountDao(
         webDavProviderInfo.Cover = cover;
 
         return webDavProviderInfo;
+    }
+
+    /// <summary>
+    /// The address a saved connection works at. kDrive connections saved before the address was required have none,
+    /// so they keep the legacy shared host: it still signs them in, but its root only lists the account's drives, and
+    /// nothing can be created there.
+    /// </summary>
+    private static string StoredUrlOrKDriveLegacy(ProviderTypes key, string storedUrl)
+    {
+        return key == ProviderTypes.kDrive && string.IsNullOrEmpty(storedUrl) ? KDriveLegacyUrl : storedUrl;
     }
 
     private AuthData GetEncodedAccessToken(AuthData authData, ProviderTypes provider)

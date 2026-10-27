@@ -46,6 +46,12 @@ public class ThirdPartyKDriveConnectBugTests(
     : ThirdPartyTestBase(fixture)
 {
     private const string KDriveProviderKey = "kDrive";
+    private const string KDriveLogin = "autotest@example.com";
+
+    // FolderType.VirtualRooms and FolderType.USER: a room account and a "My documents" one, which are
+    // re-authenticated by different code paths.
+    private const int VirtualRoomsFolderType = 14;
+    private const int MyDocumentsFolderType = 5;
 
     /// <remarks>
     /// Bug 84672: the providers list offered kDrive without <c>requiredConnectionUrl</c>, so the
@@ -92,13 +98,81 @@ public class ThirdPartyKDriveConnectBugTests(
         (await ConnectedAccountTitles()).Should().NotContain(title);
     }
 
+    /// <remarks>
+    /// Bug 84672: a connection saved before the address was required has none and works at the
+    /// legacy shared host, but its re-authentication was checked without that host and refused as
+    /// an invalid address — a room account cannot even send one, it keeps the stored address. The
+    /// legacy host is asked with a wrong password, so the call still fails (403, or 500 without
+    /// access to Infomaniak); what is asserted is that the address is no longer the reason.
+    /// </remarks>
+    [Theory]
+    [Trait("Bug", "84672")]
+    [InlineData(VirtualRoomsFolderType)]
+    [InlineData(MyDocumentsFolderType)]
+    public async Task SaveThirdParty_ReauthenticateLegacyKDrive_NotRefusedForAddress(int folderType)
+    {
+        // Arrange
+        var title = UniqueTitle("kDrive Legacy");
+        var providerId = await PlantLegacyKDrive(title, folderType);
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _thirdPartyApi.SaveThirdPartyAsync(
+                new ThirdPartyRequestDto(
+                    login: KDriveLogin,
+                    password: WrongPassword,
+                    customerTitle: title,
+                    providerKey: KDriveProviderKey,
+                    providerId: providerId),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().NotBe(400, exception.ErrorContent?.ToString());
+        exception.ErrorContent?.ToString().Should().NotContain("Invalid connection URL");
+    }
+
     private static ThirdPartyRequestDto KDriveRequest(string customerTitle, string url)
     {
         return new ThirdPartyRequestDto(
             url: url,
-            login: "autotest@example.com",
+            login: KDriveLogin,
             password: WrongPassword,
             customerTitle: customerTitle,
             providerKey: KDriveProviderKey);
+    }
+
+    /// <summary>
+    /// Writes the owner's kDrive connection the way it was saved before the address was required:
+    /// with an empty <c>url</c>. No API call writes that row any more, so it is planted directly,
+    /// with the password encrypted the way the services encrypt it.
+    /// </summary>
+    private async Task<int> PlantLegacyKDrive(string customerTitle, int folderType)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["core:machinekey"] = Fixture.GetAppHostSetting("core:machinekey") })
+            .Build();
+        var password = await new InstanceCrypto(new MachinePseudoKeys(configuration)).EncryptAsync("legacy-password");
+
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            INSERT INTO files_thirdparty_account
+                (tenant_id, provider, customer_title, user_name, password, token, url, user_id, folder_type, room_type, private, has_logo, create_on, modified_on)
+            VALUES
+                (@tenantId, 'kDrive', @title, @login, @password, '', '', @userId, @folderType, 0, 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+            SELECT LAST_INSERT_ID();
+            """;
+
+        command.Parameters.AddWithValue("@tenantId", TenantId);
+        command.Parameters.AddWithValue("@title", customerTitle);
+        command.Parameters.AddWithValue("@login", KDriveLogin);
+        command.Parameters.AddWithValue("@password", password);
+        command.Parameters.AddWithValue("@userId", Owner.Id.ToString());
+        command.Parameters.AddWithValue("@folderType", folderType);
+
+        return Convert.ToInt32(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
     }
 }
