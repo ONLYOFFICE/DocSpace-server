@@ -122,9 +122,9 @@ public class ToolService(
     {
         var folderTask = ResolveFolderAsync(context.FolderId);
         var formTask = ResolveFormAsync(context.FormId);
-        var knowledgeRoomTask = ResolveKnowledgeRoomAsync(context.KnowledgeRoomId);
+        var knowledgeRoomsTask = ResolveKnowledgeRoomsAsync(context);
 
-        await Task.WhenAll(folderTask, formTask, knowledgeRoomTask);
+        await Task.WhenAll(folderTask, formTask, knowledgeRoomsTask);
 
         // Form-data tools run only inside a launched analysis, kept per attachment to isolate conversations.
         var analyze = Guid.TryParse(context.AttachmentId, out var attachmentId)
@@ -134,7 +134,7 @@ public class ToolService(
         {
             Folder = await folderTask,
             Form = await formTask,
-            KnowledgeRoom = await knowledgeRoomTask,
+            KnowledgeRooms = await knowledgeRoomsTask,
             Analyze = analyze,
             FormSubAgent = context.FormSubAgent
         };
@@ -161,13 +161,27 @@ public class ToolService(
         }
     }
 
-    private async Task<Folder<int>?> ResolveKnowledgeRoomAsync(int roomId)
+    // The list wins; the single id is what an older ASC.AI.Chat sends. Order and duplicates of the
+    // request are kept out of the result: each room once, in the order sent.
+    private async Task<IReadOnlyList<Folder<int>>> ResolveKnowledgeRoomsAsync(ToolContext context)
     {
-        if (roomId <= 0)
+        var ids = (context.KnowledgeRoomIds is { Count: > 0 } list ? list : [context.KnowledgeRoomId])
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
         {
-            return null;
+            return [];
         }
 
+        var rooms = await Task.WhenAll(ids.Select(ResolveKnowledgeRoomAsync));
+
+        return rooms.Where(room => room is not null).Select(room => room!).ToList();
+    }
+
+    private async Task<Folder<int>?> ResolveKnowledgeRoomAsync(int roomId)
+    {
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId);
 
         return room is { FolderType: FolderType.KnowledgeRoom }

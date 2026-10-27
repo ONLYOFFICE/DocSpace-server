@@ -43,39 +43,60 @@ public class KnowledgeSearchEngine(
     private const int ResultCount = 5;
     private const int SemanticCandidates = 100;
 
-    public async Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> agent, string query)
+    public Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> agent, string query)
+    {
+        return SearchAsync([agent], query);
+    }
+
+    /// <summary>Searches several knowledge bases with one query: the query is embedded once (the
+    /// embedding model is portal-wide), each base answers with its own best chunks, and the lists are
+    /// joined in the bases' order so every base is represented.</summary>
+    public async Task<List<KnowledgeSearchResult>> SearchAsync(IReadOnlyList<Folder<int>> agents, string query)
     {
         query = query.Trim();
 
         ArgumentException.ThrowIfNullOrEmpty(query);
 
+        if (agents.Count == 0)
+        {
+            return [];
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var generator = await embeddingGeneratorFactory.CreateAsync(agent);
+        var generator = await embeddingGeneratorFactory.CreateAsync(agents[0]);
         var embedding = await generator.GenerateAsync(query);
+        var vector = embedding.Vector.ToArray();
 
         var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-        var roomId = agent.Id;
-        var searchQuery = new HybridSearchQuery<Chunk>
-        {
-            VectorField = x => x.Embedding,
-            Vector = embedding.Vector.ToArray(),
-            LexicalQuery = query,
-            LexicalFields = [x => x.Title, x => x.TextEmbedding],
-            Top = ResultCount,
-            K = SemanticCandidates,
-            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
-        };
+        var results = new List<KnowledgeSearchResult>();
 
-        return await collection.HybridSearchAsync(searchQuery)
-            .Select(x => new KnowledgeSearchResult
+        foreach (var agent in agents)
+        {
+            var roomId = agent.Id;
+            var searchQuery = new HybridSearchQuery<Chunk>
             {
-                FileId = x.FileId,
-                Title = x.Title,
-                Text = x.TextEmbedding,
-                RelativeUrl = filesLinkUtility.GetFileWebEditorUrl(x.FileId)
-            })
-            .ToListAsync();
+                VectorField = x => x.Embedding,
+                Vector = vector,
+                LexicalQuery = query,
+                LexicalFields = [x => x.Title, x => x.TextEmbedding],
+                Top = ResultCount,
+                K = SemanticCandidates,
+                Filter = x => x.TenantId == tenantId && x.RoomId == roomId
+            };
+
+            results.AddRange(await collection.HybridSearchAsync(searchQuery)
+                .Select(x => new KnowledgeSearchResult
+                {
+                    FileId = x.FileId,
+                    Title = x.Title,
+                    Text = x.TextEmbedding,
+                    RelativeUrl = filesLinkUtility.GetFileWebEditorUrl(x.FileId)
+                })
+                .ToListAsync());
+        }
+
+        return results;
     }
 }
 

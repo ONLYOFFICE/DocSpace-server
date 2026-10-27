@@ -205,18 +205,18 @@ export function getCustomServerNames(): string[] {
   return als.getStore()?.customServerNames ?? [];
 }
 
-// The knowledge room the round searches (see RequestContext.knowledgeRoomId).
-// Taken off `actionArgs.knowledgeRoom` when the request comes in, read when
+// The knowledge rooms the round searches (see RequestContext.knowledgeRoomIds).
+// Taken off `actionArgs.knowledgeRooms` when the request comes in, read when
 // the tool context for `tools/list` and `tools/call` is built.
-export function setKnowledgeRoomId(roomId: number | undefined): void {
+export function setKnowledgeRoomIds(roomIds: number[]): void {
   const store = als.getStore();
   if (store) {
-    store.knowledgeRoomId = roomId;
+    store.knowledgeRoomIds = roomIds;
   }
 }
 
-export function getKnowledgeRoomId(): number | undefined {
-  return als.getStore()?.knowledgeRoomId;
+export function getKnowledgeRoomIds(): number[] {
+  return als.getStore()?.knowledgeRoomIds ?? [];
 }
 
 // Per-request folder-info memoization store (see RequestContext). Undefined

@@ -48,7 +48,7 @@ import {
   getCustomServerNames,
   getChatContextSnapshot,
   getSourceMeta,
-  setKnowledgeRoomId,
+  setKnowledgeRoomIds,
   setRoundAttachmentIds,
   setRoundProfileId,
 } from "../requestContext.js";
@@ -104,26 +104,35 @@ function withRequestSignal<T>(res: Response, body: T): T {
   // has stopped waiting. Create the object when missing so cancellation works
   // for every caller.
   const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
-  // The knowledge base the composer connected rides in `actionArgs`; the
-  // engine never reads it, the tool context does (every action handler
-  // passes through here, so the id is in place before `getTools`).
-  setKnowledgeRoomId(knowledgeRoomIdOf(actionArgs));
+  // The knowledge bases the composer connected ride in `actionArgs`; the
+  // engine never reads them, the tool context does (every action handler
+  // passes through here, so the ids are in place before `getTools`).
+  setKnowledgeRoomIds(knowledgeRoomIdsOf(actionArgs));
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
   };
 }
 
-// `actionArgs.knowledgeRoom.id` as the room id the .NET side expects, or
-// undefined when nothing is connected or the id is not a DocSpace room id.
-function knowledgeRoomIdOf(actionArgs: Record<string, unknown>): number | undefined {
-  const knowledgeRoom = actionArgs["knowledgeRoom"];
-  if (!isObject(knowledgeRoom)) {
-    return undefined;
+// `actionArgs.knowledgeRooms[].id` as the room ids the .NET side expects —
+// each a DocSpace room id, once, in the order sent. An older widget sends a
+// single `actionArgs.knowledgeRoom`; it is read the same way.
+function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
+  const list = Array.isArray(actionArgs["knowledgeRooms"])
+    ? (actionArgs["knowledgeRooms"] as unknown[])
+    : [actionArgs["knowledgeRoom"]];
+  const ids: number[] = [];
+  for (const room of list) {
+    if (!isObject(room)) {
+      continue;
+    }
+    const id = room["id"];
+    const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
+    if (Number.isInteger(parsed) && parsed > 0 && !ids.includes(parsed)) {
+      ids.push(parsed);
+    }
   }
-  const id = knowledgeRoom["id"];
-  const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  return ids;
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt

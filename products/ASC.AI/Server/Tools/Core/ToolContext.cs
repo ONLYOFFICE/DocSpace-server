@@ -46,8 +46,13 @@ public class ToolContext
     public bool FormSubAgent { get; init; }
 
     /// <summary>The knowledge room the composer connected for the round (0 = none): the knowledge search
-    /// tool searches it instead of the folder the chat is opened from.</summary>
+    /// tool searches it instead of the folder the chat is opened from. Older callers send one room here;
+    /// <see cref="KnowledgeRoomIds"/> carries the whole list.</summary>
     public int KnowledgeRoomId { get; init; }
+
+    /// <summary>Every knowledge room the composer connected for the round; the knowledge search tool
+    /// searches all of them. Empty when none was sent.</summary>
+    public List<int>? KnowledgeRoomIds { get; init; }
 }
 
 public class ResolvedToolContext
@@ -55,9 +60,9 @@ public class ResolvedToolContext
     public IFolder? Folder { get; init; }
     public FileEntry? Form { get; init; }
 
-    /// <summary>The connected knowledge room, resolved with the caller's rights; null when none was sent,
-    /// it does not exist, or it is not a knowledge room.</summary>
-    public Folder<int>? KnowledgeRoom { get; init; }
+    /// <summary>The connected knowledge rooms, resolved with the caller's rights; a room that was sent but
+    /// does not exist, or is not a knowledge room, is left out. Empty when none was sent.</summary>
+    public IReadOnlyList<Folder<int>> KnowledgeRooms { get; init; } = [];
 
     /// <summary>
     /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
