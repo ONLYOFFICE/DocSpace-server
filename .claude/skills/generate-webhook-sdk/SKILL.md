@@ -1,6 +1,6 @@
 ---
 name: generate-webhook-sdk
-description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): regenerating the contract docspace-webhooks.yaml from the webhook payload DTOs and triggers (common/Tools/ASC.Webhooks.Contract), running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update webhooks-sdk, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing anything under webhooks-sdk/<lang>/generated/, changing payload DTOs or WebhookTrigger itself."
+description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): checking the contract docspace-webhooks.yaml against the webhook payload DTOs and triggers and, after asking the user, regenerating it (common/Tools/ASC.Webhooks.Contract), running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update webhooks-sdk, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing anything under webhooks-sdk/<lang>/generated/, changing payload DTOs or WebhookTrigger itself."
 ---
 
 # Generating the webhook SDKs
@@ -14,7 +14,7 @@ add webhook commands to that tool as a side effect.
 
 The skill does three things:
 
-1. **Regenerate the contract** from the code it describes — always.
+1. **Check the contract** against the code it describes — always — and **regenerate it** when the user says so.
 2. **Generate and verify** the requested languages, step by step, with no shell script — stage A.
 3. **Report** what changed and how each language verified; on request, **check the packages** —
    stage B.
@@ -24,9 +24,11 @@ The skill does three things:
 - **The contract is generated, never edited.** `common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`
   is written by `common/Tools/ASC.Webhooks.Contract` from the payload DTOs, the envelope,
   `WebhookTrigger` and the hand-written `docspace-webhooks.header.yaml` next to it. Nothing
-  regenerates it on its own, so a DTO change that was not followed by a run of the tool leaves the
-  SDKs describing the old payload. Step 1 below exists for that reason — do not skip it because the
-  user only asked to "regenerate the SDKs".
+  regenerates it on its own (`WebhookContractTests` only fails when it is behind), so a DTO change
+  that was not followed by a run of the tool leaves the SDKs describing the old payload. Step 1 below
+  exists for that reason: always check the contract and always ask whether to regenerate it — never
+  skip the question because the user only asked to "regenerate the SDKs", and never regenerate
+  without the answer.
 - **No script, no particular shell.** There is no generation script: this skill *is* the procedure,
   and its steps go through `openapi-generator-cli`, `python` and each language's own toolchain, which
   behave the same in bash and PowerShell on every OS. Where a step is a file operation that differs
@@ -57,10 +59,14 @@ The skill does three things:
 
 ## Algorithm
 
-1. **Contract** (below): regenerate it and review its diff. A change in it that the code change does
-   not explain is a finding — report it before generating the SDKs.
-   **Fixtures** (below) next, whenever a payload DTO or the envelope changed: the verification in A4
-   replays them, and a capture from stale binaries replays the old wire format.
+1. **Contract** (below): check whether the committed contract matches the code, then **always ask
+   whether to regenerate it** (`AskUserQuestion`, yes/no) — the counterpart of `generate-sdk` asking
+   about the OpenAPI documents. If yes, regenerate it and review its diff: a change in it that the
+   code change does not explain is a finding — report it before generating the SDKs. If no while
+   the check said "out of date", go on with the committed contract and say in the report that the
+   SDKs describe the old payload.
+   **Fixtures** (below) next, only when the regenerated contract changed more than descriptions: the
+   verification in A4 replays them, and a capture from stale binaries replays the old wire format.
 2. **Languages** — from the request; if none named, ask (`AskUserQuestion`, multiSelect) out of the
    targets read from `targets.conf`, plus "all". A contract change normally means **all**: every
    language carries the same models.
@@ -72,15 +78,30 @@ The skill does three things:
 
 ## 1. Contract
 
-From the repository root:
+From the repository root, first the check, which writes nothing and exits 1 when the committed file
+is out of date:
+
+```bash
+dotnet run --project common/Tools/ASC.Webhooks.Contract -- --check
+```
+
+Then ask (`AskUserQuestion`, yes/no) whether to regenerate the contract before the SDKs, and put the
+check's result into the question so the user decides on facts:
+
+- **out of date** — recommend yes: the code changed since the contract was last written, and SDKs
+  generated from the committed file would describe the old payload;
+- **up to date** — recommend no: regenerating writes the same file. Still ask; the user may have
+  edited `docspace-webhooks.header.yaml` or want the run as proof.
+
+On yes:
 
 ```bash
 dotnet run --project common/Tools/ASC.Webhooks.Contract
 git diff -- common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml
 ```
 
-`--check` instead writes nothing and exits 1 when the committed file is out of date. Where each part
-of the contract comes from — and therefore where a change to it belongs:
+On no, the SDKs are generated from the committed file as it is. Where each part of the contract
+comes from — and therefore where a change to it belongs:
 
 | Contract part | Source |
 | --- | --- |
@@ -115,8 +136,10 @@ exception for the trigger, to the table.
 The signed deliveries in `webhooks-sdk/samples/` are captured from a running server by
 `WebhookFixtureCaptureTests`, an explicit integration test that writes the bodies and signature
 headers byte for byte as the receiver got them. Re-capture them whenever a payload DTO or the
-envelope changed, before A4, or A4 checks the SDKs against the old wire format. Skip this only when
-the contract diff above touched nothing but descriptions.
+envelope changed, before A4, or A4 checks the SDKs against the old wire format. Skip this when the
+contract was not regenerated, or its diff is empty or touches nothing but descriptions: a capture
+rewrites every captured fixture with fresh names, ids, timestamps and signatures even when the wire
+format did not change, which only adds noise to the commit.
 
 Build the whole solution first. `dotnet test` on `ASC.Web.Api.Tests` builds only that project and
 its references, which do not include the Files service or Web.Studio, while the AppHost starts them
