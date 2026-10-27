@@ -155,6 +155,29 @@ public class ProfileStorageService(
         }
     }
 
+    public async Task<List<ByokProviderInfo>> ReadByokProvidersAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+
+        return
+        [
+            .. models
+                .Where(IsNotEmbedding)
+                .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
+                .GroupBy(x => x.Provider.Id)
+                .Select(g => new ByokProviderInfo
+                {
+                    Id = g.Key,
+                    Name = g.First().Provider.Name,
+                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.Id, Name = x.Model.Alias })]
+                })
+                .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+        ];
+    }
+
     public async Task<Profile> ReadByIdAsync(Guid id)
     {
         await AssertUserHasAccessAsync(_readTypes);

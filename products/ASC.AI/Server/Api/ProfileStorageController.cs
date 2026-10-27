@@ -75,6 +75,13 @@ public class ProfileStorageController(ProfileStorageService profileStorageServic
         return NoContent();
     }
 
+    [HttpGet("profiles/byok/providers")]
+    public async Task<List<ByokProviderDto>> ReadByokProvidersAsync()
+    {
+        var providers = await profileStorageService.ReadByokProvidersAsync();
+        return [.. providers.Select(ByokProviderMapper.MapToDto)];
+    }
+
     [HttpGet("profiles/{id}")]
     public async Task<ProfileDto> ReadByIdAsync(ReadProfileRequestDto inDto)
     {
