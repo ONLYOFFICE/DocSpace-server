@@ -338,12 +338,9 @@ public class FormRecoveryService(
     {
         for (; e != null; e = e.InnerException)
         {
-            if (e is HttpRequestException or TimeoutException or TaskCanceledException or DistributedLockException
+            if (e is HttpRequestException or TimeoutException or TaskCanceledException or DistributedLockException or DocumentBuilderFailedException
                 || e is IOException and not (FileNotFoundException or DirectoryNotFoundException)
-                || e is DocumentServiceException
-                {
-                    Code: not (DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword)
-                })
+                || e is DocumentServiceException && !FormFieldsExtractor.IsFileError(e))
             {
                 return true;
             }

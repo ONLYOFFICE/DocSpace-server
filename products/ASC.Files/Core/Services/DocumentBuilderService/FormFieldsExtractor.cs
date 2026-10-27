@@ -88,5 +88,36 @@ public class FormFieldsExtractor(
         {
             throw new TimeoutException($"The build did not finish within {_maxBuildTime.TotalMinutes} minutes");
         }
+        catch (Exception e) when (e is not OperationCanceledException && !IsFileError(e))
+        {
+            // An empty or unreadable answer of the service comes as a plain exception, as does its loss of the build.
+            throw new DocumentBuilderFailedException(e);
+        }
+    }
+
+    /// <summary>
+    /// Whether the builder refused the file itself: it could not be opened or converted, is too large or has a password.
+    /// Any other failure is the service's or the network's.
+    /// </summary>
+    public static bool IsFileError(Exception e)
+    {
+        for (; e != null; e = e.InnerException)
+        {
+            if (e is DocumentServiceException
+                {
+                    Code: DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword
+                })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
+
+/// <summary>
+/// The document builder failed to read a file for a reason of its own or of the network, not of the file.
+/// </summary>
+public class DocumentBuilderFailedException(Exception innerException)
+    : Exception("The document builder failed to read the file", innerException);

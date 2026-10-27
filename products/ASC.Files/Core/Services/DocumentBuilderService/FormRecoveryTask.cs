@@ -105,8 +105,9 @@ public class FormRecoveryTask : DistributedTaskProgress
 
     /// <summary>
     /// Waits for the earlier recoveries of the form outside the queue, then queues the task: a reader of the queue only
-    /// ever takes work, so a wait never holds it. A failure leaves the task unqueued, and the queue drops its records once
-    /// the heartbeat stops.
+    /// ever takes work, so a wait never holds it. The wait gives up on a queue it cannot read, and the queue takes the
+    /// task into its channel before it publishes it, so a failed publication still leaves the task to run: the heartbeat
+    /// goes on, and the job stops it.
     /// </summary>
     public async Task QueueWhenFreeAsync(FormRecoveryTaskManager recoveryTaskManager, DistributedTaskQueue<FormRecoveryTask> queue)
     {
@@ -118,7 +119,6 @@ public class FormRecoveryTask : DistributedTaskProgress
         catch (Exception e)
         {
             _logger.ErrorWithException(e);
-            await StopQueuedHeartbeatAsync();
         }
     }
 

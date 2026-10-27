@@ -280,6 +280,7 @@ global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
+global using DocumentBuilderFailedException = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderFailedException;
 global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
 global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
