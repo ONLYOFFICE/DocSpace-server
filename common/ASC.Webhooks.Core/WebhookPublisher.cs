@@ -123,6 +123,11 @@ public class WebhookPublisher(
         var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
         bool? devToolsLimited = null;
 
+        // one creator usually owns several subscriptions, and both answers below depend on the creator and the event
+        // only, so each is worked out once per creator for this event
+        var entitledCreators = new Dictionary<Guid, bool>();
+        var creatorsWithAccess = new Dictionary<Guid, bool>();
+
         foreach (var config in webhookConfigs)
         {
             if (config.Triggers != WebhookTrigger.All && !config.Triggers.HasFlag(trigger))
@@ -133,11 +138,16 @@ public class WebhookPublisher(
             // the creator was allowed to subscribe when the subscription was saved; what counts is what they may receive
             // now. A catch-all subscription is narrowed the same way: it stands for the events the creator's role may
             // subscribe to, not for every event of the portal
-            if (config.CreatedBy.HasValue)
+            if (config.CreatedBy is { } creatorId)
             {
-                devToolsLimited ??= (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+                if (!entitledCreators.TryGetValue(creatorId, out var entitled))
+                {
+                    devToolsLimited ??= (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+                    entitled = await IsCreatorEntitledAsync(creatorId, trigger, devToolsLimited.Value);
+                    entitledCreators[creatorId] = entitled;
+                }
 
-                if (!await IsCreatorEntitledAsync(config.CreatedBy.Value, trigger, devToolsLimited.Value))
+                if (!entitled)
                 {
                     continue;
                 }
@@ -150,9 +160,15 @@ public class WebhookPublisher(
                     continue;
                 }
 
-                if (config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+                if (config.CreatedBy is { } ownerId && authContext.CurrentAccount.ID != ownerId)
                 {
-                    if (!await checker.CheckAccessAsync(source, config.CreatedBy.Value))
+                    if (!creatorsWithAccess.TryGetValue(ownerId, out var hasAccess))
+                    {
+                        hasAccess = await checker.CheckAccessAsync(source, ownerId);
+                        creatorsWithAccess[ownerId] = hasAccess;
+                    }
+
+                    if (!hasAccess)
                     {
                         continue;
                     }
