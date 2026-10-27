@@ -44,6 +44,8 @@ global using ASC.Files.Core.ApiModels.WebhookDto;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;
 
+global using Microsoft.OpenApi;
+
 global using YamlDotNet.Core;
 global using YamlDotNet.Core.Events;
 global using YamlDotNet.RepresentationModel;

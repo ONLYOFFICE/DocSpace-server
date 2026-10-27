@@ -35,7 +35,7 @@ namespace ASC.Core.Common.Tests.Webhooks;
 
 /// <summary>
 /// The webhook SDKs are generated from the committed docspace-webhooks.yaml, and that file is generated from the
-/// payload DTOs, <c>WebhookTrigger</c> and docspace-webhooks.header.yaml. Nothing else notices when a DTO changes and
+/// payload DTOs, <c>WebhookTrigger</c> and <c>WebhookDelivery</c>. Nothing else notices when one of them changes and
 /// the contract is not regenerated: every other test stays green while the YAML and the SDKs describe the old format.
 /// </summary>
 [Trait("Category", "Webhooks")]
@@ -45,13 +45,12 @@ public class WebhookContractTests
     public void CommittedContract_MatchesTheCode()
     {
         var directory = WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory);
-        var header = File.ReadAllText(Path.Combine(directory, WebhookContractGenerator.HeaderFileName));
         var contractPath = Path.Combine(directory, WebhookContractGenerator.ContractFileName);
 
         // the generator writes LF; a checkout with core.autocrlf turns the committed file into CRLF
         var committed = File.ReadAllText(contractPath).ReplaceLineEndings("\n");
 
-        var generated = WebhookContractGenerator.Generate(header);
+        var generated = WebhookContractGenerator.Generate();
 
         committed.Should().Be(generated,
             "{0} must be regenerated from the code: run `dotnet run --project common/Tools/ASC.Webhooks.Contract` from the " +

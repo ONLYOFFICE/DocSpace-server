@@ -53,14 +53,10 @@ public class WebhookSender(
         IgnoreReadOnlyProperties = true
     };
 
-    private const string SignatureHeader = "x-docspace-signature-256";
-    private const string EventIdHeader = "x-docspace-event-id";
-    private const string EventTimestampHeader = "x-docspace-event-timestamp";
-
     public const string WebhookHttpClient = "webhookHttpClient";
     public const string WebhookHttpClientSslIgnore = "webhookHttpClientSslIgnore";
 
-    private readonly TimeSpan _requestTimeout = settings.RequestTimeout ?? Settings.DefaultRequestTimeout;
+    private readonly TimeSpan _requestTimeout = settings.RequestTimeout ?? WebhookDelivery.DefaultRequestTimeout;
 
     private const int MaxRequestPayloadLength = ushort.MaxValue;
     private const int MaxResponsePayloadBytes = 8 * 1024;
@@ -182,10 +178,10 @@ public class WebhookSender(
 
                 request.Headers.Add("Accept", "*/*");
 
-                request.Headers.Add(EventIdHeader, entry.EventId.ToString(CultureInfo.InvariantCulture));
-                request.Headers.Add(EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
+                request.Headers.Add(WebhookDelivery.EventIdHeader, entry.EventId.ToString(CultureInfo.InvariantCulture));
+                request.Headers.Add(WebhookDelivery.EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
 
-                request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
+                request.Headers.Add(WebhookDelivery.SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
 
                 request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
 
@@ -445,7 +441,7 @@ public class WebhookSender(
             return null;
         }
 
-        var jitter = 0.9 + Random.Shared.NextDouble() * 0.2;
+        var jitter = 1 - WebhookDelivery.RetryJitter + Random.Shared.NextDouble() * 2 * WebhookDelivery.RetryJitter;
 
         return DateTime.UtcNow + intervals[attempts - 1] * jitter;
     }

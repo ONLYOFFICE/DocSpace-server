@@ -145,9 +145,10 @@ the package name lives in the hand-written `typescript/package.json` instead.
 The contract lives with the server code that defines it, not here:
 [`common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`](../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml).
 It is generated from the code by `common/Tools/ASC.Webhooks.Contract` (the
-payload DTOs, the envelope, `WebhookTrigger` and their XML docs), with the
-hand-written `docspace-webhooks.header.yaml` next to it merged in for what the
-code cannot say. Never edit the YAML itself: change the code or the header and
+payload DTOs, the envelope, `WebhookTrigger` and their XML docs); what the code
+cannot say is written in `ContractHeader` in that tool, with the transport
+numbers and header names taken from `WebhookDelivery` in ASC.Webhooks.Core.
+Never edit the YAML itself: change the code and
 run `dotnet run --project common/Tools/ASC.Webhooks.Contract` (`-- --check`
 only reports whether the committed file is out of date).
 

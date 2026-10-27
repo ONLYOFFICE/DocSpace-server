@@ -50,29 +50,13 @@ public class Settings
             logger.WarningObsoleteRepeatCount();
         }
 
-        RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : _defaultRetryIntervals;
+        RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : [.. WebhookDelivery.DefaultRetryIntervals];
         ThreadCount = cfg.ThreadCount ?? 10;
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
-        RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : DefaultRequestTimeout;
+        RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : WebhookDelivery.DefaultRequestTimeout;
         JournalRetentionDays = cfg.JournalRetentionDays is > 0 ? cfg.JournalRetentionDays : null;
     }
-
-    /// <summary>
-    /// How long one attempt waits for the target's answer, and then for the start of its body, unless
-    /// webhooks:requestTimeout says otherwise.
-    /// </summary>
-    public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(30);
-
-    private static readonly TimeSpan[] _defaultRetryIntervals =
-    [
-        TimeSpan.FromMinutes(1),
-        TimeSpan.FromMinutes(5),
-        TimeSpan.FromMinutes(30),
-        TimeSpan.FromHours(2),
-        TimeSpan.FromHours(5),
-        TimeSpan.FromHours(10)
-    ];
 
     public TimeSpan[] RetryIntervals { get; init; }
     public int? ThreadCount { get; init; }

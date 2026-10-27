@@ -42,11 +42,12 @@ internal static class ContractYamlWriter
     private const int LineWidth = 100;
 
     /// <summary>
-    /// A text scalar in the style that reads best for its length.
+    /// A text scalar in the style that reads best for its length. A trailing line break alone does not make a text
+    /// multi-line: a long sentence that ends with one is folded (<c>&gt;</c>) and keeps it.
     /// </summary>
     public static YamlScalarNode Text(string value)
     {
-        var style = value.Contains('\n')
+        var style = value.TrimEnd('\n').Contains('\n')
             ? ScalarStyle.Literal
             : value.Length > LineWidth ? ScalarStyle.Folded : ScalarStyle.Any;
 
@@ -109,8 +110,8 @@ internal static class ContractYamlWriter
     }
 
     /// <summary>
-    /// A scalar the header wrote as a block (<c>|</c> or <c>&gt;</c>) keeps that style; a quoted one is re-quoted
-    /// only when YAML needs it, so the header can use whichever quoting reads best.
+    /// A block scalar (<c>|</c> or <c>&gt;</c>), as <see cref="Text"/> chooses it, keeps that style, and the plain
+    /// <c>null</c> of the catch-all trigger stays a null; everything else is quoted only when YAML needs it.
     /// </summary>
     private static ScalarStyle GetStyle(YamlScalarNode scalar)
     {

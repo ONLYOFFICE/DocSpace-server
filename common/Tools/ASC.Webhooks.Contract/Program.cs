@@ -35,7 +35,7 @@ var check = args.Contains("--check");
 var directory = WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory);
 var contractPath = Path.Combine(directory, WebhookContractGenerator.ContractFileName);
 
-var contract = WebhookContractGenerator.Generate(File.ReadAllText(Path.Combine(directory, WebhookContractGenerator.HeaderFileName)));
+var contract = WebhookContractGenerator.Generate();
 
 if (check)
 {

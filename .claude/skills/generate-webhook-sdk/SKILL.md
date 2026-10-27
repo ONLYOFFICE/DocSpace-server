@@ -23,7 +23,7 @@ The skill does three things:
 
 - **The contract is generated, never edited.** `common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`
   is written by `common/Tools/ASC.Webhooks.Contract` from the payload DTOs, the envelope,
-  `WebhookTrigger` and the hand-written `docspace-webhooks.header.yaml` next to it. Nothing
+  `WebhookTrigger`, `WebhookDelivery` and the hand-written `ContractHeader` in the tool. Nothing
   regenerates it on its own (`WebhookContractTests` only fails when it is behind), so a DTO change
   that was not followed by a run of the tool leaves the SDKs describing the old payload. Step 1 below
   exists for that reason: always check the contract and always ask whether to regenerate it — never
@@ -90,8 +90,8 @@ check's result into the question so the user decides on facts:
 
 - **out of date** — recommend yes: the code changed since the contract was last written, and SDKs
   generated from the committed file would describe the old payload;
-- **up to date** — recommend no: regenerating writes the same file. Still ask; the user may have
-  edited `docspace-webhooks.header.yaml` or want the run as proof.
+- **up to date** — recommend no: regenerating writes the same file. Still ask; the user may want the
+  run as proof.
 
 On yes:
 
@@ -110,7 +110,8 @@ comes from — and therefore where a change to it belongs:
 | a schema `description` | the type's `<summary>` and `<remarks>` |
 | a property `description` | the property's `<summary>`; for an enum the generator appends its members |
 | `x-docspace-trigger-payloads.map` | the trigger table in `WebhookContractGenerator` (by trigger family, with per-trigger exceptions), in `[Order]` order |
-| `info`, the transport and serialization notes, `EntryId`, the map's description | `common/ASC.Webhooks.Core/Contract/docspace-webhooks.header.yaml` |
+| `info`, the transport and serialization notes, `EntryId`, the map's description | `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs` (prose, `OpenApiInfo`, the `EntryId` `OpenApiSchema`) |
+| the numbers and names in the transport notes: request timeout, retry intervals and jitter, header names, config keys | `common/ASC.Webhooks.Core/WebhookDelivery.cs`, which the sender reads as well |
 
 How the generator reads the code, so that its output can be predicted:
 
