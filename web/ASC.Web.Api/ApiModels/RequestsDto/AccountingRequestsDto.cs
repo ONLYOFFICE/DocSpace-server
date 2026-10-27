@@ -375,6 +375,78 @@ public class CustomerServiceUsageRequestDto
 }
 
 /// <summary>
+/// The query parameters for reading a page of the portal's wallet top-ups: the period, the outcome and the paging
+/// window.
+/// </summary>
+/// <example>
+/// {
+///   "startDate": "2025-01-01T00:00:00Z",
+///   "endDate": "2025-12-31T23:59:59Z",
+///   "status": "Completed",
+///   "offset": 0,
+///   "limit": 25
+/// }
+/// </example>
+public class GetCustomerDepositsRequestDto
+{
+    /// <summary>
+    /// The beginning of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is
+    /// read in the portal time zone, not in the caller's; defaults to the portal creation date.
+    /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
+    [FromQuery(Name = "startDate")]
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// The end of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is read in
+    /// the portal time zone, not in the caller's; defaults to the moment the call is made.
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    [FromQuery(Name = "endDate")]
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// The outcome to keep. A top-up that is still being settled is reported as pending and may change later, while
+    /// the other outcomes are final; every outcome is reported when this is omitted.
+    /// </summary>
+    /// <example>Completed</example>
+    [FromQuery(Name = "status")]
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// The number of top-ups to skip before the first one returned, for walking through a long history page by page.
+    /// Counted after the filters are applied, and starts at 0 when omitted.
+    /// </summary>
+    /// <example>0</example>
+    [Range(0, int.MaxValue)]
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// The maximum number of top-ups returned in one page. Defaults to 25 when omitted; the answer echoes the window
+    /// back next to `totalQuantity`, `totalPage` and `currentPage`, so the next `offset` can be computed without
+    /// counting the items.
+    /// </summary>
+    /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
+    [FromQuery(Name = "limit")]
+    public int? Limit { get; set; }
+}
+
+/// <summary>
+/// The wallet top-up whose invoice is asked for.
+/// </summary>
+public class GetDepositInvoiceRequestDto
+{
+    /// <summary>
+    /// The ID of the top-up, taken from the `id` field of `GET api/2.0/portal/payment/customer/deposits`.
+    /// </summary>
+    /// <example>15342</example>
+    [FromRoute(Name = "id")]
+    public long Id { get; init; }
+}
+
+/// <summary>
 /// The parameters that select whose prices are read from the accounting service.
 /// </summary>
 public class ServicePricesRequestDto
