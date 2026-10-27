@@ -82,6 +82,23 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
         return (await _queue.GetAllTasks()).Any(t => !t.IsCompleted && t.TenantId == tenantId && t.OriginalFormId == originalFormId);
     }
 
+    /// <summary>
+    /// The recoveries of the form that run or wait, for any user.
+    /// </summary>
+    public async Task<List<FormRecoveryTask>> GetRecoveriesAsync(int tenantId, int originalFormId)
+    {
+        return (await _queue.GetAllTasks()).Where(t => !t.IsCompleted && t.TenantId == tenantId && t.OriginalFormId == originalFormId).ToList();
+    }
+
+    /// <summary>
+    /// Whether the first recovery was queued before the second. The order is strict, the id breaking a tie, so that two
+    /// recoveries never wait for each other.
+    /// </summary>
+    public static bool IsQueuedBefore(FormRecoveryTask first, FormRecoveryTask second)
+    {
+        return first.QueuedOn < second.QueuedOn || (first.QueuedOn == second.QueuedOn && string.CompareOrdinal(first.Id, second.Id) < 0);
+    }
+
     public void Dispose()
     {
         _semaphore.Dispose();

@@ -42,7 +42,6 @@ public class FormRecoveryTask : DistributedTaskProgress
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private string _baseUri;
-    private Guid _userId;
     private FormFillingReportTaskData _reportData;
 
     // The queue cancels a task that publishes nothing for a minute (its default unregister window), and a recovery of
@@ -65,6 +64,10 @@ public class FormRecoveryTask : DistributedTaskProgress
 
     public int OriginalFormId { get; set; }
 
+    public Guid UserId { get; set; }
+
+    public DateTime QueuedOn { get; set; }
+
     public FormRecoveryTask() { }
 
     public FormRecoveryTask(IServiceScopeFactory serviceScopeFactory)
@@ -77,7 +80,8 @@ public class FormRecoveryTask : DistributedTaskProgress
         _baseUri = baseUri;
         TenantId = tenantId;
         OriginalFormId = reportData.OriginalFormId;
-        _userId = userId;
+        UserId = userId;
+        QueuedOn = DateTime.UtcNow;
         _reportData = reportData;
         Id = FormRecoveryTaskManager.GetTaskId(tenantId, userId, reportData.OriginalFormId);
         Status = DistributedTaskStatus.Created;
@@ -96,7 +100,7 @@ public class FormRecoveryTask : DistributedTaskProgress
             }
 
             await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(TenantId);
-            await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(_userId);
+            await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(UserId);
 
             _reportQueue = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>().CreateQueue<FormFillingReportTask>();
 
@@ -104,6 +108,8 @@ public class FormRecoveryTask : DistributedTaskProgress
             var heartbeat = KeepAliveAsync(heartbeatStop.Token);
             try
             {
+                await WaitForEarlierRecoveriesAsync(scope.ServiceProvider.GetRequiredService<FormRecoveryTaskManager>());
+
                 var recoveryService = scope.ServiceProvider.GetRequiredService<FormRecoveryService>();
                 await recoveryService.RecoverAsync(_reportData.RoomId, _reportData.OriginalFormId, share => Progress(share * RecoveryShare), CancellationToken);
                 Progress(RecoveryShare);
@@ -139,7 +145,7 @@ public class FormRecoveryTask : DistributedTaskProgress
             try
             {
                 var reportTask = scope.ServiceProvider.GetRequiredService<FormFillingReportTask>();
-                reportTask.Init(_baseUri, TenantId, _userId, _reportData, DocumentBuilderTaskManager.GetTaskId(TenantId, _userId, _reportData.OriginalFormId));
+                reportTask.Init(_baseUri, TenantId, UserId, _reportData, DocumentBuilderTaskManager.GetTaskId(TenantId, UserId, _reportData.OriginalFormId));
 
                 // Queued with the progress shown so far, so that the client does not see it fall back to 0.
                 reportTask.Percentage = Percentage;
@@ -217,7 +223,7 @@ public class FormRecoveryTask : DistributedTaskProgress
     private async Task<FormFillingReportTask> RunReportAsync(IServiceProvider serviceProvider, int version)
     {
         var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
-        reportTask.Init(_baseUri, TenantId, _userId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
+        reportTask.Init(_baseUri, TenantId, UserId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
         reportTask.Publication = _ => Task.CompletedTask;
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken);
@@ -232,6 +238,50 @@ public class FormRecoveryTask : DistributedTaskProgress
         }
 
         return reportTask;
+    }
+
+    // A recovery of the form queued earlier by another user may be building the history of a new report file: this one
+    // waits for it and for the report it starts, so that its own report comes after them instead of between them.
+    private async Task WaitForEarlierRecoveriesAsync(FormRecoveryTaskManager recoveryTaskManager)
+    {
+        var earlierUsers = new HashSet<Guid>();
+        try
+        {
+            while (true)
+            {
+                var earlier = (await recoveryTaskManager.GetRecoveriesAsync(TenantId, OriginalFormId)).Where(t => FormRecoveryTaskManager.IsQueuedBefore(t, this)).ToList();
+                earlierUsers.UnionWith(earlier.Select(t => t.UserId));
+
+                if (earlier.Count == 0 && !await IsAnyReportRunningAsync(earlierUsers))
+                {
+                    return;
+                }
+
+                await Task.Delay(_heartbeatInterval, CancellationToken);
+            }
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            // The queue could not be read: the recovery goes on as it did before it waited for others.
+            _logger.WarnRecoveryWaitFailed(e, OriginalFormId);
+        }
+    }
+
+    // Only a report taken by its queue writes the file, and the queue marks it running at once. One still created is the
+    // status the client polls, published by a request and held by the recovery that will start it, possibly one waiting
+    // for this recovery: waiting for it would make the two wait for each other.
+    private async Task<bool> IsAnyReportRunningAsync(IEnumerable<Guid> userIds)
+    {
+        foreach (var userId in userIds)
+        {
+            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(TenantId, userId, OriginalFormId));
+            if (report is { IsCompleted: false } and not { Status: DistributedTaskStatus.Created })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Progress(double percentage)
@@ -261,7 +311,7 @@ public class FormRecoveryTask : DistributedTaskProgress
         {
             await PublishChanges();
 
-            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(TenantId, _userId, _reportData.OriginalFormId));
+            var report = await _reportQueue.PeekTask(DocumentBuilderTaskManager.GetTaskId(TenantId, UserId, _reportData.OriginalFormId));
             if (report is { IsCompleted: false, Status: DistributedTaskStatus.Created })
             {
                 report.Percentage = Percentage;

@@ -71,7 +71,9 @@ public class FormFillingReportIntegrationEventHandler(
                 var reportData = new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers);
 
                 // The recovery starts the report when it is done, also the one of a repeated request that finds it running.
-                if (@event.Recover && await NeedsRecoveryAsync(@event))
+                // A request while another user's recovery runs is queued too, to wait for it rather than write into the
+                // report file it is building.
+                if (@event.Recover && (await NeedsRecoveryAsync(@event) || await IsRecoveringAsync(@event)))
                 {
                     var recoveryTask = serviceProvider.GetService<FormRecoveryTask>();
                     recoveryTask.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData);
