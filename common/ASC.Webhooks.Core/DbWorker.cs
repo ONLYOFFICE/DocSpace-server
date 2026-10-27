@@ -53,12 +53,13 @@ public class DbWorker(
     public static readonly TimeSpan InactiveTenantDelay = TimeSpan.FromHours(1);
 
     /// <summary>
-    /// How many rows of inactive portals one statement moves out of the way of the claim.
+    /// How many rows one statement of the background upkeep touches: the rows of inactive portals it moves out of the
+    /// way of the claim, or the expired rows it deletes.
     /// </summary>
     private const int PostponeBatchSize = 500;
 
     /// <summary>
-    /// How many batches of <see cref="PostponeBatchSize"/> one run moves at most.
+    /// How many batches of <see cref="PostponeBatchSize"/> one run of the upkeep handles at most.
     /// </summary>
     private const int MaxPostponeRounds = 20;
 
@@ -532,6 +533,37 @@ public class DbWorker(
         }
 
         return moved;
+    }
+
+    /// <summary>
+    /// Deletes the delivery records of every portal created before <paramref name="before"/> that nothing will send
+    /// any more, oldest first, in batches of <see cref="PostponeBatchSize"/> and at most <see cref="MaxPostponeRounds"/>
+    /// of them per call; what is left goes on the next one. Returns how many were deleted.
+    /// </summary>
+    public async Task<int> DeleteExpiredJournalAsync(DateTime before)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var deleted = 0;
+
+        for (var round = 0; round < MaxPostponeRounds; round++)
+        {
+            var ids = await webhooksDbContext.ExpiredWebhooksLogIdsAsync(before, PostponeBatchSize).ToListAsync();
+
+            if (ids.Count == 0)
+            {
+                break;
+            }
+
+            deleted += await webhooksDbContext.DeleteExpiredWebhooksLogsAsync(ids);
+
+            if (ids.Count < PostponeBatchSize)
+            {
+                break;
+            }
+        }
+
+        return deleted;
     }
 
     /// <summary>

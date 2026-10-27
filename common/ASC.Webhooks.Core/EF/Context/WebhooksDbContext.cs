@@ -203,6 +203,23 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return Queries.InactiveTenantsDueWebhooksLogsAsync(this, now, count);
     }
 
+    // The oldest delivery records created before `before` that nothing will send any more, across all portals, for
+    // the retention of webhooks:journalRetentionDays. In id order: ids grow with creation_time, so the scan starts
+    // at the oldest rows of the primary key and stops after `count`, with no index on creation_time. A plain read.
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> ExpiredWebhooksLogIdsAsync(DateTime before, int count)
+    {
+        return Queries.ExpiredWebhooksLogIdsAsync(this, before, count);
+    }
+
+    // Deletes rows found by ExpiredWebhooksLogIdsAsync, by primary key; one put back on the schedule since then
+    // (a manual retry of its event does not do that, it adds a row) is kept.
+    [PreCompileQuery]
+    public Task<int> DeleteExpiredWebhooksLogsAsync(IEnumerable<int> ids)
+    {
+        return Queries.DeleteExpiredWebhooksLogsAsync(this, ids);
+    }
+
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     // Takes rows found by InactiveTenantsDueWebhooksLogsAsync off the schedule. A row claimed since then is no longer
     // due and is left to its sender.
@@ -409,6 +426,22 @@ static file class Queries
                     .ThenBy(it => it.log.Id)
                     .Select(it => it.log.Id)
                     .Take(count));
+
+    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<int>> ExpiredWebhooksLogIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, DateTime before, int count) =>
+                ctx.WebhooksLogs
+                    .Where(it => it.CreationTime < before && it.NextAttemptOn == null && it.LeaseId == null)
+                    .OrderBy(it => it.Id)
+                    .Select(it => it.Id)
+                    .Take(count));
+
+    public static readonly Func<WebhooksDbContext, IEnumerable<int>, Task<int>> DeleteExpiredWebhooksLogsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, IEnumerable<int> ids) =>
+                ctx.WebhooksLogs
+                    .Where(it => ids.Contains(it.Id) && it.NextAttemptOn == null && it.LeaseId == null)
+                    .ExecuteDelete());
 
     public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<InactiveTenantWebhooksLog>> InactiveTenantsDueWebhooksLogsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

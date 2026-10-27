@@ -48,7 +48,8 @@ public class WorkerService(
     private const int BatchWaves = 5;
     private readonly TimeSpan _lease = TimeSpan.FromMinutes(10);
 
-    // how often this instance moves the due rows of inactive portals out of the claim's way
+    // how often this instance moves the due rows of inactive portals out of the claim's way, and deletes the delivery
+    // records older than webhooks:journalRetentionDays when that is set
     private readonly TimeSpan _postponePeriod = TimeSpan.FromMinutes(10);
     private DateTime _nextPostponeOn = DateTime.MinValue;
 
@@ -77,6 +78,11 @@ public class WorkerService(
                     {
                         _nextPostponeOn = DateTime.UtcNow + _postponePeriod;
                         await dbWorker.PostponeInactiveTenantsJournalAsync();
+
+                        if (settings.JournalRetentionDays is { } retentionDays)
+                        {
+                            await dbWorker.DeleteExpiredJournalAsync(DateTime.UtcNow.AddDays(-retentionDays));
+                        }
                     }
 
                     entries = await dbWorker.ClaimDueJournalEntriesAsync(batchSize, _lease);

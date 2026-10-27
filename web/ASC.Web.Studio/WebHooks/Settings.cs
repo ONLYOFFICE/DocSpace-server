@@ -55,6 +55,7 @@ public class Settings
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
         RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : DefaultRequestTimeout;
+        JournalRetentionDays = cfg.JournalRetentionDays is > 0 ? cfg.JournalRetentionDays : null;
     }
 
     /// <summary>
@@ -78,4 +79,11 @@ public class Settings
     public int? TrustedDaysCount { get; init; }
     public string[] Blacklist { get; init; }
     public TimeSpan? RequestTimeout { get; init; }
+
+    /// <summary>
+    /// How many days a delivery record is kept in the journal once nothing will send it any more, for every portal;
+    /// unset or 0 keeps the records for ever. Each manual retry adds a record with a copy of the body, so the journal
+    /// otherwise only grows.
+    /// </summary>
+    public int? JournalRetentionDays { get; init; }
 }
