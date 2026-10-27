@@ -83,6 +83,11 @@ import type {
   WebSearchMutationResult,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
+import type {
+  ByokProfileInput,
+  ByokProfileUpdateInput,
+  DocspaceProfile,
+} from "../../app/storage/profilesStorage.js";
 
 /* ------------------------------ Common --------------------------------- */
 
@@ -367,6 +372,10 @@ export type Res_aiProfilesTestConnection = true | { message?: string };
 // see profilesController.getById.
 export type Res_aiProfilesGetById = Omit<Profile, "key" | "headers">;
 export type Res_aiProfilesList = Profile[];
+export type Req_aiProfilesByokCreate = ByokProfileInput;
+export type Res_aiProfilesByokCreate = Omit<DocspaceProfile, "key" | "headers">;
+export type Req_aiProfilesByokUpdate = ByokProfileUpdateInput;
+export type Res_aiProfilesByokUpdate = Omit<DocspaceProfile, "key" | "headers">;
 
 /* ------------------------------- Prompts ------------------------------- */
 

@@ -57,7 +57,30 @@ import {
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-export type DocspaceProfile = Profile & { byokProvider?: string };
+export type DocspaceProfile = Profile & {
+  /** BYOK provider id when the profile runs on the portal's own provider key. */
+  byokProvider?: string;
+};
+
+export interface ByokProfileInput {
+  /** Profile display name. */
+  name: string;
+  /** BYOK provider id from the model's `byok_providers`, e.g. `anthropic`. */
+  provider: string;
+  /** Gateway catalogue model id. */
+  modelId: string;
+  /** Provider API key. */
+  key: string;
+}
+
+export interface ByokProfileUpdateInput {
+  /** Profile display name. */
+  name: string;
+  /** Gateway catalogue model id. */
+  modelId: string;
+  /** New provider API key; omit to keep the stored one. */
+  key?: string;
+}
 
 function gatewayBaseUrl(profile: DocspaceProfile): string {
   const gateway = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
@@ -363,6 +386,31 @@ export class HttpProfilesStorage implements ProfilesStorage {
       throw err;
     }
   }
+
+  async createByok(input: ByokProfileInput): Promise<DocspaceProfile> {
+    const raw = await aiService.post(`${PATH}/byok`, input);
+    invalidateChatContext("profiles");
+    return requireProfile(raw);
+  }
+
+  async updateByok(id: string, input: ByokProfileUpdateInput): Promise<DocspaceProfile> {
+    const raw = await aiService.put(`${PATH}/byok/${encodeURIComponent(id)}`, input);
+    invalidateChatContext("profiles");
+    return requireProfile(raw);
+  }
+
+  async deleteByok(id: string): Promise<void> {
+    await aiService.delete(`${PATH}/byok/${encodeURIComponent(id)}`);
+    invalidateChatContext("profiles");
+  }
+}
+
+function requireProfile(raw: unknown): DocspaceProfile {
+  const profile = dtoToProfile(raw);
+  if (!profile) {
+    throw new Error("ai service returned invalid profile");
+  }
+  return profile;
 }
 
 // ---------------------------------------------------------------------------
