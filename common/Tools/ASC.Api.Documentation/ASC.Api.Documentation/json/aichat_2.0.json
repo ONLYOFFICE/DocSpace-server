@@ -8091,6 +8091,44 @@
               }
             }
           },
+          "402": {
+            "description": "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "403": {
             "description": "The caller cannot open the entry.",
             "content": {
@@ -8132,11 +8170,39 @@
             }
           },
           "429": {
-            "description": "The model provider is rate-limiting requests.",
+            "description": "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8152,11 +8218,39 @@
             }
           },
           "502": {
-            "description": "The model request failed; the detail is in the server log.",
+            "description": "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8176,7 +8270,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8368,6 +8490,44 @@
               }
             }
           },
+          "402": {
+            "description": "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "403": {
             "description": "The caller cannot read the entry, or cannot edit it when the values are written.",
             "content": {
@@ -8409,11 +8569,39 @@
             }
           },
           "429": {
-            "description": "The model provider is rate-limiting requests.",
+            "description": "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8429,11 +8617,39 @@
             }
           },
           "502": {
-            "description": "The model request failed; the detail is in the server log.",
+            "description": "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8453,7 +8669,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -9760,6 +10004,359 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/ai/profiles/byok": {
+      "post": {
+        "tags": [
+          "AI / Profiles"
+        ],
+        "operationId": "aiProfilesByokCreate",
+        "summary": "Create a BYOK profile",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique profile identifier (UUID)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "User-defined profile display name."
+                    },
+                    "providerType": {
+                      "$ref": "#/components/schemas/AiProviderType",
+                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+                    },
+                    "basedOn": {
+                      "$ref": "#/components/schemas/AiBuiltinProviderType",
+                      "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+                    },
+                    "baseUrl": {
+                      "type": "string",
+                      "description": "Base URL of the provider API."
+                    },
+                    "modelId": {
+                      "type": "string",
+                      "description": "Selected model ID within this provider."
+                    },
+                    "reasoning": {
+                      "type": "boolean",
+                      "description": "Whether extended thinking is enabled for this profile's model."
+                    },
+                    "reasoningSupport": {
+                      "$ref": "#/components/schemas/AiReasoningSupport",
+                      "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+                    },
+                    "capabilities": {
+                      "type": "number",
+                      "description": "Bitmask of capabilities supported by the selected model."
+                    },
+                    "canUseTool": {
+                      "type": "boolean",
+                      "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+                    },
+                    "useResponsesApi": {
+                      "type": "boolean",
+                      "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+                    },
+                    "isCloudProvider": {
+                      "type": "boolean",
+                      "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+                    },
+                    "useProxy": {
+                      "type": "boolean",
+                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+                    },
+                    "createdAt": {
+                      "type": "number",
+                      "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
+                    },
+                    "byokProvider": {
+                      "type": "string",
+                      "description": "BYOK provider id when the profile runs on the portal's own provider key."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "providerType",
+                    "baseUrl",
+                    "modelId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiByokProfileInput"
+              }
+            }
+          },
+          "x-codegen-request-body-name": "AiByokProfileInput"
+        }
+      }
+    },
+    "/api/2.0/ai/profiles/byok/{id}": {
+      "put": {
+        "tags": [
+          "AI / Profiles"
+        ],
+        "operationId": "aiProfilesByokUpdate",
+        "summary": "Update a BYOK profile",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique profile identifier (UUID)."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "User-defined profile display name."
+                    },
+                    "providerType": {
+                      "$ref": "#/components/schemas/AiProviderType",
+                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+                    },
+                    "basedOn": {
+                      "$ref": "#/components/schemas/AiBuiltinProviderType",
+                      "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+                    },
+                    "baseUrl": {
+                      "type": "string",
+                      "description": "Base URL of the provider API."
+                    },
+                    "modelId": {
+                      "type": "string",
+                      "description": "Selected model ID within this provider."
+                    },
+                    "reasoning": {
+                      "type": "boolean",
+                      "description": "Whether extended thinking is enabled for this profile's model."
+                    },
+                    "reasoningSupport": {
+                      "$ref": "#/components/schemas/AiReasoningSupport",
+                      "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+                    },
+                    "capabilities": {
+                      "type": "number",
+                      "description": "Bitmask of capabilities supported by the selected model."
+                    },
+                    "canUseTool": {
+                      "type": "boolean",
+                      "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+                    },
+                    "useResponsesApi": {
+                      "type": "boolean",
+                      "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+                    },
+                    "isCloudProvider": {
+                      "type": "boolean",
+                      "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+                    },
+                    "useProxy": {
+                      "type": "boolean",
+                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+                    },
+                    "createdAt": {
+                      "type": "number",
+                      "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
+                    },
+                    "byokProvider": {
+                      "type": "string",
+                      "description": "BYOK provider id when the profile runs on the portal's own provider key."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "providerType",
+                    "baseUrl",
+                    "modelId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiByokProfileUpdateInput"
+              }
+            }
+          },
+          "x-codegen-request-body-name": "AiByokProfileUpdateInput"
+        }
+      },
+      "delete": {
+        "tags": [
+          "AI / Profiles"
+        ],
+        "operationId": "aiProfilesByokDelete",
+        "summary": "Delete a BYOK profile",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/2.0/ai/openai/{profileId}/v1/chat/completions": {
@@ -12323,6 +12920,56 @@
         ],
         "additionalProperties": false,
         "description": "AI model metadata. Describes a single model available from a provider."
+      },
+      "AiByokProfileInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Profile display name."
+          },
+          "provider": {
+            "type": "string",
+            "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Gateway catalogue model id."
+          },
+          "key": {
+            "type": "string",
+            "description": "Provider API key."
+          }
+        },
+        "required": [
+          "name",
+          "provider",
+          "modelId",
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokProfileUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Profile display name."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Gateway catalogue model id."
+          },
+          "key": {
+            "type": "string",
+            "description": "New provider API key; omit to keep the stored one."
+          }
+        },
+        "required": [
+          "name",
+          "modelId"
+        ],
+        "additionalProperties": false
       },
       "AiCreatePromptInput": {
         "type": "object",
