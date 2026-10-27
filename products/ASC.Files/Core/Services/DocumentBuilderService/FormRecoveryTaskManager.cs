@@ -39,6 +39,7 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
     private const string TaskIdPrefix = "FormRecoveryTask";
 
     private readonly SemaphoreSlim _semaphore = new(1);
+    private DateTime _lastQueuedOn;
     private readonly DistributedTaskQueue<FormRecoveryTask> _queue = queueFactory.CreateQueue<FormRecoveryTask>();
 
     // Per user, as the report it starts: a second request of the same user waits for the running one.
@@ -64,8 +65,9 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
             }
 
             // Stamped here, under the semaphore, so that on this worker the order of the queue is the order of the times:
-            // a recovery never waits behind the later one that waits for it.
-            newTask.QueuedOn = DateTime.UtcNow;
+            // a recovery never waits behind the later one that waits for it. Kept growing when the clock is set back.
+            var now = DateTime.UtcNow;
+            newTask.QueuedOn = _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
 
             // Before the queue gets the task, since a free reader may start it at once and stop the heartbeat.
             newTask.StartQueuedHeartbeat();
