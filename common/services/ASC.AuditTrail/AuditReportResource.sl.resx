@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Poročilo o poslovanju stranke preneseno</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Omejitev porabe za storitev ustvarjena: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Omejitev porabe za storitev posodobljena: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Omejitev porabe za storitev izbrisana: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Osebne omejitve porabe za storitev nastavljene: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Osebne omejitve porabe za storitev onemogočene: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Naročnina stranke posodobljena: {0}</value>
   </data>
@@ -725,6 +740,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal deaktiviran</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal blokiran v skladu s pravilnikom o hrambi podatkov</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal odblokiran</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal izbrisan</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Strežnik MCP {0} AI agenta je bil posodobljen</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Datoteko je odprla skripta Document Builder: {0}</value>
   </data>
 </root>

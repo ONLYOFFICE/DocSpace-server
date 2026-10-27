@@ -236,6 +236,109 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetServicePrices_ResolvesTheServiceThenBuildsByServicePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath);
+            return request.RequestUri.AbsolutePath.Contains("/servicePrice/")
+                ? Json(HttpStatusCode.OK, """[{"id":12,"serviceId":7,"timeUnit":"Minute","servicePrice":0.5}]""")
+                : Json(HttpStatusCode.OK, """{"id":7,"name":"ai-tools"}""");
+        });
+
+        var prices = await client.GetServicePricesAsync("ai-tools", active: true);
+
+        paths.Should().Equal("/api/service/by-name/ai-tools", "/api/servicePrice/by-service/7");
+        prices.Should().ContainSingle().Which.TimeUnit.Should().Be(PriceTimeUnit.Minute);
+    }
+
+    [Fact]
+    public async Task CompleteCustomerSession_PostsToSessionCompletePath()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
+
+        await client.CompleteCustomerSessionAsync("portal-1", "backup", 42, 3, "3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/complete");
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        body.RootElement.GetProperty("sessionId").GetInt32().Should().Be(42);
+        body.RootElement.GetProperty("customerName").GetString().Should().Be("portal-1");
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_SendsNamesInOneRequest_AndLeavesUnknownServicesOut()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
+            ("backup", 10m, "USD"), ("disk-storage", 0.14m, "EUR"))));
+
+        var prices = await client.GetProductPriceInfoAsync(["backup", "disk-storage", "unknown"]);
+
+        handler.CallCount.Should().Be(1);
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/service");
+
+        var query = ParseQuery(handler.LastUri);
+        query["status"].Should().Be("Approved");
+        query["limit"].Should().Be("100");
+        query["offset"].Should().Be("0");
+        QueryValues(handler.LastUri, "names").Should().BeEquivalentTo("backup", "disk-storage", "unknown");
+
+        prices.Keys.Should().BeEquivalentTo("backup", "disk-storage");
+        prices["backup"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 10m });
+        prices["disk-storage"].Should().Equal(new Dictionary<string, decimal> { ["EUR"] = 0.14m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_ServiceIgnoringNamesFilter_ReturnsOnlyRequestedServices()
+    {
+        // An accounting service without the names filter answers with every approved service.
+        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 3,
+            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"), ("disk-storage", 0.14m, "USD"))));
+
+        var prices = await client.GetProductPriceInfoAsync(["ai-tools"]);
+
+        prices.Keys.Should().Equal("ai-tools");
+        prices["ai-tools"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 0m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_NoNames_SendsNoRequest()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 0)));
+
+        var prices = await client.GetProductPriceInfoAsync([]);
+
+        prices.Should().BeEmpty();
+        handler.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_AnswerLargerThanPage_ReadsEveryPage()
+    {
+        var offsets = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            var offset = ParseQuery(request.RequestUri!)["offset"];
+            offsets.Add(offset);
+
+            // 150 services: the first page holds 100 of them, the second the remaining 50.
+            var services = Enumerable.Range(int.Parse(offset), offset == "0" ? 100 : 50)
+                .Select(i => ($"service-{i}", (decimal)i, "USD"))
+                .ToArray();
+
+            return Json(HttpStatusCode.OK, ServicesPage(150, services));
+        });
+
+        var prices = await client.GetProductPriceInfoAsync(["service-0", "service-149"]);
+
+        offsets.Should().Equal("0", "100");
+        prices["service-149"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 149m });
+    }
+
+    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
@@ -271,7 +374,7 @@ public class AccountingClientTests
         // Refit.ApiRequestException to the callers.
         var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
 
-        var act = async () => await client.GetServiceInfoAsync("backup");
+        var act = async () => await client.GetAllCurrenciesAsync();
 
         (await act.Should().ThrowExactlyAsync<AccountingException>())
             .WithInnerException<HttpRequestException>();
@@ -279,9 +382,9 @@ public class AccountingClientTests
     [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "[]"));
 
-        await client.GetServiceInfoAsync("backup");
+        await client.GetAllCurrenciesAsync();
 
         handler.LastAuthorization.Should().NotBeNull();
 
@@ -397,7 +500,7 @@ public class AccountingClientTests
         await act.Should().ThrowAsync<AccountingNotConfiguredException>();
     }
 
-    private static (AccountingClient client, CapturingHandler handler) CreateClient(
+    internal static (AccountingClient client, CapturingHandler handler) CreateClient(
         Func<HttpRequestMessage, HttpResponseMessage> responder, string baseUrl = BaseUrl)
     {
         var configuration = new ConfigurationBuilder()
@@ -435,7 +538,15 @@ public class AccountingClientTests
         return $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("""{"service":"backup"}""", count))}}],"totalQuantity":{{totalQuantity}}}""";
     }
 
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
+    private static string ServicesPage(int totalQuantity, params (string Name, decimal Price, string Currency)[] services)
+    {
+        var items = services.Select(s =>
+            $$$"""{"name":"{{{s.Name}}}","priceValue":{{{s.Price.ToString(CultureInfo.InvariantCulture)}}},"currency":{"code":"{{{s.Currency}}}"}}""");
+
+        return $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""";
+    }
+
+    internal static HttpResponseMessage Json(HttpStatusCode status, string json)
     {
         return new HttpResponseMessage(status)
         {
@@ -451,7 +562,17 @@ public class AccountingClientTests
         return $"ASC {key}:{timestamp}:{hash}";
     }
 
-    private static Dictionary<string, string> ParseQuery(Uri uri)
+    private static List<string> QueryValues(Uri uri, string name)
+    {
+        return uri.Query.TrimStart('?')
+            .Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Select(pair => pair.Split('=', 2))
+            .Where(pair => Uri.UnescapeDataString(pair[0]) == name)
+            .Select(pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1]) : "")
+            .ToList();
+    }
+
+    internal static Dictionary<string, string> ParseQuery(Uri uri)
     {
         var result = new Dictionary<string, string>();
         var query = uri.Query.TrimStart('?');
@@ -472,7 +593,7 @@ public class AccountingClientTests
         return result;
     }
 
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
+    internal sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
         public int CallCount { get; private set; }
         public Uri? LastUri { get; private set; }

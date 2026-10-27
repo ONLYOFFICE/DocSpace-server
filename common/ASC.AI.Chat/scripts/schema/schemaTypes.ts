@@ -219,8 +219,12 @@ export type AiToolCallData = {
   messageId: string;
   /** Index of the tool-call content part inside `message.content`. */
   idx: number;
-  /** Snapshot of the assistant message at the time the tool call surfaced. */
-  message: ThreadMessageLike;
+  /**
+   * Snapshot of the assistant message at the time the tool call surfaced.
+   * Optional and ignored: the engine resumes from the stored message, and
+   * the copy inflated the body past the parser limit (Bug 84608).
+   */
+  message?: ThreadMessageLike;
   /** Per-request engine options: extra tools, reasoning, prompt override. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
@@ -561,6 +565,97 @@ export type Req_aiExportTextToDocx = {
 };
 /** Accepted-for-processing acknowledgement (conversion is asynchronous). */
 export type Res_aiExportTextToDocx = { success: boolean };
+
+export type Req_aiMetaGenerate = {
+  /** The entry's table. Only `file` for now: a folder or a room answers 400. */
+  kind: "file";
+  /** The entry's integer id. */
+  id: string | number;
+  /** What kind of metadata fields the caller is interested in; a hint for the model. */
+  prompt?: string;
+};
+export type Res_aiMetaGenerate = {
+  /** The proposed custom metadata fields with the values the text supports. */
+  fields: {
+    /** Field name, at most 255 characters. */
+    name: string;
+    /** The value found in the documents, or null when the text does not state one. */
+    value: string | null;
+  }[];
+  /** The documents the proposal was read from. */
+  sources: {
+    id: string;
+    title: string;
+    /** Whether the document was cut to fit the model's budget. */
+    truncated: boolean;
+  }[];
+  /** The entries that were left out, with the reason for each. */
+  skipped: {
+    id: string;
+    title?: string;
+    reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
+  }[];
+};
+
+export type Req_aiMetaFill = {
+  /** The entry's table. Only `file` for now: a folder or a room answers 400. */
+  kind: "file";
+  /** The entry's integer id. */
+  id: string | number;
+  /** What to pay attention to; a hint for the model. */
+  prompt?: string;
+  /** Also replace the fields that already carry a value. Default false. */
+  overwrite?: boolean;
+  /** Resolve the values but write nothing; the caller writes what the user confirms. Default true: a write needs an explicit false. */
+  dryRun?: boolean;
+};
+/** A metadata value: exactly one member, by the field's type. */
+export type AiMetadataValue = {
+  stringValue?: string;
+  numberValue?: number;
+  /** ISO 8601 date-time, UTC midnight of the date. */
+  dateValue?: string;
+  optionIds?: string[];
+};
+export type AiEntryMetadataField = {
+  id: number;
+  name: string;
+  /** `MetadataFieldType`: 0 String, 1 Date, 2 Number, 3 SingleChoice, 4 MultiChoice. */
+  type: number;
+  options: { id: string; value: string }[];
+  value?: AiMetadataValue;
+};
+export type AiEntryMetadata = {
+  templates: { id: number; name: string; visible: boolean; fields: AiEntryMetadataField[] }[];
+  customFields: { name: string; value: string }[];
+};
+export type Res_aiMetaFill = {
+  /** Whether the values were only proposed (`true`) or written as well. */
+  dryRun: boolean;
+  /** The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it. */
+  metadata: AiEntryMetadata;
+  /** The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field. */
+  filled: {
+    /** Absent for a custom field. */
+    fieldId?: number;
+    name: string;
+    value: AiMetadataValue | string;
+  }[];
+  /** The fields left as they were, with the reason for each. */
+  unresolved: {
+    fieldId?: number;
+    name: string;
+    reason: "already_set" | "not_found" | "invalid_value" | "unknown_option" | "write_failed";
+  }[];
+  /** The documents the values were read from. */
+  sources: { id: string; title: string; truncated: boolean }[];
+  /** The entries that were left out, with the reason for each. */
+  skipped: {
+    id: string;
+    title?: string;
+    reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
+  }[];
+};
 /**
  * A DocSpace room id: an integer for native rooms, a string for
  * third-party-backed ones.

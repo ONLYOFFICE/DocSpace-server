@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Изтеглен отчет за потребителски операции</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Създаден лимит на разходите за услуга: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Актуализиран лимит на разходите за услуга: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Изтрит лимит на разходите за услуга: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Зададени персонални лимити на разходите за услуга: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Деактивирани персонални лимити на разходите за услуга: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Актуализиран потребителски абонамент: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Порталът е деактивиран</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Порталът е блокиран от политиката за съхранение на данни</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Порталът е отблокиран</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Порталът е изтрит</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Стойностите на метаданните са актуализирани: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Файлът е отворен от скрипт на Document Builder: {0}</value>
   </data>
 </root>

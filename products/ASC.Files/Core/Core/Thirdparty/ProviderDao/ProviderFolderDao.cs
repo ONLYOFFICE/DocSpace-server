@@ -334,7 +334,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         await folderDao.DeleteFolderAsync(selector.ConvertId(folderId));
     }
 
-    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
+    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken)
     {
         if (toFolderId is int tId)
         {

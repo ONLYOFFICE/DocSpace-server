@@ -41,103 +41,106 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 [Trait("Category", "Metadata")]
 public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const int StringType = 0;
     private const string ClientField = "Client";
     private const string DepartmentField = "Department";
 
     [Fact]
     public async Task DeleteField_RemovesItFromTheTemplateAndTheEntries()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Fields " + suffix,
+        var template = await CreateTemplateAsync("Fields " + suffix,
         [
-            new MetadataFieldPayload { Name = ClientField, Type = StringType },
-            new MetadataFieldPayload { Name = DepartmentField, Type = StringType }
-        ], TestContext.Current.CancellationToken);
+            new MetadataFieldRequest(ClientField, MetadataFieldType.String),
+            new MetadataFieldRequest(DepartmentField, MetadataFieldType.String)
+        ]);
         var clientFieldId = template.Field(ClientField).Id;
         var departmentFieldId = template.Field(DepartmentField).Id;
         var room = await CreateCustomRoom($"Fields {suffix}");
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(room.Id,
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(room.Id, new SetMetadataValues(
         [
-            new MetadataValuePayload { FieldId = clientFieldId, StringValue = "ACME" },
-            new MetadataValuePayload { FieldId = departmentFieldId, StringValue = "Legal" }
-        ], TestContext.Current.CancellationToken);
+            new MetadataValueRequest(clientFieldId, stringValue: "ACME"),
+            new MetadataValueRequest(departmentFieldId, stringValue: "Legal")
+        ]), TestContext.Current.CancellationToken);
 
-        await api.DeleteFieldAsync(template.Id, departmentFieldId, TestContext.Current.CancellationToken);
+        await _metadataApi.DeleteFieldAsync(template.Id, departmentFieldId, TestContext.Current.CancellationToken);
 
-        var reloaded = await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        var reloaded = (await _metadataApi.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken)).Response;
         reloaded.Fields.Should().ContainSingle().Which.Id.Should().Be(clientFieldId);
 
-        var metadata = await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken);
+        var metadata = (await _metadataApi.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken)).Response.Templates;
         var entry = metadata.Should().ContainSingle(t => t.Id == template.Id).Which;
-        entry.Fields.Should().ContainSingle("the deleted field leaves the entries with it").Which.Value!.StringValue.Should().Be("ACME", "the other field keeps its value");
+        entry.Fields.Should().ContainSingle("the deleted field leaves the entries with it").Which.Value.StringValue.Should().Be("ACME", "the other field keeps its value");
 
         // a filter on the deleted field is refused, the same way an unknown one is
-        using var search = await api.SearchFolderResponseAsync(room.Id, new { metadataFilters = new object[] { new { fieldId = departmentFieldId, op = "eq", value = "Legal" } } }, TestContext.Current.CancellationToken);
-        search.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var search = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(room.Id,
+                new FolderMetadataSearch(metadataFilters: [new MetadataFilterConditionRequest(fieldId: departmentFieldId, op: "eq", value: "Legal")]), TestContext.Current.CancellationToken));
+        search.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task FileDeletedForGood_IsGoneWithItsMetadata()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Gone " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
-        var condition = new { fieldId = template.Field(ClientField).Id, op = "eq", value = "ACME" };
+        var template = await CreateTemplateAsync("Gone " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
+        var condition = new MetadataFilterConditionRequest(fieldId: template.Field(ClientField).Id, op: "eq", value: "ACME");
         var room = await CreateCustomRoom($"Gone {suffix}");
         var file = await CreateFile($"gone-{suffix}.docx", room.Id);
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = condition.fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await SetFileValueAsync(file.Id, condition.FieldId, "ACME");
 
-        (await PollFolderContentAsync(api, room.Id, template.Id, condition, c => c.FileIds().Contains(file.Id))).FileIds().Should().Contain(file.Id);
+        (await PollFolderContentAsync(room.Id, template.Id, condition, c => c.FileIds().Contains(file.Id))).FileIds().Should().Contain(file.Id);
 
         await DeleteAndWaitAsync(new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true });
 
-        using var response = await api.GetFileMetadataResponseAsync(file.Id, TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var response = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken));
+        response.ErrorCode.Should().Be(404);
 
-        var content = await PollFolderContentAsync(api, room.Id, template.Id, condition, c => !c.FileIds().Contains(file.Id));
+        var content = await PollFolderContentAsync(room.Id, template.Id, condition, c => !c.FileIds().Contains(file.Id));
         content.FileIds().Should().NotContain(file.Id, "a deleted file is not found by the metadata it had");
     }
 
     [Fact]
     public async Task EmptiedTrash_DropsTheMetadataOfItsEntries()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Trash " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
-        var condition = new { fieldId = template.Field(ClientField).Id, op = "eq", value = "ACME" };
-        var value = new MetadataValuePayload { FieldId = condition.fieldId, StringValue = "ACME" };
+        var template = await CreateTemplateAsync("Trash " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
+        var condition = new MetadataFilterConditionRequest(fieldId: template.Field(ClientField).Id, op: "eq", value: "ACME");
 
         // room entries are deleted for good, so the trash case is a folder of "My documents"
         var myDocumentsId = await GetUserFolderIdAsync(Owner);
         var folder = await CreateFolderInMy($"Trash {suffix}", Owner);
         var file = await CreateFile($"trash-{suffix}.docx", folder.Id);
 
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(folder.Id, [value], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [value], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await SetFolderValueAsync(folder.Id, condition.FieldId, "ACME");
+        await SetFileValueAsync(file.Id, condition.FieldId, "ACME");
 
         await DeleteAndWaitAsync(new DeleteBatchRequestDto { FolderIds = [new(folder.Id)], Immediately = false });
 
-        var trashed = await api.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken);
+        var trashed = (await _metadataApi.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Templates;
         trashed.Should().ContainSingle(t => t.Id == template.Id, "a folder in the trash keeps its metadata until the trash is emptied");
 
         var results = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         await WaitAsync(results);
 
-        using var folderResponse = await api.GetFolderMetadataResponseAsync(folder.Id, TestContext.Current.CancellationToken);
-        folderResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var folderResponse = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken));
+        folderResponse.ErrorCode.Should().Be(404);
 
-        using var fileResponse = await api.GetFileMetadataResponseAsync(file.Id, TestContext.Current.CancellationToken);
-        fileResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var fileResponse = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken));
+        fileResponse.ErrorCode.Should().Be(404);
 
-        var content = await PollFolderContentAsync(api, myDocumentsId, template.Id, condition, c => !c.FolderIds().Contains(folder.Id) && !c.FileIds().Contains(file.Id));
+        var content = await PollFolderContentAsync(myDocumentsId, template.Id, condition, c => !c.FolderIds().Contains(folder.Id) && !c.FileIds().Contains(file.Id));
         content.FolderIds().Should().NotContain(folder.Id, "an entry dropped with the trash is not found by the metadata it had");
         content.FileIds().Should().NotContain(file.Id);
     }
@@ -145,22 +148,23 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task RestoredFile_KeepsItsMetadata()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Restore " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
-        var condition = new { fieldId = template.Field(ClientField).Id, op = "eq", value = "ACME" };
+        var template = await CreateTemplateAsync("Restore " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
+        var condition = new MetadataFilterConditionRequest(fieldId: template.Field(ClientField).Id, op: "eq", value: "ACME");
 
         var myDocumentsId = await GetUserFolderIdAsync(Owner);
         var file = await CreateFileInMy($"restore-{suffix}.docx", Owner);
 
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = condition.fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await SetFileValueAsync(file.Id, condition.FieldId, "ACME");
 
         await DeleteAndWaitAsync(new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false });
 
         // the restore is a move out of the trash, back to where the file was
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(myDocumentsId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new BatchRequestDtoAllOfFileIds(file.Id)],
@@ -168,34 +172,35 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         }, TestContext.Current.CancellationToken)).Response;
         await WaitAsync(results);
 
-        var metadata = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
-        metadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("ACME", "the trip through the trash changes nothing");
+        var metadata = (await _metadataApi.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken)).Response.Templates;
+        metadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value.StringValue.Should().Be("ACME", "the trip through the trash changes nothing");
 
-        var content = await PollFolderContentAsync(api, myDocumentsId, template.Id, condition, c => c.FileIds().Contains(file.Id));
+        var content = await PollFolderContentAsync(myDocumentsId, template.Id, condition, c => c.FileIds().Contains(file.Id));
         content.FileIds().Should().Contain(file.Id, "the restored file is found by its metadata where it came back to");
     }
 
     [Fact]
     public async Task CopiedFolder_CarriesTheMetadataOfItselfAndItsContent()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Copy " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Copy " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
         var clientFieldId = template.Field(ClientField).Id;
 
         var sourceRoom = await CreateCustomRoom($"Copy source {suffix}");
         var folder = await CreateFolder($"Copied {suffix}", sourceRoom.Id);
         var file = await CreateFile($"copied-{suffix}.docx", folder.Id);
 
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(folder.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "Folder" }], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "File" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await SetFolderValueAsync(folder.Id, clientFieldId, "Folder");
+        await SetFileValueAsync(file.Id, clientFieldId, "File");
 
         var targetRoom = await CreateCustomRoom($"Copy target {suffix}");
 
         var results = (await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new BatchRequestDtoAllOfDestFolderId(targetRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
@@ -203,48 +208,50 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         }, TestContext.Current.CancellationToken)).Response;
         await WaitAsync(results);
 
-        var folderCopy = await FindAsync(api, targetRoom.Id, c => c.Folders.FirstOrDefault(f => f.Title == folder.Title));
-        var fileCopy = await FindAsync(api, folderCopy.Id, c => c.Files.FirstOrDefault(f => f.Title == file.Title));
+        var folderCopy = await FindAsync(targetRoom.Id, c => c.Folders.FirstOrDefault(f => f.Title == folder.Title));
+        var fileCopy = await FindAsync(folderCopy.Id, c => c.Files.FirstOrDefault(f => f.Title == file.Title));
 
         folderCopy.Id.Should().NotBe(folder.Id);
 
-        var folderMetadata = await PollMetadataAsync(api, folderCopy.Id, FileEntryType.Folder, m => m.Any(t => t.Id == template.Id));
-        folderMetadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("Folder", "the copy of the folder carries the folder's metadata");
+        var folderMetadata = await PollMetadataAsync(folderCopy.Id, FileEntryType.Folder, m => m.Any(t => t.Id == template.Id));
+        folderMetadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value.StringValue.Should().Be("Folder", "the copy of the folder carries the folder's metadata");
 
-        var fileMetadata = await PollMetadataAsync(api, fileCopy.Id, FileEntryType.File, m => m.Any(t => t.Id == template.Id));
-        fileMetadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("File", "the copy of the content carries the content's metadata");
+        var fileMetadata = await PollMetadataAsync(fileCopy.Id, FileEntryType.File, m => m.Any(t => t.Id == template.Id));
+        fileMetadata.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value.StringValue.Should().Be("File", "the copy of the content carries the content's metadata");
 
-        var source = await api.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken);
-        source.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("Folder", "the source is left as it was");
+        var source = (await _metadataApi.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Templates;
+        source.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value.StringValue.Should().Be("Folder", "the source is left as it was");
     }
 
     [Fact]
     public async Task DeletedRoom_IsGoneWithItsMetadata()
     {
-        var api = await ArrangeAsync();
+        await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
-        var template = await api.CreateTemplateAsync("Room " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
-        var condition = new { fieldId = template.Field(ClientField).Id, op = "eq", value = "ACME" };
+        var template = await CreateTemplateAsync("Room " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
+        var condition = new MetadataFilterConditionRequest(fieldId: template.Field(ClientField).Id, op: "eq", value: "ACME");
         var room = await CreateCustomRoom($"Deleted {suffix}");
         var file = await CreateFile($"deleted-{suffix}.docx", room.Id);
 
-        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.AssignFileTemplatesAsync(file.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = condition.fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(file.Id, [new MetadataValuePayload { FieldId = condition.fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(room.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(file.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await SetFolderValueAsync(room.Id, condition.FieldId, "ACME");
+        await SetFileValueAsync(file.Id, condition.FieldId, "ACME");
 
-        (await PollRoomsAsync(api, template.Id, condition, r => r.RoomIds().Contains(room.Id))).RoomIds().Should().Contain(room.Id);
+        (await PollRoomsAsync(template.Id, condition, r => r.RoomIds().Contains(room.Id))).RoomIds().Should().Contain(room.Id);
 
         var operation = (await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken)).Response;
         await WaitAsync(operation.Finished ? [operation] : await WaitLongOperation(operation.Id));
 
-        using var roomResponse = await api.GetFolderMetadataResponseAsync(room.Id, TestContext.Current.CancellationToken);
-        roomResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var roomResponse = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken));
+        roomResponse.ErrorCode.Should().Be(404);
 
-        using var fileResponse = await api.GetFileMetadataResponseAsync(file.Id, TestContext.Current.CancellationToken);
-        fileResponse.StatusCode.Should().Be(HttpStatusCode.NotFound, "the content of a deleted room is deleted for good");
+        var fileResponse = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken));
+        fileResponse.ErrorCode.Should().Be(404, "the content of a deleted room is deleted for good");
 
-        var rooms = await PollRoomsAsync(api, template.Id, condition, r => !r.RoomIds().Contains(room.Id));
+        var rooms = await PollRoomsAsync(template.Id, condition, r => !r.RoomIds().Contains(room.Id));
         rooms.RoomIds().Should().NotContain(room.Id, "a deleted room is not found by the metadata it had");
     }
 
@@ -252,6 +259,9 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
 
     private async Task DeleteAndWaitAsync(DeleteBatchRequestDto request)
     {
+        // only the started operation, so the wait follows it and not an older one listed first
+        request.ReturnSingleOperation = true;
+
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(request, TestContext.Current.CancellationToken)).Response;
 
         await WaitAsync(results);
@@ -267,13 +277,13 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         results.Should().NotContain(operation => !operation.Finished || !string.IsNullOrEmpty(operation.Error));
     }
 
-    private static async Task<RoomEntryResponse> FindAsync(MetadataApiClient api, int folderId, Func<FolderContentResponse, RoomEntryResponse?> select)
+    private async Task<RoomEntryResponse> FindAsync(int folderId, Func<FolderContentResponse, RoomEntryResponse?> select)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            var content = await api.GetFolderContentAsync(folderId, withSubFolders: false, cancellationToken: TestContext.Current.CancellationToken);
+            var content = await _foldersApi.GetFolderContentWithMetadataAsync(folderId, withSubFolders: false, cancellationToken: TestContext.Current.CancellationToken);
             var entry = select(content);
 
             if (entry != null || DateTime.UtcNow > deadline)
@@ -288,13 +298,13 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
     /// <summary>
     /// Requests the folder content filtered by metadata, retrying only to absorb the indexing lag of a written or removed document.
     /// </summary>
-    private static async Task<FolderContentResponse> PollFolderContentAsync(MetadataApiClient api, int folderId, int templateId, object condition, Func<FolderContentResponse, bool> until)
+    private async Task<FolderContentResponse> PollFolderContentAsync(int folderId, int templateId, MetadataFilterConditionRequest condition, Func<FolderContentResponse, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            var content = await api.GetFolderContentAsync(folderId, templateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
+            var content = await _foldersApi.GetFolderContentWithMetadataAsync(folderId, templateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
 
             if (until(content) || DateTime.UtcNow > deadline)
             {
@@ -305,13 +315,13 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         }
     }
 
-    private static async Task<RoomsContentResponse> PollRoomsAsync(MetadataApiClient api, int templateId, object condition, Func<RoomsContentResponse, bool> until)
+    private async Task<RoomsContentResponse> PollRoomsAsync(int templateId, MetadataFilterConditionRequest condition, Func<RoomsContentResponse, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            var rooms = await api.GetRoomsAsync(templateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
+            var rooms = await _roomsApi.GetRoomsWithMetadataAsync(templateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
 
             if (until(rooms) || DateTime.UtcNow > deadline)
             {
@@ -322,15 +332,15 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         }
     }
 
-    private static async Task<List<EntryTemplateResponse>> PollMetadataAsync(MetadataApiClient api, int entryId, FileEntryType entryType, Func<List<EntryTemplateResponse>, bool> until)
+    private async Task<List<EntryTemplateDto>> PollMetadataAsync(int entryId, FileEntryType entryType, Func<List<EntryTemplateDto>, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
             var metadata = entryType == FileEntryType.File
-                ? await api.GetFileMetadataAsync(entryId, TestContext.Current.CancellationToken)
-                : await api.GetFolderMetadataAsync(entryId, TestContext.Current.CancellationToken);
+                ? (await _metadataApi.GetFileMetadataAsync(entryId, TestContext.Current.CancellationToken)).Response.Templates
+                : (await _metadataApi.GetFolderMetadataAsync(entryId, TestContext.Current.CancellationToken)).Response.Templates;
 
             if (until(metadata) || DateTime.UtcNow > deadline)
             {
@@ -341,11 +351,19 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         }
     }
 
-    private async Task<MetadataApiClient> ArrangeAsync()
+    private async Task<MetadataTemplateDto> CreateTemplateAsync(string name, List<MetadataFieldRequest> fields, bool visible = true)
     {
-        await _filesClient.Authenticate(Owner);
+        return (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto(name, visible, fields), TestContext.Current.CancellationToken)).Response;
+    }
 
-        return new MetadataApiClient(_filesClient);
+    private async Task SetFolderValueAsync(int folderId, int fieldId, string value)
+    {
+        await _metadataApi.SetFolderValuesAsync(folderId, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: value)]), TestContext.Current.CancellationToken);
+    }
+
+    private async Task SetFileValueAsync(int fileId, int fieldId, string value)
+    {
+        await _metadataApi.SetFileValuesAsync(fileId, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: value)]), TestContext.Current.CancellationToken);
     }
 
     private static string Suffix()

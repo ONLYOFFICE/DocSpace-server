@@ -23,6 +23,7 @@
   <Project Path="common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
   <Project Path="common/services/ASC.ApiSystem/ASC.ApiSystem.csproj" />
   <Project Path="common/services/ASC.AuditTrail/ASC.AuditTrail.csproj" />
+  <Project Path="common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj" />
   <Project Path="common/services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
   <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
@@ -30,6 +31,7 @@
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Core.Tests/ASC.Data.Backup.Core.Tests.csproj" />
+  <Project Path="common/Tests/ASC.Data.Backup.Tests/ASC.Data.Backup.Tests.csproj" />
   <Project Path="common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj" />
   <Project Path="common/Tests/ASC.Tests.Common/ASC.Tests.Common.csproj" />
   <Project Path="common/Tools/ASC.Data.Stress/ASC.Data.Stress.csproj" />

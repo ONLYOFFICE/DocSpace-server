@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>تم تنزيل تقرير عمليات العملاء</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>تم إنشاء حد الإنفاق على الخدمة: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>تم تحديث حد الإنفاق على الخدمة: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>تم حذف حد الإنفاق على الخدمة: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>تم تعيين حدود الإنفاق الشخصية على الخدمة: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>تم تعطيل حدود الإنفاق الشخصية على الخدمة: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>تم تحديث اشتراك العميل: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>تم تعطيل البوابة</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>تم حظر البوابة بموجب سياسة الاحتفاظ بالبيانات</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>تم إلغاء حظر البوابة</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>تم حذف البوابة</value>
@@ -1292,5 +1313,8 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>تم تحديث قيم البيانات الوصفية: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>تم فتح الملف بواسطة نص Document Builder: {0}</value>
   </data>
 </root>

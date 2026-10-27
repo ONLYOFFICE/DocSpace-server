@@ -232,6 +232,7 @@ public class TfaappController(
     [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own")]
     [SwaggerResponse(405, "The requested method is not enabled on this portal, or the SMS method has no configured provider")]
+    [AllowNotPayment]
     [HttpPut("tfaapp")]
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {

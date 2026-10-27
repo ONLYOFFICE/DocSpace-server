@@ -142,3 +142,25 @@ skill re-checks usage through LSP on every run anyway.
   `CreateObjectUploader(...).InitiateSessionAsync()` for the session URI and then PUT the chunks with our own
   HTTP requests, so library-side upload changes (validation, hashing) do not reach them. We set no
   `UploadValidationMode` and catch neither `UploadValidationException` nor `GoogleApiException`.
+
+## Roslyn (`Microsoft.CodeAnalysis.Common`, `Microsoft.CodeAnalysis.CSharp`)
+
+- **Traps:** they are referenced only by `ASC.Analyzers`, which the services load as an analyzer — so it runs
+  inside the compiler of whatever SDK builds the code, not on our pinned Roslyn. The pin must not exceed the
+  Roslyn of the oldest SDK feature band we support (10.0.1xx ships Roslyn 5.0.x; distro packages install that
+  band), otherwise that compiler skips the analyzer with CS9057 — a new warning, and the analyzer silently stops
+  checking. A local build on a newer SDK stays green and hides it. Recheck: the file version of
+  `<dotnet root>/sdk/<version>/Roslyn/bincore/Microsoft.CodeAnalysis.dll` of the oldest SDK used by CI/packaging.
+
+## Microsoft.Build
+
+- **Blockers for the next attempt:** 18.10 and later ship only `net11.0` and `net472` (no net10.0 group), so on
+  net10.0 NuGet falls back to the net472 assets with NU1701. Stay on the newest 18.x that still has a net10.0
+  group until the TFM moves to net11. Recheck: the `targetFramework` groups of the target version's nuspec.
+
+## FirebaseAdmin
+
+- **Blockers for the next attempt:** from 3.6 `Message.Token` is `[Obsolete]` in favour of `Fid` — a Firebase
+  Installation ID, a different identifier from the FCM registration tokens our mobile apps register and
+  `FirebaseHelper` sends to. Bumping to 3.6+ raises CS0618 there; either suppress it deliberately or move the
+  apps and the stored device ids to FID first. 3.5.x has everything else without the obsoletion.

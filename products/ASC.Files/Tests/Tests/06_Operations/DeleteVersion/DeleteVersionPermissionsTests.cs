@@ -52,7 +52,7 @@ public class DeleteVersionPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -104,7 +104,7 @@ public class DeleteVersionPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -147,7 +147,7 @@ public class DeleteVersionPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -171,7 +171,7 @@ public class DeleteVersionPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);

@@ -429,7 +429,8 @@ public class MetadataValueRequest
     public string StringValue { get; set; }
 
     /// <summary>
-    /// The number value.
+    /// The number value: a whole number of at most 2^53-1 (9007199254740991) in magnitude, the largest integer a JSON
+    /// client reads exactly. A larger one is refused rather than stored and returned rounded.
     /// </summary>
     /// <example>150000</example>
     public long? NumberValue { get; set; }
@@ -574,7 +575,8 @@ public class CustomFieldRequest
 public class SearchFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder or room to search in; take the id from a listing such as `GET api/2.0/files/@root`. A numeric id
+    /// addresses a folder of the portal, a string one a folder in a connected third-party storage.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]

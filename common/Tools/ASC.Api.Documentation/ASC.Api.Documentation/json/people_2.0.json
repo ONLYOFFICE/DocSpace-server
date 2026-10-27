@@ -396,7 +396,7 @@
           "Api keys"
         ],
         "summary": "Get the current API key",
-        "description": "Returns the API key that authenticated this very request, letting the holder of a key find out what it is\r\nallowed to do without knowing its ID.\r\nThe key is identified by the `Authorization` header of the call itself, so the request has to be sent as\r\n`Bearer sk-...`; a session authenticated in any other way has no key to report and this operation is not\r\nusable for it.\r\nThe call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the\r\nsecret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.\r\nTo look at a key other than the one in use, call `GET api/2.0/keys` instead.",
+        "description": "Returns the API key that authenticated this very request, letting the holder of a key find out what it is\r\nallowed to do without knowing its ID.\r\nThe key is identified by the `Authorization` header of the call itself, so the request has to be sent as\r\n`Bearer sk-...`; a session authenticated in any other way, by a cookie or by a user token, has no key to\r\nreport and is rejected with 400.\r\nThe call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the\r\nsecret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.\r\nTo look at a key other than the one in use, call `GET api/2.0/keys` instead.",
         "operationId": "getApiKey",
         "responses": {
           "200": {
@@ -421,10 +421,7 @@
             }
           },
           "400": {
-            "description": "The request has no Authorization header, as with a session authenticated by a cookie"
-          },
-          "500": {
-            "description": "The Authorization header carries a token that is not an API key of this portal"
+            "description": "The request is not authenticated by an API key, as with a session authenticated by a cookie or by a user token"
           },
           "401": {
             "description": "Unauthorized",
@@ -443,6 +440,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -489,7 +496,7 @@
           "Api keys"
         ],
         "summary": "Update an API key",
-        "description": "Renames an API key, replaces the scopes it may use, or activates and deactivates it, without changing the\r\nsecret.\r\nThe caller may update a key they created themselves, and a DocSpace administrator may update any key of the\r\nportal.\r\nTake the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is\r\nrejected with 400, and the fields that are left out keep their current values.\r\nThe answer is a plain boolean: true when the key was changed, and false when it was not - which is also what\r\nan already expired key returns, because such a key is left untouched instead of being reported as an error.\r\nDeactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it\r\nwhen the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.",
+        "description": "Renames an API key, replaces the scopes it may use, or activates and deactivates it, without changing the\r\nsecret.\r\nThe caller may update a key they created themselves, and a DocSpace administrator may update any key of the\r\nportal.\r\nTake the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is\r\nrejected with 400, as is a name that is empty or made of whitespace only, and the fields that are left out\r\nkeep their current values.\r\nThe answer is a plain boolean: true when the key was changed, and false when it was not - which is also what\r\nan already expired key returns, because such a key is left untouched instead of being reported as an error.\r\nDeactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it\r\nwhen the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.\r\nAn ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.",
         "operationId": "updateApiKey",
         "parameters": [
           {
@@ -541,12 +548,12 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know"
+            "description": "The request body cannot be read, the name is empty, made of whitespace only or longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know"
           },
           "403": {
             "description": "The key belongs to another member and the caller is not a DocSpace admin"
           },
-          "500": {
+          "404": {
             "description": "The portal has no key with this ID"
           },
           "401": {
@@ -566,6 +573,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -610,7 +627,7 @@
           "Api keys"
         ],
         "summary": "Delete an API key",
-        "description": "Deletes the API key with the ID given in the route, so that it stops authenticating requests immediately.\r\nThe caller may delete a key they created themselves, and a DocSpace administrator may delete any key of the\r\nportal.\r\nThe removal is permanent and cannot be undone: the secret was only ever readable at creation time, so a\r\ndeleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.\r\nTo stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.\r\nThe answer is a plain boolean reporting whether the key was removed.",
+        "description": "Deletes the API key with the ID given in the route, so that it stops authenticating requests immediately.\r\nThe caller may delete a key they created themselves, and a DocSpace administrator may delete any key of the\r\nportal.\r\nThe removal is permanent and cannot be undone: the secret was only ever readable at creation time, so a\r\ndeleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.\r\nTo stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.\r\nThe answer is a plain boolean reporting whether the key was removed.\r\nAn ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.",
         "operationId": "deleteApiKey",
         "parameters": [
           {
@@ -652,7 +669,7 @@
           "403": {
             "description": "The key belongs to another member and the caller is not a DocSpace admin"
           },
-          "500": {
+          "404": {
             "description": "The portal has no key with this ID"
           },
           "401": {
@@ -672,6 +689,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13406,7 +13433,6 @@
                 "retina": "/storage/userphotos/photo_retina.png?hash=123456"
               }
             ],
-            "type": "null",
             "description": "The result of a successful upload, whose shape depends on `autosave`. With `autosave` on it holds the URLs of\r\nthe stored avatar in every size - `main`, `retina`, `max`, `big`, `medium` and `small` - each carrying a\r\n`hash` query parameter that changes with the avatar. With `autosave` off it holds the name of the temporary\r\nfile to pass to `POST api/2.0/people/{userId}/photo/thumbnails`. It is empty when the upload failed."
           },
           "message": {
@@ -14783,12 +14809,13 @@
               "Updated API Key"
             ],
             "maxLength": 30,
-            "minLength": 0,
+            "minLength": 1,
+            "pattern": "[\\s\\S]*\\S[\\s\\S]*",
             "type": [
               "null",
               "string"
             ],
-            "description": "The new label of the key, up to 30 characters. Omit it to keep the current name."
+            "description": "The new label of the key, up to 30 characters, neither empty nor made of whitespace only. Omit it to keep the\r\ncurrent name."
           },
           "permissions": {
             "examples": [

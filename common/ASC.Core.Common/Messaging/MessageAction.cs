@@ -441,6 +441,9 @@ public enum MessageAction
     [Description("File converted")]
     FileConverted = 5035,
 
+    [Description("File opened by a document builder script")]
+    FileOpenedByDocumentBuilder = 5208,
+
     [Description("File change owner")]
     FileChangeOwner = 5043,
 
@@ -1061,6 +1064,21 @@ public enum MessageAction
     /// </summary>
     [Description("Portal unblocked")]
     PortalUnblocked = 6111,
+
+    [Description("Service spending limit created")]
+    CustomerServiceLimitCreated = 6112,
+
+    [Description("Service spending limit updated")]
+    CustomerServiceLimitUpdated = 6113,
+
+    [Description("Personal service spending limits set")]
+    CustomerServiceLimitsSet = 6114,
+
+    [Description("Personal service spending limits disabled")]
+    CustomerServiceLimitsDisabled = 6115,
+
+    [Description("Service spending limit deleted")]
+    CustomerServiceLimitDeleted = 6116,
 
     #endregion
 
