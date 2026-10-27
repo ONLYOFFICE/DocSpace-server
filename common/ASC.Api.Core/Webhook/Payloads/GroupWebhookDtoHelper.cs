@@ -43,8 +43,15 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
     {
         var result = group.MapToWebhookDto();
 
-        result.IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null;
-        result.MembersCount = (await userManager.GetUsersByGroupAsync(group.ID)).Length;
+        var isSystem = await userManager.IsSystemGroup(group.ID);
+
+        result.IsSystem = isSystem ? true : null;
+
+        // a count query for an ordinary group; the members of a system group follow from the user types, which only
+        // the full list resolves
+        result.MembersCount = isSystem
+            ? (await userManager.GetUsersByGroupAsync(group.ID)).Length
+            : await userManager.GetGroupMembersCountAsync(group.ID);
 
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
 

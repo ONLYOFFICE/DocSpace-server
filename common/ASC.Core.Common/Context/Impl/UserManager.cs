@@ -648,6 +648,16 @@ public class UserManager(
         return IsUserInGroupInternal(userId, groupId, await GetRefsInternalAsync());
     }
 
+    /// <summary>
+    /// How many active and pending members a group that is not a system group has, counted in the database rather
+    /// than by loading the users. The members of a system group follow from the user types: count those with
+    /// <see cref="GetUsersByGroupAsync"/>.
+    /// </summary>
+    public Task<int> GetGroupMembersCountAsync(Guid groupId)
+    {
+        return userService.GetGroupMembersCountAsync(Tenant.Id, groupId);
+    }
+
     public async Task<UserInfo[]> GetUsersByGroupAsync(Guid groupId, EmployeeStatus employeeStatus = EmployeeStatus.Default)
     {
         var refs = await GetRefsInternalAsync();

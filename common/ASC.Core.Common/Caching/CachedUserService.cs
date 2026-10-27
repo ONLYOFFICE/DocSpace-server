@@ -368,6 +368,11 @@ public class CachedUserService : IUserService
         return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
+    public Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
+    {
+        return _service.GetGroupMembersCountAsync(tenant, groupId);
+    }
+
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)
     {
         if (exp == null)
