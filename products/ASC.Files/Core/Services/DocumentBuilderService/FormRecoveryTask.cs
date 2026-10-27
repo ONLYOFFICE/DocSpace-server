@@ -49,6 +49,10 @@ public class FormRecoveryTask : DistributedTaskProgress
     // hundreds of forms runs for many, so it publishes on a timer: a single read through the builder can outlast the window.
     private static readonly TimeSpan _heartbeatInterval = TimeSpan.FromSeconds(3);
 
+    // The heartbeat keeps the task alive whatever its reports do, so a report of the history gets the limit of a script
+    // build: the builder is polled with no limit of its own.
+    private static readonly TimeSpan _maxReportBuildTime = TimeSpan.FromMinutes(10);
+
     // The report the client polls waits in its own queue, under the same window, until the recovery starts it, and shows
     // the progress of the recovery. The report then publishes its own from 30 on, so the recovery and the older versions
     // of the report share the part below it.
@@ -215,13 +219,16 @@ public class FormRecoveryTask : DistributedTaskProgress
         var reportTask = serviceProvider.GetRequiredService<FormFillingReportTask>();
         reportTask.Init(_baseUri, TenantId, _userId, _reportData with { OriginalFormVersion = version }, $"{Id}_v{version}");
         reportTask.Publication = _ => Task.CompletedTask;
+
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken);
+        deadline.CancelAfter(_maxReportBuildTime);
         try
         {
-            await reportTask.RunJob(CancellationToken);
+            await reportTask.RunJob(deadline.Token);
         }
         catch (OperationCanceledException) when (!CancellationToken.IsCancellationRequested)
         {
-            // A timeout of a request inside the build, reported as cancelled: a failed run, tried again by the caller.
+            // Out of time, or a request inside the build timed out: a failed run, tried again by the caller.
         }
 
         return reportTask;

@@ -76,6 +76,7 @@ public class FormRecoveryService(
     {
         Recovered,
         Skipped,
+        Postponed,
         Failed,
         Unrecoverable
     }
@@ -188,6 +189,8 @@ public class FormRecoveryService(
     {
         var fileDao = daoFactory.GetFileDao<int>();
 
+        // Searched again after the check that queued the run: the run may have waited for a slot, and the responses
+        // indexed meanwhile must not be read through the builder.
         var (room, form, doneFolder, orphans) = await FindFormOrphansAsync(fileDao, roomId, originalFormId);
         if (orphans.Count == 0)
         {
@@ -210,6 +213,7 @@ public class FormRecoveryService(
 
             var orphan = orphans[i];
 
+            Exception passingFailure = null;
             var (outcome, version) = (RecoveryOutcome.Failed, 0);
             try
             {
@@ -221,20 +225,26 @@ public class FormRecoveryService(
             }
             catch (Exception e) when (IsPassingFailure(e))
             {
-                // Not the file's fault: it is left for the next report, uncounted, so that an outage does not use up the
-                // attempts of every form, and the forms after it are still read.
-                logger.WarnRecoverySubmissionPostponed(e, orphan.Id, originalFormId);
-                if (++passingFailures >= MaxPassingFailuresInRow)
-                {
-                    logger.WarnRecoveryStopped(e, originalFormId, i + 1, orphans.Count);
-                    break;
-                }
-
-                continue;
+                passingFailure = e;
+                outcome = RecoveryOutcome.Postponed;
             }
             catch (Exception e)
             {
                 logger.ErrorRecoverySubmissionFailed(e, orphan.Id, originalFormId);
+            }
+
+            if (outcome == RecoveryOutcome.Postponed)
+            {
+                // Not the file's fault: it is left for the next report, uncounted, so that an outage does not use up the
+                // attempts of every form, and the forms after it are still read.
+                logger.WarnRecoverySubmissionPostponed(passingFailure, orphan.Id, originalFormId);
+                if (++passingFailures >= MaxPassingFailuresInRow)
+                {
+                    logger.WarnRecoveryStopped(passingFailure, originalFormId, i + 1, orphans.Count);
+                    break;
+                }
+
+                continue;
             }
 
             passingFailures = 0;
@@ -411,7 +421,12 @@ public class FormRecoveryService(
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
         {
             var (success, indexed) = await factoryIndexerForm.TrySelectIdsAsync(r => r.Where(s => s.Id, orphan.Id).Limit(0, 1));
-            if (!success || indexed.Count > 0)
+            if (!success)
+            {
+                return (RecoveryOutcome.Postponed, 0);
+            }
+
+            if (indexed.Count > 0)
             {
                 return (RecoveryOutcome.Skipped, 0);
             }
@@ -443,7 +458,8 @@ public class FormRecoveryService(
         if (!await formFillingReportCreator.IndexRecoveredSubmissionAsync(
                 orphan, form.Id, version.File.Version, roomId, resultFormNumber, formsDataJson, tenantUtil.DateTimeToUtc(orphan.CreateOn), !version.HasMetadata))
         {
-            return (RecoveryOutcome.Failed, 0);
+            // The index refused or could not be reached: the number stays on the file for the next report.
+            return (RecoveryOutcome.Postponed, 0);
         }
 
         version.HasMetadata = true;

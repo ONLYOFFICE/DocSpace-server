@@ -53,10 +53,10 @@ internal static partial class FormRecoveryServiceLogger
     [LoggerMessage(LogLevel.Warning, "Form recovery: completed form {fileId} of form {formId} in room {roomId} matches no form version by its fields, skipped")]
     public static partial void WarnRecoveryVersionUnmatched(this ILogger<FormRecoveryService> logger, int fileId, int formId, int roomId);
 
-    [LoggerMessage(LogLevel.Warning, "Form recovery: completed form {fileId} of form {formId} could not be read, the document builder or the network failed; it is left for the next report")]
+    [LoggerMessage(LogLevel.Warning, "Form recovery: completed form {fileId} of form {formId} could not be recovered, the document builder, the search index or the network failed; it is left for the next report")]
     public static partial void WarnRecoverySubmissionPostponed(this ILogger<FormRecoveryService> logger, Exception exception, int fileId, int formId);
 
-    [LoggerMessage(LogLevel.Warning, "Form recovery: stopped for form {formId} after {done} of {count} completed forms, the document builder or the network failed; the rest is recovered by the next report")]
+    [LoggerMessage(LogLevel.Warning, "Form recovery: stopped for form {formId} after {done} of {count} completed forms, the document builder, the search index or the network failed; the rest is recovered by the next report")]
     public static partial void WarnRecoveryStopped(this ILogger<FormRecoveryService> logger, Exception exception, int formId, int done, int count);
 
     [LoggerMessage(LogLevel.Warning, "Form recovery: completed form {fileId} of form {formId} holds no form data, skipped")]
