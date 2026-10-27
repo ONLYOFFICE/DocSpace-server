@@ -27,7 +27,13 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.tags.*;
 
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen {
 
@@ -55,6 +61,15 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String SECTION_TITLE = "sectionTitle";
     private static final String ENUM_DOC = "x-enum-doc";
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
+
+    /**
+     * The cURL commands of the example tabs instead of the pages: one file, with a command per
+     * operation (see CallSnippets.configure). A call over HTTP has no SDK to be generated from and
+     * lives on these pages only, so it is rendered by the generator of the pages.
+     */
+    private boolean snippetsOnly;
+
+    private Snippets snippets;
 
     /**
      * Fragment for a heading, following the slug rule GitHub and VS Code share: lower case,
@@ -286,6 +301,11 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     public void processOpts() {
         super.processOpts();
 
+        snippetsOnly = CallSnippets.configure(this);
+        if (snippetsOnly) {
+            return;
+        }
+
         // One document per service instead of a page per tag and per model. The name comes
         // from the split sub-document the run was given, so it matches the json/*.json layout.
         Object documentName = additionalProperties.get("documentName");
@@ -385,6 +405,16 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         OperationsMap results = super.postProcessOperationsWithModels(objs, allModels);
 
+        // The commands need nothing of what the pages are marked up with below.
+        if (snippetsOnly) {
+            if (snippets == null) {
+                snippets = new Snippets(openAPI, allModels, String.valueOf(additionalProperties.get("snippetsServerUrl")));
+            }
+
+            CallSnippets.attach(results, snippets::attach);
+            return results;
+        }
+
         results.put(SECTION_TITLE, sectionTitle(results));
 
         if (allModels != null) {
@@ -411,6 +441,15 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         return results;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+
+        if (snippetsOnly && snippets != null) {
+            CallSnippets.report(snippets.placeholders());
+        }
     }
 
     // The string-id twin of a generic action (see ThirdPartyVariants) stays attached to its operation: the
@@ -663,5 +702,812 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     @Override
     public String getHelp() {
         return "Generates custom Markdown API documentation.";
+    }
+
+    /**
+     * Builds the cURL command of one operation: the request as it goes over the wire, written for a
+     * POSIX shell. What the command carries follows the call snippets of the languages (see
+     * {@link MyCSharpClientCodegen}): the required parameters, the files and the minimal body - a
+     * model with its required fields only, with the values the document states for them.
+     * <p>
+     * The command is assembled here rather than in the template: every option it takes depends on the
+     * operation, and the template has nothing around them to hold.
+     */
+    private static final class Snippets {
+
+        static final String COMMAND = "x-snippet-command";
+
+        private static final int MAX_DEPTH = 4;
+
+        /** An option on a line of its own, under the first one. */
+        private static final String NEXT_OPTION = " \\\n  ";
+
+        /** The body stands on an option line; its fields go a level deeper. */
+        private static final String BODY_INDENT = "  ";
+
+        private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
+        /** A shell computes no date for the command, so one without an example stands in fixed. */
+        private static final String DATE_TIME = "2025-01-01T00:00:00Z";
+        private static final String DATE = "2025-01-01";
+
+        private static final String FILE = "file.docx";
+
+        private static final Pattern UUID_TEXT =
+                Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
+        /** What a path segment and a query value may carry unencoded beyond the unreserved characters (RFC 3986). */
+        private static final String PATH_SAFE = ":@";
+        private static final String QUERY_SAFE = ":@/";
+
+        /** Stands for a file: in a form it is uploaded, in a JSON body it is the name of one. */
+        private static final Object FILE_VALUE = new Object();
+
+        /** What enumValue returns for a type that is no enum. */
+        private static final Object NOT_ENUM = new Object();
+
+        private final OpenAPI openAPI;
+        private final Map<String, CodegenModel> models;
+        private final String serverUrl;
+
+        /** Values the document states no example for, as "operationId: name", for the run's log. */
+        private final List<String> placeholders = new ArrayList<>();
+
+        Snippets(OpenAPI openAPI, List<ModelMap> allModels, String serverUrl) {
+            this.openAPI = openAPI;
+            this.models = CallSnippets.models(allModels);
+            this.serverUrl = serverUrl;
+        }
+
+        List<String> placeholders() {
+            return placeholders;
+        }
+
+        void attach(CodegenOperation operation) {
+            String path = operation.path;
+            List<String> query = new ArrayList<>();
+            List<String> options = new ArrayList<>(authorization(operation));
+            List<String> form = new ArrayList<>();
+            String body = null;
+
+            for (CodegenParameter parameter : operation.allParams) {
+                String where = operation.operationIdOriginal + ": " + parameter.baseName;
+                Shape shape = Shape.of(parameter);
+
+                if (parameter.isBodyParam) {
+                    Object value = body(operation, shape, CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
+                    body = json(value, BODY_INDENT);
+                    continue;
+                }
+
+                if (!parameter.required && !shape.isFile && !shape.isFileList) {
+                    continue;
+                }
+
+                if (parameter.isFormParam && (shape.isFile || shape.isFileList)) {
+                    form.add("-F " + shellQuote(parameter.baseName + "=@" + FILE));
+                    continue;
+                }
+
+                Object example = CallSnippets.plain(parameter.isFormParam
+                        ? SpecExamples.formField(openAPI, operation, parameter.baseName)
+                        : SpecExamples.parameter(openAPI, operation, parameter.baseName, SpecExamples.location(parameter)));
+                Object value = value(shape, example, parameter.baseName, where, 0);
+
+                if (parameter.isPathParam) {
+                    path = path.replace("{" + parameter.baseName + "}", encode(text(value), PATH_SAFE));
+                } else if (parameter.isQueryParam) {
+                    query(query, parameter.baseName, value);
+                } else if (parameter.isHeaderParam) {
+                    options.add("-H " + shellQuote(parameter.baseName + ": " + text(value)));
+                } else if (parameter.isCookieParam) {
+                    options.add("-b " + shellQuote(parameter.baseName + "=" + text(value)));
+                } else if (parameter.isFormParam) {
+                    form.add(formField(operation, parameter.baseName, text(value)));
+                }
+            }
+
+            String url = serverUrl + path + (query.isEmpty() ? "" : "?" + String.join("&", query));
+
+            StringBuilder first = new StringBuilder("curl");
+            if (streams(operation)) {
+                // The response comes as a stream, which curl would otherwise hold back until it ends.
+                first.append(" -N");
+            }
+            if (!"GET".equalsIgnoreCase(operation.httpMethod)) {
+                first.append(" -X ").append(operation.httpMethod.toUpperCase(Locale.ROOT));
+            }
+            first.append(' ').append(shellQuote(url));
+
+            List<String> lines = new ArrayList<>();
+            lines.add(first.toString());
+            lines.addAll(options);
+            if (body != null) {
+                lines.add("-H \"Content-Type: application/json\"");
+                lines.add("-d '" + body.replace("'", "'\\''") + "'");
+            }
+            lines.addAll(form);
+
+            operation.vendorExtensions.put(COMMAND, String.join(NEXT_OPTION, lines));
+        }
+
+        /**
+         * The credentials the operation states, the way the document has them sent: the access token for
+         * a bearer scheme or OAuth 2.0, which every other tab sends too, or else a key in a cookie or a
+         * header. An operation that states none sends nothing.
+         */
+        private static List<String> authorization(CodegenOperation operation) {
+            if (operation.authMethods == null) {
+                return Collections.emptyList();
+            }
+
+            for (CodegenSecurity security : operation.authMethods) {
+                if (Boolean.TRUE.equals(security.isBasicBearer) || Boolean.TRUE.equals(security.isOAuth)) {
+                    return Collections.singletonList("-H \"Authorization: Bearer YOUR_API_KEY\"");
+                }
+            }
+
+            for (CodegenSecurity security : operation.authMethods) {
+                if (Boolean.TRUE.equals(security.isApiKey) && security.keyParamName != null) {
+                    String key = "YOUR_" + security.keyParamName.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]+", "_");
+                    if (Boolean.TRUE.equals(security.isKeyInCookie)) {
+                        return Collections.singletonList("-b " + shellQuote(security.keyParamName + "=" + key));
+                    }
+                    if (Boolean.TRUE.equals(security.isKeyInHeader)) {
+                        return Collections.singletonList("-H " + shellQuote(security.keyParamName + ": " + key));
+                    }
+                }
+            }
+
+            return Collections.emptyList();
+        }
+
+        /** Whether the operation answers with a stream of events or of JSON lines. */
+        private static boolean streams(CodegenOperation operation) {
+            if (operation.produces != null) {
+                for (Map<String, String> produced : operation.produces) {
+                    String mediaType = String.valueOf(produced.get("mediaType")).toLowerCase(Locale.ROOT);
+                    if (mediaType.contains("event-stream") || mediaType.contains("ndjson")) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /** The query of a list a value per item, as ASP.NET binds it: ids=1&amp;ids=2. */
+        private static void query(List<String> query, String name, Object value) {
+            if (value instanceof List) {
+                for (Object item : (List<?>) value) {
+                    query.add(encode(name, QUERY_SAFE) + "=" + encode(text(item), QUERY_SAFE));
+                }
+            } else if (value instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                    query.add(encode(name + "[" + entry.getKey() + "]", QUERY_SAFE) + "=" + encode(text(entry.getValue()), QUERY_SAFE));
+                }
+            } else {
+                query.add(encode(name, QUERY_SAFE) + "=" + encode(text(value), QUERY_SAFE));
+            }
+        }
+
+        /**
+         * A field of a form body. A multipart field takes -F, or --form-string where curl would read the
+         * value as a file or as its own field options; an urlencoded one is encoded by curl.
+         */
+        private static String formField(CodegenOperation operation, String name, String value) {
+            if (!Boolean.TRUE.equals(operation.isMultipart)) {
+                return "--data-urlencode " + shellQuote(name + "=" + value);
+            }
+
+            boolean literal = value.startsWith("@") || value.startsWith("<") || value.contains(";");
+            return (literal ? "--form-string " : "-F ") + shellQuote(name + "=" + value);
+        }
+
+        /**
+         * The request body. A model gets its required fields only, whatever the document states for the
+         * body as a whole; an array or a scalar takes the example the document states for it.
+         */
+        private Object body(CodegenOperation operation, Shape shape, Object example, String where) {
+            CodegenModel model = shape.isArray ? null : model(shape);
+
+            // A body that is an enum schema the generator may hand over as its underlying type: the
+            // value of a member, chosen as for any other enum.
+            if (model == null && !shape.isArray && !shape.isMap) {
+                CodegenModel enumBody = CallSnippets.enumBody(openAPI, operation, models);
+                if (enumBody != null) {
+                    return member(enumBody, enumBody.allowableValues, example, where);
+                }
+            }
+
+            if (model == null || model.isEnum || CallSnippets.isComposed(model)) {
+                return value(shape, example, "body", where, 0);
+            }
+
+            return construct(model, where, 0);
+        }
+
+        /**
+         * A model as an object with its required fields; past the depth a model with required fields is
+         * built to, an empty one, and the place is left to the reader.
+         */
+        private Object construct(CodegenModel model, String where, int depth) {
+            Map<String, Object> fields = new LinkedHashMap<>();
+
+            if (model.allVars == null) {
+                return fields;
+            }
+
+            for (CodegenProperty property : model.allVars) {
+                if (!property.required || fields.containsKey(property.baseName)) {
+                    continue;
+                }
+
+                if (depth >= MAX_DEPTH) {
+                    placeholders.add(where);
+                    return new LinkedHashMap<String, Object>();
+                }
+
+                Object example = CallSnippets.plain(SpecExamples.inheritedProperty(openAPI, model.name, property.baseName));
+                fields.put(property.baseName, value(Shape.of(property), example, property.baseName,
+                        where + "." + property.baseName, depth + 1));
+            }
+
+            return fields;
+        }
+
+        private Object value(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.isFileList) {
+                return Collections.singletonList(FILE_VALUE);
+            }
+
+            if (shape.isFile) {
+                return FILE_VALUE;
+            }
+
+            Object enumValue = enumValue(shape, example, where);
+            if (enumValue != NOT_ENUM) {
+                return enumValue;
+            }
+
+            if (shape.isArray) {
+                List<Object> items = new ArrayList<>();
+                if (example instanceof List) {
+                    for (Object item : (List<?>) example) {
+                        items.add(item(shape, CallSnippets.plain(item), name, where, depth + 1));
+                    }
+                }
+
+                if (items.isEmpty()) {
+                    // A list the document requires items in gets one, standing in for them: an empty one
+                    // would not make a valid request.
+                    if (shape.minItems != null && shape.minItems > 0) {
+                        items.add(item(shape, null, name, where, depth + 1));
+                    } else {
+                        placeholders.add(where);
+                    }
+                }
+
+                return items;
+            }
+
+            if (shape.isMap) {
+                return map(shape, example, name, where, depth);
+            }
+
+            CodegenModel model = model(shape);
+            if (model != null) {
+                return CallSnippets.isComposed(model)
+                        ? composed(model, example, name, where, depth)
+                        : construct(model, where, depth);
+            }
+
+            // A free-form object, or a value of any type: the example as it stands. Without one, an empty
+            // object; for a value of any type that is a stand-in the log notes.
+            if (shape.isFreeFormObject || shape.isAnyType) {
+                if (example != null) {
+                    return example;
+                }
+                if (!shape.isFreeFormObject) {
+                    placeholders.add(where);
+                }
+                return new LinkedHashMap<String, Object>();
+            }
+
+            return scalar(shape, example, name, where);
+        }
+
+        private Object item(Shape shape, Object example, String name, String where, int depth) {
+            return shape.items == null ? scalar(new Shape(), example, name, where) : value(shape.item(), example, name, where, depth);
+        }
+
+        /**
+         * A dictionary with the entries of the example; one the document requires entries in and gives no
+         * example for gets one standing in for them, which the log notes.
+         */
+        private Object map(Shape shape, Object example, String name, String where, int depth) {
+            Map<String, Object> entries = new LinkedHashMap<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.put(String.valueOf(entry.getKey()), entry(shape, CallSnippets.plain(entry.getValue()), name, where, depth));
+                }
+            }
+
+            if (entries.isEmpty() && shape.minProperties != null && shape.minProperties > 0) {
+                int logged = placeholders.size();
+                entries.put("YOUR_KEY", entry(shape, null, name, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            return entries;
+        }
+
+        /** A value of a dictionary; one without a description of its values is the example as it stands. */
+        private Object entry(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.items != null) {
+                return value(shape.item(), example, name, where, depth + 1);
+            }
+
+            return example != null ? example : new LinkedHashMap<String, Object>();
+        }
+
+        /**
+         * A oneOf or anyOf: on the wire it is the value of one of its variants, the one the example fits,
+         * or else the first one.
+         */
+        private Object composed(CodegenModel model, Object example, String name, String where, int depth) {
+            List<CodegenProperty> variants = new ArrayList<>();
+            if (model.getComposedSchemas() != null) {
+                if (model.getComposedSchemas().getOneOf() != null) {
+                    variants.addAll(model.getComposedSchemas().getOneOf());
+                }
+                if (variants.isEmpty() && model.getComposedSchemas().getAnyOf() != null) {
+                    variants.addAll(model.getComposedSchemas().getAnyOf());
+                }
+            }
+
+            // A variant can be a oneOf of its own and lead back here, so it stops at the depth the models do.
+            if (depth >= MAX_DEPTH || variants.isEmpty()) {
+                placeholders.add(where);
+                return new LinkedHashMap<String, Object>();
+            }
+
+            CodegenProperty chosen = null;
+            for (CodegenProperty variant : variants) {
+                if (fits(Shape.of(variant), example)) {
+                    chosen = variant;
+                    break;
+                }
+            }
+
+            if (chosen == null) {
+                chosen = variants.get(0);
+                example = null;
+            }
+
+            return value(Shape.of(chosen), example, name, where, depth + 1);
+        }
+
+        private boolean fits(Shape shape, Object example) {
+            if (example == null) {
+                return false;
+            }
+
+            if (shape.isArray) {
+                return example instanceof List;
+            }
+
+            if (shape.isMap || shape.isFreeFormObject) {
+                return example instanceof Map;
+            }
+
+            CodegenModel model = model(shape);
+            if (model != null) {
+                // An enum fits only an example that names one of its members; any other is left to a
+                // variant beside it, such as a string.
+                return model.isEnum ? named(model.allowableValues, enumNames(model), example) != null : example instanceof Map;
+            }
+
+            if (shape.isEnum) {
+                return named(shape.allowableValues, null, example) != null;
+            }
+
+            if (shape.isAnyType) {
+                return true;
+            }
+
+            if (shape.isString) {
+                return example instanceof String;
+            }
+
+            if (shape.isInteger) {
+                return example instanceof Number && new BigDecimal(String.valueOf(example)).stripTrailingZeros().scale() <= 0;
+            }
+
+            if (shape.isNumber) {
+                return example instanceof Number;
+            }
+
+            if (shape.isBoolean) {
+                return example instanceof Boolean;
+            }
+
+            return false;
+        }
+
+        /**
+         * The value of an enum member, of an enum schema or of one declared in place; NOT_ENUM for any
+         * other type. On the wire a member is its value, whatever the SDKs name it.
+         */
+        private Object enumValue(Shape shape, Object example, String where) {
+            // An array or a dictionary of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
+                return NOT_ENUM;
+            }
+
+            CodegenModel model = model(shape);
+            if (model != null && model.isEnum) {
+                return member(model, model.allowableValues, example, where);
+            }
+
+            if (shape.isEnum && hasMembers(shape.allowableValues)) {
+                return member(null, shape.allowableValues, example, where);
+            }
+
+            return NOT_ENUM;
+        }
+
+        private static boolean hasMembers(Map<String, Object> allowableValues) {
+            Object values = allowableValues == null ? null : allowableValues.get("values");
+            return values instanceof List && !((List<?>) values).isEmpty();
+        }
+
+        /** The member of an enum the example names, or else the first one, which the log notes. */
+        private Object member(CodegenModel model, Map<String, Object> allowableValues, Object example, String where) {
+            Object chosen = named(allowableValues, model == null ? null : enumNames(model), example);
+            if (chosen == null) {
+                placeholders.add(where);
+                chosen = ((List<?>) allowableValues.get("values")).get(0);
+            }
+
+            return chosen;
+        }
+
+        /**
+         * The value of the member the example names, by its value or by the name the document gives it;
+         * null when it names none.
+         */
+        private static Object named(Map<String, Object> allowableValues, List<?> names, Object example) {
+            Object values = allowableValues == null ? null : allowableValues.get("values");
+            if (example == null || !(values instanceof List)) {
+                return null;
+            }
+
+            String text = SpecExamples.text(example);
+            List<?> members = (List<?>) values;
+            for (int i = 0; i < members.size(); i++) {
+                if (text.equals(String.valueOf(members.get(i)))
+                        || (names != null && i < names.size() && text.equals(String.valueOf(names.get(i))))) {
+                    return members.get(i);
+                }
+            }
+
+            return null;
+        }
+
+        /**
+         * The member names the document states for an enum schema in x-enum-varnames. The generator's
+         * own names cannot be used: this generator names every member after the model (see enumVarNames).
+         */
+        private List<?> enumNames(CodegenModel model) {
+            if (openAPI == null || openAPI.getComponents() == null || openAPI.getComponents().getSchemas() == null) {
+                return null;
+            }
+
+            Schema<?> schema = openAPI.getComponents().getSchemas().get(model.name);
+            Object names = schema == null || schema.getExtensions() == null ? null : schema.getExtensions().get("x-enum-varnames");
+            return names instanceof List ? (List<?>) names : null;
+        }
+
+        private CodegenModel model(Shape shape) {
+            if (shape.complexType != null && models.containsKey(shape.complexType)) {
+                return models.get(shape.complexType);
+            }
+
+            // An enum schema in a path or a query the generator names by its type only.
+            return shape.dataType != null ? models.get(shape.dataType) : null;
+        }
+
+        /**
+         * A value of a plain type. A date, a date-time or a UUID the example does not hold in its form
+         * counts as no example.
+         */
+        private Object scalar(Shape shape, Object example, String name, String where) {
+            String text = example == null ? null : SpecExamples.text(example);
+
+            if (shape.isDateTime) {
+                if (text != null) {
+                    try {
+                        OffsetDateTime.parse(text);
+                        return text;
+                    } catch (DateTimeParseException notADateTime) {
+                        // Falls through to the placeholder.
+                    }
+                }
+                placeholders.add(where);
+                return DATE_TIME;
+            }
+
+            if (shape.isDate) {
+                if (text != null) {
+                    String day = text.length() > 10 ? text.substring(0, 10) : text;
+                    try {
+                        LocalDate.parse(day);
+                        return day;
+                    } catch (DateTimeParseException notADate) {
+                        // Falls through to the placeholder.
+                    }
+                }
+                placeholders.add(where);
+                return DATE;
+            }
+
+            if (shape.isUuid) {
+                if (text == null || !UUID_TEXT.matcher(text).matches()) {
+                    placeholders.add(where);
+                    return NIL_UUID;
+                }
+                return text;
+            }
+
+            if (shape.isInteger || shape.isNumber) {
+                if (example instanceof Number) {
+                    return example;
+                }
+                if (text != null) {
+                    try {
+                        return new BigDecimal(text);
+                    } catch (NumberFormatException notANumber) {
+                        // Falls through to the placeholder.
+                    }
+                }
+                placeholders.add(where);
+                return 0;
+            }
+
+            if (shape.isBoolean) {
+                if (example instanceof Boolean) {
+                    return example;
+                }
+                if ("true".equalsIgnoreCase(text) || "false".equalsIgnoreCase(text)) {
+                    return Boolean.parseBoolean(text);
+                }
+                placeholders.add(where);
+                return false;
+            }
+
+            if (example instanceof List || example instanceof Map) {
+                return example;
+            }
+
+            if (text == null) {
+                placeholders.add(where);
+                return CallSnippets.placeholderName(name);
+            }
+
+            return text;
+        }
+
+        /** A value as it is written into a path, a query, a header or a form field. */
+        private static String text(Object value) {
+            if (value == FILE_VALUE) {
+                return FILE;
+            }
+            if (value instanceof String) {
+                return (String) value;
+            }
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).toPlainString();
+            }
+            if (value == null || value instanceof Number || value instanceof Boolean) {
+                return String.valueOf(value);
+            }
+
+            return json(value, "");
+        }
+
+        /**
+         * A value as JSON, an object or an array a member per line; indent is where the line the value
+         * starts on stands.
+         */
+        private static String json(Object value, String indent) {
+            if (value == null) {
+                return "null";
+            }
+            if (value == FILE_VALUE) {
+                return jsonString(FILE);
+            }
+            if (value instanceof String) {
+                return jsonString((String) value);
+            }
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).toPlainString();
+            }
+            if (value instanceof Number || value instanceof Boolean) {
+                return String.valueOf(value);
+            }
+
+            String inner = indent + "  ";
+            List<String> members = new ArrayList<>();
+
+            if (value instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                    members.add(inner + jsonString(String.valueOf(entry.getKey())) + ": "
+                            + json(CallSnippets.plain(entry.getValue()), inner));
+                }
+                return members.isEmpty() ? "{}" : "{\n" + String.join(",\n", members) + "\n" + indent + "}";
+            }
+
+            if (value instanceof List) {
+                for (Object item : (List<?>) value) {
+                    members.add(inner + json(CallSnippets.plain(item), inner));
+                }
+                return members.isEmpty() ? "[]" : "[\n" + String.join(",\n", members) + "\n" + indent + "]";
+            }
+
+            return jsonString(SpecExamples.text(value));
+        }
+
+        private static String jsonString(String text) {
+            StringBuilder builder = new StringBuilder("\"");
+            for (char c : text.toCharArray()) {
+                switch (c) {
+                    case '"':
+                        builder.append("\\\"");
+                        break;
+                    case '\\':
+                        builder.append("\\\\");
+                        break;
+                    case '\n':
+                        builder.append("\\n");
+                        break;
+                    case '\r':
+                        builder.append("\\r");
+                        break;
+                    case '\t':
+                        builder.append("\\t");
+                        break;
+                    default:
+                        if (c < 0x20) {
+                            builder.append(String.format("\\u%04x", (int) c));
+                        } else {
+                            builder.append(c);
+                        }
+                }
+            }
+            return builder.append('"').toString();
+        }
+
+        /** Percent-encoding, as UTF-8: everything but the unreserved characters and those the place allows. */
+        private static String encode(String text, String safe) {
+            StringBuilder builder = new StringBuilder();
+            for (byte b : text.getBytes(StandardCharsets.UTF_8)) {
+                char c = (char) (b & 0xFF);
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                        || c == '-' || c == '.' || c == '_' || c == '~' || safe.indexOf(c) >= 0) {
+                    builder.append(c);
+                } else {
+                    builder.append('%').append(String.format("%02X", b & 0xFF));
+                }
+            }
+            return builder.toString();
+        }
+
+        /**
+         * An argument of the shell: in double quotes, with what the shell expands in them escaped; in
+         * single quotes where it holds a !, which an interactive shell expands even inside double quotes.
+         */
+        private static String shellQuote(String text) {
+            if (text.indexOf('!') >= 0) {
+                return "'" + text.replace("'", "'\\''") + "'";
+            }
+
+            return "\"" + text
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("$", "\\$")
+                    .replace("`", "\\`") + "\"";
+        }
+
+        /** What the command needs to know about the type of a parameter or a property. */
+        private static final class Shape {
+            String dataType;
+            String complexType;
+            boolean isEnum;
+            boolean isArray;
+            boolean isMap;
+            boolean isFreeFormObject;
+            boolean isAnyType;
+            boolean isModel;
+            boolean isString;
+            boolean isInteger;
+            boolean isNumber;
+            boolean isBoolean;
+            boolean isDate;
+            boolean isDateTime;
+            boolean isUuid;
+            boolean isFile;
+            boolean isFileList;
+            Integer minItems;
+            Integer minProperties;
+            Map<String, Object> allowableValues;
+            CodegenProperty items;
+
+            static Shape of(CodegenParameter parameter) {
+                Shape shape = new Shape();
+                shape.dataType = parameter.dataType;
+                shape.complexType = parameter.baseType;
+                shape.isEnum = parameter.isEnum;
+                shape.isArray = parameter.isArray;
+                shape.isMap = parameter.isMap;
+                shape.isFreeFormObject = parameter.isFreeFormObject;
+                shape.isAnyType = parameter.isAnyType;
+                shape.isModel = parameter.isModel;
+                shape.isString = parameter.isString;
+                shape.isInteger = parameter.isInteger || parameter.isLong || parameter.isShort;
+                shape.isNumber = parameter.isNumber || parameter.isFloat || parameter.isDouble || parameter.isDecimal;
+                shape.isBoolean = parameter.isBoolean;
+                shape.isDate = parameter.isDate;
+                shape.isDateTime = parameter.isDateTime;
+                shape.isUuid = parameter.isUuid;
+                shape.isFile = parameter.isFile || parameter.isBinary;
+                shape.isFileList = (shape.isFile && parameter.isCollectionFormatMulti)
+                        || (parameter.isArray && parameter.items != null && (parameter.items.isFile || parameter.items.isBinary));
+                if (shape.isFileList) {
+                    shape.isFile = false;
+                }
+                shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
+                shape.allowableValues = parameter.allowableValues;
+                shape.items = parameter.items;
+                return shape;
+            }
+
+            static Shape of(CodegenProperty property) {
+                Shape shape = new Shape();
+                shape.dataType = property.dataType;
+                shape.complexType = property.complexType;
+                shape.isEnum = property.isEnum;
+                shape.isArray = property.isArray;
+                shape.isMap = property.isMap;
+                shape.isFreeFormObject = property.isFreeFormObject;
+                shape.isAnyType = property.isAnyType;
+                shape.isModel = property.isModel;
+                shape.isString = property.isString;
+                shape.isInteger = property.isInteger || property.isLong || property.isShort;
+                shape.isNumber = property.isNumber || property.isFloat || property.isDouble || property.isDecimal;
+                shape.isBoolean = property.isBoolean;
+                shape.isDate = property.isDate;
+                shape.isDateTime = property.isDateTime;
+                shape.isUuid = property.isUuid;
+                shape.isFile = property.isFile || property.isBinary;
+                shape.isFileList = property.isArray && property.items != null && (property.items.isFile || property.items.isBinary);
+                if (shape.isFileList) {
+                    shape.isFile = false;
+                }
+                shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
+                shape.allowableValues = property.allowableValues;
+                shape.items = property.items;
+                return shape;
+            }
+
+            /** The shape of an item of this array. */
+            Shape item() {
+                return of(items);
+            }
+        }
     }
 }
