@@ -60,6 +60,8 @@ internal class ProviderAccountDao(
     ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
+    private const string KDriveLegacyUrl = "https://connect.drive.infomaniak.com";
+
     public virtual async Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
@@ -495,9 +497,12 @@ internal class ProviderAccountDao(
         var color = input.Color;
         var cover = input.Cover;
 
-        if (key == ProviderTypes.kDrive)
+        // Connections saved before the address was required have none, so they keep the legacy shared host: it still
+        // signs them in, but its root only lists the account's drives, and nothing can be created there.
+        // A connection checked before it is saved (id 0) gets no fallback and, like any WebDAV one, is refused without one.
+        if (key == ProviderTypes.kDrive && id != 0 && string.IsNullOrEmpty(authData.Url))
         {
-            authData.Url = "https://connect.drive.infomaniak.com";
+            authData.Url = KDriveLegacyUrl;
         }
 
         if (key == ProviderTypes.Box)
@@ -716,6 +721,7 @@ internal class ProviderAccountDao(
                 return new AuthData(token: token.ToJson());
             case ProviderTypes.SharePoint:
             case ProviderTypes.WebDav:
+            case ProviderTypes.kDrive:
             case ProviderTypes.NextCloud:
             case ProviderTypes.OwnCloud:
                 break;

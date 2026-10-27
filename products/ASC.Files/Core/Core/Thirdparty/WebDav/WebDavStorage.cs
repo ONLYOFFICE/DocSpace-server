@@ -54,9 +54,13 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             return;
         }
 
-        ArgumentException.ThrowIfNullOrEmpty(authData.Url);
+        // an address that cannot be parsed has to be refused here as a bad request: new Uri() would throw a
+        // UriFormatException, which reaches the caller as a server error
+        if (!Uri.TryCreate(authData.Url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InvalidThirdPartyUrl, nameof(authData));
+        }
 
-        var uri = new Uri(authData.Url);
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
         _baseUrl = _baseUri.ToString().Trim('/');
         _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
