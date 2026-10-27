@@ -76,6 +76,10 @@ async function withValidationMessage<T>(call: Promise<T>): Promise<T> {
 }
 
 export const byokProfilesController = {
+  providers: asyncHandler(async (_req, res) => {
+    res.json(await storage.profiles.readByokProviders());
+  }),
+
   create: asyncHandler(async (req, res) => {
     const body = readBody(req.body);
     const profile = await withValidationMessage(

@@ -296,6 +296,13 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     hasBody: true,
   },
   {
+    method: "GET",
+    path: "/profiles/byok/providers",
+    tag: "Profiles",
+    operationId: "aiProfilesByokProviders",
+    summary: "List BYOK providers",
+  },
+  {
     method: "POST",
     path: "/profiles/byok",
     tag: "Profiles",

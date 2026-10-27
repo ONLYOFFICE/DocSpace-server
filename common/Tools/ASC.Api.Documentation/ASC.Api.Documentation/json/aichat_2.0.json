@@ -10006,6 +10006,60 @@
         }
       }
     },
+    "/api/2.0/ai/profiles/byok/providers": {
+      "get": {
+        "tags": [
+          "AI / Profiles"
+        ],
+        "operationId": "aiProfilesByokProviders",
+        "summary": "List BYOK providers",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiByokProvider"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/profiles/byok": {
       "post": {
         "tags": [
@@ -12920,6 +12974,50 @@
         ],
         "additionalProperties": false,
         "description": "AI model metadata. Describes a single model available from a provider."
+      },
+      "AiByokProvider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "BYOK provider id, passed as `provider` when creating a BYOK profile."
+          },
+          "name": {
+            "type": "string",
+            "description": "Provider display name."
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiByokModel"
+            },
+            "description": "Models that can be called through this provider with the portal's own key."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "models"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Gateway catalogue model id, passed as `modelId` when creating a BYOK profile."
+          },
+          "name": {
+            "type": "string",
+            "description": "Model display name."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
       },
       "AiByokProfileInput": {
         "type": "object",

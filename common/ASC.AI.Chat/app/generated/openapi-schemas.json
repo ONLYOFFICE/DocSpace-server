@@ -1337,6 +1337,50 @@
       "additionalProperties": false,
       "description": "AI model metadata. Describes a single model available from a provider."
     },
+    "AiByokProvider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "BYOK provider id, passed as `provider` when creating a BYOK profile."
+        },
+        "name": {
+          "type": "string",
+          "description": "Provider display name."
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiByokModel"
+          },
+          "description": "Models that can be called through this provider with the portal's own key."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Gateway catalogue model id, passed as `modelId` when creating a BYOK profile."
+        },
+        "name": {
+          "type": "string",
+          "description": "Model display name."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
     "AiByokProfileInput": {
       "type": "object",
       "properties": {
@@ -5161,6 +5205,14 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/AiProfile"
+        }
+      }
+    },
+    "aiProfilesByokProviders": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiByokProvider"
         }
       }
     },

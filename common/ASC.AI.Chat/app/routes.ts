@@ -224,6 +224,7 @@ export default function registerRoutes(app: Application): void {
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 
+  router.get("/profiles/byok/providers", byokProfilesController.providers);
   router.post("/profiles/byok", byokProfilesController.create);
   router.put("/profiles/byok/:id", byokProfilesController.update);
   router.delete("/profiles/byok/:id", byokProfilesController.delete);
