@@ -55,13 +55,10 @@ public class FileEntryWebhookDtoHelper(
     /// Maps any entry to the payload its trigger expects: a file, a room or a plain folder.
     /// </summary>
     /// <remarks>
-    /// The return type is <see cref="object"/> on purpose and must stay that way. System.Text.Json serializes a
-    /// property by its DECLARED type, and narrowing this to <c>FileEntryWebhookDto&lt;T&gt;</c> would erase every
-    /// subtype field on the wire - exactly the bug this whole payload change exists to fix, and one that fails
-    /// silently. A property declared as <c>object</c> is the one case where System.Text.Json uses the runtime
-    /// type instead.
+    /// Declared as the base type: the envelope writes its payload by the runtime type (<c>WebhookPayload.Payload</c>),
+    /// so the file, folder and room fields reach the wire all the same.
     /// </remarks>
-    public async Task<object> GetAsync<T>(FileEntry<T> entry)
+    public async Task<FileEntryWebhookDto<T>> GetAsync<T>(FileEntry<T> entry)
     {
         return entry switch
         {
@@ -77,11 +74,11 @@ public class FileEntryWebhookDtoHelper(
     /// the REST API shows the entry to them: a User or a Guest gets the author and the last editor without the profile
     /// link, and the quota of a room goes only to an owner who may edit the room.
     /// </summary>
-    public async Task<object> RestrictForSubscriberAsync<T>(object payload, FileEntry<T> source, Guid? subscriberId)
+    public async Task<FileEntryWebhookDto<T>> RestrictForSubscriberAsync<T>(FileEntryWebhookDto<T> entry, FileEntry<T> source, Guid? subscriberId)
     {
-        if (payload is not FileEntryWebhookDto<T> entry || !subscriberId.HasValue)
+        if (entry == null || !subscriberId.HasValue)
         {
-            return payload;
+            return entry;
         }
 
         var result = await userWebhookDtoHelper.IsWithoutContactsAccessAsync(subscriberId)
@@ -100,7 +97,7 @@ public class FileEntryWebhookDtoHelper(
     }
 
     /// <summary>
-    /// The form.submit counterpart of <see cref="RestrictForSubscriberAsync{T}(object, FileEntry{T}, Guid?)"/>.
+    /// The form.submit counterpart of <see cref="RestrictForSubscriberAsync{T}(FileEntryWebhookDto{T}, FileEntry{T}, Guid?)"/>.
     /// </summary>
     public async Task<FormSubmitWebhookDto<T>> RestrictForSubscriberAsync<T>(FormSubmitWebhookDto<T> payload, Guid? subscriberId)
     {

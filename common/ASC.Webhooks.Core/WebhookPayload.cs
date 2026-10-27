@@ -47,6 +47,8 @@ public class WebhookPayload<T1, T2>
     /// The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime
     /// narrows it.
     /// </summary>
+    // written by its runtime type: a payload built as FileEntryWebhookDto<T> still carries its file, folder or room fields
+    [JsonConverter(typeof(RuntimeTypeJsonConverterFactory))]
     public T1 Payload { get; set; }
 
     /// <summary>

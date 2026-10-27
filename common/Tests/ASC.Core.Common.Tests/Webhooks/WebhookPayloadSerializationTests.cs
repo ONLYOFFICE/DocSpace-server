@@ -35,38 +35,44 @@ namespace ASC.Core.Common.Tests.Webhooks;
 
 /// <summary>
 /// The bug the typed webhook payloads exist to fix: System.Text.Json serializes by DECLARED type, so publishing a
-/// payload typed as its abstract base silently drops every subtype field. A property declared as <c>object</c> is
-/// the one case where the runtime type is used instead, which is why <c>FileEntryWebhookDtoHelper.GetAsync</c>
-/// returns <c>object</c> and must keep doing so.
+/// payload typed as its abstract base would silently drop every subtype field. The envelope writes its payload by
+/// the runtime type instead, which is why <c>FileEntryWebhookDtoHelper</c> may declare the base.
 /// </summary>
 [Trait("Category", "Webhooks")]
 public class WebhookPayloadSerializationTests
 {
+    // The publisher's own options, so a change to them reaches these tests. No TenantUtil: it is read only for a
+    // DateTimeKind.Local value, and every date in these bodies is UTC or default.
+    private static readonly JsonSerializerOptions _options = WebhookPublisher.CreateSerializerOptions(null);
+
     [Fact]
-    public void EntryPayload_KeepsSubtypeFields_WhenPublished()
+    public void EntryPayload_KeepsSubtypeFields_WhenDeclaredAsBase()
     {
-        // The publisher's own options, so a change to them reaches this test. No TenantUtil: it is read only for a
-        // DateTimeKind.Local value, and every date in this body is UTC or default.
-        var options = WebhookPublisher.CreateSerializerOptions(null);
+        FileEntryWebhookDto<int> payload = new FileWebhookDto<int> { Id = 10, Title = "321.xlsx", Version = 3, ContentLength = 4096 };
 
-        object payload = new FileWebhookDto<int> { Id = 10, Title = "321.xlsx", Version = 3, ContentLength = 4096 };
-
-        var json = JsonSerializer.Serialize(new WebhookPayload<object, int>
-        {
-            Payload = payload
-        }, options);
+        var json = JsonSerializer.Serialize(new WebhookPayload<FileEntryWebhookDto<int>, int> { Payload = payload }, _options);
 
         json.Should().Contain("\"version\":3").And.Contain("\"contentLength\":4096");
     }
 
     [Fact]
-    public void EntryPayloadFactory_StaysWeaklyTyped()
+    public void EntryPayload_IsTheSame_WhateverItIsDeclaredAs()
     {
-        var returnType = typeof(FileEntryWebhookDtoHelper)
-            .GetMethod(nameof(FileEntryWebhookDtoHelper.GetAsync))!
-            .ReturnType;
+        var room = new RoomWebhookDto<int> { Id = 7, Title = "Contracts", QuotaLimit = 1024 };
 
-        returnType.Should().Be(typeof(Task<object>),
-            "narrowing this to the abstract base would erase every file, folder and room field on the wire");
+        var asBase = JsonSerializer.Serialize(new WebhookPayload<FileEntryWebhookDto<int>, int> { Payload = room }, _options);
+        var asObject = JsonSerializer.Serialize(new WebhookPayload<object, int> { Payload = room }, _options);
+        var asItself = JsonSerializer.Serialize(new WebhookPayload<RoomWebhookDto<int>, int> { Payload = room }, _options);
+
+        asBase.Should().Be(asItself).And.Be(asObject).And.Contain("\"quotaLimit\":1024");
+    }
+
+    [Fact]
+    public void MissingPayload_IsLeftOut_AsBefore()
+    {
+        var asBase = JsonSerializer.Serialize(new WebhookPayload<FileEntryWebhookDto<int>, int>(), _options);
+        var asObject = JsonSerializer.Serialize(new WebhookPayload<object, int>(), _options);
+
+        asBase.Should().Be(asObject).And.NotContain("\"payload\"");
     }
 }

@@ -34,6 +34,8 @@
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
 
 global using ASC.Common;
 global using ASC.Common.Caching;
