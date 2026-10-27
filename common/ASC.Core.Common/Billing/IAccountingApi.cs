@@ -55,6 +55,9 @@ public interface IAccountingApi
     [Post("/session/complete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);
 
+    [Post("/operation/bonus-credit")]
+    Task<OperationResult> CreditBonusAsync([Body] BonusCreditOperation data);
+
     [Get("/customer/{portalId}/operations")]
     Task<Report> GetCustomerOperationsAsync(string portalId, [Query] OperationFilter filter);
 

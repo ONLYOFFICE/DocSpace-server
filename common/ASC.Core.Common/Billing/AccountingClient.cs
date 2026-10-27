@@ -85,6 +85,21 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             customerParticipantName, metadata));
     }
 
+    /// <summary>
+    /// Credits a bonus to the customer's wallet at once, without the approval a manual operation needs, and returns
+    /// the completed operation. <paramref name="externalRef"/> is our reference of the bonus, and
+    /// <paramref name="utcExpiresAt"/> the moment the bonus expires, or <c>null</c> for one that does not. A credit the
+    /// accounting service refuses as conflicting throws <see cref="AccountingConflictException"/>. The request is
+    /// never retried, so the caller decides what a failure means; the cached balance of the portal is not touched here.
+    /// </summary>
+    public async Task<OperationResult> CreditBonusAsync(string portalId, decimal sum, string currency, string externalRef,
+        DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.CreditBonusAsync(new BonusCreditOperation(portalId, externalRef, utcExpiresAt, sum, currency, metadata));
+    }
+
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
     {
         EnsureConfigured();
@@ -709,6 +724,22 @@ public class Session
     /// The expiration date of the session.
     /// </summary>
     public DateTime Expire { get; init; }
+}
+
+/// <summary>
+/// The result of an operation the accounting service completed at once.
+/// </summary>
+public class OperationResult : CurrencyAmount
+{
+    /// <summary>
+    /// The ID of the operation in the accounting service.
+    /// </summary>
+    public long OperationId { get; init; }
+
+    /// <summary>
+    /// The quantity of the service the operation covers.
+    /// </summary>
+    public int Quantity { get; init; }
 }
 
 /// <summary>
@@ -1546,6 +1577,14 @@ public record SessionCompleteOperation(
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
+public record BonusCreditOperation(
+    string CustomerName,
+    string ExternalRef,
+    DateTime? ExpiresAt,
+    decimal Sum,
+    string Currency,
+    Dictionary<string, string> Metadata);
+
 public static class AccountingHttpClientExtension
 {
     private const string ResiliencePipelineName = "accountingResiliencePipeline";
@@ -1698,8 +1737,9 @@ public static class AccountingHttpClientExtension
             return new AccountingServiceLimitExceededException(detail);
         }
 
-        // A second limit of the same scope, or for the same user; elsewhere a 409 stays a plain failure, as before.
-        if (response.StatusCode == HttpStatusCode.Conflict && serviceLimitRequest)
+        // A second limit of the same scope or for the same user, or a bonus credit that conflicts with one already made;
+        // elsewhere a 409 stays a plain failure, as before.
+        if (response.StatusCode == HttpStatusCode.Conflict && (serviceLimitRequest || IsBonusCreditRequest(response.RequestMessage)))
         {
             return new AccountingConflictException(detail);
         }
@@ -1755,6 +1795,11 @@ public static class AccountingHttpClientExtension
         return path != null &&
                (path.EndsWith("/serviceLimit", StringComparison.OrdinalIgnoreCase) ||
                 path.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsBonusCreditRequest(HttpRequestMessage request)
+    {
+        return request?.RequestUri?.AbsolutePath.EndsWith("/operation/bonus-credit", StringComparison.OrdinalIgnoreCase) == true;
     }
 
     private static bool IsServiceLimitNotFound(string detail)
