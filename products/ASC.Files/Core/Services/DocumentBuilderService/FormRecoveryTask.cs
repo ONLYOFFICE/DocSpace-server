@@ -59,6 +59,8 @@ public class FormRecoveryTask : DistributedTaskProgress
     private const double HistoryShare = 5;
     private DistributedTaskQueue<FormFillingReportTask> _reportQueue;
     private ILogger<FormRecoveryTask> _logger;
+    private TaskCompletionSource _queuedHeartbeatStop;
+    private Task _queuedHeartbeat;
 
     public int TenantId { get; set; }
 
@@ -81,14 +83,25 @@ public class FormRecoveryTask : DistributedTaskProgress
         TenantId = tenantId;
         OriginalFormId = reportData.OriginalFormId;
         UserId = userId;
-        QueuedOn = DateTime.UtcNow;
         _reportData = reportData;
         Id = FormRecoveryTaskManager.GetTaskId(tenantId, userId, reportData.OriginalFormId);
         Status = DistributedTaskStatus.Created;
     }
 
+    /// <summary>
+    /// Publishes the task and the status the client polls while the task waits for a reader of its queue: the readers take
+    /// tasks in turn, so it may wait behind a long recovery, and the queue drops what publishes nothing for a minute.
+    /// </summary>
+    public void StartQueuedHeartbeat()
+    {
+        _queuedHeartbeatStop = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _queuedHeartbeat = KeepAliveQueuedAsync(_queuedHeartbeatStop.Task);
+    }
+
     protected override async Task DoJob()
     {
+        await StopQueuedHeartbeatAsync();
+
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var logger = _logger = scope.ServiceProvider.GetRequiredService<ILogger<FormRecoveryTask>>();
 
@@ -287,6 +300,46 @@ public class FormRecoveryTask : DistributedTaskProgress
     private void Progress(double percentage)
     {
         Percentage = Math.Max(Percentage, percentage);
+    }
+
+    private async Task KeepAliveQueuedAsync(Task stop)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        _logger = scope.ServiceProvider.GetRequiredService<ILogger<FormRecoveryTask>>();
+        _reportQueue = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>().CreateQueue<FormFillingReportTask>();
+
+        using var heartbeatStop = new CancellationTokenSource();
+        var heartbeat = KeepAliveAsync(heartbeatStop.Token);
+
+        await stop;
+        await heartbeatStop.CancelAsync();
+        await heartbeat;
+    }
+
+    /// <summary>
+    /// Stops the heartbeat of the queued task: the job takes it over, or the task never got into the queue. A failure of
+    /// this heartbeat only cost publications, so it is logged, not thrown.
+    /// </summary>
+    public async Task StopQueuedHeartbeatAsync()
+    {
+        if (_queuedHeartbeat == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _queuedHeartbeatStop.TrySetResult();
+            await _queuedHeartbeat;
+        }
+        catch (Exception e)
+        {
+            _logger?.WarnRecoveryHeartbeatFailed(e, _reportData.OriginalFormId);
+        }
+        finally
+        {
+            _queuedHeartbeat = null;
+        }
     }
 
     private async Task KeepAliveAsync(CancellationToken cancellationToken)
