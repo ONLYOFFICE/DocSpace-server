@@ -477,14 +477,20 @@ public class DbWorker(
     }
 
     /// <summary>
-    /// Puts a row written by a publisher of the previous version on the schedule: see
-    /// <see cref="WebhooksDbContext.ScheduleUnscheduledWebhooksLogAsync"/>.
+    /// What the journal shows as the response of a row a publisher of the previous version wrote.
     /// </summary>
-    public async Task ScheduleUnscheduledJournalEntryAsync(int tenantId, int id)
+    public const string PreviousVersionNote =
+        "Not sent: the event was published by a service of the previous version, in the old payload format";
+
+    /// <summary>
+    /// Marks a row written by a publisher of the previous version as never to be sent: see
+    /// <see cref="WebhooksDbContext.MarkPreviousVersionWebhooksLogAsync"/>. True when the row was marked.
+    /// </summary>
+    public async Task<bool> MarkPreviousVersionJournalEntryAsync(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.ScheduleUnscheduledWebhooksLogAsync(tenantId, id, DateTime.UtcNow);
+        return await webhooksDbContext.MarkPreviousVersionWebhooksLogAsync(tenantId, id, PreviousVersionNote) > 0;
     }
 
     public async Task<int?> GetJournalAttemptsAsync(int tenantId, int id)

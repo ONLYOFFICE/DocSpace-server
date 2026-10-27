@@ -172,10 +172,11 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
 
-    // True for an event whose original row was written and sent before the attempt counter existed: that sender wrote
-    // the request headers on every attempt but never counted one, while this one counts every attempt it records. The
-    // body of such a row is in the old payload format, which carried whole REST objects (the password of a shared
-    // link among them), so it is not sent again.
+    // True for an event whose original row was written before the attempt counter existed: that sender wrote the
+    // request headers on every attempt but never counted one, and a row it never got to is marked by
+    // MarkPreviousVersionWebhooksLogAsync, while this version writes headers or a response only together with a
+    // counted attempt. The body of such a row is in the old payload format, which carried whole REST objects (the
+    // password of a shared link among them), so it is not sent again.
     [PreCompileQuery]
     public Task<bool> WebhooksEventPredatesAttemptsAsync(int tenantId, int eventId)
     {
@@ -218,15 +219,20 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
-    // A publisher of the version before the attempt counter writes its row without next_attempt_on and leaves the
-    // sending to its own Web.Studio, which this one replaced, so the row would never be claimed. It is put on the
-    // schedule when its event arrives. Remove once no service of that version can publish any more.
-    public Task<int> ScheduleUnscheduledWebhooksLogAsync(int tenantId, int id, DateTime now)
+    // A publisher of the version before the attempt counter writes its row without next_attempt_on, with a body in the
+    // old payload format (whole REST objects, the password of a shared link among them), and leaves the sending to its
+    // own Web.Studio. The event says which publisher wrote the row (WebhookRequestIntegrationEvent.Scheduled), so the
+    // row is recognised by that mark rather than by its state, which a stopped or cancelled row of this version shares.
+    // It is never sent: the note goes into the response, which a row of this version gets only together with an
+    // attempt, so WebhooksEventPredatesAttemptsAsync refuses a manual retry of it too. Only a row nothing has been
+    // written to yet is marked. Remove once no service of that version can publish any more.
+    public Task<int> MarkPreviousVersionWebhooksLogAsync(int tenantId, int id, string note)
     {
         return WebhooksLogs
             .Where(r => r.TenantId == tenantId && r.Id == id && r.NextAttemptOn == null && r.LeaseId == null &&
-                        r.Attempts == 0 && r.Status == 0 && r.Delivery == null && r.RequestHeaders == null)
-            .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, now));
+                        r.Attempts == 0 && r.Status == 0 && r.Delivery == null && r.RequestHeaders == null &&
+                        r.ResponsePayload == null)
+            .ExecuteUpdateAsync(q => q.SetProperty(p => p.ResponsePayload, note));
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
@@ -429,5 +435,5 @@ static file class Queries
             (WebhooksDbContext ctx, int tenantId, int eventId) =>
                 ctx.WebhooksLogs.Any(it =>
                     it.TenantId == tenantId && it.Id == eventId && it.RetryOf == null &&
-                    it.Attempts == 0 && it.RequestHeaders != null));
+                    it.Attempts == 0 && (it.RequestHeaders != null || it.ResponsePayload != null)));
 }

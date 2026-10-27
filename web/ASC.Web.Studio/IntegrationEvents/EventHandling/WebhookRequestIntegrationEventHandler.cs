@@ -45,9 +45,20 @@ public class WebhookRequestIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            // during a rolling update a publisher of the previous version writes its row without a schedule; this one
-            // puts it on the schedule, rows written by the current publisher are left as they are
-            await dbWorker.ScheduleUnscheduledJournalEntryAsync(@event.TenantId, @event.WebhookLogId);
+            // a publisher of this version wrote its row on the schedule already, and the worker only has to wake up.
+            // One of the previous version, still running during a rolling update, wrote it unscheduled and in the old
+            // payload format, which is never sent: the row is marked so that neither the sender nor a manual retry
+            // picks it up. The mark comes from the event, never from the row's state, which a row of this version
+            // stopped by a manual retry or cancelled before its first attempt shares
+            if (!@event.Scheduled)
+            {
+                if (await dbWorker.MarkPreviousVersionJournalEntryAsync(@event.TenantId, @event.WebhookLogId))
+                {
+                    logger.WarningPreviousVersionEvent(@event.TenantId, @event.WebhookLogId);
+                }
+
+                return;
+            }
 
             workerSignal.Notify();
         }

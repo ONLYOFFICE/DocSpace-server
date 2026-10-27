@@ -234,6 +234,35 @@ public class RetryWebhookTests(
     }
 
     [Fact]
+    public async Task RetryWebhook_UnsentRecordOfAPreviousVersionPublisher_ThrowsConflict()
+    {
+        // Arrange: a record as Web.Studio leaves one that a publisher of the previous version wrote during a rolling
+        // update: never attempted, off the schedule, with the note in place of a response
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await ExecuteSqlAsync(
+            """
+            UPDATE webhooks_logs
+            SET attempts = 0, status = 0, delivery = NULL, request_headers = NULL, response_headers = NULL,
+                next_attempt_on = NULL, lease_id = NULL, response_payload = @note
+            WHERE id = @id
+            """,
+            ("@id", record!.Id),
+            ("@note", ASC.Webhooks.Core.DbWorker.PreviousVersionNote));
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken));
+
+        // Assert: the body of such a record is in the old format too, sent or not
+        exception.ErrorCode.Should().Be(409);
+        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task RetryWebhook_UnknownId_ThrowsNotFound()
     {
         // Arrange

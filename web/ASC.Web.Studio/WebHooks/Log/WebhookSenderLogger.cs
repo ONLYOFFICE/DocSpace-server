@@ -58,4 +58,7 @@ internal static partial class WebhookSenderLogger
 
     [LoggerMessage(LogLevel.Warning, "webhooks:repeatcount is no longer read: retries follow webhooks:retryIntervals, a list of TimeSpan values")]
     public static partial void WarningObsoleteRepeatCount(this ILogger<Settings> logger);
+
+    [LoggerMessage(LogLevel.Warning, "Webhook tenant: {tenantId}, log: {logId} was published by a service of the previous version in the old payload format and is not sent; update every publishing service together with Web.Studio")]
+    public static partial void WarningPreviousVersionEvent(this ILogger<WebhookRequestIntegrationEventHandler> logger, int tenantId, int logId);
 }
