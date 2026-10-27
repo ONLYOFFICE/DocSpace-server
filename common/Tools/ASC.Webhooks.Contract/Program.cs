@@ -32,26 +32,49 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 var check = args.Contains("--check");
-var directory = WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory);
-var contractPath = Path.Combine(directory, WebhookContractGenerator.ContractFileName);
+
+// the server's own copy, which ASC.Webhooks.Core embeds and Web.Studio serves, and the published one in the spec
+// submodule, which the SDKs are generated from; the second is skipped when the submodule is not checked out
+List<string> contractPaths = [Path.Combine(WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory), WebhookContractGenerator.ContractFileName)];
+
+if (WebhookContractGenerator.FindPublishedDirectory(AppContext.BaseDirectory) is { } publishedDirectory)
+{
+    contractPaths.Add(Path.Combine(publishedDirectory, WebhookContractGenerator.ContractFileName));
+}
+else
+{
+    Console.WriteLine("sdk/docspace-api-spec is not checked out: the published copy of the contract is skipped.");
+}
 
 var contract = WebhookContractGenerator.Generate();
 
 if (check)
 {
-    var current = File.Exists(contractPath) ? File.ReadAllText(contractPath).ReplaceLineEndings("\n") : "";
+    var outdated = 0;
 
-    if (current == contract)
+    foreach (var contractPath in contractPaths)
     {
-        Console.WriteLine($"{contractPath} is up to date.");
-        return 0;
+        var current = File.Exists(contractPath) ? File.ReadAllText(contractPath).ReplaceLineEndings("\n") : "";
+
+        if (current == contract)
+        {
+            Console.WriteLine($"{contractPath} is up to date.");
+        }
+        else
+        {
+            Console.Error.WriteLine($"{contractPath} is out of date: run dotnet run --project common/Tools/ASC.Webhooks.Contract and commit the result.");
+            outdated++;
+        }
     }
 
-    Console.Error.WriteLine($"{contractPath} is out of date: run dotnet run --project common/Tools/ASC.Webhooks.Contract and commit the result.");
-    return 1;
+    return outdated == 0 ? 0 : 1;
 }
 
-File.WriteAllText(contractPath, contract, new UTF8Encoding(false));
-Console.WriteLine($"Wrote {contractPath}");
+foreach (var contractPath in contractPaths)
+{
+    Directory.CreateDirectory(Path.GetDirectoryName(contractPath)!);
+    File.WriteAllText(contractPath, contract, new UTF8Encoding(false));
+    Console.WriteLine($"Wrote {contractPath}");
+}
 
 return 0;

@@ -1,6 +1,6 @@
 ---
 name: generate-sdk
-description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates, the webhook SDKs in webhooks-sdk/ (generate-webhook-sdk)."
+description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates, the webhook SDKs in the webhooks/ folders of the SDK submodules (generate-webhook-sdk)."
 ---
 
 # Generating SDKs

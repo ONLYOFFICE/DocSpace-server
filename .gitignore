@@ -17,8 +17,6 @@ node_modules/
 **/.yarn/cache
 **/.yarn/install-state.gz
 *-lock.json
-# ...except the webhook TypeScript SDK, whose build has to be reproducible (npm ci)
-!webhooks-sdk/typescript/package-lock.json
 
 # ---------- OS ----------
 .DS_Store

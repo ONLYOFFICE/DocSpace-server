@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
-/// Writes the signed delivery fixtures of the webhook SDKs (<c>webhooks-sdk/samples/</c>) from what this server
+/// Writes the signed delivery fixtures of the webhook SDKs (<c>Fixtures/</c> next to this file) from what this server
 /// really sends: one delivery of every event family the suite can drive, and one automatic retry. The SDK
 /// verification of the <c>generate-webhook-sdk</c> skill replays them through every language's sample, so the
 /// SDKs are checked against the current wire format instead of a hand-made snapshot.
@@ -205,12 +205,15 @@ public class WebhookFixtureCaptureTests(
         await File.WriteAllTextAsync(Path.Combine(samples, $"{name}.sig"), signature, utf8, TestContext.Current.CancellationToken);
     }
 
-    /// <summary>The <c>webhooks-sdk/samples</c> directory of the repository the suite was built from.</summary>
+    /// <summary>
+    /// The <c>Fixtures</c> directory next to this file, in the repository the suite was built from: the suite that
+    /// captures the deliveries keeps them, and the SDKs read them from here.
+    /// </summary>
     private static string FindSamplesDirectory()
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
-            var samples = Path.Combine(directory.FullName, "webhooks-sdk", "samples");
+            var samples = Path.Combine(directory.FullName, "web", "ASC.Web.Api.Tests", "Tests", "02_Settings", "Webhooks", "Fixtures");
 
             if (File.Exists(Path.Combine(samples, "SECRET")))
             {
@@ -218,7 +221,7 @@ public class WebhookFixtureCaptureTests(
             }
         }
 
-        throw new DirectoryNotFoundException($"No webhooks-sdk/samples/SECRET above {AppContext.BaseDirectory}.");
+        throw new DirectoryNotFoundException($"No web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/Fixtures/SECRET above {AppContext.BaseDirectory}.");
     }
 
     private static string TriggerOf(string body)

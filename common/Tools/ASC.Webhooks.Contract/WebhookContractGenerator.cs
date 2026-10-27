@@ -89,11 +89,29 @@ public static class WebhookContractGenerator
     /// </summary>
     public static string FindContractDirectory(string start)
     {
+        return Path.Combine(FindRepositoryRoot(start), "common", "ASC.Webhooks.Core", "Contract");
+    }
+
+    /// <summary>
+    /// The directory of the published copy of the contract in the <c>sdk/docspace-api-spec</c> submodule, next to the
+    /// signed delivery fixtures the SDKs are verified against; null when the submodule is not checked out.
+    /// </summary>
+    public static string FindPublishedDirectory(string start)
+    {
+        var spec = Path.Combine(FindRepositoryRoot(start), "sdk", "docspace-api-spec");
+
+        return Directory.Exists(spec) && Directory.EnumerateFileSystemEntries(spec).Any()
+            ? Path.Combine(spec, "webhooks")
+            : null;
+    }
+
+    private static string FindRepositoryRoot(string start)
+    {
         for (var directory = new DirectoryInfo(start); directory != null; directory = directory.Parent)
         {
             if (File.Exists(Path.Combine(directory.FullName, "ASC.Web.slnx")))
             {
-                return Path.Combine(directory.FullName, "common", "ASC.Webhooks.Core", "Contract");
+                return directory.FullName;
             }
         }
 

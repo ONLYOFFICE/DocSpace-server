@@ -1,6 +1,6 @@
 ---
 name: generate-webhook-sdk
-description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): checking the contract docspace-webhooks.yaml against the webhook payload DTOs and triggers and, after asking the user, regenerating it (common/Tools/ASC.Webhooks.Contract), running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update webhooks-sdk, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing anything under webhooks-sdk/<lang>/generated/, changing payload DTOs or WebhookTrigger itself."
+description: "Generating the DocSpace webhook SDKs (the webhooks/ folder of each API SDK submodule in sdk/): checking the contract docspace-webhooks.yaml against the webhook payload DTOs and triggers and, after asking the user, regenerating it (common/Tools/ASC.Webhooks.Contract), running openapi-generator-cli per language from the skill's targets.conf with its post-steps, building each language and replaying the signed fixtures through its sample, and optionally checking that each package still builds and installs. USE FOR: generate webhook SDK, regenerate webhook models, update the webhook SDKs, a webhook payload DTO or trigger changed and the SDKs must follow, NOT VERIFIED languages, webhook SDK packaging check, how to regenerate the webhook SDKs by hand. DO NOT USE FOR: the REST API SDKs in sdk/ (generate-sdk), hand-editing what the generator writes into a webhook SDK, changing payload DTOs or WebhookTrigger itself."
 ---
 
 # Generating the webhook SDKs
@@ -8,7 +8,7 @@ description: "Generating the DocSpace webhook SDKs (webhooks-sdk/): checking the
 This is the inbound counterpart of `generate-sdk` and shares none of its tooling. The webhook SDKs
 are built by calling `openapi-generator-cli` directly, one language at a time; the
 `ASC.Api.Documentation` tool is deliberately not involved (its joiner rewrites the REST contract on
-every run and its output folders point at the API SDK submodules — `webhooks-sdk/README.md`,
+every run and its output folders point at the API SDK submodules — `common/Tools/ASC.Webhooks.Contract/Sdk/README.md`,
 *Why not the generate-sdk tool*). Never route a webhook generation through `generate-sdk`, and never
 add webhook commands to that tool as a side effect.
 
@@ -38,23 +38,32 @@ The skill does three things:
   Set the working directory once (it persists between calls in both shell tools) and use each
   tool's own directory flag (`go -C`, `mvn -f`, `npm --prefix`, `swift --package-path`,
   `dotnet --project`) for the commands that need another one.
-- **Never edit `<lang>/generated/`.** It is wiped on every run. A fix belongs in the contract, in
-  `targets.conf` (generator flags), in `templates/<lang>/`, in a shim (`go/shim`, `java/shim`, `python/shim`,
-  `php/shim`, `ruby/shim`, `swift/shim`, `kotlin/docs`), or in the hand-written runtime `<lang>/src/`.
-- **`generated/` is committed** (see `webhooks-sdk/.gitignore`): its diff is part of the change and
+- **Never edit `<out>/`.** It is wiped on every run. A fix belongs in the contract, in
+  `targets.conf` (generator flags), in `<tools>/templates/<lang>/`, in a shim (`<root>/shim` of java, python, php, ruby and swift,
+  `<root>/_shim` of go, `<root>/docs` of kotlin), or in the hand-written runtime `<root>/src/`.
+- **The generated files are committed** (see the `.gitignore` in each `<root>`): its diff is part of the change and
   goes into the same commit as the contract change that caused it. Only `.generate.log` and
   `.verify.log` are ignored.
+- **Where things are.** Every command runs from the **repository root**. Four names stand for paths:
+  `<root>` is the directory of one language's webhook SDK, the second field of its `targets.conf`
+  line (`sdk/docspace-api-sdk-csharp/webhooks`, …); `<out>` is where the generator writes,
+  `<root>` joined with the third field -- `<root>/generated` for every language but go, `<root>` itself
+  for go, whose module sits at the root of `webhooks/`; `<spec>` is the published contract
+  `sdk/docspace-api-spec/webhooks/docspace-webhooks.yaml`; `<fixtures>` is `web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/Fixtures`, the source of the signed
+  deliveries, kept by the suite that captures them, and `<root>/fixtures` is each SDK's committed copy of it;
+  `<tools>` is `common/Tools/ASC.Webhooks.Contract/Sdk` (the pinned `openapitools.json`, the
+  templates and `gen-trigger-map.py`). A `<root>` inside a submodule is committed there, not here.
 - **No hardcoded language list or flags.** The targets are the lines of
   [`targets.conf`](targets.conf), next to this file; read it before offering choices or running
   anything. The first
   field of a line is the language name (lowercase directory names — `csharp`, `typescript`, … —
   unlike `generate-sdk`'s command names).
-- **Keep the evidence.** Each language's generator output goes to `<lang>/generated/.generate.log`
-  and its build and sample output to `<lang>/generated/.verify.log` (both gitignored); those files
+- **Keep the evidence.** Each language's generator output goes to `<out>/.generate.log`
+  and its build and sample output to `<out>/.verify.log` (both gitignored); those files
   are the proof, not your summary. Report their paths.
 - **A change to the procedure is a change to this skill.** A new generator flag goes into
   `targets.conf`; a new post-step, build or sample command goes into the stage A tables. The
-  comments in `webhooks-sdk/` (samples, shims, templates, `README.md`) point here instead of
+  comments in the SDK folders and the tooling (samples, shims, templates, `README.md`) point here instead of
   repeating the steps.
 
 ## Algorithm
@@ -72,8 +81,8 @@ The skill does three things:
    language carries the same models.
 3. **Stage A** for each chosen language, with verification on unless the user asked for generation
    only.
-4. **Report**: per-language verify outcome, `NOT VERIFIED` languages, the `git status` of
-   `webhooks-sdk/`, and anything the contract check found.
+4. **Report**: per-language verify outcome, `NOT VERIFIED` languages, the `git status` of every
+   `<root>` and of `sdk/docspace-api-spec`, and anything the contract check found.
 5. **Stage B** only when asked (publishing, packaging changes, "does it still install").
 
 ## 1. Contract
@@ -98,7 +107,14 @@ On yes:
 ```bash
 dotnet run --project common/Tools/ASC.Webhooks.Contract
 git diff -- common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml
+git -C sdk/docspace-api-spec diff -- webhooks/docspace-webhooks.yaml
 ```
+
+The tool writes the same file twice: the server's copy, which `ASC.Webhooks.Core` embeds and
+Web.Studio serves, and the published `<spec>` in the `sdk/docspace-api-spec` submodule, which the
+SDKs are generated from. The check compares both; with the submodule not checked out it says so and
+skips the published copy -- then initialise it (`git submodule update --init sdk/docspace-api-spec`)
+before generating.
 
 On no, the SDKs are generated from the committed file as it is. Where each part of the contract
 comes from — and therefore where a change to it belongs:
@@ -135,7 +151,7 @@ exception for the trigger, to the table.
 
 ### Fixtures
 
-The signed deliveries in `webhooks-sdk/samples/` are captured from a running server by
+The signed deliveries in `<fixtures>` are captured from a running server by
 `WebhookFixtureCaptureTests`, an explicit integration test that writes the bodies and signature
 headers byte for byte as the receiver got them. Re-capture them whenever a payload DTO or the
 envelope changed, before A4, or A4 checks the SDKs against the old wire format. Skip this when the
@@ -151,21 +167,24 @@ from the old binaries. From the repository root:
 ```bash
 dotnet build ASC.Web.slnx
 dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-class "*WebhookFixtureCaptureTests" --explicit only
-git status --short webhooks-sdk/samples
+git status --short web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/Fixtures
 ```
 
 The test needs the integration-test stack (Docker, the Aspire host); where tests run on another
-machine, run it there and bring back `webhooks-sdk/samples/`. `unknown.trigger.json`,
-`form.submit.json` and `samples/negative/` are written by hand and left alone; their `.sig` files
-are re-signed only when their body changes.
+machine, run it there and bring back `<fixtures>`. `unknown.trigger.json`,
+`form.submit.json` and `negative/` are written by hand and left alone; their `.sig` files
+are re-signed only when their body changes. A capture, or a change to a hand-written fixture, reaches
+the SDKs only through the copy step in A3, so run it for **every** language afterwards, even when
+the contract and the models did not change.
 
 ## Stage A — generate and verify
 
-**Working directory: `webhooks-sdk/`** for every command in this stage. Every path below is relative
-to it. That is also what makes the generator version pinned in `webhooks-sdk/openapitools.json`
-apply. Fixture files are the one exception: pass them as **absolute** paths, because `go -C` and
+**Working directory: the repository root** for every command in this stage; every path below is
+relative to it, with `<root>`, `<spec>`, `<fixtures>` and `<tools>` as in the ground rules. The
+generator version is pinned by `--openapitools <tools>/openapitools.json` on every generator call.
+Fixture files are passed as **absolute** paths, because `go -C` and
 `dotnet run --project` resolve a relative path against a different directory. In a POSIX shell on
-Windows (Git Bash, MSYS) write that path with `cygpath -m "$PWD/samples/<name>.json"`
+Windows (Git Bash, MSYS) write that path with `cygpath -m "$PWD/<root>/fixtures/<name>.json"`
 (`W:/Work/...`): MSYS converts a `/w/...` argument for a native program only when the argument
 *starts* with the path, so `"-Dexec.args=/w/... <secret> <sig>"` reaches Maven unconverted and
 Java and Kotlin open a file that does not exist. PowerShell's `(Resolve-Path ...).Path` is already
@@ -189,9 +208,9 @@ python -c "import yaml"     # or python3 on a box without a `python`
 ```
 
 If neither `python` nor `python3` is there, or the import fails, stop the run here and ask for
-`pip install pyyaml` — A1 would otherwise wipe `generated/` and leave it without its trigger tables.
+`pip install pyyaml` — A1 would otherwise wipe `<out>` and leave it without its trigger tables.
 
-### A1. Wipe `<lang>/generated/`
+### A1. Wipe `<out>`
 
 Create the directory if it is missing, then delete its **contents**, files first and directories
 after, never the directory itself: on Windows an editor or the previous generator run can still hold
@@ -199,27 +218,54 @@ a handle on it. A leftover empty directory after this step is harmless; a leftov
 
 ```bash
 # POSIX shell — Linux, macOS, Git Bash on Windows
-mkdir -p <lang>/generated
-find <lang>/generated -mindepth 1 -type f -delete
-find <lang>/generated -mindepth 1 -depth -type d -exec rmdir {} +
+mkdir -p <out>
+find <out> -mindepth 1 -type f -delete
+find <out> -mindepth 1 -depth -type d -exec rmdir {} +
 ```
 
 ```powershell
 # PowerShell — any OS
-New-Item -ItemType Directory -Force <lang>/generated | Out-Null
-Get-ChildItem <lang>/generated -Recurse -File -Force | Remove-Item -Force
-Get-ChildItem <lang>/generated -Directory -Force | Remove-Item -Recurse -Force
+New-Item -ItemType Directory -Force <out> | Out-Null
+Get-ChildItem <out> -Recurse -File -Force | Remove-Item -Force
+Get-ChildItem <out> -Directory -Force | Remove-Item -Recurse -Force
 ```
+
+**When `<out>` is `<root>` itself (go)**, the directory also holds the hand-written `_shim/`,
+`samples/` and `.gitignore`, so it is never wiped wholesale. Delete instead what the previous run
+wrote: every path listed in `<out>/.openapi-generator/FILES`, the `.openapi-generator/` directory,
+the post-step outputs (`triggers.go` and a copy of every file in `_shim/`) and the two logs; then
+remove the directories left empty (`docs/`, `api/`). A model the contract dropped is in the old
+manifest, so it goes too.
+
+```bash
+# POSIX shell
+while IFS= read -r f; do rm -f "<out>/${f:?}"; done < <out>/.openapi-generator/FILES
+rm -rf <out>/.openapi-generator <out>/triggers.go <out>/.generate.log <out>/.verify.log
+for f in <root>/_shim/*; do b=$(basename "$f"); rm -f "<out>/${b:?}"; done
+find <out> -mindepth 1 -depth -type d -empty -delete
+```
+
+```powershell
+# PowerShell
+Get-Content <out>/.openapi-generator/FILES | ForEach-Object { Remove-Item "<out>/$_" -Force -ErrorAction SilentlyContinue }
+Remove-Item <out>/.openapi-generator, <out>/triggers.go, <out>/.generate.log, <out>/.verify.log -Recurse -Force -ErrorAction SilentlyContinue
+Get-ChildItem <root>/_shim -File | ForEach-Object { Remove-Item "<out>/$($_.Name)" -Force -ErrorAction SilentlyContinue }
+Get-ChildItem <out> -Directory -Recurse | Sort-Object { $_.FullName.Length } -Descending | Where-Object { -not (Get-ChildItem $_.FullName -Force) } | Remove-Item
+```
+
+With no manifest yet (a first run), there is nothing of a previous run to delete.
 
 ### A2. Run the generator
 
 From the language's line in [`targets.conf`](targets.conf)
-(`dirname|generator|global-properties|additional-properties|template-dir|extra-cli-args`):
+(`name|root|generator|global-properties|additional-properties|template-dir|extra-cli-args`):
 
 ```
-openapi-generator-cli generate -i ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml -g "<generator>" -o "<dirname>/generated" --global-property "<global-properties>" --additional-properties="<additional-properties>" -t "<template-dir>" -c "<template-dir>/files.yaml" <extra-cli-args> > <dirname>/generated/.generate.log 2>&1
+openapi-generator-cli --openapitools <tools>/openapitools.json generate -i <spec> -g "<generator>" -o "<out>" --global-property "<global-properties>" --additional-properties="<additional-properties>" -t "<template-dir>" -c "<template-dir>/files.yaml" <extra-cli-args> > <out>/.generate.log 2>&1
 ```
 
+- Never leave out `--openapitools`: without it the CLI uses whatever version it finds and writes a
+  stray `openapitools.json` into the repository root.
 - Leave out `--additional-properties` when that field is empty, and `-t` when the template dir is
   empty.
 - Add `-c <template-dir>/files.yaml` **only when that file exists** (Glob). A custom output file can
@@ -233,18 +279,18 @@ openapi-generator-cli generate -i ../common/ASC.Webhooks.Core/Contract/docspace-
   you got npm's `.ps1` shim; call `openapi-generator-cli.cmd` / `npm.cmd` instead.
 
 Judge it by the exit code. On a failure the language is **FAILED**: report
-`<lang>/generated/.generate.log` and skip its post-step and verification. Otherwise count the
-generated files (Glob `<lang>/generated/**/*`, minus `.generate.log`) for the report.
+`<out>/.generate.log` and skip its post-step and verification. Otherwise count the
+generated files (Glob `<out>/**/*`, minus `.generate.log`) for the report.
 
 ### A3. Post-step
 
 Every language has one. The trigger -> payload model tables are derived from the contract by
-`tools/gen-trigger-map.py`, never hand-maintained, and every sample picks its payload model through
+`<tools>/gen-trigger-map.py`, never hand-maintained, and every sample picks its payload model through
 its language's table. It is invoked as `python` here; on a box where only `python3` exists, use that.
 A0 has already checked that it and PyYAML are there.
 
 First, for **every** language: put back the generator's file manifest when only its line endings
-changed. On Windows the generator writes `<lang>/generated/.openapi-generator/FILES` with CRLF; git
+changed. On Windows the generator writes `<out>/.openapi-generator/FILES` with CRLF; git
 then warns `CRLF will be replaced by LF` on every diff, and depending on `core.autocrlf` lists the
 nine manifests as modified although their content is the same -- rewriting the file with LF does
 not help, git still sees a changed file it cannot tell apart. Restoring it from git does: it leaves
@@ -252,56 +298,76 @@ an LF file and a clean status. A manifest whose content really changed (a model 
 fails the comparison and stays as generated.
 
 ```bash
-# POSIX shell, from webhooks-sdk/
-for f in */generated/.openapi-generator/FILES; do git diff --ignore-cr-at-eol --quiet -- "$f" && git checkout -- "$f"; done
+# POSIX shell, per <root>
+git -C <out> diff --ignore-cr-at-eol --quiet -- .openapi-generator/FILES && git -C <out> checkout -- .openapi-generator/FILES
 ```
 
 ```powershell
-# PowerShell, from webhooks-sdk/
-Get-ChildItem */generated/.openapi-generator/FILES | ForEach-Object { git diff --ignore-cr-at-eol --quiet -- $_.FullName; if ($LASTEXITCODE -eq 0) { git checkout -- $_.FullName } }
+# PowerShell, per <root>
+git -C <out> diff --ignore-cr-at-eol --quiet -- .openapi-generator/FILES; if ($LASTEXITCODE -eq 0) { git -C <out> checkout -- .openapi-generator/FILES }
 ```
 
-`git diff` and `git checkout` take paths relative to the current directory, so these run from
-`webhooks-sdk/` like the rest of stage A.
+`git -C <out>` runs git in the repository that owns `<out>` -- the API SDK submodule or this one --
+so the same line works for both; from the server root a plain `git checkout` refuses a path inside a
+submodule.
 
-Then, per language (`<spec>` is `../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`):
+Then, per language:
 
 | Language | Post-step |
 | --- | --- |
-| `java` | copy the contents of `java/shim/` into `java/generated/src/main/java/` (merging directories); then `python tools/gen-trigger-map.py --lang java --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java`; then `python tools/gen-trigger-map.py --lang java-triggers --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.java`; then `python tools/gen-trigger-map.py --lang java-router --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out java/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookRouter.java` (the router's typed `on<Trigger>` methods) |
-| `kotlin` | copy `kotlin/docs/*.md` into `kotlin/generated/docs/`; then `python tools/gen-trigger-map.py --lang kotlin --spec <spec> --package onlyoffice.docspace.webhooks.sdk --model-package onlyoffice.docspace.webhooks.sdk.models --out kotlin/generated/src/main/kotlin/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.kt` |
-| `go` | copy `go/shim/*.go` into `go/generated/`; then `python tools/gen-trigger-map.py --lang go --spec <spec> --package docspace_webhooks_sdk --out go/generated/triggers.go` |
-| `csharp` | `python tools/gen-trigger-map.py --lang csharp --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python tools/gen-trigger-map.py --lang markdown --spec <spec> --doc-path docs/ --out csharp/generated/TRIGGERS.md`; then `python tools/gen-trigger-map.py --lang csharp-router --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out csharp/generated/src/DocSpace.Webhooks.SDK/WebhookRouter.Triggers.cs` (the `On<Trigger>` methods of `WebhookRouter`) |
-| `php` | copy `php/shim/*.php` into `php/generated/lib/` (the router); then `python tools/gen-trigger-map.py --lang php --spec <spec> --package "OnlyOffice\DocSpace\Webhooks\Sdk" --model-package "OnlyOffice\DocSpace\Webhooks\Sdk\Model" --out php/generated/lib/WebhookTriggers.php` |
-| `python` | copy `python/shim/*.py` into `python/generated/docspace_webhooks_sdk/` (the router); then `python tools/gen-trigger-map.py --lang python --spec <spec> --package docspace_webhooks_sdk --out python/generated/docspace_webhooks_sdk/triggers.py` |
-| `ruby` | copy `ruby/shim/*.rb` into `ruby/generated/lib/docspace-webhooks-sdk/` (the router, which the gem entry requires); then `python tools/gen-trigger-map.py --lang ruby --spec <spec> --package DocspaceWebhooksSdk --out ruby/generated/lib/docspace-webhooks-sdk/webhook_triggers.rb` (the gem entry point from `templates/ruby/gem.mustache` requires it) |
-| `swift` | copy `swift/shim/*.swift` into `swift/generated/Sources/DocSpaceWebhooksSDK/` (the router); then `python tools/gen-trigger-map.py --lang swift --spec <spec> --out swift/generated/Sources/DocSpaceWebhooksSDK/WebhookTriggers.swift` |
-| `typescript` | `python tools/gen-trigger-map.py --lang typescript --spec <spec> --out typescript/generated/triggers.ts` |
+| `java` | copy the contents of `<root>/shim/` into `<out>/src/main/java/` (merging directories); then `python <tools>/gen-trigger-map.py --lang java --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out <out>/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java`; then `python <tools>/gen-trigger-map.py --lang java-triggers --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out <out>/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.java`; then `python <tools>/gen-trigger-map.py --lang java-router --spec <spec> --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out <out>/src/main/java/com/onlyoffice/docspace/webhooks/sdk/WebhookRouter.java` (the router's typed `on<Trigger>` methods) |
+| `kotlin` | copy `<root>/docs/*.md` into `<out>/docs/`; then `python <tools>/gen-trigger-map.py --lang kotlin --spec <spec> --package onlyoffice.docspace.webhooks.sdk --model-package onlyoffice.docspace.webhooks.sdk.models --out <out>/src/main/kotlin/onlyoffice/docspace/webhooks/sdk/WebhookTriggers.kt` |
+| `go` | copy `<root>/_shim/*.go` into `<out>/`; then `python <tools>/gen-trigger-map.py --lang go --spec <spec> --package docspace_webhooks_sdk --out <out>/triggers.go` |
+| `csharp` | `python <tools>/gen-trigger-map.py --lang csharp --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out <out>/src/DocSpace.Webhooks.SDK/Triggers.cs`; then `python <tools>/gen-trigger-map.py --lang markdown --spec <spec> --doc-path docs/ --out <out>/TRIGGERS.md`; then `python <tools>/gen-trigger-map.py --lang csharp-router --spec <spec> --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out <out>/src/DocSpace.Webhooks.SDK/WebhookRouter.Triggers.cs` (the `On<Trigger>` methods of `WebhookRouter`) |
+| `php` | copy `<root>/shim/*.php` into `<out>/lib/` (the router); then `python <tools>/gen-trigger-map.py --lang php --spec <spec> --package "OnlyOffice\DocSpace\Webhooks\Sdk" --model-package "OnlyOffice\DocSpace\Webhooks\Sdk\Model" --out <out>/lib/WebhookTriggers.php` |
+| `python` | copy `<root>/shim/*.py` into `<out>/docspace_webhooks_sdk/` (the router); then `python <tools>/gen-trigger-map.py --lang python --spec <spec> --package docspace_webhooks_sdk --out <out>/docspace_webhooks_sdk/triggers.py` |
+| `ruby` | copy `<root>/shim/*.rb` into `<out>/lib/docspace-webhooks-sdk/` (the router, which the gem entry requires); then `python <tools>/gen-trigger-map.py --lang ruby --spec <spec> --package DocspaceWebhooksSdk --out <out>/lib/docspace-webhooks-sdk/webhook_triggers.rb` (the gem entry point from `<tools>/templates/ruby/gem.mustache` requires it) |
+| `swift` | copy `<root>/shim/*.swift` into `<out>/Sources/DocSpaceWebhooksSDK/` (the router); then `python <tools>/gen-trigger-map.py --lang swift --spec <spec> --out <out>/Sources/DocSpaceWebhooksSDK/WebhookTriggers.swift` |
+| `typescript` | `python <tools>/gen-trigger-map.py --lang typescript --spec <spec> --out <out>/triggers.ts` |
 
 The PHP namespaces are quoted: both shells keep backslashes inside double quotes.
 
-The copies:
+Then, for **every** language, replace its copy of the fixtures with the source and put the copy's
+README next to it. Each SDK repository carries its own copy, committed like `<out>`, so that its
+sample and tests run from a clone of that repository alone; nothing in an SDK reads `<fixtures>`
+itself. The copy is never edited by hand: a fixture is changed in `<fixtures>` and copied again.
 
 ```bash
 # POSIX shell
-cp -r java/shim/. java/generated/src/main/java/
-cp kotlin/docs/*.md kotlin/generated/docs/
-cp go/shim/*.go go/generated/
-cp python/shim/*.py python/generated/docspace_webhooks_sdk/
-cp php/shim/*.php php/generated/lib/
-cp ruby/shim/*.rb ruby/generated/lib/docspace-webhooks-sdk/
-cp swift/shim/*.swift swift/generated/Sources/DocSpaceWebhooksSDK/
+rm -rf "<root>/fixtures"; mkdir -p <root>/fixtures
+cp -r <fixtures>/. <root>/fixtures/
+cp <tools>/fixtures-README.md <root>/fixtures/README.md
+```
+
+```powershell
+# PowerShell
+Remove-Item <root>/fixtures -Recurse -Force -ErrorAction SilentlyContinue
+Copy-Item <fixtures> <root>/fixtures -Recurse
+Copy-Item <tools>/fixtures-README.md <root>/fixtures/README.md -Force
+```
+
+The shim copies, each with the `<root>` of its own language (C# and TypeScript have none):
+
+```bash
+# POSIX shell
+cp -r <root>/shim/. <out>/src/main/java/                       # java
+cp <root>/docs/*.md <out>/docs/                                # kotlin
+cp <root>/_shim/*.go <out>/                                    # go
+cp <root>/shim/*.py <out>/docspace_webhooks_sdk/               # python
+cp <root>/shim/*.php <out>/lib/                                # php
+cp <root>/shim/*.rb <out>/lib/docspace-webhooks-sdk/           # ruby
+cp <root>/shim/*.swift <out>/Sources/DocSpaceWebhooksSDK/      # swift
 ```
 
 ```powershell
 # PowerShell — Copy-Item merges into the existing package directories when the target is their parent
-Copy-Item java/shim/* java/generated/src/main/java/ -Recurse -Force
-Copy-Item kotlin/docs/*.md kotlin/generated/docs/ -Force
-Copy-Item go/shim/*.go go/generated/ -Force
-Copy-Item python/shim/*.py python/generated/docspace_webhooks_sdk/ -Force
-Copy-Item php/shim/*.php php/generated/lib/ -Force
-Copy-Item ruby/shim/*.rb ruby/generated/lib/docspace-webhooks-sdk/ -Force
-Copy-Item swift/shim/*.swift swift/generated/Sources/DocSpaceWebhooksSDK/ -Force
+Copy-Item <root>/shim/* <out>/src/main/java/ -Recurse -Force                  # java
+Copy-Item <root>/docs/*.md <out>/docs/ -Force                                 # kotlin
+Copy-Item <root>/_shim/*.go <out>/ -Force                                     # go
+Copy-Item <root>/shim/*.py <out>/docspace_webhooks_sdk/ -Force                # python
+Copy-Item <root>/shim/*.php <out>/lib/ -Force                                 # php
+Copy-Item <root>/shim/*.rb <out>/lib/docspace-webhooks-sdk/ -Force            # ruby
+Copy-Item <root>/shim/*.swift <out>/Sources/DocSpaceWebhooksSDK/ -Force       # swift
 ```
 
 ### A4. Verify
@@ -309,22 +375,22 @@ Copy-Item swift/shim/*.swift swift/generated/Sources/DocSpaceWebhooksSDK/ -Force
 Skip only when the user asked for generation alone, and then say so in the report. Generating is not
 the same as working: every SDK here once generated cleanly and still failed to compile or to parse
 a real delivery. So each generated language is built, and then its sample is run over **every**
-signed fixture in `samples/`. The sample verifies the signature and parses the payload with the
+signed fixture in `<root>/fixtures`. The sample verifies the signature and parses the payload with the
 generated models, which is exactly what a receiver does. It must also pick the right model and refuse
 what a receiver must refuse, so the run checks both: the model each sample reports, and its exit
-code on the negative fixtures in `samples/negative/`.
+code on the negative fixtures in `<root>/fixtures/negative/`.
 
-Append the output of every command for a language to `<lang>/generated/.verify.log`
-(`>> <lang>/generated/.verify.log 2>&1`, the same in both shells), starting from an empty file. A
+Append the output of every command for a language to `<out>/.verify.log`
+(`>> <out>/.verify.log 2>&1`, the same in both shells), starting from an empty file. A
 run that generated the language has one already (A1 wiped the directory); a verify-only run empties
 it first:
 
 ```bash
-: > <lang>/generated/.verify.log            # POSIX shell
+: > <out>/.verify.log            # POSIX shell
 ```
 
 ```powershell
-Set-Content <lang>/generated/.verify.log '' # PowerShell
+Set-Content <out>/.verify.log '' # PowerShell
 ```
 
 **Toolchain first.** If the tool in the *Needs* column is not on PATH (`command -v <tool>` /
@@ -333,33 +399,33 @@ and it must never be reported as a pass.
 
 | Language | Needs | Build (any non-zero exit = BUILD FAILED) | Sample, per fixture |
 | --- | --- | --- | --- |
-| `csharp` | `dotnet` | `dotnet build csharp/samples/WebhookLogger -nologo -v q` | `dotnet run --project csharp/samples/WebhookLogger --no-build -- --file <body> --secret <secret> --signature <sig>` |
-| `go` | `go` | `go -C go/generated vet ./...`; then `go -C go/samples vet ./...` | `go -C go/samples run . <body> <secret> <sig>` |
-| `java` | `mvn` | `mvn -f java/pom.xml -q compile` | `mvn -f java/pom.xml -q exec:java "-Dexec.args=<body> <secret> <sig>"` |
-| `kotlin` | `mvn` | `mvn -f kotlin/pom.xml -q compile` | `mvn -f kotlin/pom.xml -q exec:java "-Dexec.args=<body> <secret> <sig>"` |
-| `php` | `php` | `php -l` on every `php/generated/lib/**/*.php` (below) | `php php/samples/log_webhook.php <body> <secret> <sig>` |
-| `python` | `python` | `python -m compileall -q python/generated` | `python python/samples/log_webhook.py <body> <secret> <sig>` |
-| `ruby` | `ruby` | — | `ruby ruby/samples/log_webhook.rb <body> <secret> <sig>` |
-| `swift` | `swift` | `swift build --package-path swift` | `swift run --package-path swift WebhookLogger <body> <secret> <sig>` |
-| `typescript` | `npm` | if `typescript/node_modules` is missing: `npm --prefix typescript ci --silent`; then `npm --prefix typescript run -s build` | `node typescript/dist/samples/log-webhook.js <body> <secret> <sig>` |
+| `csharp` | `dotnet` | `dotnet build <root>/samples/WebhookLogger -nologo -v q` | `dotnet run --project <root>/samples/WebhookLogger --no-build -- --file <body> --secret <secret> --signature <sig>` |
+| `go` | `go` | `go -C <out> vet ./...`; then `go -C <root>/samples vet ./...` | `go -C <root>/samples run . <body> <secret> <sig>` |
+| `java` | `mvn` | `mvn -f <root>/pom.xml -q compile` | `mvn -f <root>/pom.xml -q exec:java "-Dexec.args=<body> <secret> <sig>"` |
+| `kotlin` | `mvn` | `mvn -f <root>/pom.xml -q compile` | `mvn -f <root>/pom.xml -q exec:java "-Dexec.args=<body> <secret> <sig>"` |
+| `php` | `php` | `php -l` on every `<out>/lib/**/*.php` (below) | `php <root>/samples/log_webhook.php <body> <secret> <sig>` |
+| `python` | `python` | `python -m compileall -q <out>` | `python <root>/samples/log_webhook.py <body> <secret> <sig>` |
+| `ruby` | `ruby` | — | `ruby <root>/samples/log_webhook.rb <body> <secret> <sig>` |
+| `swift` | `swift` | `swift build --package-path <root>` | `swift run --package-path <root> WebhookLogger <body> <secret> <sig>` |
+| `typescript` | `npm` | if `<root>/node_modules` is missing: `npm --prefix <root> ci --silent`; then `npm --prefix <root> run -s build` | `node <root>/dist/samples/log-webhook.js <body> <secret> <sig>` |
 
 - The `-Dexec.args=…` argument is quoted as a whole on purpose: PowerShell splits an unquoted `-D`
   argument at the first dot.
-- `typescript/package-lock.json` is committed, so `npm ci` installs exactly the locked versions. A
+- `<root>/package-lock.json` is committed, so `npm ci` installs exactly the locked versions. A
   failing `npm ci` is **BUILD FAILED**: never fall back to `npm install`, which resolves the ranges
   afresh and would verify the SDK against dependencies nobody locked.
-- Fixtures: Glob `samples/*.json`. `<body>` is the fixture's **absolute** path (`cygpath -m` in a
+- Fixtures: Glob `<root>/fixtures/*.json`. `<body>` is the fixture's **absolute** path (`cygpath -m` in a
   POSIX shell on Windows, see above). `<sig>` is the content of the `.sig` file with the same name
-  (`sha256=…`). `<secret>` is the content of `samples/SECRET`. Read both files and pass the values
+  (`sha256=…`). `<secret>` is the content of `<root>/fixtures/SECRET`. Read both files and pass the values
   trimmed. A fixture whose sample exits non-zero is **FAILED**.
 - **The model check.** Every sample prints one line `model: <name>`: the payload model it parsed
   with, as the contract names the schema (`FilePayload`, `UserPayload`, …), `untyped` for the
   catch-all `*`, and `unknown` for a trigger the contract does not list. The expected name comes
-  from the contract's `x-docspace-trigger-payloads` map, read with a one-liner (run from
-  `webhooks-sdk/`, the same in both shells):
+  from the contract's `x-docspace-trigger-payloads` map, read with a one-liner (from the
+  repository root, the same in both shells):
 
   ```
-  python -c "import json,sys,yaml; m=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['x-docspace-trigger-payloads']['map']; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print((m[t] or 'untyped') if t in m else 'unknown')" ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml samples/<name>.json
+  python -c "import json,sys,yaml; m=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['x-docspace-trigger-payloads']['map']; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print((m[t] or 'untyped') if t in m else 'unknown')" <spec> <root>/fixtures/<name>.json
   ```
 
   A run whose output has no line that, trimmed, equals `model: <expected>` is **FAILED (wrong
@@ -369,21 +435,21 @@ and it must never be reported as a pass.
   trigger, through the generated trigger table, and prints one line `delivery: <name>`: the
   `*Delivery` schema (`FileDelivery`, `UserDelivery`, …), or `none` for the catch-all `*` and for a
   trigger the contract does not list. The expected name is the body of the trigger's entry in the
-  contract's `webhooks` section, read with a one-liner (from `webhooks-sdk/`, the same in both
+  contract's `webhooks` section, read with a one-liner (from the repository root, the same in both
   shells; `chr(36)` spells the `$` of `$ref`, which both shells would expand inside the quotes):
 
   ```
-  python -c "import json,sys,yaml; w=yaml.safe_load(open(sys.argv[1],encoding='utf-8')).get('webhooks') or {}; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print(w[t]['post']['requestBody']['content']['application/json']['schema'][chr(36)+'ref'].rsplit('/',1)[1] if t in w else 'none')" ../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml samples/<name>.json
+  python -c "import json,sys,yaml; w=yaml.safe_load(open(sys.argv[1],encoding='utf-8')).get('webhooks') or {}; t=json.load(open(sys.argv[2],encoding='utf-8'))['event'].get('trigger'); print(w[t]['post']['requestBody']['content']['application/json']['schema'][chr(36)+'ref'].rsplit('/',1)[1] if t in w else 'none')" <spec> <root>/fixtures/<name>.json
   ```
 
   A run whose output has no line that, trimmed, equals `delivery: <expected>` is **FAILED (wrong
   delivery)**, even with exit code 0: the delivery table of that language no longer follows the
   contract's `webhooks` section, or the sample stopped going through it.
-- **The negative fixtures.** Glob `samples/negative/*.json` and run each sample over them exactly as
-  over the positive ones (their `.sig` sits next to them; `samples/negative/README.md` says what is
+- **The negative fixtures.** Glob `<root>/fixtures/negative/*.json` and run each sample over them exactly as
+  over the positive ones (their `.sig` sits next to them; `<root>/fixtures/negative/README.md` says what is
   wrong with each). Every sample must exit **non-zero** on each of them; one that exits 0 is
   **FAILED (accepted a negative fixture)** — it would accept a forged or broken delivery, and the
-  positive run cannot show that. The positive Glob `samples/*.json` does not descend into the
+  positive run cannot show that. The positive Glob `<root>/fixtures/*.json` does not descend into the
   subfolder, so the two sets never mix.
 - Skip the samples of a language whose build failed.
 
@@ -391,12 +457,12 @@ PHP lint, which has to be a loop because `php -l` takes one file:
 
 ```bash
 # POSIX shell
-find php/generated/lib -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+find <out>/lib -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 ```
 
 ```powershell
 # PowerShell
-Get-ChildItem php/generated/lib -Recurse -Filter *.php | ForEach-Object { php -l $_.FullName > $null; if ($LASTEXITCODE) { "FAILED: $($_.FullName)" } }
+Get-ChildItem <out>/lib -Recurse -Filter *.php | ForEach-Object { php -l $_.FullName > $null; if ($LASTEXITCODE) { "FAILED: $($_.FullName)" } }
 ```
 
 The bash form fails through `xargs`' exit code. The PowerShell loop does not set one, so the
@@ -407,8 +473,8 @@ Outcomes, per language — use these words in the report:
 | Outcome | Meaning |
 | --- | --- |
 | `models: N files` | generation succeeded (not that it compiles) |
-| `FAILED — see <lang>/generated/.generate.log` | the generator failed; nothing for that language is verified |
-| `BUILD FAILED — see <lang>/generated/.verify.log` | generated, but the language does not build — the most common real failure |
+| `FAILED — see <out>/.generate.log` | the generator failed; nothing for that language is verified |
+| `BUILD FAILED — see <out>/.verify.log` | generated, but the language does not build — the most common real failure |
 | `<fixture>: ok` / `FAILED` | the sample parsed (or did not parse) that real delivery |
 | `<fixture>: FAILED (wrong model)` | it parsed, but with another model than the contract gives its trigger |
 | `<fixture>: FAILED (wrong delivery)` | the whole body went into another delivery model than the trigger's `webhooks` entry names |
@@ -422,33 +488,33 @@ it. So collect the `NOT VERIFIED` list every time and report it.
 
 PHP, Ruby and Swift are the toolchains a machine most often lacks. When Docker is available, verify
 them in a container instead of reporting them `NOT VERIFIED`: the same build and sample commands,
-over the same fixtures, with `webhooks-sdk/` mounted at `/w`. Inside the container a fixture is
-`/w/samples/<name>.json` (`/w/samples/negative/<name>.json`), not the host path; secret, signature
+over the same fixtures, with the repository root mounted at `/w`. Inside the container a fixture is
+`/w/<root>/fixtures/<name>.json` (`/w/<root>/fixtures/negative/<name>.json`), not the host path; secret, signature
 and the model and delivery checks are as in A4. A language verified this way counts as verified; the report says
 so, with the image and the Docker host it ran on.
 
 ```bash
-# POSIX shell on Linux or macOS, from webhooks-sdk/; --user keeps the files the build writes owned by you
+# POSIX shell on Linux or macOS, from the repository root; --user keeps the files the build writes owned by you
 D="docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v $PWD:/w -w /w"
-$D php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
-$D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
-$D ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
+$D php:8.3-cli sh -c 'find <out>/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
+$D php:8.3-cli php <root>/samples/log_webhook.php /w/<root>/fixtures/<name>.json <secret> <sig>
+$D ruby:3.4-slim ruby <root>/samples/log_webhook.rb /w/<root>/fixtures/<name>.json <secret> <sig>
 # Swift: build once, then run the built sample per fixture in the same container -- a fresh container
 # per fixture would resolve swift-crypto and compile from scratch each time
-$D swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "$(tr -d "\r\n" < samples/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
+$D swift:6.1 bash -c 'swift build --package-path <root> && for f in <root>/fixtures/*.json <root>/fixtures/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path <root> WebhookLogger "/w/$f" "$(tr -d "\r\n" < <root>/fixtures/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
 ```
 
 In Git Bash (MSYS) on Windows the lines above do not work as they are: MSYS rewrites every argument
 that looks like a POSIX path for the native `docker.exe`, so `-v $PWD:/w`, `-w /w` and
-`/w/samples/...` reach Docker as Windows paths. Switch the rewriting off for these commands and give
+`/w/<root>/fixtures/...` reach Docker as Windows paths. Switch the rewriting off for these commands and give
 the mount a Windows source path (`cygpath -m`, `W:/Work/...`); Docker Desktop maps file ownership
 itself, so drop `--user` too. This is for a local Docker Desktop only: with `DOCKER_HOST` set to a
 remote daemon the Windows path means nothing to it (`invalid mode: /w`), see the note below.
 
 ```bash
-# Git Bash on Windows with a local Docker Desktop, from webhooks-sdk/
+# Git Bash on Windows with a local Docker Desktop, from the repository root
 D="docker run --rm -v $(cygpath -m "$PWD"):/w -w /w"
-MSYS_NO_PATHCONV=1 $D php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
+MSYS_NO_PATHCONV=1 $D php:8.3-cli php <root>/samples/log_webhook.php /w/<root>/fixtures/<name>.json <secret> <sig>
 ```
 
 The same prefix goes before every `$D` line: `MSYS_NO_PATHCONV=1 $D ruby:3.4-slim ...`,
@@ -459,11 +525,11 @@ Git Bash `mvn` launcher fails to start (`Could not find or load main class
 Kotlin.
 
 ```powershell
-# PowerShell, from webhooks-sdk/ (Docker Desktop maps file ownership itself, so no --user)
-docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli sh -c 'find php/generated/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
-docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli php php/samples/log_webhook.php /w/samples/<name>.json <secret> <sig>
-docker run --rm -v "${PWD}:/w" -w /w ruby:3.4-slim ruby ruby/samples/log_webhook.rb /w/samples/<name>.json <secret> <sig>
-docker run --rm -v "${PWD}:/w" -w /w swift:6.1 bash -c 'swift build --package-path swift && for f in samples/*.json samples/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path swift WebhookLogger "/w/$f" "$(tr -d "\r\n" < samples/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
+# PowerShell, from the repository root (Docker Desktop maps file ownership itself, so no --user)
+docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli sh -c 'find <out>/lib -name "*.php" -print0 | xargs -0 -n1 php -l > /dev/null'
+docker run --rm -v "${PWD}:/w" -w /w php:8.3-cli php <root>/samples/log_webhook.php /w/<root>/fixtures/<name>.json <secret> <sig>
+docker run --rm -v "${PWD}:/w" -w /w ruby:3.4-slim ruby <root>/samples/log_webhook.rb /w/<root>/fixtures/<name>.json <secret> <sig>
+docker run --rm -v "${PWD}:/w" -w /w swift:6.1 bash -c 'swift build --package-path <root> && for f in <root>/fixtures/*.json <root>/fixtures/negative/*.json; do echo "--- $f"; swift run --skip-build --package-path <root> WebhookLogger "/w/$f" "$(tr -d "\r\n" < <root>/fixtures/SECRET)" "$(tr -d "\r\n" < "${f%.json}.sig")"; echo "exit $?"; done'
 ```
 
 The Swift command reads the secret and each signature inside the container, so it runs as it
@@ -471,7 +537,7 @@ stands. It is one single-quoted argument in both shells, so `$f` and `$(tr ...)`
 `bash` inside the container.
 
 - `-v $PWD:/w` mounts a path of the machine the Docker **daemon** runs on. With `DOCKER_HOST`
-  pointing at a remote daemon, the mount works only when `webhooks-sdk/` exists at that same path on
+  pointing at a remote daemon, the mount works only when the repository exists at that same path on
   that host, so sync the tree there first and run the commands on that host (over `ssh`, with the
   POSIX form above); a mount from Windows fails there with `invalid mode: /w`.
 - The images: `php:8.3-cli`, `ruby:3.4-slim`, `swift:6.1`. The Swift package needs network access
@@ -485,41 +551,51 @@ from — and therefore where a fix belongs:
 
 | Language | Package file | Owner |
 | --- | --- | --- |
-| C# | `csharp/src/DocSpace.Webhooks.SDK/DocSpace.Webhooks.SDK.csproj` | hand-written |
-| Go | `go/generated/go.mod`, `go.sum` | generator (`supportingFiles` + `--git-user-id/--git-repo-id` in `targets.conf`); `generated/` is the module root |
-| Java / Kotlin | `java/pom.xml`, `kotlin/pom.xml` | hand-written |
-| PHP | `php/generated/composer.json` | `templates/php/composer.mustache` |
-| Python | `python/generated/pyproject.toml`, package `__init__.py` | `templates/python/pyproject.mustache`, `__init__package.mustache` |
-| Ruby | `ruby/generated/docspace-webhooks-sdk.gemspec` | `templates/ruby/gemspec.mustache` |
-| Swift | `swift/Package.swift` | hand-written |
-| TypeScript | `typescript/package.json` | hand-written |
+| C# | `<root>/src/DocSpace.Webhooks.SDK/DocSpace.Webhooks.SDK.csproj` | hand-written |
+| Go | `<out>/go.mod`, `go.sum` | generator (`supportingFiles` + `--git-user-id/--git-repo-id` in `targets.conf`); `<out>` is `<root>`, the module root, so the import path is `github.com/ONLYOFFICE/docspace-api-sdk-go/webhooks` and a release is a tag `webhooks/v<version>` |
+| Java / Kotlin | `<root>/pom.xml`, `<root>/pom.xml` | hand-written |
+| PHP | `<out>/composer.json` | `<tools>/templates/php/composer.mustache` |
+| Python | `<out>/pyproject.toml`, package `__init__.py` | `<tools>/templates/python/pyproject.mustache`, `__init__package.mustache` |
+| Ruby | `<out>/docspace-webhooks-sdk.gemspec` | `<tools>/templates/ruby/gemspec.mustache` |
+| Swift | `<root>/Package.swift` | hand-written |
+| TypeScript | `<root>/package.json` | hand-written |
 
 Name, description, author, license and repository follow the matching API SDK in
-`sdk/docspace-api-sdk-*` (`webhooks` in place of `api`); `README.md` → *Package naming* has the table.
+`sdk/docspace-api-sdk-*` (`webhooks` in place of `api`); `<tools>/README.md` → *Package naming* has the table.
 
 Checks, from the repo root, each into a scratch directory outside the repo:
 
 ```bash
-dotnet pack webhooks-sdk/csharp/src/DocSpace.Webhooks.SDK -o <scratch>     # nuspec id/version/license; only lib/ inside
-mvn -f webhooks-sdk/java/pom.xml -q -DskipTests package                    # jar name = README coordinates, no samples/ classes
-mvn -f webhooks-sdk/kotlin/pom.xml -q -DskipTests package
-python -m pip wheel --no-deps -w <scratch> webhooks-sdk/python/generated   # then install into a fresh venv and import
-npm pack --dry-run ./webhooks-sdk/typescript                               # only dist/src and dist/generated
+dotnet pack sdk/docspace-api-sdk-csharp/webhooks/src/DocSpace.Webhooks.SDK -o <scratch>  # nuspec id/version/license; only lib/ inside
+mvn -f sdk/docspace-api-sdk-java/webhooks/pom.xml -q -DskipTests package                   # jar name = README coordinates, no samples/ classes
+mvn -f sdk/docspace-api-sdk-kotlin/webhooks/pom.xml -q -DskipTests package
+python -m pip wheel --no-deps -w <scratch> sdk/docspace-api-sdk-python/webhooks/generated  # then install into a fresh venv and import
+npm pack --dry-run ./sdk/docspace-api-sdk-typescript/webhooks                             # only dist/src and dist/generated
 ```
 
-Keep the `./` in the `npm pack` argument: without it npm reads `webhooks-sdk/typescript` as a
-GitHub `user/repo` and packs something else.
+Keep the `./` in the `npm pack` argument: without it npm reads the path as a GitHub `user/repo` and
+packs something else.
 
-For Go, the sample module (`go/samples`, with a `replace` onto `../generated`) is the consumer test,
+For Go, the sample module (`<root>/samples`, with a `replace` onto `../generated`) is the consumer test,
 and stage A's verify already runs it. PHP has no `composer` check unless Composer is installed —
-then `composer validate webhooks-sdk/php/generated/composer.json`.
+then `composer validate <out>/composer.json`.
+
+Every moved package lives in its API SDK's repository but is a package of its own, with its own
+manifest in `<root>`: Maven's `pom.xml`, Python's `<out>/pyproject.toml`, Ruby's gemspec. The C# one is not in `DocSpace.API.SDK.sln`,
+so the repository's build workflow does not build it. The TypeScript one is kept
+out of the API SDK's own build by `"webhooks"` in the `exclude` of its `tsconfig.json`, which comes
+from the `tsconfig.mustache` template of `ASC.Api.Documentation`; without it `npm pack` of the API
+SDK would compile `webhooks/` as well.
 
 ## Reporting the result
 
 - Per language: generated / built / each fixture ok — or exactly which step failed and the log path.
 - The `NOT VERIFIED` list, verbatim.
-- `git status --short webhooks-sdk/` — the generated diff, which belongs in the commit. These are
-  plain directories in **this** repo, not submodules; there is no pointer to bump.
+- `git -C <root> status --short .` for every generated language, and
+  `git -C sdk/docspace-api-spec status --short webhooks` -- the generated diff, which belongs in the
+  commit. Every `<root>` and the published contract are committed in **their** repositories (the API
+  SDK submodules and `sdk/docspace-api-spec`), and the server then bumps the submodule pointers; the
+  fixtures are files of this repository.
 - Whether the contract was changed, and if it was behind the code but the user chose not to update
   it, say plainly that the generated SDKs describe the old payload.
 
@@ -530,16 +606,15 @@ and `python` (or `python3`) for the trigger tables. No bash. Verification needs 
 toolchain: `dotnet`, `go`, `mvn`, `php`, `python`, `ruby`, `swift`, `npm`. A missing one is
 reported as not verified, not as a failure.
 
-The generator version is pinned by `webhooks-sdk/openapitools.json` and applies because stage A runs
-from `webhooks-sdk/`. Do not run `openapi-generator-cli version` from the repo root to check the
-install — it writes a stray `openapitools.json` into the current directory. Run it from
-`webhooks-sdk/`.
+The generator version is pinned by `<tools>/openapitools.json`, passed with `--openapitools` on every
+call. Check the install the same way: `openapi-generator-cli --openapitools <tools>/openapitools.json
+version`. Without the flag the CLI writes a stray `openapitools.json` into the current directory.
 
 ## Failure modes
 
 - `BUILD FAILED` in Go with `missing go.sum entry` or `updates to go.mod needed` — the sample module
-  `go/samples` is out of step with `generated/go.mod`; run `go -C go/samples mod tidy`, never in
-  `generated/` (it is regenerated).
+  `<root>/samples` is out of step with `<out>/go.mod`; run `go -C <root>/samples mod tidy`, never in
+  the module root (its `go.mod` is regenerated).
 - A language builds but every fixture fails to parse — the contract declares something the wire does
   not carry (a `required` field that `WhenWritingDefault` omits, an enum that gained a value, a
   number format the language cannot map). Fix the contract, not the generated model. The README
@@ -559,7 +634,7 @@ install — it writes a stray `openapitools.json` into the current directory. Ru
   from the contract map.
 - Every Java/Kotlin sample run fails with an unknown lifecycle phase `.args=…` — the `-Dexec.args`
   argument lost its quotes in PowerShell.
-- A file from an older generator version survives in `generated/` — the wipe in A1 stopped at a
+- A file from an older generator version survives in `<out>` — the wipe in A1 stopped at a
   locked file. Close whatever holds it and wipe again; never generate over leftovers.
 
 Known-harmless noise:
