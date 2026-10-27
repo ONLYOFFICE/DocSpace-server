@@ -52,6 +52,16 @@ public class DbWorker(
     /// </summary>
     public static readonly TimeSpan InactiveTenantDelay = TimeSpan.FromHours(1);
 
+    /// <summary>
+    /// How many rows of inactive portals one statement moves out of the way of the claim.
+    /// </summary>
+    private const int PostponeBatchSize = 500;
+
+    /// <summary>
+    /// How many batches of <see cref="PostponeBatchSize"/> one run moves at most.
+    /// </summary>
+    private const int MaxPostponeRounds = 20;
+
     private static string GetCacheKey(int tenantId)
     {
         return $"webhooks_configs_{tenantId}";
@@ -481,16 +491,47 @@ public class DbWorker(
     }
 
     /// <summary>
-    /// Moves the due rows of portals that are not active out of the way of the claim: see
-    /// <see cref="WebhooksDbContext.PostponeInactiveTenantsWebhooksLogsAsync"/>.
+    /// Moves the due rows of portals that are not active, or no longer exist, out of the way of the claim: see
+    /// <see cref="WebhooksDbContext.InactiveTenantsDueWebhooksLogsAsync"/>. Works in batches of
+    /// <see cref="PostponeBatchSize"/>, each one a short statement of its own, and stops after
+    /// <see cref="MaxPostponeRounds"/> of them; what is left waits for the next run.
     /// </summary>
     public async Task<int> PostponeInactiveTenantsJournalAsync()
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var now = DateTime.UtcNow;
+        var moved = 0;
 
-        return await webhooksDbContext.PostponeInactiveTenantsWebhooksLogsAsync(now, now + InactiveTenantDelay);
+        for (var round = 0; round < MaxPostponeRounds; round++)
+        {
+            var now = DateTime.UtcNow;
+            var rows = await webhooksDbContext.InactiveTenantsDueWebhooksLogsAsync(now, PostponeBatchSize).ToListAsync();
+
+            if (rows.Count == 0)
+            {
+                break;
+            }
+
+            var unschedule = rows.Where(r => r.Unschedule).Select(r => r.Id).ToList();
+            var postpone = rows.Where(r => !r.Unschedule).Select(r => r.Id).ToList();
+
+            if (unschedule.Count > 0)
+            {
+                moved += await webhooksDbContext.UnscheduleWebhooksLogsAsync(unschedule, now);
+            }
+
+            if (postpone.Count > 0)
+            {
+                moved += await webhooksDbContext.PostponeWebhooksLogsAsync(postpone, now, now + InactiveTenantDelay);
+            }
+
+            if (rows.Count < PostponeBatchSize)
+            {
+                break;
+            }
+        }
+
+        return moved;
     }
 
     /// <summary>
@@ -616,6 +657,16 @@ public class ClaimedWebhooksLog
 {
     public int TenantId { get; init; }
     public int Id { get; init; }
+}
+
+public class InactiveTenantWebhooksLog
+{
+    public int Id { get; init; }
+
+    /// <summary>
+    /// True when the portal is being removed or is gone: the row leaves the schedule instead of waiting.
+    /// </summary>
+    public bool Unschedule { get; init; }
 }
 
 /// <summary>

@@ -192,27 +192,39 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
 
-    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
-    // The claim skips the rows of portals that are not active, but those rows stay at the head of the next_attempt_on
-    // index, and every poll of every instance would read them again. Rows of a portal being removed leave the
-    // schedule; those of a portal that may come back (suspended, being restored or migrated) wait until postponeTo.
-    public async Task<int> PostponeInactiveTenantsWebhooksLogsAsync(DateTime now, DateTime postponeTo)
+    // The claim skips the due rows of portals that are not active, and of portals whose tenant row is gone, but those
+    // rows stay at the head of the next_attempt_on index, and every poll of every instance would read them again.
+    // This finds a batch of them, oldest first, and says which ones leave the schedule: those of a portal being
+    // removed or already removed. A plain read without locks, so it never holds the rows of active portals it scans
+    // past; the UPDATEs that follow touch the rows it returned by primary key only.
+    [PreCompileQuery]
+    public IAsyncEnumerable<InactiveTenantWebhooksLog> InactiveTenantsDueWebhooksLogsAsync(DateTime now, int count)
     {
-        var dropped = await WebhooksLogs
-            .Where(r => r.NextAttemptOn != null && r.NextAttemptOn <= now &&
-                        Tenants.Any(t => t.Id == r.TenantId && t.Status == TenantStatus.RemovePending))
+        return Queries.InactiveTenantsDueWebhooksLogsAsync(this, now, count);
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Takes rows found by InactiveTenantsDueWebhooksLogsAsync off the schedule. A row claimed since then is no longer
+    // due and is left to its sender.
+    public Task<int> UnscheduleWebhooksLogsAsync(IEnumerable<int> ids, DateTime now)
+    {
+        return WebhooksLogs
+            .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
             .ExecuteUpdateAsync(q => q
                 .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
+    }
 
-        var postponed = await WebhooksLogs
-            .Where(r => r.NextAttemptOn != null && r.NextAttemptOn <= now &&
-                        Tenants.Any(t => t.Id == r.TenantId && t.Status != TenantStatus.Active))
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Moves rows found by InactiveTenantsDueWebhooksLogsAsync, of portals that may come back (suspended, being
+    // restored or migrated), to postponeTo.
+    public Task<int> PostponeWebhooksLogsAsync(IEnumerable<int> ids, DateTime now, DateTime postponeTo)
+    {
+        return WebhooksLogs
+            .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
             .ExecuteUpdateAsync(q => q
                 .SetProperty(p => p.NextAttemptOn, postponeTo)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
-
-        return dropped + postponed;
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
@@ -396,6 +408,21 @@ static file class Queries
                     .OrderBy(it => it.log.NextAttemptOn)
                     .ThenBy(it => it.log.Id)
                     .Select(it => it.log.Id)
+                    .Take(count));
+
+    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<InactiveTenantWebhooksLog>> InactiveTenantsDueWebhooksLogsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, DateTime now, int count) =>
+                ctx.WebhooksLogs
+                    .Where(it => it.NextAttemptOn != null && it.NextAttemptOn <= now &&
+                                 !ctx.Tenants.Any(t => t.Id == it.TenantId && t.Status == TenantStatus.Active))
+                    .OrderBy(it => it.NextAttemptOn)
+                    .ThenBy(it => it.Id)
+                    .Select(it => new InactiveTenantWebhooksLog
+                    {
+                        Id = it.Id,
+                        Unschedule = !ctx.Tenants.Any(t => t.Id == it.TenantId && t.Status != TenantStatus.RemovePending)
+                    })
                     .Take(count));
 
     public static readonly Func<WebhooksDbContext, IEnumerable<int>, Guid, IAsyncEnumerable<ClaimedWebhooksLog>> ClaimedWebhooksLogsAsync =
