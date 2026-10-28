@@ -46,8 +46,15 @@ namespace ASC.ClearEvents.Tests.Infrastructure;
 public static class TestTariffs
 {
     private static readonly ConcurrentDictionary<int, (TariffState State, bool FreeQuota)> _tariffs = new();
+    private static readonly ConcurrentDictionary<int, int> _lookups = new();
 
     public static ITariffService Service { get; } = DispatchProxy.Create<ITariffService, TariffServiceProxy>();
+
+    /// <summary>How many times a pass has asked for the tariff of <paramref name="tenantId"/>.</summary>
+    public static int LookupsOf(int tenantId)
+    {
+        return _lookups.GetValueOrDefault(tenantId);
+    }
 
     /// <summary>
     /// Sets the tariff of <paramref name="tenantId"/>: its <paramref name="state"/>, and whether its quota is a
@@ -72,6 +79,8 @@ public static class TestTariffs
             {
                 case nameof(ITariffService.GetTariffAsync):
                     var tenantId = (int)args![0]!;
+
+                    _lookups.AddOrUpdate(tenantId, 1, (_, count) => count + 1);
 
                     return Task.FromResult(new Tariff { Id = tenantId, State = Get(tenantId).State, DueDate = DateTime.MaxValue, Quotas = [] });
 

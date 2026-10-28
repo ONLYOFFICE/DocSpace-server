@@ -117,6 +117,14 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
+        // The tenants are picked by their oldest event, history included, so a tenant whose old events are all part of
+        // a history is picked on every pass. Nothing past the free life time outside a history means nothing to clear
+        // on either tariff, the paid life time being the longer one, and the tariff is not looked up for it.
+        if (!await ef.AuditEventsToClearAsync(tenantId, freeThreshold, null, 0, 1).AnyAsync(stoppingToken))
+        {
+            return 0;
+        }
+
         var paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
         var threshold = paid ? paidThreshold : freeThreshold;
 
