@@ -37,6 +37,15 @@ public class AuditTrailRetentionConfiguration
 {
     public const string SectionName = "clearEvents:auditTrail";
 
+    /// <summary>
+    /// The shortest life time a pass accepts: the longest window the audit trail can be set to show
+    /// (<see cref="TenantAuditSettings.MaxLifeTime"/>), so that no setting deletes events a portal still reports.
+    /// </summary>
+    public const int MinLifeTimeDays = TenantAuditSettings.MaxLifeTime;
+
+    /// <summary>The longest period between passes: the longest delay <see cref="Task.Delay(TimeSpan)"/> accepts.</summary>
+    public static readonly TimeSpan MaxPeriod = TimeSpan.FromMilliseconds(uint.MaxValue - 1);
+
     public bool Enabled { get; init; }
 
     public int PaidLifeTimeDays { get; init; } = 3 * 365;
@@ -46,4 +55,16 @@ public class AuditTrailRetentionConfiguration
     public TimeSpan Period { get; init; } = TimeSpan.FromDays(1);
 
     public int BatchSize { get; init; } = 1000;
+
+    public bool IsPeriodUsable => Period > TimeSpan.Zero && Period <= MaxPeriod;
+
+    /// <summary>
+    /// Whether a pass may run with these settings. A life time of a few days would delete almost the whole audit
+    /// trail of every portal, and a free life time above the paid one would keep the events of free portals longer.
+    /// </summary>
+    public bool IsUsable =>
+        FreeLifeTimeDays >= MinLifeTimeDays &&
+        PaidLifeTimeDays >= FreeLifeTimeDays &&
+        BatchSize > 0 &&
+        IsPeriodUsable;
 }
