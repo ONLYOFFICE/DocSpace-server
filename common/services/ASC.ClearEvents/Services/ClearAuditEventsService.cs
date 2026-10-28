@@ -118,11 +118,7 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
-        return await ef.AuditEvents
-            .GroupBy(r => r.TenantId)
-            .Where(r => r.Min(a => a.Date) < freeThreshold)
-            .Select(r => r.Key)
-            .ToListAsync(stoppingToken);
+        return await ef.AuditEventTenantsOlderThanAsync(freeThreshold).ToListAsync(stoppingToken);
     }
 
     private async Task<int> RemoveOldAuditEventsAsync(int tenantId, DateTime freeThreshold, DateTime paidThreshold, CancellationToken stoppingToken)
@@ -135,33 +131,28 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
 
         var removed = 0;
 
+        DateTime? afterDate = null;
+        var afterId = 0;
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            var ids = await ef.AuditEvents
-                .Where(r => r.TenantId == tenantId && r.Date < threshold)
-                .OrderBy(r => r.Date)
-                .Select(r => r.Id)
-                .Take(_retention.BatchSize)
-                .ToListAsync(stoppingToken);
+            var events = await ef.AuditEventsToClearAsync(tenantId, threshold, afterDate, afterId, _retention.BatchSize).ToListAsync(stoppingToken);
 
-            if (ids.Count == 0)
+            if (events.Count == 0)
             {
                 break;
             }
 
-            var deleted = await ef.AuditEvents.Where(r => ids.Contains(r.Id)).ExecuteDeleteAsync(stoppingToken);
+            (afterId, afterDate) = (events[^1].Id, events[^1].Date);
 
-            if (deleted == 0)
+            removed += await ef.DeleteAuditEventsToClearAsync(tenantId, events.Select(r => r.Id).ToList());
+
+            if (events.Count < _retention.BatchSize)
             {
-                continue;
+                break;
             }
 
-            if (ids.Count == _retention.BatchSize)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
-            }
-
-            removed += deleted;
+            await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
         }
 
         if (removed > 0)
