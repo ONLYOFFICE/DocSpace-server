@@ -71,6 +71,11 @@
       "x-displayName": "Export"
     },
     {
+      "name": "AI / Metadata",
+      "description": "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
+      "x-displayName": "Metadata"
+    },
+    {
       "name": "AI / OpenAI passthrough",
       "description": "OpenAI-compatible endpoints proxied to a profile's provider.",
       "x-displayName": "OpenAI passthrough"
@@ -127,6 +132,7 @@
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
+        "AI / Metadata",
         "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
@@ -147,7 +153,7 @@
         ],
         "operationId": "aiSend",
         "summary": "Run an AI action",
-        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
+        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message. Nothing was persisted.",
@@ -155,6 +161,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiThreadMessageLike"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -219,7 +235,7 @@
         ],
         "operationId": "aiSendCustom",
         "summary": "Send custom",
-        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. The shape of the answer depends on the body rather than on the route: with `isStream` set it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
+        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message, or a newline-delimited stream of chat events when `isStream` was set. Nothing was persisted.",
@@ -228,6 +244,16 @@
                 "schema": {
                   "$ref": "#/components/schemas/AiThreadMessageLike",
                   "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, or `isStream` is not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -705,7 +731,7 @@
         ],
         "operationId": "aiAssignmentsResolveForAction",
         "summary": "Resolve for action",
-        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room, and a room with no assignment of its own degrades to the portal-wide one. This fails when neither slot is set or the bound profile is gone, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
+        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, the slot names a profile that no longer exists, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
         "responses": {
           "200": {
             "description": "The profile that will serve the action.",
@@ -718,7 +744,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing.",
+            "description": "`actionType` is missing or unknown.",
             "content": {
               "application/json": {
                 "schema": {
@@ -739,6 +765,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile can serve the action, or `entityId` names a room that does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -793,7 +829,7 @@
         ],
         "operationId": "aiAssignmentsTryResolveForAction",
         "summary": "Try resolve for action",
-        "description": "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
+        "description": "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room the caller can open - an unknown one answers 404 here as well. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
         "responses": {
           "200": {
             "description": "The profile that will serve the action, or an empty result when none is configured.",
@@ -813,7 +849,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing.",
+            "description": "`actionType` is missing or unknown.",
             "content": {
               "application/json": {
                 "schema": {
@@ -834,6 +870,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`entityId` names a room that does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1400,7 +1446,7 @@
             }
           },
           "400": {
-            "description": "The attachment payload is malformed.",
+            "description": "The attachment payload is malformed, or `input.path` is missing or empty.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2273,7 +2319,7 @@
         ],
         "operationId": "aiPreferencesGetDeepMode",
         "summary": "Get deep mode",
-        "description": "Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes \"off\" from \"unset\" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.",
+        "description": "Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400, as it is on the write. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes \"off\" from \"unset\" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "Whether deep mode is on, falling back to the configured default when the scope has no value of its own.",
@@ -2281,6 +2327,16 @@
               "application/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2508,7 +2564,7 @@
         ],
         "operationId": "aiPreferencesIsDeepModeSet",
         "summary": "Is deep mode set",
-        "description": "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
+        "description": "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference; a value that is not a room ID is refused with 400. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
         "responses": {
           "200": {
             "description": "Whether the scope has a preference of its own, whichever way that preference is set.",
@@ -2516,6 +2572,16 @@
               "application/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2574,7 +2640,7 @@
         ],
         "operationId": "aiPreferencesGetReasoningLevel",
         "summary": "Get reasoning level",
-        "description": "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
+        "description": "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400. Providers clamp the depth to what the model accepts.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2582,6 +2648,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiReasoningLevel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2722,7 +2798,7 @@
         ],
         "operationId": "aiPreferencesGetToolPermissionMode",
         "summary": "Get tool permission mode",
-        "description": "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+        "description": "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored, though a value that is not a room ID is still refused with 400. The AI service's default is `auto`.",
         "responses": {
           "200": {
             "description": "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none is stored.",
@@ -2730,6 +2806,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiChatToolPermissionMode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2883,11 +2969,18 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiProfileMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -2966,11 +3059,18 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header - that one answers with the profile result shape, `success: false` and an `error` naming the `key` field.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiProfileMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -3123,7 +3223,7 @@
         ],
         "operationId": "aiProfilesListModels",
         "summary": "List models",
-        "description": "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a missing profile or a caller without access keeps the status the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
+        "description": "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
         "responses": {
           "200": {
             "description": "The models the profile's provider currently offers.",
@@ -3160,6 +3260,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile with this identifier exists for the caller.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3212,7 +3322,7 @@
         ],
         "operationId": "aiProfilesListProviderModels",
         "summary": "List provider models",
-        "description": "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
+        "description": "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well, and so is an `apiKey` with characters that cannot travel in an HTTP header (anything outside printable ASCII), since no provider could ever accept it. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
         "responses": {
           "200": {
             "description": "The models the endpoint offers for the supplied credentials.",
@@ -3228,7 +3338,7 @@
             }
           },
           "400": {
-            "description": "`baseUrl` is missing, points at a private network address, or the provider rejected the supplied API key.",
+            "description": "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that cannot travel in an HTTP header, or the provider rejected the supplied API key.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3335,7 +3445,7 @@
         ],
         "operationId": "aiProfilesTestConnection",
         "summary": "Test a profile's provider",
-        "description": "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter. The result is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
+        "description": "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter, and a profile the caller cannot see answers 404 before anything is probed. The result of the probe itself is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
         "responses": {
           "200": {
             "description": "The outcome of the probe. A failed probe is reported here, not as a status.",
@@ -3383,6 +3493,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile with this identifier exists for the caller.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3588,7 +3708,7 @@
         ],
         "operationId": "aiProfilesList",
         "summary": "List provider profiles",
-        "description": "Lists the portal's AI provider profiles with their secrets stripped, the same way the single-profile read does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
+        "description": "Lists the portal's AI provider profiles. A portal administrator receives each profile in full, `key` and `headers` included, because the settings page edits them; every other caller gets them with those secrets stripped, as the single-profile read always does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
         "responses": {
           "200": {
             "description": "The portal's profiles, with their keys and headers stripped.",
@@ -3643,10 +3763,20 @@
         ],
         "operationId": "aiPromptsCreate",
         "summary": "Save a prompt",
-        "description": "Saves a new prompt in the caller's own prompt library and returns it. The name has to be non-empty and unique inside its folder, and `folderId` has to name an existing folder - omit it to save the prompt at the root. Prompts are per-user: another user's library is never visible here, and no permission beyond having AI enabled is needed. The answer carries the stored prompt including the ID to use with the update, move and delete operations.",
+        "description": "Saves a new prompt in the caller's own prompt library and returns it. `name` and `text` have to be strings and `folderId`, when sent, a string or null, or the call answers 400 before the library is touched. The name has to be non-empty and unique inside its folder, and `folderId` has to name an existing folder - omit it to save the prompt at the root. A refusal keeps the `{ success: false, error }` body but answers 400 for an empty value, 404 for an unknown folder and 409 for a name already in use. Prompts are per-user: another user's library is never visible here, and no permission beyond having AI enabled is needed. The answer carries the stored prompt including the ID to use with the update, move and delete operations.",
         "responses": {
           "200": {
             "description": "Whether the prompt was saved, with it in `prompt`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3671,6 +3801,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`folderId` names no folder of the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A prompt of that name already sits in the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3716,10 +3866,20 @@
         ],
         "operationId": "aiPromptsUpdate",
         "summary": "Update a saved prompt",
-        "description": "Changes a saved prompt and returns the stored result. Only the fields present in `updates` are written, so a partial object leaves the rest of the prompt alone. The name and the folder reference are re-validated whenever either changes, which means an update can fail on a name another prompt in the same folder already uses. Use `PUT api/2.0/ai/prompts/move` to change only the folder.",
+        "description": "Changes a saved prompt and returns the stored result. Only the fields present in `updates` are written, so a partial object leaves the rest of the prompt alone. The name and the folder reference are re-validated whenever either changes, which means an update can fail on a name another prompt in the same folder already uses - that answers 409, an unknown prompt or folder 404, an empty or non-string value 400, always with the `{ success: false, error }` body. Use `PUT api/2.0/ai/prompts/move` to change only the folder.",
         "responses": {
           "200": {
             "description": "Whether the prompt was updated, with the stored prompt in `prompt`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3744,6 +3904,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No prompt has this ID, or `folderId` names no folder of the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A prompt of that name already sits in the target folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -3788,10 +3968,20 @@
         ],
         "operationId": "aiPromptsMove",
         "summary": "Move a prompt to a folder",
-        "description": "Moves a saved prompt into another folder, or to the root when `folderId` is omitted or null. The name is re-validated in the target folder, so the move fails when a prompt of that name already sits there - rename it first with `PUT api/2.0/ai/prompts/update`. Nothing about the prompt other than its folder changes. The answer carries the moved prompt.",
+        "description": "Moves a saved prompt into another folder, or to the root when `folderId` is omitted or null. The name is re-validated in the target folder, so the move fails with 409 when a prompt of that name already sits there - rename it first with `PUT api/2.0/ai/prompts/update`; an unknown prompt or folder answers 404. Nothing about the prompt other than its folder changes. The answer carries the moved prompt.",
         "responses": {
           "200": {
             "description": "Whether the prompt was moved, with the moved prompt in `prompt`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`id` is missing or `folderId` is neither a string nor null.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3816,6 +4006,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No prompt has this ID, or `folderId` names no folder of the caller's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A prompt of that name already sits in the target folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPromptMutationResult"
                 }
               }
             }
@@ -4016,10 +4226,20 @@
         ],
         "operationId": "aiPromptsCreateFolder",
         "summary": "Create folder",
-        "description": "Creates a folder in the caller's prompt library and returns it. The name has to be non-empty and unique across that library. Folders do not nest: there is one flat level, so a folder cannot be created inside another. The answer carries the folder ID to use as `folderId` when saving or moving prompts.",
+        "description": "Creates a folder in the caller's prompt library and returns it. The name has to be a non-empty string and unique across that library - a non-string or empty one answers 400, a name in use 409, both with the `{ success: false, error }` body. Folders do not nest: there is one flat level, so a folder cannot be created inside another. The answer carries the folder ID to use as `folderId` when saving or moving prompts.",
         "responses": {
           "200": {
             "description": "Whether the folder was created, with it in `folder`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`name` is missing, empty or not a string.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4044,6 +4264,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A folder of that name already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4093,10 +4323,20 @@
         ],
         "operationId": "aiPromptsRenameFolder",
         "summary": "Rename folder",
-        "description": "Renames a folder in the caller's prompt library, validating the new name against the folders already there. The prompts inside it are untouched and keep their IDs. The answer carries the renamed folder. A name that another folder already uses is rejected.",
+        "description": "Renames a folder in the caller's prompt library, validating the new name against the folders already there. The prompts inside it are untouched and keep their IDs. The answer carries the renamed folder. A name that another folder already uses is rejected with 409, an unknown folder with 404 and a non-string or empty name with 400, always with the `{ success: false, error }` body.",
         "responses": {
           "200": {
             "description": "Whether the folder was renamed, with the stored folder in `folder`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`id` or `name` is missing, or `name` is empty or not a string.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4121,6 +4361,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No folder has this ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A folder of that name already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiFolderMutationResult"
                 }
               }
             }
@@ -4369,10 +4629,20 @@
         ],
         "operationId": "aiPromptsImportBundle",
         "summary": "Import bundle",
-        "description": "Writes a bundle produced by `GET api/2.0/ai/prompts/export` back into the caller's library. `mode` decides how: `replace` deletes the current prompts and folders before writing, and `merge` writes the bundle on top of what is already there. The folder references inside the bundle are validated before anything is written, so a corrupt bundle is rejected whole rather than applied halfway. `replace` is destructive and cannot be undone - export first if the current library matters.",
+        "description": "Writes a bundle produced by `GET api/2.0/ai/prompts/export` back into the caller's library. `mode` decides how: `replace` deletes the current prompts and folders before writing, and `merge` writes the bundle on top of what is already there. The bundle's shape - version 1, `folders` and `prompts` arrays of objects with string ids, names and texts - and the folder references inside it are validated before anything is written, so a corrupt bundle is rejected whole rather than applied halfway: 400 with the refusals in `errors`, or 409 when every refusal is a name that already exists in the library. `replace` is destructive and cannot be undone - export first if the current library matters.",
         "responses": {
           "200": {
             "description": "Whether the bundle was written, how many prompts it imported, and what was refused.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4397,6 +4667,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Every refused entry is a name that already exists in the library (`merge` only).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiImportResult"
                 }
               }
             }
@@ -4771,7 +5051,7 @@
         ],
         "operationId": "aiThreadsAppendUserMessage",
         "summary": "Append user message",
-        "description": "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+        "description": "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
         "responses": {
           "200": {
             "description": "The stored message, with the ID storage assigned to it.",
@@ -4797,7 +5077,7 @@
             }
           },
           "400": {
-            "description": "The message is longer than the limit allows.",
+            "description": "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5404,10 +5684,10 @@
         ],
         "operationId": "aiThreadsReadMessages",
         "summary": "Read messages",
-        "description": "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. Omitting `threadId` is not an error: the call answers 200 with an empty list, so an empty result does not distinguish a thread with no messages from a request that forgot the ID. A malformed cursor is ignored and the read starts from the beginning.",
+        "description": "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. `threadId` is required and a missing one answers 400, so an empty list always means a thread with no messages. A malformed cursor is ignored and the read starts from the beginning.",
         "responses": {
           "200": {
-            "description": "The thread's messages, oldest first unless `direction` reversed them. An empty list also means the request carried no thread ID.",
+            "description": "The thread's messages, oldest first unless `direction` reversed them.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5415,6 +5695,16 @@
                   "items": {
                     "$ref": "#/components/schemas/AiThreadMessageLike"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`threadId` is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -5602,10 +5892,10 @@
         ],
         "operationId": "aiThreadsGetMessageById",
         "summary": "Get one chat message",
-        "description": "Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required. Unlike `GET api/2.0/ai/threads/get-by-id` an unknown ID is not reported as 404: the answer is an empty body with status 200, so a client has to treat a missing payload as \"no such message\". Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.",
+        "description": "Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required and, as with `GET api/2.0/ai/threads/get-by-id`, an unknown or deleted ID answers 404, so the result is never an empty body. Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.",
         "responses": {
           "200": {
-            "description": "The message, or an empty body when no message has that ID.",
+            "description": "The message.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5651,6 +5941,16 @@
               }
             }
           },
+          "404": {
+            "description": "No message has this ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
             "content": {
@@ -5685,7 +5985,7 @@
         ],
         "operationId": "aiThreadsUpdateMessage",
         "summary": "Update message",
-        "description": "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object. Neither the ID nor the payload is validated here, so a malformed request surfaces as an error relayed from storage rather than as a 400. The answer only confirms the write.",
+        "description": "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object with a known `role` and a content that is a non-blank string or a part list with at least one real part - a tool-call-only assistant message counts, an empty list does not. The role has to match the stored message's: a user message cannot be turned into an assistant one. An unknown `messageId` answers 404. The answer only confirms the write.",
         "responses": {
           "200": {
             "description": "Confirms the replacement was stored.",
@@ -5693,6 +5993,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -5709,6 +6019,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No message has this ID.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6284,7 +6604,7 @@
         ],
         "operationId": "aiToolsListSystemTools",
         "summary": "List system tools",
-        "description": "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
+        "description": "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers; for an agent room those are the servers enabled for that agent alone, never the portal-wide registry - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
         "responses": {
           "200": {
             "description": "The scope's tools grouped by server type, the system group keys named in `system`, and the reason a registered server delivered none in `errors`.",
@@ -6474,7 +6794,7 @@
         ],
         "operationId": "aiToolsSetDisabled",
         "summary": "Set disabled",
-        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open.",
+        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
         "responses": {
           "200": {
             "description": "Confirms the new disable list was stored for that server type.",
@@ -6487,7 +6807,7 @@
             }
           },
           "400": {
-            "description": "The list of tools to disable is malformed.",
+            "description": "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6566,7 +6886,7 @@
         ],
         "operationId": "aiToolsGetDisabled",
         "summary": "Get disabled",
-        "description": "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
+        "description": "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. Without `scope` the answer is the caller's effective list, with the tools an administrator switched off for everyone folded in; `scope=tenant` reads that administrator list alone, which is what the settings page shows. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
         "responses": {
           "200": {
             "description": "The switched-off tools as a map of server type to tool names. An absent type means nothing is switched off for it.",
@@ -6580,6 +6900,16 @@
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`scope` is not `user` or `tenant`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -6626,6 +6956,14 @@
               "examples": [
                 "1234"
               ]
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ]
@@ -6738,7 +7076,7 @@
         ],
         "operationId": "aiToolsSetAllowAlways",
         "summary": "Set allow always",
-        "description": "Adds one tool to the scope's always-allow list, or takes it off, which decides whether a call to it pauses the round for approval. `value` is coerced to a boolean, so any truthy value adds and any falsy one removes. Unlike the disable operation, `serverType` is not validated here: an unknown one is stored and then simply never matches, so a wrong value fails silently. `entityId` has to name a room the caller can open.",
+        "description": "Adds one tool to the scope's always-allow list, or takes it off, which decides whether a call to it pauses the round for approval. `serverType` and `toolName` have to be non-empty strings and `value` a real boolean - `true` adds, `false` removes - and anything else is rejected before the list is touched, so a malformed body can no longer grant a permanent approval. Unlike the disable operation, `serverType` is not checked against the known server types: an unknown one is stored and then simply never matches. `entityId` has to name a room the caller can open.",
         "responses": {
           "200": {
             "description": "Confirms the always-allow list was updated.",
@@ -6746,6 +7084,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`serverType` or `toolName` is missing or empty, or `value` is not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -7282,7 +7630,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiWebSearchMutationResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiErrorResponse"
+                    }
+                  ]
                 }
               }
             }
@@ -7602,6 +7957,514 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AiExportTextToDocxRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/meta/generate": {
+      "post": {
+        "tags": [
+          "AI / Metadata"
+        ],
+        "operationId": "aiMetaGenerate",
+        "summary": "Generate metadata fields",
+        "description": "Reads one file as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe it, and what their values are. `kind` names the entry's table and `id` its integer identifier, the same way as `POST api/2.0/ai/meta/fill`; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The text is the file itself, converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry; each field carries the value the text supports as a string, or `null` when the text does not state one, since a custom field on the portal is text and cannot be saved empty. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+        "responses": {
+          "200": {
+            "description": "The proposed fields, each with a name and the value found or null, the documents the proposal was read from, and the entries that were left out with the reason for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Field name, at most 255 characters."
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The value found in the documents, or null when the text does not state one."
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The proposed custom metadata fields with the values the text supports."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean",
+                            "description": "Whether the document was cut to fit the model's budget."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "truncated"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The documents the proposal was read from."
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "unsupported",
+                              "limit",
+                              "forbidden",
+                              "not_found",
+                              "empty",
+                              "failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The entries that were left out, with the reason for each."
+                    }
+                  },
+                  "required": [
+                    "fields",
+                    "sources",
+                    "skipped"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot open the entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entry does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The content could not be read as text; `skipped` says why.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The model provider is rate-limiting requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model request failed; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Reading the files or the model round did not finish within the time budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMetaGenerateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/meta/fill": {
+      "post": {
+        "tags": [
+          "AI / Metadata"
+        ],
+        "operationId": "aiMetaFill",
+        "summary": "Fill metadata values",
+        "description": "Fills the metadata of one file from its text and writes the result. `kind` names the entry's table and `id` its integer identifier; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`; `dryRun` (default true) resolves the values but writes nothing, so the caller shows them for confirmation and saves the accepted ones itself; only an explicit `dryRun: false` writes, and it is meant for a caller that has already collected the user's confirmation. The fields are the entry's own: every field of the visible templates it carries, assigned or inherited through a cascade - a hidden template is skipped as the UI and the search skip it - and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need; a write the portal refuses is reported per field as `write_failed`, and the call fails with the portal's status only when nothing was written at all. The answer carries `dryRun` as it was applied, the entry's metadata after the write (or as it stands, with `dryRun`), the values written or proposed, the fields left empty with the reason for each, and the documents that were read.",
+        "responses": {
+          "200": {
+            "description": "Whether it was a dry run, the entry's metadata, the values written or proposed, the fields left empty with the reason for each, and the documents the values were read from.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dryRun": {
+                      "type": "boolean",
+                      "description": "Whether the values were only proposed (`true`) or written as well."
+                    },
+                    "metadata": {
+                      "$ref": "#/components/schemas/AiEntryMetadata",
+                      "description": "The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it."
+                    },
+                    "filled": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fieldId": {
+                            "type": "number",
+                            "description": "Absent for a custom field."
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/AiMetadataValue"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field."
+                    },
+                    "unresolved": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fieldId": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "already_set",
+                              "not_found",
+                              "invalid_value",
+                              "unknown_option",
+                              "write_failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The fields left as they were, with the reason for each."
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "truncated": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "truncated"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The documents the values were read from."
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "unsupported",
+                              "limit",
+                              "forbidden",
+                              "not_found",
+                              "empty",
+                              "failed"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "reason"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The entries that were left out, with the reason for each."
+                    }
+                  },
+                  "required": [
+                    "dryRun",
+                    "metadata",
+                    "filled",
+                    "unresolved",
+                    "sources",
+                    "skipped"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot read the entry, or cannot edit it when the values are written.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entry does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The entry has no metadata fields to fill, or none of its content could be read as text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The model provider is rate-limiting requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model request failed; the detail is in the server log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Reading the files or the model round did not finish within the time budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMetaFillRequest"
               }
             }
           }
@@ -8589,7 +9452,7 @@
         ],
         "operationId": "aiSettingsSetUser",
         "summary": "Update user AI settings",
-        "description": "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+        "description": "Replaces the AI settings of the calling user and returns the stored result. `chatRecommendedModelVisible` is required and has to be a real boolean - a body the JSON parser cannot read, such as one sent as text/plain, used to arrive empty and answer 200 having stored nothing. The body is then proxied to the DocSpace AI service, which validates the rest, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
         "responses": {
           "200": {
             "description": "The calling user's stored AI settings.",
@@ -8597,6 +9460,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`chatRecommendedModelVisible` is missing or not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -8644,7 +9517,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "The user's AI settings, proxied unchanged to the DocSpace AI service, which owns and validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send it back changed.",
+          "description": "The user's AI settings: `chatRecommendedModelVisible` as a boolean, required. Read the current one with `GET api/2.0/ai/config/user` and send it back changed.",
           "content": {
             "application/json": {
               "schema": {
@@ -8896,10 +9769,10 @@
         ],
         "operationId": "aiOpenaiChatCompletions",
         "summary": "OpenAI chat completions passthrough",
-        "description": "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider verbatim - the payload is owned by the plugin's SDK on one end and the provider on the other. A client disconnect cancels the provider call.",
+        "description": "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
         "responses": {
           "200": {
-            "description": "The provider's own response, relayed verbatim with its status and content type.",
+            "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9176,7 +10049,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9243,7 +10116,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "An OpenAI Chat Completions request, forwarded to the provider byte for byte. The shape is the provider's, not this API's, so consult the provider's own reference; the model and the credentials come from the profile in the path and must not be sent here.",
+          "description": "An OpenAI Chat Completions request, forwarded to the provider as sent. The shape is the provider's, not this API's, so consult the provider's own reference. The credentials come from the profile in the path and must not be sent here; the profile's model is used when the body names none, and a `model` in the body takes precedence.",
           "content": {
             "application/json": {
               "schema": {
@@ -9263,16 +10136,67 @@
         ],
         "operationId": "aiOpenaiImagesGenerations",
         "summary": "OpenAI image generation passthrough",
-        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working exactly as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider unchanged. The provider's status and body are relayed verbatim, so its 429 and its own error envelope surface as they stand. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - `prompt` has to be a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
         "responses": {
           "200": {
-            "description": "The provider's own response, relayed verbatim with its status and content type.",
+            "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Human-readable description of the failure."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "OpenAI error class, for example `invalid_request_error`.",
+                          "examples": [
+                            "invalid_request_error"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Machine-readable code, when the provider supplies one."
+                        },
+                        "param": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The request parameter at fault, when the failure names one."
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -9543,7 +10467,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9610,7 +10534,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "An OpenAI image-generation request, forwarded to the provider byte for byte. The shape is the provider's, not this API's, and the credentials come from the profile in the path.",
+          "description": "An OpenAI image-generation request, forwarded to the provider as sent once its documented fields pass a type check. The shape is the provider's, not this API's, and the credentials come from the profile in the path.",
           "content": {
             "application/json": {
               "schema": {
@@ -9727,7 +10651,7 @@
         ],
         "operationId": "aiEditorToolsCall",
         "summary": "Call an editor tool",
-        "description": "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be one of the tools `GET api/2.0/ai/editor-tools/list` reports; anything else, including a tool the editor is not allowed to reach, is refused. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
+        "description": "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be exactly one of the tools `GET api/2.0/ai/editor-tools/list` reports (surrounding whitespace is ignored, letter case is not); anything else, including a tool the editor is not allowed to reach, is refused with 400 before anything runs. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
         "responses": {
           "200": {
             "description": "The tool's output as a string. A tool that failed reports it inside that string.",
@@ -9750,7 +10674,7 @@
             }
           },
           "400": {
-            "description": "The tool name is not one this portal exposes.",
+            "description": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9820,7 +10744,7 @@
         ],
         "operationId": "aiWebSearchPassthroughSearch",
         "summary": "Web search passthrough",
-        "description": "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. The provider's own status, body and content type are relayed as they stand, so a provider that rate-limits answers 429 and one that is unreachable answers 502. Closing the connection aborts the upstream request.",
+        "description": "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, its detail stays in the server log and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed verbatim with its status and content type.",
@@ -9830,6 +10754,16 @@
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -9895,7 +10829,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9907,7 +10841,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "A search request in the shape the portal's active web-search provider expects, forwarded to it unchanged. The endpoint and the key come from the stored configuration and must not be sent here.",
+          "description": "A search request in the shape the portal's active web-search provider expects, forwarded to it once `query` and `numResults` pass a type check. The endpoint and the key come from the stored configuration and must not be sent here.",
           "content": {
             "application/json": {
               "schema": {
@@ -9927,7 +10861,7 @@
         ],
         "operationId": "aiWebSearchPassthroughContents",
         "summary": "Web page contents passthrough",
-        "description": "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. The provider's status, body and content type are relayed verbatim, so its 429 and its failures surface unchanged. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
+        "description": "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with the detail kept in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed verbatim with its status and content type.",
@@ -9937,6 +10871,16 @@
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -10002,7 +10946,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10014,7 +10958,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "A page-contents request in the shape the portal's active web-search provider expects, forwarded to it unchanged. The endpoint and the key come from the stored configuration.",
+          "description": "A page-contents request in the shape the portal's active web-search provider expects, forwarded to it once `urls` passes a type check. The endpoint and the key come from the stored configuration.",
           "content": {
             "application/json": {
               "schema": {
@@ -10096,6 +11040,14 @@
           "allow"
         ],
         "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
+      },
+      "AiChatToolPrefsScope": {
+        "type": "string",
+        "enum": [
+          "user",
+          "tenant"
+        ],
+        "description": "Which disabled tool list a read or write addresses: the caller's own (`user`, what an absent value means) or the one an administrator keeps for everyone (`tenant`), which every user's reads fold in."
       },
       "AiActionArgs": {
         "type": "object",
@@ -10253,7 +11205,8 @@
           "ImageGeneration",
           "OCR",
           "Vision",
-          "FormAnalysis"
+          "FormAnalysis",
+          "GenerateMeta"
         ],
         "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
@@ -10687,7 +11640,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced.",
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
             "examples": [
               {
                 "role": "assistant",
@@ -10722,8 +11675,7 @@
         "required": [
           "threadId",
           "messageId",
-          "idx",
-          "message"
+          "idx"
         ],
         "additionalProperties": false,
         "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
@@ -10978,13 +11930,18 @@
             "enum": [
               "key",
               "url",
-              "name"
+              "name",
+              "text"
             ],
             "description": "The rejected field."
           },
           "message": {
             "type": "string",
             "description": "The human-readable reason the field was rejected."
+          },
+          "code": {
+            "$ref": "#/components/schemas/AiErrorCode",
+            "description": "Optional: producers that know the reason set it (the prompts engine does)."
           }
         },
         "required": [
@@ -10993,6 +11950,16 @@
         ],
         "additionalProperties": false,
         "description": "A field-scoped validation error: which form field was rejected, and why."
+      },
+      "AiErrorCode": {
+        "type": "string",
+        "enum": [
+          "required",
+          "conflict",
+          "not_found",
+          "invalid"
+        ],
+        "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
       },
       "AiBulkAssignmentResult": {
         "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
@@ -11919,6 +12886,132 @@
           "success"
         ]
       },
+      "AiMetadataValue": {
+        "type": "object",
+        "properties": {
+          "stringValue": {
+            "type": "string"
+          },
+          "numberValue": {
+            "type": "number"
+          },
+          "dateValue": {
+            "type": "string",
+            "description": "ISO 8601 date-time, UTC midnight of the date."
+          },
+          "optionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "A metadata value: exactly one member, by the field's type."
+      },
+      "AiEntryMetadataField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "number",
+            "description": "`MetadataFieldType`: 0 String, 1 Date, 2 Number, 3 SingleChoice, 4 MultiChoice."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "value": {
+            "$ref": "#/components/schemas/AiMetadataValue"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "AiEntryMetadata": {
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "visible": {
+                  "type": "boolean"
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiEntryMetadataField"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "visible",
+                "fields"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "templates",
+          "customFields"
+        ],
+        "additionalProperties": false
+      },
       "AiUserSettingsWrapper": {
         "type": "object",
         "properties": {
@@ -12278,7 +13371,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates and default templates sections always report 0, because the number is not collected for them.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -12286,7 +13379,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates\r\nsections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
                 "format": "int32"
               },
               "isShareable": {
@@ -13295,11 +14388,70 @@
                   "format": "int32"
                 },
                 "description": "The IDs of the metadata templates assigned to the file entry."
+              },
+              "metadataMatches": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to.",
+                  "$ref": "#/components/schemas/AiMetadataMatchDto"
+                },
+                "description": "Where the search text of the listing was met in the metadata of the entry: one item per string value holding\r\nthe text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose\r\nmetadata contain it; an entry found by its title alone carries nothing here."
               }
             }
           }
         ],
         "description": "The part of a file or folder that depends on how the entry is identified: by a number on the portal, or by a\r\nstring on a connected third-party account."
+      },
+      "AiMetadataMatchDto": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "examples": [
+              3
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The ID of the metadata template the matching field belongs to. Null for a custom field, which belongs to no\r\ntemplate the API shows.",
+            "format": "int32"
+          },
+          "fieldId": {
+            "examples": [
+              12
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The ID of the matching template field. Null for a custom field, which is addressed by its name alone.",
+            "format": "int32"
+          },
+          "fieldName": {
+            "examples": [
+              "Client"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name of the matching field: the template field or the custom field as it is shown in the entry metadata."
+          },
+          "value": {
+            "examples": [
+              "ACME Corporation"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The stored value that holds the searched text, as it was written, not only the matching part of it."
+          }
+        },
+        "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to."
       },
       "AiApiDateTime": {
         "type": "object",
@@ -13887,10 +15039,11 @@
               "MarkAsRead",
               "Import",
               "Convert",
-              "Duplicate"
+              "Duplicate",
+              "Build"
             ],
             "type": "string",
-            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]"
+            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate, Build - Build]"
           },
           {
             "examples": [
@@ -13904,10 +15057,11 @@
               4,
               5,
               6,
-              7
+              7,
+              8
             ],
             "type": "integer",
-            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate, 8 - Build]",
             "x-enum-varnames": [
               "Move",
               "Copy",
@@ -13916,7 +15070,8 @@
               "MarkAsRead",
               "Import",
               "Convert",
-              "Duplicate"
+              "Duplicate",
+              "Build"
             ]
           }
         ],
@@ -14161,7 +15316,6 @@
                 }
               ]
             ],
-            "type": "null",
             "description": "The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries\r\nthe identifier, the title and the folder and room types, and folders the caller cannot read are left out, so\r\nthe chain can be shorter than the real depth."
           },
           "startIndex": {
@@ -14301,7 +15455,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
@@ -14318,7 +15472,6 @@
         },
         "required": [
           "idx",
-          "message",
           "messageId",
           "result",
           "threadId"
@@ -14892,6 +16045,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AiChatToolPrefsScope",
+            "description": "The list the write lands in; omitted means the caller's own."
           }
         },
         "required": [
@@ -14977,6 +16134,66 @@
           "title",
           "content",
           "folderId"
+        ],
+        "additionalProperties": false
+      },
+      "AiMetaGenerateRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What kind of metadata fields the caller is interested in; a hint for the model."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "AiMetaFillRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What to pay attention to; a hint for the model."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Also replace the fields that already carry a value. Default false."
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Resolve the values but write nothing; the caller writes what the user confirms. Default true: a write needs an explicit false."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
         ],
         "additionalProperties": false
       },

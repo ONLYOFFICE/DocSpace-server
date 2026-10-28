@@ -72,7 +72,7 @@ public class ReportDto
     /// How many movements match the filters in total, across every page.
     /// </summary>
     /// <example>137</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
     /// <summary>
     /// How many pages those movements come to at the current `limit`.
     /// </summary>
@@ -437,7 +437,7 @@ public class CustomerServiceUsageReportDto
     /// How many services match the filters in total, across every page - services, not charges.
     /// </summary>
     /// <example>1</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
 
     /// <summary>
     /// How many pages those entries come to at the current `limit`.

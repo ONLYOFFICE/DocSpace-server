@@ -47,6 +47,9 @@ public class FormFieldsExtractor(
 {
     private const string ScriptName = "ExtractFormFieldsData.docbuilder";
 
+    // The builder is polled with no limit of its own, and a run kept alive by its heartbeat would wait forever.
+    private static readonly TimeSpan _maxBuildTime = TimeSpan.FromMinutes(5);
+
     // The default encoder escapes "&", which the script engine does not decode in a string literal.
     private static readonly JsonSerializerOptions _scriptStringOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
@@ -59,7 +62,7 @@ public class FormFieldsExtractor(
         string sourceUrl;
         await using (var stream = await daoFactory.GetFileDao<int>().GetFileStreamAsync(file))
         {
-            sourceUrl = documentServiceConnector.ReplaceCommunityAddress(await pathProvider.GetTempUrlAsync(stream, ".pdf"));
+            sourceUrl = documentServiceConnector.ReplaceCommunityAddress(await pathProvider.GetTempUrlAsync(stream, FileUtility.GetFileExtension(file.Title)));
         }
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName)
@@ -70,12 +73,51 @@ public class FormFieldsExtractor(
             .Replace("${sourceFileUrl}", JsonSerializer.Serialize(sourceUrl, _scriptStringOptions))
             .Replace("${tempFileName}", tempFileName);
 
-        var resultUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(script, tempFileName, ""), cancellationToken);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(_maxBuildTime);
 
-#pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
-        var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
+        try
+        {
+            var resultUrl = await documentBuilderTask.BuildFileAsync(new DocumentBuilderInputData(script, tempFileName, ""), deadline.Token);
 
-        return (await httpClient.GetStringAsync(resultUrl, cancellationToken)).Trim();
+            var httpClient = httpClientFactory.CreateClient();
+
+            return (await httpClient.GetStringAsync(resultUrl, deadline.Token)).Trim();
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException($"The build did not finish within {_maxBuildTime.TotalMinutes} minutes");
+        }
+        catch (Exception e) when (e is not OperationCanceledException && !IsFileError(e))
+        {
+            // An empty or unreadable answer of the service comes as a plain exception, as does its loss of the build.
+            throw new DocumentBuilderFailedException(e);
+        }
+    }
+
+    /// <summary>
+    /// Whether the builder refused the file itself: it could not be opened or converted, is too large or has a password.
+    /// Any other failure is the service's or the network's.
+    /// </summary>
+    public static bool IsFileError(Exception e)
+    {
+        for (; e != null; e = e.InnerException)
+        {
+            if (e is DocumentServiceException
+                {
+                    Code: DocumentServiceException.ErrorCode.Convert or DocumentServiceException.ErrorCode.SizeLimit or DocumentServiceException.ErrorCode.ConvertPassword
+                })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
+
+/// <summary>
+/// The document builder failed to read a file for a reason of its own or of the network, not of the file.
+/// </summary>
+public class DocumentBuilderFailedException(Exception innerException)
+    : Exception("The document builder failed to read the file", innerException);

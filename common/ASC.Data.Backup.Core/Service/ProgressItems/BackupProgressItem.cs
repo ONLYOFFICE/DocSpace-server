@@ -108,6 +108,27 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         _httpHeaders = request.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
     }
 
+    /// <summary>
+    /// The archive name for this backup: the timestamped name, or, when a backup of the same tenant
+    /// already carries it, the same name with the first free index - "name(1).tar.gz". The timestamp
+    /// has a resolution of one second, and a small portal is backed up faster than that, so without the
+    /// index two archives would share one path in the storage and deleting either would delete both.
+    /// A tenant runs one backup at a time, so the name cannot be taken between this check and the save.
+    /// </summary>
+    private static async Task<string> GetFreeBackupNameAsync(BackupRepository backupRepository, int tenantId, string baseName, string extension)
+    {
+        var taken = (await backupRepository.GetBackupNamesAsync(tenantId, baseName)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var backupName = $"{baseName}.{extension}";
+
+        for (var index = 1; taken.Contains(backupName); index++)
+        {
+            backupName = $"{baseName}({index}).{extension}";
+        }
+
+        return backupName;
+    }
+
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
@@ -146,7 +167,11 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             var getter = backupStorage as IGetterWriteOperator;
             var name = Dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
-            var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", name, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
+            var backupName = await GetFreeBackupNameAsync(
+                backupRepository,
+                Dump ? -1 : TenantId,
+                string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}", name, dateTime),
+                await getter.GetBackupExtensionAsync(_storageBasePath));
 
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;

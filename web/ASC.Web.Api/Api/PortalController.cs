@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.Identity;
-
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -90,9 +88,8 @@ public class PortalController(
     QuotaHelper quotaHelper,
     QuotaSocketManager quotaSocketManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client,
+    PortalRemovalService portalRemovalService,
     InvitationLinkDtoHelper invitationLinkDtoHelper,
     CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
@@ -880,6 +877,7 @@ public class PortalController(
     [SwaggerResponse(400, "Alias is empty")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
@@ -1117,6 +1115,54 @@ public class PortalController(
     }
 
     /// <remarks>
+    /// Unblocks this portal, blocked by the retention policy after a long period without use, so its users can sign in
+    /// again. The portal must be blocked. The call is authorized only by the unblocking link the retention letters send
+    /// to the owner; it works for the current block only. The call is mutating: it makes the portal active, records the
+    /// unblocking in the audit trail, refreshes its Content Security Policy and restarts the retention count. Nothing
+    /// is returned in the body; to check the status, read `tenantStatus` from `GET api/2.0/settings`, which a blocked
+    /// portal still answers. A lapsed paid tariff stays unpaid after the unblocking, so renewing it is the next step.
+    /// The letters of a free portal carry no such link: support unblocks it. The call does not bring back a portal
+    /// deleted at the end of its retention period, or one its owner deactivated, which `PUT api/2.0/portal/continue`
+    /// brings back. An invalid link, a link of an earlier block, or a portal that is no longer blocked, a repeated call
+    /// included, is refused with 401; an ordinary sign-in token instead of the link is refused with 403.
+    /// </remarks>
+    /// <summary>
+    /// Unblock a portal
+    /// </summary>
+    /// <path>api/2.0/portal/unblock</path>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
+    [SwaggerResponse(401, "The unblocking link is invalid, was mailed for an earlier block, or the portal is not blocked")]
+    [SwaggerResponse(403, "The call carries an ordinary sign-in token instead of the unblocking link")]
+    [AllowBlocked]
+    [AllowNotPayment]
+    [HttpPut("unblock")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalUnblock")]
+    public async Task UnblockPortal()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        // The link is refused for a portal that is not blocked before it gets here; a call that raced another one
+        // which has just unblocked the portal gets the same answer, not a second unblocking.
+        if (tenant.Status != TenantStatus.Blocked)
+        {
+            throw new AuthenticationException("The portal is not blocked");
+        }
+
+        // The new status date is also where the retention count starts again.
+        tenant.SetStatus(TenantStatus.Active);
+        await tenantManager.SaveTenantAsync(tenant);
+        messageService.Send(MessageAction.PortalUnblocked);
+
+        // The category of the block is over with it; the next block records its own.
+        await settingsManager.SaveAsync(new PortalRetentionSettings());
+
+        var current = await settingsManager.LoadAsync<CspSettings>();
+        await cspSettingsHelper.SaveAsync(current.Domains, false);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
+    }
+
+    /// <remarks>
     /// Deactivates this portal: its status becomes suspended and its users can no longer work in it, while all of its
     /// rooms, files and accounts stay untouched. It is reached only with the deactivation link that
     /// `POST api/2.0/portal/suspend` mails to the portal owner - that link authorizes the call instead of an
@@ -1185,32 +1231,25 @@ public class PortalController(
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant);
-
-        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-        {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-        }
-
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
         var redirectLink = externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled");
 
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
-
-        messageService.Send(MessageAction.PortalDeleted);
-
-        await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
-        await cspSettingsHelper.UpdateBaseDomainAsync();
-
-        if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+        await portalRemovalService.RemoveAsync(tenant, securityContext.CurrentAccount.ID, auto: false, async () =>
         {
-            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-            await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
-        }
+            await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
-        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            messageService.Send(MessageAction.PortalDeleted);
+
+            await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
+            await cspSettingsHelper.UpdateBaseDomainAsync();
+
+            if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+            {
+                var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+            }
+        });
 
         return redirectLink;
     }

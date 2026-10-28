@@ -112,6 +112,20 @@ public class MetadataValue
 }
 
 /// <summary>
+/// Where a free text search met the metadata of an entry: one string value holding the text, with the field it
+/// belongs to. A custom field is reported by its name alone, the hidden system template and its field ids stay inside.
+/// </summary>
+public class MetadataTextMatch
+{
+    public int EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+    public int? TemplateId { get; set; }
+    public int? FieldId { get; set; }
+    public string FieldName { get; set; }
+    public string Value { get; set; }
+}
+
+/// <summary>
 /// The metadata template to entry binding.
 /// </summary>
 public class MetadataTemplateLink
@@ -133,6 +147,16 @@ public class TemplateMetadata
 {
     public MetadataTemplate Template { get; set; }
     public List<MetadataValue> Values { get; set; } = [];
+
+    /// <summary>
+    /// Whether the template cascades from the entry to its content. Always false on a file.
+    /// </summary>
+    public bool Cascade { get; set; }
+
+    /// <summary>
+    /// How the cascade of the entry treats the values the sub-entries already hold. Meaningful while <see cref="Cascade"/> is set.
+    /// </summary>
+    public MetadataConflictResolveType CascadeConflict { get; set; }
 }
 
 /// <summary>

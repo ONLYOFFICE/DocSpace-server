@@ -66,6 +66,14 @@ public class PaymentHelper(
         }
     }
 
+    public async Task DemandAiEnabledAsync()
+    {
+        if (!await aiGateway.IsAiEnabledAsync())
+        {
+            throw new InvalidOperationException("AI Tools service is not enabled for the portal");
+        }
+    }
+
     public async Task DemandAdminAsync()
     {
         if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -382,9 +390,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(int tenantId, string quotaName)
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId, string quotaName, DocsCloudTrialCustomer customer)
     {
-        var result = await tariffService.GetDocsCloudTrialAsync(tenantId);
+        var result = await tariffService.GetDocsCloudTrialAsync(tenantId, customer);
 
         if (result)
         {

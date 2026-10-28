@@ -62,9 +62,10 @@ internal sealed class LetterHost : IAsyncDisposable
     /// <summary>
     /// Builds the graph against the database Aspire provisioned. <paramref name="portalUrl"/> is the
     /// address the registered portal answers on: the notification image folder is configured from it, so
-    /// that the images a letter carries sit on the same host as its links.
+    /// that the images a letter carries sit on the same host as its links. <paramref name="webApi"/> is where
+    /// Web.Api answers, which stands in for the identity service the stack does not run.
     /// </summary>
-    public static async Task<LetterHost> BuildAsync(string connectionString, string portalUrl)
+    public static async Task<LetterHost> BuildAsync(string connectionString, string portalUrl, Uri webApi)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = [] });
 
@@ -73,7 +74,7 @@ internal sealed class LetterHost : IAsyncDisposable
 
         builder.Configuration.AddDefaultConfiguration(builder.Environment)
                              .AddStudioNotifyConfiguration(builder.Environment)
-                             .AddInMemoryCollection(BuildOverrides(connectionString, portalUrl));
+                             .AddInMemoryCollection(BuildOverrides(connectionString, portalUrl, webApi));
 
         // Autofac and NLog. Autofac is not optional: IUrlShortener resolves to BaseUrlShortener, whose
         // ConsumerFactory only has constructors taking IContainer / ILifetimeScope.
@@ -105,7 +106,7 @@ internal sealed class LetterHost : IAsyncDisposable
         await _app.DisposeAsync();
     }
 
-    private static Dictionary<string, string?> BuildOverrides(string connectionString, string portalUrl)
+    private static Dictionary<string, string?> BuildOverrides(string connectionString, string portalUrl, Uri webApi)
     {
         return new Dictionary<string, string?>
         {
@@ -116,6 +117,8 @@ internal sealed class LetterHost : IAsyncDisposable
             // whole stack is standalone by. It cannot come from appsettings.test.json here: this host
             // runs in the test process, whose environment is whatever `dotnet test` was started with —
             // without it the base domain resolves to "" and every tenant domain becomes the bare alias.
+            // `localhost` here is what makes the installation standalone (CoreBaseSettings.Standalone); the
+            // domain the portals get is the BaseDomain setting the fixture saves into the database.
             ["core:base-domain"] = "localhost",
 
             // The letters need neither: FusionCache stays L1-only, cache notifications fall back to the
@@ -128,6 +131,12 @@ internal sealed class LetterHost : IAsyncDisposable
 
             // Nothing may leave this process: the tests deliver to MailPit themselves.
             ["core:notify:postman"] = "log",
+
+            // The identity service is not part of the stack. By default its address is built from a server
+            // root this host does not have (localhost:80, where nothing listens), so removing a portal
+            // failed on the connection. Web.Api answers that path with a plain 404, which the retention
+            // job's removal is allowed to shrug off.
+            ["core:oidc:authority"] = $"{webApi.ToString().TrimEnd('/')}/api/2.0/oauth2",
 
             // Short-circuits StudioNotifyHelper.GetNotificationImageUrl, which otherwise goes through
             // WebImageSupplier -> WebPath: a sync-over-async .Result and, on a standalone portal, the

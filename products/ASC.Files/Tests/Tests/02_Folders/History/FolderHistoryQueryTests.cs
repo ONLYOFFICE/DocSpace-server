@@ -182,12 +182,8 @@ public class FolderHistoryQueryTests(
 
         var folder = await CreateFolder("Autotest Folder History MyDocs", myDocsFolderId);
 
-        // Act
-        var history = (await _foldersApi.GetFolderHistoryAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        history.Should().NotBeEmpty();
-        history.ConvertAll(e => e.Action?.Id).Should().Contain(MessageAction.FolderCreated);
+        // Act & Assert: the audit entry is written asynchronously (event bus to Web.Studio), so it is polled
+        await AssertHistoryContainsAsync(folder.Id, MessageAction.FolderCreated);
     }
 
     [Fact]

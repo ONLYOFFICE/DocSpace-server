@@ -49,6 +49,10 @@ public interface IBillingApi
     [Post("/billing/GetAccountLink")]
     Task<string> GetAccountLinkAsync([Body] GetAccountLinkRequestDto requestDto);
 
+    /// <remarks>Returns the raw response body: the hosted invoice URL as a JSON string.</remarks>
+    [Post("/billing/GetInvoiceLink")]
+    Task<string> GetInvoiceLinkAsync([Body] GetInvoiceLinkRequestDto requestDto);
+
     [Post("/billing/GetActiveResources")]
     Task<PaymentLast[]> GetActiveResourcesAsync(
         [Body] BillingPortalRequestDto requestDto,
@@ -90,5 +94,5 @@ public interface IBillingApi
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
     [Post("/billing/getwdocstrial")]
-    Task<string> GetDocsCloudTrialAsync([Body] BillingPortalRequestDto requestDto);
+    Task<string> GetDocsCloudTrialAsync([Body] GetDocsCloudTrialRequestDto requestDto);
 }

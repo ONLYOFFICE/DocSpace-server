@@ -355,6 +355,9 @@ internal class MetadataDao(
 
         await filesDbContext.SaveChangesAsync();
 
+        // the fields are part of the template: a field saved is the template modified
+        await filesDbContext.TouchMetadataTemplateByFieldAsync(tenantId, dbField.Id, userId, now);
+
         return ToField(dbField);
     }
 
@@ -400,6 +403,8 @@ internal class MetadataDao(
     public async Task DeleteFieldAsync(int fieldId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -409,6 +414,10 @@ internal class MetadataDao(
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
+
+            // the fields are part of the template: a field removed is the template modified; before the field row goes,
+            // the touch finds the template through it
+            await context.TouchMetadataTemplateByFieldAsync(tenantId, fieldId, userId, now);
 
             await context.MetadataValues
                 .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)
@@ -670,6 +679,28 @@ internal class MetadataDao(
         await filesDbContext.ConvertMetadataCascadeLinksToDirectAsync(tenantId, sourceFolderId, templateId);
     }
 
+    public async Task StopCascadeAsync(int folderId, int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        // the flag and the inherited links go together: a flag taken off alone would leave the subtree pointing at a
+        // folder that no longer cascades, and the links converted alone would let the next pass stamp them again
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.StopMetadataCascadeAsync(tenantId, folderId, templateId);
+            await context.ConvertMetadataCascadeLinksToDirectAsync(tenantId, folderId, templateId);
+
+            await tx.CommitAsync();
+        });
+    }
+
     public async Task SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -743,6 +774,22 @@ internal class MetadataDao(
                 yield return value;
             }
         }
+    }
+
+    public async Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<int> fileIds, IEnumerable<int> folderIds, string text, bool includeHiddenTemplates)
+    {
+        var lowerText = GetSearchText(text);
+
+        if (string.IsNullOrEmpty(lowerText))
+        {
+            return [];
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.MetadataTextMatchesAsync(tenantId, fileIds, folderIds, lowerText, includeHiddenTemplates).ToListAsync();
     }
 
     public async Task DeleteValuesAsync(int entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null)

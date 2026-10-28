@@ -50,7 +50,7 @@ public interface ITariffService
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
     Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity);
-    Task<bool> GetDocsCloudTrialAsync(int tenantId);
+    Task<bool> GetDocsCloudTrialAsync(int tenantId, DocsCloudTrialCustomer customer);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
@@ -59,6 +59,13 @@ public interface ITariffService
     Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
+
+    /// <summary>
+    /// Whether money is left on the portal's wallet: true or false when the accounting service answered
+    /// (a portal it does not know has no wallet, so false), null when it could not be asked or did not answer
+    /// before <paramref name="cancellationToken"/> was cancelled.
+    /// </summary>
+    Task<bool?> HasPositiveBalanceAsync(int tenantId, CancellationToken cancellationToken = default);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
@@ -66,9 +73,25 @@ public interface ITariffService
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
     Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter);
     Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);
+    IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter, CancellationToken cancellationToken = default);
+    Task<DepositReport> GetCustomerDepositsAsync(int tenantId, DepositFilter filter);
+    Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, DateTime utcStartDate, DateTime utcEndDate, CancellationToken cancellationToken = default);
+    Task<string> GetInvoiceLinkAsync(int tenantId, string paymentRef);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
     Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
+    Task<ServiceLimit> GetServiceLimitAsync(int tenantId, string groupName, int id);
+    Task<ServiceLimit> GetTotalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimit> GetGlobalServiceLimitAsync(int tenantId, string groupName);
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string groupName, ServiceLimitFilter filter);
+    Task<Dictionary<Guid, UserServiceLimit>> GetCachedParticipantServiceLimitsAsync(int tenantId, string groupName);
+    Task<UserServiceLimit> GetCachedUserServiceLimitAsync(int tenantId, string groupName, Guid userId);
+    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, string groupName, int id, decimal? amountValue, int? quantityValue, bool? enabled);
+    Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName);
+    Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, string groupName, int id);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
 }

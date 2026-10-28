@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Հաստատեք հաշվի դադարեցումը</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Կապվել աջակցման թիմի հետ</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Ապաակտիվացնել պորտալը</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Միանալ սենյակին</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Պահպանել իմ տարածքը</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Պահպանել իմ տարածքը և միջոցները</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Թողնել կարծիք</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Սահմանել գաղտնաբառ</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Կիսվել կարծիքով</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Սկսեք անվճար փորձաշրջան</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Ապաարգելափակել իմ տարածքը</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Թարմացնել</value>
@@ -743,6 +758,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} պորտալն արգելափակվել է տվյալների պահպանման քաղաքականությամբ. այն չի օգտագործվել, կամ դրա բաժանորդագրությունը չի երկարաձգվել: Թե որ դեպքն է, ցույց է տալիս ստորև նշված կատեգորիան:
+
+*Պորտալ:* ${PortalUrl}
+*Սեփականատեր:* ${UserName} ${UserEmail}
+*Կատեգորիա:* ${Category}
+*Ջնջման ամսաթիվ:* ${DeleteDate}
+
+Եթե այն չապաարգելափակվի, պորտալը և դրա բոլոր տվյալները կջնջվեն այդ օրը:
+
+Եթե սեփականատերը խնդրի պահպանել այն, նորից ակտիվացրեք պորտալը մինչև այդ ամսաթիվը:</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Ձեր տարածքն արգելափակված է, բայց դեռ ոչինչ կորած չէ
+
+#if($Unpaid == "True")
+Քանի որ ձեր ${LetterLogoText} տարածքի՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, բաժանորդագրությունն ավարտվել է, մենք այն ժամանակավորապես արգելափակել ենք: Սա նշանակում է, որ այս պահին ձեր թիմից ոչ ոք չի կարող մուտք գործել, բայց ձեր բոլոր փաստաթղթերն ու կարգավորումները դեռ ապահով են:
+#else
+Քանի որ ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, որոշ ժամանակ չի օգտագործվել, մենք այն ժամանակավորապես արգելափակել ենք: Սա նշանակում է, որ այս պահին ձեր թիմից ոչ ոք չի կարող մուտք գործել, բայց ձեր բոլոր փաստաթղթերն ու կարգավորումները դեռ ապահով են:
+#end
+
+Ձեր տվյալները մեզ մոտ կպահվեն մինչև այս ամսաթիվը՝ *$DeleteDate*: Դրանից հետո տարածքը և դրա ողջ բովանդակությունն ընդմիշտ կջնջվեն:
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Լավ նորություն. դեռ ուշ չէ: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, ապա երկարաձգեք բաժանորդագրությունը՝ աշխատանքին վերադառնալու համար: Ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#else
+Լավ նորություն. դեռ ուշ չէ: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, և ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան տվյալներ, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և պահուստավորեք դրանք մինչև $DeleteDateShort:
+#else
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և ներբեռնեք դրանք մինչև $DeleteDateShort:
+#end
+#else
+Լավ նորություն. դեռ ուշ չէ: Պարզապես կապվեք մեր աջակցման թիմի հետ մինչև $DeleteDateShort, և մենք կօգնենք վերականգնել ձեր տարածքը ճիշտ այնպես, ինչպես թողել եք:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, տեղեկացրեք մեզ մինչև $DeleteDateShort, և մենք կօգնենք ձեզ մուտք ստանալ դրանց:
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Ձեր տարածքը ջնջվել է
+
+#if($Unpaid == "True")
+Քանի որ ձեր ${LetterLogoText} տարածքի՝ *$PortalName*, բաժանորդագրությունն ավարտվել էր և չէր երկարաձգվել, մեր "Գաղտնիության քաղաքականության":"$URL1" համաձայն՝ մենք այն ջնջել ենք դրա բոլոր տվյալների հետ միասին:
+#else
+Քանի որ ձեր ${LetterLogoText} տարածքը՝ *$PortalName*, երկար ժամանակ չէր օգտագործվել, մեր "Գաղտնիության քաղաքականության":"$URL1" համաձայն՝ մենք այն ջնջել ենք դրա բոլոր տվյալների հետ միասին:
+#end
+
+#if($Unpaid == "True")
+Շնորհակալություն մեզ հետ աշխատելու համար: Մենք շատ կցանկանայինք իմանալ, թե ինչու դադարեցիք այն օգտագործել. ինչ-որ բան չէր աշխատում, գտաք ավելի հարմար լուծում, թե պարզապես այլևս դրա կարիքը չունեիք: Սա ընդամենը մեկ րոպե կխլի, և յուրաքանչյուր պատասխան օգնում է մեզ կատարելագործվել:
+#else
+Շնորհակալություն ${LetterLogoText}-ը փորձելու համար: Մենք շատ կցանկանայինք իմանալ, թե ինչու դադարեցիք այն օգտագործել. ինչ-որ բան չէր աշխատում, գտաք ավելի հարմար լուծում, թե պարզապես այլևս դրա կարիքը չունեիք: Սա ընդամենը մեկ րոպե կխլի, և յուրաքանչյուր պատասխան օգնում է մեզ կատարելագործվել:
+#end
+
+$OrangeButton
+
+Եթե երբևէ ցանկանաք վերադառնալ, միշտ սպասված եք: Կարող եք "նոր տարածք ստեղծել":"$URL2" ցանկացած ժամանակ:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Ձեր տարածքը շուտով կջնջվի
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ դրա բաժանորդագրությունն ավարտվել է: Սա բարեկամական վերջին հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#else
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ դրա բաժանորդագրությունն ավարտվել է: Սա բարեկամական հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#end
+#else
+#if($FinalNotice == "True")
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ որոշ ժամանակ չի օգտագործվել: Սա բարեկամական վերջին հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#else
+Ձեր ${LetterLogoText} տարածքը՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, դեռ արգելափակված է, քանի որ որոշ ժամանակ չի օգտագործվել: Սա բարեկամական հիշեցում է. տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն այս օրը՝ *$DeleteDate*:
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, ապա երկարաձգեք բաժանորդագրությունը՝ աշխատանքին վերադառնալու համար: Ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#else
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես ապաարգելափակեք ձեր տարածքը մինչև $DeleteDateShort, և ամեն ինչ կլինի ճիշտ այնտեղ, որտեղ թողել եք:
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան տվյալներ, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և պահուստավորեք դրանք մինչև $DeleteDateShort: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#else
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, ապաարգելափակեք տարածքը և ներբեռնեք դրանք մինչև $DeleteDateShort: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#end
+#else
+Եթե ցանկանում եք պահպանել այն, դեռ ժամանակ կա: Պարզապես կապվեք մեր աջակցման թիմի հետ մինչև $DeleteDateShort, և մենք կօգնենք վերականգնել ձեր տարածքը ճիշտ այնպես, ինչպես թողել եք:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Եթե կան ֆայլեր, որոնք ցանկանում եք պահել, տեղեկացրեք մեզ մինչև $DeleteDateShort, և մենք կօգնենք ձեզ մուտք ստանալ դրանց: Դրանից հետո մենք չենք կարողանա վերականգնել դրանք:
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Վաղուց ձեզ չենք տեսել
+
+Արդեն որոշ ժամանակ է, ինչ ոչ ոք մուտք չի գործել ձեր ${LetterLogoText} տարածք՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*: Ուզում էինք կապվել ձեզ հետ, նախքան ձեր փաստաթղթերի և կարգավորումների հետ ինչ-որ բան կպատահի:
+
+Որպեսզի ամեն ինչ բոլորի համար սահուն աշխատի, մենք արգելափակում ենք այն անվճար տարածքները, որոնք որոշ ժամանակ չեն օգտագործվել: Ահա թե դա ինչ է նշանակում ձեր տարածքի համար.
+
+*$BlockDate*: ձեր տարածքը կարգելափակվի, և դուք չեք կարողանա մուտք գործել:
+*$DeleteDate*: տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն:
+
+Լավ նորություն. այն պահպանելը հեշտ է: Պարզապես մեկ անգամ մուտք գործեք մինչև $BlockDateShort, և ամեն ինչ կմնա ճիշտ այնպես, ինչպես թողել եք:
+
+$OrangeButton
+
+Եթե տարածքն այլևս ձեզ պետք չէ, ոչինչ անել պետք չէ: Պարզապես մինչև $BlockDateShort ներբեռնեք այն ֆայլերը, որոնք ցանկանում եք պահել:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Ձեր բաժանորդագրությունն ավարտվել է, բայց ձեր տարածքը դեռ այստեղ է
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* տարածքի ձեր ${LetterLogoText} բաժանորդագրությունն ավարտվել է *$DueDate*: Շնորհակալություն մեզ հետ աշխատելու համար: Հուսով ենք, որ ${LetterLogoText}-ը մի փոքր հեշտացրել է ձեր աշխատանքը:
+
+Որպեսզի ամեն ինչ սահուն աշխատի, մենք արգելափակում ենք այն տարածքները, որոնց բաժանորդագրությունն ավարտվել է: Ահա թե դա ինչ է նշանակում ձեր տարածքի համար.
+
+*$BlockDate*: ձեր տարածքը կարգելափակվի, և դուք չեք կարողանա մուտք գործել:
+*$DeleteDate*: տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն:
+
+Լավ նորություն. այն պահպանելը հեշտ է: Պարզապես երկարաձգեք ձեր բաժանորդագրությունը մինչև $BlockDateShort, և ձեր փաստաթղթերը, կարգավորումները և թիմը կմնան ճիշտ այնտեղ, որտեղ թողել եք:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Պարզապես մի մոռացեք մինչև $BlockDateShort պահուստավորել այն տվյալները, որոնք ցանկանում եք պահել:
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Ձեր բաժանորդագրությունն ավարտվել է, բայց ձեր տարածքը և միջոցները դեռ այստեղ են
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* տարածքի ձեր ${LetterLogoText} բաժանորդագրությունն ավարտվել է *$DueDate*: Շնորհակալություն մեզ հետ աշխատելու համար: Ձեր դրամապանակում դեռ միջոցներ կան ("ստուգել մնացորդը":"$URL1"), և մենք չէինք ուզում, որ դուք կորցնեք դրանք՝ առանց իմանալու:
+
+Որպեսզի ամեն ինչ սահուն աշխատի, մենք արգելափակում ենք այն տարածքները, որոնց բաժանորդագրությունն ավարտվել է: Ահա թե դա ինչ է նշանակում ձեր տարածքի համար.
+
+*$BlockDate*: ձեր տարածքը կարգելափակվի, և դուք չեք կարողանա մուտք գործել:
+*$DeleteDate*: տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն՝ ձեր դրամապանակի միջոցների հետ միասին:
+
+Լավ նորություն. երկուսն էլ պահպանելը հեշտ է: Պարզապես երկարաձգեք ձեր բաժանորդագրությունը մինչև $BlockDateShort, և ձեր փաստաթղթերը, կարգավորումները և միջոցները կմնան ճիշտ այնտեղ, որտեղ թողել եք: Դրամապանակի մնացորդը կարող է նույնիսկ ծածկել դրա մի մասը:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Պարզապես մի մոռացեք մինչև $BlockDateShort պահուստավորել այն տվյալները, որոնք ցանկանում եք պահել:
+#else
+h1.Ձեր տարածքում ձեզ դեռ միջոցներ են սպասում
+
+Արդեն որոշ ժամանակ է, ինչ ոչ ոք մուտք չի գործել ձեր ${LetterLogoText} տարածք՝ *"${__VirtualRootPath}":"${__VirtualRootPath}"*, բայց դրա "դրամապանակում":"$URL1" դեռ միջոցներ կան: Մենք չէինք ուզում, որ դուք կորցնեք դրանք՝ առանց իմանալու:
+
+Որպեսզի ամեն ինչ սահուն աշխատի, մենք արգելափակում ենք ոչ ակտիվ տարածքները: Ահա թե դա ինչ է նշանակում ձեր տարածքի համար.
+
+*$BlockDate*: ձեր տարածքը կարգելափակվի, և դուք չեք կարողանա մուտք գործել:
+*$DeleteDate*: տարածքը և դրա բոլոր տվյալները ընդմիշտ կջնջվեն՝ ձեր դրամապանակի միջոցների հետ միասին:
+
+Լավ նորություն. երկուսն էլ պահպանելը հեշտ է: Պարզապես մեկ անգամ մուտք գործեք մինչև $BlockDateShort, և ձեր փաստաթղթերը, կարգավորումները և միջոցները կմնան ճիշտ այնտեղ, որտեղ թողել եք:
+
+$OrangeButton
+
+Եթե որոշել եք առաջ շարժվել, դա միանգամայն նորմալ է: Պարզապես մի մոռացեք մինչև $BlockDateShort ներբեռնել այն ֆայլերը, որոնք ցանկանում եք պահել:
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" պորտալի ապաակտիվացում
 
@@ -1151,30 +1346,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText}-ը&lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Դուք չեք մտել ձեր ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; կես տարուց ավելի:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Քանի որ դուք որոշել եք այլևս չօգտագործել այն, ձեր ${LetterLogoText}-ը և բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt; համաձայն։&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Մենք կգնահատենք ձեր կարծիքը։ Ինչու՞ եք որոշել դադարեցնել ${LetterLogoText} օգտագործումը։&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե ցանկանում եք շարունակել օգտագործել ձեր ${LetterLogoText}-ը, պարզապես մուտք գործեք այն և կատարեք ցանկացած գործողություն։&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText}-ը&lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Դուք չեք մտել ձեր ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; արդեն 3 ամիս։&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ուշադրություն. ձեր ${LetterLogoText}-ը և բոլոր տվյալները կջնջվեն 6 ամիս անգործությունից հետո։ Պարզապես մուտք գործեք հիմա, որպեսզի ձեր ${LetterLogoText}-ը մնա ակտիվ և կարողանաք շարունակել օգտագործել այն։&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ստացեք &lt;span style="color: #FF6F3D;"&gt;անվճար&lt;/span&gt; ${LetterLogoText} հավելվածներ&lt;/td&gt;&lt;/tr&gt;
 
@@ -1189,32 +1360,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Բջջային սարքերում փաստաթղթերը խմբագրելու համար ձեռք բերեք ${LetterLogoText} Documents հավելվածը &lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText}-ը &lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Դուք չեք մտել ձեր ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; կես տարուց ավելի:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Քանի որ որոշել եք այլևս չօգտագործել այն, ձեր ${LetterLogoText}-ը և բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt;:&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Մենք կգնահատենք ձեր կարծիքը: Ինչո՞ւ որոշեցիք դադարեցնել ${LetterLogoText}-ի օգտագործումը:&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե կարծում եք, որ սա սխալ է և ցանկանում եք շարունակել օգտագործել ${LetterLogoText}-ը, դիմեք մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;աջակցության թիմին&lt;/a&gt;:&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText}-ը &lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Դուք չեք մտել ձեր ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; արդեն 3 ամիս։&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Քանի որ դուք չեք օգտագործում այն, ձեր ${LetterLogoText}-ը և բոլոր տվյալները կջնջվեն 6 ամիս անգործությունից հետո՝ մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt; համաձայն։&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե կարծում եք, որ սա սխալ է և ցանկանում եք շարունակել օգտագործել ${LetterLogoText}-ը, դիմեք մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;աջակցության թիմին&lt;/a&gt;:&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1630,6 +1775,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Ձեր գաղտնաբառը հաջողությամբ փոխվել է</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} պորտալն արգելափակվել է տվյալների պահպանման քաղաքականությամբ</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքն արգելափակված է, բայց ձեր տվյալներն ապահով են մինչև $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը ջնջվել է</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը շուտով կջնջվի (ջնջման ամսաթիվ՝ $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը պահպանելու վերջին հնարավորությունը (ջնջման ամսաթիվ՝ $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը կարոտել է ձեզ (անհրաժեշտ է գործել մինչև $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքը կարոտել է ձեզ (անհրաժեշտ է գործել մինչև $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} տարածքում դեռ միջոցներ կան (վերջնաժամկետ՝ $BlockDate)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} պորտալի ապաակտիվացում</value>
   </data>
@@ -1699,20 +1868,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Բացահայտեք 4 հարմար հավելված ձեր ${LetterLogoText}-ում</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText}-ը կջնջվի</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText}-ը կջնջվի</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ստացեք անվճար ${LetterLogoText} հավելվածներ</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText}-ը կջնջվի</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText}-ը կջնջվի</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Բացահայտեք ${LetterLogoText}-ի բիզնես բաժանորդագրությունը</value>

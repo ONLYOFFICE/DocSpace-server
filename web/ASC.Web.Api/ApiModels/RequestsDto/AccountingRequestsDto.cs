@@ -375,14 +375,85 @@ public class CustomerServiceUsageRequestDto
 }
 
 /// <summary>
+/// The query parameters for reading a page of the portal's wallet top-ups: the period, the outcome and the paging
+/// window.
+/// </summary>
+/// <example>
+/// {
+///   "startDate": "2025-01-01T00:00:00Z",
+///   "endDate": "2025-12-31T23:59:59Z",
+///   "status": "Completed",
+///   "offset": 0,
+///   "limit": 25
+/// }
+/// </example>
+public class GetCustomerDepositsRequestDto
+{
+    /// <summary>
+    /// The beginning of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is
+    /// read in the portal time zone, not in the caller's; defaults to the portal creation date.
+    /// </summary>
+    /// <example>2025-01-01T00:00:00Z</example>
+    [FromQuery(Name = "startDate")]
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// The end of the period, inclusive, as an ISO 8601 timestamp. A value with neither `Z` nor an offset is read in
+    /// the portal time zone, not in the caller's; defaults to the moment the call is made.
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    [FromQuery(Name = "endDate")]
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// The outcome to keep. A top-up that is still being settled is reported as pending and may change later, while
+    /// the other outcomes are final; every outcome is reported when this is omitted.
+    /// </summary>
+    /// <example>Completed</example>
+    [FromQuery(Name = "status")]
+    public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// The number of top-ups to skip before the first one returned, for walking through a long history page by page.
+    /// Counted after the filters are applied, and starts at 0 when omitted.
+    /// </summary>
+    /// <example>0</example>
+    [Range(0, int.MaxValue)]
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// The maximum number of top-ups returned in one page. Defaults to 25 when omitted; the answer echoes the window
+    /// back next to `totalQuantity`, `totalPage` and `currentPage`, so the next `offset` can be computed without
+    /// counting the items.
+    /// </summary>
+    /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
+    [FromQuery(Name = "limit")]
+    public int? Limit { get; set; }
+}
+
+/// <summary>
+/// The wallet top-up whose invoice is asked for.
+/// </summary>
+public class GetDepositInvoiceRequestDto
+{
+    /// <summary>
+    /// The ID of the top-up, taken from the `id` field of `GET api/2.0/portal/payment/customer/deposits`.
+    /// </summary>
+    /// <example>15342</example>
+    [FromRoute(Name = "id")]
+    public long Id { get; init; }
+}
+
+/// <summary>
 /// The parameters that select whose prices are read from the accounting service.
 /// </summary>
 public class ServicePricesRequestDto
 {
     /// <summary>
     /// The service whose price list is read, named the way the billing catalogue names it, such as `ai-tools` or
-    /// `backup`. Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`; a name
-    /// the accounting service does not price yields an empty list rather than an error.
+    /// `backup`. Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`.
     /// </summary>
     /// <example>ai-tools</example>
     [StringLength(255)]
@@ -397,6 +468,216 @@ public class ServicePricesRequestDto
     /// <example>false</example>
     [FromQuery(Name = "active")]
     public bool Active { get; init; }
+}
+
+/// <summary>
+/// The bounds the service limit requests are validated against.
+/// </summary>
+public static class ServiceLimitConstraints
+{
+    /// <summary>
+    /// The largest amount threshold a service limit may have, in the currency of the AI services.
+    /// </summary>
+    public const double MaxAmountValue = 10_000;
+
+    /// <summary>
+    /// The most users one call may set a personal limit for: the whole list goes to the accounting service in one
+    /// request and into one audit record.
+    /// </summary>
+    public const int MaxUserIds = 1000;
+}
+
+/// <summary>
+/// The parameters that select one service limit of the portal, for reading or deleting it.
+/// </summary>
+public class ServiceLimitIdRequestDto
+{
+    /// <summary>
+    /// The ID of the service limit, as returned in `id` by the operation that created it or by the reads of limits.
+    /// </summary>
+    /// <example>42</example>
+    [Range(1, int.MaxValue)]
+    [FromRoute(Name = "id")]
+    public int Id { get; init; }
+}
+
+/// <summary>
+/// How the list of the limits in force for the portal users is paged and sorted.
+/// </summary>
+public class GetParticipantServiceLimitsRequestDto
+{
+    /// <summary>
+    /// The number of limits to skip before the first one returned, counted in the sort order of the list.
+    /// </summary>
+    /// <example>0</example>
+    [Range(0, int.MaxValue)]
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; init; }
+
+    /// <summary>
+    /// The largest number of limits one page holds.
+    /// </summary>
+    /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
+    [FromQuery(Name = "limit")]
+    public int? Limit { get; init; }
+
+    /// <summary>
+    /// The field the list is sorted by: the user a limit applies to, or the moment it was created.
+    /// </summary>
+    /// <example>Created</example>
+    [EnumDataType(typeof(ServiceLimitOrderBy))]
+    [FromQuery(Name = "orderBy")]
+    public ServiceLimitOrderBy? OrderBy { get; init; }
+
+    /// <summary>
+    /// The direction the field named in `orderBy` is sorted in.
+    /// </summary>
+    /// <example>Descending</example>
+    [EnumDataType(typeof(OperationOrderType))]
+    [FromQuery(Name = "orderType")]
+    public OperationOrderType? OrderType { get; init; }
+}
+
+/// <summary>
+/// The spending limit to create on the AI services: for the portal as a whole, for every user, or for one user.
+/// </summary>
+/// <example>
+/// {
+///   "scope": "Custom",
+///   "userId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+///   "amountValue": 50,
+///   "period": "Day"
+/// }
+/// </example>
+public class CreateServiceLimitRequestDto
+{
+    /// <summary>
+    /// Whom the limit applies to.
+    /// </summary>
+    /// <example>Custom</example>
+    [EnumDataType(typeof(ServiceLimitScope))]
+    public ServiceLimitScope Scope { get; init; } = ServiceLimitScope.Total;
+
+    /// <summary>
+    /// The ID of the portal user a personal limit is set for, as returned in `id` by the people operations.
+    /// </summary>
+    /// <example>3f2504e0-4f89-11d3-9a0c-0305e82c3301</example>
+    public Guid? UserId { get; init; }
+
+    /// <summary>
+    /// The most money the AI services may cost per period, in their currency, which cannot be chosen. Zero blocks the
+    /// AI services completely.
+    /// </summary>
+    /// <example>50</example>
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity the AI services may consume per period, in their common unit. Zero blocks the AI services
+    /// completely.
+    /// </summary>
+    /// <example>1000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The window the thresholds apply to, in UTC. A day, week or month is calendar-aligned rather than rolling - a
+    /// daily limit resets at midnight UTC, a weekly one on Monday - while a lifetime limit counts from its creation and
+    /// never resets.
+    /// </summary>
+    /// <example>Day</example>
+    [EnumDataType(typeof(ServiceLimitPeriod))]
+    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
+}
+
+/// <summary>
+/// The new thresholds and state of an existing service limit.
+/// </summary>
+/// <example>
+/// {
+///   "id": 42,
+///   "amountValue": 100,
+///   "enabled": true
+/// }
+/// </example>
+public class UpdateServiceLimitRequestDto
+{
+    /// <summary>
+    /// The ID of the service limit, as returned in `id` by the operation that created it or by the reads of limits.
+    /// </summary>
+    /// <example>42</example>
+    [Required]
+    [Range(1, int.MaxValue)]
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The most money the AI services may cost per period, in their currency. Zero blocks the AI services completely.
+    /// </summary>
+    /// <example>100</example>
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity the AI services may consume per period, in their common unit. Zero blocks the AI services
+    /// completely.
+    /// </summary>
+    /// <example>2000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// Whether the limit is in force: false switches it off at once, true switches it back on.
+    /// </summary>
+    /// <example>true</example>
+    public bool? Enabled { get; init; }
+}
+
+/// <summary>
+/// The personal spending limit on the AI services to set for each of several portal users.
+/// </summary>
+/// <example>
+/// {
+///   "userIds": ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"],
+///   "amountValue": 40,
+///   "period": "Day"
+/// }
+/// </example>
+public class SetParticipantServiceLimitsRequestDto
+{
+    /// <summary>
+    /// The IDs of the portal users the limit is set for, as returned in `id` by the people operations.
+    /// </summary>
+    /// <example>["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"]</example>
+    [Required]
+    [MinLength(1)]
+    [MaxLength(ServiceLimitConstraints.MaxUserIds)]
+    public List<Guid> UserIds { get; init; }
+
+    /// <summary>
+    /// The most money the AI services may cost each user per period, in their currency, which cannot be chosen. Zero
+    /// blocks the AI services completely.
+    /// </summary>
+    /// <example>40</example>
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity the AI services may consume per period for each user, in their common unit. Zero blocks the
+    /// AI services completely.
+    /// </summary>
+    /// <example>1000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The window the thresholds apply to, in UTC. A day, week or month is calendar-aligned rather than rolling - a
+    /// daily limit resets at midnight UTC, a weekly one on Monday - while a lifetime limit counts from its creation and
+    /// never resets.
+    /// </summary>
+    /// <example>Day</example>
+    [EnumDataType(typeof(ServiceLimitPeriod))]
+    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
 }
 
 

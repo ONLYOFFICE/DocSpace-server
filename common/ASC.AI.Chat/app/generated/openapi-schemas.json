@@ -54,6 +54,14 @@
       ],
       "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
     },
+    "AiChatToolPrefsScope": {
+      "type": "string",
+      "enum": [
+        "user",
+        "tenant"
+      ],
+      "description": "Which disabled tool list a read or write addresses: the caller's own (`user`, what an absent value means) or the one an administrator keeps for everyone (`tenant`), which every user's reads fold in."
+    },
     "AiActionArgs": {
       "type": "object",
       "properties": {
@@ -210,7 +218,8 @@
         "ImageGeneration",
         "OCR",
         "Vision",
-        "FormAnalysis"
+        "FormAnalysis",
+        "GenerateMeta"
       ],
       "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
     },
@@ -644,7 +653,7 @@
         },
         "message": {
           "$ref": "#/components/schemas/AiThreadMessageLike",
-          "description": "Snapshot of the assistant message at the time the tool call surfaced.",
+          "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
           "examples": [
             {
               "role": "assistant",
@@ -679,8 +688,7 @@
       "required": [
         "threadId",
         "messageId",
-        "idx",
-        "message"
+        "idx"
       ],
       "additionalProperties": false,
       "description": "Identifies a pending tool call to resume — mirrors the library `ToolCallData` (its serializable fields)."
@@ -935,13 +943,18 @@
           "enum": [
             "key",
             "url",
-            "name"
+            "name",
+            "text"
           ],
           "description": "The rejected field."
         },
         "message": {
           "type": "string",
           "description": "The human-readable reason the field was rejected."
+        },
+        "code": {
+          "$ref": "#/components/schemas/AiErrorCode",
+          "description": "Optional: producers that know the reason set it (the prompts engine does)."
         }
       },
       "required": [
@@ -950,6 +963,16 @@
       ],
       "additionalProperties": false,
       "description": "A field-scoped validation error: which form field was rejected, and why."
+    },
+    "AiErrorCode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "conflict",
+        "not_found",
+        "invalid"
+      ],
+      "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
     },
     "AiBulkAssignmentResult": {
       "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
@@ -1876,6 +1899,132 @@
         "success"
       ]
     },
+    "AiMetadataValue": {
+      "type": "object",
+      "properties": {
+        "stringValue": {
+          "type": "string"
+        },
+        "numberValue": {
+          "type": "number"
+        },
+        "dateValue": {
+          "type": "string",
+          "description": "ISO 8601 date-time, UTC midnight of the date."
+        },
+        "optionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "A metadata value: exactly one member, by the field's type."
+    },
+    "AiEntryMetadataField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number",
+          "description": "`MetadataFieldType`: 0 String, 1 Date, 2 Number, 3 SingleChoice, 4 MultiChoice."
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "value": {
+          "$ref": "#/components/schemas/AiMetadataValue"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "AiEntryMetadata": {
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AiEntryMetadataField"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "visible",
+              "fields"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "customFields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "templates",
+        "customFields"
+      ],
+      "additionalProperties": false
+    },
     "AiUserSettingsWrapper": {
       "type": "object",
       "properties": {
@@ -2235,7 +2384,7 @@
                 5
               ],
               "type": "integer",
-              "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates and default templates sections always report 0, because the number is not collected for them.",
+              "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
               "format": "int32"
             },
             "foldersCount": {
@@ -2243,7 +2392,7 @@
                 7
               ],
               "type": "integer",
-              "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates\r\nsections report 0.",
+              "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
               "format": "int32"
             },
             "isShareable": {
@@ -3252,11 +3401,70 @@
                 "format": "int32"
               },
               "description": "The IDs of the metadata templates assigned to the file entry."
+            },
+            "metadataMatches": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to.",
+                "$ref": "#/components/schemas/AiMetadataMatchDto"
+              },
+              "description": "Where the search text of the listing was met in the metadata of the entry: one item per string value holding\r\nthe text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose\r\nmetadata contain it; an entry found by its title alone carries nothing here."
             }
           }
         }
       ],
       "description": "The part of a file or folder that depends on how the entry is identified: by a number on the portal, or by a\r\nstring on a connected third-party account."
+    },
+    "AiMetadataMatchDto": {
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "examples": [
+            3
+          ],
+          "type": [
+            "null",
+            "integer"
+          ],
+          "description": "The ID of the metadata template the matching field belongs to. Null for a custom field, which belongs to no\r\ntemplate the API shows.",
+          "format": "int32"
+        },
+        "fieldId": {
+          "examples": [
+            12
+          ],
+          "type": [
+            "null",
+            "integer"
+          ],
+          "description": "The ID of the matching template field. Null for a custom field, which is addressed by its name alone.",
+          "format": "int32"
+        },
+        "fieldName": {
+          "examples": [
+            "Client"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The name of the matching field: the template field or the custom field as it is shown in the entry metadata."
+        },
+        "value": {
+          "examples": [
+            "ACME Corporation"
+          ],
+          "type": [
+            "null",
+            "string"
+          ],
+          "description": "The stored value that holds the searched text, as it was written, not only the matching part of it."
+        }
+      },
+      "description": "Where a text search met the metadata of a file, a folder or a room: one string value that holds the searched text,\r\nwith the field it belongs to."
     },
     "AiApiDateTime": {
       "type": "object",
@@ -3844,10 +4052,11 @@
             "MarkAsRead",
             "Import",
             "Convert",
-            "Duplicate"
+            "Duplicate",
+            "Build"
           ],
           "type": "string",
-          "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]"
+          "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate, Build - Build]"
         },
         {
           "examples": [
@@ -3861,10 +4070,11 @@
             4,
             5,
             6,
-            7
+            7,
+            8
           ],
           "type": "integer",
-          "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+          "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate, 8 - Build]",
           "x-enum-varnames": [
             "Move",
             "Copy",
@@ -3873,7 +4083,8 @@
             "MarkAsRead",
             "Import",
             "Convert",
-            "Duplicate"
+            "Duplicate",
+            "Build"
           ]
         }
       ],
@@ -4118,7 +4329,6 @@
               }
             ]
           ],
-          "type": "null",
           "description": "The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries\r\nthe identifier, the title and the folder and room types, and folders the caller cannot read are left out, so\r\nthe chain can be shorter than the real depth."
         },
         "startIndex": {
@@ -4293,7 +4503,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
@@ -4310,7 +4520,6 @@
         },
         "required": [
           "idx",
-          "message",
           "messageId",
           "result",
           "threadId"
@@ -5472,6 +5681,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AiChatToolPrefsScope",
+            "description": "The list the write lands in; omitted means the caller's own."
           }
         },
         "required": [
@@ -5656,6 +5869,300 @@
         ],
         "additionalProperties": false,
         "description": "Accepted-for-processing acknowledgement (conversion is asynchronous)."
+      }
+    },
+    "aiMetaGenerate": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What kind of metadata fields the caller is interested in; a hint for the model."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Field name, at most 255 characters."
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The value found in the documents, or null when the text does not state one."
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The proposed custom metadata fields with the values the text supports."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "truncated": {
+                  "type": "boolean",
+                  "description": "Whether the document was cut to fit the model's budget."
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "truncated"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The documents the proposal was read from."
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "unsupported",
+                    "limit",
+                    "forbidden",
+                    "not_found",
+                    "empty",
+                    "failed"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The entries that were left out, with the reason for each."
+          }
+        },
+        "required": [
+          "fields",
+          "sources",
+          "skipped"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aiMetaFill": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "file",
+            "description": "The entry's table. Only `file` for now: a folder or a room answers 400."
+          },
+          "id": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The entry's integer id."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What to pay attention to; a hint for the model."
+          },
+          "overwrite": {
+            "type": "boolean",
+            "description": "Also replace the fields that already carry a value. Default false."
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Resolve the values but write nothing; the caller writes what the user confirms. Default true: a write needs an explicit false."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "description": "Whether the values were only proposed (`true`) or written as well."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/AiEntryMetadata",
+            "description": "The entry's metadata after the write (or as it stands, with `dryRun`), as `GET api/2.0/files/metadata/{kind}/{id}` returns it."
+          },
+          "filled": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldId": {
+                  "type": "number",
+                  "description": "Absent for a custom field."
+                },
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AiMetadataValue"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The values written, or proposed with `dryRun`: a typed value for a template field, a string for a custom field."
+          },
+          "unresolved": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldId": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "already_set",
+                    "not_found",
+                    "invalid_value",
+                    "unknown_option",
+                    "write_failed"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The fields left as they were, with the reason for each."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "truncated": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "truncated"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The documents the values were read from."
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "unsupported",
+                    "limit",
+                    "forbidden",
+                    "not_found",
+                    "empty",
+                    "failed"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The entries that were left out, with the reason for each."
+          }
+        },
+        "required": [
+          "dryRun",
+          "metadata",
+          "filled",
+          "unresolved",
+          "sources",
+          "skipped"
+        ],
+        "additionalProperties": false
       }
     },
     "aiAgentsCreate": {

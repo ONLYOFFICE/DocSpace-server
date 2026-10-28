@@ -123,7 +123,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             return AsyncEnumerable.Empty<File<string>>();
         }
 
-        var files = GetFilesAsync(fileIds);
+        // A provider answers with null for an id it no longer has (WebDAV on a failed PROPFIND, Google
+        // Drive on 404); such an id must drop out here, before the predicates below read its fields.
+        var files = GetFilesAsync(fileIds).Where(x => x != null);
 
         //Filter
         if (subjectID != Guid.Empty)
@@ -469,7 +471,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {

@@ -64,7 +64,6 @@ internal static class PeriodicLetterContexts
             DelayDueDate = DateTime.MaxValue.Date,
             DelayDueDateIsNotMax = false,
             DefaultRebranding = true,
-            UnusedPortalNotifyFrom = today.AddYears(-1),
             LastActivity = Activity(today)
         };
     }
@@ -74,9 +73,19 @@ internal static class PeriodicLetterContexts
         return new TenantQuota { Free = free, Trial = trial, Lifetime = lifetime, Customization = customization };
     }
 
-    public static Lazy<Task<DateTime>> Activity(DateTime date)
+    /// <summary>A portal whose last audit event and last sign-in were both on <paramref name="date"/>.</summary>
+    public static Lazy<Task<PortalActivity>> Activity(DateTime date)
     {
-        return new Lazy<Task<DateTime>>(() => Task.FromResult(date));
+        return Activity(date, date);
+    }
+
+    /// <summary>
+    /// A portal whose last audit event and last sign-in fell on different days - or whose sign-in history
+    /// has been purged, so its last sign-in reads as the creation date.
+    /// </summary>
+    public static Lazy<Task<PortalActivity>> Activity(DateTime lastEventOn, DateTime lastLoginOn)
+    {
+        return new Lazy<Task<PortalActivity>>(() => Task.FromResult(new PortalActivity(lastEventOn, lastLoginOn)));
     }
 
     /// <summary>A portal on a paid tariff running out on <paramref name="due"/>.</summary>
@@ -119,6 +128,17 @@ internal static class PeriodicLetterContexts
         };
     }
 
+    /// <summary>A free portal last used on <paramref name="lastActivity"/>, looked at on <paramref name="today"/>.</summary>
+    public static PeriodicLetterContext Free(Tenant tenant, DateTime today, DateTime lastActivity)
+    {
+        return Fresh(tenant, today) with
+        {
+            Quota = Quota(free: true),
+            Tariff = new Tariff { Quotas = [], State = TariffState.Paid, DueDate = DateTime.MaxValue, DelayDueDate = DateTime.MaxValue },
+            LastActivity = Activity(lastActivity)
+        };
+    }
+
     /// <summary>A portal whose paid tariff lapsed on <paramref name="due"/> and was never renewed.</summary>
     public static PeriodicLetterContext Lapsed(PeriodicLetterContext context, DateTime due)
     {
@@ -127,19 +147,6 @@ internal static class PeriodicLetterContexts
             Tariff = new Tariff { Quotas = [], State = TariffState.NotPaid, DueDate = due, DelayDueDate = DateTime.MaxValue },
             DueDate = due.Date,
             DueDateIsNotMax = true
-        };
-    }
-
-    /// <summary>
-    /// A portal nobody has touched for <paramref name="months"/> months, checked on the anniversary of
-    /// its creation — the only day the inactivity warnings look at.
-    /// </summary>
-    public static PeriodicLetterContext Idle(PeriodicLetterContext context, int months)
-    {
-        return context with
-        {
-            CreatedDate = context.NowDate.AddYears(-2),
-            LastActivity = Activity(context.NowDate.AddMonths(-months))
         };
     }
 

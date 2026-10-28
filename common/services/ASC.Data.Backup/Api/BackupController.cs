@@ -134,8 +134,8 @@ public class BackupController(
     /// `cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0
     /// to 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with
     /// Sunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for
-    /// `EveryDay`, and because an omitted `day` is stored as 0, which neither period accepts, a weekly or
-    /// monthly schedule sent without it fails instead of falling back to a default.
+    /// `EveryDay`, and a weekly or monthly schedule sent without it is rejected with 400 instead of falling
+    /// back to a default.
     /// `backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older
     /// copies are removed by a background cleaner, and only the ones this schedule created: archives made by
     /// `POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops
@@ -149,11 +149,11 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, the number of the stored copies is outside 1-30, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
+    [SwaggerResponse(400, "The request body cannot be read, `cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, the number of the stored copies is outside 1-30, `storageType` is not a storage the backups can be written to, a `ThirdPartyConsumer` schedule has no known `module`, the `folderId` or `filePath` key the storage type needs is missing, the `folderId` of a `Documents` schedule is not a number, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
-    [SwaggerResponse(500, "`cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, a key or value of `storageParams` is null, the `folderId` or `filePath` key the storage type needs is missing, or `Local` storage was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(500, "A key or value of `storageParams` is null, or `Local` storage was requested on a portal that is not a standalone installation")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
@@ -165,11 +165,12 @@ public class BackupController(
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
         var backupStored = inDto.BackupsStored ?? 1;
+        var cronParams = inDto.CronParams ?? throw new ArgumentException("cronParams is required");
         var cron = new CronParams
         {
-            Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
-            Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day ?? 0
+            Period = cronParams.Period ?? BackupPeriod.EveryDay,
+            Hour = cronParams.Hour,
+            Day = cronParams.Day ?? 0
         };
         if (backupStored is > 30 or < 1)
         {
@@ -178,14 +179,21 @@ public class BackupController(
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
+            var folderId = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
 
-            if (int.TryParse(storageParams["folderId"], out var fId))
+            // A Documents folder has a numeric ID; a string one belongs to a third-party storage, as in startbackup.
+            if (storageType == BackupStorageType.Documents && !int.TryParse(folderId, out _))
+            {
+                throw new ArgumentException("wrong folder type");
+            }
+
+            if (int.TryParse(folderId, out var fId))
             {
                 await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(folderId);
             }
         }
         await backupService.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
@@ -244,11 +252,11 @@ public class BackupController(
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued backup job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type or is missing, an item of `storageParams` is null, has no key or no value, or repeats a key, or a dump was requested on a portal that is not a standalone installation")]
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
-    [SwaggerResponse(500, "A key or value of `storageParams` is null, `ThridpartyDocuments` storage has no `folderId`, or `Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(500, "`Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
@@ -261,7 +269,11 @@ public class BackupController(
         }
 
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
-        var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+        var storageParams = inDto.StorageParams == null
+            ? new Dictionary<string, string>()
+            : inDto.StorageParams.ToDictionary(
+                r => r?.Key?.ToString() ?? throw new ArgumentException("every item of storageParams must have a key"),
+                r => r.Value?.ToString() ?? throw new ArgumentException("every item of storageParams must have a value"));
 
         var canParse = false;
         if (storageParams.TryGetValue("folderId", out var param))
@@ -287,13 +299,15 @@ public class BackupController(
                 await quotaController.QuotaUsedCheckAsync(0, authContext.CurrentAccount.ID);
             }
 
-            if (int.TryParse(storageParams["folderId"], out var fId))
+            var folderId = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
+
+            if (int.TryParse(folderId, out var fId))
             {
                 await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(folderId);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)
@@ -496,7 +510,7 @@ public class BackupController(
     /// answers true, so the result confirms that the request was accepted rather than that anything was
     /// deleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.
     /// The record is removed before the archive, so when the storage can no longer be reached the archive
-    /// stays behind with nothing pointing at it.
+    /// stays behind with nothing pointing at it. An ID that no backup has ever had is answered with 404.
     /// </remarks>
     /// <summary>Delete the backup</summary>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
@@ -504,7 +518,7 @@ public class BackupController(
     [SwaggerResponse(200, "True once the request has been accepted, whether or not a backup was deleted", typeof(bool))]
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(500, "There is no backup record with this ID")]
+    [SwaggerResponse(404, "There is no backup record with this ID")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupRequestDto inDto)
     {
@@ -557,11 +571,10 @@ public class BackupController(
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued restoring job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, `backupId` is not a GUID and `storageParams` has no `filePath`, or an item of `storageParams` is null, has no key or no value, or repeats a key")]
     [SwaggerResponse(402, "The pricing plan of this portal does not allow restoring")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The backup record was not found, the file given in `filePath` or its folder was not found, or, for `Local` storage, no backup archive has been uploaded to the portal")]
-    [SwaggerResponse(500, "`backupId` is not a GUID and `storageParams` has no `filePath`, or a key or value of `storageParams` is null")]
     [HttpPost("startrestore")]
     public async Task<BackupProgressDto> StartBackupRestore(StartBackupRestoreRequestDto inDto)
     {
@@ -572,7 +585,11 @@ public class BackupController(
 
         await backupService.DemandPermissionsRestoreAsync();
 
-        var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+        var storageParams = inDto.StorageParams == null
+            ? new Dictionary<string, string>()
+            : inDto.StorageParams.ToDictionary(
+                r => r?.Key?.ToString() ?? throw new ArgumentException("every item of storageParams must have a key"),
+                r => r.Value?.ToString() ?? throw new ArgumentException("every item of storageParams must have a value"));
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")

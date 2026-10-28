@@ -46,6 +46,10 @@ public class RawApiResponse<T>
 
     [JsonPropertyName("statusCode")]
     public int StatusCode { get; init; }
+
+    /// <summary>The full size of a paged list; absent on responses that are not lists.</summary>
+    [JsonPropertyName("total")]
+    public long? Total { get; init; }
 }
 
 public class AuthTokenResponse

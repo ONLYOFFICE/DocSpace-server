@@ -160,7 +160,7 @@ public class FileUploader(
             throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (folder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms || !await fileSecurity.CanCreateAsync(folder))
+        if (DocSpaceHelper.IsRoomsSectionRoot(folder.FolderType) || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -215,6 +215,11 @@ public class FileUploader(
         file.ContentLength = fileSize;
 
         return file;
+    }
+
+    public async Task VerifyFolderForUploadAsync<T>(T folderId)
+    {
+        await GetFolderIdAsync(folderId, null);
     }
 
     public async Task<File<T>> VerifyChunkedUploadForEditing<T>(T fileId, long fileSize)

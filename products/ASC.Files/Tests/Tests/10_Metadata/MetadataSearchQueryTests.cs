@@ -72,7 +72,7 @@ public class MetadataSearchQueryTests
     public void String_ShouldMatch_OnExactValue()
     {
         // the helper lowers the requested value, the stored value is lowered by the predicate itself
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.String, StringValue = "acme" };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.String, StringValue = "acme" };
 
         Matches(condition, String("acme")).Should().BeTrue();
         Matches(condition, String("ACME")).Should().BeTrue();
@@ -82,7 +82,7 @@ public class MetadataSearchQueryTests
     [Fact]
     public void String_ShouldNotMatch_OnSubstring()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.String, StringValue = "acme" };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.String, StringValue = "acme" };
 
         Matches(condition, String("acme corp")).Should().BeFalse();
         Matches(condition, String("the acme")).Should().BeFalse();
@@ -91,8 +91,20 @@ public class MetadataSearchQueryTests
     [Fact]
     public void String_ShouldNotMatch_WhenFieldIsDifferent()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.String, StringValue = "acme" };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.String, StringValue = "acme" };
 
+        Matches(condition, String("acme", OtherFieldId)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void String_ShouldMatch_OnSubstring_WhenContains()
+    {
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.String, StringValue = "acme", StringContains = true };
+
+        Matches(condition, String("acme")).Should().BeTrue();
+        Matches(condition, String("ACME Corp")).Should().BeTrue();
+        Matches(condition, String("the Acme")).Should().BeTrue();
+        Matches(condition, String("globex")).Should().BeFalse();
         Matches(condition, String("acme", OtherFieldId)).Should().BeFalse();
     }
 
@@ -103,7 +115,7 @@ public class MetadataSearchQueryTests
     [Fact]
     public void Number_ShouldMatch_WithinRangeInclusively()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberFrom = 10, NumberTo = 20 };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberFrom = 10, NumberTo = 20 };
 
         Matches(condition, Number(10)).Should().BeTrue();
         Matches(condition, Number(15)).Should().BeTrue();
@@ -115,7 +127,7 @@ public class MetadataSearchQueryTests
     [Fact]
     public void Number_ShouldMatch_WithOpenUpperBound()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberFrom = 10 };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberFrom = 10 };
 
         Matches(condition, Number(10)).Should().BeTrue();
         Matches(condition, Number(1_000_000)).Should().BeTrue();
@@ -125,7 +137,7 @@ public class MetadataSearchQueryTests
     [Fact]
     public void Number_ShouldMatch_WithOpenLowerBound()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberTo = 20 };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberTo = 20 };
 
         Matches(condition, Number(20)).Should().BeTrue();
         Matches(condition, Number(-5)).Should().BeTrue();
@@ -133,9 +145,21 @@ public class MetadataSearchQueryTests
     }
 
     [Fact]
+    public void Number_ShouldExcludeTheBounds_WhenExclusive()
+    {
+        var above = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberFrom = 10, FromExclusive = true };
+        var below = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberTo = 20, ToExclusive = true };
+
+        Matches(above, Number(10)).Should().BeFalse();
+        Matches(above, Number(11)).Should().BeTrue();
+        Matches(below, Number(20)).Should().BeFalse();
+        Matches(below, Number(19)).Should().BeTrue();
+    }
+
+    [Fact]
     public void Number_ShouldNotMatch_WhenFieldIsDifferent()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Number, NumberFrom = 10, NumberTo = 20 };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Number, NumberFrom = 10, NumberTo = 20 };
 
         Matches(condition, Number(15, OtherFieldId)).Should().BeFalse();
     }
@@ -149,7 +173,7 @@ public class MetadataSearchQueryTests
     {
         var from = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var to = new DateTime(2026, 6, 30, 0, 0, 0, DateTimeKind.Utc);
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Date, DateFrom = from, DateTo = to };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Date, DateFrom = from, DateTo = to };
 
         Matches(condition, Date(from)).Should().BeTrue();
         Matches(condition, Date(to)).Should().BeTrue();
@@ -162,7 +186,7 @@ public class MetadataSearchQueryTests
     public void Date_ShouldMatch_WithOpenUpperBound()
     {
         var from = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Date, DateFrom = from };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Date, DateFrom = from };
 
         Matches(condition, Date(from)).Should().BeTrue();
         Matches(condition, Date(from.AddYears(10))).Should().BeTrue();
@@ -170,10 +194,23 @@ public class MetadataSearchQueryTests
     }
 
     [Fact]
+    public void Date_ShouldExcludeTheBounds_WhenExclusive()
+    {
+        var bound = new DateTime(2026, 6, 30, 12, 0, 0, DateTimeKind.Utc);
+        var after = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Date, DateFrom = bound, FromExclusive = true };
+        var before = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Date, DateTo = bound, ToExclusive = true };
+
+        Matches(after, Date(bound)).Should().BeFalse();
+        Matches(after, Date(bound.AddSeconds(1))).Should().BeTrue();
+        Matches(before, Date(bound)).Should().BeFalse();
+        Matches(before, Date(bound.AddSeconds(-1))).Should().BeTrue();
+    }
+
+    [Fact]
     public void Date_ShouldNotMatch_WhenFieldIsDifferent()
     {
         var from = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.Date, DateFrom = from };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.Date, DateFrom = from };
 
         Matches(condition, Date(from, OtherFieldId)).Should().BeFalse();
     }
@@ -183,9 +220,9 @@ public class MetadataSearchQueryTests
     #region Choice
 
     [Theory]
-    [InlineData(MetadataFieldType.SingleChoice)]
-    [InlineData(MetadataFieldType.MultiChoice)]
-    public void Choice_ShouldMatch_AnyOfTheRequestedOptions(MetadataFieldType fieldType)
+    [InlineData(CoreMetadataFieldType.SingleChoice)]
+    [InlineData(CoreMetadataFieldType.MultiChoice)]
+    public void Choice_ShouldMatch_AnyOfTheRequestedOptions(CoreMetadataFieldType fieldType)
     {
         var first = Guid.NewGuid();
         var second = Guid.NewGuid();
@@ -202,7 +239,7 @@ public class MetadataSearchQueryTests
     public void Choice_ShouldNotMatch_WhenFieldIsDifferent()
     {
         var optionId = Guid.NewGuid();
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.SingleChoice, OptionIds = [optionId] };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.SingleChoice, OptionIds = [optionId] };
 
         Matches(condition, Option(optionId, OtherFieldId)).Should().BeFalse();
     }
@@ -211,7 +248,7 @@ public class MetadataSearchQueryTests
     public void Choice_ShouldNotMatch_AValueRowWithoutOption()
     {
         // a string/number/date row is stored with an empty option id, it must never satisfy a choice condition
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = MetadataFieldType.MultiChoice, OptionIds = [Guid.NewGuid()] };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = CoreMetadataFieldType.MultiChoice, OptionIds = [Guid.NewGuid()] };
 
         Matches(condition, String("acme")).Should().BeFalse();
     }
@@ -221,7 +258,7 @@ public class MetadataSearchQueryTests
     [Fact]
     public void BuildConditionPredicate_ShouldThrow_OnUnknownFieldType()
     {
-        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = (MetadataFieldType)42 };
+        var condition = new MetadataFilterCondition { FieldId = FieldId, FieldType = (CoreMetadataFieldType)42 };
 
         var act = () => MetadataSearchQuery.BuildConditionPredicate(condition);
 

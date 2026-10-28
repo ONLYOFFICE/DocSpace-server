@@ -538,6 +538,51 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Service spending limit created: {0}, {1}.
+        /// </summary>
+        public static string CustomerServiceLimitCreated {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Service spending limit deleted: {0}, {1}.
+        /// </summary>
+        public static string CustomerServiceLimitDeleted {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal service spending limits disabled: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitsDisabled {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitsDisabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Personal service spending limits set: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitsSet {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitsSet", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Service spending limit updated: {0}, {1}.
+        /// </summary>
+        public static string CustomerServiceLimitUpdated {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Customer subscription updated: {0}.
         /// </summary>
         public static string CustomerSubscriptionUpdated {
@@ -1092,6 +1137,15 @@ namespace ASC.AuditTrail {
         public static string FileNotSavedDueToUserQuota {
             get {
                 return ResourceManager.GetString("FileNotSavedDueToUserQuota", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File Opened By Document Builder Script: {0}.
+        /// </summary>
+        public static string FileOpenedByDocumentBuilder {
+            get {
+                return ResourceManager.GetString("FileOpenedByDocumentBuilder", resourceCulture);
             }
         }
         
@@ -2194,6 +2248,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Portal blocked by the retention policy.
+        /// </summary>
+        public static string PortalBlocked {
+            get {
+                return ResourceManager.GetString("PortalBlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Portal Deactivated.
         /// </summary>
         public static string PortalDeactivated {
@@ -2217,6 +2280,15 @@ namespace ASC.AuditTrail {
         public static string PortalRenamed {
             get {
                 return ResourceManager.GetString("PortalRenamed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Portal unblocked.
+        /// </summary>
+        public static string PortalUnblocked {
+            get {
+                return ResourceManager.GetString("PortalUnblocked", resourceCulture);
             }
         }
         
