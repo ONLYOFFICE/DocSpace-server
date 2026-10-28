@@ -45,3 +45,10 @@ public class ByokModelInfo
     public Guid Id { get; init; }
     public required string Name { get; init; }
 }
+
+public class ByokKeyInfo
+{
+    public Guid Id { get; init; }
+    public string? Name { get; init; }
+    public required string Provider { get; init; }
+}

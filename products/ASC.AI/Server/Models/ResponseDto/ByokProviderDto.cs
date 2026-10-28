@@ -51,3 +51,16 @@ public static partial class ByokProviderMapper
 {
     public static partial ByokProviderDto MapToDto(ByokProviderInfo provider);
 }
+
+public class ByokKeyDto
+{
+    public Guid Id { get; init; }
+    public string? Name { get; init; }
+    public required string Provider { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class ByokKeyDtoMapper
+{
+    public static partial ByokKeyDto MapToDto(ByokKeyInfo key);
+}

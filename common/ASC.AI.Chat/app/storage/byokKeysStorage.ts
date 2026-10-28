@@ -33,8 +33,6 @@
 import { aiService } from "./httpClient.js";
 import { getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
-import { dtoToProfile } from "./profilesStorage.js";
-import type { DocspaceProfile } from "./profilesStorage.js";
 import { invalidateChatContext } from "./chatContextSnapshot.js";
 
 const PATH = "/byok";
@@ -44,6 +42,15 @@ export interface ByokKeyInput {
   provider: string;
   /** Provider API key. */
   key: string;
+}
+
+export interface ByokKey {
+  /** Model revision id the key is set for, used in the path when replacing or deleting it. */
+  id: string;
+  /** Model display name; absent when the model is no longer in the gateway catalogue. */
+  name?: string;
+  /** BYOK provider id the key belongs to, e.g. `anthropic`. */
+  provider: string;
 }
 
 export interface ByokModel {
@@ -63,18 +70,29 @@ export interface ByokProvider {
 }
 
 export class HttpByokKeysStorage {
-  async set(id: string, input: ByokKeyInput): Promise<DocspaceProfile> {
-    const raw = await aiService.put(`${PATH}/keys/${encodeURIComponent(id)}`, input);
-    invalidateChatContext("profiles");
-    const profile = dtoToProfile(raw);
-    if (!profile) {
-      throw new Error("ai service returned invalid profile");
+  async readAll(): Promise<ByokKey[]> {
+    const raw = await aiService.get(PATH);
+    if (!Array.isArray(raw)) {
+      return [];
     }
-    return profile;
+    return raw.filter(isObject).flatMap((item) => {
+      const key = dtoToByokKey(item);
+      return key ? [key] : [];
+    });
+  }
+
+  async set(id: string, input: ByokKeyInput): Promise<ByokKey> {
+    const raw = await aiService.put(`${PATH}/${encodeURIComponent(id)}`, input);
+    invalidateChatContext("profiles");
+    const key = isObject(raw) ? dtoToByokKey(raw) : undefined;
+    if (!key) {
+      throw new Error("ai service returned invalid byok key");
+    }
+    return key;
   }
 
   async delete(id: string): Promise<void> {
-    await aiService.delete(`${PATH}/keys/${encodeURIComponent(id)}`);
+    await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
     invalidateChatContext("profiles");
   }
 
@@ -88,6 +106,16 @@ export class HttpByokKeysStorage {
       return provider ? [provider] : [];
     });
   }
+}
+
+function dtoToByokKey(raw: JsonObject): ByokKey | undefined {
+  const id = getString(raw, "id");
+  const provider = getString(raw, "provider");
+  if (id === undefined || provider === undefined) {
+    return undefined;
+  }
+  const name = getString(raw, "name");
+  return name === undefined ? { id, provider } : { id, name, provider };
 }
 
 function dtoToByokModel(raw: JsonObject): ByokModel | undefined {

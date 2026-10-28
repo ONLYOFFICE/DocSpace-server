@@ -59,7 +59,11 @@ static file class ByokKeyQueriesContainer
     public static readonly Func<AiIntegrationContext, int, IAsyncEnumerable<DbByokKey>> GetByokKeysAsync =
         EF.CompileAsyncQuery(
             (AiIntegrationContext ctx, int tenantId) =>
-                ctx.ByokKeys.Where(x => x.TenantId == tenantId));
+                ctx.ByokKeys
+                    .Where(x => x.TenantId == tenantId)
+                    .OrderByDescending(x => x.ModifiedOn)
+                    .ThenBy(x => x.Id)
+                    .AsQueryable());
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<DbByokKey?>> GetByokKeyForUpdateAsync =
         EF.CompileAsyncQuery(

@@ -32,7 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { storage } from "../storage/index.js";
-import type { DocspaceProfile } from "../storage/profilesStorage.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import { getObject, getString, isObject } from "../narrow.js";
@@ -44,11 +43,6 @@ function readBody(body: unknown): JsonObject {
 
 function readString(body: JsonObject, field: string): string {
   return getString(body, field) ?? "";
-}
-
-function toClientProfile(profile: DocspaceProfile): Omit<DocspaceProfile, "key" | "headers"> {
-  const { key: _key, headers: _headers, ...rest } = profile;
-  return rest;
 }
 
 function upstreamMessage(body: string): string | undefined {
@@ -76,19 +70,23 @@ async function withValidationMessage<T>(call: Promise<T>): Promise<T> {
 }
 
 export const byokKeysController = {
+  list: asyncHandler(async (_req, res) => {
+    res.json(await storage.byokKeys.readAll());
+  }),
+
   providers: asyncHandler(async (_req, res) => {
     res.json(await storage.byokKeys.readProviders());
   }),
 
   set: asyncHandler(async (req, res) => {
     const body = readBody(req.body);
-    const profile = await withValidationMessage(
+    const key = await withValidationMessage(
       storage.byokKeys.set(req.params["id"] ?? "", {
         provider: readString(body, "provider"),
         key: readString(body, "key"),
       }),
     );
-    res.json(toClientProfile(profile));
+    res.json(key);
   }),
 
   delete: asyncHandler(async (req, res) => {

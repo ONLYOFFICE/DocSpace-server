@@ -83,7 +83,7 @@ import type {
   WebSearchMutationResult,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
-import type { ByokKeyInput, ByokProvider } from "../../app/storage/byokKeysStorage.js";
+import type { ByokKey, ByokKeyInput, ByokProvider } from "../../app/storage/byokKeysStorage.js";
 import type { DocspaceProfile } from "../../app/storage/profilesStorage.js";
 
 /* ------------------------------ Common --------------------------------- */
@@ -372,9 +372,10 @@ export type Res_aiProfilesList = Profile[];
 
 /* -------------------------------- BYOK --------------------------------- */
 
+export type Res_aiByokKeysList = ByokKey[];
 export type Res_aiByokProviders = ByokProvider[];
 export type Req_aiByokKeysSet = ByokKeyInput;
-export type Res_aiByokKeysSet = Omit<DocspaceProfile, "key" | "headers">;
+export type Res_aiByokKeysSet = ByokKey;
 
 /* ------------------------------- Prompts ------------------------------- */
 

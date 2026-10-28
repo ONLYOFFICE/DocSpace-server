@@ -224,9 +224,10 @@ export default function registerRoutes(app: Application): void {
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 
+  router.get("/byok", byokKeysController.list);
   router.get("/byok/providers", byokKeysController.providers);
-  router.put("/byok/keys/:id", byokKeysController.set);
-  router.delete("/byok/keys/:id", byokKeysController.delete);
+  router.put("/byok/:id", byokKeysController.set);
+  router.delete("/byok/:id", byokKeysController.delete);
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist

@@ -84,7 +84,7 @@ public class ProfileStorageService(
         return created;
     }
 
-    public async Task<Profile> SetByokKeyAsync(Guid id, string provider, string key)
+    public async Task<ByokKeyInfo> SetByokKeyAsync(Guid id, string provider, string key)
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
@@ -105,7 +105,7 @@ public class ProfileStorageService(
 
         messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
 
-        return MapGatewayProfile(model, provider);
+        return new ByokKeyInfo { Id = id, Name = model.Alias, Provider = provider };
     }
 
     public async Task DeleteByokKeyAsync(Guid id)
@@ -121,6 +121,33 @@ public class ProfileStorageService(
         }
 
         messageService.Send(MessageAction.AiByokKeyDeleted, MessageTarget.Create(id), name);
+    }
+
+    public async Task<List<ByokKeyInfo>> ReadByokKeysAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var keys = await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        if (keys.Count == 0)
+        {
+            return [];
+        }
+
+        var names = (await _aiGateway.GetAllModelsAsync()).Data
+            .DistinctBy(m => m.RevisionId)
+            .ToDictionary(m => m.RevisionId, m => m.Alias);
+
+        return
+        [
+            .. keys
+                .Select(k => new ByokKeyInfo
+                {
+                    Id = k.Id,
+                    Name = names.GetValueOrDefault(k.Id),
+                    Provider = k.Provider
+                })
+        ];
     }
 
     public async Task<List<ByokProviderInfo>> ReadByokProvidersAsync()

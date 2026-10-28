@@ -297,6 +297,13 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   },
   {
     method: "GET",
+    path: "/byok",
+    tag: "BYOK",
+    operationId: "aiByokKeysList",
+    summary: "List BYOK keys",
+  },
+  {
+    method: "GET",
     path: "/byok/providers",
     tag: "BYOK",
     operationId: "aiByokProviders",
@@ -304,7 +311,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   },
   {
     method: "PUT",
-    path: "/byok/keys/{id}",
+    path: "/byok/{id}",
     tag: "BYOK",
     operationId: "aiByokKeysSet",
     summary: "Set a BYOK key",
@@ -313,7 +320,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   },
   {
     method: "DELETE",
-    path: "/byok/keys/{id}",
+    path: "/byok/{id}",
     tag: "BYOK",
     operationId: "aiByokKeysDelete",
     summary: "Delete a BYOK key",
