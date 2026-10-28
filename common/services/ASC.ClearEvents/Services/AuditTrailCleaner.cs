@@ -156,7 +156,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
         if (removed > 0)
         {
-            logger.DebugRemovedAuditEvents(removed, threshold, tenantId, paid);
+            logger.InformationRemovedTenantAuditEvents(removed, threshold, tenantId, paid);
         }
 
         return removed;
