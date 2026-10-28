@@ -165,6 +165,11 @@ public class OperationDto
     /// <example>99.99</example>
     public decimal Debit { get; set; }
     /// <summary>
+    /// Whether the AI operation ran on the portal's own provider key.
+    /// </summary>
+    /// <example>true</example>
+    public bool Byok { get; set; }
+    /// <summary>
     /// What the AI provider charged for the whole `quantity` of an AI tools or AI search charge, as the billing
     /// service recorded it - the provider's side of the same operation `debit` bills the portal for. It is `null`
     /// on any other movement, and on an AI charge recorded without a provider cost.
@@ -229,6 +234,7 @@ public class OperationDto
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;
+        Byok = WalletServiceDescriptionManager.IsByok(operation.Metadata);
         Cost = WalletServiceDescriptionManager.GetProviderCost(operation.Metadata);
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)

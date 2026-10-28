@@ -229,6 +229,14 @@ public class WalletServiceDescriptionManager
             : null;
     }
 
+    public static bool IsByok(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataByok, out var value) &&
+               bool.TryParse(value, out var byok) &&
+               byok;
+    }
+
     /// <summary>
     /// Returns the localized name of the source type, or the raw value for an unknown one.
     /// </summary>
