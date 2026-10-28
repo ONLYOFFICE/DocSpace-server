@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Tests.Tests;
+namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// The <c>clearEvents:auditTrail</c> settings that stop a pass before it deletes anything: the cleanup switched

@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Tests.Tests;
+namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// Room history as Files writes it, through a cleanup pass: a room keeps its history however old it is, an
