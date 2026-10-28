@@ -101,11 +101,15 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         var pastFreeLifeTime = await SeedEventAsync(FreeLifeTimeDays + 30);
 
+        // Past both life times: removed on every tariff, so a pass that skipped the tenant cannot pass for one that
+        // kept the paid retention.
+        var pastPaidLifeTime = await SeedEventAsync(PaidLifeTimeDays + 30);
+
         // Act
         await RunCleanupAsync();
 
         // Assert
-        var remaining = await RemainingEventsAsync([pastFreeLifeTime]);
+        var remaining = await RemainingEventsAsync([pastFreeLifeTime, pastPaidLifeTime]);
 
         if (keepsPaidRetention)
         {

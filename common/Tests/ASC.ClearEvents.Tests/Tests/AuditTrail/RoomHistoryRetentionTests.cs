@@ -62,8 +62,9 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task ClearAsync_HistoryInterleavedAcrossBatches_RemovesEveryEventOutsideHistory()
     {
-        // Arrange: oldest first, every other event in a history, so each batch of two holds both kinds and the
-        // history events are what the pass has to read past to reach the rest.
+        // Arrange: oldest first, every other event in a history. The read query leaves history events out before it
+        // takes a batch, so every batch is full of events to remove; this guards against that filter moving after the
+        // paging, where a batch of history events would end the pass early or be deleted with the rest.
         const int batchSize = 2;
 
         var inHistory = new List<int>();

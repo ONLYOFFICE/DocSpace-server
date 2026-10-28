@@ -99,10 +99,16 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         };
     }
 
-    /// <summary>Runs one cleanup pass over every tenant.</summary>
-    protected Task RunCleanupAsync(AuditTrailRetentionConfiguration? retention = null)
+    /// <summary>
+    /// Runs one cleanup pass over every tenant. A pass skips a tenant it fails on and only logs it, so a call the
+    /// tariff stand-in cannot answer is checked here: unchecked, it would leave every event of the tenant in place
+    /// and pass every test that asserts what was kept.
+    /// </summary>
+    protected async Task RunCleanupAsync(AuditTrailRetentionConfiguration? retention = null)
     {
-        return fixture.Cleaner.ClearAsync(retention ?? Retention(), TestContext.Current.CancellationToken);
+        await fixture.Cleaner.ClearAsync(retention ?? Retention(), TestContext.Current.CancellationToken);
+
+        TestTariffs.UnexpectedCalls.Should().BeEmpty("the pass must only ask the tariff what TestTariffs answers");
     }
 
     /// <summary>
@@ -123,7 +129,7 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         {
             TenantId = tenantId,
             Date = DateTime.UtcNow.AddDays(-daysAgo),
-            Action = (int)MessageAction.RoomRenamed,
+            Action = (int)AuditAction.RoomRenamed,
             UserId = Owner.Id,
             FilesReferences = historyOfFolderIds
                 .Select(id => new DbFilesAuditReference { EntryId = id, EntryType = FolderEntry })
@@ -162,6 +168,50 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     }
 
     /// <summary>
+    /// Reads the audit trail until the history of an entry holds an event for each of <paramref name="actions"/>,
+    /// since the events are written after the request that caused them returns. Returns the ids of the events in
+    /// that history last seen, so a timed-out assertion shows what was there.
+    /// </summary>
+    protected async Task<List<int>> PollHistoryEventsAsync(int entryId, byte entryType, params AuditAction[] actions)
+    {
+        var expected = actions.Select(a => (int?)a).ToList();
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            await using var ef = await fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+            var events = await ef.AuditEvents
+                .Where(r => r.TenantId == TenantId && r.FilesReferences.Any(a => a.EntryId == entryId && a.EntryType == entryType))
+                .Select(r => new { r.Id, r.Action })
+                .ToListAsync(TestContext.Current.CancellationToken);
+
+            if (expected.All(a => events.Exists(e => e.Action == a)) || DateTime.UtcNow >= deadline)
+            {
+                return events.ConvertAll(e => e.Id);
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>Every entry the given events are in the history of, as (entry id, entry type).</summary>
+    protected async Task<List<(int EntryId, byte EntryType)>> HistoriesOfAsync(IEnumerable<int> eventIds)
+    {
+        var ids = eventIds.ToList();
+
+        await using var ef = await fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+        var references = await ef.FilesAuditReferences
+            .Where(r => ids.Contains(r.AuditEventId))
+            .Select(r => new { r.EntryId, r.EntryType })
+            .Distinct()
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        return references.ConvertAll(r => (r.EntryId, r.EntryType));
+    }
+
+    /// <summary>
     /// Moves every audit event of this portal <paramref name="days"/> days into the past, so that the events
     /// the services wrote a moment ago are as old as the cleanup needs them to be.
     /// </summary>
@@ -181,13 +231,21 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             TestContext.Current.CancellationToken)).Response;
     }
 
+    protected async Task<int> GetMyDocumentsIdAsync()
+    {
+        return (await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+    }
+
     protected async Task<FileDto> CreateFileAsync(int folderId, string title)
     {
         return (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response;
     }
 
-    /// <summary>Waits for the long operations of the caller to finish, returning what was last observed.</summary>
-    protected async Task<List<FileOperationDto>> WaitLongOperationAsync()
+    /// <summary>
+    /// Waits for the long operations of the caller to finish and asserts that they did without an error: a delete
+    /// still running, or failed, would otherwise surface as an unexplained result of the cleanup pass after it.
+    /// </summary>
+    protected async Task WaitLongOperationAsync()
     {
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
@@ -197,7 +255,9 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
             if (statuses.TrueForAll(r => r.Finished) || DateTime.UtcNow >= deadline)
             {
-                return statuses;
+                statuses.Should().OnlyContain(r => r.Finished && string.IsNullOrEmpty(r.Error));
+
+                return;
             }
 
             await Task.Delay(200, TestContext.Current.CancellationToken);
