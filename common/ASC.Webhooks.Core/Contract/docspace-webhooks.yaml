@@ -89,9 +89,13 @@ webhooks:
     post:
       operationId: userCreated
       summary: user.created
-      description: >-
-        Sent on the `user.created` event. The body is a UserDelivery, whose `payload` is a UserPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `user.created` event. The body is a UserDelivery, whose `payload` is a UserPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/people` (Add a user), once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent
+        - `POST api/2.0/people/thirdparty/signup` (Sign up with a provider), when the third-party account is not linked to a profile yet and a new profile is created
       tags:
         - user
       parameters:
@@ -137,9 +141,12 @@ webhooks:
     post:
       operationId: userInvited
       summary: user.invited
-      description: >-
-        Sent on the `user.invited` event. The body is a UserDelivery, whose `payload` is a UserPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `user.invited` event. The body is a UserDelivery, whose `payload` is a UserPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/people/invite` (Invite users), for every address that does not belong to a profile yet
       tags:
         - user
       parameters:
@@ -185,9 +192,21 @@ webhooks:
     post:
       operationId: userUpdated
       summary: user.updated
-      description: >-
-        Sent on the `user.updated` event. The body is a UserDelivery, whose `payload` is a UserPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `user.updated` event. The body is a UserDelivery, whose `payload` is a UserPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `DELETE api/2.0/people/@self` (Close my own profile), rather than `user.deleted`: the profile is only disabled
+        - `PUT api/2.0/people/activationstatus/{activationStatus}` (Set my activation status)
+        - `PUT api/2.0/people/status/{status}` (Change a user status), for every listed account, whether or not its status changes
+        - `POST api/2.0/people/type` (Start updating user type), once the queued type change finishes successfully, not when it is cancelled or fails
+        - `PUT api/2.0/people/type/{type}` (Change a user type), for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent
+        - `PUT api/2.0/people/{userId}` (Update a user), when the call changes the profile; on another member's profile only `disable` and `isUser` change anything
+        - `PUT api/2.0/people/{userId}/culture` (Update a user culture), even when the culture does not change
+        - `POST api/2.0/people/{userId}/photo` (Upload a user photo), only when `autosave` is true and the image is saved to the profile
+        - `PUT api/2.0/people/{userId}/photo` (Update a user photo)
+        - `DELETE api/2.0/people/{userId}/photo` (Delete a user photo), even when the profile had no avatar
       tags:
         - user
       parameters:
@@ -233,9 +252,14 @@ webhooks:
     post:
       operationId: userDeleted
       summary: user.deleted
-      description: >-
-        Sent on the `user.deleted` event. The body is a UserDelivery, whose `payload` is a UserPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `user.deleted` event. The body is a UserDelivery, whose `payload` is a UserPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/people/delete` (Delete users), for every account it deletes; an account the caller may not delete is skipped without one
+        - `POST api/2.0/people/reassign/start` (Start the data reassignment), for the source account when `deleteProfile` is true, once the reassignment finishes successfully
+        - `DELETE api/2.0/people/{userId}` (Delete a user)
       tags:
         - user
       parameters:
@@ -281,9 +305,12 @@ webhooks:
     post:
       operationId: groupCreated
       summary: group.created
-      description: >-
-        Sent on the `group.created` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `group.created` event. The body is a GroupDelivery, whose `payload` is a GroupPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/group` (Add a new group)
       tags:
         - group
       parameters:
@@ -329,9 +356,12 @@ webhooks:
     post:
       operationId: groupUpdated
       summary: group.updated
-      description: >-
-        Sent on the `group.updated` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `group.updated` event. The body is a GroupDelivery, whose `payload` is a GroupPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/group/{id}` (Update a group)
       tags:
         - group
       parameters:
@@ -377,9 +407,12 @@ webhooks:
     post:
       operationId: groupDeleted
       summary: group.deleted
-      description: >-
-        Sent on the `group.deleted` event. The body is a GroupDelivery, whose `payload` is a GroupPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `group.deleted` event. The body is a GroupDelivery, whose `payload` is a GroupPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `DELETE api/2.0/group/{id}` (Delete a group)
       tags:
         - group
       parameters:
@@ -425,9 +458,25 @@ webhooks:
     post:
       operationId: fileCreated
       summary: file.created
-      description: >-
-        Sent on the `file.created` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.created` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/docs/builder` (Run a document builder script), for each file the queued script saves: `file.created` for a new file, `file.updated` for an existing one
+        - `POST api/2.0/docs/converter` (Convert a file)
+        - `POST api/2.0/files/@my/file` (Create a file in My documents)
+        - `POST api/2.0/files/@my/html` (Create an HTML file in My documents), also when the content is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/text` (Create a text file in My documents), also when the content is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/file/{fileId}/copyas` (Copy a file)
+        - `POST api/2.0/files/file/{id}/saveaspdf` (Save a file as PDF)
+        - `POST api/2.0/files/{folderId}/file` (Create a file)
+        - `POST api/2.0/files/{folderId}/html` (Create an HTML file), also when the content is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/insert` (Insert a file), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/text` (Create a text file), also when the content is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/upload` (Upload a file), also when the upload is saved as a new version of an existing file
       tags:
         - file
       parameters:
@@ -473,9 +522,18 @@ webhooks:
     post:
       operationId: fileUploaded
       summary: file.uploaded
-      description: >-
-        Sent on the `file.uploaded` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.uploaded` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/file/{fileId}/copyas` (Copy a file), as well when the copy is converted to another format
+        - `POST api/2.0/files/{folderId}/insert` (Insert a file), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/session/{sessionId}` (Upload the next chunk), on the request that completes the upload, without `file.created`
+        - `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` (Finalize an upload session), without `file.created`
+        - `POST api/2.0/files/{folderId}/upload` (Upload a file), also when the upload is saved as a new version of an existing file
       tags:
         - file
       parameters:
@@ -521,9 +579,23 @@ webhooks:
     post:
       operationId: fileUpdated
       summary: file.updated
-      description: >-
-        Sent on the `file.updated` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.updated` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/docs/builder` (Run a document builder script), for each file the queued script saves: `file.created` for a new file, `file.updated` for an existing one
+        - `PUT api/2.0/files/file/{fileId}` (Update a file), for a rename that takes effect, and again for a switch to `lastVersion`
+        - `PUT api/2.0/files/file/{fileId}/comment` (Update a comment)
+        - `PUT api/2.0/files/file/{fileId}/lock` (Lock a file)
+        - `POST api/2.0/files/file/{fileId}/restoreversion` (Restore a file version)
+        - `PUT api/2.0/files/file/{fileId}/saveediting` (Save edited file content)
+        - `PUT api/2.0/files/fileops/deleteversion` (Delete file versions), once for every removed version
+        - `PUT api/2.0/files/order` (Set order of files), for every file in the list
+        - `POST api/2.0/files/owner` (Change the room or file owner), for every file whose owner changes
+        - `PUT api/2.0/files/{fileId}/order` (Set file order), when the order changes
+
+        Also raised by the editor, every time it saves a document, a force-save included; submitting a filled form raises `form.submit` instead.
       tags:
         - file
       parameters:
@@ -569,9 +641,13 @@ webhooks:
     post:
       operationId: fileTrashed
       summary: file.trashed
-      description: >-
-        Sent on the `file.trashed` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.trashed` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `DELETE api/2.0/files/file/{fileId}` (Delete a file), once the queued operation moves the file to the trash
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), for every listed file the queued operation moves to the trash; the files inside listed folders raise none
       tags:
         - file
       parameters:
@@ -617,9 +693,16 @@ webhooks:
     post:
       operationId: fileDeleted
       summary: file.deleted
-      description: >-
-        Sent on the `file.deleted` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.deleted` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `DELETE api/2.0/files/file/{fileId}` (Delete a file), instead when the file is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed file that is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage
+        - `PUT api/2.0/files/fileops/emptytrash` (Empty the "Trash" folder), for every file lying directly in the trash; the files inside trashed folders raise none
+
+        Also raised by the automatic clean-up of the trash, for every file it deletes.
       tags:
         - file
       parameters:
@@ -665,9 +748,12 @@ webhooks:
     post:
       operationId: fileRestored
       summary: file.restored
-      description: >-
-        Sent on the `file.restored` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.restored` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), instead for a file moved out of the trash
       tags:
         - file
       parameters:
@@ -713,9 +799,13 @@ webhooks:
     post:
       operationId: fileCopied
       summary: file.copied
-      description: >-
-        Sent on the `file.copied` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.copied` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied file, the files inside copied folders included, once the queued operation processes it
+        - `PUT api/2.0/files/fileops/duplicate` (Duplicate files and folders), for every duplicated file, the files inside duplicated folders and rooms included, once the queued operation processes it
       tags:
         - file
       parameters:
@@ -761,9 +851,12 @@ webhooks:
     post:
       operationId: fileMoved
       summary: file.moved
-      description: >-
-        Sent on the `file.moved` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.moved` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for every moved file once the queued operation processes it; the files inside a moved folder raise none unless it is merged into a folder of the same name
       tags:
         - file
       parameters:
@@ -809,9 +902,14 @@ webhooks:
     post:
       operationId: fileDownloaded
       summary: file.downloaded
-      description: >-
-        Sent on the `file.downloaded` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `file.downloaded` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/bulkdownload` (Bulk download), for every listed file, once the queued operation packs it; the files inside listed folders raise none
+
+        Also raised by a download through the file's `viewUrl`, once per download.
       tags:
         - file
       parameters:
@@ -857,9 +955,12 @@ webhooks:
     post:
       operationId: folderCreated
       summary: folder.created
-      description: >-
-        Sent on the `folder.created` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.created` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/files/folder/{folderId}` (Create a folder)
       tags:
         - folder
       parameters:
@@ -905,9 +1006,17 @@ webhooks:
     post:
       operationId: folderUpdated
       summary: folder.updated
-      description: >-
-        Sent on the `folder.updated` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.updated` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), when the title changes
+        - `PUT api/2.0/files/folder/{folderId}/order` (Set folder order), when the order changes
+        - `PUT api/2.0/files/order` (Set order of files), for every folder in the list whose order changes
+        - `POST api/2.0/files/owner` (Change the room or file owner), for every listed folder whose owner changes, rooms included
+
+        Also raised by a change of a member's type that hands their rooms over to another administrator, for every room handed over.
       tags:
         - folder
       parameters:
@@ -953,9 +1062,13 @@ webhooks:
     post:
       operationId: folderTrashed
       summary: folder.trashed
-      description: >-
-        Sent on the `folder.trashed` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.trashed` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), for every listed folder moved to the trash; the folders inside it raise none
+        - `DELETE api/2.0/files/folder/{folderId}` (Delete a folder), once the queued operation moves the folder to the trash; the folders inside it raise none
       tags:
         - folder
       parameters:
@@ -1001,9 +1114,14 @@ webhooks:
     post:
       operationId: folderDeleted
       summary: folder.deleted
-      description: >-
-        Sent on the `folder.deleted` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.deleted` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed folder deleted at once
+        - `PUT api/2.0/files/fileops/emptytrash` (Empty the "Trash" folder), for every folder lying directly in the trash
+        - `DELETE api/2.0/files/folder/{folderId}` (Delete a folder), instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage
       tags:
         - folder
       parameters:
@@ -1049,9 +1167,12 @@ webhooks:
     post:
       operationId: folderRestored
       summary: folder.restored
-      description: >-
-        Sent on the `folder.restored` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.restored` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), instead for a folder moved out of the trash
       tags:
         - folder
       parameters:
@@ -1097,9 +1218,13 @@ webhooks:
     post:
       operationId: folderCopied
       summary: folder.copied
-      description: >-
-        Sent on the `folder.copied` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.copied` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied folder, the folders inside it included
+        - `PUT api/2.0/files/fileops/duplicate` (Duplicate files and folders), for every duplicated folder, the folders inside it included
       tags:
         - folder
       parameters:
@@ -1145,9 +1270,12 @@ webhooks:
     post:
       operationId: folderMoved
       summary: folder.moved
-      description: >-
-        Sent on the `folder.moved` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.moved` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for every listed folder; the folders inside it raise none unless it is merged into a folder of the same name
       tags:
         - folder
       parameters:
@@ -1193,9 +1321,12 @@ webhooks:
     post:
       operationId: folderDownloaded
       summary: folder.downloaded
-      description: >-
-        Sent on the `folder.downloaded` event. The body is a FolderDelivery, whose `payload` is a FolderPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `folder.downloaded` event. The body is a FolderDelivery, whose `payload` is a FolderPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/bulkdownload` (Bulk download), for every listed folder, rooms included, once the queued operation starts packing it; the folders inside it raise none
       tags:
         - folder
       parameters:
@@ -1241,9 +1372,17 @@ webhooks:
     post:
       operationId: roomCreated
       summary: room.created
-      description: >-
-        Sent on the `room.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `room.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `POST api/2.0/files/rooms` (Create a room)
+        - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), once the queued operation builds the room
+        - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room)
+        - `POST api/2.0/files/roomtemplate` (Create a room template), for the new template, once the queued operation builds it
+
+        Also raised by a data migration into the portal, for every room it creates.
       tags:
         - room
       parameters:
@@ -1289,9 +1428,20 @@ webhooks:
     post:
       operationId: roomUpdated
       summary: room.updated
-      description: >-
-        Sent on the `room.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `room.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), instead when the folder is a room
+        - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), after it when `quota` is given
+        - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), for every listed room
+        - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), for every listed room, even when its quota does not change
+        - `PUT api/2.0/files/rooms/{id}` (Update a room), on every successful call, even one that changes nothing
+        - `POST api/2.0/files/rooms/{id}/cover` (Change the room cover), when the color or the cover changes
+        - `POST api/2.0/files/rooms/{id}/logo` (Set the room logo), when a logo is given in `tmpFile`
+        - `DELETE api/2.0/files/rooms/{id}/logo` (Remove a room logo), when the room had a logo
+        - `POST api/2.0/files/roomtemplate` (Create a room template), after it when `quota` is given
       tags:
         - room
       parameters:
@@ -1337,9 +1487,13 @@ webhooks:
     post:
       operationId: roomArchived
       summary: room.archived
-      description: >-
-        Sent on the `room.archived` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `room.archived` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for every listed room moved to the archive
+        - `PUT api/2.0/files/rooms/{id}/archive` (Archive a room), once the queued operation moves the room to the archive, for an AI agent as well
       tags:
         - room
       parameters:
@@ -1385,9 +1539,14 @@ webhooks:
     post:
       operationId: roomDeleted
       summary: room.deleted
-      description: >-
-        Sent on the `room.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `room.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), for every listed room
+        - `DELETE api/2.0/files/folder/{folderId}` (Delete a folder), instead when the folder is a room
+        - `DELETE api/2.0/files/rooms/{id}` (Remove a room), once the queued operation deletes the room
       tags:
         - room
       parameters:
@@ -1433,9 +1592,13 @@ webhooks:
     post:
       operationId: roomRestored
       summary: room.restored
-      description: >-
-        Sent on the `room.restored` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `room.restored` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for every listed room moved out of the archive
+        - `PUT api/2.0/files/rooms/{id}/unarchive` (Unarchive a room), once the queued operation moves the room out of the archive, for an AI agent as well
       tags:
         - room
       parameters:
@@ -1481,9 +1644,13 @@ webhooks:
     post:
       operationId: roomCopied
       summary: room.copied
-      description: >-
-        Sent on the `room.copied` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `room.copied` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every listed room copied into its own section, an AI agent included
+        - `PUT api/2.0/files/fileops/duplicate` (Duplicate files and folders), for every listed room, an AI agent included
       tags:
         - room
       parameters:
@@ -1529,9 +1696,10 @@ webhooks:
     post:
       operationId: formSubmit
       summary: form.submit
-      description: >-
-        Sent on the `form.submit` event. The body is a FormSubmitDelivery, whose `payload` is a FormSubmitPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `form.submit` event. The body is a FormSubmitDelivery, whose `payload` is a FormSubmitPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        No REST API operation raises it; it is raised by the editor when a user submits a filled form.
       tags:
         - form
       parameters:
@@ -1577,9 +1745,10 @@ webhooks:
     post:
       operationId: formFilledOut
       summary: form.filled.out
-      description: >-
-        Sent on the `form.filled.out` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `form.filled.out` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        No REST API operation raises it; it is raised by the editor when the last role of a form in a virtual data room submits it.
       tags:
         - form
       parameters:
@@ -1625,9 +1794,13 @@ webhooks:
     post:
       operationId: formStopped
       summary: form.stopped
-      description: >-
-        Sent on the `form.stopped` event. The body is a FileDelivery, whose `payload` is a FilePayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `form.stopped` event. The body is a FileDelivery, whose `payload` is a FilePayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/file/{fileId}/manageformfilling` (Perform form filling action), when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started
+        - `GET api/2.0/files/file/{fileId}/openedit` (Get the editor configuration), when a PDF form whose filling had started in a form-filling room is opened with `edit` true
       tags:
         - form
       parameters:
@@ -1673,9 +1846,12 @@ webhooks:
     post:
       operationId: agentCreated
       summary: agent.created
-      description: >-
-        Sent on the `agent.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+      description: |
+        Sent on the `agent.created` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`.
+
+        Raised by these REST API operations:
+
+        - `POST internal/ai/agents` (Create an ai agent)
       tags:
         - agent
       parameters:
@@ -1721,9 +1897,21 @@ webhooks:
     post:
       operationId: agentUpdated
       summary: agent.updated
-      description: >-
-        Sent on the `agent.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `agent.updated` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), instead when it is an AI agent
+        - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), instead for a listed AI agent
+        - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), instead for a listed AI agent
+        - `PUT api/2.0/files/rooms/{id}` (Update a room), instead when the room is an AI agent
+        - `POST api/2.0/files/rooms/{id}/cover` (Change the room cover), instead when the room is an AI agent
+        - `POST api/2.0/files/rooms/{id}/logo` (Set the room logo), instead when the room is an AI agent
+        - `DELETE api/2.0/files/rooms/{id}/logo` (Remove a room logo), instead when the room is an AI agent
+        - `PUT internal/ai/agents/agentquota` (Change the AI agent quota limit), for every listed agent, even when its quota does not change
+        - `PUT internal/ai/agents/resetquota` (Reset the AI agents quota limit), for every listed agent
+        - `PUT internal/ai/agents/{id}` (Update an ai agent), on every successful call, even one that changes nothing
       tags:
         - agent
       parameters:
@@ -1769,9 +1957,15 @@ webhooks:
     post:
       operationId: agentDeleted
       summary: agent.deleted
-      description: >-
-        Sent on the `agent.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload.
-        Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+      description: |
+        Sent on the `agent.deleted` event. The body is a RoomDelivery, whose `payload` is a RoomPayload. Roles that may subscribe to it: `DocSpaceAdmin`, `RoomAdmin`, `User`.
+
+        Raised by these REST API operations:
+
+        - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed AI agent
+        - `DELETE api/2.0/files/folder/{folderId}` (Delete a folder), instead when it is an AI agent
+        - `DELETE api/2.0/files/rooms/{id}` (Remove a room), instead when the room is an AI agent
+        - `DELETE internal/ai/agents/{id}` (Remove an ai agent), once the queued operation deletes the agent
       tags:
         - agent
       parameters:

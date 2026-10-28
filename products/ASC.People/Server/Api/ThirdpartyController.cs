@@ -202,6 +202,7 @@ public class ThirdpartyController(
     /// </summary>
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.UserCreated, When = "when the third-party account is not linked to a profile yet and a new profile is created")]
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "The profile linked to the third-party identity, or an empty body when the authorization was cancelled or the profile could not be created", typeof(EmployeeDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `key` or `serializedProfile`, or `serializedProfile` is empty or was issued by another portal")]

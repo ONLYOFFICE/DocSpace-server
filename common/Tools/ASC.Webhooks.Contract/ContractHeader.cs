@@ -63,6 +63,21 @@ internal static class ContractHeader
     };
 
     /// <summary>
+    /// What raises a trigger outside the REST API, written to follow "Also raised by". The API operations come from
+    /// the generated API documents instead (<see cref="RaisingOperations"/>); this is the part no action declares.
+    /// </summary>
+    private static readonly Dictionary<WebhookTrigger, string> _otherSources = new()
+    {
+        [WebhookTrigger.FileUpdated] = "the editor, every time it saves a document, a force-save included; submitting a filled form raises `form.submit` instead",
+        [WebhookTrigger.FileDownloaded] = "a download through the file's `viewUrl`, once per download",
+        [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, for every file it deletes",
+        [WebhookTrigger.FolderUpdated] = "a change of a member's type that hands their rooms over to another administrator, for every room handed over",
+        [WebhookTrigger.RoomCreated] = "a data migration into the portal, for every room it creates",
+        [WebhookTrigger.FormSubmit] = "the editor when a user submits a filled form",
+        [WebhookTrigger.FormFilledOut] = "the editor when the last role of a form in a virtual data room submits it"
+    };
+
+    /// <summary>
     /// The roles a trigger can be offered to, in the order and the names the REST API uses for them.
     /// </summary>
     private static readonly EmployeeType[] _roles = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
@@ -157,7 +172,7 @@ internal static class ContractHeader
     /// The entry of <c>webhooks</c> for one trigger: the POST the sender makes, its headers, its body and what the
     /// receiver's answer means.
     /// </summary>
-    public static YamlMappingNode GetWebhook(WebhookTrigger trigger, string payloadSchema)
+    public static YamlMappingNode GetWebhook(WebhookTrigger trigger, string payloadSchema, IReadOnlyList<RaisingOperation> raisedBy)
     {
         var name = trigger.ToCustomString();
         var roles = string.Join(", ", _roles.Where(r => trigger.IsAvailableFor(r)).Select(r => $"`{r}`"));
@@ -169,7 +184,7 @@ internal static class ContractHeader
             {
                 "description", ContractYamlWriter.Text(
                     $"Sent on the `{name}` event. The body is a {GetDeliveryName(payloadSchema)}, whose `payload` is a " +
-                    $"{payloadSchema}. Roles that may subscribe to it: {roles}.")
+                    $"{payloadSchema}. Roles that may subscribe to it: {roles}.\n\n" + GetSources(trigger, raisedBy))
             },
             { "tags", new YamlSequenceNode(new YamlScalarNode(trigger.GetTargetType())) },
             {
@@ -210,6 +225,38 @@ internal static class ContractHeader
         };
 
         return new YamlMappingNode { { "post", operation } };
+    }
+
+    /// <summary>
+    /// What raises a trigger: the REST API operations that declare it (<see cref="RaisingOperations"/>), then what the
+    /// portal raises it on by itself.
+    /// </summary>
+    private static string GetSources(WebhookTrigger trigger, IReadOnlyList<RaisingOperation> raisedBy)
+    {
+        var text = new StringBuilder();
+
+        if (raisedBy.Count > 0)
+        {
+            text.Append("Raised by these REST API operations:\n\n");
+
+            foreach (var operation in raisedBy)
+            {
+                text.Append($"- `{operation.Method} {operation.Path}` ({operation.Summary})");
+                text.Append(operation.When is null ? "\n" : $", {operation.When}\n");
+            }
+        }
+        var hasOther = _otherSources.TryGetValue(trigger, out var other);
+
+        if (raisedBy.Count == 0)
+        {
+            text.Append(hasOther ? $"No REST API operation raises it; it is raised by {other}.\n" : "No REST API operation raises it.\n");
+        }
+        else if (hasOther)
+        {
+            text.Append($"\nAlso raised by {other}.\n");
+        }
+
+        return text.ToString();
     }
 
     private static string GetOperationId(string trigger)

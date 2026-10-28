@@ -164,14 +164,14 @@ public class GroupController(
     /// every listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a
     /// disabled account or an ID that matches nobody.
     /// The call is not idempotent: names are not unique, so repeating it creates a second group with the same name.
-    /// Creating a group raises a `GroupCreated` webhook, and the answer holds the new group with its members
-    /// included.
+    /// The answer holds the new group with its members included.
     /// Members can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.
     /// </remarks>
     /// <summary>
     /// Add a new group
     /// </summary>
     /// <path>api/2.0/group</path>
+    [RaisesWebhook(WebhookTrigger.GroupCreated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The new group, with its members", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist")]
@@ -234,12 +234,13 @@ public class GroupController(
     /// sent to see what was actually applied.
     /// Members are added first and removed afterwards, an account listed in both lists therefore ends up removed,
     /// and removing an account that is not a member changes nothing.
-    /// The change raises a `GroupUpdated` webhook, and the answer holds the group as it is after the update.
+    /// The answer holds the group as it is after the update.
     /// </remarks>
     /// <summary>
     /// Update a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The group as it is after the update", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `groupName` is longer than 128 characters")]
@@ -291,7 +292,7 @@ public class GroupController(
     /// The removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the
     /// group loses that share, so members who had access only through this group lose it too.
     /// The accounts themselves are kept - only their membership disappears.
-    /// The call answers 204 with no body and raises a `GroupDeleted` webhook; a second call with the same ID answers
+    /// The call answers 204 with no body; a second call with the same ID answers
     /// 404 rather than succeeding again.
     /// To empty a group without deleting it, move its members away with
     /// `PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.
@@ -300,6 +301,7 @@ public class GroupController(
     /// Delete a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
+    [RaisesWebhook(WebhookTrigger.GroupDeleted)]
     [Tags("Group")]
     [SwaggerResponse(204, "The group is deleted. No content is returned")]
     [SwaggerResponse(403, "No permissions to perform this action")]

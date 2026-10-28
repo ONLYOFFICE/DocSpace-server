@@ -97,6 +97,7 @@ public class ReassignController(
     /// </remarks>
     /// <summary>Start the data reassignment</summary>
     /// <path>api/2.0/people/reassign/start</path>
+    [RaisesWebhook(WebhookTrigger.UserDeleted, When = "for the source account when `deleteProfile` is true, once the reassignment finishes successfully")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued reassignment", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fromUserId` or `toUserId`, the destination user does not exist or is not an active room or DocSpace admin, or the source user does not exist, is a system account, the portal owner, the caller, is not disabled, or is a DocSpace or People administrator while the caller is not the portal owner")]

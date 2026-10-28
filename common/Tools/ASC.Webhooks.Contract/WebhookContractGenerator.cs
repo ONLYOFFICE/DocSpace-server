@@ -135,6 +135,9 @@ public static class WebhookContractGenerator
 
         var schemas = new SchemaBuilder(options, new XmlDocumentation(assemblies));
 
+        // the API operations that raise each trigger, from the generated API documents
+        var raisedBy = RaisingOperations.Load(RaisingOperations.GetDocumentsDirectory(FindRepositoryRoot(AppContext.BaseDirectory)));
+
         schemas.Add(typeof(WebhookPayload<,>));
 
         var triggerMap = new YamlMappingNode();
@@ -162,7 +165,7 @@ public static class WebhookContractGenerator
             var payloadSchema = schemas.Add(GetPayloadType(trigger));
 
             triggerMap.Add(trigger.ToCustomString(), payloadSchema);
-            webhooks.Add(trigger.ToCustomString(), ContractHeader.GetWebhook(trigger, payloadSchema));
+            webhooks.Add(trigger.ToCustomString(), ContractHeader.GetWebhook(trigger, payloadSchema, raisedBy.GetValueOrDefault(trigger.ToCustomString(), [])));
 
             if (!payloadSchemas.Contains(payloadSchema))
             {

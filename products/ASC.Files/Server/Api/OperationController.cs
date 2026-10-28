@@ -64,6 +64,8 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FolderDownloaded, When = "for every listed folder, rooms included, once the queued operation starts packing it; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FileDownloaded, When = "for every listed file, once the queued operation packs it; the files inside listed folders raise none")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The download operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read, or an item of `fileConvertIds` has no `key` or `value`")]
@@ -102,6 +104,9 @@ public class OperationController(
     /// <summary>Copy files and folders</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every copied folder, the folders inside it included")]
+    [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room copied into its own section, an AI agent included")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, the files inside copied folders included, once the queued operation processes it")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot read one of the listed items, the destination is a listed folder or lies inside one, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
@@ -135,6 +140,12 @@ public class OperationController(
     /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "for every listed folder moved to the trash; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead for a listed folder deleted at once")]
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "for every listed room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead for a listed AI agent")]
+    [RaisesWebhook(WebhookTrigger.FileTrashed, When = "for every listed file the queued operation moves to the trash; the files inside listed folders raise none")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead for a listed file that is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items, one of them is locked by another user or open for editing, or a room is sent to Trash without `immediately`")]
@@ -167,6 +178,7 @@ public class OperationController(
     /// <summary>Delete file versions</summary>
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "once for every removed version")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileId` or `versions`")]
@@ -197,6 +209,8 @@ public class OperationController(
     /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "for every folder lying directly in the trash")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "for every file lying directly in the trash; the files inside trashed folders raise none")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "`folderType` holds a value that is not a folder type")]
@@ -334,6 +348,12 @@ public class OperationController(
     /// <summary>Move files and folders</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderMoved, When = "for every listed folder; the folders inside it raise none unless it is merged into a folder of the same name")]
+    [RaisesWebhook(WebhookTrigger.FolderRestored, When = "instead for a folder moved out of the trash")]
+    [RaisesWebhook(WebhookTrigger.RoomArchived, When = "for every listed room moved to the archive")]
+    [RaisesWebhook(WebhookTrigger.RoomRestored, When = "for every listed room moved out of the archive")]
+    [RaisesWebhook(WebhookTrigger.FileMoved, When = "for every moved file once the queued operation processes it; the files inside a moved folder raise none unless it is merged into a folder of the same name")]
+    [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
@@ -366,6 +386,9 @@ public class OperationController(
     /// <summary>Duplicate files and folders</summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every duplicated folder, the folders inside it included")]
+    [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room, an AI agent included")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every duplicated file, the files inside duplicated folders and rooms included, once the queued operation processes it")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The duplicate operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items, or cannot copy that item")]

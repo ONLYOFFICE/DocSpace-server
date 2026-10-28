@@ -95,6 +95,7 @@ public class VirtualRoomsInternalController(
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
+    [RaisesWebhook(WebhookTrigger.RoomCreated)]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
@@ -162,6 +163,8 @@ public class VirtualRoomsInternalController(
     /// </remarks>
     /// <summary>Create a room from the template</summary>
     /// <path>api/2.0/files/rooms/fromtemplate</path>
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "once the queued operation builds the room")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "after it when `quota` is given")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The progress record of the room creation job", typeof(RoomFromTemplateStatusDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `templateId` or `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 or `cover` longer than 50 characters, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, `lifetime` has an unknown `period` or a `value` outside 1-999, or the `watermark` text is longer than 255 characters")]
@@ -390,6 +393,7 @@ public class VirtualRoomsThirdPartyController(
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
+    [RaisesWebhook(WebhookTrigger.RoomCreated)]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
@@ -476,6 +480,8 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Update a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "on every successful call, even one that changes nothing")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
@@ -505,6 +511,8 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>Change the room quota limit</summary>
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room, even when its quota does not change")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
@@ -556,6 +564,8 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>Reset the room quota limit</summary>
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
@@ -602,6 +612,8 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Remove a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "once the queued operation deletes the room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead when the room is an AI agent")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued delete operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
@@ -632,6 +644,7 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Archive a room</summary>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
+    [RaisesWebhook(WebhookTrigger.RoomArchived, When = "once the queued operation moves the room to the archive, for an AI agent as well")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued archive operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
@@ -669,6 +682,7 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Unarchive a room</summary>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
+    [RaisesWebhook(WebhookTrigger.RoomRestored, When = "once the queued operation moves the room out of the archive, for an AI agent as well")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued unarchive operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
@@ -1026,6 +1040,8 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Set the room logo</summary>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "when a logo is given in `tmpFile`")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with the addresses of its new logo", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `tmpFile`, `x` or `y` is outside 0-1280, `width` or `height` is missing or outside 1-1280, the crop position lies outside the uploaded picture, or a third-party identifier refers to a storage account that is not connected")]
@@ -1056,6 +1072,8 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Change the room cover</summary>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "when the color or the cover changes")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the cover change", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, `color` is not six hexadecimal digits, `cover` is not an identifier from the cover gallery, or a third-party identifier refers to a storage account that is not connected")]
@@ -1133,6 +1151,8 @@ public abstract class VirtualRoomsController<T>(
     /// </remarks>
     /// <summary>Remove a room logo</summary>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "when the room had a logo")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its logo removed", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]

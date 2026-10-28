@@ -116,6 +116,10 @@ SDKs are generated from. The check compares both; with the submodule not checked
 skips the published copy -- then initialise it (`git submodule update --init sdk/docspace-api-spec`)
 before generating.
 
+The contract reads the API documents as they are on disk. When a `[RaisesWebhook]` attribute changed, re-emit
+them first (stage A of the `generate-sdk` skill), or the contract lists the operations as they were; the check
+compares against the same files, so it does not notice either.
+
 On no, the SDKs are generated from the committed file as it is. Where each part of the contract
 comes from — and therefore where a change to it belongs:
 
@@ -127,6 +131,7 @@ comes from — and therefore where a change to it belongs:
 | a property `description` | the property's `<summary>`; for an enum the generator appends its members |
 | `x-docspace-trigger-payloads.map` | the trigger table in `WebhookContractGenerator` (by trigger family, with per-trigger exceptions), in `[Order]` order |
 | `webhooks` (one POST per trigger: headers, body, answers), `tags` (one per trigger family) and the `*Delivery` schemas (`WebhookEnvelope` with `payload` typed, one per payload schema) | the same trigger table, with the texts in `ContractHeader` (`GetWebhook`, `GetTag`, `GetDeliverySchema`); a family without a tag description stops the generator |
+| the list of REST API operations that raise each trigger, in its `webhooks` description | `[RaisesWebhook]` on the API actions, read from `x-docspace-webhooks` in the generated API documents (`common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json/*.json`, see `RaisingOperations`); what raises a trigger outside the API is `_otherSources` in `ContractHeader` |
 | `info`, the transport and serialization notes, `EntryId`, the map's description | `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs` (prose, `OpenApiInfo`, the `EntryId` `OpenApiSchema`) |
 | the numbers and names in the transport notes: request timeout, retry intervals and jitter, header names, config keys | `common/ASC.Webhooks.Core/WebhookDelivery.cs`, which the sender reads as well |
 
