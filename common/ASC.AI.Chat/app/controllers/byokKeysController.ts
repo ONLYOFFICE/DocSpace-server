@@ -75,38 +75,24 @@ async function withValidationMessage<T>(call: Promise<T>): Promise<T> {
   }
 }
 
-export const byokProfilesController = {
+export const byokKeysController = {
   providers: asyncHandler(async (_req, res) => {
-    res.json(await storage.profiles.readByokProviders());
+    res.json(await storage.byokKeys.readProviders());
   }),
 
-  create: asyncHandler(async (req, res) => {
+  set: asyncHandler(async (req, res) => {
     const body = readBody(req.body);
     const profile = await withValidationMessage(
-      storage.profiles.createByok({
-        name: readString(body, "name"),
+      storage.byokKeys.set(req.params["id"] ?? "", {
         provider: readString(body, "provider"),
-        modelId: readString(body, "modelId"),
         key: readString(body, "key"),
       }),
     );
     res.json(toClientProfile(profile));
   }),
 
-  update: asyncHandler(async (req, res) => {
-    const body = readBody(req.body);
-    const profile = await withValidationMessage(
-      storage.profiles.updateByok(req.params["id"] ?? "", {
-        name: readString(body, "name"),
-        modelId: readString(body, "modelId"),
-        key: getString(body, "key"),
-      }),
-    );
-    res.json(toClientProfile(profile));
-  }),
-
   delete: asyncHandler(async (req, res) => {
-    await storage.profiles.deleteByok(req.params["id"] ?? "");
+    await storage.byokKeys.delete(req.params["id"] ?? "");
     res.status(204).end();
   }),
 };

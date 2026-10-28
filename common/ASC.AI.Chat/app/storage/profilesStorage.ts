@@ -32,15 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, aiServiceBaseUrl, withTimeout } from "./httpClient.js";
-import {
-  isObject,
-  getString,
-  getNumber,
-  getBoolean,
-  getArray,
-  getObjectArray,
-} from "../narrow.js";
-import type { JsonObject } from "../narrow.js";
+import { isObject, getString, getNumber, getBoolean, getArray } from "../narrow.js";
 import logger from "../log.js";
 import {
   countUpstreamCall,
@@ -69,42 +61,6 @@ export type DocspaceProfile = Profile & {
   /** BYOK provider id when the profile runs on the portal's own provider key. */
   byokProvider?: string;
 };
-
-export interface ByokProfileInput {
-  /** Profile display name. */
-  name: string;
-  /** BYOK provider id from the model's `byok_providers`, e.g. `anthropic`. */
-  provider: string;
-  /** Gateway catalogue model id. */
-  modelId: string;
-  /** Provider API key. */
-  key: string;
-}
-
-export interface ByokProfileUpdateInput {
-  /** Profile display name. */
-  name: string;
-  /** Gateway catalogue model id. */
-  modelId: string;
-  /** New provider API key; omit to keep the stored one. */
-  key?: string;
-}
-
-export interface ByokModel {
-  /** Gateway catalogue model id, passed as `modelId` when creating a BYOK profile. */
-  id: string;
-  /** Model display name. */
-  name: string;
-}
-
-export interface ByokProvider {
-  /** BYOK provider id, passed as `provider` when creating a BYOK profile. */
-  id: string;
-  /** Provider display name. */
-  name: string;
-  /** Models that can be called through this provider with the portal's own key. */
-  models: ByokModel[];
-}
 
 function gatewayBaseUrl(profile: DocspaceProfile): string {
   const gateway = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
@@ -410,61 +366,6 @@ export class HttpProfilesStorage implements ProfilesStorage {
       throw err;
     }
   }
-
-  async createByok(input: ByokProfileInput): Promise<DocspaceProfile> {
-    const raw = await aiService.post(`${PATH}/byok`, input);
-    invalidateChatContext("profiles");
-    return requireProfile(raw);
-  }
-
-  async updateByok(id: string, input: ByokProfileUpdateInput): Promise<DocspaceProfile> {
-    const raw = await aiService.put(`${PATH}/byok/${encodeURIComponent(id)}`, input);
-    invalidateChatContext("profiles");
-    return requireProfile(raw);
-  }
-
-  async deleteByok(id: string): Promise<void> {
-    await aiService.delete(`${PATH}/byok/${encodeURIComponent(id)}`);
-    invalidateChatContext("profiles");
-  }
-
-  async readByokProviders(): Promise<ByokProvider[]> {
-    const raw = await aiService.get(`${PATH}/byok/providers`);
-    if (!Array.isArray(raw)) {
-      return [];
-    }
-    return raw.filter(isObject).flatMap((item) => {
-      const provider = dtoToByokProvider(item);
-      return provider ? [provider] : [];
-    });
-  }
-}
-
-function requireProfile(raw: unknown): DocspaceProfile {
-  const profile = dtoToProfile(raw);
-  if (!profile) {
-    throw new Error("ai service returned invalid profile");
-  }
-  return profile;
-}
-
-function dtoToByokModel(raw: JsonObject): ByokModel | undefined {
-  const id = getString(raw, "id");
-  const name = getString(raw, "name");
-  return id === undefined || name === undefined ? undefined : { id, name };
-}
-
-function dtoToByokProvider(raw: JsonObject): ByokProvider | undefined {
-  const id = getString(raw, "id");
-  const name = getString(raw, "name");
-  if (id === undefined || name === undefined) {
-    return undefined;
-  }
-  const models = (getObjectArray(raw, "models") ?? []).flatMap((item) => {
-    const model = dtoToByokModel(item);
-    return model ? [model] : [];
-  });
-  return { id, name, models };
 }
 
 // ---------------------------------------------------------------------------

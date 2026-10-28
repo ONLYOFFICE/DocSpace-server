@@ -56,7 +56,7 @@ import { contextController } from "./controllers/contextController.js";
 import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
-import { byokProfilesController } from "./controllers/byokProfilesController.js";
+import { byokKeysController } from "./controllers/byokKeysController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
@@ -224,10 +224,9 @@ export default function registerRoutes(app: Application): void {
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 
-  router.get("/profiles/byok/providers", byokProfilesController.providers);
-  router.post("/profiles/byok", byokProfilesController.create);
-  router.put("/profiles/byok/:id", byokProfilesController.update);
-  router.delete("/profiles/byok/:id", byokProfilesController.delete);
+  router.get("/byok/providers", byokKeysController.providers);
+  router.put("/byok/keys/:id", byokKeysController.set);
+  router.delete("/byok/keys/:id", byokKeysController.delete);
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist

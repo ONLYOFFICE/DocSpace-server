@@ -35,6 +35,7 @@ import type { ContextFolder, RoomSkill, StorageAdapter } from "@onlyoffice/ai-ch
 
 import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
+import { HttpByokKeysStorage } from "./byokKeysStorage.js";
 import { HttpFormAnalysisStorage } from "./formAnalysisStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
@@ -60,6 +61,7 @@ export class HttpStorageAdapter implements StorageAdapter {
   public webSearch = new HttpWebSearchStorage();
   public attachments = new HttpAttachmentsStorage();
   public formAnalysis = new HttpFormAnalysisStorage();
+  public byokKeys = new HttpByokKeysStorage();
 
   // Rooms and skills for the chat's context: the rooms with a `.ai` folder
   // the caller can read (one cloud entry — DocSpace is a single cloud, so
