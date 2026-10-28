@@ -326,18 +326,40 @@ public abstract record AiModelPricing<TPrice>
     public string OwnedBy { get; init; }
 
     /// <summary>
-    /// The provider that serves the model.
+    /// The providers the model can be called through: the built-in one first, then the BYOK ones.
+    /// </summary>
+    public required IReadOnlyList<AiProviderPricing<TPrice>> Providers { get; init; }
+}
+
+/// <summary>
+/// The price of a model called through one provider.
+/// </summary>
+public record AiProviderPricing<TPrice>
+{
+    /// <summary>
+    /// The provider type, the value BYOK keys store as their provider.
     /// </summary>
     /// <example>openai</example>
-    public string Provider { get; init; }
+    public required string Id { get; init; }
 
     /// <summary>
-    /// The link to the pricing page of the model.
+    /// The display name of the provider.
+    /// </summary>
+    /// <example>OpenAI</example>
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Whether the model is called through this provider with the built-in key.
+    /// </summary>
+    public bool BuiltIn { get; init; }
+
+    public required TPrice Price { get; init; }
+
+    /// <summary>
+    /// The model page for the built-in provider, the vendor's pricing page for a BYOK one.
     /// </summary>
     /// <example>https://openai.com/api/pricing</example>
     public string Link { get; init; }
-
-    public required TPrice Price { get; init; }
 }
 
 /// <summary>

@@ -49,7 +49,8 @@ public class PaymentHelper(
     WalletStaticProvider walletStaticProvider,
     CoreSettings coreSettings,
     ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic,
-    TenantWalletSettingsConfig walletSettingsConfig)
+    TenantWalletSettingsConfig walletSettingsConfig,
+    ILogger<PaymentHelper> logger)
 {
     public void DemandConfigured()
     {
@@ -465,7 +466,8 @@ public class PaymentHelper(
     public async Task<AiPricesDto> GetAiPricesAsync()
     {
         var aiPrices = await aiGateway.GetPricesAsync();
-        var byokIds = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
+        var byokProviders = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId()))
+            .ToDictionary(k => k.Id, k => k.Provider);
         var icons = new Dictionary<string, string>();
 
         var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
@@ -484,46 +486,66 @@ public class PaymentHelper(
             icons[searchType] = await walletStaticProvider.GetImageAsync(searchType);
         }
 
-        var chat = aiPrices.Chat.Select(m => new AiEntryPricingDto<AiChatPriceDto>
+        var chat = aiPrices.Chat.Select(m =>
         {
-            Id = m.Id,
-            Image = icons[m.OwnedBy.ToLower()],
-            Alias = m.Alias,
-            Provider = m.Provider,
-            Price = new AiChatPriceDto
+            var (provider, byok) = SelectProvider(m);
+
+            return new AiEntryPricingDto<AiChatPriceDto>
             {
-                Prompt = m.Price.Prompt,
-                Completion = m.Price.Completion,
-                PromptCacheRead = m.Price.PromptCacheRead,
-                PromptCacheWrite = m.Price.PromptCacheWrite,
-                PromptCacheWrite1H = m.Price.PromptCacheWrite1H
-            },
-            Link = m.Link,
-            Byok = byokIds.Contains(m.RevisionId)
+                Id = m.Id,
+                Image = icons[m.OwnedBy.ToLower()],
+                Alias = m.Alias,
+                Provider = provider.Name,
+                Price = new AiChatPriceDto
+                {
+                    Prompt = provider.Price.Prompt,
+                    Completion = provider.Price.Completion,
+                    PromptCacheRead = provider.Price.PromptCacheRead,
+                    PromptCacheWrite = provider.Price.PromptCacheWrite,
+                    PromptCacheWrite1H = provider.Price.PromptCacheWrite1H
+                },
+                Link = provider.Link,
+                Byok = byok
+            };
         }).ToList();
 
         var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
 
-        var embedding = aiPrices.Embedding.Select(e => new AiEntryPricingDto<AiEmbeddingPriceDto>
+        var embedding = aiPrices.Embedding.Select(e =>
         {
-            Id = e.Id,
-            Alias = e.Alias,
-            Provider = e.Provider,
-            Image = embeddingImage,
-            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
-            Link = e.Link,
-            Byok = byokIds.Contains(e.RevisionId)
+            var (provider, byok) = SelectProvider(e);
+
+            return new AiEntryPricingDto<AiEmbeddingPriceDto>
+            {
+                Id = e.Id,
+                Alias = e.Alias,
+                Provider = provider.Name,
+                Image = embeddingImage,
+                Price = new AiEmbeddingPriceDto { Prompt = provider.Price.Prompt },
+                Link = provider.Link,
+                Byok = byok
+            };
         }).ToList();
 
-        var image = aiPrices.Image.Select(m => new AiEntryPricingDto<AiImagePriceDto>
+        var image = aiPrices.Image.Select(m =>
         {
-            Id = m.Id,
-            Image = icons[m.OwnedBy.ToLower()],
-            Alias = m.Alias,
-            Provider = m.Provider,
-            Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion, Image = m.Price.Image },
-            Link = m.Link,
-            Byok = byokIds.Contains(m.RevisionId)
+            var (provider, byok) = SelectProvider(m);
+
+            return new AiEntryPricingDto<AiImagePriceDto>
+            {
+                Id = m.Id,
+                Image = icons[m.OwnedBy.ToLower()],
+                Alias = m.Alias,
+                Provider = provider.Name,
+                Price = new AiImagePriceDto
+                {
+                    Prompt = provider.Price.Prompt,
+                    Completion = provider.Price.Completion,
+                    Image = provider.Price.Image
+                },
+                Link = provider.Link,
+                Byok = byok
+            };
         }).ToList();
 
         var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>
@@ -544,6 +566,26 @@ public class PaymentHelper(
             WebSearch = search,
             Currency = aiPrices.Currency.Map()
         };
+
+        (AiProviderPricing<TPrice> Provider, bool Byok) SelectProvider<TPrice>(AiModelPricing<TPrice> model)
+        {
+            var builtIn = model.Providers.First(p => p.BuiltIn);
+
+            if (!byokProviders.TryGetValue(model.RevisionId, out var byokProvider))
+            {
+                return (builtIn, false);
+            }
+
+            var provider = model.Providers.FirstOrDefault(p => !p.BuiltIn && p.Id == byokProvider);
+            if (provider is not null)
+            {
+                return (provider, true);
+            }
+
+            logger.WarningByokProviderNotPriced(model.RevisionId, byokProvider);
+
+            return (builtIn, true);
+        }
     }
 
     public async Task<RestrictedModelsResponse> SetRestrictedAiModelsAsync(HashSet<string> models)
