@@ -51,7 +51,8 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
         _cleaner = cleaner;
         _retention = configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>() ?? new();
 
-        ExecuteTaskPeriod = _retention.Period > TimeSpan.Zero ? _retention.Period : _defaults.Period;
+        // A period Task.Delay rejects would fault the background service, and with it the host, after the first pass.
+        ExecuteTaskPeriod = _retention.IsPeriodUsable ? _retention.Period : _defaults.Period;
     }
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; }

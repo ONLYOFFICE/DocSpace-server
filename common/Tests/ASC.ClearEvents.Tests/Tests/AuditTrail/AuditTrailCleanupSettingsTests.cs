@@ -35,11 +35,16 @@ namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// The <c>clearEvents:auditTrail</c> settings that stop a pass before it deletes anything: the cleanup switched
-/// off, which is the default, and values that would make it delete what it must not — a life time of zero days
-/// is the whole audit trail.
+/// off, which is the default, and values that would make it delete what it must not — a life time of a few days
+/// is almost the whole audit trail — or stop the host it runs in.
 /// </summary>
 public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    private const int MinLifeTimeDays = AuditTrailRetentionConfiguration.MinLifeTimeDays;
+
+    /// <summary>Just past the longest delay Task.Delay accepts (about 49.7 days).</summary>
+    private const int BeyondMaxPeriodHours = 50 * 24;
+
     [Fact]
     public async Task ClearAsync_Disabled_RemovesNothing()
     {
@@ -63,15 +68,33 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
         new AuditTrailRetentionConfiguration().Enabled.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task ClearAsync_LifeTimeAtTheMinimum_IsUsed()
+    {
+        // Arrange
+        var expired = await SeedEventAsync(MinLifeTimeDays + 30);
+        var recent = await SeedEventAsync(MinLifeTimeDays - 30);
+
+        // Act
+        await RunCleanupAsync(Retention(freeLifeTimeDays: MinLifeTimeDays, paidLifeTimeDays: MinLifeTimeDays));
+
+        // Assert
+        (await RemainingEventsAsync([expired, recent])).Should().BeEquivalentTo([recent]);
+    }
+
     [Theory]
     [InlineData(0, PaidLifeTimeDays, 1000, 24)]
     [InlineData(-1, PaidLifeTimeDays, 1000, 24)]
+    [InlineData(1, PaidLifeTimeDays, 1000, 24)]
+    [InlineData(MinLifeTimeDays - 1, PaidLifeTimeDays, 1000, 24)]
     [InlineData(FreeLifeTimeDays, 0, 1000, 24)]
+    [InlineData(PaidLifeTimeDays, FreeLifeTimeDays, 1000, 24)]
     [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 0, 24)]
     [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, 0)]
+    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, BeyondMaxPeriodHours)]
     public async Task ClearAsync_UnusableSettings_RemovesNothing(int freeLifeTimeDays, int paidLifeTimeDays, int batchSize, int periodHours)
     {
-        // Arrange
+        // Arrange: older than every life time in the rows, so any of them that ran would remove it.
         var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
 
         // Act

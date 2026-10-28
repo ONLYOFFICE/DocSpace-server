@@ -34,8 +34,8 @@
 namespace ASC.ClearEvents.Log;
 internal static partial class AuditTrailCleanerLogger
 {
-    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), batch size {batchSize} and period {period} are not a usable configuration.")]
-    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int batchSize, TimeSpan period);
+    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), batch size {batchSize} and period {period} are not a usable configuration. Both life times must be at least {minLifeTimeDays} day(s) with the free one not above the paid one, the batch size positive and the period above zero and at most {maxPeriod}.")]
+    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int batchSize, TimeSpan period, int minLifeTimeDays, TimeSpan maxPeriod);
 
     [LoggerMessage(LogLevel.Debug, "Removed {count} audit event(s) older than {threshold} for tenant {tenantId} (paid tariff: {paid}).")]
     public static partial void DebugRemovedAuditEvents(this ILogger<AuditTrailCleaner> logger, int count, DateTime threshold, int tenantId, bool paid);

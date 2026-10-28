@@ -49,9 +49,15 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
             return;
         }
 
-        if (retention.PaidLifeTimeDays <= 0 || retention.FreeLifeTimeDays <= 0 || retention.BatchSize <= 0 || retention.Period <= TimeSpan.Zero)
+        if (!retention.IsUsable)
         {
-            logger.WarningInvalidConfiguration(retention.PaidLifeTimeDays, retention.FreeLifeTimeDays, retention.BatchSize, retention.Period);
+            logger.WarningInvalidConfiguration(
+                retention.PaidLifeTimeDays,
+                retention.FreeLifeTimeDays,
+                retention.BatchSize,
+                retention.Period,
+                AuditTrailRetentionConfiguration.MinLifeTimeDays,
+                AuditTrailRetentionConfiguration.MaxPeriod);
             return;
         }
 
