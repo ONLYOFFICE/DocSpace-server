@@ -1,0 +1,29 @@
+builder.OpenFile(${sourceFileUrl});
+
+// GetFormsData() gives the shape Document Server posts on submission. A PDF without the form signature opens as a
+// plain PDF, whose document has no form data.
+var doc = Api.GetDocument();
+var json = JSON.stringify({ formsdata: doc.GetFormsData ? doc.GetFormsData() : null });
+
+// The result travels as a text file, so non-ASCII characters are escaped; a backslash literal fails the build.
+var escaped = "";
+for (var i = 0; i < json.length; i++) {
+    var code = json.charCodeAt(i);
+    if (code < 128) {
+        escaped += json.charAt(i);
+    } else {
+        var hex = code.toString(16);
+        while (hex.length < 4) {
+            hex = "0" + hex;
+        }
+        escaped += String.fromCharCode(92) + "u" + hex;
+    }
+}
+
+GlobalVariable["formsData"] = escaped;
+builder.CloseFile();
+
+builder.CreateFile("docx");
+Api.GetDocument().GetElement(0).AddText(GlobalVariable["formsData"]);
+builder.SaveFile("txt", "${tempFileName}");
+builder.CloseFile();
