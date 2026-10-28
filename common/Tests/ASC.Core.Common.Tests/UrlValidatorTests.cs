@@ -242,7 +242,7 @@ public class UrlValidatorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ValidateAsync_InvalidUrl_ShouldBlock(string url)
+    public async Task ValidateAsync_InvalidUrl_ShouldBlock(string? url)
     {
         var result = await _urlValidator.ValidateAsync(url);
 

@@ -344,7 +344,7 @@ public class AccountingClientTests
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
             """{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":1500.75}]}"""));
 
-        var balance = await client.GetCustomerBalanceAsync("portal-1");
+        var balance = await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
         handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/balance");
@@ -360,7 +360,7 @@ public class AccountingClientTests
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"), baseUrl: "https://accounting.example.com");
 
-        await client.GetCustomerBalanceAsync("portal-1");
+        await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         handler.LastUri!.AbsolutePath.Should().Be("/customer/portal-1/balance");
         handler.LastUri.ToString().Should().Be("https://accounting.example.com/customer/portal-1/balance");
@@ -445,7 +445,7 @@ public class AccountingClientTests
                 : Json(HttpStatusCode.OK, """{"accountNumber":7}""");
         });
 
-        var balance = await client.GetCustomerBalanceAsync("portal-1");
+        var balance = await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         balance.AccountNumber.Should().Be(7);
         handler.CallCount.Should().Be(2);
@@ -457,7 +457,7 @@ public class AccountingClientTests
         // A 400 "customer not found" on a GET is a definitive result - it must not be retried.
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.BadRequest, "Customer not found"));
 
-        var act = async () => await client.GetCustomerBalanceAsync("portal-1");
+        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
         handler.CallCount.Should().Be(1);
@@ -495,7 +495,7 @@ public class AccountingClientTests
 
         client.Configured.Should().BeFalse();
 
-        var act = async () => await client.GetCustomerBalanceAsync("portal-1");
+        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
         await act.Should().ThrowAsync<AccountingNotConfiguredException>();
     }
