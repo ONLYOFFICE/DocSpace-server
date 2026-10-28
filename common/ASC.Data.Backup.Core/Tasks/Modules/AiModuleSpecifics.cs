@@ -150,6 +150,10 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         new("ai_integration_assignments", "tenant_id", "id", IdType.GuidV7)
         {
             DateColumns = new Dictionary<string, bool> { { "created_at", false } }
+        },
+        new("ai_integration_byok_keys", "tenant_id")
+        {
+            DateColumns = new Dictionary<string, bool> { { "modified_on", false } }
         }
     ];
 
@@ -184,6 +188,9 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
             case "ai_integration_mcp_servers":
                 PrepareEncryptedColumn(data, "config", true);
                 break;
+            case "ai_integration_byok_keys":
+                PrepareEncryptedColumn(data, "key", true);
+                break;
         }
     }
 
@@ -203,6 +210,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
                 }
 
                 return true;
+            case "ai_integration_byok_keys" when columnName == "key" && value != null:
             case "ai_integration_mcp_servers" when columnName == "config" && value != null:
                 try
                 {

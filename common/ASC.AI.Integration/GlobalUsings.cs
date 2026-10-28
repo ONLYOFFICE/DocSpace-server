@@ -54,4 +54,6 @@ global using Microsoft.Extensions.DependencyInjection;
 
 global using NetEscapades.EnumGenerators;
 
+global using Riok.Mapperly.Abstractions;
+
 global using ZiggyCreatures.Caching.Fusion;
