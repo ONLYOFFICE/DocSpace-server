@@ -163,15 +163,16 @@ public class StudioNotifyService(
         string roomUniqId,
         string roomTitle,
         string confirmationUrl,
+        EmployeeType inviteType,
         bool isAgent,
         string culture = null,
         bool limitation = false)
     {
         var saasAgentInviteNotifyAction = serviceProvider.GetService<SaasAgentInviteNotifyAction>();
-        saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
+        saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
 
         var saasRoomInviteNotifyAction = serviceProvider.GetService<SaasRoomInviteNotifyAction>();
-        saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
+        saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteNotifyAction : saasRoomInviteNotifyAction, roomUniqId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 

@@ -431,6 +431,7 @@ public class FileSharingAceHelper(
                     entry.UniqID,
                     entry.Title,
                     shortenLink,
+                    FileSecurity.GetTypeByShare(share),
                     entry is IFolder { FolderType: FolderType.AiRoom },
                     culture,
                     true);

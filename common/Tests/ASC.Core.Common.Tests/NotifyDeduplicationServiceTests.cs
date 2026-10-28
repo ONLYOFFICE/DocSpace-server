@@ -175,6 +175,23 @@ public class NotifyDeduplicationServiceTests
     }
 
     [Fact]
+    public async Task RoomInvitationWithAnotherAccountType_IsNotSuppressed()
+    {
+        // The invitation link carries the account type the invitee joins with: re-inviting a viewer as a room
+        // manager has to deliver the new link, while re-inviting with the same type changes nothing in the link.
+        var service = CreateService();
+        var action = new TestAction("saas_room_invite", tags: ["InviteType"]);
+
+        var asUser = await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("InviteType", "User")]));
+        var asRoomAdmin = await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("InviteType", "RoomAdmin")]));
+        var asRoomAdminAgain = await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("InviteType", "RoomAdmin")]));
+
+        asUser.Should().BeFalse();
+        asRoomAdmin.Should().BeFalse();
+        asRoomAdminAgain.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task ActionThatOptsOut_IsNeverSuppressed()
     {
         var service = CreateService();

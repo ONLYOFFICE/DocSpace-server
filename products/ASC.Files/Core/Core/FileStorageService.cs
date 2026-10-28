@@ -5501,7 +5501,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.Title, await urlShortener.GetShortenLinkAsync(link), FileSecurity.GetTypeByShare(ace.Access), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -5536,7 +5536,7 @@ public class FileStorageService //: IFileStorageService
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.Title, shortenLink, FileSecurity.GetTypeByShare(ace.Access), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 

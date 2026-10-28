@@ -1304,6 +1304,9 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
 {
     public override string ID => "saas_room_invite";
 
+    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1312,7 +1315,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1322,6 +1325,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1334,6 +1338,9 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "saas_agent_invite";
 
+    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1342,7 +1349,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1352,6 +1359,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)

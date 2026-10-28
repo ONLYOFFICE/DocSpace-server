@@ -48,6 +48,7 @@ public static class CommonTags
     public const string MyStaffLink = "MyStaffLink";
     public const string SettingsLink = "SettingsLink";
     public const string InviteLink = "InviteLink";
+    public const string InviteType = "InviteType";
     public const string Date = "Date";
     public const string Device = "Device";
     public const string Location = "Location";
