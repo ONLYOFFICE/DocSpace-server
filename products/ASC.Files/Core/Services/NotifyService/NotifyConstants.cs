@@ -105,6 +105,9 @@ public class ShareDocumentNotifyAction(TenantManager tenantManager, BaseCommonLi
 {
     public override string ID => "ShareDocument";
 
+    // the letter names the access level, so a share changed to another level is a new letter
+    public override string[] DeduplicationTags => [NotifyConstants.TagAccessRights];
+
     public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
