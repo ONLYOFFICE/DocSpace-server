@@ -34,7 +34,8 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// How long the portal keeps its login history and its audit trail.
+/// The lifetimes of the portal's two security logs: how long login events are kept, and how far back the audit trail
+/// is shown.
 /// </summary>
 public class TenantAuditSettingsDto
 {
@@ -45,7 +46,7 @@ public class TenantAuditSettingsDto
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
-    /// How many days audit trail events are kept, from 1 to 180; 180 when the portal never changed it.
+    /// How many days back the audit trail is shown and reported, from 1 to 180; 180 when the portal never changed it.
     /// </summary>
     /// <example>90</example>
     public int AuditTrailLifeTime { get; init; }
