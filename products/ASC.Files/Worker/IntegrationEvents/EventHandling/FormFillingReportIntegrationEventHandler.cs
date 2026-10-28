@@ -39,6 +39,8 @@ public class FormFillingReportIntegrationEventHandler(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
+    FormRecoveryTaskManager formRecoveryTaskManager,
+    FormRecoveryService formRecoveryService,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
@@ -66,10 +68,31 @@ public class FormFillingReportIntegrationEventHandler(
 
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
+                var reportData = new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers);
+
+                // The recovery starts the report when it is done, also the one of a repeated request that finds it running.
+                // A request while another user's recovery runs is queued too, to wait for it rather than write into the
+                // report file it is building.
+                if (@event.Recover && (await NeedsRecoveryAsync(@event) || await IsRecoveringAsync(@event)))
+                {
+                    var recoveryTask = serviceProvider.GetService<FormRecoveryTask>();
+                    recoveryTask.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData);
+                    await formRecoveryTaskManager.TryEnqueueAsync(recoveryTask);
+
+                    return;
+                }
+
+                // A report started meanwhile would take the place of the one the client waits for and show a part of the
+                // responses; the recovery's report takes this response in.
+                if (!@event.Recover && await IsRecoveringAsync(@event))
+                {
+                    return;
+                }
+
                 var task = serviceProvider.GetService<FormFillingReportTask>();
 
                 var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, @event.OriginalFormId);
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers), taskId);
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData, taskId);
 
                 await documentBuilderTaskManager.StartTask(task);
             }
@@ -77,6 +100,50 @@ public class FormFillingReportIntegrationEventHandler(
             {
                 logger.ErrorWithException(ex);
             }
+        }
+    }
+
+    // On every submission: a failed check starts the report as without the recovery, rather than drop it.
+    private async Task<bool> IsRecoveringAsync(FormFillingReportIntegrationEvent @event)
+    {
+        try
+        {
+            return await formRecoveryTaskManager.IsRecoveringAsync(@event.TenantId, @event.OriginalFormId);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+
+            return false;
+        }
+    }
+
+    // Only when there is something to do: forms missing from the index, or the versions of the older form versions that a
+    // new report file gets. Otherwise the report starts at once, as without the recovery, and so it does when the check
+    // fails.
+    private async Task<bool> NeedsRecoveryAsync(FormFillingReportIntegrationEvent @event)
+    {
+        try
+        {
+            if (await formRecoveryService.HasMissingResponsesAsync(@event.RoomId, @event.OriginalFormId))
+            {
+                return true;
+            }
+
+            if (!@event.IsNewFile)
+            {
+                return false;
+            }
+
+            var versions = await formRecoveryService.GetVersionsWithResponsesAsync(@event.RoomId, @event.OriginalFormId);
+
+            return versions != null && versions.Any(v => v < @event.OriginalFormVersion);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+
+            return false;
         }
     }
 }
