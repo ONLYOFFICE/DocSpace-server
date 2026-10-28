@@ -46,6 +46,7 @@ import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
+import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -123,6 +124,24 @@ export async function assertThreadCreatable(
   profileId: string | undefined,
 ): Promise<void> {
   await assertEntityAccessible(entityId);
+  // Inside an AI project only its owner, Project managers and Members may
+  // chat; the project's model is what the round will use.
+  const project = await readAiProjectChatContext(entityId);
+  if (project) {
+    if (!project.canChat) {
+      throw Object.assign(new Error("You cannot chat in this AI project"), {
+        status: 403,
+        expose: true,
+      });
+    }
+    if (project.profileAvailable && project.effectiveProfileId) {
+      return;
+    }
+    throw Object.assign(new Error("The model of this AI project is not available"), {
+      status: 409,
+      expose: true,
+    });
+  }
   // A malformed profileId makes the C# lookup fail with a non-404 status;
   // treat that the same as "no such profile" and fall through to the
   // scope-assignment resolution instead of relaying an opaque error

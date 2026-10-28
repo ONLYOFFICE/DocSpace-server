@@ -506,6 +506,24 @@ export async function resolveAgentEntityId(
   return folderInfo?.isAgent ? entityId : undefined;
 }
 
+/** `FolderType.AiProjectRoom` on the C# side — an AI project. */
+const AI_PROJECT_FOLDER_TYPE = 40;
+
+/**
+ * The project id when `entityId` is an AI project (`FolderType.AiProjectRoom`),
+ * `undefined` for any other folder, an unknown one, or no id at all. Served
+ * from the primed chat-context snapshot when it describes the folder.
+ */
+export async function resolveAiProjectEntityId(
+  entityId: string | undefined,
+): Promise<string | undefined> {
+  if (!entityId || !/^\d+$/.test(entityId)) {
+    return undefined;
+  }
+  const folderInfo = await getFolderInfoOnce(entityId);
+  return folderInfo?.folderType === AI_PROJECT_FOLDER_TYPE ? entityId : undefined;
+}
+
 /**
  * Gate a client-supplied `entityId` on *accessibility* (not agent-ness). When
  * an entityId is present it must reference a folder the caller can actually

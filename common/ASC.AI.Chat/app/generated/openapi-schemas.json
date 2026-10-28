@@ -1876,660 +1876,6 @@
         "success"
       ]
     },
-    "AiProjectProfile": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The AI profile id."
-        },
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The profile's display name; `null` when the profile no longer exists."
-        },
-        "provider": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The provider name; `null` when the profile no longer exists."
-        },
-        "available": {
-          "type": "boolean",
-          "description": "Whether the profile exists and is enabled."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "provider",
-        "available"
-      ],
-      "additionalProperties": false,
-      "description": "The model of a project as the list and card show it. `available` is false when the profile was disabled or deleted after it was chosen."
-    },
-    "AiProjectSource": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number",
-          "description": "The room id."
-        },
-        "title": {
-          "type": "string",
-          "description": "The room title."
-        },
-        "roomType": {
-          "type": "number",
-          "description": "The room type: 10 Instructions, 11 Knowledge."
-        },
-        "logo": {
-          "$ref": "#/components/schemas/AiProjectLogo",
-          "description": "The room logo, as the room DTO carries it."
-        },
-        "skillsCount": {
-          "type": "number",
-          "description": "Instructions rooms: the number of Markdown skills in the room."
-        },
-        "indexedFiles": {
-          "type": "number",
-          "description": "Knowledge rooms: the number of files already indexed."
-        },
-        "totalFiles": {
-          "type": "number",
-          "description": "Knowledge rooms: the number of files in the room."
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "roomType",
-        "logo"
-      ],
-      "additionalProperties": false,
-      "description": "A room linked to a project: an Instructions room (type 10) or a Knowledge room (type 11)."
-    },
-    "AiProjectLogo": {
-      "type": "object",
-      "properties": {
-        "original": {
-          "type": "string"
-        },
-        "large": {
-          "type": "string"
-        },
-        "medium": {
-          "type": "string"
-        },
-        "small": {
-          "type": "string"
-        },
-        "color": {
-          "type": "string"
-        },
-        "cover": {
-          "$ref": "#/components/schemas/AiProjectCover",
-          "description": "The built-in cover drawn in `color`, as a room carries it; absent when the initials are drawn. The mock answers with an empty `data`."
-        }
-      },
-      "required": [
-        "original",
-        "large",
-        "medium",
-        "small",
-        "color"
-      ],
-      "additionalProperties": false,
-      "description": "A room logo: no uploaded sizes in the mock, the colour and the built-in cover."
-    },
-    "AiProjectCover": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "data"
-      ],
-      "additionalProperties": false,
-      "description": "A built-in room cover: its id and the SVG it is drawn from."
-    },
-    "AiProjectSettings": {
-      "type": "object",
-      "properties": {
-        "profile": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/AiProjectProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "description": "The project's model; `null` means the portal default."
-        },
-        "instructionsRooms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectSource"
-          },
-          "description": "The linked Instructions rooms, in the order they were added."
-        },
-        "knowledgeRooms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectSource"
-          },
-          "description": "The linked Knowledge rooms, in the order they were added."
-        },
-        "canEditSettings": {
-          "type": "boolean",
-          "description": "Whether the caller may change the settings: the owner and project managers."
-        }
-      },
-      "required": [
-        "profile",
-        "instructionsRooms",
-        "knowledgeRooms",
-        "canEditSettings"
-      ],
-      "additionalProperties": false,
-      "description": "The settings block of a project (`AiProjectSettingsDto` on the C# side)."
-    },
-    "AiProjectSecurity": {
-      "type": "object",
-      "properties": {
-        "Read": {
-          "type": "boolean"
-        },
-        "Rename": {
-          "type": "boolean"
-        },
-        "EditRoom": {
-          "type": "boolean"
-        },
-        "EditAccess": {
-          "type": "boolean"
-        },
-        "ChangeOwner": {
-          "type": "boolean"
-        },
-        "Delete": {
-          "type": "boolean"
-        },
-        "Pin": {
-          "type": "boolean"
-        },
-        "Leave": {
-          "type": "boolean"
-        },
-        "Create": {
-          "type": "boolean"
-        },
-        "CopyTo": {
-          "type": "boolean"
-        },
-        "MoveTo": {
-          "type": "boolean"
-        },
-        "Download": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "Read",
-        "Rename",
-        "EditRoom",
-        "EditAccess",
-        "ChangeOwner",
-        "Delete",
-        "Pin",
-        "Leave",
-        "Create",
-        "CopyTo",
-        "MoveTo",
-        "Download"
-      ],
-      "additionalProperties": false,
-      "description": "What the caller may do with the project."
-    },
-    "AiProjectUser": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "displayName": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "avatarSmall": {
-          "type": "string"
-        },
-        "hasAvatar": {
-          "type": "boolean"
-        },
-        "isOwner": {
-          "type": "boolean",
-          "description": "The portal owner."
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "description": "A DocSpace admin."
-        },
-        "isRoomAdmin": {
-          "type": "boolean",
-          "description": "A room admin."
-        },
-        "isCollaborator": {
-          "type": "boolean",
-          "description": "A user (the \"collaborator\" employee type)."
-        },
-        "isVisitor": {
-          "type": "boolean",
-          "description": "A guest."
-        },
-        "status": {
-          "type": "number",
-          "description": "`EmployeeStatus`: 1 active, 2 pending."
-        },
-        "avatarColor": {
-          "type": "string",
-          "description": "The colour of the generated avatar."
-        }
-      },
-      "required": [
-        "id",
-        "displayName",
-        "email",
-        "avatarSmall",
-        "hasAvatar",
-        "isOwner",
-        "isAdmin",
-        "isRoomAdmin",
-        "isCollaborator",
-        "isVisitor",
-        "status",
-        "avatarColor"
-      ],
-      "additionalProperties": false,
-      "description": "A user as the project endpoints show one (a subset of `EmployeeFullDto`)."
-    },
-    "AiProject": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "parentId": {
-          "type": "number"
-        },
-        "rootFolderId": {
-          "type": "number"
-        },
-        "rootFolderType": {
-          "type": "number",
-          "description": "`FolderType.AiProjects`, the projects root."
-        },
-        "type": {
-          "type": "number",
-          "description": "`FolderType.AiProjectRoom`."
-        },
-        "roomType": {
-          "type": "number",
-          "description": "`RoomType.AiProjectRoom` (12)."
-        },
-        "title": {
-          "type": "string"
-        },
-        "created": {
-          "type": "string"
-        },
-        "updated": {
-          "type": "string"
-        },
-        "createdBy": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/AiProjectUser"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "filesCount": {
-          "type": "number",
-          "description": "Always 0: a project holds no files."
-        },
-        "foldersCount": {
-          "type": "number",
-          "description": "Always 0: a project holds no folders."
-        },
-        "new": {
-          "type": "number"
-        },
-        "pinned": {
-          "type": "boolean",
-          "description": "Whether the caller pinned the project."
-        },
-        "inRoom": {
-          "type": "boolean",
-          "description": "Whether the caller is a member."
-        },
-        "access": {
-          "type": "number",
-          "description": "The caller's role: 1 owner, 9 project manager, 11 member, 0 none (admins outside the project)."
-        },
-        "logo": {
-          "$ref": "#/components/schemas/AiProjectLogo"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "security": {
-          "$ref": "#/components/schemas/AiProjectSecurity"
-        },
-        "aiProject": {
-          "$ref": "#/components/schemas/AiProjectSettings"
-        }
-      },
-      "required": [
-        "id",
-        "parentId",
-        "rootFolderId",
-        "rootFolderType",
-        "type",
-        "roomType",
-        "title",
-        "created",
-        "updated",
-        "createdBy",
-        "filesCount",
-        "foldersCount",
-        "new",
-        "pinned",
-        "inRoom",
-        "access",
-        "logo",
-        "tags",
-        "security",
-        "aiProject"
-      ],
-      "additionalProperties": false,
-      "description": "A project as a room folder (`FolderDto` of room type 12) with its `aiProject` block."
-    },
-    "AiProjectsPage": {
-      "type": "object",
-      "properties": {
-        "files": {
-          "type": "array",
-          "items": {
-            "not": {}
-          },
-          "description": "Always empty: the root holds no files."
-        },
-        "folders": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProject"
-          },
-          "description": "One folder per project on the page."
-        },
-        "current": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "parentId": {
-              "type": "number"
-            },
-            "rootFolderType": {
-              "type": "number"
-            },
-            "title": {
-              "type": "string"
-            },
-            "filesCount": {
-              "type": "number"
-            },
-            "foldersCount": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "id",
-            "parentId",
-            "rootFolderType",
-            "title",
-            "filesCount",
-            "foldersCount"
-          ],
-          "additionalProperties": false
-        },
-        "pathParts": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "title": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "title"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "startIndex": {
-          "type": "number"
-        },
-        "count": {
-          "type": "number",
-          "description": "The number of projects on this page."
-        },
-        "total": {
-          "type": "number",
-          "description": "The number of projects that match the filter."
-        },
-        "new": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "files",
-        "folders",
-        "current",
-        "pathParts",
-        "startIndex",
-        "count",
-        "total",
-        "new"
-      ],
-      "additionalProperties": false,
-      "description": "The folder-content payload of the projects root."
-    },
-    "AiProjectWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "$ref": "#/components/schemas/AiProject"
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectsPageWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "$ref": "#/components/schemas/AiProjectsPage"
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectMember": {
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "number",
-          "description": "1 owner, 9 project manager, 11 member (also the link's role)."
-        },
-        "sharedTo": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/AiProjectUser"
-            },
-            {
-              "$ref": "#/components/schemas/AiProjectInviteLink"
-            }
-          ]
-        },
-        "isOwner": {
-          "type": "boolean"
-        },
-        "isLocked": {
-          "type": "boolean"
-        },
-        "canEditAccess": {
-          "type": "boolean",
-          "description": "Whether the caller may change this entry's role."
-        },
-        "subjectType": {
-          "type": "number",
-          "description": "0 a user, 1 an invitation link."
-        }
-      },
-      "required": [
-        "access",
-        "sharedTo",
-        "isOwner",
-        "isLocked",
-        "canEditAccess",
-        "subjectType"
-      ],
-      "additionalProperties": false,
-      "description": "A project member or the invitation link, as a file-share entry."
-    },
-    "AiProjectInviteLink": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "shareLink": {
-          "type": "string",
-          "description": "The portal-relative link to share."
-        },
-        "linkType": {
-          "type": "number"
-        },
-        "primary": {
-          "type": "boolean"
-        },
-        "internal": {
-          "type": "boolean"
-        },
-        "requestToken": {
-          "type": "string"
-        },
-        "isExpired": {
-          "type": "boolean"
-        },
-        "expirationDate": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "password": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "denyDownload": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "shareLink",
-        "linkType",
-        "primary",
-        "internal",
-        "requestToken",
-        "isExpired",
-        "expirationDate",
-        "password",
-        "denyDownload"
-      ],
-      "additionalProperties": false
-    },
     "AiProjectSettingsRequest": {
       "type": "object",
       "properties": {
@@ -2538,205 +1884,51 @@
             "string",
             "null"
           ],
-          "description": "The model: a UUID of an enabled chat profile, or `null` for the portal default."
+          "description": "The model: a UUID of a chat profile, or `null` for the portal default."
         },
         "instructionsRoomIds": {
           "type": "array",
           "items": {
             "type": "number"
           },
-          "description": "The Instructions rooms (type 10) to link; replaces the current list."
+          "description": "The Instructions rooms (type 10) to link, at most 20; replaces the current list."
         },
         "knowledgeRoomIds": {
           "type": "array",
           "items": {
             "type": "number"
           },
-          "description": "The Knowledge rooms (type 11) to link; replaces the current list."
+          "description": "The Knowledge rooms (type 11) to link, at most 20; replaces the current list."
         }
       },
       "additionalProperties": false,
       "description": "The `aiProject` block of a create or update body (`AiProjectSettingsRequestDto` on the C# side). An absent field keeps the current value."
     },
-    "AiProjectLinkableRoom": {
+    "AiProjectLogoRequest": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
-        "createdBy": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/AiProjectUser"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "id": {
-          "type": "number",
-          "description": "The room id."
-        },
-        "title": {
+        "tmpFile": {
           "type": "string",
-          "description": "The room title."
+          "description": "The uploaded picture, as `POST files/logos` named it."
         },
-        "roomType": {
-          "type": "number",
-          "description": "The room type: 10 Instructions, 11 Knowledge."
-        },
-        "logo": {
-          "$ref": "#/components/schemas/AiProjectLogo",
-          "description": "The room logo, as the room DTO carries it."
-        },
-        "skillsCount": {
-          "type": "number",
-          "description": "Instructions rooms: the number of Markdown skills in the room."
-        },
-        "indexedFiles": {
-          "type": "number",
-          "description": "Knowledge rooms: the number of files already indexed."
-        },
-        "totalFiles": {
-          "type": "number",
-          "description": "Knowledge rooms: the number of files in the room."
-        }
-      },
-      "required": [
-        "createdBy",
-        "id",
-        "logo",
-        "roomType",
-        "title"
-      ],
-      "description": "A room the selector offers, with its creator."
-    },
-    "AiProjectLinkableRoomsWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectLinkableRoom"
-          }
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectDeleteOperation": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "operation": {
+        "x": {
           "type": "number"
         },
-        "progress": {
+        "y": {
           "type": "number"
         },
-        "finished": {
-          "type": "boolean"
+        "width": {
+          "type": "number"
         },
-        "error": {
-          "type": "string"
+        "height": {
+          "type": "number"
         }
       },
       "required": [
-        "id",
-        "operation",
-        "progress",
-        "finished",
-        "error"
+        "tmpFile"
       ],
       "additionalProperties": false,
-      "description": "A finished file operation, the shape the asynchronous room delete answers."
-    },
-    "AiProjectDeleteWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectDeleteOperation"
-          }
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectMembersWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectMember"
-          }
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
+      "description": "An uploaded picture (`POST api/2.0/files/logos`) and its crop."
     },
     "AiProjectInvitation": {
       "type": "object",
@@ -2747,153 +1939,29 @@
         },
         "email": {
           "type": "string",
-          "description": "The email of someone without an account; they are added as a pending guest."
+          "description": "The email of someone without an account."
         },
         "access": {
           "type": "number",
-          "description": "9 project manager (owner, DocSpace admins and room admins only), 11 member, 0 remove."
+          "description": "9 project manager (portal owner, DocSpace admins and room admins only), 11 member, 0 remove."
         }
       },
       "required": [
         "access"
       ],
       "additionalProperties": false,
-      "description": "One membership change: a user by `id` or an outsider by `email`, and the role."
-    },
-    "AiProjectMembersResult": {
-      "type": "object",
-      "properties": {
-        "members": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectMember"
-          }
-        },
-        "warning": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "members",
-        "warning"
-      ],
-      "additionalProperties": false,
-      "description": "The members after a change, and a warning when something could not be applied."
-    },
-    "AiProjectMembersResultWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "$ref": "#/components/schemas/AiProjectMembersResult"
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectSuccessWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "$ref": "#/components/schemas/AiSuccessResponse"
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectLinkWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/AiProjectMember"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
+      "description": "One membership change: a user by `id` or someone without an account by `email`, and the role."
     },
     "AiProjectSkill": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "number",
-          "description": "The file id."
-        },
-        "title": {
           "type": "string",
-          "description": "The file title, e.g. `tone-of-voice.md`."
+          "description": "The file id."
         },
         "name": {
           "type": "string",
-          "description": "The frontmatter name, what the model sees."
+          "description": "The frontmatter name, what the model sees; the file name without `.md` when it has none."
         },
         "description": {
           "type": "string",
@@ -2902,7 +1970,6 @@
       },
       "required": [
         "id",
-        "title",
         "name",
         "description"
       ],
@@ -2911,73 +1978,45 @@
     },
     "AiProjectSkillsRoom": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "number"
-        },
-        "title": {
-          "type": "string"
-        },
-        "logo": {
-          "$ref": "#/components/schemas/AiProjectLogo"
-        },
         "skills": {
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiProjectSkill"
           }
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "logo",
-        "skills"
-      ],
-      "additionalProperties": false,
-      "description": "An Instructions room with its skills."
-    },
-    "AiProjectSkillsWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "object",
-          "properties": {
-            "rooms": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/AiProjectSkillsRoom"
-              }
-            }
-          },
-          "required": [
-            "rooms"
+        },
+        "id": {
+          "type": "number",
+          "description": "The room id."
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
           ],
-          "additionalProperties": false
+          "description": "The room title; `null` when the room is not available."
         },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
+        "logo": {
+          "description": "The room logo, as the room DTO carries it; `null` when the room is not available.",
+          "type": [
+            "object",
+            "null"
+          ]
         },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
+        "available": {
+          "type": "boolean",
+          "description": "`false` when the room is gone or the caller can no longer read it."
         }
       },
       "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
+        "available",
+        "id",
+        "logo",
+        "skills",
+        "title"
+      ],
+      "description": "An Instructions room with its skills."
     },
     "AiProjectKnowledgeFile": {
       "type": "object",
@@ -2993,7 +2032,7 @@
         },
         "indexed": {
           "type": "boolean",
-          "description": "Whether the file is already indexed for search."
+          "description": "Whether the file is indexed for search."
         }
       },
       "required": [
@@ -3007,221 +2046,60 @@
     },
     "AiProjectKnowledgeRoom": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "number"
-        },
-        "title": {
-          "type": "string"
-        },
-        "logo": {
-          "$ref": "#/components/schemas/AiProjectLogo"
-        },
         "totalFiles": {
-          "type": "number"
+          "type": "number",
+          "description": "The number of files in the room, subfolders included."
         },
         "indexedFiles": {
-          "type": "number"
+          "type": "number",
+          "description": "The number of listed files already indexed."
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "The room holds more files than one listing reads (1000)."
         },
         "files": {
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiProjectKnowledgeFile"
           }
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "logo",
-        "totalFiles",
-        "indexedFiles",
-        "files"
-      ],
-      "additionalProperties": false,
-      "description": "A Knowledge room with its files and indexing counts."
-    },
-    "AiProjectKnowledgeWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "object",
-          "properties": {
-            "rooms": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/AiProjectKnowledgeRoom"
-              }
-            }
-          },
-          "required": [
-            "rooms"
-          ],
-          "additionalProperties": false
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectPickableUser": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "employeeType": {
-          "type": "number",
-          "description": "`EmployeeType`: 1 room admin, 2 guest, 3 DocSpace admin, 4 user."
-        },
-        "canOwnProject": {
-          "type": "boolean",
-          "description": "Whether the user may hold the owner or project manager role."
         },
         "id": {
-          "type": "string"
-        },
-        "displayName": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "avatarSmall": {
-          "type": "string"
-        },
-        "hasAvatar": {
-          "type": "boolean"
-        },
-        "isOwner": {
-          "type": "boolean",
-          "description": "The portal owner."
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "description": "A DocSpace admin."
-        },
-        "isRoomAdmin": {
-          "type": "boolean",
-          "description": "A room admin."
-        },
-        "isCollaborator": {
-          "type": "boolean",
-          "description": "A user (the \"collaborator\" employee type)."
-        },
-        "isVisitor": {
-          "type": "boolean",
-          "description": "A guest."
-        },
-        "status": {
           "type": "number",
-          "description": "`EmployeeStatus`: 1 active, 2 pending."
+          "description": "The room id."
         },
-        "avatarColor": {
-          "type": "string",
-          "description": "The colour of the generated avatar."
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The room title; `null` when the room is not available."
+        },
+        "logo": {
+          "description": "The room logo, as the room DTO carries it; `null` when the room is not available.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "available": {
+          "type": "boolean",
+          "description": "`false` when the room is gone or the caller can no longer read it."
         }
       },
       "required": [
-        "avatarColor",
-        "avatarSmall",
-        "canOwnProject",
-        "displayName",
-        "email",
-        "employeeType",
-        "hasAvatar",
+        "available",
+        "files",
         "id",
-        "isAdmin",
-        "isCollaborator",
-        "isOwner",
-        "isRoomAdmin",
-        "isVisitor",
-        "status"
+        "indexedFiles",
+        "logo",
+        "title",
+        "totalFiles",
+        "truncated"
       ],
-      "description": "A user the invite and change-owner panels can pick."
-    },
-    "AiProjectUsersWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectPickableUser"
-          }
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
-    },
-    "AiProjectProfilesWrapper": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "response": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectProfile"
-          }
-        },
-        "status": {
-          "type": "number",
-          "description": "0 on success."
-        },
-        "statusCode": {
-          "type": "number",
-          "description": "The HTTP status, 200 on success."
-        },
-        "count": {
-          "type": "number",
-          "description": "List answers: the number of entries returned."
-        },
-        "total": {
-          "type": "number",
-          "description": "List answers: the number of entries that match."
-        }
-      },
-      "required": [
-        "response",
-        "status",
-        "statusCode"
-      ]
+      "description": "A Knowledge room with its files and indexing counts."
     },
     "AiUserSettingsWrapper": {
       "type": "object",
@@ -7229,23 +6107,23 @@
     "aiProjectsCreate": {
       "request": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "title": {
             "type": "string",
             "description": "The project title, 1 to 170 characters."
           },
+          "color": {
+            "type": "string",
+            "description": "The logo colour: six hexadecimal digits without `#`, or empty for the default."
+          },
+          "cover": {
+            "type": "string",
+            "description": "The id of a built-in cover (`GET files/rooms/covers`), or empty for the initials."
+          },
           "logo": {
-            "type": "object",
-            "properties": {
-              "color": {
-                "type": "string"
-              },
-              "cover": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "description": "The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), \"\" for the initials."
+            "$ref": "#/components/schemas/AiProjectLogoRequest",
+            "description": "An uploaded logo."
           },
           "aiProject": {
             "$ref": "#/components/schemas/AiProjectSettingsRequest"
@@ -7253,77 +6131,46 @@
         },
         "required": [
           "title"
-        ],
-        "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
+        ]
       }
     },
     "aiProjectsUpdate": {
       "request": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "title": {
             "type": "string",
             "description": "The new title, 1 to 170 characters."
           },
+          "color": {
+            "type": "string",
+            "description": "The logo colour: six hexadecimal digits without `#`, or empty for the default."
+          },
+          "cover": {
+            "type": "string",
+            "description": "The id of a built-in cover (`GET files/rooms/covers`), or empty for the initials."
+          },
           "logo": {
-            "type": "object",
-            "properties": {
-              "color": {
-                "type": "string"
-              },
-              "cover": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "description": "The project logo, as a room request carries it: `color` (#rrggbb) and the id of a built-in cover (`GET files/rooms/covers`), \"\" for the initials."
+            "$ref": "#/components/schemas/AiProjectLogoRequest",
+            "description": "An uploaded logo."
           },
           "aiProject": {
             "$ref": "#/components/schemas/AiProjectSettingsRequest"
           }
-        },
-        "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
-      }
-    },
-    "aiProjectsList": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectsPageWrapper"
-      }
-    },
-    "aiProjectsGet": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
-      }
-    },
-    "aiProjectsPin": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
-      }
-    },
-    "aiProjectsUnpin": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
-      }
-    },
-    "aiProjectsLinkableRooms": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectLinkableRoomsWrapper"
+        }
       }
     },
     "aiProjectsDelete": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectDeleteWrapper"
-      }
-    },
-    "aiProjectsGetMembers": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectMembersWrapper"
+      "request": {
+        "type": "object",
+        "properties": {
+          "deleteAfter": {
+            "type": "boolean",
+            "description": "Delete the room after the editing session finishes."
+          }
+        },
+        "additionalProperties": false
       }
     },
     "aiProjectsSetMembers": {
@@ -7343,20 +6190,20 @@
           "message": {
             "type": "string",
             "description": "The text of the notification."
+          },
+          "culture": {
+            "type": "string",
+            "description": "The culture of the notification."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Apply the change even when it affects a user's other shares."
           }
         },
         "required": [
           "invitations"
         ],
         "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiProjectMembersResultWrapper"
-      }
-    },
-    "aiProjectsLeave": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectSuccessWrapper"
       }
     },
     "aiProjectsChangeOwner": {
@@ -7376,56 +6223,149 @@
           "userId"
         ],
         "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiProjectWrapper"
-      }
-    },
-    "aiProjectsGetLinks": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectMembersWrapper"
       }
     },
     "aiProjectsSetLink": {
       "request": {
         "type": "object",
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Switch the invitation link on or off."
+          "linkId": {
+            "type": "string",
+            "description": "The link to change or remove; absent creates a new link."
+          },
+          "access": {
+            "type": "number",
+            "description": "11 member (create or change), 0 remove the link."
           },
           "title": {
             "type": "string",
-            "description": "Rename the link."
+            "description": "The link title, 1 to 255 characters."
+          },
+          "expirationDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "When the link stops working; `null` never."
+          },
+          "maxUseCount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "How many times the link may be used, 1 to 1000; `null` without a limit."
           }
         },
         "required": [
-          "enabled"
+          "access"
         ],
         "additionalProperties": false
-      },
-      "response": {
-        "$ref": "#/components/schemas/AiProjectLinkWrapper"
+      }
+    },
+    "aiProjectsResend": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "usersIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The pending members to invite again."
+          },
+          "resendAll": {
+            "type": "boolean",
+            "description": "Invite every pending member again."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "aiProjectsMute": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "mute": {
+            "type": "boolean",
+            "description": "`true` turns the project's notifications off for the caller, `false` back on."
+          }
+        },
+        "required": [
+          "mute"
+        ],
+        "additionalProperties": false
       }
     },
     "aiProjectsSkills": {
       "response": {
-        "$ref": "#/components/schemas/AiProjectSkillsWrapper"
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AiProjectSkillsRoom"
+                }
+              }
+            },
+            "required": [
+              "rooms"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
       }
     },
     "aiProjectsKnowledge": {
       "response": {
-        "$ref": "#/components/schemas/AiProjectKnowledgeWrapper"
-      }
-    },
-    "aiProjectsUsers": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectUsersWrapper"
-      }
-    },
-    "aiProjectsProfiles": {
-      "response": {
-        "$ref": "#/components/schemas/AiProjectProfilesWrapper"
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AiProjectKnowledgeRoom"
+                }
+              }
+            },
+            "required": [
+              "rooms"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "number",
+            "description": "0 on success."
+          },
+          "statusCode": {
+            "type": "number",
+            "description": "The HTTP status, 200 on success."
+          }
+        },
+        "required": [
+          "response",
+          "status",
+          "statusCode"
+        ]
       }
     },
     "aiAgentsList": {

@@ -221,6 +221,11 @@ const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, stri
   aiProjectsSetLink: { id: "The project identifier." },
   aiProjectsSkills: { id: "The project identifier." },
   aiProjectsKnowledge: { id: "The project identifier." },
+  aiProjectsResend: { id: "The project identifier." },
+  aiProjectsMute: { id: "The project identifier." },
+  aiProjectsDuplicate: { id: "The project identifier." },
+  aiProjectsDeleteLogo: { id: "The project identifier." },
+  aiProjectsHistory: { id: "The project identifier." },
   aiProfilesGetById: { id: "The AI provider profile identifier." },
   aiPromptsGetById: { id: "The saved prompt identifier." },
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
@@ -268,6 +273,11 @@ const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, 
   aiProjectsSetLink: { id: EXAMPLE_IDS.project },
   aiProjectsSkills: { id: EXAMPLE_IDS.project },
   aiProjectsKnowledge: { id: EXAMPLE_IDS.project },
+  aiProjectsResend: { id: EXAMPLE_IDS.project },
+  aiProjectsMute: { id: EXAMPLE_IDS.project },
+  aiProjectsDuplicate: { id: EXAMPLE_IDS.project },
+  aiProjectsDeleteLogo: { id: EXAMPLE_IDS.project },
+  aiProjectsHistory: { id: EXAMPLE_IDS.project },
   aiProfilesGetById: { id: EXAMPLE_IDS.profile },
   aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
   aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
@@ -319,42 +329,47 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiDenyToolCall:
     'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
 
-  // Projects - mock-backed until the Files API's room type 12 lands.
+  // Projects - rooms of type 12, delegated to the .NET AI service (AiProjectsController).
   aiProjectsList:
-    "Lists the AI projects the caller may see: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The answer is a folder-content payload of the projects root, one folder per project with its `aiProject` block (model, Instructions rooms, Knowledge rooms) and the caller's `security`. Pinned projects come first; `filterValue` narrows by title, `sortBy` takes `DateAndTime` (default), `AZ` or `DateAndTimeCreation`, `sortOrder` `ascending` or `descending`, `role` / `hasInstructions` / `hasKnowledge` filter by the caller's role and the linked rooms, and `startIndex`/`count` page the list. Currently served from an in-memory mock whose caller is a fixed portal administrator.",
+    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with its `aiProject` block and the caller's `security`. Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `startIndex` and `count` are the rooms listing's; `role`, `hasInstructions`, `hasKnowledge` and `linkedRoomId` narrow by the caller's role and the linked rooms.",
   aiProjectsCreate:
-    "Creates an AI project. The caller becomes its owner and the only member; only the portal owner, DocSpace admins and room admins may create. `title` is required. The optional `aiProject` block sets the model (`profileId`, a UUID of an enabled chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10, `knowledgeRoomIds` rooms of type 11, each readable by the caller. The caller is granted Viewer on every linked room they are not yet in. A project holds no files of its own.",
-  aiProjectsLinkableRooms:
-    "Lists the rooms a project may link, for the room selector: `type` is required and is `10` for Instructions rooms or `11` for Knowledge rooms; `filterValue` narrows by title. Only rooms the caller can read are returned, each with its skills count (type 10) or indexed/total file counts (type 11).",
-  aiProjectsUsers:
-    "Lists the portal users the invite and change-owner panels can pick from, with `canOwnProject` saying who may hold the owner or project manager role. `filterValue` narrows by name or email. Mock data standing in for the People API.",
-  aiProjectsProfiles:
-    "Lists the AI profiles a project can be bound to, as the model picker of the project dialog shows them: id, name, provider and whether the profile is enabled. Mock data; a project may also be bound to any profile of the portal by its id (the mock answers `available: false` and no name until the real profile storage lists it).",
+    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it. The optional `aiProject` block sets the model (`profileId`, a UUID of a chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each readable by the caller, not third-party, at most 20 of each. The caller is granted Viewer on every linked room they are not yet in. Room-only fields (tags, quota, lifetime, watermark, ...) are refused.",
   aiProjectsGet:
-    "Returns one AI project with its `aiProject` block, the caller's `access` and `security`. A project the caller is not a member of answers 404, unless the caller is the portal owner or a DocSpace admin, who see every project.",
+    "Returns one AI project as a room card: its `aiProject` block, the caller's `access` and `security`. A room that is not an AI project answers 404.",
   aiProjectsUpdate:
-    "Changes an AI project: `title`, `logo.color` and the `aiProject` block. Owner and project manager only. In `aiProject` an absent field keeps its value and `profileId: null` returns the project to the portal default model; the room lists replace the current ones and are validated as on create. Every member who is not yet in a newly linked room is granted Viewer on it; removing a room from the project does not revoke anything.",
+    "Changes an AI project: `title`, `color`, `cover`, `logo` and the `aiProject` block. Owner and project managers only. In `aiProject` an absent field keeps its value, `profileId: null` returns to the portal default model and a room list replaces the current one, validated as on create. Every member not yet in a newly linked room is granted Viewer on it; unlinking a room revokes nothing.",
   aiProjectsDelete:
-    "Deletes an AI project. Owner only. Members lose the project; the linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched. The answer is a finished file-operation entry, so a client written against the asynchronous room delete can poll it once and stop.",
+    "Deletes an AI project as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner only. The linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched.",
   aiProjectsPin:
-    "Pins the project at the top of the caller's list. Members only; pinning is per user, as for rooms.",
+    "Pins the project at the top of the caller's list, as a room is pinned. Pinning is per user.",
   aiProjectsUnpin: "Removes the caller's pin from the project.",
   aiProjectsGetMembers:
-    "Lists the members of the project with their roles, owner first, as file-share entries: `access` 1 is the owner, 9 a project manager, 11 a member. `canEditAccess` tells whether the caller may change that entry.",
+    "Lists the members of the project with their roles, as the room share entries: `access` 1 is the project owner, 9 a project manager, 11 a member. `filterType` 1 lists the invitation link instead.",
   aiProjectsSetMembers:
-    "Invites, re-roles or removes members. Owner and project manager only. Each invitation names a user by `id` or an outsider by `email` (who becomes a pending guest), and an `access`: 9 project manager, allowed for the portal owner, DocSpace admins and room admins only; 11 member, allowed for everyone; 0 removes. The owner cannot be re-roled or removed here - use the change-owner operation. Every member added is granted Viewer on each linked Instructions and Knowledge room they are not yet in; an existing share on a room is never downgraded. Removal does not revoke those shares.",
+    "Invites, re-roles or removes members through the room share. Owner and project managers only. Each invitation names a user by `id` or someone without an account by `email`, and an `access`: 9 project manager (the portal owner, DocSpace admins and room admins only), 11 member (anyone), 0 removes. The project owner cannot be changed here - use the change-owner operation. Every member added is granted Viewer on each linked Instructions and Knowledge room they are not yet in; an existing share on a room is never downgraded, and removal revokes nothing.",
   aiProjectsLeave:
-    "Removes the caller from the project. Project managers and members only: the owner has to hand the project over first with the change-owner operation. The Viewer shares the project granted on its rooms are kept.",
+    "Removes the caller from the project, as a room is left. Project managers and members only: the project owner has to hand the project over first. The Viewer shares the project granted on its rooms are kept.",
   aiProjectsChangeOwner:
-    "Hands the project to another user. Owner only. `userId` has to name a user who may own a project (the portal owner, a DocSpace admin or a room admin); users and guests are refused. With `keepAsManager` (default true) the previous owner stays as a project manager, otherwise they leave the project. The new owner is granted Viewer on the linked rooms they are not yet in.",
+    "Hands the project to another user. Owner only. `userId` must name the portal owner, a DocSpace admin or a room admin. With `keepAsManager` (default true) the previous owner stays as a project manager, otherwise they leave the project right after. The new owner is granted Viewer on the linked rooms they are not yet in.",
   aiProjectsGetLinks:
-    "Returns the project's invitation link as a file-share entry when it is switched on, else an empty list. Anyone who joins through the link becomes a member (access 11).",
+    "Returns the project's invitation link as a room share entry, or an empty list when there is none or the caller may not manage links. Anyone who joins through the link becomes a member (access 11).",
   aiProjectsSetLink:
-    "Switches the invitation link on or off (`enabled`) and optionally renames it (`title`). Owner and project manager only. Switching the link off and on again issues a new token, so a leaked link stops working. The answer is the link entry, or `null` once it is off.",
+    "Creates, changes or removes the project's invitation link through the room links. Owner and project managers only. `access` 11 creates (no `linkId`) or changes (with `linkId`) the link, 0 removes the link named by `linkId`; `title`, `expirationDate` and `maxUseCount` are the room link's.",
   aiProjectsSkills:
-    "Lists the skills of every Instructions room linked to the project, grouped by room, for the skills panel: each skill is a Markdown file with its frontmatter name and description. Which skills a chat round uses is the user's per-session choice and is not stored.",
+    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description. A room that is gone or that the caller can no longer read is listed with `available: false`. Which skills a chat round uses is the user's per-session choice and is not stored.",
   aiProjectsKnowledge:
-    "Lists the files of every Knowledge room linked to the project, grouped by room, with the room's indexed and total counts and each file's indexing state, for the files panel.",
+    "Lists the files of every Knowledge room linked to the project, subfolders included, grouped by room, with each file's indexing state and the room's indexed and total counts. A room that is gone or unreadable is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
+
+  aiProjectsResend:
+    "Sends the project invitation again to members who have not accepted it yet: the users in `usersIds`, or with `resendAll` every pending member. Owner and project managers only.",
+  aiProjectsMute:
+    "Turns the project's notifications off (`mute: true`) or back on for the caller. Per user.",
+  aiProjectsDuplicate:
+    "Copies the project - title, logo, model and linked rooms, without its members - as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner and project managers only. The caller becomes the copy's owner; linked rooms they cannot read are left out.",
+  aiProjectsDeleteLogo:
+    "Removes the project's uploaded logo; the colour and cover are drawn again. Owner and project managers only.",
+  aiProjectsHistory:
+    "Returns the project's history events, newest first: `fromDate` and `toDate` bound them, `startIndex` and `count` page them.",
 
   // Agents - delegated to the .NET AI service, with the profile binding kept here.
   aiAgentsList:
@@ -682,65 +697,71 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "402": true,
   },
 
-  // Projects - the id is an integer; the write operations validate roles
-  // and the linked rooms.
+  // Projects - the id is an integer and must name a room of type 12; the
+  // write operations validate the body before anything is forwarded.
   aiProjectsCreate: {
     "400":
-      "`title` is missing or too long, `aiProject.profileId` is not a UUID, or a room id is " +
-      "not an accessible room of the required type.",
+      "`title` is missing or too long, a field is not a project field, `color` or `cover` is " +
+      "malformed, `aiProject.profileId` is not a UUID of a chat profile, or a room id is not an " +
+      "accessible room of the required type.",
     "403": "The caller is a user or a guest, who cannot create projects.",
   },
-  aiProjectsLinkableRooms: { "400": "`type` is neither 10 nor 11." },
   aiProjectsGet: {
     "400": "The project id is not a positive integer.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsUpdate: {
     "400":
-      "The project id is not a positive integer, `title` is empty or too long, or the " +
-      "`aiProject` block fails the checks of create.",
+      "The project id is not a positive integer, nothing to update is given, or a field fails " +
+      "the checks of create.",
     "403": "The caller is neither the owner nor a project manager.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsDelete: {
     "400": "The project id is not a positive integer.",
     "403": "The caller is not the owner.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsPin: {
-    "403": "The caller is not a member of the project.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
-  aiProjectsUnpin: { "404": "The project does not exist or the caller is not a member of it." },
+  aiProjectsUnpin: {
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+  },
   aiProjectsGetMembers: {
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsSetMembers: {
     "400":
-      "`invitations` is empty, an entry has neither id nor email, names no user, asks a role " +
-      "the user cannot hold, or targets the owner.",
+      "`invitations` is empty, an entry has neither a UUID id nor an email, or asks an access " +
+      "other than 0, 9 or 11.",
     "403": "The caller is neither the owner nor a project manager.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsLeave: {
-    "400": "The caller is not a member, or is the owner and has to hand the project over first.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "400": "The caller is the project owner and has to hand the project over first.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
   aiProjectsChangeOwner: {
-    "400":
-      "`userId` is not a UUID, names no user, names the current owner, or names a user or guest.",
-    "403": "The caller is not the owner.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "400": "`userId` is not a UUID or `keepAsManager` is not a boolean.",
+    "403": "The caller is not the owner, or the new owner may not own a project.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
-  aiProjectsGetLinks: { "404": "The project does not exist or the caller is not a member of it." },
+  aiProjectsGetLinks: {
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+  },
   aiProjectsSetLink: {
-    "400": "`enabled` is missing.",
+    "400":
+      "`access` is neither 11 nor 0, `linkId` is missing for a removal or is not a UUID, or " +
+      "`title`, `expirationDate` or `maxUseCount` is out of range.",
     "403": "The caller is neither the owner nor a project manager.",
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
-  aiProjectsSkills: { "404": "The project does not exist or the caller is not a member of it." },
+  aiProjectsSkills: {
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+  },
   aiProjectsKnowledge: {
-    "404": "The project does not exist or the caller is not a member of it.",
+    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
 
   // Agents - the room ID is an integer on the .NET side and a non-integer one
@@ -1278,21 +1299,23 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiProjectsList:
     "The projects the caller may see, in the folder-content envelope of the projects root.",
   aiProjectsCreate: "The created project, with the caller as its owner.",
-  aiProjectsLinkableRooms: "The rooms of the requested type the caller can read.",
-  aiProjectsUsers: "The users, with `canOwnProject` per entry.",
-  aiProjectsProfiles: "The profiles, with `available` per entry.",
   aiProjectsGet: "The project, with its `aiProject` block and the caller's `security`.",
   aiProjectsUpdate: "The updated project.",
-  aiProjectsDelete: "A finished file-operation entry for the deleted project.",
+  aiProjectsDelete: "The file operation deleting the project.",
   aiProjectsPin: "The project, now pinned for the caller.",
   aiProjectsUnpin: "The project, no longer pinned for the caller.",
-  aiProjectsGetMembers: "The members with their roles, owner first.",
+  aiProjectsGetMembers: "The members with their roles, or the invitation link.",
   aiProjectsSetMembers:
     "The members after the change, and a warning when something could not be applied.",
   aiProjectsLeave: "The caller has left the project.",
-  aiProjectsChangeOwner: "The project under its new owner, as the previous owner sees it.",
-  aiProjectsGetLinks: "The invitation link, or an empty list when it is off.",
-  aiProjectsSetLink: "The invitation link, or `null` once it is off.",
+  aiProjectsChangeOwner: "The project under its new owner.",
+  aiProjectsGetLinks: "The invitation link, or an empty list.",
+  aiProjectsSetLink: "The invitation link, or nothing once it is removed.",
+  aiProjectsResend: "The invitations were sent again.",
+  aiProjectsMute: "The caller's notification settings for rooms.",
+  aiProjectsDuplicate: "The file operation copying the project.",
+  aiProjectsDeleteLogo: "The project without its uploaded logo.",
+  aiProjectsHistory: "The project's history events.",
   aiProjectsSkills: "The skills of the linked Instructions rooms, grouped by room.",
   aiProjectsKnowledge: "The files of the linked Knowledge rooms, grouped by room.",
 
@@ -1935,7 +1958,7 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       name: "sortBy",
       in: "query",
       description:
-        "The sort field: `DateAndTime` (last change, the default), `AZ` or `DateAndTimeCreation`.",
+        "The sort field, as for rooms: `DateAndTime` (last change, the default), `AZ` or `DateAndTimeCreation`.",
       required: false,
       schema: { type: "string", examples: ["DateAndTime"] },
     },
@@ -1945,6 +1968,13 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       description: "`ascending` or `descending` (the default).",
       required: false,
       schema: { type: "string", examples: ["descending"] },
+    },
+    {
+      name: "subjectId",
+      in: "query",
+      description: "Keep only the projects this user owns.",
+      required: false,
+      schema: { type: "string", examples: ["00000000-0000-0000-0000-000000000000"] },
     },
     {
       name: "role",
@@ -1969,6 +1999,13 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       schema: { type: "boolean", examples: [true] },
     },
     {
+      name: "linkedRoomId",
+      in: "query",
+      description: "Keep only the projects that link this Instructions or Knowledge room.",
+      required: false,
+      schema: { type: "integer", examples: [42] },
+    },
+    {
       name: "startIndex",
       in: "query",
       description: PARAM_DOCS["startIndex"] ?? "",
@@ -1983,29 +2020,64 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       schema: { type: "integer", examples: [25] },
     },
   ],
-  aiProjectsUsers: [
+  aiProjectsHistory: [
+    {
+      name: "fromDate",
+      in: "query",
+      description: "Keep only the events from this date (ISO-8601).",
+      required: false,
+      schema: { type: "string", examples: ["2026-10-01T00:00:00Z"] },
+    },
+    {
+      name: "toDate",
+      in: "query",
+      description: "Keep only the events up to this date (ISO-8601).",
+      required: false,
+      schema: { type: "string", examples: ["2026-10-28T23:59:59Z"] },
+    },
+    {
+      name: "startIndex",
+      in: "query",
+      description: PARAM_DOCS["startIndex"] ?? "",
+      required: false,
+      schema: { type: "integer", examples: [0] },
+    },
+    {
+      name: "count",
+      in: "query",
+      description: PARAM_DOCS["count"] ?? "",
+      required: false,
+      schema: { type: "integer", examples: [25] },
+    },
+  ],
+  aiProjectsGetMembers: [
+    {
+      name: "filterType",
+      in: "query",
+      description: "`0` (the default) lists the users and groups, `1` the invitation link.",
+      required: false,
+      schema: { type: "integer", examples: [0] },
+    },
     {
       name: "filterValue",
       in: "query",
-      description: "Keep only the users whose name or email contains this text.",
+      description: "Keep only the members whose name contains this text.",
       required: false,
       schema: { type: "string", examples: ["anna"] },
     },
-  ],
-  aiProjectsLinkableRooms: [
     {
-      name: "type",
+      name: "startIndex",
       in: "query",
-      description: "The room type to list: `10` for Instructions rooms, `11` for Knowledge rooms.",
-      required: true,
-      schema: { type: "integer", examples: [10] },
+      description: PARAM_DOCS["startIndex"] ?? "",
+      required: false,
+      schema: { type: "integer", examples: [0] },
     },
     {
-      name: "filterValue",
+      name: "count",
       in: "query",
-      description: "Keep only the rooms whose title contains this text.",
+      description: PARAM_DOCS["count"] ?? "",
       required: false,
-      schema: { type: "string", examples: ["brand"] },
+      schema: { type: "integer", examples: [25] },
     },
   ],
   aiAgentsList: [

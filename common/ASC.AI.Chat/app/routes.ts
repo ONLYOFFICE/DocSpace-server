@@ -56,7 +56,7 @@ import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
-import { projectsController } from "./controllers/projectsController.js";
+import { aiProjectsController } from "./controllers/aiProjectsController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
@@ -206,27 +206,28 @@ export default function registerRoutes(app: Application): void {
   router.put("/agents/:id", agentsController.updateAgent);
   router.delete("/agents/:id", agentsController.deleteAgent);
 
-  // AI Projects — mock-backed for now (see projectsController); the same
-  // paths will delegate to the Files API's room type 12 later. The literal
-  // `rooms` sub-path is registered before `/projects/:id`.
-  router.get("/projects", projectsController.getProjects);
-  router.get("/projects/rooms", projectsController.getLinkableRooms);
-  router.get("/projects/users", projectsController.getUsers);
-  router.get("/projects/profiles", projectsController.getProfiles);
-  router.post("/projects", projectsController.createProject);
-  router.get("/projects/:id", projectsController.getProject);
-  router.put("/projects/:id", projectsController.updateProject);
-  router.delete("/projects/:id", projectsController.deleteProject);
-  router.put("/projects/:id/pin", projectsController.pinProject);
-  router.put("/projects/:id/unpin", projectsController.unpinProject);
-  router.get("/projects/:id/share", projectsController.getMembers);
-  router.put("/projects/:id/share", projectsController.setMembers);
-  router.put("/projects/:id/leave", projectsController.leaveProject);
-  router.put("/projects/:id/owner", projectsController.changeOwner);
-  router.get("/projects/:id/links", projectsController.getInviteLink);
-  router.put("/projects/:id/links", projectsController.setInviteLink);
-  router.get("/projects/:id/skills", projectsController.getSkills);
-  router.get("/projects/:id/knowledge", projectsController.getKnowledgeFiles);
+  // AI projects: rooms of type 12 with a settings block, delegated to the
+  // .NET AI service like the agents above (see aiProjectsController).
+  router.get("/projects", aiProjectsController.getProjects);
+  router.post("/projects", aiProjectsController.createProject);
+  router.get("/projects/:id", aiProjectsController.getProject);
+  router.put("/projects/:id", aiProjectsController.updateProject);
+  router.delete("/projects/:id", aiProjectsController.deleteProject);
+  router.put("/projects/:id/pin", aiProjectsController.pinProject);
+  router.put("/projects/:id/unpin", aiProjectsController.unpinProject);
+  router.get("/projects/:id/share", aiProjectsController.getMembers);
+  router.put("/projects/:id/share", aiProjectsController.setMembers);
+  router.put("/projects/:id/leave", aiProjectsController.leaveProject);
+  router.put("/projects/:id/owner", aiProjectsController.changeOwner);
+  router.get("/projects/:id/links", aiProjectsController.getInviteLinks);
+  router.put("/projects/:id/links", aiProjectsController.setInviteLink);
+  router.post("/projects/:id/resend", aiProjectsController.resendInvitations);
+  router.put("/projects/:id/mute", aiProjectsController.muteProject);
+  router.put("/projects/:id/duplicate", aiProjectsController.duplicateProject);
+  router.delete("/projects/:id/logo", aiProjectsController.deleteLogo);
+  router.get("/projects/:id/history", aiProjectsController.getHistory);
+  router.get("/projects/:id/skills", aiProjectsController.getSkills);
+  router.get("/projects/:id/knowledge", aiProjectsController.getKnowledgeFiles);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

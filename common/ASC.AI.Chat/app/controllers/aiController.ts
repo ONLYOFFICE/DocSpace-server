@@ -53,6 +53,7 @@ import {
   setRoundProfileId,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
+import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
@@ -771,6 +772,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -822,6 +832,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -940,6 +959,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -991,6 +1019,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -1015,6 +1052,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -1034,6 +1080,15 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
