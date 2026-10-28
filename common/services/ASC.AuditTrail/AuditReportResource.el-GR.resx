@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Το προφίλ AI ανατέθηκε στον AI πράκτορα για ενέργεια: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Διαγράφηκε κλειδί BYOK για μοντέλο AI: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Ορίστηκε κλειδί BYOK για μοντέλο AI: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Το προφίλ AI ανατέθηκε στην ενέργεια: {0}</value>
   </data>

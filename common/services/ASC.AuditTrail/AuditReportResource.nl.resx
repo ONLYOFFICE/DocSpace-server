@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI-profiel toegewezen aan AI-agent voor actie: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>BYOK-sleutel verwijderd voor AI-model: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>BYOK-sleutel ingesteld voor AI-model: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI-profiel toegewezen aan actie: {0}</value>
   </data>

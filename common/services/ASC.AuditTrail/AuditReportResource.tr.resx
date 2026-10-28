@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI profili, AI aracısına eylem için atandı: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI modeli için BYOK anahtarı silindi: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI modeli için BYOK anahtarı ayarlandı: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profili eyleme atandı: {0}</value>
   </data>

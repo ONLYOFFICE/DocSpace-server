@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Perfil de IA atribuído ao agente de IA para ação: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Chave BYOK excluída para o modelo de IA: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Chave BYOK definida para o modelo de IA: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Perfil de IA atribuído à ação: {0}</value>
   </data>

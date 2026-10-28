@@ -89,8 +89,7 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var models = (await _aiGateway.GetAllModelsAsync()).Data;
-        var model = models.FirstOrDefault(m => m.RevisionId == id && IsNotEmbedding(m)) ?? throw new ItemNotFoundException();
+        var model = await FindByokModelAsync(id) ?? throw new ItemNotFoundException();
 
         if (model.ByokProviders?.Any(p => p.Id == provider) != true)
         {
@@ -104,6 +103,8 @@ public class ProfileStorageService(
 
         await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, provider, key);
 
+        messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
+
         return MapGatewayProfile(model, provider);
     }
 
@@ -112,10 +113,14 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
+        var name = (await FindByokModelAsync(id))?.Alias ?? id.ToString();
+
         if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
         {
             throw new ItemNotFoundException();
         }
+
+        messageService.Send(MessageAction.AiByokKeyDeleted, MessageTarget.Create(id), name);
     }
 
     public async Task<List<ByokProviderInfo>> ReadByokProvidersAsync()
@@ -220,6 +225,13 @@ public class ProfileStorageService(
         {
             throw new ItemNotFoundException();
         }
+    }
+
+    private async Task<Model?> FindByokModelAsync(Guid id)
+    {
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+
+        return models.FirstOrDefault(m => m.RevisionId == id && IsNotEmbedding(m));
     }
 
     private async Task<List<Profile>> MapGatewayProfilesAsync(List<Model> models)

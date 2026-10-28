@@ -1080,6 +1080,12 @@ public enum MessageAction
     [Description("Service spending limit deleted")]
     CustomerServiceLimitDeleted = 6116,
 
+    [Description("AI model BYOK key set")]
+    AiByokKeySet = 6117,
+
+    [Description("AI model BYOK key deleted")]
+    AiByokKeyDeleted = 6118,
+
     #endregion
 
     #region others

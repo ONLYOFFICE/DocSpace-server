@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI 에이전트에 작업용 AI 프로필이 할당되었습니다: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI 모델의 BYOK 키가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI 모델의 BYOK 키가 설정되었습니다: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>작업에 AI 프로필이 할당되었습니다: {0}</value>
   </data>

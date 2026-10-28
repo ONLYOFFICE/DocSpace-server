@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI 配置文件已分配给 AI 代理以执行操作：{0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>已删除 AI 模型的 BYOK 密钥：{0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>已为 AI 模型设置 BYOK 密钥：{0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI 配置文件已分配给操作：{0}</value>
   </data>

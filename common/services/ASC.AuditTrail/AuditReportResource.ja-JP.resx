@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AIエージェントにアクション用AIプロファイルが割り当てられました：{0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AIモデルのBYOKキーが削除されました：{0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AIモデルのBYOKキーが設定されました：{0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>アクション用AIプロファイルが割り当てられました：{0}</value>
   </data>

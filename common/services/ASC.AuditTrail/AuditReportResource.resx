@@ -165,6 +165,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI profile assigned to AI agent for action: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>BYOK key deleted for AI model: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>BYOK key set for AI model: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profile assigned to action: {0}</value>
   </data>
