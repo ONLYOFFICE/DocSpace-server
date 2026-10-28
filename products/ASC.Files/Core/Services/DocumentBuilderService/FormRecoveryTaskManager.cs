@@ -34,11 +34,11 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singleton]
-public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory, IDistributedLockProvider distributedLockProvider) : IDisposable
+public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory, IDistributedLockProvider distributedLockProvider)
 {
     private const string TaskIdPrefix = "FormRecoveryTask";
 
-    private readonly SemaphoreSlim _semaphore = new(1);
+    private readonly Lock _queuedOnLock = new();
     private DateTime _lastQueuedOn;
     private readonly DistributedTaskQueue<FormRecoveryTask> _queue = queueFactory.CreateQueue<FormRecoveryTask>();
 
@@ -50,61 +50,66 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory, 
     /// </summary>
     public async Task<bool> TryEnqueueAsync(FormRecoveryTask newTask)
     {
-        await _semaphore.WaitAsync();
+        // Requests of one user may reach two workers at once: the check and the publication go under a lock of the cluster
+        // per recovery, so that only one of them queues it and the starts of other recoveries do not wait.
+        IDistributedLockHandle handle;
         try
         {
-            // Requests of one user may reach two workers at once: the check and the publication go under a lock of the
-            // cluster, so that only one of them queues the recovery.
-            IDistributedLockHandle handle;
-            try
+            handle = await distributedLockProvider.TryAcquireFairLockAsync($"{newTask.Id}_start");
+        }
+        catch (DistributedLockException)
+        {
+            // The start that holds the lock queued the recovery, which starts the report itself. A lock that could not be had
+            // for any other reason fails the request, which the caller logs.
+            if (await _queue.PeekTask(newTask.Id) is { IsCompleted: false })
             {
-                handle = await distributedLockProvider.TryAcquireFairLockAsync($"{newTask.Id}_start");
-            }
-            catch (DistributedLockException)
-            {
-                // Another start of this recovery holds the lock, so its task is about to run.
                 return false;
             }
 
-            await using (handle)
-            {
-                var task = await _queue.PeekTask(newTask.Id);
-                if (task is { IsCompleted: false })
-                {
-                    return false;
-                }
-
-                if (task != null)
-                {
-                    await _queue.DequeueTask(task.Id);
-                }
-
-                // The order the recoveries of a form run in; kept growing when the clock is set back.
-                var now = DateTime.UtcNow;
-                newTask.QueuedOn = _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
-
-                // Published at once, so that the task is seen as running, and queued once the earlier recoveries of the form
-                // are done. The heartbeat starts first, since a free reader may start the task as soon as it is queued and
-                // stop it.
-                newTask.StartQueuedHeartbeat();
-                try
-                {
-                    await _queue.PublishTask(newTask);
-                }
-                catch
-                {
-                    await newTask.StopQueuedHeartbeatAsync();
-                    throw;
-                }
-
-                _ = newTask.QueueWhenFreeAsync(this, _queue);
-
-                return true;
-            }
+            throw;
         }
-        finally
+
+        await using (handle)
         {
-            _semaphore.Release();
+            var task = await _queue.PeekTask(newTask.Id);
+            if (task is { IsCompleted: false })
+            {
+                return false;
+            }
+
+            if (task != null)
+            {
+                await _queue.DequeueTask(task.Id);
+            }
+
+            newTask.QueuedOn = NextQueuedOn();
+
+            // Published at once, so that the task is seen as running, and queued once the earlier recoveries of the form are
+            // done. The heartbeat starts first, since a free reader may start the task as soon as it is queued and stop it.
+            newTask.StartQueuedHeartbeat();
+            try
+            {
+                await _queue.PublishTask(newTask);
+            }
+            catch
+            {
+                await newTask.StopQueuedHeartbeatAsync();
+                throw;
+            }
+
+            _ = newTask.QueueWhenFreeAsync(this, _queue);
+
+            return true;
+        }
+    }
+
+    // The order the recoveries of a form run in; kept growing when the clock is set back.
+    private DateTime NextQueuedOn()
+    {
+        lock (_queuedOnLock)
+        {
+            var now = DateTime.UtcNow;
+            return _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
         }
     }
 
@@ -132,10 +137,5 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory, 
     public static bool IsQueuedBefore(FormRecoveryTask first, FormRecoveryTask second)
     {
         return first.QueuedOn < second.QueuedOn || (first.QueuedOn == second.QueuedOn && string.CompareOrdinal(first.Id, second.Id) < 0);
-    }
-
-    public void Dispose()
-    {
-        _semaphore.Dispose();
     }
 }
