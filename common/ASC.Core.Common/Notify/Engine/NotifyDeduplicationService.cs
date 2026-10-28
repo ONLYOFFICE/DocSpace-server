@@ -53,9 +53,18 @@ public class NotifyDeduplicationService(
             ? period
             : _defaultPeriod;
 
+    // An invitation link expires this long after it is first opened. Suppressing a resend for longer could leave
+    // the recipient holding only an expired link, so no period may outlast it.
+    private readonly TimeSpan _maxPeriod = EmailValidationKeyProvider.GetValidVisitLinkInterval(configuration);
+
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
     {
         var period = request.NotifyAction.DeduplicationPeriod ?? _period;
+        if (period > _maxPeriod)
+        {
+            period = _maxPeriod;
+        }
+
         if (period <= TimeSpan.Zero)
         {
             return false;
