@@ -77,13 +77,14 @@ public class NotifyDeduplicationServiceTests
     [Fact]
     public async Task RenamedRoom_IsStillTheSameLetter()
     {
+        // The action does take a tag into the key, so a service that took every tag would let the renamed room through.
         var service = CreateService();
-        var action = new TestAction("saas_room_invite_existing_user");
+        var action = new TestAction("user_role_changed", tags: ["AccessLevel"]);
 
-        await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("RoomTitle", "Before")]));
-        var afterRename = await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("RoomTitle", "After")]));
+        await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("AccessLevel", "Editing"), new TagValue("RoomTitle", "Before")]));
+        var afterRename = await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("AccessLevel", "Editing"), new TagValue("RoomTitle", "After")]));
 
-        afterRename.Should().BeTrue("a title is free text the caller controls and never part of the key");
+        afterRename.Should().BeTrue("only the tags the action names enter the key, and a title is free text the caller controls");
     }
 
     [Fact]
