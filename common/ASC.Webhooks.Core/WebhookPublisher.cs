@@ -40,7 +40,8 @@ public class WebhookPublisher(
     TenantUtil tenantUtil,
     AuthContext authContext,
     UserManager userManager,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    WebhookSocketManager webhookSocketManager)
     : IWebhookPublisher
 {
     // One instance for the process: the serializer builds its metadata per options instance, so options created
@@ -228,7 +229,11 @@ public class WebhookPublisher(
             RequestPayload = payloadStr
         };
 
-        return await PublishAsync(webhooksLog);
+        var newWebhooksLog = await PublishAsync(webhooksLog);
+
+        await webhookSocketManager.AddWebhookLogAsync(webhookConfig, newWebhooksLog.Id);
+
+        return newWebhooksLog;
     }
 
 
@@ -244,6 +249,10 @@ public class WebhookPublisher(
         await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, result.Log.TenantId, result.Log.Id));
 
         result.Log.Config = webhookLog.Config;
+
+        // the new record, and the one retried: a retry ends the pending attempts of the event's earlier records
+        await webhookSocketManager.AddWebhookLogAsync(webhookLog.Config, result.Log.Id);
+        await webhookSocketManager.UpdateWebhookLogAsync(webhookLog.Config, webhookLog.Id);
 
         return result;
     }

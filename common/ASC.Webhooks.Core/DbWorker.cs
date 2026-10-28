@@ -610,7 +610,8 @@ public class DbWorker(
     }
 
     /// <summary>
-    /// What the journal shows as the response of a row a publisher of the previous version wrote.
+    /// What the journal shows as the response of a row a publisher of the previous version wrote. Upgrade105 writes
+    /// the same text into the rows it marks, and the backup restore compares with it: keep them equal.
     /// </summary>
     public const string PreviousVersionNote =
         "Not sent: the event was published by a service of the previous version, in the old payload format";
@@ -627,6 +628,32 @@ public class DbWorker(
     /// </summary>
     public const string UnreadableBodyNote =
         "Not sent: the stored body of the event cannot be read";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that was not sent because its portal is gone or being removed.
+    /// </summary>
+    public const string PortalRemovedNote =
+        "Not sent: the portal is removed or being removed";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that was not sent because its subscription is disabled.
+    /// </summary>
+    public const string SubscriptionDisabledNote =
+        "Not sent: the subscription is disabled";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that was not sent because the target address of its
+    /// subscription failed validation, which disables the subscription; followed by the reason.
+    /// </summary>
+    public const string TargetRejectedNote =
+        "Not sent: the target address was rejected, and the subscription was disabled: ";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that was waiting for its first attempt when the backup the
+    /// portal was restored from was taken.
+    /// </summary>
+    public const string RestoredFromBackupNote =
+        "Not sent: the portal was restored from a backup taken before the event was delivered";
 
     /// <summary>
     /// Marks a row written by a publisher of the previous version as never to be sent: see

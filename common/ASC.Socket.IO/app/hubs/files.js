@@ -713,6 +713,28 @@ module.exports = (io) => {
     filesIO.to(target).emit(`plugin:${module}:${event}`, { message });
   }
 
+  // A webhook subscription and its delivery journal are visible to the DocSpace admins and to the owner of the
+  // subscription only, so the server names the users (WebhookSocketManager): each gets the event in the private room
+  // only the server puts a connection into. The data holds ids only, for the client to re-read the subscription
+  // (GET settings/webhooks) or its journal (GET settings/webhooks/log).
+  function webhookEvent(name, { tenantId, userIds, data } = {}) {
+    if (!Number.isInteger(tenantId) || tenantId <= 0 || !Array.isArray(userIds)) {
+      logger.warn(`${name} skipped: tenantId=${tenantId}`);
+      return;
+    }
+
+    logger.info(`${name} ${data?.id} in tenant ${tenantId} for ${userIds.length} users`);
+    userIds
+      .filter((userId) => guid.test(userId))
+      .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit(`s:${name}`, data));
+  }
+
+  const addWebhook = (body) => webhookEvent("add-webhook", body);
+  const updateWebhook = (body) => webhookEvent("update-webhook", body);
+  const deleteWebhook = (body) => webhookEvent("delete-webhook", body);
+  const addWebhookLog = (body) => webhookEvent("add-webhook-log", body);
+  const updateWebhookLog = (body) => webhookEvent("update-webhook-log", body);
+
   return {
     startEdit,
     stopEdit,
@@ -766,6 +788,11 @@ module.exports = (io) => {
     changeExternalSharingSettings,
     externalDbSettings,
     formSuggestedQuestions,
-    pluginEvent
+    pluginEvent,
+    addWebhook,
+    updateWebhook,
+    deleteWebhook,
+    addWebhookLog,
+    updateWebhookLog
   };
 };

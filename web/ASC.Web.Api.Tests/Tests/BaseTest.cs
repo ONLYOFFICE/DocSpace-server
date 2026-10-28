@@ -102,9 +102,19 @@ public class BaseTest(
     protected PortalSettingsApi _portalSettingsApi = null!;
     protected PortalUsersApi _portalUsersApi = null!;
 
+    /// <summary>
+    /// True for a test class that needs the services of <see cref="AspireAppFixture"/> the run does not wait for.
+    /// </summary>
+    protected virtual bool NeedsLazyResources => false;
+
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
+
+        if (NeedsLazyResources)
+        {
+            await fixture.WaitForLazyResourcesAsync();
+        }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);

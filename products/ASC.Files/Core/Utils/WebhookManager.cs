@@ -42,6 +42,12 @@ public class WebhookManager(
     IServiceProvider serviceProvider,
     FileEntryWebhookDtoHelper fileEntryWebhookDtoHelper)
 {
+    /// <summary>
+    /// Finds the subscriptions an event about <paramref name="fileEntry"/> goes to while the caller can still read it,
+    /// for an action that moves it where they no longer can (the trash); the payload is built later, by
+    /// <see cref="PublishAsync{T}(WebhookTrigger, IEnumerable{DbWebhooksConfig}, FileEntry{T})"/>, from the entry as it
+    /// is after the action.
+    /// </summary>
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
         var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
@@ -60,6 +66,29 @@ public class WebhookManager(
         var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
 
         await PublishForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
+            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
+    }
+
+    /// <summary>
+    /// Builds the event for every subscriber now and returns the call that publishes it, for an action that removes
+    /// <paramref name="fileEntry"/>: who receives the event and what each of them may see in it (the quota of a room
+    /// goes only to those who may edit the room) is decided while the entry and its access records still exist.
+    /// </summary>
+    public async Task<Func<Task>> PrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
+        var pureFileEntry = await GetPureFileEntry(fileEntry) ?? fileEntry;
+
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, pureFileEntry);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return () => Task.CompletedTask;
+        }
+
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
+
+        return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
     }
 
@@ -115,12 +144,34 @@ public class WebhookManager(
         TId dataId,
         Func<TPayload, Guid?, Task<TPayload>> restrictForSubscriber)
     {
+        var publish = await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, dataId, restrictForSubscriber);
+
+        await publish();
+    }
+
+    private async Task<Func<Task>> PrepareForSubscribersAsync<TPayload, TId>(
+        WebhookTrigger trigger,
+        IEnumerable<DbWebhooksConfig> webhookConfigs,
+        TPayload payload,
+        TId dataId,
+        Func<TPayload, Guid?, Task<TPayload>> restrictForSubscriber)
+    {
+        var publications = new List<Func<Task>>();
+
         foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
         {
             var subscriberPayload = await restrictForSubscriber(payload, subscriberConfigs.Key);
 
-            await webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, dataId);
+            publications.Add(() => webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, dataId));
         }
+
+        return async () =>
+        {
+            foreach (var publish in publications)
+            {
+                await publish();
+            }
+        };
     }
 
     private async Task<FormSubmitWebhookDto<T>> GetFormSubmitPayloadAsync<T>(SubmittedFormData<T> formData)

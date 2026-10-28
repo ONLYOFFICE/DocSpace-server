@@ -43,6 +43,9 @@ public abstract class WebhookDeliveryTestBase(
 {
     private readonly AspireAppFixture _fixture = fixture;
 
+    // Web.Studio sends the deliveries, and Files publishes the file events
+    protected override bool NeedsLazyResources => true;
+
     /// <summary>
     /// The automatic retries the integration-test profile configures: <see cref="ProfileRetryCount"/> of them,
     /// <see cref="ProfileRetryInterval"/> apart, instead of the production schedule of minutes to hours. The values are

@@ -192,6 +192,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         var webhookTrigger = WebhookTrigger.All;
         IEnumerable<DbWebhooksConfig> webhookConfigs = null;
+        Func<Task> publishWebhook = null;
 
         foreach (var folderId in folderIds)
         {
@@ -255,7 +256,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     ? WebhookTrigger.AgentDeleted
                                     : WebhookTrigger.RoomDeleted
                                 : WebhookTrigger.FolderDeleted;
-                            webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
+                            publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
                         }
 
                         await socketManager.DeleteFolder(folder, action: async () => await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId));
@@ -274,7 +275,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 : MessageAction.ThirdPartyDeleted;
 
                             await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
-                            await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                            await publishWebhook();
 
                             if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                             {
@@ -327,7 +328,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                         ? WebhookTrigger.AgentDeleted
                                         : WebhookTrigger.RoomDeleted
                                     : WebhookTrigger.FolderDeleted;
-                                webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
+                                publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
                             }
 
                             // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
@@ -381,7 +382,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
                                 }
 
-                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                await publishWebhook();
 
                                 if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                                 {
@@ -445,7 +446,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                             ? WebhookTrigger.AgentDeleted
                                             : WebhookTrigger.RoomDeleted
                                         : WebhookTrigger.FolderDeleted;
-                                    webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
+                                    publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
                                 }
 
                                 // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
@@ -487,7 +488,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                         await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
                                     }
 
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                    await publishWebhook();
 
                                     if (isRoom && folder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                                     {
@@ -784,7 +785,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             fromRoomFileIds.Contains(file.Id.ToString()) ? ASC.Core.Configuration.Constants.CoreSystem.ID : file.GetFileQuotaOwner();
 
         var hasHeaders = _headers is { Count: > 0 };
-        var configsByFile = new Dictionary<T, IEnumerable<DbWebhooksConfig>>();
+        var publishByFile = new Dictionary<T, Func<Task>>();
 
         if ((hasHeaders && isNeedSendActions) || !hasHeaders)
         {
@@ -796,7 +797,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             {
                 foreach (var file in files)
                 {
-                    configsByFile[file.Id] = await webhookManager.GetWebhookConfigsAsync(WebhookTrigger.FileDeleted, file);
+                    publishByFile[file.Id] = await webhookManager.PrepareAsync(WebhookTrigger.FileDeleted, file);
                 }
             }
         }
@@ -896,9 +897,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                     {
                         await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
 
-                        if (configsByFile.TryGetValue(file.Id, out var configs))
+                        if (publishByFile.TryGetValue(file.Id, out var publishWebhook))
                         {
-                            await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
+                            await publishWebhook();
                         }
                     }
                 }
@@ -906,9 +907,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 {
                     await filesMessageService.SendAsync(MessageAction.FileDeleted, file, MessageInitiator.AutoCleanUp, file.Title);
 
-                    if (configsByFile.TryGetValue(file.Id, out var configs))
+                    if (publishByFile.TryGetValue(file.Id, out var publishWebhook))
                     {
-                        await webhookManager.PublishAsync(WebhookTrigger.FileDeleted, configs, file);
+                        await publishWebhook();
                     }
                 }
             }

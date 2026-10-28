@@ -65,7 +65,7 @@ public class WebhookSender(
 
     /// <summary>
     /// How long one attempt may hold its row: the lease is renewed for this long right before the request goes out,
-    /// and the batch lease of <see cref="WorkerService"/> is a multiple of it.
+    /// and the claim lease of <see cref="WorkerService"/> is at least as long.
     /// </summary>
     public TimeSpan AttemptLease => _requestTimeout + _attemptBookkeeping;
 
@@ -81,7 +81,9 @@ public class WebhookSender(
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+        var socketManager = scope.ServiceProvider.GetRequiredService<WebhookSocketManager>();
         var journalUpdated = false;
+        DbWebhooksLog entry = null;
 
         // set once the request may have gone out: a failure before that is not an attempt and uses up no retry
         var requestSent = false;
@@ -99,7 +101,7 @@ public class WebhookSender(
             var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
             if (tenant == null)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
+                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.PortalRemovedNote);
                 return;
             }
 
@@ -110,7 +112,7 @@ public class WebhookSender(
                 // and waits like the other rows of an inactive portal (DbWorker.PostponeInactiveTenantsJournalAsync)
                 if (tenant.Status == TenantStatus.RemovePending)
                 {
-                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
+                    await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.PortalRemovedNote);
                 }
                 else
                 {
@@ -120,7 +122,7 @@ public class WebhookSender(
                 return;
             }
 
-            var entry = await dbWorker.ReadJournal(tenantId, webhookLogId);
+            entry = await dbWorker.ReadJournal(tenantId, webhookLogId);
             if (entry == null)
             {
                 await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
@@ -131,7 +133,8 @@ public class WebhookSender(
             // before it was disabled either. A manual retry is refused for it up front (DbWorker.RetryJournalAsync)
             if (!entry.Config.Enabled)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
+                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.SubscriptionDisabledNote);
+                await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
                 return;
             }
 
@@ -143,6 +146,7 @@ public class WebhookSender(
             {
                 logger.InfoCreatorNotEntitled(tenantId, webhookLogId, entry.ConfigId, entry.Trigger);
                 await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.CreatorNotEntitledNote);
+                await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
                 return;
             }
 
@@ -152,8 +156,9 @@ public class WebhookSender(
             });
             if (!validationResult.IsValid)
             {
-                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
-                await DisableWebhook(validationResult, entry, dbWorker, messageService);
+                // a blacklisted target removes the subscription, and its records with it; otherwise the record stays
+                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.TargetRejectedNote + validationResult.ErrorMessage);
+                await DisableWebhook(validationResult, entry, dbWorker, messageService, socketManager);
                 return;
             }
 
@@ -168,6 +173,7 @@ public class WebhookSender(
                 // the body will not become readable on a later attempt
                 logger.ErrorFailedToSend(tenantId, webhookLogId, e);
                 await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.UnreadableBodyNote);
+                await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
                 return;
             }
 
@@ -213,8 +219,8 @@ public class WebhookSender(
             var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
             var httpClient = clientFactory.CreateClient(httpClientName);
 
-            // the batch lease may have run out while the row waited for its turn, and another instance may have claimed
-            // the row since: the request goes out only while the row is still this attempt's, for long enough to finish
+            // the claim lease may have run out during the checks above, and another instance may have claimed the row
+            // since: the request goes out only while the row is still this attempt's, for long enough to finish
             if (!await dbWorker.RenewJournalLeaseAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + AttemptLease))
             {
                 logger.DebugLeaseTakenOver(webhookLogId);
@@ -274,6 +280,7 @@ public class WebhookSender(
                     await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
                     await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
                     messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
+                    await socketManager.DeleteWebhookAsync(entry.Config);
                     return;
                 }
 
@@ -340,6 +347,10 @@ public class WebhookSender(
 
             journalUpdated = true;
 
+            // the record, and the subscription, whose last success or failure every attempt moves
+            await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);
+            await socketManager.UpdateWebhookAsync(entry.Config);
+
             if (autoDisabled)
             {
                 messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
@@ -347,10 +358,15 @@ public class WebhookSender(
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // the service is stopping; an accepted request is recorded, or it would go out again once the lease expires
+            // the service is stopping; an accepted request is recorded, or it would go out again once the lease expires,
+            // and a row whose request never went out is handed back at once, rather than held for the rest of its lease
             if (deliveredOn.HasValue && !journalUpdated)
             {
                 await RegisterDeliveryAsync(dbWorker, tenantId, webhookLogId, leaseId, deliveredStatus, deliveredOn.Value, attempts);
+            }
+            else if (!requestSent)
+            {
+                await ReleaseAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId, DateTime.UtcNow);
             }
 
             throw;
@@ -379,6 +395,11 @@ public class WebhookSender(
             {
                 await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
             }
+
+            if (entry != null)
+            {
+                await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
+            }
         }
     }
 
@@ -394,11 +415,16 @@ public class WebhookSender(
         }
     }
 
-    private async Task ReleaseUnsentAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
+    private Task ReleaseUnsentAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
+    {
+        return ReleaseAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId, DateTime.UtcNow + _unsentAttemptDelay);
+    }
+
+    private async Task ReleaseAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId, DateTime nextAttemptOn)
     {
         try
         {
-            await dbWorker.ReleaseJournalAttemptAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + _unsentAttemptDelay);
+            await dbWorker.ReleaseJournalAttemptAsync(tenantId, webhookLogId, leaseId, nextAttemptOn);
         }
         catch (Exception e)
         {
@@ -525,7 +551,7 @@ public class WebhookSender(
     }
 
     private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
-        MessageService messageService)
+        MessageService messageService, WebhookSocketManager socketManager)
     {
         if (validationResult.Blacklisted)
         {
@@ -533,12 +559,20 @@ public class WebhookSender(
             messageService.SendHeadersMessage(MessageAction.WebhookDeleted,
                 MessageTarget.Create(entry.ConfigId), null,
                 $"{entry.Config.Name} (blacklist)");
+            await socketManager.DeleteWebhookAsync(entry.Config);
+
+            return;
         }
-        else if (await dbWorker.DisableWebhookConfigAsync(entry.TenantId, entry.ConfigId, entry.Config.Uri))
+
+        // the record stays, with the note of why it was not sent
+        await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);
+
+        if (await dbWorker.DisableWebhookConfigAsync(entry.TenantId, entry.ConfigId, entry.Config.Uri))
         {
             messageService.SendHeadersMessage(MessageAction.WebhookUpdated,
                 MessageTarget.Create(entry.ConfigId), null,
                 $"{entry.Config.Name} ({validationResult.ErrorMessage})");
+            await socketManager.UpdateWebhookAsync(entry.Config);
         }
     }
 

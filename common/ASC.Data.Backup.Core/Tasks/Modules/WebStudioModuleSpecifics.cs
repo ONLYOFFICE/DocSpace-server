@@ -48,7 +48,9 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("app_settings", "tenant_id") {DateColumns = new Dictionary<string, bool> {{"last_modified", false}}},
         new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
-        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
+        // next_attempt_on is a moment in the future and moves with the restored dates; creation_time and delivery record
+        // what has already happened and stay as they were
+        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"], DateColumns = new Dictionary<string, bool> { { "next_attempt_on", true } } }
     ];
 
     private readonly RelationInfo[] _relations =
@@ -78,23 +80,31 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
         if (prepared && table.Name == "webhooks_logs")
         {
-            // The schedule is kept, so a delivery waiting for its next attempt resumes on the target: a portal transfer
-            // (TransferPortalTask restores through this same path) would otherwise lose every pending retry, since the
-            // source portal stops sending once it is no longer active. Only the lease is cleared: it names an instance
-            // of the source's sender, and a row that was in flight is due again once its lease time (held in
-            // next_attempt_on while leased) has passed. The cost for a plain restore: pending rows of the archive are
-            // sent by the restored portal, those whose time has passed right after the portal is active again, under
-            // new ids (event.id, and webhook.id, which the sender rewrites from the restored subscription); a delivery the
-            // portal had already completed after the backup was taken reaches the receiver a second time. The ids of
-            // the entries inside the stored body are those of the source portal: a body is a record of what was sent.
+            // The lease names an instance of the source's sender; a row that was in flight is due again once its lease
+            // time (held in next_attempt_on while leased) has passed.
             SetNull(preparedRow, "lease_id");
 
+            // A portal transfer keeps the schedule, so a delivery waiting for its next attempt resumes on the target:
+            // the source portal stops sending once it is no longer active, and every pending retry would be lost.
+            // A restore from an archive brings back a past state instead: the portal may have delivered those events
+            // after the backup was taken, and sending them again, under new ids (event.id, and webhook.id, which the
+            // sender rewrites from the restored subscription), would reach the receiver a second time with nothing
+            // to tell it so. The schedule is dropped, and a row that had not been answered yet says why it never was.
+            if (!columnMapper.PortalTransfer && !IsNull(preparedRow, "next_attempt_on"))
+            {
+                SetNull(preparedRow, "next_attempt_on");
+
+                if (IsNull(preparedRow, "response_payload"))
+                {
+                    SetValue(preparedRow, "response_payload", DbWorker.RestoredFromBackupNote);
+                }
+            }
+
             // An archive of the previous version has no attempts column, and its unsent rows are in the old payload
-            // format, which must never be sent: they get the note Upgrade105 gives such rows in place, the text of
-            // ASC.Webhooks.Core.DbWorker.PreviousVersionNote; keep the texts equal.
+            // format, which must never be sent: they get the note Upgrade105 gives such rows in place.
             if (!HasColumn(preparedRow, "attempts") && IsNull(preparedRow, "request_headers") && IsNull(preparedRow, "response_payload"))
             {
-                SetValue(preparedRow, "response_payload", PreviousVersionNote);
+                SetValue(preparedRow, "response_payload", DbWorker.PreviousVersionNote);
             }
 
             return (true, preparedRow);
@@ -113,9 +123,6 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
         return (true, preparedRow);
     }
-
-    private const string PreviousVersionNote =
-        "Not sent: the event was published by a service of the previous version, in the old payload format";
 
     private static void SetNull(Dictionary<string, object> preparedRow, string column)
     {

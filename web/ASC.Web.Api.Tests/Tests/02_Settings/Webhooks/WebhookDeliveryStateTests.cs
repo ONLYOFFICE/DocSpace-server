@@ -127,7 +127,8 @@ public class WebhookDeliveryStateTests(
         {
             Name = newName,
             Uri = subscription.Uri,
-            SecretKey = subscription.SecretKey
+            SecretKey = subscription.SecretKey,
+            Enabled = true
         }, TestContext.Current.CancellationToken);
 
         // the edit proves something only while the attempt still waits for its answer: on a machine too slow for the
@@ -142,6 +143,7 @@ public class WebhookDeliveryStateTests(
         var config = await GetSubscriptionAsync(subscription.Id);
 
         config!.Name.Should().Be(newName, "the attempt writes only its own bookkeeping, not the subscription it read before the edit");
+        config.Enabled.Should().BeTrue();
         config.LastSuccessOn.Should().NotBeNull();
     }
 

@@ -121,4 +121,9 @@ public static class Constants
         "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
         "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
     ];
+
+    // The services that get WebhookTestBlacklist: Web.Api checks the target of a subscription when it is saved, and
+    // Web.Studio sends the deliveries. Every other UrlValidator caller of the profile keeps the default list, so the
+    // SSRF tests of the other suites run against what production refuses.
+    public static IReadOnlyList<string> WebhookTestBlacklistServices { get; } = ["onlyoffice-web-api", "onlyoffice-web-studio"];
 }

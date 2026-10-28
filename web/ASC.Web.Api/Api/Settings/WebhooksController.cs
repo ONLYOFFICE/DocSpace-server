@@ -53,6 +53,7 @@ public class WebhooksController(
     IUrlValidator urlValidator,
     IHttpClientFactory clientFactory,
     WebhookUserAccessChecker webhookUserAccessChecker,
+    WebhookSocketManager webhookSocketManager,
     WebhookGroupAccessChecker webhookGroupAccessChecker)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -121,17 +122,19 @@ public class WebhooksController(
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, ssl, inDto.Triggers, targetId);
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
+        await webhookSocketManager.AddWebhookAsync(webhook);
 
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
     /// <remarks>
     /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
-    /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `ssl`,
-    /// `triggers` or `targetId` resets them to off, `ssl` following the scheme of the target (`true` for `https`,
-    /// `false` for `http`), all events and no target: read the current values with `GET
-    /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an empty
-    /// value keeping the existing secret and a new one having to satisfy the portal password rules. A `DocSpaceAdmin`
+    /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`
+    /// or `targetId` resets them to off, all events and no target: read the current values with `GET
+    /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:
+    /// an empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a
+    /// left-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and
+    /// `https`. A `DocSpaceAdmin`
     /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`
     /// gives 404 and another member's subscription 403 before the payload is validated. The payload is then validated
     /// as on creation, except that trigger flags are checked against the role of the subscription's creator rather than
@@ -168,7 +171,9 @@ public class WebhooksController(
 
         // the triggers are the owner's to receive, so they are checked against the owner's role, not the editor's
         var ownerId = existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID;
-        var ssl = ResolveSsl(inDto.SSL, inDto.Uri);
+        // left out, ssl keeps the stored value: a client written before the field became optional never sends it, and
+        // must not switch certificate checking on for a subscription that was saved with it off
+        var ssl = inDto.SSL ?? existingWebhook.SSL;
         var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, ssl, inDto.Triggers, inDto.TargetId, ownerId, false);
 
         existingWebhook.Name = inDto.Name;
@@ -186,6 +191,7 @@ public class WebhooksController(
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
+        await webhookSocketManager.UpdateWebhookAsync(webhook);
 
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
@@ -242,6 +248,7 @@ public class WebhooksController(
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
+        await webhookSocketManager.UpdateWebhookAsync(webhook);
 
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
@@ -287,6 +294,7 @@ public class WebhooksController(
         var webhook = await dbWorker.RemoveWebhookConfigAsync(inDto.Id);
 
         messageService.Send(MessageAction.WebhookDeleted, MessageTarget.Create(webhook.Id), webhook.Name);
+        await webhookSocketManager.DeleteWebhookAsync(webhook);
 
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }

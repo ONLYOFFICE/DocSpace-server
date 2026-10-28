@@ -75,6 +75,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     protected abstract IEnumerable<string> Resources { get; }
 
     /// <summary>
+    /// Services only some test classes of the suite need. They start with the stack and get their clients at once,
+    /// but the run does not wait for them: a test that uses them calls <see cref="WaitForLazyResourcesAsync"/>, so the
+    /// other classes start as soon as <see cref="Resources"/> are healthy.
+    /// </summary>
+    protected virtual IEnumerable<string> LazyResources => [];
+
+    private readonly Lock _lazyResourcesLock = new();
+    private Task? _lazyResourcesHealthy;
+
+    /// <summary>
     /// The AppHost launch profile this suite's stack is built from. The profile is where the resource
     /// graph is decided (the switch in <c>ASC.AppHost/Program.cs</c>), so a suite that needs a smaller
     /// graph than <c>integration-test</c> gets a profile of its own there rather than pruning the graph
@@ -146,7 +156,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
                 + "went healthy is the one to read, not this.");
         }
 
-        foreach (var resource in resources)
+        foreach (var resource in resources.Union(LazyResources))
         {
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
@@ -406,6 +416,34 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         Environment.SetEnvironmentVariable("NEXTCLOUD_URL", $"{origin}/remote.php/dav/files/{user}/");
         Environment.SetEnvironmentVariable("NEXTCLOUD_LOGIN", user);
         Environment.SetEnvironmentVariable("NEXTCLOUD_PASSWORD", ASC.AppHost.Configuration.Constants.NextcloudPassword);
+    }
+
+    /// <summary>
+    /// Waits until every service of <see cref="LazyResources"/> is healthy. The first caller starts the wait and the
+    /// others share it, so it costs the run once.
+    /// </summary>
+    public Task WaitForLazyResourcesAsync()
+    {
+        lock (_lazyResourcesLock)
+        {
+            return _lazyResourcesHealthy ??= WaitForHealthyAsync(LazyResources.ToList());
+        }
+    }
+
+    private async Task WaitForHealthyAsync(List<string> resources)
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+
+        try
+        {
+            await Task.WhenAll(resources.Select(r => _app.ResourceNotifications.WaitForResourceHealthyAsync(r, startUp.Token)));
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"{string.Join(", ", resources)} did not come up within {_startUpBudget.TotalMinutes} minutes. The log "
+                + "of whichever of them never went healthy is the one to read, not this.");
+        }
     }
 
     private Uri ResolveBaseAddress(string resourceName)

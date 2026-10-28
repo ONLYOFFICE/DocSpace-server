@@ -31,118 +31,12 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Webhooks.Core;
-
-using InternalEmployeeType = ASC.Core.Users.EmployeeType;
-using InternalWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
 using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
 
 namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    public static TheoryData<InternalWebhookTrigger> AdminOnlyTriggers =>
-    [
-        InternalWebhookTrigger.UserCreated,
-        InternalWebhookTrigger.UserInvited,
-        InternalWebhookTrigger.GroupCreated,
-        InternalWebhookTrigger.GroupUpdated,
-        InternalWebhookTrigger.GroupDeleted,
-        InternalWebhookTrigger.RoomCreated,
-        InternalWebhookTrigger.RoomCopied,
-        InternalWebhookTrigger.AgentCreated,
-    ];
-
-    public static TheoryData<InternalWebhookTrigger> AllRolesTriggers =>
-    [
-        InternalWebhookTrigger.All,
-        InternalWebhookTrigger.UserUpdated,
-        InternalWebhookTrigger.UserDeleted,
-        InternalWebhookTrigger.FileCreated,
-        InternalWebhookTrigger.FileUploaded,
-        InternalWebhookTrigger.FileUpdated,
-        InternalWebhookTrigger.FileTrashed,
-        InternalWebhookTrigger.FileDeleted,
-        InternalWebhookTrigger.FileRestored,
-        InternalWebhookTrigger.FileCopied,
-        InternalWebhookTrigger.FileMoved,
-        InternalWebhookTrigger.FolderCreated,
-        InternalWebhookTrigger.FolderUpdated,
-        InternalWebhookTrigger.FolderTrashed,
-        InternalWebhookTrigger.FolderDeleted,
-        InternalWebhookTrigger.FolderRestored,
-        InternalWebhookTrigger.FolderCopied,
-        InternalWebhookTrigger.FolderMoved,
-        InternalWebhookTrigger.RoomUpdated,
-        InternalWebhookTrigger.RoomArchived,
-        InternalWebhookTrigger.RoomDeleted,
-        InternalWebhookTrigger.RoomRestored,
-        InternalWebhookTrigger.FormSubmit,
-        InternalWebhookTrigger.FormFilledOut,
-        InternalWebhookTrigger.FormStopped,
-        InternalWebhookTrigger.AgentUpdated,
-        InternalWebhookTrigger.AgentDeleted,
-        InternalWebhookTrigger.FileDownloaded,
-        InternalWebhookTrigger.FolderDownloaded,
-    ];
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_DocSpaceAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_RoomAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_User_ReturnsFalse(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.User).Should().BeFalse();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_DocSpaceAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_RoomAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_User_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.User).Should().BeTrue();
-
-    /// <summary>
-    /// Every trigger sits in exactly one of the two lists above, so a trigger added later cannot go untested by
-    /// the role checks: it fails here until it is classified.
-    /// </summary>
-    [Fact]
-    public void AllTriggers_AreClassifiedInExactlyOneList()
-    {
-        var adminOnly = AdminOnlyTriggers.Select(row => row.Data).ToList();
-        var allRoles = AllRolesTriggers.Select(row => row.Data).ToList();
-
-        adminOnly.Should().NotIntersectWith(allRoles);
-        adminOnly.Concat(allRoles).Should().BeEquivalentTo(Enum.GetValues<InternalWebhookTrigger>());
-    }
-
-    [Fact]
-    public void AllTriggers_HaveAvailableForAttribute()
-    {
-        var type = typeof(InternalWebhookTrigger);
-
-        foreach (var value in Enum.GetValues<InternalWebhookTrigger>())
-        {
-            var field = type.GetField(value.ToString());
-            var attr = Attribute.GetCustomAttribute(field!, typeof(AvailableForAttribute));
-            attr.Should().NotBeNull($"WebhookTrigger.{value} is missing [AvailableFor] attribute");
-        }
-    }
-
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "73741")]

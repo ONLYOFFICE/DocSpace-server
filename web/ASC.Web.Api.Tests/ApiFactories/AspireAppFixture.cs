@@ -35,19 +35,24 @@ namespace ASC.Web.Api.Tests.ApiFactories;
 
 /// <summary>
 /// The Web.Api suite's Aspire host: Web.Api itself is always started by the base fixture, plus
-/// People (members and guests a test invites) and the two identity containers the OAuth2 suites
-/// talk to.
+/// People (members and guests a test invites), the two identity containers the OAuth2 suites
+/// talk to and the WireMock subscriber of the webhook tests; Web.Studio and Files only for the webhook
+/// delivery tests, which wait for them themselves.
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
     protected override IEnumerable<string> Resources =>
         [
             ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization,
-            // the webhook delivery tests: Web.Studio runs the sender, WireMock is the subscriber it sends to
-            ResourceNames.WebStudio, ResourceNames.WebhookReceiver,
-            // the file events of the webhook payload tests
-            ResourceNames.Files
+            // the subscriber of the webhook tests: creating a subscription probes it, and it is a container that starts
+            // long before the services
+            ResourceNames.WebhookReceiver
         ];
+
+    // the webhook delivery tests (WebhookDeliveryTestBase) wait for these themselves: Web.Studio runs the sender, and
+    // Files publishes the file events of the payload tests. Files is the slowest service to come up, and the rest of
+    // the suite does not need it
+    protected override IEnumerable<string> LazyResources => [ResourceNames.WebStudio, ResourceNames.Files];
 
     protected override PortalClients CreateClients(PortalContext context)
     {

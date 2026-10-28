@@ -36,21 +36,28 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Threading.Channels;
 
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
+global using ASC.Security.Cryptography;
 global using ASC.Webhooks.Core.EF.Context;
 global using ASC.Webhooks.Core.EF.Model;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
+global using ASC.Webhooks.Core.Log;
 
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Logging;
 
 global using ProtoBuf;

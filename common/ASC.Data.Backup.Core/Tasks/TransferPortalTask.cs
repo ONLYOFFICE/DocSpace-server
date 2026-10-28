@@ -71,7 +71,7 @@ public class TransferPortalTask(DbFactory dbFactory,
         var toDbFactory = new DbFactory(null, null);
         var tenantAlias = GetTenantAlias(fromDbFactory);
         var backupFilePath = GetBackupFilePath(tenantAlias);
-        var columnMapper = new ColumnMapper();
+        var columnMapper = new ColumnMapper { PortalTransfer = true };
         try
         {
             //target db can have error tenant from the previous attempts

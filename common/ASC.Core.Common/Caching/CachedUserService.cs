@@ -371,7 +371,10 @@ public class CachedUserService : IUserService
     // Counted from the cached membership refs and the cached users of the tenant, under the same conditions as the
     // database query of the inner service: core_usergroup has no index that starts with the group, so that query reads
     // every membership row of the tenant. Both caches are already invalidated by their tags on every membership and
-    // user change, so the count needs no cache entry of its own.
+    // user change, so the count needs no cache entry of its own. It walks every user of the tenant, an in-memory pass
+    // that is cheap once per event (the group webhooks) but not per listed group: a listing needs a batched count.
+    // Walking the group's refs instead would need the status of each member, and the per-user cache entries are cold
+    // where the tenant list is not, so a large group would cost one query per member.
     public async Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
     {
         var refs = await GetUserGroupRefsAsync(tenant);

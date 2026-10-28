@@ -675,13 +675,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (WebhookReceiverResource != null)
         {
-            // a blacklist the receiver passes (Constants.WebhookTestBlacklist). It reaches every UrlValidator caller
-            // of the services in this profile, not only the webhook sender
-            var blacklist = Constants.WebhookTestBlacklist;
-
-            for (var i = 0; i < blacklist.Count; i++)
+            // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
+            // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
+            if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))
             {
-                resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
+                var blacklist = Constants.WebhookTestBlacklist;
+
+                for (var i = 0; i < blacklist.Count; i++)
+                {
+                    resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
+                }
             }
 
             // Retries due at once rather than after minutes to hours, so the tests can watch a delivery being

@@ -183,7 +183,15 @@ public class WebhookEntryPayloadTests(
         p.GetProperty("createdBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
         p.TryGetProperty("chatSettings", out _).Should().BeFalse("the chat settings are left to the REST API");
 
-        // both events would come from the same publication, so the agent.created record found above settles it
+        // a room created after the agent is the control: once its room.created is recorded, a room.created of the agent
+        // published on any path would have been recorded before it
+        var controlTitle = $"control-{Guid.NewGuid():N}";
+        await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(title: controlTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken);
+
+        (await WaitForEventPayloadAsync(subscription.Id, "room.created", r => r.GetProperty("title").GetString() == controlTitle))
+            .Should().NotBeNull("the control room is announced as a room");
+
         (await WaitForEventPayloadAsync(subscription.Id, "room.created", r => r.GetProperty("title").GetString() == title, timeoutSeconds: 0))
             .Should().BeNull("an agent is not also announced as a room");
     }
