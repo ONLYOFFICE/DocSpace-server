@@ -1211,8 +1211,8 @@ public abstract class VirtualRoomsController<T>(
     /// set the flag does nothing, so a successful answer never proves that a message went out. Nothing about the room
     /// or its membership changes, and the operation can be repeated. The caller must be a manager of the room, an
     /// archived room is refused, a room template is answered as missing, and a malformed account id is rejected as an
-    /// invalid request. The call is rate limited, so a client that loops over members should send one batch instead.
-    /// The response carries no body.
+    /// invalid request. A member who already got the invitation to this room within the last ten minutes (the server
+    /// default) is not mailed again, and the link in that letter stays valid. The response carries no body.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
@@ -1223,7 +1223,6 @@ public abstract class VirtualRoomsController<T>(
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/resend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(inDto.Id, inDto.UserInvitation.UsersIds, inDto.UserInvitation.ResendAll);

@@ -1007,9 +1007,9 @@ public class PortalController(
     /// owner and hold the portal-settings right, and on a server installation the last remaining space cannot be
     /// deactivated - the call is refused when every other space has limited access. The letter always goes to the
     /// owner's own address, and the operation keeps working while the portal's payment has lapsed. It is mutating
-    /// only in that it sends a message, and it is rate-limited to five requests per fifteen minutes per user and path
-    /// by default, answering 429 above that. Nothing is returned in the body, so a client cannot tell from the answer
-    /// whether the mail was delivered. The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which
+    /// only in that it sends a message, and a repeat within ten minutes (the server default) sends no second letter
+    /// while the links of the first one stay valid. Nothing is returned in the body, so a client cannot tell from the
+    /// answer whether the mail was delivered. The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which
     /// suspends the portal, and the second one authorizes `PUT api/2.0/portal/continue`, which makes it active again.
     /// To remove the portal instead of pausing it, use `POST api/2.0/portal/delete`.
     /// </remarks>
@@ -1023,7 +1023,6 @@ public class PortalController(
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1047,8 +1046,9 @@ public class PortalController(
     /// installation the last remaining space cannot be removed - the call is refused when every other space has
     /// limited access. The letter goes to the owner's own address whoever asked for it, and it warns about the
     /// subscription that will stop renewing when the portal is on a paid plan. The operation keeps working while the
-    /// portal's payment has lapsed, is mutating only in that it sends a message, and is rate-limited to five requests
-    /// per fifteen minutes per user and path by default, answering 429 above that. Nothing is returned in the body.
+    /// portal's payment has lapsed, is mutating only in that it sends a message, and a repeat within ten minutes (the
+    /// server default) sends no second letter while the link of the first one stays valid. Nothing is returned in the
+    /// body.
     /// The link in the letter authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its
     /// rooms, files and accounts and cannot be undone. To pause the portal instead of deleting it, send the
     /// deactivation letter with `POST api/2.0/portal/suspend`.
@@ -1063,7 +1063,6 @@ public class PortalController(
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

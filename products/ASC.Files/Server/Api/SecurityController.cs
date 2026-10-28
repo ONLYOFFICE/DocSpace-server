@@ -269,8 +269,8 @@ public abstract class SecurityController<T>(
     /// `PUT api/2.0/files/file/{id}/share`. The caller needs comment rights, which the creator of the file, the
     /// manager of its room and a member invited to comment, review or edit have, while a guest or a member without
     /// access is refused with 403; a file that does not exist answers with 404 and a file in the trash is refused.
-    /// The operation is rate-limited and answers 429 once the caller sends too many notifications. A delivery failure
-    /// is swallowed, so 200 does not prove that the mail left the portal.
+    /// A person already notified about this file within the last ten minutes (the server default) is not mailed again,
+    /// whatever the note says. A delivery failure is swallowed, so 200 does not prove that the mail left the portal.
     /// </remarks>
     /// <summary>Notify mentioned users</summary>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
@@ -281,7 +281,6 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(403, "The caller may not comment on the file")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{fileId}/sendeditornotify")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<List<AceShortDto>> SendEditorNotify(MentionMessageRequestDto<T> inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
