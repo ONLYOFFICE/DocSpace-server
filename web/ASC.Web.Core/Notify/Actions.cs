@@ -3564,7 +3564,7 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "user_type_changed";
 
-    public override string[] DeduplicationTags => ["UserType"];
+    public override string[] DeduplicationTags => [CommonTags.NewUserType];
 
     public override List<Pattern> Patterns
     {
@@ -3574,13 +3574,14 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(UserInfo u, string userType)
+    public void Init(UserInfo u, EmployeeType type, string userType)
     {
         var culture = GetCulture(u);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
+            new TagValue(CommonTags.NewUserType, type.ToStringFast()),
             new TagValue("UserType", userType),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3594,7 +3595,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 {
     public override string ID => "user_role_changed";
 
-    public override string[] DeduplicationTags => ["UserRole"];
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
 
     public override List<Pattern> Patterns
     {
@@ -3604,7 +3605,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -3613,6 +3614,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
         [
             new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3626,7 +3628,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 {
     public override string ID => "user_agent_role_changed";
 
-    public override string[] DeduplicationTags => ["UserRole"];
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
 
     public override List<Pattern> Patterns
     {
@@ -3636,7 +3638,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -3645,6 +3647,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
         [
             new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),

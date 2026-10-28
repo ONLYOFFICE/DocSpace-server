@@ -2610,7 +2610,7 @@ public class UserController(
             }
 
             await socketManager.ChangeUserTypeAsync(user, true);
-            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
             messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([user.Id]), [user.DisplayUserName(false, displayUserSettingsHelper)], [user.Id], inDto.Type);
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         }

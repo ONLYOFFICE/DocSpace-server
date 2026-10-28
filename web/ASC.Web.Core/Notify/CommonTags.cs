@@ -82,6 +82,8 @@ public static class CommonTags
     public const string ToUserLink = "ToUserLink";
     public const string Message = "Message";
     public const string RoomRole = "RoomRole";
+    public const string AccessLevel = "AccessLevel";
+    public const string NewUserType = "NewUserType";
     public const string Count = "Count";
 
     public const string Address = "Address";

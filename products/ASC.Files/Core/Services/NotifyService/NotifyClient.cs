@@ -158,7 +158,7 @@ public class NotifyClient(
             var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
             
-            action.Init(fileEntry, folder, url, fileExtension, aceString, message, culture);
+            action.Init(fileEntry, folder, url, fileExtension, recipientPair.Value, aceString, message, culture);
 
             await client.SendNoticeAsync(
                 action,
@@ -408,7 +408,7 @@ public class NotifyClient(
         var accessString = FileShareExtensions.GetAccessString(currentRole, isAgent: isAgent);
 
         var action = isAgent ? serviceProvider.GetService<AgentUpdateAccessForUserNotifyAction>() : serviceProvider.GetService<RoomUpdateAccessForUserNotifyAction>();
-        action.Init(room, accessString);
+        action.Init(room, currentRole, accessString);
         
         await client.SendNoticeAsync(
             action,

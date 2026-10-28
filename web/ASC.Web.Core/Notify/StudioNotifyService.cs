@@ -497,12 +497,12 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(saasAdminWelcomeV1NotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
-    public async Task SendMsgUserTypeChangedAsync(UserInfo u, string userType)
+    public async Task SendMsgUserTypeChangedAsync(UserInfo u, EmployeeType type, string userType)
     {
         try
         {
             var userTypeChangedNotifyAction = serviceProvider.GetService<UserTypeChangedNotifyAction>();
-            userTypeChangedNotifyAction.Init(u, userType);
+            userTypeChangedNotifyAction.Init(u, type, userType);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(userTypeChangedNotifyAction, [u], [EMailSenderName]);
         }
@@ -512,15 +512,16 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomUniqId, string roomTitle, string roomUrl, string userRole, bool isAgent = false)
+    // accessLevel is the role as the server names it, not its localized text: it tells repeated letters apart
+    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomUniqId, string roomTitle, string roomUrl, string accessLevel, string userRole, bool isAgent = false)
     {
         try
         {
             var userAgentRoleChangedNotifyAction = serviceProvider.GetService<UserAgentRoleChangedNotifyAction>();
-            userAgentRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
+            userAgentRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, accessLevel, userRole);
 
             var userRoleChangedNotifyAction = serviceProvider.GetService<UserRoleChangedNotifyAction>();
-            userRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
+            userRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, accessLevel, userRole);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? userAgentRoleChangedNotifyAction : userRoleChangedNotifyAction, roomUniqId, [u], [EMailSenderName]);
         }

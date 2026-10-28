@@ -49,7 +49,7 @@ public class UserTypeChangedLetterTests : LetterTestBase<UserTypeChangedNotifyAc
 
     protected override Task InitAsync(UserTypeChangedNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Recipient, UserType);
+        action.Init(scope.Recipient, EmployeeType.RoomAdmin, UserType);
 
         return Task.CompletedTask;
     }

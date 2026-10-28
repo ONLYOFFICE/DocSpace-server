@@ -46,7 +46,8 @@ public interface INotifyAction
 
     /// <summary>
     /// Tags whose values become part of the duplicate key. Only values the server controls (ids, enum states) belong here,
-    /// never free text such as titles or messages: a caller could vary it and get the letter sent again.
+    /// never free text such as titles or messages, nor localized text, which follows a culture the caller may choose:
+    /// a caller could vary either and get the letter sent again.
     /// </summary>
     string[] DeduplicationTags => [];
 }

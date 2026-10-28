@@ -161,12 +161,12 @@ public class NotifyDeduplicationServiceTests
     public async Task DiscriminatorValue_TellsLettersApart()
     {
         var service = CreateService();
-        var action = new TestAction("user_type_changed", tags: ["UserType"]);
+        var action = new TestAction("user_type_changed", tags: ["NewUserType"]);
 
-        var toAdmin = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("UserType", "RoomAdmin")]));
-        var toUser = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("UserType", "User")]));
-        var toAdminAgain = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("UserType", "RoomAdmin")]));
-        var toUserAgain = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("UserType", "User")]));
+        var toAdmin = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("NewUserType", "RoomAdmin")]));
+        var toUser = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("NewUserType", "User")]));
+        var toAdminAgain = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("NewUserType", "RoomAdmin")]));
+        var toUserAgain = await service.IsDuplicateAsync(Request(action, null, tags: [new TagValue("NewUserType", "User")]));
 
         toAdmin.Should().BeFalse();
         toUser.Should().BeFalse();

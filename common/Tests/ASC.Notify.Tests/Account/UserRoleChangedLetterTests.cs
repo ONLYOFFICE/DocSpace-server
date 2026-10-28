@@ -58,7 +58,7 @@ public class UserRoleChangedLetterTests : LetterTestBase<UserRoleChangedNotifyAc
 
     protected override Task InitAsync(UserRoleChangedNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Recipient, RoomTitle, RoomUrl(scope), UserRole);
+        action.Init(scope.Recipient, RoomTitle, RoomUrl(scope), "Editing", UserRole);
 
         return Task.CompletedTask;
     }
