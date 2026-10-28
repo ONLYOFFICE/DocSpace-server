@@ -43,28 +43,28 @@ public class AiPricesDto
     /// the installation can bill for, not necessarily one this portal may use -
     /// `GET api/2.0/portal/payment/ai-model/restrictions` says which are allowed.
     /// </summary>
-    /// <example>[{"id":"gpt-4o","alias":"GPT-4o","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":5.0,"completion":15.0}}]</example>
+    /// <example>[{"id":"gpt-4o","alias":"GPT-4o","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":5.0,"completion":15.0},"byok":false}]</example>
     public required List<AiEntryPricingDto<AiChatPriceDto>> Chat { get; init; }
 
     /// <summary>
     /// The embedding models on offer, priced per million tokens of input; an embedding model has no completion
     /// side, so its price object carries `prompt` alone.
     /// </summary>
-    /// <example>[{"id":"text-embedding-3-large","alias":"Text Embedding 3 Large","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":0.13}}]</example>
+    /// <example>[{"id":"text-embedding-3-large","alias":"Text Embedding 3 Large","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":0.13},"byok":false}]</example>
     public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
 
     /// <summary>
     /// The image models on offer, priced per million prompt and completion tokens plus a price for each image
     /// produced.
     /// </summary>
-    /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"completion":15.0,"image":30.0}}]</example>
+    /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"completion":15.0,"image":30.0},"byok":false}]</example>
     public required List<AiEntryPricingDto<AiImagePriceDto>> Image { get; init; }
 
     /// <summary>
     /// The web search providers on offer. Their `price` is a bare number - the cost of one search - rather than
     /// an object, because there are no tokens to distinguish.
     /// </summary>
-    /// <example>[{"id":"web-search","alias":"Web Search","provider":"tavily","image":"https://cdn.example.com/providers/tavily.png","price":0.01}]</example>
+    /// <example>[{"id":"web-search","alias":"Web Search","provider":"tavily","image":"https://cdn.example.com/providers/tavily.png","price":0.01,"byok":false}]</example>
     public required List<AiEntryPricingDto<decimal>> WebSearch { get; init; }
 
     /// <summary>
@@ -114,6 +114,13 @@ public class AiEntryPricingDto<T>
     /// </summary>
     /// <example>{"prompt":5.0,"completion":15.0}</example>
     public required T Price { get; init; }
+
+    /// <summary>
+    /// Whether this portal calls the model with its own provider key (BYOK) instead of the built-in one. The
+    /// `price` is still the built-in one.
+    /// </summary>
+    /// <example>false</example>
+    public bool Byok { get; init; }
 
     /// <summary>
     /// The provider's own page for the model, for a person to read the model's terms. It is empty when the

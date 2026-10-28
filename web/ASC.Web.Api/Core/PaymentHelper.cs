@@ -44,6 +44,7 @@ public class PaymentHelper(
     MessageService messageService,
     QuotaSocketManager quotaSocketManager,
     AiGateway aiGateway,
+    ByokKeyStorage byokKeyStorage,
     DocsCloudClient docsCloudClient,
     WalletStaticProvider walletStaticProvider,
     CoreSettings coreSettings,
@@ -464,6 +465,7 @@ public class PaymentHelper(
     public async Task<AiPricesDto> GetAiPricesAsync()
     {
         var aiPrices = await aiGateway.GetPricesAsync();
+        var byokIds = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
         var icons = new Dictionary<string, string>();
 
         var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
@@ -496,7 +498,8 @@ public class PaymentHelper(
                 PromptCacheWrite = m.Price.PromptCacheWrite,
                 PromptCacheWrite1H = m.Price.PromptCacheWrite1H
             },
-            Link = m.Link
+            Link = m.Link,
+            Byok = byokIds.Contains(m.RevisionId)
         }).ToList();
 
         var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
@@ -508,7 +511,8 @@ public class PaymentHelper(
             Provider = e.Provider,
             Image = embeddingImage,
             Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt },
-            Link = e.Link
+            Link = e.Link,
+            Byok = byokIds.Contains(e.RevisionId)
         }).ToList();
 
         var image = aiPrices.Image.Select(m => new AiEntryPricingDto<AiImagePriceDto>
@@ -518,7 +522,8 @@ public class PaymentHelper(
             Alias = m.Alias,
             Provider = m.Provider,
             Price = new AiImagePriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion, Image = m.Price.Image },
-            Link = m.Link
+            Link = m.Link,
+            Byok = byokIds.Contains(m.RevisionId)
         }).ToList();
 
         var search = aiPrices.Search.Select(s => new AiEntryPricingDto<decimal>

@@ -49,6 +49,7 @@ global using System.Reflection;
 global using System.Web;
 
 global using ASC.AI.Integration.Extensions;
+global using ASC.AI.Integration.Profiles;
 global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;

@@ -309,6 +309,12 @@ public abstract record AiModelPricing<TPrice>
     public required string Id { get; init; }
 
     /// <summary>
+    /// The gateway revision of the model, the id BYOK keys are stored under.
+    /// </summary>
+    [JsonPropertyName("revision_id")]
+    public required Guid RevisionId { get; init; }
+
+    /// <summary>
     /// The display name of the model.
     /// </summary>
     /// <example>GPT-4o</example>
@@ -556,5 +562,5 @@ public record ModelByokProvider
 
 public record ModelsResponse
 {
-    public required IEnumerable<Model> Data { get; init; }
+    public required IReadOnlyList<Model> Data { get; init; }
 }
