@@ -56,6 +56,11 @@
       "x-displayName": "Attachments"
     },
     {
+      "name": "AI / BYOK",
+      "description": "The portal's own provider keys that override built-in models.",
+      "x-displayName": "BYOK"
+    },
+    {
       "name": "AI / Context",
       "description": "Rooms connected to the chat as context and the skills of their .ai folder.",
       "x-displayName": "Context"
@@ -129,6 +134,7 @@
         "AI / AI",
         "AI / Assignments",
         "AI / Attachments",
+        "AI / BYOK",
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
@@ -10006,12 +10012,12 @@
         }
       }
     },
-    "/api/2.0/ai/profiles/byok/providers": {
+    "/api/2.0/ai/byok/providers": {
       "get": {
         "tags": [
-          "AI / Profiles"
+          "AI / BYOK"
         ],
-        "operationId": "aiProfilesByokProviders",
+        "operationId": "aiByokProviders",
         "summary": "List BYOK providers",
         "responses": {
           "200": {
@@ -10060,155 +10066,13 @@
         }
       }
     },
-    "/api/2.0/ai/profiles/byok": {
-      "post": {
-        "tags": [
-          "AI / Profiles"
-        ],
-        "operationId": "aiProfilesByokCreate",
-        "summary": "Create a BYOK profile",
-        "responses": {
-          "200": {
-            "description": "Success.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Unique profile identifier (UUID)."
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "User-defined profile display name."
-                    },
-                    "providerType": {
-                      "$ref": "#/components/schemas/AiProviderType",
-                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
-                    },
-                    "basedOn": {
-                      "$ref": "#/components/schemas/AiBuiltinProviderType",
-                      "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
-                    },
-                    "baseUrl": {
-                      "type": "string",
-                      "description": "Base URL of the provider API."
-                    },
-                    "modelId": {
-                      "type": "string",
-                      "description": "Selected model ID within this provider."
-                    },
-                    "reasoning": {
-                      "type": "boolean",
-                      "description": "Whether extended thinking is enabled for this profile's model."
-                    },
-                    "reasoningSupport": {
-                      "$ref": "#/components/schemas/AiReasoningSupport",
-                      "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
-                    },
-                    "capabilities": {
-                      "type": "number",
-                      "description": "Bitmask of capabilities supported by the selected model."
-                    },
-                    "canUseTool": {
-                      "type": "boolean",
-                      "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
-                    },
-                    "useResponsesApi": {
-                      "type": "boolean",
-                      "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
-                    },
-                    "isCloudProvider": {
-                      "type": "boolean",
-                      "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
-                    },
-                    "useProxy": {
-                      "type": "boolean",
-                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
-                    },
-                    "createdAt": {
-                      "type": "number",
-                      "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
-                    },
-                    "byokProvider": {
-                      "type": "string",
-                      "description": "BYOK provider id when the profile runs on the portal's own provider key."
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "providerType",
-                    "baseUrl",
-                    "modelId"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiByokProfileInput"
-              }
-            }
-          },
-          "x-codegen-request-body-name": "AiByokProfileInput"
-        }
-      }
-    },
-    "/api/2.0/ai/profiles/byok/{id}": {
+    "/api/2.0/ai/byok/keys/{id}": {
       "put": {
         "tags": [
-          "AI / Profiles"
+          "AI / BYOK"
         ],
-        "operationId": "aiProfilesByokUpdate",
-        "summary": "Update a BYOK profile",
+        "operationId": "aiByokKeysSet",
+        "summary": "Set a BYOK key",
         "responses": {
           "200": {
             "description": "Success.",
@@ -10346,19 +10210,19 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiByokProfileUpdateInput"
+                "$ref": "#/components/schemas/AiByokKeyInput"
               }
             }
           },
-          "x-codegen-request-body-name": "AiByokProfileUpdateInput"
+          "x-codegen-request-body-name": "AiByokKeyInput"
         }
       },
       "delete": {
         "tags": [
-          "AI / Profiles"
+          "AI / BYOK"
         ],
-        "operationId": "aiProfilesByokDelete",
-        "summary": "Delete a BYOK profile",
+        "operationId": "aiByokKeysDelete",
+        "summary": "Delete a BYOK key",
         "responses": {
           "200": {
             "description": "Success.",
@@ -12980,7 +12844,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "BYOK provider id, passed as `provider` when creating a BYOK profile."
+            "description": "BYOK provider id, passed as `provider` when setting a BYOK key."
           },
           "name": {
             "type": "string",
@@ -13006,7 +12870,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Gateway catalogue model id, passed as `modelId` when creating a BYOK profile."
+            "description": "Model id, used in the path when setting its BYOK key."
           },
           "name": {
             "type": "string",
@@ -13019,20 +12883,12 @@
         ],
         "additionalProperties": false
       },
-      "AiByokProfileInput": {
+      "AiByokKeyInput": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Profile display name."
-          },
           "provider": {
             "type": "string",
             "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
-          },
-          "modelId": {
-            "type": "string",
-            "description": "Gateway catalogue model id."
           },
           "key": {
             "type": "string",
@@ -13040,32 +12896,8 @@
           }
         },
         "required": [
-          "name",
           "provider",
-          "modelId",
           "key"
-        ],
-        "additionalProperties": false
-      },
-      "AiByokProfileUpdateInput": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Profile display name."
-          },
-          "modelId": {
-            "type": "string",
-            "description": "Gateway catalogue model id."
-          },
-          "key": {
-            "type": "string",
-            "description": "New provider API key; omit to keep the stored one."
-          }
-        },
-        "required": [
-          "name",
-          "modelId"
         ],
         "additionalProperties": false
       },
