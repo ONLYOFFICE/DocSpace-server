@@ -92,7 +92,9 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
         services.RegisterQueue<FileBuilderOperation>(10, timeUntilUnregisterInSeconds: FileBuilderOperation.TimeUntilUnregisterInSeconds);
-        services.RegisterQueue<FormFillingReportTask>();
+        // a report publishes only between its steps, and it waits for the one reader of the queue and the build silently:
+        // the window outlasts a build of a large form, as for FileBuilderOperation
+        services.RegisterQueue<FormFillingReportTask>(timeUntilUnregisterInSeconds: 60 * 11);
         services.RegisterQueue<FormRecoveryTask>(2);
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
