@@ -69,14 +69,22 @@ public class WebhookSender(
     /// </summary>
     public TimeSpan AttemptLease => _requestTimeout + _attemptBookkeeping;
 
-    private const int MaxRequestPayloadLength = ushort.MaxValue;
+    private const int MaxRequestPayloadBytes = ushort.MaxValue;
     private const int MaxResponsePayloadBytes = 8 * 1024;
+
+    /// <summary>
+    /// How long a row waits after an attempt that failed before its request went out.
+    /// </summary>
+    private static readonly TimeSpan _unsentAttemptDelay = TimeSpan.FromMinutes(1);
 
     public async Task Send(int tenantId, int webhookLogId, Guid leaseId, CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
         var journalUpdated = false;
+
+        // set once the request may have gone out: a failure before that is not an attempt and uses up no retry
+        var requestSent = false;
 
         // set once the target has accepted the request: from then on a failure must not schedule the event again
         var attempts = 0;
@@ -149,7 +157,19 @@ public class WebhookSender(
                 return;
             }
 
-            var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
+            WebhookPayload<object, object> webhookPayload;
+
+            try
+            {
+                webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
+            }
+            catch (JsonException e)
+            {
+                // the body will not become readable on a later attempt
+                logger.ErrorFailedToSend(tenantId, webhookLogId, e);
+                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.UnreadableBodyNote);
+                return;
+            }
 
             if (webhookPayload?.Event == null || webhookPayload?.Webhook == null)
             {
@@ -159,15 +179,15 @@ public class WebhookSender(
             // the original row's id, also on a manual retry, so the receiver recognises the event it may already have
             webhookPayload.Event.Id = entry.EventId;
 
+            // the subscription as it is now: a row restored from a backup holds the id it had on the source portal
+            webhookPayload.Webhook.Id = entry.ConfigId;
+
             if (entry.Attempts > 0)
             {
-                webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? webhookPayload.Event.CreateOn;
-                webhookPayload.Webhook.LastFailureContent = entry.ResponsePayload;
-                // stored as UtcNow, but a datetime column reads back as Unspecified, which would go out without the Z;
-                // cut to whole seconds like every other timestamp of the body
-                webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn is { } lastSuccessOn
-                    ? new DateTime(lastSuccessOn.Ticks - lastSuccessOn.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc)
-                    : null;
+                // the subscription's own record of its last failure and success, which every attempt keeps current
+                webhookPayload.Webhook.LastFailureOn = ToBodyTimestamp(entry.Config.LastFailureOn);
+                webhookPayload.Webhook.LastFailureContent = entry.Config.LastFailureContent;
+                webhookPayload.Webhook.LastSuccessOn = ToBodyTimestamp(entry.Config.LastSuccessOn);
                 webhookPayload.Webhook.RetryCount = entry.Attempts;
                 webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
             }
@@ -200,6 +220,8 @@ public class WebhookSender(
                 logger.DebugLeaseTakenOver(webhookLogId);
                 return;
             }
+
+            requestSent = true;
 
             try
             {
@@ -305,7 +327,8 @@ public class WebhookSender(
                 logger.WarningDeliveryGivenUp(entry.Id, attempts);
             }
 
-            if (requestPayload.Length > MaxRequestPayloadLength)
+            // the column holds bytes, not characters: a body of Cyrillic text under the limit in characters may not fit
+            if (Encoding.UTF8.GetByteCount(requestPayload) > MaxRequestPayloadBytes)
             {
                 requestPayload = entry.RequestPayload;
             }
@@ -346,6 +369,12 @@ public class WebhookSender(
                 // the target has the event already: record the delivery instead of scheduling it once more
                 await RegisterDeliveryAsync(dbWorker, tenantId, webhookLogId, leaseId, deliveredStatus, deliveredOn.Value, attempts);
             }
+            else if (!requestSent)
+            {
+                // nothing reached the target (the database or a check failed first): the row is handed back for a
+                // later try that does not count, so a transient fault does not use up the retries of the event
+                await ReleaseUnsentAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
+            }
             else
             {
                 await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
@@ -358,6 +387,18 @@ public class WebhookSender(
         try
         {
             await dbWorker.RecordJournalDeliveryAsync(tenantId, webhookLogId, leaseId, status, delivery, attempts);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFailedToRegisterAttempt(tenantId, webhookLogId, e);
+        }
+    }
+
+    private async Task ReleaseUnsentAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
+    {
+        try
+        {
+            await dbWorker.ReleaseJournalAttemptAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + _unsentAttemptDelay);
         }
         catch (Exception e)
         {
@@ -425,6 +466,13 @@ public class WebhookSender(
         var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, cancellationToken);
 
         return Encoding.UTF8.GetString(buffer, 0, read);
+    }
+
+    // stored as UtcNow, but a datetime column reads back as Unspecified, which would go out without the Z; cut to whole
+    // seconds like every other timestamp of the body
+    private static DateTime? ToBodyTimestamp(DateTime? value)
+    {
+        return value is { } stored ? new DateTime(stored.Ticks - stored.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc) : null;
     }
 
     private static string ToStorableText(string value)
@@ -514,7 +562,10 @@ public static class WebhookSenderExtension
     {
         var lifeTime = TimeSpan.FromMinutes(5);
 
+        // the deadline of an attempt is webhooks:requestTimeout, applied per call; the client's own 100 seconds would
+        // silently cut a longer one
         services.AddHttpClient(WebhookSender.WebhookHttpClient)
+            .ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
             .SetHandlerLifetime(lifeTime)
             .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
             {
@@ -523,6 +574,7 @@ public static class WebhookSenderExtension
             });
 
         services.AddHttpClient(WebhookSender.WebhookHttpClientSslIgnore)
+            .ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
             .SetHandlerLifetime(lifeTime)
             .ConfigurePrimaryHttpMessageHandler(_ =>
             {

@@ -37,9 +37,12 @@ var check = args.Contains("--check");
 // submodule, which the SDKs are generated from; the second is skipped when the submodule is not checked out
 List<string> contractPaths = [Path.Combine(WebhookContractGenerator.FindContractDirectory(AppContext.BaseDirectory), WebhookContractGenerator.ContractFileName)];
 
+string publishedPath = null;
+
 if (WebhookContractGenerator.FindPublishedDirectory(AppContext.BaseDirectory) is { } publishedDirectory)
 {
-    contractPaths.Add(Path.Combine(publishedDirectory, WebhookContractGenerator.ContractFileName));
+    publishedPath = Path.Combine(publishedDirectory, WebhookContractGenerator.ContractFileName);
+    contractPaths.Add(publishedPath);
 }
 else
 {
@@ -54,6 +57,13 @@ if (check)
 
     foreach (var contractPath in contractPaths)
     {
+        // the pinned spec commit may not carry the published copy yet; that is a pending publication, not a stale file
+        if (contractPath == publishedPath && !File.Exists(contractPath))
+        {
+            Console.WriteLine($"{contractPath} is not in the checked-out spec submodule yet: skipped.");
+            continue;
+        }
+
         var current = File.Exists(contractPath) ? File.ReadAllText(contractPath).ReplaceLineEndings("\n") : "";
 
         if (current == contract)

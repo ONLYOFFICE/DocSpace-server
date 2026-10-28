@@ -246,9 +246,9 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return Queries.DeleteExpiredWebhooksLogsAsync(this, ids);
     }
 
-    // The rows of one event, (retry_of ?? id) == eventId: the original row and its manual retries. Looked up
-    // separately (UNION ALL) for the same reason as WebhooksEventExistsAsync. A retry's own id finds nothing, since a
-    // retry is never the original of another row.
+    // The row with this id and the rows that retry it: for the id of an event's first row, the original and its
+    // manual retries; for the id of a retry, that retry alone, since a retry is never the original of another row.
+    // Looked up separately (UNION ALL) for the same reason as WebhooksEventExistsAsync.
     [PreCompileQuery]
     public IAsyncEnumerable<int> WebhooksEventRowIdsAsync(int tenantId, int eventId)
     {
@@ -510,7 +510,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebhooksDbContext ctx, int tenantId, int eventId) =>
                 ctx.WebhooksLogs
-                    .Where(it => it.TenantId == tenantId && it.Id == eventId && it.RetryOf == null)
+                    .Where(it => it.TenantId == tenantId && it.Id == eventId)
                     .Select(it => it.Id)
                     .Concat(ctx.WebhooksLogs
                         .Where(it => it.TenantId == tenantId && it.RetryOf == eventId)

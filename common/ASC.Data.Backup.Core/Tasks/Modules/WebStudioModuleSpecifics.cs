@@ -84,9 +84,18 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             // of the source's sender, and a row that was in flight is due again once its lease time (held in
             // next_attempt_on while leased) has passed. The cost for a plain restore: pending rows of the archive are
             // sent by the restored portal, those whose time has passed right after the portal is active again, under
-            // new ids (event.id); a delivery the portal had already completed after the backup was taken reaches the
-            // receiver a second time.
+            // new ids (event.id, and webhook.id, which the sender rewrites from the restored subscription); a delivery the
+            // portal had already completed after the backup was taken reaches the receiver a second time. The ids of
+            // the entries inside the stored body are those of the source portal: a body is a record of what was sent.
             SetNull(preparedRow, "lease_id");
+
+            // An archive of the previous version has no attempts column, and its unsent rows are in the old payload
+            // format, which must never be sent: they get the note Upgrade105 gives such rows in place, the text of
+            // ASC.Webhooks.Core.DbWorker.PreviousVersionNote; keep the texts equal.
+            if (!HasColumn(preparedRow, "attempts") && IsNull(preparedRow, "request_headers") && IsNull(preparedRow, "response_payload"))
+            {
+                SetValue(preparedRow, "response_payload", PreviousVersionNote);
+            }
 
             return (true, preparedRow);
         }
@@ -105,13 +114,38 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         return (true, preparedRow);
     }
 
+    private const string PreviousVersionNote =
+        "Not sent: the event was published by a service of the previous version, in the old payload format";
+
     private static void SetNull(Dictionary<string, object> preparedRow, string column)
     {
-        var key = preparedRow.Keys.FirstOrDefault(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
+        SetValue(preparedRow, column, null);
+    }
+
+    private static void SetValue(Dictionary<string, object> preparedRow, string column, object value)
+    {
+        var key = FindColumn(preparedRow, column);
         if (key != null)
         {
-            preparedRow[key] = null;
+            preparedRow[key] = value;
         }
+    }
+
+    private static bool HasColumn(Dictionary<string, object> preparedRow, string column)
+    {
+        return FindColumn(preparedRow, column) != null;
+    }
+
+    private static bool IsNull(Dictionary<string, object> preparedRow, string column)
+    {
+        var key = FindColumn(preparedRow, column);
+
+        return key == null || preparedRow[key] is null or DBNull;
+    }
+
+    private static string FindColumn(Dictionary<string, object> preparedRow, string column)
+    {
+        return preparedRow.Keys.FirstOrDefault(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsWebSearchSettings(object settingsId)

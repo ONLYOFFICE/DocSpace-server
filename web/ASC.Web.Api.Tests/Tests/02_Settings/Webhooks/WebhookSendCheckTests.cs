@@ -65,11 +65,11 @@ public class WebhookSendCheckTests(
 
         config.Should().BeNull("a target in a blacklisted network is removed, not just switched off");
 
-        // The receiver cannot tell whether a request went out: after the URL change it would go to 10.0.0.1, never to
-        // WireMock. Nor can the record: webhooks_logs rows go with their subscription (ON DELETE CASCADE). The removal
-        // itself is the proof that the URL was checked before sending, since only that check removes a subscription
-        // (WebhookSender.DisableWebhook); what is left to assert is that the journal holds nothing for it afterwards
-        (await GetLogAsync(subscription.Id)).Should().BeEmpty("the records of a removed subscription go with it");
+        // The removal itself is the proof that the URL was checked before sending, since only that check removes a
+        // subscription (WebhookSender.DisableWebhook); the records cannot add to it, they go with their subscription
+        // (ON DELETE CASCADE). What the receiver can still tell is that the requeued attempt did not go to the address
+        // the subscription had before the change: a sender working from a stale copy of it would have delivered here
+        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the delivery made before the URL change");
     }
 
     [Fact]

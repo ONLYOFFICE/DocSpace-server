@@ -130,6 +130,11 @@ public class WebhookDeliveryStateTests(
             SecretKey = subscription.SecretKey
         }, TestContext.Current.CancellationToken);
 
+        // the edit proves something only while the attempt still waits for its answer: on a machine too slow for the
+        // receiver's delay the race is lost, and the test says so instead of passing without one
+        (await GetLogAsync(subscription.Id)).Should().ContainSingle().Which.Status.Should()
+            .Be(0, "the edit must land while the attempt is in flight; the receiver's 8-second delay was not enough");
+
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
         record.Status.Should().Be(200);

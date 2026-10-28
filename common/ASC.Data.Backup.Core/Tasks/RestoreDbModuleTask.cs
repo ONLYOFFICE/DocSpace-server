@@ -268,7 +268,7 @@ public class RestoreDbModuleTask : PortalTaskBase
     // as a root). Building the whole tree up front loaded every row of the archive, payloads included, before the first
     // insert, once per attempt of the table: for webhooks_logs, whose retries always point at the original row, which the
     // archive normally holds before them, nearly nothing is held back now. Only the keys of the passed rows are kept.
-    private static IEnumerable<DataRowInfo> ParentsFirst(IEnumerable<DataRowInfo> rows, RelationInfo selfRelation)
+    internal static IEnumerable<DataRowInfo> ParentsFirst(IEnumerable<DataRowInfo> rows, RelationInfo selfRelation)
     {
         var passed = new HashSet<object>();
         var heldBack = new List<DataRowInfo>();

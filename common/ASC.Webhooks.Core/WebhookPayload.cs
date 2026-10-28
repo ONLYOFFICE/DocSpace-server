@@ -223,7 +223,7 @@ public class WebhookPayloadConfigInfo<T2>
     public int RetryCount { get; set; }
 
     /// <summary>
-    /// When the next retry is scheduled, in UTC; absent when no retry is pending.
+    /// When this retry was sent, in UTC, cut to whole seconds. Sent only on an automatic retry, like `lastFailureOn`.
     /// </summary>
     public DateTime? RetryOn { get; set; }
 }

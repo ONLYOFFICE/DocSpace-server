@@ -41,7 +41,8 @@ public class UserWebhookManager(
     WebhookGroupAccessChecker webhookGroupAccessChecker,
     WebhookUserAccessChecker webhookUserAccessChecker,
     UserWebhookDtoHelper userWebhookDtoHelper,
-    GroupWebhookDtoHelper groupWebhookDtoHelper)
+    GroupWebhookDtoHelper groupWebhookDtoHelper,
+    ILogger<UserWebhookManager> logger)
 {
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
@@ -59,7 +60,7 @@ public class UserWebhookManager(
 
     public async Task PublishAfterAsync(WebhookTrigger trigger, UserInfo userInfo, Func<Task> action)
     {
-        var publish = await PrepareAsync(trigger, userInfo);
+        var publish = await TryPrepareAsync(trigger, userInfo.Id, () => PrepareAsync(trigger, userInfo));
 
         await action();
 
@@ -68,11 +69,27 @@ public class UserWebhookManager(
 
     public async Task PublishAfterAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo, Func<Task> action)
     {
-        var publish = await PrepareAsync(trigger, groupInfo);
+        var publish = await TryPrepareAsync(trigger, groupInfo.ID, () => PrepareAsync(trigger, groupInfo));
 
         await action();
 
         await publish();
+    }
+
+    // The payload is built before the action, which removes what it describes; a failure to build it must not stop
+    // the action itself, so the webhook is dropped instead.
+    private async Task<Func<Task>> TryPrepareAsync(WebhookTrigger trigger, Guid entityId, Func<Task<Func<Task>>> prepare)
+    {
+        try
+        {
+            return await prepare();
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorPrepareWebhook(trigger, entityId, e);
+
+            return () => Task.CompletedTask;
+        }
     }
 
     private async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, UserInfo userInfo)

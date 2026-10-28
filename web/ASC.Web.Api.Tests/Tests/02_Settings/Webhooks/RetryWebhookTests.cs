@@ -145,6 +145,21 @@ public class RetryWebhookTests(
     }
 
     [Fact]
+    public async Task RetryWebhook_EventIdFilterWithTheRetryId_ReturnsThatRecordAlone()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+        var retry = await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
+
+        // Act
+        var records = (await _webhooksApi.GetWebhooksLogsAsync(
+            eventId: retry.Response.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert: the id a retry returns is what its caller polls the outcome with
+        records.Select(r => r.Id).Should().Equal(retry.Response.Id);
+    }
+
+    [Fact]
     public async Task RetryWebhook_DeliveredRecord_ResendsTheSameBodyAndSignature()
     {
         // Arrange
@@ -183,6 +198,7 @@ public class RetryWebhookTests(
 
         // Assert
         exception.ErrorCode.Should().Be(409);
+        exception.ErrorContent?.ToString().Should().Contain("The event is being sent right now");
     }
 
     [Fact]
@@ -209,6 +225,7 @@ public class RetryWebhookTests(
 
         // Assert: a disabled subscription receives nothing, so nothing is queued for it
         exception.ErrorCode.Should().Be(409);
+        exception.ErrorContent?.ToString().Should().Contain("The webhook is disabled");
         (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
     }
 
@@ -229,6 +246,7 @@ public class RetryWebhookTests(
 
         // Assert: its body is in the old format, which carried whole REST objects, so it is not sent again
         exception.ErrorCode.Should().Be(409);
+        exception.ErrorContent?.ToString().Should().Contain("The delivery was recorded in an earlier webhook format");
         (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
     }
 
@@ -258,6 +276,7 @@ public class RetryWebhookTests(
 
         // Assert: the body of such a record is in the old format too, sent or not
         exception.ErrorCode.Should().Be(409);
+        exception.ErrorContent?.ToString().Should().Contain("The delivery was recorded in an earlier webhook format");
         (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
     }
 

@@ -74,6 +74,7 @@ internal static class ContractHeader
     /// </summary>
     private static readonly Dictionary<WebhookTrigger, string> _otherSources = new()
     {
+        [WebhookTrigger.FileCreated] = "an AI agent during a chat, for every document, presentation or form it creates with its editor tools",
         [WebhookTrigger.FileUpdated] = "the editor, every time it saves a document, a force-save included; submitting a filled form raises `form.submit` instead",
         [WebhookTrigger.FileDownloaded] = "a download through the file's `viewUrl`, once per download",
         [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, for every file it deletes",

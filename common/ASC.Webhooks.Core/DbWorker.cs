@@ -623,6 +623,12 @@ public class DbWorker(
         "Not sent: the creator of the subscription may no longer receive this event";
 
     /// <summary>
+    /// What the journal shows as the response of a row that was not sent because its stored body cannot be read.
+    /// </summary>
+    public const string UnreadableBodyNote =
+        "Not sent: the stored body of the event cannot be read";
+
+    /// <summary>
     /// Marks a row written by a publisher of the previous version as never to be sent: see
     /// <see cref="WebhooksDbContext.MarkPreviousVersionWebhooksLogAsync"/>. True when the row was marked.
     /// </summary>
@@ -662,7 +668,7 @@ public class DbWorker(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        // the rows of the event, (retry_of ?? id) == eventId, are found first by primary key and the retry_of index;
+        // the row eventId and its retries are found first by primary key and the retry_of index;
         // an OR of the two in the query below would read the tenant's whole range, for the page and for the count
         List<int> eventRowIds = null;
 

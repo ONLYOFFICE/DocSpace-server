@@ -115,6 +115,10 @@ public class UserWebhookDtoHelper(
                 result.Groups = null;
                 result.Department = null;
                 result.ProfileUrl = null;
+                result.UserName = null;
+                result.Email = null;
+                result.MobilePhone = null;
+                result.Contacts = null;
             }
         }
 

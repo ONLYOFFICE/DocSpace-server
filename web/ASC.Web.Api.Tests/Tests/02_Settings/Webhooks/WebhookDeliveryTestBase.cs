@@ -154,9 +154,9 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// Polls one delivery record as the owner until it has been attempted (a non-zero status), and returns the last
-    /// observed state either way; fails when the record is not in the log at all. The <c>eventId</c> filter takes the
-    /// id of the event's first record and returns it with every manual retry of it, so the record is picked out of
-    /// them by its own id: a retry's own id matches no event.
+    /// observed state either way; fails when the record is not in the log at all. The <c>eventId</c> filter given the
+    /// id of the event's first record returns it with every manual retry of it, so the record is picked out of them
+    /// by its own id.
     /// </summary>
     protected async Task<WebhooksLogDto> WaitForAttemptAsync(int eventId, int deliveryId)
     {

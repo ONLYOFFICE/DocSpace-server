@@ -20,7 +20,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             // previous sender processed is recognised by its request headers; one it never got to (its in-memory
             // queue was lost with the update) looks like a row of this version that was stopped before any attempt,
             // so it gets the note that ASC.Webhooks.Core.DbWorker.PreviousVersionNote holds; keep the two texts equal.
-            // Rows still on the schedule of this version, or leased, are left alone.
+            // Rows still on the schedule of this version, or leased, are left alone. No index serves the predicate, so the
+            // statement reads the whole journal once; it changes only the rows the previous sender never got to, a few
+            // at most, so the undo log stays small, and it runs during the update, while the services are stopped.
             migrationBuilder.Sql(
                 "UPDATE webhooks_logs SET response_payload = 'Not sent: the event was published by a service of the previous version, in the old payload format' " +
                 "WHERE retry_of IS NULL AND attempts = 0 AND next_attempt_on IS NULL AND lease_id IS NULL " +

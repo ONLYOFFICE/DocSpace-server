@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Text;
+
 global using ASC.Data.Backup.Tasks;
 global using ASC.Data.Backup.Tasks.Data;
 global using ASC.Data.Backup.Tasks.Modules;

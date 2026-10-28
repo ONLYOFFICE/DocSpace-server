@@ -86,8 +86,7 @@ public class CreateWebhooksConfigRequestsDto
 
     /// <summary>
     /// Whether the target certificate is verified. `true` demands an `https` address with a valid certificate; `false`
-    /// delivers without checking the certificate, and is what a plain `http` target needs. Left out, it is on for an
-    /// `https` target and off for an `http` one.
+    /// delivers without checking the certificate, and is what a plain `http` target needs.
     /// </summary>
     /// <example>true</example>
     public bool? SSL { get; set; }

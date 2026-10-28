@@ -479,7 +479,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
@@ -507,7 +507,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]
@@ -534,7 +534,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </remarks>
     /// <summary>Insert a file to the "Common" section</summary>
     /// <path>api/2.0/files/@common/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -563,7 +563,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </remarks>
     /// <summary>Insert a file into My documents</summary>
     /// <path>api/2.0/files/@my/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, with the identifier, version and title it was saved under", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
@@ -589,7 +589,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </ol>]]>
     /// </remarks>
     /// <path>api/2.0/files/@common/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
@@ -618,7 +618,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// </remarks>
     /// <summary>Upload a file to My documents</summary>
     /// <path>api/2.0/files/@my/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "also when the upload is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "An array holding the single uploaded file", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]

@@ -342,6 +342,7 @@ public class GroupController(
     /// Move group members
     /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "twice, once for the source and once for the destination group, and not at all when both IDs name the same group")]
     [Tags("Group")]
     [SwaggerResponse(200, "The destination group with its members", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -369,6 +370,9 @@ public class GroupController(
             await RemoveUserFromDepartmentAsync(userInfo.Id, fromGroup);
         }
 
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, fromGroup);
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, toGroup);
+
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
     }
 
@@ -391,6 +395,7 @@ public class GroupController(
     /// Replace group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members it ends up with", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member")]
@@ -426,6 +431,8 @@ public class GroupController(
             await TransferUserToDepartmentAsync(userId, group, false);
         }
 
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
 
@@ -445,6 +452,7 @@ public class GroupController(
     /// Add group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its members after the addition", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -463,6 +471,8 @@ public class GroupController(
                 await TransferUserToDepartmentAsync(userId, group, false);
             }
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
@@ -483,6 +493,7 @@ public class GroupController(
     /// Set a group manager
     /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its new manager", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
@@ -504,6 +515,8 @@ public class GroupController(
             throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
@@ -523,6 +536,7 @@ public class GroupController(
     /// Remove group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
+    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members that remain", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -538,6 +552,8 @@ public class GroupController(
         {
             await RemoveUserFromDepartmentAsync(userId, group);
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }

@@ -78,12 +78,15 @@ public class UserWebhookDto
 
     /// <summary>
     /// The unique login name of the user, made from the local part of their email address when the account is created.
+    /// Absent when the subscription's creator is a User or a Guest, who may not see the contacts of other users, unless
+    /// this user is that creator.
     /// </summary>
     /// <example>mike.zanyatski</example>
     public string UserName { get; set; }
 
     /// <summary>
-    /// The email address the user signs in with and receives notifications at.
+    /// The email address the user signs in with and receives notifications at. Absent when the subscription's creator
+    /// is a User or a Guest, who may not see the contacts of other users, unless this user is that creator.
     /// </summary>
     /// <example>mike.zanyatski@example.com</example>
     [EmailAddress]
@@ -91,7 +94,8 @@ public class UserWebhookDto
 
     /// <summary>
     /// The additional contacts from the user's profile, such as extra phone numbers, emails and social links. Absent
-    /// when the profile has none.
+    /// when the profile has none, and when the subscription's creator is a User or a Guest, who may not see the
+    /// contacts of other users, unless this user is that creator.
     /// </summary>
     public List<ContactWebhookDto> Contacts { get; set; }
 
@@ -194,7 +198,8 @@ public class UserWebhookDto
     public string CultureName { get; set; }
 
     /// <summary>
-    /// The mobile phone number from the user's profile; absent when none is set.
+    /// The mobile phone number from the user's profile; absent when none is set, and when the subscription's creator
+    /// is a User or a Guest, who may not see the contacts of other users, unless this user is that creator.
     /// </summary>
     /// <example>+1 916 555 0100</example>
     public string MobilePhone { get; set; }

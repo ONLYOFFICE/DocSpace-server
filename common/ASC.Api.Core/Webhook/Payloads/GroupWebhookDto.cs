@@ -33,24 +33,29 @@
 
 namespace ASC.Api.Core.Webhook.Payloads;
 
+// A copy of GroupDto, deliberately not derived from it: the webhook wire contract is versioned separately from the
+// REST API. The member list is not carried, deliberately: a group can hold thousands of users, and every one of them
+// would be expanded into the body of every group event.
+
 /// <summary>
-/// The group carried by a group.* webhook.
+/// The group a group.* webhook is about.
 /// </summary>
 /// <remarks>
-/// A copy of GroupDto, deliberately not derived from it. The member list is not carried: a group can hold
-/// thousands of users and every one of them would be expanded into the body of every group event. Receivers
-/// that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed.
+/// The payload describes the group at the time of the event, without the list of its members. A `group.updated`
+/// delivery follows a change made through the group API - a rename, a new manager, or members added, removed,
+/// replaced or moved to another group - but does not say which of these happened: compare the payload with the
+/// previous one, and read the current members with `GET api/2.0/group/{id}` when they are needed.
 /// </remarks>
 public class GroupWebhookDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group the event is about; `GET api/2.0/group/{id}` returns the group with its members by it.
     /// </summary>
     /// <example>c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c</example>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The group name.
+    /// The name of the group as it is shown in the portal, after a rename the new one.
     /// </summary>
     /// <example>Marketing Team</example>
     public string Name { get; set; }
@@ -69,24 +74,29 @@ public class GroupWebhookDto
     public Guid Category { get; set; }
 
     /// <summary>
-    /// Specifies whether the group comes from LDAP or not.
+    /// Whether the group is synchronized from an LDAP directory, where its name and members are managed; `false` for
+    /// a group created in the portal.
     /// </summary>
     /// <example>false</example>
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// Specifies whether the group is a system group or not.
+    /// `true` for a built-in system group, whose members follow from the user types rather than from membership
+    /// changes. Absent for every other group, never `false`.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? IsSystem { get; set; }
 
     /// <summary>
-    /// The group manager.
+    /// The user who manages the group. Absent when the group has no manager. A
+    /// subscription owner of the `User` or `Guest` type, who may not see the contacts of other users, gets it without
+    /// the user name and the profile link.
     /// </summary>
     public UserSummaryWebhookDto Manager { get; set; }
 
     /// <summary>
-    /// The number of group members.
+    /// How many users belong to the group at the time of the event, disabled accounts not counted; 0 for a group
+    /// without members.
     /// </summary>
     /// <example>12</example>
     public int MembersCount { get; set; }
@@ -103,27 +113,28 @@ public class GroupWebhookDto
 public class GroupSummaryWebhookDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group; `GET api/2.0/group/{id}` returns the group with its members by it.
     /// </summary>
     /// <example>c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c</example>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The group name.
+    /// The name of the group as it is shown in the portal.
     /// </summary>
     /// <example>Marketing Team</example>
     public string Name { get; set; }
 
     /// <summary>
-    /// The user name of the group manager, not an ID.
+    /// The user name of the user who manages the group, not an ID. Absent when the group has no manager.
     /// </summary>
     /// <example>Mike.Zanyatski</example>
     public string Manager { get; set; }
 
     /// <summary>
-    /// Specifies whether the group is a system group or not.
+    /// `true` for a built-in system group, whose members follow from the user types rather than from membership
+    /// changes. Absent for every other group, never `false`.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? IsSystem { get; set; }
 }
 

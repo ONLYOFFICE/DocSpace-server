@@ -361,7 +361,12 @@ webhooks:
 
         Raised by these REST API operations:
 
+        - `PUT api/2.0/group/{fromId}/members/{toId}` (Move group members), twice, once for the source and once for the destination group, and not at all when both IDs name the same group
         - `PUT api/2.0/group/{id}` (Update a group)
+        - `PUT api/2.0/group/{id}/manager` (Set a group manager)
+        - `POST api/2.0/group/{id}/members` (Replace group members)
+        - `PUT api/2.0/group/{id}/members` (Add group members)
+        - `DELETE api/2.0/group/{id}/members` (Remove group members)
       tags:
         - group
       parameters:
@@ -466,17 +471,20 @@ webhooks:
         - `POST api/2.0/docs/builder` (Run a document builder script), for each file the queued script saves: `file.created` for a new file, `file.updated` for an existing one
         - `POST api/2.0/docs/converter` (Convert a file)
         - `POST api/2.0/files/@my/file` (Create a file in My documents)
-        - `POST api/2.0/files/@my/html` (Create an HTML file in My documents), also when the content is saved as a new version of an existing file
-        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), also when the upload is saved as a new version of an existing file
-        - `POST api/2.0/files/@my/text` (Create a text file in My documents), also when the content is saved as a new version of an existing file
-        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/html` (Create an HTML file in My documents), whether the content creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), whether the upload creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/text` (Create a text file in My documents), whether the content creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), whether the upload creates a new file or is saved as a new version of an existing file
         - `POST api/2.0/files/file/{fileId}/copyas` (Copy a file)
         - `POST api/2.0/files/file/{id}/saveaspdf` (Save a file as PDF)
         - `POST api/2.0/files/{folderId}/file` (Create a file)
-        - `POST api/2.0/files/{folderId}/html` (Create an HTML file), also when the content is saved as a new version of an existing file
-        - `POST api/2.0/files/{folderId}/insert` (Insert a file), also when the upload is saved as a new version of an existing file
-        - `POST api/2.0/files/{folderId}/text` (Create a text file), also when the content is saved as a new version of an existing file
-        - `POST api/2.0/files/{folderId}/upload` (Upload a file), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/html` (Create an HTML file), whether the content creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/insert` (Insert a file), whether the upload creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/text` (Create a text file), whether the content creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/upload` (Upload a file), whether the upload creates a new file or is saved as a new version of an existing file
+        - `POST portal/licensequota/report` (Generate the Document Server license quota report), for the report file it saves into the caller's personal section, unless there is no license quota data to report
+
+        Also raised by an AI agent during a chat, for every document, presentation or form it creates with its editor tools.
       tags:
         - file
       parameters:
@@ -527,13 +535,13 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), also when the upload is saved as a new version of an existing file
-        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/insert` (Insert a file into My documents), whether the upload creates a new file or is saved as a new version of an existing file
+        - `POST api/2.0/files/@my/upload` (Upload a file to My documents), whether the upload creates a new file or is saved as a new version of an existing file
         - `POST api/2.0/files/file/{fileId}/copyas` (Copy a file), as well when the copy is converted to another format
-        - `POST api/2.0/files/{folderId}/insert` (Insert a file), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/insert` (Insert a file), whether the upload creates a new file or is saved as a new version of an existing file
         - `POST api/2.0/files/{folderId}/session/{sessionId}` (Upload the next chunk), on the request that completes the upload, without `file.created`
         - `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` (Finalize an upload session), without `file.created`
-        - `POST api/2.0/files/{folderId}/upload` (Upload a file), also when the upload is saved as a new version of an existing file
+        - `POST api/2.0/files/{folderId}/upload` (Upload a file), whether the upload creates a new file or is saved as a new version of an existing file
       tags:
         - file
       parameters:
@@ -2163,7 +2171,9 @@ components:
         retryOn:
           type: string
           format: date-time
-          description: When the next retry is scheduled, in UTC; absent when no retry is pending.
+          description: >-
+            When this retry was sent, in UTC, cut to whole seconds. Sent only on an automatic retry, like
+            `lastFailureOn`.
     WebhookTargetInfo:
       type: object
       description: >-
@@ -2203,18 +2213,23 @@ components:
           type: string
           description: >-
             The unique login name of the user, made from the local part of their email address when the
-            account is created.
+            account is created. Absent when the subscription's creator is a User or a Guest, who may not
+            see the contacts of other users, unless this user is that creator.
         email:
           type: string
           format: email
-          description: The email address the user signs in with and receives notifications at.
+          description: >-
+            The email address the user signs in with and receives notifications at. Absent when the subscription's
+            creator is a User or a Guest, who may not see the contacts of other users, unless this user
+            is that creator.
         contacts:
           type: array
           items:
             $ref: '#/components/schemas/ContactPayload'
           description: >-
             The additional contacts from the user's profile, such as extra phone numbers, emails and social
-            links. Absent when the profile has none.
+            links. Absent when the profile has none, and when the subscription's creator is a User or
+            a Guest, who may not see the contacts of other users, unless this user is that creator.
         status:
           type: integer
           description: >-
@@ -2292,7 +2307,10 @@ components:
             portal's language.
         mobilePhone:
           type: string
-          description: The mobile phone number from the user's profile; absent when none is set.
+          description: >-
+            The mobile phone number from the user's profile; absent when none is set, and when the subscription's
+            creator is a User or a Guest, who may not see the contacts of other users, unless this user
+            is that creator.
         mobilePhoneActivationStatus:
           type: integer
           description: >-
@@ -2369,16 +2387,20 @@ components:
         id:
           type: string
           format: uuid
-          description: The group ID.
+          description: The ID of the group; `GET api/2.0/group/{id}` returns the group with its members
+            by it.
         name:
           type: string
-          description: The group name.
+          description: The name of the group as it is shown in the portal.
         manager:
           type: string
-          description: The user name of the group manager, not an ID.
+          description: The user name of the user who manages the group, not an ID. Absent when the group
+            has no manager.
         isSystem:
           type: boolean
-          description: Specifies whether the group is a system group or not.
+          description: >-
+            `true` for a built-in system group, whose members follow from the user types rather than from
+            membership changes. Absent for every other group, never `false`.
     UserSummaryPayload:
       type: object
       description: >-
@@ -2414,17 +2436,19 @@ components:
     GroupPayload:
       type: object
       description: |-
-        The group carried by a group.* webhook.
+        The group a group.* webhook is about.
 
-        A copy of GroupDto, deliberately not derived from it. The member list is not carried: a group can hold thousands of users and every one of them would be expanded into the body of every group event. Receivers that need the roster should call GET api/2.0/group/{id} with MembersCount as the hint that it changed.
+        The payload describes the group at the time of the event, without the list of its members. A `group.updated` delivery follows a change made through the group API - a rename, a new manager, or members added, removed, replaced or moved to another group - but does not say which of these happened: compare the payload with the previous one, and read the current members with `GET api/2.0/group/{id}` when they are needed.
       properties:
         id:
           type: string
           format: uuid
-          description: The group ID.
+          description: >-
+            The ID of the group the event is about; `GET api/2.0/group/{id}` returns the group with its
+            members by it.
         name:
           type: string
-          description: The group name.
+          description: The name of the group as it is shown in the portal, after a rename the new one.
         parent:
           type: string
           format: uuid
@@ -2437,16 +2461,22 @@ components:
             category ID for the built-in system groups.
         isLDAP:
           type: boolean
-          description: Specifies whether the group comes from LDAP or not.
+          description: >-
+            Whether the group is synchronized from an LDAP directory, where its name and members are managed;
+            `false` for a group created in the portal.
         isSystem:
           type: boolean
-          description: Specifies whether the group is a system group or not.
+          description: >-
+            `true` for a built-in system group, whose members follow from the user types rather than from
+            membership changes. Absent for every other group, never `false`.
         manager:
           $ref: '#/components/schemas/UserSummaryPayload'
         membersCount:
           type: integer
           format: int32
-          description: The number of group members.
+          description: >-
+            How many users belong to the group at the time of the event, disabled accounts not counted;
+            0 for a group without members.
     FilePayload:
       description: |-
         The file carried by a file.* webhook, and by form.filled.out and form.stopped.

@@ -95,7 +95,8 @@ public class WebhooksController(
     /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
     /// of the subscribed events, 0 standing for all of them; a flag the caller's role may not use is rejected, so take
     /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl` demands an `https` target with a valid
-    /// certificate, `false` leaves the certificate unchecked, and left out it follows the scheme of the target.
+    /// certificate, `false` leaves the certificate unchecked, and left out it is `true` for an `https` target and
+    /// `false` for an `http` one.
     /// `targetId` limits the events to one entity, for user or group events a user or group the creator may see. A
     /// subscription fires only while it is enabled, for events its creator may see and their current role may
     /// subscribe to. Any role except `Guest` may create one, and each call adds another subscription.
@@ -127,7 +128,8 @@ public class WebhooksController(
     /// <remarks>
     /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
     /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `ssl`,
-    /// `triggers` or `targetId` resets them to off, the scheme of the target, all events and no target: read the current values with `GET
+    /// `triggers` or `targetId` resets them to off, `ssl` following the scheme of the target (`true` for `https`,
+    /// `false` for `http`), all events and no target: read the current values with `GET
     /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an empty
     /// value keeping the existing secret and a new one having to satisfy the portal password rules. A `DocSpaceAdmin`
     /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`

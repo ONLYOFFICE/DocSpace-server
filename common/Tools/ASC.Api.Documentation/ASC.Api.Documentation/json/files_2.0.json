@@ -2941,7 +2941,7 @@
           "Files / Files"
         ],
         "summary": "Create an HTML file",
-        "description": "Creates an HTML file in the folder named in the route out of the markup passed as the content, and answers\r\nwith the stored file. The `.html` extension is added to the title unless the title already ends with it, and a\r\nrequest carrying no content is rejected as an invalid request. `createNewIfExist` acts the other way round\r\nthan its name reads: with `true` the file that already carries this title is updated, the markup replacing its\r\ncontent and a version appearing in its history, while with `false`, which is also the default, another file is\r\ncreated and its title made unique, as in \"Notes (1).html\". Updating needs the existing file to be editable by\r\nthe caller, so one that is locked, open in an editing session, encrypted or in Trash is left alone and a new\r\nfile appears beside it instead. The caller needs the right to create files in the folder and is otherwise\r\nrefused with 403. The call is mutating. To create the file in the caller's own section use\r\n`POST api/2.0/files/@my/html`.\n\nRaises the `file.created` webhook also when the content is saved as a new version of an existing file.",
+        "description": "Creates an HTML file in the folder named in the route out of the markup passed as the content, and answers\r\nwith the stored file. The `.html` extension is added to the title unless the title already ends with it, and a\r\nrequest carrying no content is rejected as an invalid request. `createNewIfExist` acts the other way round\r\nthan its name reads: with `true` the file that already carries this title is updated, the markup replacing its\r\ncontent and a version appearing in its history, while with `false`, which is also the default, another file is\r\ncreated and its title made unique, as in \"Notes (1).html\". Updating needs the existing file to be editable by\r\nthe caller, so one that is locked, open in an editing session, encrypted or in Trash is left alone and a new\r\nfile appears beside it instead. The caller needs the right to create files in the folder and is otherwise\r\nrefused with 403. The call is mutating. To create the file in the caller's own section use\r\n`POST api/2.0/files/@my/html`.\n\nRaises the `file.created` webhook whether the content creates a new file or is saved as a new version of an existing file.",
         "operationId": "createHtmlFile",
         "parameters": [
           {
@@ -3072,7 +3072,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the content is saved as a new version of an existing file"
+            "when": "whether the content creates a new file or is saved as a new version of an existing file"
           }
         ],
         "x-thirdparty-variant": {
@@ -3122,7 +3122,7 @@
           "Files / Files"
         ],
         "summary": "Create a text file",
-        "description": "Creates a text file in the folder named in the route out of the text passed as the content, and answers with\r\nthe stored file. The extension follows the content rather than the request: `.txt` normally, but `.html` as\r\nsoon as the text contains something shaped like an HTML tag, so a snippet of markup sent here ends up as an\r\nHTML file; the extension is added to the title unless the title already ends with it. A request carrying no\r\ncontent is rejected as an invalid request. `createNewIfExist` acts the other way round than its name reads:\r\nwith `true` the file that already carries this title is updated and a version appears in its history, while\r\nwith `false`, which is also the default, another file is created and its title made unique, as in \"Notes\r\n(1).txt\". A file that is locked, open in an editing session, encrypted or in Trash is not updated - a new file\r\nappears beside it instead. The caller needs the right to create files in the folder. The call is mutating. To\r\ncreate the file in the caller's own section use `POST api/2.0/files/@my/text`.\n\nRaises the `file.created` webhook also when the content is saved as a new version of an existing file.",
+        "description": "Creates a text file in the folder named in the route out of the text passed as the content, and answers with\r\nthe stored file. The extension follows the content rather than the request: `.txt` normally, but `.html` as\r\nsoon as the text contains something shaped like an HTML tag, so a snippet of markup sent here ends up as an\r\nHTML file; the extension is added to the title unless the title already ends with it. A request carrying no\r\ncontent is rejected as an invalid request. `createNewIfExist` acts the other way round than its name reads:\r\nwith `true` the file that already carries this title is updated and a version appears in its history, while\r\nwith `false`, which is also the default, another file is created and its title made unique, as in \"Notes\r\n(1).txt\". A file that is locked, open in an editing session, encrypted or in Trash is not updated - a new file\r\nappears beside it instead. The caller needs the right to create files in the folder. The call is mutating. To\r\ncreate the file in the caller's own section use `POST api/2.0/files/@my/text`.\n\nRaises the `file.created` webhook whether the content creates a new file or is saved as a new version of an existing file.",
         "operationId": "createTextFile",
         "parameters": [
           {
@@ -3253,7 +3253,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the content is saved as a new version of an existing file"
+            "when": "whether the content creates a new file or is saved as a new version of an existing file"
           }
         ],
         "x-thirdparty-variant": {
@@ -6714,7 +6714,7 @@
           "Files / Files"
         ],
         "summary": "Create an HTML file in My documents",
-        "description": "Creates an HTML file in the caller's own \"My documents\" section out of the markup passed as the content, and\r\nanswers with the stored file. The `.html` extension is added to the title unless the title already ends with\r\nit, and a request carrying no content is rejected as invalid. `createNewIfExist` acts the other way round than\r\nits name reads: with `true` the file that already carries this title is updated, the markup replacing its\r\ncontent and a version appearing in its history, while with `false`, which is also the default, another file is\r\ncreated and its title made unique, as in \"Notes (1).html\". Updating needs the existing file to be editable by\r\nthe caller, so one that is locked, open in an editing session, encrypted or in Trash is left alone and a new\r\nfile appears beside it instead. The call is mutating: repeating it with `true` keeps a single file and grows\r\nits history, repeating it with `false` fills the section with numbered copies. A guest has no \"My documents\"\r\nsection and is refused. To create the file in a room or another folder use\r\n`POST api/2.0/files/{folderId}/html`.\n\nRaises the `file.created` webhook also when the content is saved as a new version of an existing file.",
+        "description": "Creates an HTML file in the caller's own \"My documents\" section out of the markup passed as the content, and\r\nanswers with the stored file. The `.html` extension is added to the title unless the title already ends with\r\nit, and a request carrying no content is rejected as invalid. `createNewIfExist` acts the other way round than\r\nits name reads: with `true` the file that already carries this title is updated, the markup replacing its\r\ncontent and a version appearing in its history, while with `false`, which is also the default, another file is\r\ncreated and its title made unique, as in \"Notes (1).html\". Updating needs the existing file to be editable by\r\nthe caller, so one that is locked, open in an editing session, encrypted or in Trash is left alone and a new\r\nfile appears beside it instead. The call is mutating: repeating it with `true` keeps a single file and grows\r\nits history, repeating it with `false` fills the section with numbered copies. A guest has no \"My documents\"\r\nsection and is refused. To create the file in a room or another folder use\r\n`POST api/2.0/files/{folderId}/html`.\n\nRaises the `file.created` webhook whether the content creates a new file or is saved as a new version of an existing file.",
         "operationId": "createHtmlFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -6828,7 +6828,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the content is saved as a new version of an existing file"
+            "when": "whether the content creates a new file or is saved as a new version of an existing file"
           }
         ]
       }
@@ -6839,7 +6839,7 @@
           "Files / Files"
         ],
         "summary": "Create a text file in My documents",
-        "description": "Creates a text file in the caller's own \"My documents\" section out of the text passed as the content, and\r\nanswers with the stored file. The extension follows the content rather than the request: `.txt` normally, but\r\n`.html` as soon as the text contains something shaped like an HTML tag, so a snippet of markup sent here ends\r\nup as an HTML file; the extension is added to the title unless the title already ends with it. A request\r\ncarrying no content is rejected as invalid. `createNewIfExist` acts the other way round than its name reads:\r\nwith `true` the file that already carries this title is updated and a version appears in its history, while\r\nwith `false`, which is also the default, another file is created and its title made unique, as in\r\n\"Notes (1).txt\". A file that is locked, open in an editing session, encrypted or in Trash is not updated - a\r\nnew file appears beside it instead. The call is mutating. A guest has no \"My documents\" section and is\r\nrefused. To create the file in a room or another folder use `POST api/2.0/files/{folderId}/text`.\n\nRaises the `file.created` webhook also when the content is saved as a new version of an existing file.",
+        "description": "Creates a text file in the caller's own \"My documents\" section out of the text passed as the content, and\r\nanswers with the stored file. The extension follows the content rather than the request: `.txt` normally, but\r\n`.html` as soon as the text contains something shaped like an HTML tag, so a snippet of markup sent here ends\r\nup as an HTML file; the extension is added to the title unless the title already ends with it. A request\r\ncarrying no content is rejected as invalid. `createNewIfExist` acts the other way round than its name reads:\r\nwith `true` the file that already carries this title is updated and a version appears in its history, while\r\nwith `false`, which is also the default, another file is created and its title made unique, as in\r\n\"Notes (1).txt\". A file that is locked, open in an editing session, encrypted or in Trash is not updated - a\r\nnew file appears beside it instead. The call is mutating. A guest has no \"My documents\" section and is\r\nrefused. To create the file in a room or another folder use `POST api/2.0/files/{folderId}/text`.\n\nRaises the `file.created` webhook whether the content creates a new file or is saved as a new version of an existing file.",
         "operationId": "createTextFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -6953,7 +6953,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the content is saved as a new version of an existing file"
+            "when": "whether the content creates a new file or is saved as a new version of an existing file"
           }
         ]
       }
@@ -13033,7 +13033,7 @@
           "Files / Folders"
         ],
         "summary": "Insert a file",
-        "description": "Stores a file in the folder named by the path in a single request, taking its name from `title` rather than\r\nfrom the uploaded part, which is what separates it from `POST api/2.0/files/{folderId}/upload`. The content\r\nmay arrive either as a multipart part or as the raw request body. The name is stripped of characters a title\r\ncannot hold and truncated, and `createNewIfExist` settles the clash: false adds a new version to the file that\r\nalready carries the name, true keeps both by giving the new one a numeric suffix. The caller needs the right\r\nto add content to the folder, so a reader, an editor and a guest get 403, a section root and an archived room\r\nare refused as well, and an unknown folder gives 404. Formats the portal converts are converted afterwards in\r\nthe background; pass `keepConvertStatus` to keep the outcome readable through\r\n`GET api/2.0/files/file/{fileId}/checkconversion`. The answer is the stored file. A large payload belongs in a\r\nchunked session instead.\n\nRaises the `file.created` and `file.uploaded` webhooks also when the upload is saved as a new version of an existing file.",
+        "description": "Stores a file in the folder named by the path in a single request, taking its name from `title` rather than\r\nfrom the uploaded part, which is what separates it from `POST api/2.0/files/{folderId}/upload`. The content\r\nmay arrive either as a multipart part or as the raw request body. The name is stripped of characters a title\r\ncannot hold and truncated, and `createNewIfExist` settles the clash: false adds a new version to the file that\r\nalready carries the name, true keeps both by giving the new one a numeric suffix. The caller needs the right\r\nto add content to the folder, so a reader, an editor and a guest get 403, a section root and an archived room\r\nare refused as well, and an unknown folder gives 404. Formats the portal converts are converted afterwards in\r\nthe background; pass `keepConvertStatus` to keep the outcome readable through\r\n`GET api/2.0/files/file/{fileId}/checkconversion`. The answer is the stored file. A large payload belongs in a\r\nchunked session instead.\n\nRaises the `file.created` and `file.uploaded` webhooks whether the upload creates a new file or is saved as a new version of an existing file.",
         "operationId": "insertFile",
         "parameters": [
           {
@@ -13260,11 +13260,11 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           },
           {
             "trigger": "file.uploaded",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           }
         ],
         "x-thirdparty-variant": {
@@ -13314,7 +13314,7 @@
           "Files / Folders"
         ],
         "summary": "Upload a file",
-        "description": "Stores a file in the folder named by the path in a single multipart request, taking its name from the uploaded\r\npart; use `POST api/2.0/files/{folderId}/insert` when the name has to be given separately or the content is\r\nsent as a raw body. The answer is a list that always holds exactly one file. `createNewIfExist` settles the\r\nclash: false adds a new version to the file that already carries the name, true keeps both by giving the new\r\none a numeric suffix. `storeOriginalFile` reaches further than this call, because it saves the setting on the\r\ncalling account, the same one `PUT api/2.0/files/storeoriginal` writes, and it stays in force for later\r\nuploads. The caller needs the right to add content to the folder, so a reader, an editor and a guest get 403,\r\na section root and an archived room are refused as well, and an unknown folder gives 404. A request without a\r\nfile is rejected as invalid, and a payload above the portal upload limit is refused.\n\nRaises the `file.created` and `file.uploaded` webhooks also when the upload is saved as a new version of an existing file.",
+        "description": "Stores a file in the folder named by the path in a single multipart request, taking its name from the uploaded\r\npart; use `POST api/2.0/files/{folderId}/insert` when the name has to be given separately or the content is\r\nsent as a raw body. The answer is a list that always holds exactly one file. `createNewIfExist` settles the\r\nclash: false adds a new version to the file that already carries the name, true keeps both by giving the new\r\none a numeric suffix. `storeOriginalFile` reaches further than this call, because it saves the setting on the\r\ncalling account, the same one `PUT api/2.0/files/storeoriginal` writes, and it stays in force for later\r\nuploads. The caller needs the right to add content to the folder, so a reader, an editor and a guest get 403,\r\na section root and an archived room are refused as well, and an unknown folder gives 404. A request without a\r\nfile is rejected as invalid, and a payload above the portal upload limit is refused.\n\nRaises the `file.created` and `file.uploaded` webhooks whether the upload creates a new file or is saved as a new version of an existing file.",
         "operationId": "uploadFile",
         "parameters": [
           {
@@ -13485,11 +13485,11 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           },
           {
             "trigger": "file.uploaded",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           }
         ],
         "x-thirdparty-variant": {
@@ -13539,7 +13539,7 @@
           "Files / Folders"
         ],
         "summary": "Insert a file into My documents",
-        "description": "Stores one file in the caller's own My documents section, the personal storage every portal member has, and\r\nreturns the stored file. The destination takes no identifier: it is resolved from the calling account and\r\ncreated on first use, while a guest account has none and is answered as missing (404). Send the content as a\r\n`multipart/form-data` part or as the raw request body, and name it with `title`, which wins over the name of\r\nthe uploaded part and has invalid characters replaced before storing. The call is not idempotent: by default a\r\nfile of the same title is overwritten as a new version, while `createNewIfExist=true` stores a separate copy\r\nunder a title made unique with a numeric suffix; a title held by a file that is locked or open in the editor\r\ncannot be overwritten either, and a second file appears under the same title. Formats listed in\r\n`extsMustConvert` of `GET api/2.0/files/settings` are converted after the response is sent;\r\n`keepConvertStatus=true` keeps that result readable through `GET api/2.0/files/file/{fileId}/checkconversion`,\r\nwhich otherwise drops it. Files over the single-request size limit or the account's storage quota are refused:\r\nsend those through `POST api/2.0/files/{folderId}/upload/create_session`, and use\r\n`POST api/2.0/files/{folderId}/insert` for any other destination.\n\nRaises the `file.created` and `file.uploaded` webhooks also when the upload is saved as a new version of an existing file.",
+        "description": "Stores one file in the caller's own My documents section, the personal storage every portal member has, and\r\nreturns the stored file. The destination takes no identifier: it is resolved from the calling account and\r\ncreated on first use, while a guest account has none and is answered as missing (404). Send the content as a\r\n`multipart/form-data` part or as the raw request body, and name it with `title`, which wins over the name of\r\nthe uploaded part and has invalid characters replaced before storing. The call is not idempotent: by default a\r\nfile of the same title is overwritten as a new version, while `createNewIfExist=true` stores a separate copy\r\nunder a title made unique with a numeric suffix; a title held by a file that is locked or open in the editor\r\ncannot be overwritten either, and a second file appears under the same title. Formats listed in\r\n`extsMustConvert` of `GET api/2.0/files/settings` are converted after the response is sent;\r\n`keepConvertStatus=true` keeps that result readable through `GET api/2.0/files/file/{fileId}/checkconversion`,\r\nwhich otherwise drops it. Files over the single-request size limit or the account's storage quota are refused:\r\nsend those through `POST api/2.0/files/{folderId}/upload/create_session`, and use\r\n`POST api/2.0/files/{folderId}/insert` for any other destination.\n\nRaises the `file.created` and `file.uploaded` webhooks whether the upload creates a new file or is saved as a new version of an existing file.",
         "operationId": "insertFileToMyFromBody",
         "requestBody": {
           "content": {
@@ -13758,11 +13758,11 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           },
           {
             "trigger": "file.uploaded",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           }
         ]
       }
@@ -13773,7 +13773,7 @@
           "Files / Folders"
         ],
         "summary": "Upload a file to My documents",
-        "description": "Uploads one file into the caller's own My documents section and returns it inside a single-element array; one\r\nrequest stores exactly one file. The destination takes no identifier: it is resolved from the calling account\r\nand created on first use, while a guest account has none and is answered as missing (404). The body has to be\r\n`multipart/form-data` carrying the file part; a request without it is rejected as invalid, and the stored name\r\ncomes from that part, since unlike `POST api/2.0/files/@my/insert` there is no separate title. The call is not\r\nidempotent: by default a file of the same title is overwritten as a new version, while `createNewIfExist=true`\r\nstores a separate copy under a title made unique with a numeric suffix. `storeOriginalFile` is not a\r\nper-request switch: it writes the same account setting as `PUT api/2.0/files/storeoriginal`, which decides\r\nwhat happens to the formats listed in `extsMustConvert` of `GET api/2.0/files/settings` when they are\r\nconverted after the response - false replaces the uploaded file with the converted one, true keeps both;\r\n`keepConvertStatus=true` keeps that conversion result readable through\r\n`GET api/2.0/files/file/{fileId}/checkconversion`. Files over the single-request size limit or the account's\r\nstorage quota are refused; send those through `POST api/2.0/files/{folderId}/upload/create_session`.\n\nRaises the `file.created` and `file.uploaded` webhooks also when the upload is saved as a new version of an existing file.",
+        "description": "Uploads one file into the caller's own My documents section and returns it inside a single-element array; one\r\nrequest stores exactly one file. The destination takes no identifier: it is resolved from the calling account\r\nand created on first use, while a guest account has none and is answered as missing (404). The body has to be\r\n`multipart/form-data` carrying the file part; a request without it is rejected as invalid, and the stored name\r\ncomes from that part, since unlike `POST api/2.0/files/@my/insert` there is no separate title. The call is not\r\nidempotent: by default a file of the same title is overwritten as a new version, while `createNewIfExist=true`\r\nstores a separate copy under a title made unique with a numeric suffix. `storeOriginalFile` is not a\r\nper-request switch: it writes the same account setting as `PUT api/2.0/files/storeoriginal`, which decides\r\nwhat happens to the formats listed in `extsMustConvert` of `GET api/2.0/files/settings` when they are\r\nconverted after the response - false replaces the uploaded file with the converted one, true keeps both;\r\n`keepConvertStatus=true` keeps that conversion result readable through\r\n`GET api/2.0/files/file/{fileId}/checkconversion`. Files over the single-request size limit or the account's\r\nstorage quota are refused; send those through `POST api/2.0/files/{folderId}/upload/create_session`.\n\nRaises the `file.created` and `file.uploaded` webhooks whether the upload creates a new file or is saved as a new version of an existing file.",
         "operationId": "uploadFileToMy",
         "parameters": [
           {
@@ -13938,11 +13938,11 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.created",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           },
           {
             "trigger": "file.uploaded",
-            "when": "also when the upload is saved as a new version of an existing file"
+            "when": "whether the upload creates a new file or is saved as a new version of an existing file"
           }
         ]
       }

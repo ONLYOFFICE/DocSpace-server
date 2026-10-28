@@ -371,7 +371,7 @@ public abstract class FilesController<T>(
     /// Create an HTML file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/html</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -400,7 +400,7 @@ public abstract class FilesController<T>(
     /// Create a text file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/text</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -1340,7 +1340,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create an HTML file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/html</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1368,7 +1368,7 @@ public class FilesControllerCommon(
     /// Create an HTML file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/html</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -1386,7 +1386,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create a text file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/text</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1412,7 +1412,7 @@ public class FilesControllerCommon(
     /// Create a text file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/text</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, When = "also when the content is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]

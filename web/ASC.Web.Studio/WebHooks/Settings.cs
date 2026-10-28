@@ -51,7 +51,8 @@ public class Settings
         }
 
         RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : [.. WebhookDelivery.DefaultRetryIntervals];
-        ThreadCount = cfg.ThreadCount ?? 10;
+        // a parallel loop of no threads throws, which would stop the delivery of every webhook
+        ThreadCount = cfg.ThreadCount is > 0 ? cfg.ThreadCount : 10;
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
         RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : WebhookDelivery.DefaultRequestTimeout;
