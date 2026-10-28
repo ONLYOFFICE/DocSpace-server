@@ -276,11 +276,13 @@ public class FormRecoveryTask : DistributedTaskProgress
     }
 
     // A recovery of the form queued earlier by another user may be building the history of a new report file: this one
-    // waits for it and for the report it starts, so that its own report comes after them instead of between them.
+    // waits for it and for the report it starts, so that its own report comes after them instead of between them. It
+    // waits for a report of its own user still running too: the queue would keep that one and drop the report of this
+    // recovery.
     private async Task WaitForEarlierRecoveriesAsync(FormRecoveryTaskManager recoveryTaskManager)
     {
-        var earlierUsers = new HashSet<Guid>();
-        var waitingSince = DateTime.UtcNow;
+        var earlierUsers = new HashSet<Guid> { UserId };
+        var waiting = Stopwatch.StartNew();
         var warned = false;
         try
         {
@@ -294,7 +296,7 @@ public class FormRecoveryTask : DistributedTaskProgress
                     return;
                 }
 
-                if (!warned && DateTime.UtcNow - waitingSince > _longWaitWarning)
+                if (!warned && waiting.Elapsed > _longWaitWarning)
                 {
                     _logger.WarnRecoveryWaitingLong(OriginalFormId, (int)_longWaitWarning.TotalMinutes, string.Join(", ", earlier.Select(t => t.Id)));
                     warned = true;

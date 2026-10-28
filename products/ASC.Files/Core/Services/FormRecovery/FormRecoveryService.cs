@@ -238,6 +238,7 @@ public class FormRecoveryService(
                 // Not the file's fault: it is left for the next report, uncounted, so that an outage does not use up the
                 // attempts of every form, and the forms after it are still read.
                 logger.WarnRecoverySubmissionPostponed(passingFailure, orphan.Id, originalFormId);
+                await MarkPostponedAsync(orphan, roomId, form, fileDao);
                 if (++passingFailures >= MaxPassingFailuresInRow)
                 {
                     logger.WarnRecoveryStopped(passingFailure, originalFormId, i + 1, orphans.Count);
@@ -311,23 +312,28 @@ public class FormRecoveryService(
             indexed.UnionWith(found);
         }
 
-        var orphans = new List<File<int>>();
+        var orphans = new List<(File<int> File, DateTime PostponedOn)>();
         foreach (var files in completed.Where(f => !indexed.Contains(f.Id)).Chunk(LookupBatchSize))
         {
             var properties = await fileDao.GetPropertiesAsync(files.Select(f => f.Id));
-            orphans.AddRange(files.Where(f =>
+            foreach (var file in files)
             {
-                var formFilling = properties.GetValueOrDefault(f.Id)?.FormFilling;
+                var formFilling = properties.GetValueOrDefault(file.Id)?.FormFilling;
                 if (formFilling is { OriginalFormId: not 0 } && formFilling.OriginalFormId != originalFormId)
                 {
-                    return false;
+                    continue;
                 }
 
-                return formFilling?.RecoveryFailedVersion != f.Version || (formFilling.RecoveryFailedAttempts ?? 0) < MaxRecoveryAttempts;
-            }));
+                if (formFilling?.RecoveryFailedVersion != file.Version || (formFilling.RecoveryFailedAttempts ?? 0) < MaxRecoveryAttempts)
+                {
+                    orphans.Add((file, formFilling?.RecoveryPostponedOn ?? DateTime.MinValue));
+                }
+            }
         }
 
-        return orphans;
+        // A file put off by a failure is read after the others, the one put off longest ago first, so that a few files the
+        // builder keeps failing on cannot stop every run before the rest is read.
+        return orphans.OrderBy(o => o.PostponedOn).Select(o => o.File).ToList();
     }
 
     // A failure of the builder, the network or a lock, which passes. Anything else, a defect included, counts as an
@@ -478,18 +484,30 @@ public class FormRecoveryService(
 
     // Counted for the version of the file, so that a new version is read again; an unrecoverable file takes all the
     // attempts at once. Under the submission lock, as the other writes of the file's properties.
-    private async Task CountFailedAttemptAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, bool unrecoverable)
+    private Task CountFailedAttemptAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, bool unrecoverable)
+    {
+        return UpdateRecoveryPropertiesAsync(orphan, roomId, form, fileDao, formFilling =>
+        {
+            var attempts = formFilling.RecoveryFailedVersion == orphan.Version ? formFilling.RecoveryFailedAttempts ?? 0 : 0;
+            formFilling.RecoveryFailedVersion = orphan.Version;
+            formFilling.RecoveryFailedAttempts = unrecoverable ? MaxRecoveryAttempts : attempts + 1;
+        });
+    }
+
+    private Task MarkPostponedAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao)
+    {
+        return UpdateRecoveryPropertiesAsync(orphan, roomId, form, fileDao, formFilling => formFilling.RecoveryPostponedOn = DateTime.UtcNow);
+    }
+
+    // Under the submission lock, as the other writes of the file's properties; a failure only loses the mark.
+    private async Task UpdateRecoveryPropertiesAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, Action<FormFillingProperties<int>> update)
     {
         try
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
             {
                 var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
-                var formFilling = properties.FormFilling ??= new FormFillingProperties<int>();
-
-                var attempts = formFilling.RecoveryFailedVersion == orphan.Version ? formFilling.RecoveryFailedAttempts ?? 0 : 0;
-                formFilling.RecoveryFailedVersion = orphan.Version;
-                formFilling.RecoveryFailedAttempts = unrecoverable ? MaxRecoveryAttempts : attempts + 1;
+                update(properties.FormFilling ??= new FormFillingProperties<int>());
                 await fileDao.SaveProperties(orphan.Id, properties);
             }
         }

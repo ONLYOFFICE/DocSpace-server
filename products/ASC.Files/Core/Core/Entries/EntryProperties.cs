@@ -164,6 +164,12 @@ public class FormFillingProperties<T>
     /// </summary>
     public int? RecoveryFailedAttempts { get; set; }
 
+    /// <summary>
+    /// When reading the completed form back was last put off by a failure of the builder, the network or the index;
+    /// recovery reads such files after the others.
+    /// </summary>
+    public DateTime? RecoveryPostponedOn { get; set; }
+
 }
 
 /// <summary>

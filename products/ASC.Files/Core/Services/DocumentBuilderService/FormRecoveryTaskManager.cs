@@ -34,7 +34,7 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Singleton]
-public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) : IDisposable
+public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory, IDistributedLockProvider distributedLockProvider) : IDisposable
 {
     private const string TaskIdPrefix = "FormRecoveryTask";
 
@@ -53,37 +53,54 @@ public class FormRecoveryTaskManager(IDistributedTaskQueueFactory queueFactory) 
         await _semaphore.WaitAsync();
         try
         {
-            var task = await _queue.PeekTask(newTask.Id);
-            if (task is { IsCompleted: false })
+            // Requests of one user may reach two workers at once: the check and the publication go under a lock of the
+            // cluster, so that only one of them queues the recovery.
+            IDistributedLockHandle handle;
+            try
             {
+                handle = await distributedLockProvider.TryAcquireFairLockAsync($"{newTask.Id}_start");
+            }
+            catch (DistributedLockException)
+            {
+                // Another start of this recovery holds the lock, so its task is about to run.
                 return false;
             }
 
-            if (task != null)
+            await using (handle)
             {
-                await _queue.DequeueTask(task.Id);
+                var task = await _queue.PeekTask(newTask.Id);
+                if (task is { IsCompleted: false })
+                {
+                    return false;
+                }
+
+                if (task != null)
+                {
+                    await _queue.DequeueTask(task.Id);
+                }
+
+                // The order the recoveries of a form run in; kept growing when the clock is set back.
+                var now = DateTime.UtcNow;
+                newTask.QueuedOn = _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
+
+                // Published at once, so that the task is seen as running, and queued once the earlier recoveries of the form
+                // are done. The heartbeat starts first, since a free reader may start the task as soon as it is queued and
+                // stop it.
+                newTask.StartQueuedHeartbeat();
+                try
+                {
+                    await _queue.PublishTask(newTask);
+                }
+                catch
+                {
+                    await newTask.StopQueuedHeartbeatAsync();
+                    throw;
+                }
+
+                _ = newTask.QueueWhenFreeAsync(this, _queue);
+
+                return true;
             }
-
-            // The order the recoveries of a form run in; kept growing when the clock is set back.
-            var now = DateTime.UtcNow;
-            newTask.QueuedOn = _lastQueuedOn = now > _lastQueuedOn ? now : _lastQueuedOn.AddTicks(1);
-
-            // Published at once, so that the task is seen as running, and queued once the earlier recoveries of the form are
-            // done. The heartbeat starts first, since a free reader may start the task as soon as it is queued and stop it.
-            newTask.StartQueuedHeartbeat();
-            try
-            {
-                await _queue.PublishTask(newTask);
-            }
-            catch
-            {
-                await newTask.StopQueuedHeartbeatAsync();
-                throw;
-            }
-
-            _ = newTask.QueueWhenFreeAsync(this, _queue);
-
-            return true;
         }
         finally
         {
