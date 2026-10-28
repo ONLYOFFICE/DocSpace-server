@@ -45,16 +45,13 @@ public class PaymentFilter(ILogger<PaymentFilter> logger, TenantExtra tenantExtr
             return;
         }
 
-        var header = context.HttpContext.Request.Headers["Payment-Info"];
-        if (string.IsNullOrEmpty(header) || (bool.TryParse(header, out var flag) && flag))
+        if (await tenantExtra.IsNotPaidAsync(false))
         {
-            if (await tenantExtra.IsNotPaidAsync(false))
-            {
-                context.Result = new StatusCodeResult((int)HttpStatusCode.PaymentRequired);
-                logger.WarningPaymentRequired(context.HttpContext.Request.Url());
-                return;
-            }
+            context.Result = new StatusCodeResult((int)HttpStatusCode.PaymentRequired);
+            logger.WarningPaymentRequired(context.HttpContext.Request.Url());
+            return;
         }
+
         await next();
     }
 }
