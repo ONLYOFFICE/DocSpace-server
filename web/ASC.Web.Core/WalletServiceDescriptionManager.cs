@@ -237,6 +237,11 @@ public class WalletServiceDescriptionManager
                byok;
     }
 
+    public static string GetProvider(Dictionary<string, string> metadata)
+    {
+        return metadata?.GetValueOrDefault(BillingClient.MetadataProvider);
+    }
+
     /// <summary>
     /// Returns the localized name of the source type, or the raw value for an unknown one.
     /// </summary>

@@ -170,6 +170,11 @@ public class OperationDto
     /// <example>true</example>
     public bool Byok { get; set; }
     /// <summary>
+    /// The AI provider that ran the operation; `null` when it was not recorded.
+    /// </summary>
+    /// <example>anthropic</example>
+    public string Provider { get; set; }
+    /// <summary>
     /// What the AI provider charged for the whole `quantity` of an AI tools or AI search charge, as the billing
     /// service recorded it - the provider's side of the same operation `debit` bills the portal for. It is `null`
     /// on any other movement, and on an AI charge recorded without a provider cost.
@@ -235,6 +240,7 @@ public class OperationDto
         Credit = operation.Credit;
         Debit = operation.Debit;
         Byok = WalletServiceDescriptionManager.IsByok(operation.Metadata);
+        Provider = WalletServiceDescriptionManager.GetProvider(operation.Metadata);
         Cost = WalletServiceDescriptionManager.GetProviderCost(operation.Metadata);
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
