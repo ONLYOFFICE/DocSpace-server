@@ -31,12 +31,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Integration.Profiles;
+namespace ASC.AI.Models.RequestDto.Byok;
 
-public class ByokProfileData
+public class DeleteByokKeyRequestDto
 {
-    public required string Name { get; init; }
-    public required string Provider { get; init; }
-    public required string ModelId { get; init; }
-    public required string Key { get; init; }
+    [FromRoute(Name = "id")]
+    public required Guid Id { get; init; }
 }

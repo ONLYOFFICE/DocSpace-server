@@ -31,11 +31,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Integration.Profiles;
+namespace ASC.AI.Models.RequestDto.Byok;
 
-public class ByokProfileUpdateData
+public class SetByokKeyRequestDto
 {
-    public required string Name { get; init; }
-    public required string ModelId { get; init; }
-    public string? Key { get; init; }
+    [FromRoute(Name = "id")]
+    public required Guid Id { get; init; }
+
+    [FromBody]
+    public required SetByokKeyRequest Body { get; init; }
+}
+
+public class SetByokKeyRequest
+{
+    [Required]
+    public required string Provider { get; init; }
+
+    [Required]
+    [MaxLength(AiIntegrationLimits.MaxKeyLength)]
+    public required string Key { get; init; }
 }

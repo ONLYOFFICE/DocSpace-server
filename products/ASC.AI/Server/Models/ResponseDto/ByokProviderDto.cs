@@ -42,7 +42,7 @@ public class ByokProviderDto
 
 public class ByokModelDto
 {
-    public required string Id { get; init; }
+    public Guid Id { get; init; }
     public required string Name { get; init; }
 }
 

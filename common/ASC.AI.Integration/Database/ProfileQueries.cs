@@ -48,12 +48,6 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<ProfileModelRef> GetProfileModelRefsAsync(int tenantId, IEnumerable<Guid> ids)
-    {
-        return ProfileQueriesContainer.GetProfileModelRefsAsync(this, tenantId, ids);
-    }
-
-    [PreCompileQuery]
     public Task<DbProfile?> GetProfileForUpdateAsync(int tenantId, Guid id)
     {
         return ProfileQueriesContainer.GetProfileForUpdateAsync(this, tenantId, id);
@@ -86,13 +80,6 @@ static file class ProfileQueriesContainer
                     .Where(x => x.TenantId == tenantId)
                     .OrderBy(x => x.Id)
                     .AsQueryable());
-
-    public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, IAsyncEnumerable<ProfileModelRef>> GetProfileModelRefsAsync =
-        EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids) =>
-                ctx.Profiles
-                    .Where(x => x.TenantId == tenantId && ids.Contains(x.Id))
-                    .Select(x => new ProfileModelRef { Id = x.Id, ProviderType = x.ProviderType, ModelId = x.ModelId }));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<DbProfile?>> GetProfileForUpdateAsync =
         EF.CompileAsyncQuery(

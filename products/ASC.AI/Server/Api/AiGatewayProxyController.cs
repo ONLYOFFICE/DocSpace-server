@@ -83,8 +83,8 @@ public class AiGatewayProxyController(
             return NotFound();
         }
 
-        var (provider, apiKey) = await profileStorageService.ReadByokCredentialsAsync(profileId);
-        var key = await IssueKeyAsync(() => aiGateway.GetByokKeyAsync(provider, apiKey));
+        var credentials = await profileStorageService.ReadByokCredentialsAsync(profileId);
+        var key = await IssueKeyAsync(() => aiGateway.GetByokKeyAsync(credentials.Provider, credentials.Key));
 
         return await ForwardAsync(path, key);
     }

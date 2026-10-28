@@ -31,32 +31,32 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.Profiles;
+namespace ASC.AI.Api;
 
-public class UpdateByokProfileRequestDto
+[Scope]
+[ApiEndpoint("ai", Internal = true)]
+[AiFeature]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class ByokKeysController(ProfileStorageService profileStorageService) : ControllerBase
 {
-    [FromRoute(Name = "id")]
-    public required Guid Id { get; init; }
+    [HttpGet("byok/providers")]
+    public async Task<List<ByokProviderDto>> ReadProvidersAsync()
+    {
+        var providers = await profileStorageService.ReadByokProvidersAsync();
+        return [.. providers.Select(ByokProviderMapper.MapToDto)];
+    }
 
-    [FromBody]
-    public required UpdateByokProfileRequest Body { get; init; }
-}
+    [HttpPut("byok/keys/{id}")]
+    public async Task<ProfileDto> SetAsync(SetByokKeyRequestDto inDto)
+    {
+        var profile = await profileStorageService.SetByokKeyAsync(inDto.Id, inDto.Body.Provider, inDto.Body.Key);
+        return ProfileMapper.MapToDto(profile);
+    }
 
-public class UpdateByokProfileRequest
-{
-    [Required]
-    [MaxLength(AiIntegrationLimits.MaxNameLength)]
-    public required string Name { get; init; }
-
-    [Required]
-    public required string ModelId { get; init; }
-
-    [MaxLength(AiIntegrationLimits.MaxKeyLength)]
-    public string? Key { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
-public static partial class UpdateByokProfileRequestMapper
-{
-    public static partial ByokProfileUpdateData Map(this UpdateByokProfileRequest source);
+    [HttpDelete("byok/keys/{id}")]
+    public async Task<IActionResult> DeleteAsync(DeleteByokKeyRequestDto inDto)
+    {
+        await profileStorageService.DeleteByokKeyAsync(inDto.Id);
+        return NoContent();
+    }
 }

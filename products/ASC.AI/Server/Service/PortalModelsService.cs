@@ -31,11 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Integration.Profiles;
+namespace ASC.AI.Service;
 
-public class ProfileModelRef
+[Scope]
+public class PortalModelsService(AiGateway gateway, ByokKeyStorage byokKeyStorage, TenantManager tenantManager)
 {
-    public Guid Id { get; init; }
-    public required string ProviderType { get; init; }
-    public required string ModelId { get; init; }
+    public async Task<List<Model>> ReadAsync()
+    {
+        List<Model> models = [.. (await gateway.GetModelsAsync()).Data];
+
+        var overridden = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId()))
+            .Select(k => k.Id)
+            .Except(models.Select(m => m.RevisionId))
+            .ToHashSet();
+
+        if (overridden.Count == 0)
+        {
+            return models;
+        }
+
+        var catalogue = (await gateway.GetAllModelsAsync()).Data;
+
+        models.AddRange(catalogue.Where(m => overridden.Contains(m.RevisionId)));
+
+        return models;
+    }
 }

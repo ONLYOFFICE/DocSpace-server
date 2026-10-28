@@ -42,6 +42,6 @@ public class ByokProviderInfo
 
 public class ByokModelInfo
 {
-    public required string Id { get; init; }
+    public Guid Id { get; init; }
     public required string Name { get; init; }
 }

@@ -39,6 +39,8 @@ public class ProfileStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ProfileStorage storage,
+    ByokKeyStorage byokKeyStorage,
+    PortalModelsService portalModelsService,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -82,76 +84,37 @@ public class ProfileStorageService(
         return created;
     }
 
-    public async Task<Profile> CreateByokAsync(ByokProfileData profile)
+    public async Task<Profile> SetByokKeyAsync(Guid id, string provider, string key)
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var model = await GetByokModelAsync(profile.Provider, profile.ModelId);
-        await AssertByokKeyValidAsync(profile.Provider, profile.Key);
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+        var model = models.FirstOrDefault(m => m.RevisionId == id && IsNotEmbedding(m)) ?? throw new ItemNotFoundException();
 
-        var created = await storage.CreateAsync(tenantManager.GetCurrentTenantId(), new ProfileData
+        if (model.ByokProviders?.Any(p => p.Id == provider) != true)
         {
-            Name = profile.Name,
-            ProviderType = profile.Provider,
-            BaseUrl = string.Empty,
-            Key = profile.Key,
-            ModelId = profile.ModelId
-        });
-
-        messageService.Send(MessageAction.AiProfileCreated, MessageTarget.Create(created.Id), created.Name);
-
-        return MapByokProfile(created, model);
-    }
-
-    public async Task<Profile> UpdateByokAsync(Guid id, ByokProfileUpdateData profile)
-    {
-        await AssertUserHasAccessAsync(_writeTypes);
-        AssertGatewayConfigured();
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var existing = await storage.ReadByIdAsync(tenantId, id) ?? throw new ItemNotFoundException();
-
-        var model = await GetByokModelAsync(existing.ProviderType, profile.ModelId);
-
-        var key = existing.Key;
-        if (!string.IsNullOrEmpty(profile.Key))
-        {
-            await AssertByokKeyValidAsync(existing.ProviderType, profile.Key);
-            key = profile.Key;
+            throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
         }
 
-        var updated = await storage.UpdateAsync(tenantId, new Profile
+        if (!await _aiGateway.VerifyByokKeyAsync(provider, key))
         {
-            Id = existing.Id,
-            Name = profile.Name,
-            ProviderType = existing.ProviderType,
-            BaseUrl = string.Empty,
-            Key = key,
-            ModelId = profile.ModelId,
-            CreatedAt = existing.CreatedAt
-        });
+            throw new ArgumentException(ErrorMessages.InvalidKey);
+        }
 
-        messageService.Send(MessageAction.AiProfileUpdated, MessageTarget.Create(updated.Id), updated.Name);
+        await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, provider, key);
 
-        return MapByokProfile(updated, model);
+        return MapGatewayProfile(model, provider);
     }
 
-    public async Task DeleteByokAsync(Guid id)
+    public async Task DeleteByokKeyAsync(Guid id)
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(ProfileStorage.GetLockKey(tenantId, id)))
+        if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
         {
-            var profile = await storage.ReadByIdAsync(tenantId, id) ?? throw new ItemNotFoundException();
-
-            await storage.DeleteAsync(tenantId, id);
-
-            messageService.Send(MessageAction.AiProfileDeleted, MessageTarget.Create(profile.Id), profile.Name);
+            throw new ItemNotFoundException();
         }
     }
 
@@ -161,18 +124,19 @@ public class ProfileStorageService(
         AssertGatewayConfigured();
 
         var models = (await _aiGateway.GetAllModelsAsync()).Data;
+        var overridden = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
 
         return
         [
             .. models
-                .Where(IsNotEmbedding)
+                .Where(m => IsNotEmbedding(m) && !overridden.Contains(m.RevisionId))
                 .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
                 .GroupBy(x => x.Provider.Id)
                 .Select(g => new ByokProviderInfo
                 {
                     Id = g.Key,
                     Name = g.First().Provider.Name,
-                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.Id, Name = x.Model.Alias })]
+                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.RevisionId, Name = x.Model.Alias })]
                 })
                 .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
         ];
@@ -182,25 +146,15 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        if (!_aiGateway.Configured)
+        if (_aiGateway.Configured)
         {
-            return await storage.ReadByIdAsync(tenantId, id) ?? throw new ItemNotFoundException();
+            var profiles = await ReadAllVerifiedAsync();
+            return profiles.Find(p => p.Id == id) ?? throw new ItemNotFoundException();
         }
 
-        var customerModels = (await _aiGateway.GetModelsAsync()).Data;
+        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
-        var builtIn = MapGatewayProfiles(customerModels).FirstOrDefault(p => p.Id == id);
-        if (builtIn is not null)
-        {
-            return builtIn;
-        }
-
-        var stored = await storage.ReadByIdAsync(tenantId, id) ?? throw new ItemNotFoundException();
-        var allModels = (await _aiGateway.GetAllModelsAsync()).Data;
-
-        return MapByokProfile(stored, allModels) ?? throw new ItemNotFoundException();
+        return profile ?? throw new ItemNotFoundException();
     }
 
     public async Task<List<Profile>> ReadAllAsync()
@@ -242,43 +196,22 @@ public class ProfileStorageService(
         }
     }
 
-    internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
+    internal async Task<List<Profile>> ReadAllVerifiedAsync(List<Model>? models = null)
     {
         if (!_aiGateway.Configured)
         {
             return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
         }
 
-        var customerModels = models ?? (await _aiGateway.GetModelsAsync()).Data;
-        var builtIn = MapGatewayProfiles(customerModels).ToList();
-
-        var stored = await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        if (stored.Count == 0)
-        {
-            return builtIn;
-        }
-
-        var allModels = (await _aiGateway.GetAllModelsAsync()).Data.ToList();
-
-        return
-        [
-            .. builtIn,
-            .. stored.Select(p => MapByokProfile(p, allModels)).OfType<Profile>()
-        ];
+        return await MapGatewayProfilesAsync(models ?? await portalModelsService.ReadAsync());
     }
 
-    internal async Task<(string Provider, string Key)> ReadByokCredentialsAsync(Guid id)
+    internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
     {
         await AssertUserHasAccessAsync(_readTypes);
         AssertGatewayConfigured();
 
-        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
-        if (profile is null || string.IsNullOrEmpty(profile.Key))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        return (profile.ProviderType, profile.Key);
+        return await byokKeyStorage.ReadCredentialsAsync(tenantManager.GetCurrentTenantId(), id) ?? throw new ItemNotFoundException();
     }
 
     private void AssertGatewayConfigured()
@@ -289,46 +222,24 @@ public class ProfileStorageService(
         }
     }
 
-    private async Task<Model> GetByokModelAsync(string provider, string modelId)
+    private async Task<List<Profile>> MapGatewayProfilesAsync(List<Model> models)
     {
-        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+        var byokProviders = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).ToDictionary(k => k.Id, k => k.Provider);
 
-        return FindByokModel(models, provider, modelId) ?? throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
+        return
+        [
+            .. models
+                .Where(IsNotEmbedding)
+                .Select(m => MapGatewayProfile(m, byokProviders.GetValueOrDefault(m.RevisionId)))
+        ];
     }
 
-    private async Task AssertByokKeyValidAsync(string provider, string key)
-    {
-        if (!await _aiGateway.VerifyByokKeyAsync(provider, key))
-        {
-            throw new ArgumentException(ErrorMessages.InvalidKey);
-        }
-    }
-
-    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
-    {
-        return models
-            .Where(IsNotEmbedding)
-            .Select(m => MapGatewayProfile(m, m.RevisionId, m.Alias, null, default));
-    }
-
-    private Profile? MapByokProfile(Profile stored, IEnumerable<Model> models)
-    {
-        var model = FindByokModel(models, stored.ProviderType, stored.ModelId);
-
-        return model is null ? null : MapByokProfile(stored, model);
-    }
-
-    private Profile MapByokProfile(Profile stored, Model model)
-    {
-        return MapGatewayProfile(model, stored.Id, stored.Name, stored.ProviderType, stored.CreatedAt);
-    }
-
-    private Profile MapGatewayProfile(Model model, Guid id, string name, string? byokProvider, DateTime createdAt)
+    private Profile MapGatewayProfile(Model model, string? byokProvider)
     {
         return new Profile
         {
-            Id = id,
-            Name = name,
+            Id = model.RevisionId,
+            Name = model.Alias,
             ProviderType = "onlyoffice",
             BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
             ModelId = model.Id,
@@ -337,19 +248,13 @@ public class ProfileStorageService(
             Capabilities = MapCapabilities(model),
             UseResponsesApi = false,
             Key = "onlyoffice",
-            ByokProvider = byokProvider,
-            CreatedAt = createdAt
+            ByokProvider = byokProvider
         };
     }
 
     private static bool IsNotEmbedding(Model model)
     {
         return !string.Equals(model.Type, "embedding", StringComparison.OrdinalIgnoreCase);
-    }
-
-    internal static Model? FindByokModel(IEnumerable<Model> models, string provider, string modelId)
-    {
-        return models.FirstOrDefault(m => IsNotEmbedding(m) && m.Id == modelId && m.ByokProviders?.Any(p => p.Id == provider) == true);
     }
 
     private static ReasoningConfig MapReasoning(Model model)

@@ -52,6 +52,7 @@ public class ChatContextService(
     FileSecurity fileSecurity,
     AiGateway gateway,
     AiSettingsService aiSettingsService,
+    PortalModelsService portalModelsService,
     ProfileStorageService profileStorageService,
     AssignmentsStorageService assignmentsStorageService,
     PreferencesStorageService preferencesStorageService,
@@ -117,9 +118,7 @@ public class ChatContextService(
             return null;
         }
 
-        var response = await _gateway.GetModelsAsync();
-
-        return [.. response.Data];
+        return await portalModelsService.ReadAsync();
     }
 
     private async Task<AiSettingsDto> ReadConfigAsync()
