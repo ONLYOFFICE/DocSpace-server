@@ -1217,7 +1217,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
+    [SwaggerResponse(200, "The request is accepted; the pending members it covers are mailed again, except those who already got this invitation within the repeat period")]
     [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
