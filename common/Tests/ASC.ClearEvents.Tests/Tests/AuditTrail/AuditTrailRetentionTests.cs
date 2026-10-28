@@ -51,6 +51,24 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         // Assert
         (await RemainingEventsAsync([expired, recent])).Should().BeEquivalentTo([recent]);
+        TestTariffs.LookupsOf(TenantId).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ClearAsync_OnlyHistoryPastFreeLifeTime_DoesNotLookUpTheTariff()
+    {
+        // Arrange: the portal is picked by its oldest event, which is part of a history, and nothing else is old.
+        const int roomId = int.MaxValue - 1;
+
+        var inHistory = await SeedEventAsync(PaidLifeTimeDays * 2, roomId);
+        var recent = await SeedEventAsync(FreeLifeTimeDays - 30);
+
+        // Act
+        await RunCleanupAsync();
+
+        // Assert
+        TestTariffs.LookupsOf(TenantId).Should().Be(0);
+        (await RemainingEventsAsync([inHistory, recent])).Should().BeEquivalentTo([inHistory, recent]);
     }
 
     [Fact]
