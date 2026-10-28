@@ -157,6 +157,6 @@ public class OpenEditFormFillingTests(
         await _filesApi.OpenEditFileAsync(formId, edit: true, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        (await GetStartFilling(formId)).Should().NotBe(true, "opening the form for editing takes it off filling");
+        (await GetStartFilling(formId)).Should().BeFalse("opening the form for editing takes it off filling");
     }
 }
