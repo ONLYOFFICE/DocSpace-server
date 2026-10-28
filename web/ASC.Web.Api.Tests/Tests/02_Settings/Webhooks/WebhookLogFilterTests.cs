@@ -219,8 +219,7 @@ public class WebhookLogFilterTests(
         {
             var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
 
-            record.Should().NotBeNull("subscription {0} should have been attempted by now", subscription.Name);
-            record!.Status.Should().NotBe(0);
+            record.Status.Should().NotBe(0, "subscription {0} should have been attempted by now", subscription.Name);
         }
     }
 

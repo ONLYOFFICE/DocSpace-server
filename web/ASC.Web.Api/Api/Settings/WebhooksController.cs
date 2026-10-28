@@ -94,10 +94,9 @@ public class WebhooksController(
     /// success code, redirects not followed. `secretKey` is mandatory, has to satisfy the password rules of `GET
     /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
     /// of the subscribed events, 0 standing for all of them; a flag the caller's role may not use is rejected, so take
-    /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl=true` demands an `https` target with a valid
-    /// certificate, `ssl=false` leaves the certificate unchecked. `targetId` limits the events to one entity; when
-    /// every trigger is a user or group event it must be the ID of a user or group the creator may see, and when
-    /// other events are mixed in, an entry ID is accepted too and the user and group events then never match. A
+    /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl` demands an `https` target with a valid
+    /// certificate, `false` leaves the certificate unchecked, and left out it follows the scheme of the target.
+    /// `targetId` limits the events to one entity, for user or group events a user or group the creator may see. A
     /// subscription fires only while it is enabled, for events its creator may see and their current role may
     /// subscribe to. Any role except `Guest` may create one, and each call adds another subscription.
     /// </remarks>
@@ -115,9 +114,10 @@ public class WebhooksController(
     {
         _ = await CheckAdminPermissionsAsync();
 
-        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, inDto.TargetId, authContext.CurrentAccount.ID, true);
+        var ssl = ResolveSsl(inDto.SSL, inDto.Uri);
+        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, ssl, inDto.Triggers, inDto.TargetId, authContext.CurrentAccount.ID, true);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, targetId);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, ssl, inDto.Triggers, targetId);
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -127,7 +127,7 @@ public class WebhooksController(
     /// <remarks>
     /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
     /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `ssl`,
-    /// `triggers` or `targetId` resets them to off, all events and no target: read the current values with `GET
+    /// `triggers` or `targetId` resets them to off, the scheme of the target, all events and no target: read the current values with `GET
     /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an empty
     /// value keeping the existing secret and a new one having to satisfy the portal password rules. A `DocSpaceAdmin`
     /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`
@@ -166,12 +166,13 @@ public class WebhooksController(
 
         // the triggers are the owner's to receive, so they are checked against the owner's role, not the editor's
         var ownerId = existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID;
-        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, inDto.Triggers, inDto.TargetId, ownerId, false);
+        var ssl = ResolveSsl(inDto.SSL, inDto.Uri);
+        var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, ssl, inDto.Triggers, inDto.TargetId, ownerId, false);
 
         existingWebhook.Name = inDto.Name;
         existingWebhook.Uri = inDto.Uri;
         existingWebhook.Enabled = inDto.Enabled;
-        existingWebhook.SSL = inDto.SSL;
+        existingWebhook.SSL = ssl;
         existingWebhook.Triggers = inDto.Triggers;
         existingWebhook.TargetId = targetId;
 
@@ -398,14 +399,15 @@ public class WebhooksController(
     /// Sends a batch of past webhook deliveries again. `ids` holds identifiers of delivery records from `GET
     /// api/2.0/settings/webhooks/log`; for each one a new delivery record of the same event is queued, with its own
     /// `id`, the retried record's `eventId` and the caller in `retriedBy`, and the response lists those new records.
-    /// Records that do not exist, records of another member's subscription when the caller is not a `DocSpaceAdmin`,
-    /// and records the single retry refuses with 409 (an event being sent right now, a disabled subscription, a record
-    /// older than the current delivery format) are skipped in silence, so compare the response with `ids`; an empty
-    /// `ids` queues nothing. A `Guest` is refused. Each receiver gets the same `event.id` and `x-docspace-event-id`
-    /// header in a body serialized and signed anew. The work is asynchronous: read the log with `eventId` for each
-    /// returned identifier until `nextAttemptOn` is empty; a set `delivery` then means success and an empty one that
-    /// the portal gave up after its automatic retries (on the default schedule, six more tries over about 18 hours).
-    /// Rate limited with 429. `PUT api/2.0/settings/webhook/{id}/retry` reports why a single record was not queued.
+    /// Each event is retried once per call, so a second identifier of the same event is passed over. Records that do
+    /// not exist, records of another member's subscription when the caller is not a `DocSpaceAdmin`, and records
+    /// that cannot be queued now (an event being sent right now, a disabled subscription, a record older than the
+    /// current delivery format) are skipped in silence, so compare the response with `ids`; an empty `ids` queues
+    /// nothing. A `Guest` is refused. Each receiver gets the same `event.id` and `x-docspace-event-id` header in a
+    /// body serialized and signed anew. The work is asynchronous: read the log with `eventId` for each returned
+    /// identifier until `nextAttemptOn` is empty; a set `delivery` then means success, an empty one that the portal
+    /// gave up. At most 100 identifiers per call, rate limited with 429. `PUT api/2.0/settings/webhook/{id}/retry`
+    /// reports why a single record was not queued.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries
@@ -413,7 +415,8 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "The new delivery records, one for every identifier that could be retried, each with its own identifier", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(200, "The new delivery records, one for every event that could be retried, each with its own identifier", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or `ids` holds more than 100 identifiers")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [HttpPut("webhook/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -422,12 +425,16 @@ public class WebhooksController(
         var isAdmin = await CheckAdminPermissionsAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
+        // each retry of an event stops the rows queued earlier for it, so a second id of the same event would cancel
+        // the record the first one has just returned
+        var events = new HashSet<int>();
+
         // a missing list queues nothing, like an empty one
-        foreach (var id in inDto.Ids ?? [])
+        foreach (var id in (inDto.Ids ?? []).Distinct())
         {
             var item = await dbWorker.ReadJournal(tenantId, id);
 
-            if (item == null)
+            if (item == null || !events.Add(item.EventId))
             {
                 continue;
             }
@@ -507,6 +514,15 @@ public class WebhooksController(
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// The certificate check a request asks for: what it sent, or, left out, on for an `https` target and off for an
+    /// `http` one - a plain `http` target with the check on would be refused here and disabled by the sender.
+    /// </summary>
+    private static bool ResolveSsl(bool? ssl, string uri)
+    {
+        return ssl ?? (Uri.TryCreate(uri, UriKind.Absolute, out var parsed) && parsed.Scheme == Uri.UriSchemeHttps);
     }
 
     /// <summary>

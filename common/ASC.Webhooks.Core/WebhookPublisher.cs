@@ -140,7 +140,7 @@ public class WebhookPublisher(
                 if (!entitledCreators.TryGetValue(creatorId, out var entitled))
                 {
                     devToolsLimited ??= (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
-                    entitled = await IsCreatorEntitledAsync(creatorId, trigger, devToolsLimited.Value);
+                    entitled = await IsCreatorEntitledAsync(userManager, creatorId, trigger, devToolsLimited.Value);
                     entitledCreators[creatorId] = entitled;
                 }
 
@@ -182,9 +182,10 @@ public class WebhookPublisher(
     /// Whether the creator of a subscription may still receive <paramref name="trigger"/>: an active member whose
     /// current role may subscribe to it, and a DocSpace admin while the developer tools are limited for users. A
     /// creator who was removed, terminated, turned into a guest or downgraded to a role without that trigger gets
-    /// nothing, as the API would no longer let them subscribe to it.
+    /// nothing, as the API would no longer let them subscribe to it. The sender asks the same before every attempt
+    /// (<see cref="WebhookCreatorEntitlement"/>), so the retries of an event stop as well.
     /// </summary>
-    private async Task<bool> IsCreatorEntitledAsync(Guid creatorId, WebhookTrigger trigger, bool devToolsLimited)
+    internal static async Task<bool> IsCreatorEntitledAsync(UserManager userManager, Guid creatorId, WebhookTrigger trigger, bool devToolsLimited)
     {
         var creator = await userManager.GetUsersAsync(creatorId);
 
@@ -261,4 +262,20 @@ public class WebhookPublisher(
         return newWebhooksLog;
     }
 
+}
+
+/// <summary>
+/// The entitlement check of <see cref="WebhookPublisher"/> for the sender: a subscription's creator who may no longer
+/// receive an event gets neither its automatic retries nor a manual retry, which carry the body stored at publish.
+/// Asks in the portal of the current tenant.
+/// </summary>
+[Scope]
+public class WebhookCreatorEntitlement(UserManager userManager, SettingsManager settingsManager)
+{
+    public async Task<bool> IsEntitledAsync(Guid creatorId, WebhookTrigger trigger)
+    {
+        var devToolsLimited = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+
+        return await WebhookPublisher.IsCreatorEntitledAsync(userManager, creatorId, trigger, devToolsLimited);
+    }
 }

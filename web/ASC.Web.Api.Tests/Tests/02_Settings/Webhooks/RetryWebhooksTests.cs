@@ -106,7 +106,7 @@ public class RetryWebhooksTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await PlantInFlightAsync(record!.Id);
+        await PlantInFlightAsync(record.Id);
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -137,7 +137,7 @@ public class RetryWebhooksTests(
 
         // Act
         var result = await _webhooksApi.RetryWebhooksAsync(
-            new WebhookRetryRequestDto([record!.Id]), TestContext.Current.CancellationToken);
+            new WebhookRetryRequestDto([record.Id]), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeEmpty();

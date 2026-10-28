@@ -234,13 +234,13 @@ public class WebhookTargetTests(
     /// Polls the records of one subscription until there is at least one, and returns them all, so that a record
     /// that should not be there shows up in the assertion rather than as an exception of the poll.
     /// </summary>
-    private async Task<List<DeliveryRecord>> WaitForRecordsAsync(int configId)
+    private async Task<List<WebhooksLogDto>> WaitForRecordsAsync(int configId)
     {
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var records = await GetDeliveryRecordsAsync(configId);
+            var records = await GetLogAsync(configId);
 
             if (records.Count > 0 || DateTime.UtcNow >= deadline)
             {
@@ -279,19 +279,6 @@ public class WebhookTargetTests(
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         return new WebhookSubscription(created.Response.Id, dto.Name, dto.Uri, dto.SecretKey);
-    }
-
-    /// <summary>
-    /// <paramref name="subject"/> renames themselves, which publishes <c>user.updated</c>: the same call made by the
-    /// owner leaves the name as it is and publishes nothing.
-    /// </summary>
-    private async Task RenameAsync(User subject)
-    {
-        var firstName = $"Renamed{Initializer.Faker.Random.String2(8, "abcdefghijklmnopqrstuvwxyz")}";
-
-        await _peopleClient.Authenticate(subject);
-        await _profilesApi.UpdateMemberAsync(
-            subject.Id.ToString(), new UpdateMemberRequestDto { FirstName = firstName }, TestContext.Current.CancellationToken);
     }
 
     private async Task<Guid> CreateGroupAsync()

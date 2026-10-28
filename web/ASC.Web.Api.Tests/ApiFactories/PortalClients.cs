@@ -51,15 +51,18 @@ public sealed class PortalClients : PortalClientsBase
     public ProfilesApi ProfilesApi { get; }
     public ApiKeysApi ApiKeysApi { get; }
 
-    // People service — the user and group events the webhook payload tests publish
+    // People service — the user and group events the webhook payload tests publish, and the type change
+    // (a background task) the webhook publish-access tests demote a member with
     public UserStatusApi UserStatusApi { get; }
     public GroupApi GroupApi { get; }
+    public UserTypeApi UserTypeApi { get; }
 
     // Files service — the file, folder, room and agent events the webhook payload tests publish
     public HttpClient FilesHttpClient { get; }
     public RoomsApi RoomsApi { get; }
     public FilesApi FilesApi { get; }
     public FoldersApi FoldersApi { get; }
+    public OperationsApi OperationsApi { get; }
 
     // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
     public HttpClient WebhookReceiverHttpClient { get; }
@@ -114,6 +117,7 @@ public sealed class PortalClients : PortalClientsBase
         ApiKeysApi = new ApiKeysApi(PeopleHttpClient, peopleConfig);
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
         GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+        UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
 
         FilesHttpClient = CreateClient(ResourceNames.Files);
 
@@ -121,6 +125,7 @@ public sealed class PortalClients : PortalClientsBase
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
+        OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
 
         WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 

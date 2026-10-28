@@ -256,12 +256,50 @@ public class RestoreDbModuleTask : PortalTaskBase
         var selfRelation = _module.TableRelations.SingleOrDefault(x => x.ChildTable == table.Name && x.IsSelfRelation());
         if (selfRelation != null)
         {
-            rows = rows
-                .ToTree(x => x[selfRelation.ParentColumn], x => x[selfRelation.ChildColumn])
-                .SelectMany(OrderNode);
+            rows = ParentsFirst(rows, selfRelation);
         }
 
         return rows;
+    }
+
+    // Streams the rows of a table that refers to itself so that a parent always comes before its children. A row whose
+    // parent is empty or already passed goes on at once; only a row that arrives before its parent is held back, and the
+    // held rows follow at the end as a tree, parents first (a row whose parent is not in the archive at all ends up there
+    // as a root). Building the whole tree up front loaded every row of the archive, payloads included, before the first
+    // insert, once per attempt of the table: for webhooks_logs, whose retries always point at the original row, which the
+    // archive normally holds before them, nearly nothing is held back now. Only the keys of the passed rows are kept.
+    private static IEnumerable<DataRowInfo> ParentsFirst(IEnumerable<DataRowInfo> rows, RelationInfo selfRelation)
+    {
+        var passed = new HashSet<object>();
+        var heldBack = new List<DataRowInfo>();
+
+        foreach (var row in rows)
+        {
+            var parentKey = row[selfRelation.ChildColumn];
+
+            if (parentKey is null || parentKey == DBNull.Value || passed.Contains(parentKey))
+            {
+                passed.Add(row[selfRelation.ParentColumn]);
+
+                yield return row;
+            }
+            else
+            {
+                heldBack.Add(row);
+            }
+        }
+
+        if (heldBack.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (var row in heldBack
+                     .ToTree(x => x[selfRelation.ParentColumn], x => x[selfRelation.ChildColumn])
+                     .SelectMany(OrderNode))
+        {
+            yield return row;
+        }
     }
 
     private static IEnumerable<DataRowInfo> OrderNode(TreeNode<DataRowInfo> node)

@@ -93,6 +93,10 @@ public static class WebhooksPayloadExtension
                 entity.HasIndex(e => e.NextAttemptOn)
                     .HasDatabaseName("next_attempt_on");
 
+                // the retention of webhooks:journalRetentionDays walks the oldest rows (ExpiredWebhooksLogIdsAsync)
+                entity.HasIndex(e => e.CreationTime)
+                    .HasDatabaseName("creation_time");
+
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
                     .HasColumnName("id")
@@ -267,6 +271,9 @@ public static class WebhooksPayloadExtension
 
                 entity.HasIndex(e => e.NextAttemptOn)
                     .HasDatabaseName("ix_webhooks_logs_next_attempt_on");
+
+                entity.HasIndex(e => e.CreationTime)
+                    .HasDatabaseName("ix_webhooks_logs_creation_time");
 
                 entity.HasIndex(e => new { e.TenantId, e.RetryOf })
                     .HasDatabaseName("ix_webhooks_logs_tenant_id_retry_of");

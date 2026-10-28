@@ -24,6 +24,12 @@
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
 // 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Webhooks.Contract;
 
@@ -71,8 +77,7 @@ internal static class ContractHeader
         [WebhookTrigger.FileUpdated] = "the editor, every time it saves a document, a force-save included; submitting a filled form raises `form.submit` instead",
         [WebhookTrigger.FileDownloaded] = "a download through the file's `viewUrl`, once per download",
         [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, for every file it deletes",
-        [WebhookTrigger.FolderUpdated] = "a change of a member's type that hands their rooms over to another administrator, for every room handed over",
-        [WebhookTrigger.RoomCreated] = "a data migration into the portal, for every room it creates",
+        [WebhookTrigger.FolderCreated] = "the automatic clean-up of a guest's personal folder left unchanged for 30 days, once for the folder it creates in the personal section of the member who takes over the files and folders the guest shared from it",
         [WebhookTrigger.FormSubmit] = "the editor when a user submits a filled form",
         [WebhookTrigger.FormFilledOut] = "the editor when the last role of a form in a virtual data room submits it"
     };
@@ -189,13 +194,13 @@ internal static class ContractHeader
             { "tags", new YamlSequenceNode(new YamlScalarNode(trigger.GetTargetType())) },
             {
                 "parameters", new YamlSequenceNode(
-                    Header(WebhookDelivery.SignatureHeader,
+                    HeaderParameter(WebhookDelivery.SignatureHeader,
                         "`sha256=` and the uppercase hex HMAC-SHA256 of the raw body under the subscription's secret. " +
                         "The only header that is authenticated; compare it case-insensitively."),
-                    Header(WebhookDelivery.EventIdHeader,
+                    HeaderParameter(WebhookDelivery.EventIdHeader,
                         "A copy of `event.id`, for dropping an already-seen delivery without parsing the body. Not " +
                         "covered by the signature."),
-                    Header(WebhookDelivery.EventTimestampHeader,
+                    HeaderParameter(WebhookDelivery.EventTimestampHeader,
                         "A copy of `event.createOn`, in the same ISO-8601 UTC spelling. Not covered by the signature."))
             },
             {
@@ -266,7 +271,10 @@ internal static class ContractHeader
         return parts[0] + string.Concat(parts.Skip(1).Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
     }
 
-    private static YamlMappingNode Header(string name, string description)
+    /// <summary>
+    /// A required header of the delivery request, as an entry of the operation's <c>parameters</c>.
+    /// </summary>
+    private static YamlMappingNode HeaderParameter(string name, string description)
     {
         return new YamlMappingNode
         {
@@ -333,13 +341,13 @@ internal static class ContractHeader
               delivery log, which starts a fresh series under the same event.id.
 
               Headers:
-            {Header(WebhookDelivery.SignatureHeader,
+            {HeaderLine(WebhookDelivery.SignatureHeader,
                 "sha256=<UPPERCASE hex HMAC-SHA256 of the raw",
                 "body>. GitHub emits lowercase hex, so compare",
                 "case-insensitively. This is the only header",
                 "that is authenticated.")}
-            {Header(WebhookDelivery.EventIdHeader, "Copy of event.id.")}
-            {Header(WebhookDelivery.EventTimestampHeader,
+            {HeaderLine(WebhookDelivery.EventIdHeader, "Copy of event.id.")}
+            {HeaderLine(WebhookDelivery.EventTimestampHeader,
                 "Copy of event.createOn, same ISO-8601 UTC",
                 "spelling, e.g. 2026-09-17T10:22:56Z.")}
 
@@ -364,9 +372,10 @@ internal static class ContractHeader
 
     /// <summary>
     /// One entry of the Headers block: the name, then its text from <see cref="HeaderColumn"/> on, starting on the
-    /// next line when the name leaves no room for it.
+    /// next line when the name leaves no room for it. Named apart from <see cref="HeaderParameter"/>: under one name a
+    /// single line of text bound to that overload and wrote the parameter's YAML into the description.
     /// </summary>
-    private static string Header(string name, params string[] lines)
+    private static string HeaderLine(string name, params string[] lines)
     {
         var text = new StringBuilder("    ").Append(name);
 

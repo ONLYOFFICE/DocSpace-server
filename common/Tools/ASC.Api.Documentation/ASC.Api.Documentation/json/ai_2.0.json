@@ -266,7 +266,7 @@
           "AI / Agents"
         ],
         "summary": "Create an ai agent",
-        "description": "Creates an ai agent.",
+        "description": "Creates an ai agent.\n\nRaises the `agent.created` webhook.",
         "operationId": "createAgent",
         "requestBody": {
           "content": {
@@ -368,6 +368,11 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "agent.created"
           }
         ]
       }
@@ -501,7 +506,7 @@
           "AI / Agents"
         ],
         "summary": "Update an ai agent",
-        "description": "Updates an ai agent.",
+        "description": "Updates an ai agent.\n\nRaises the `agent.updated` webhook on every successful call, even one that changes nothing.",
         "operationId": "updateAgent",
         "parameters": [
           {
@@ -621,6 +626,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "agent.updated",
+            "when": "on every successful call, even one that changes nothing"
+          }
         ]
       },
       "delete": {
@@ -628,7 +639,7 @@
           "AI / Agents"
         ],
         "summary": "Remove an ai agent",
-        "description": "Removes an ai agent.",
+        "description": "Removes an ai agent.\n\nRaises the `agent.deleted` webhook once the queued operation deletes the agent.",
         "operationId": "deleteAgent",
         "parameters": [
           {
@@ -759,6 +770,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "agent.deleted",
+            "when": "once the queued operation deletes the agent"
+          }
         ]
       }
     },
@@ -768,7 +785,7 @@
           "AI / Agents"
         ],
         "summary": "Change the AI agent quota limit",
-        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.",
+        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent, even when its quota does not change.",
         "operationId": "updateAgentsQuota",
         "requestBody": {
           "content": {
@@ -876,6 +893,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "agent.updated",
+            "when": "for every listed agent, even when its quota does not change"
+          }
         ]
       }
     },
@@ -885,7 +908,7 @@
           "AI / Agents"
         ],
         "summary": "Reset the AI agents quota limit",
-        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.",
+        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent.",
         "operationId": "resetAgentsQuota",
         "requestBody": {
           "content": {
@@ -992,6 +1015,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "agent.updated",
+            "when": "for every listed agent"
           }
         ]
       }

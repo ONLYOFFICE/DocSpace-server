@@ -52,7 +52,9 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "responseHeaders": "{\"content-type\":\"application/json\"}",
 ///   "responsePayload": "{\"ok\":true}",
 ///   "status": 200,
-///   "delivery": "2024-01-15T10:30:00Z"
+///   "delivery": "2024-01-15T10:30:00Z",
+///   "attempts": 1,
+///   "nextAttemptOn": null
 /// }
 /// </example>
 public class WebhooksLogDto
@@ -95,8 +97,9 @@ public class WebhooksLogDto
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// When the event was queued for delivery, as a UTC instant - unlike the dates of the subscription itself, which come
-    /// in the portal time zone. Records come back newest first by this moment.
+    /// When this delivery record was queued, as a UTC instant - unlike the dates of the subscription itself, which come
+    /// in the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the
+    /// moment of the retry. Records come back newest first by this moment.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime CreationTime { get; set; }
@@ -159,17 +162,19 @@ public class WebhooksLogDto
 
     /// <summary>
     /// How many times the portal has tried to deliver this record so far. A failed attempt is retried with
-    /// growing pauses, about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, all of them under the same
-    /// record and the same `x-docspace-event-id` header, so a receiver can drop a delivery it has already
-    /// processed.
+    /// growing pauses - on the default schedule about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, though
+    /// an installation may configure its own - all of them under the same record and the same
+    /// `x-docspace-event-id` header, so a receiver can drop a delivery it has already processed.
     /// </summary>
     /// <example>1</example>
     public int Attempts { get; set; }
 
     /// <summary>
-    /// When the next attempt is due, as a UTC instant like `creationTime`. It is empty once the record is
-    /// delivered, once the retries run out, once the subscription is disabled or removed, and once a manual retry of
-    /// the same event takes over from this record.
+    /// When the next attempt is due, as a UTC instant like `creationTime`. While an attempt is being sent right now
+    /// it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry; it
+    /// changes again once the attempt ends. It is empty once the record is delivered, once the retries run out,
+    /// once the subscription is disabled or removed, and once a manual retry of the same event takes over from this
+    /// record.
     /// </summary>
     /// <example>2024-01-15T10:35:00Z</example>
     public DateTime? NextAttemptOn { get; set; }
@@ -177,7 +182,7 @@ public class WebhooksLogDto
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper)
+public partial class WebhooksLogDtoMapper(EmployeeDtoHelper employeeDtoHelper)
 {
     public async Task<WebhooksLogDto> MapAsync(DbWebhooksLog source)
     {
@@ -191,5 +196,6 @@ public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil, EmployeeDtoHelp
     [MapperIgnoreTarget(nameof(WebhooksLogDto.RetriedBy))]
     private partial WebhooksLogDto Map(DbWebhooksLog source);
 
-    private DateTime MapDateToUtc(DateTime source) => tenantUtil.DateTimeToUtc(source);
+    // the journal stores UTC instants, which a datetime column reads back as Unspecified: mark them, do not convert
+    private static DateTime MapDateToUtc(DateTime source) => DateTime.SpecifyKind(source, DateTimeKind.Utc);
 }

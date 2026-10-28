@@ -67,10 +67,9 @@ public class RetryWebhookTests(
         var result = await _webhooksApi.RetryWebhookAsync(delivery.Id, TestContext.Current.CancellationToken);
 
         // Assert
-        var record = await WaitForAttemptAsync(result.Response.Id);
+        var record = await WaitForAttemptAsync(delivery.Id, result.Response.Id);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().NotBe(0);
+        record.Status.Should().NotBe(0);
         record.ResponsePayload.Should().NotBeNullOrEmpty();
     }
 
@@ -85,7 +84,7 @@ public class RetryWebhookTests(
         var original = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
         await ExecuteSqlAsync(
             "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
-            ("@id", original!.Id));
+            ("@id", original.Id));
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -114,8 +113,8 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
-        var firstRetry = await _webhooksApi.RetryWebhookAsync(original!.Id, TestContext.Current.CancellationToken);
-        await WaitForAttemptAsync(firstRetry.Response.Id);
+        var firstRetry = await _webhooksApi.RetryWebhookAsync(original.Id, TestContext.Current.CancellationToken);
+        (await WaitForAttemptAsync(original.Id, firstRetry.Response.Id)).Status.Should().NotBe(0, "the first retry should have been attempted by now");
 
         // Act
         var secondRetry = await _webhooksApi.RetryWebhookAsync(firstRetry.Response.Id, TestContext.Current.CancellationToken);
@@ -155,7 +154,7 @@ public class RetryWebhookTests(
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
 
         // Act
-        await _webhooksApi.RetryWebhookAsync(record!.Id, TestContext.Current.CancellationToken);
+        await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken);
 
         // Assert: byte for byte, so a receiver that verifies the signature and drops a repeated event id
         // recognises the retry as the event it already has
@@ -175,7 +174,7 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await PlantInFlightAsync(record!.Id);
+        await PlantInFlightAsync(record.Id);
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -206,7 +205,7 @@ public class RetryWebhookTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _webhooksApi.RetryWebhookAsync(record!.Id, TestContext.Current.CancellationToken));
+            async () => await _webhooksApi.RetryWebhookAsync(record.Id, TestContext.Current.CancellationToken));
 
         // Assert: a disabled subscription receives nothing, so nothing is queued for it
         exception.ErrorCode.Should().Be(409);
@@ -221,7 +220,7 @@ public class RetryWebhookTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await ExecuteSqlAsync("UPDATE webhooks_logs SET attempts = 0 WHERE id = @id", ("@id", record!.Id));
+        await ExecuteSqlAsync("UPDATE webhooks_logs SET attempts = 0 WHERE id = @id", ("@id", record.Id));
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -249,7 +248,7 @@ public class RetryWebhookTests(
                 next_attempt_on = NULL, lease_id = NULL, response_payload = @note
             WHERE id = @id
             """,
-            ("@id", record!.Id),
+            ("@id", record.Id),
             ("@note", ASC.Webhooks.Core.DbWorker.PreviousVersionNote));
 
         // Act

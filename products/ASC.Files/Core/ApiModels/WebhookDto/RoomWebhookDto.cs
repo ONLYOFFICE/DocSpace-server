@@ -33,14 +33,15 @@
 
 namespace ASC.Files.Core.ApiModels.WebhookDto;
 
+// A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and has the
+// same shape today, so agent.* sends it as well. Not carried: logo, watermark, lifetime, tags and chatSettings. Each
+// needs per-request URL building or an extra query that a delivery should not pay for.
+
 /// <summary>
-/// The room carried by a room.* webhook, and by every agent.* webhook.
+/// The room carried by a room.* webhook, and the AI agent carried by every agent.* webhook.
 /// </summary>
 /// <remarks>
-/// A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and
-/// has the same shape today, so agent.* sends it as well.
-/// Not carried: logo, watermark, lifetime, tags and chatSettings. Each needs per-request URL building or an extra
-/// query that a delivery should not pay for; receivers can read them from GET api/2.0/files/rooms/{id}.
+/// Carries no logo, watermark, file lifetime, tags or chat settings; read them from `GET api/2.0/files/rooms/{id}`.
 /// </remarks>
 public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
 {
@@ -48,13 +49,13 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public override FileEntryType FileEntryType => FileEntryType.Folder;
 
     /// <summary>
-    /// The room type.
+    /// The kind of room, which decides what the room is for and which roles it offers.
     /// </summary>
     /// <example>2</example>
     public RoomType? RoomType { get; set; }
 
     /// <summary>
-    /// The underlying folder type of the room.
+    /// The same kind of room as `roomType`, in the numbering the portal uses for folders.
     /// </summary>
     /// <example>5</example>
     public FolderType? Type { get; set; }
@@ -72,19 +73,19 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// Specifies whether the room is private or not.
+    /// True for a private room, whose files are end-to-end encrypted.
     /// </summary>
     /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Specifies whether the room is indexed or not.
+    /// True when the room numbers its files and folders in a fixed order; `order` on each entry is that number.
     /// </summary>
     /// <example>false</example>
     public bool Indexing { get; set; }
 
     /// <summary>
-    /// Specifies whether downloading from the room is denied or not.
+    /// True when downloading, copying and printing the room's files is restricted for those who may only view them.
     /// </summary>
     /// <example>false</example>
     public bool DenyDownload { get; set; }
@@ -110,13 +111,13 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public long? UsedSpace { get; set; }
 
     /// <summary>
-    /// The room cover colour.
+    /// The background colour of the room icon, as a hex RGB code.
     /// </summary>
     /// <example>#4781D1</example>
     public string Color { get; set; }
 
     /// <summary>
-    /// The room cover name.
+    /// The name of the cover picture chosen for the room icon; absent when none is chosen.
     /// </summary>
     /// <example>cover-1</example>
     public string Cover { get; set; }

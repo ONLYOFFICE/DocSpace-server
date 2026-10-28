@@ -47,8 +47,8 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
 
         result.IsSystem = isSystem ? true : null;
 
-        // a count query for an ordinary group; the members of a system group follow from the user types, which only
-        // the full list resolves
+        // a count over the cached membership refs for an ordinary group; the members of a system group follow from the
+        // user types, which only the full list resolves
         result.MembersCount = isSystem
             ? (await userManager.GetUsersByGroupAsync(group.ID)).Length
             : await userManager.GetGroupMembersCountAsync(group.ID);
@@ -64,8 +64,8 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
     }
 
     /// <summary>
-    /// Cuts the payload for one subscription owner: a User or a Guest gets the manager without the profile link,
-    /// as the REST API shows it to them.
+    /// Cuts the payload for one subscription owner: a User or a Guest gets the manager without the profile link and
+    /// the user name, as the REST API shows it to them.
     /// </summary>
     public async Task<GroupWebhookDto> RestrictForSubscriberAsync(GroupWebhookDto payload, Guid? subscriberId)
     {

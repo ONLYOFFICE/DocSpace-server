@@ -56,6 +56,15 @@ internal static partial class WebhookSenderLogger
     [LoggerMessage(LogLevel.Error, "Failed to schedule the next attempt of webhook tenant: {tenantId}, log: {logId}")]
     public static partial void ErrorFailedToRegisterAttempt(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
 
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: not sent, another instance has claimed the entry since this one did")]
+    public static partial void DebugLeaseTakenOver(this ILogger<WebhookSender> logger, int logId);
+
+    [LoggerMessage(LogLevel.Information, "Webhook tenant: {tenantId}, log: {logId} is not sent: the creator of subscription {configId} may no longer receive {trigger}")]
+    public static partial void InfoCreatorNotEntitled(this ILogger<WebhookSender> logger, int tenantId, int logId, int configId, WebhookTrigger trigger);
+
+    [LoggerMessage(LogLevel.Warning, "webhooks:requestTimeout {requestTimeout} is longer than {maxRequestTimeout}, which is taken instead")]
+    public static partial void WarningRequestTimeoutTooLong(this ILogger<Settings> logger, TimeSpan requestTimeout, TimeSpan maxRequestTimeout);
+
     [LoggerMessage(LogLevel.Warning, "webhooks:repeatcount is no longer read: retries follow webhooks:retryIntervals, a list of TimeSpan values")]
     public static partial void WarningObsoleteRepeatCount(this ILogger<Settings> logger);
 

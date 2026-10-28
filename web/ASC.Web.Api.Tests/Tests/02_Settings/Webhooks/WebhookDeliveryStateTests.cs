@@ -49,13 +49,16 @@ public class WebhookDeliveryStateTests(
     public async Task Attempt_LeaseTakenOverWhileSending_DoesNotOverwriteTheRecord()
     {
         // Arrange: a receiver slow enough to hold the attempt in flight while the test steps in, and a second,
-        // fast subscription to the same events that serves as a marker
-        var receiver = await CreateReceiverAsync(delayMilliseconds: 4_000);
+        // fast subscription to the same events that serves as a marker. The answer comes 3 seconds before the attempt
+        // would give up on the target, which leaves 9 seconds for the wait, the read and the SQL below even on a busy
+        // machine: a shorter delay let the attempt finish first under parallel load
+        var answerDelay = ProfileRequestTimeout - TimeSpan.FromSeconds(3);
+        var receiver = await CreateReceiverAsync(delayMilliseconds: (int)answerDelay.TotalMilliseconds);
         var subscription = await CreateSubscriptionAsync(receiver, WebhookTrigger.UserCreated);
         var marker = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserCreated);
         await FireEventAsync();
         await receiver.WaitForDeliveriesAsync(1);
-        var record = (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle().Subject;
+        var record = (await GetLogAsync(subscription.Id)).Should().ContainSingle().Subject;
 
         // Act: while the attempt waits for its answer, the record passes to another sender
         await ExecuteSqlAsync(
@@ -63,14 +66,19 @@ public class WebhookDeliveryStateTests(
             ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
 
         // Assert: the subscription records the success, just before the attempt tries to write the record
-        (await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null)).Should().NotBeNull();
+        var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null);
+
+        config.Should().NotBeNull();
+        config!.LastSuccessOn.Should().NotBeNull("the target answered 200, which the subscription records");
 
         // The sender claims nothing new until every attempt of its current batch has ended, the one above included.
         // So once an event published only now has been delivered to the marker, the attempt has written whatever it
         // was going to write: no fixed pause is needed. (The integration-test profile runs one Web.Studio.)
-        var markerRecords = (await GetDeliveryRecordsAsync(marker.Id)).Count;
+        var markerRecords = (await GetLogAsync(marker.Id)).Count;
         await FireEventAsync();
-        await WaitForAttemptedDeliveriesAsync(marker.Id, markerRecords + 1);
+
+        (await WaitForAttemptedDeliveriesAsync(marker.Id, markerRecords + 1)).Count(l => l.Status != 0).Should()
+            .BeGreaterThanOrEqualTo(markerRecords + 1, "the marker's new event must have been attempted before the record is read");
 
         var after = (await GetDeliveryRecordsAsync(subscription.Id)).Single(r => r.Id == record.Id);
 
@@ -92,12 +100,12 @@ public class WebhookDeliveryStateTests(
         await ExecuteSqlAsync(
             "UPDATE webhooks_logs SET status = 0, delivery = NULL, attempts = 0, lease_id = @leaseId, " +
             "next_attempt_on = UTC_TIMESTAMP() - INTERVAL 1 SECOND WHERE id = @id",
-            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record!.Id));
+            ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
 
         // Assert: another poll claims it with a lease of its own and delivers it
         var redelivered = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        redelivered!.Status.Should().Be(200);
+        redelivered.Status.Should().Be(200);
         redelivered.Attempts.Should().Be(1);
         redelivered.NextAttemptOn.Should().BeNull();
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(2, "the dead sender's attempt and the one that took over");
@@ -124,7 +132,7 @@ public class WebhookDeliveryStateTests(
 
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
 
         var config = await GetSubscriptionAsync(subscription.Id);
 
@@ -149,7 +157,7 @@ public class WebhookDeliveryStateTests(
         var record = await WaitForRecordAsync(
             subscription.Id, r => r.Attempts > ProfileRetryCount && r.NextAttemptOn is null, timeoutSeconds: 120);
 
-        record!.Attempts.Should().Be(ProfileRetryCount + 1);
+        record.Attempts.Should().Be(ProfileRetryCount + 1);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeFalse();
@@ -172,7 +180,7 @@ public class WebhookDeliveryStateTests(
         // Assert: one failure is not enough, the retry got its chance and succeeded
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record!.Attempts.Should().Be(2);
+        record.Attempts.Should().Be(2);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeTrue("a subscription is disabled only once the retries of an event have run out");
@@ -195,7 +203,7 @@ public class WebhookDeliveryStateTests(
         var record = await WaitForRecordAsync(
             subscription.Id, r => r.Attempts > ProfileRetryCount && r.NextAttemptOn is null, timeoutSeconds: 120);
 
-        record!.Attempts.Should().Be(ProfileRetryCount + 1);
+        record.Attempts.Should().Be(ProfileRetryCount + 1);
 
         var config = await GetSubscriptionAsync(subscription.Id);
         config!.Enabled.Should().BeTrue();

@@ -72,7 +72,7 @@ public class FileEntryWebhookDtoHelper(
     /// <summary>
     /// Cuts a payload built by <see cref="GetAsync{T}"/> from <paramref name="source"/> for one subscription owner, as
     /// the REST API shows the entry to them: a User or a Guest gets the author and the last editor without the profile
-    /// link, and the quota of a room goes only to an owner who may edit the room.
+    /// link and the user name, and the quota of a room goes only to an owner who may edit the room.
     /// </summary>
     public async Task<FileEntryWebhookDto<T>> RestrictForSubscriberAsync<T>(FileEntryWebhookDto<T> entry, FileEntry<T> source, Guid? subscriberId)
     {

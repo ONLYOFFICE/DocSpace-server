@@ -55,8 +55,21 @@ public class Settings
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
         RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : WebhookDelivery.DefaultRequestTimeout;
+
+        // the lease of a claimed batch is derived from the request timeout (WorkerService), so an unbounded value would
+        // keep the rows of an instance that died mid-send, and every manual retry of their events, waiting for as long
+        if (RequestTimeout > MaxRequestTimeout)
+        {
+            logger.WarningRequestTimeoutTooLong(RequestTimeout.Value, MaxRequestTimeout);
+            RequestTimeout = MaxRequestTimeout;
+        }
         JournalRetentionDays = cfg.JournalRetentionDays is > 0 ? cfg.JournalRetentionDays : null;
     }
+
+    /// <summary>
+    /// The longest webhooks:requestTimeout taken; a longer one is cut to it.
+    /// </summary>
+    public static readonly TimeSpan MaxRequestTimeout = TimeSpan.FromMinutes(5);
 
     public TimeSpan[] RetryIntervals { get; init; }
     public int? ThreadCount { get; init; }

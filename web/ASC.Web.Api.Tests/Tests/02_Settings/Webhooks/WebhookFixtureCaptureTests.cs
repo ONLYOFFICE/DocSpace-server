@@ -42,7 +42,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <remarks>
 /// Explicit: it rewrites files in the repository, so it runs only when asked for, for instance
 /// <c>dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-trait "Category=WebhookFixtures" --explicit only</c>.
-/// The subscriptions are signed with the secret of <c>samples/SECRET</c>, set with a MySQL statement because the
+/// The subscriptions are signed with the secret of <c>Fixtures/SECRET</c>, set with a MySQL statement because the
 /// password rules may refuse it through the API. Bodies and signature headers are written byte for byte as the
 /// receiver got them. <c>unknown.trigger.json</c> is not a real delivery and is left alone; form.submit cannot be
 /// captured, since the integration-test profile runs no Document Server.
@@ -63,8 +63,8 @@ public class WebhookFixtureCaptureTests(
     public async Task CaptureSdkFixtures()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
-        var samples = FindSamplesDirectory();
-        var secret = (await File.ReadAllTextAsync(Path.Combine(samples, "SECRET"), cancellationToken)).Trim();
+        var fixtures = FindFixturesDirectory();
+        var secret = (await File.ReadAllTextAsync(Path.Combine(fixtures, "SECRET"), cancellationToken)).Trim();
 
         // a catch-all subscription for one delivery of every family, and a file.created one whose receiver accepts the
         // first file, fails the second once and accepts its retry, so the retry carries lastSuccessOn as well
@@ -104,10 +104,10 @@ public class WebhookFixtureCaptureTests(
 
         foreach (var (trigger, delivery) in captured)
         {
-            await WriteFixtureAsync(samples, trigger, delivery, secret);
+            await WriteFixtureAsync(fixtures, trigger, delivery, secret);
         }
 
-        await WriteFixtureAsync(samples, "file.created.retry", retry, secret);
+        await WriteFixtureAsync(fixtures, "file.created.retry", retry, secret);
     }
 
     private async Task SetSecretAsync(int subscriptionId, string secret)
@@ -193,31 +193,31 @@ public class WebhookFixtureCaptureTests(
         }
     }
 
-    private static async Task WriteFixtureAsync(string samples, string name, ReceivedDelivery delivery, string secret)
+    private static async Task WriteFixtureAsync(string fixtures, string name, ReceivedDelivery delivery, string secret)
     {
         var signature = delivery.Header("x-docspace-signature-256");
 
-        signature.Should().BeEquivalentTo($"sha256={Sign(secret, delivery.Body)}", "the fixture of {0} must verify with samples/SECRET", name);
+        signature.Should().BeEquivalentTo($"sha256={Sign(secret, delivery.Body)}", "the fixture of {0} must verify with Fixtures/SECRET", name);
 
         var utf8 = new UTF8Encoding(false);
 
-        await File.WriteAllTextAsync(Path.Combine(samples, $"{name}.json"), delivery.Body, utf8, TestContext.Current.CancellationToken);
-        await File.WriteAllTextAsync(Path.Combine(samples, $"{name}.sig"), signature, utf8, TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(fixtures, $"{name}.json"), delivery.Body, utf8, TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(fixtures, $"{name}.sig"), signature, utf8, TestContext.Current.CancellationToken);
     }
 
     /// <summary>
     /// The <c>Fixtures</c> directory next to this file, in the repository the suite was built from: the suite that
     /// captures the deliveries keeps them, and the SDKs read them from here.
     /// </summary>
-    private static string FindSamplesDirectory()
+    private static string FindFixturesDirectory()
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
-            var samples = Path.Combine(directory.FullName, "web", "ASC.Web.Api.Tests", "Tests", "02_Settings", "Webhooks", "Fixtures");
+            var fixtures = Path.Combine(directory.FullName, "web", "ASC.Web.Api.Tests", "Tests", "02_Settings", "Webhooks", "Fixtures");
 
-            if (File.Exists(Path.Combine(samples, "SECRET")))
+            if (File.Exists(Path.Combine(fixtures, "SECRET")))
             {
-                return samples;
+                return fixtures;
             }
         }
 

@@ -72,6 +72,7 @@ global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 global using LoginHistoryApi = DocSpace.API.SDK.Api.Security.LoginHistoryApi;
 global using MigrationApi = DocSpace.API.SDK.Api.Migration.MigrationApi;
 global using OAuth2Api = DocSpace.API.SDK.Api.Security.OAuth2Api;
+global using OperationsApi = DocSpace.API.SDK.Api.Files.OperationsApi;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
 global using PortalGuestsApi = DocSpace.API.SDK.Api.Portal.GuestsApi;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;

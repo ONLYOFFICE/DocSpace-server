@@ -140,25 +140,11 @@ public class WebhookDevToolsRestrictionTests(
     /// </summary>
     private async Task<int> CreateRecordAsync(User member, WebhookSubscription subscription)
     {
-        var cancellationToken = TestContext.Current.CancellationToken;
+        var roomId = await CreateRoomAsync(member);
+        await CreateFileAsync(roomId);
 
-        await _filesClient.Authenticate(Owner);
-
-        var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
-
-        await _roomsApi.SetRoomSecurityAsync(
-            room.Id,
-            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.Read)], notify: false),
-            cancellationToken);
-
-        await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest($"file-{Guid.NewGuid():N}.docx"), cancellationToken);
-
-        var record = await WaitForRecordAsync(subscription.Id, _ => true);
-
-        record.Should().NotBeNull("the member may read the room the file is in");
-
-        return record!.Id;
+        // the member may read the room the file is in, so the subscription has the record
+        return (await WaitForRecordAsync(subscription.Id, _ => true)).Id;
     }
 
     private async Task CallAsync(string endpoint, WebhookSubscription subscription, int recordId)

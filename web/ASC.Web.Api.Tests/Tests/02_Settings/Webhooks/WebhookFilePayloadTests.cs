@@ -45,18 +45,24 @@ public class WebhookFilePayloadTests(
     AspireAppFixture fixture)
     : WebhookDeliveryTestBase(fixture)
 {
+    /// <summary>
+    /// Bug 81093: the <c>createdBy</c> and <c>updatedBy</c> of a file event carried the <c>profileUrl</c> of the
+    /// author to every subscriber, a people search by the author's email, also to a <c>User</c> the REST API never
+    /// shows that link to. The payload is now cut per subscriber like the REST answer, so the owner keeps the link
+    /// and a <c>User</c> who may read the room gets the author without it.
+    /// </summary>
     [Fact]
     [Trait("Bug", "81093")]
     public async Task FileCreated_UserSubscription_OmitsTheProfileLinkOfTheAuthor()
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var roomId = await CreateRoomSharedWithAsync(member);
+        var roomId = await CreateRoomAsync(member);
         var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
         var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
 
         // Act
-        var title = await CreateFileAsync(roomId);
+        var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
         var ownerPayload = await WaitForFilePayloadAsync(ownerSubscription.Id, title);
@@ -87,7 +93,7 @@ public class WebhookFilePayloadTests(
             new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(defaultQuota)), cancellationToken);
 
         var member = await InviteContact(EmployeeType.User);
-        var roomId = await CreateRoomSharedWithAsync(member);
+        var roomId = await CreateRoomAsync(member);
         var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, member);
         var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated);
 
@@ -107,35 +113,6 @@ public class WebhookFilePayloadTests(
 
         memberPayload.Should().NotBeNull("the member may read the room");
         memberPayload!.Value.TryGetProperty("quotaLimit", out _).Should().BeFalse("the member may not edit the room");
-    }
-
-    private async Task<int> CreateRoomSharedWithAsync(User member)
-    {
-        var cancellationToken = TestContext.Current.CancellationToken;
-
-        await _filesClient.Authenticate(Owner);
-
-        var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
-
-        await _roomsApi.SetRoomSecurityAsync(
-            room.Id,
-            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.Read)], notify: false),
-            cancellationToken);
-
-        return room.Id;
-    }
-
-    private async Task<string> CreateFileAsync(int roomId)
-    {
-        var cancellationToken = TestContext.Current.CancellationToken;
-        var title = $"file-{Guid.NewGuid():N}.docx";
-
-        await _filesClient.Authenticate(Owner);
-
-        await _filesApi.CreateFileAsync(roomId, new CreateFileRequest(title), cancellationToken);
-
-        return title;
     }
 
     private Task<JsonElement?> WaitForFilePayloadAsync(int configId, string title)

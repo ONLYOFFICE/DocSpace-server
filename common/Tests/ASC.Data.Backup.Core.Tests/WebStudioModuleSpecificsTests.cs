@@ -160,25 +160,26 @@ public class WebStudioModuleSpecificsTests
     }
 
     [Fact]
-    public async Task TryPrepareRow_WebhooksLogs_PendingAttempt_IsNotScheduledAgain()
+    public async Task TryPrepareRow_WebhooksLogs_PendingAttempt_KeepsScheduleAndDropsLease()
     {
         // Arrange — a record that was due for its next attempt, and leased by a sender, when the backup was taken
         var specifics = CreateSpecifics();
+        var nextAttemptOn = DateTime.UtcNow.AddMinutes(5);
 
         var row = new DataRowInfo("webhooks_logs");
         row.SetValue("id", OldOriginalLogId);
         row.SetValue("tenant_id", OldTenantId);
         row.SetValue("config_id", OldConfigId);
         row.SetValue("uid", _oldUser);
-        row.SetValue("next_attempt_on", DateTime.UtcNow.AddMinutes(5));
+        row.SetValue("next_attempt_on", nextAttemptOn);
         row.SetValue("lease_id", Guid.NewGuid().ToString());
 
         // Act
         var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
 
-        // Assert — the restored portal keeps the history but sends nothing the source portal had queued
+        // Assert — the pending retry survives a portal transfer, the lease of the source's sender does not
         prepared.Should().BeTrue();
-        preparedRow!["next_attempt_on"].Should().BeNull();
+        preparedRow!["next_attempt_on"].Should().Be(nextAttemptOn);
         preparedRow["lease_id"].Should().BeNull();
         preparedRow["uid"].Should().Be(_newUser);
     }

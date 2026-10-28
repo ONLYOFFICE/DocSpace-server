@@ -33,13 +33,15 @@
 
 namespace ASC.Files.Core.ApiModels.WebhookDto;
 
+// A copy of SubmittedFormData.
+
 /// <summary>
 /// The pair of files carried by a form.submit webhook.
 /// </summary>
 /// <remarks>
-/// A copy of SubmittedFormData. The only trigger whose payload is a wrapper rather than a bare entry, and the
-/// only one whose webhook.target.id refers to a different entity - the original form - than the file that
-/// changed. form.filled.out and form.stopped do not use this shape; they carry a plain FileWebhookDto.
+/// The only payload that wraps two entries rather than being one, and the only one whose `webhook.target.id` refers to
+/// a different entity, the original form, than the file that changed. form.filled.out and form.stopped do not use this
+/// shape; they carry a single file.
 /// </remarks>
 public class FormSubmitWebhookDto<T>
 {

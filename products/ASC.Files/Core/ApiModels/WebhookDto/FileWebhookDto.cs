@@ -33,13 +33,15 @@
 
 namespace ASC.Files.Core.ApiModels.WebhookDto;
 
+// A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the
+// form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in particular
+// opens the file stream to measure the image.
+
 /// <summary>
 /// The file carried by a file.* webhook, and by form.filled.out and form.stopped.
 /// </summary>
 /// <remarks>
-/// A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the
-/// form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in
-/// particular opens the file stream to measure the image.
+/// Carries no thumbnail, image dimensions or form-filling state; read them from the REST API by the file ID.
 /// </remarks>
 public class FileWebhookDto<T> : FileEntryWebhookDto<T>
 {
@@ -47,25 +49,27 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public override FileEntryType FileEntryType => FileEntryType.File;
 
     /// <summary>
-    /// The file version.
+    /// The number of the current version of the file, starting at 1 and growing with every saved version.
     /// </summary>
     /// <example>1</example>
     public int Version { get; set; }
 
     /// <summary>
-    /// The version group of the file.
+    /// The number of the version group the current version belongs to; the versions saved during one editing session
+    /// share a group.
     /// </summary>
     /// <example>1</example>
     public int VersionGroup { get; set; }
 
     /// <summary>
-    /// The file size in bytes, as a number; the REST FileDto sends a formatted string instead.
+    /// The size of the current version of the file in bytes.
     /// </summary>
     /// <example>12345</example>
     public long ContentLength { get; set; }
 
     /// <summary>
-    /// The file type.
+    /// The kind of content the file holds, derived from its extension: a document, a spreadsheet, a presentation, a
+    /// PDF, an image and so on.
     /// </summary>
     /// <example>7</example>
     public FileType FileType { get; set; }
@@ -77,7 +81,8 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public string FileExst { get; set; }
 
     /// <summary>
-    /// The comment on the current file version.
+    /// The comment saved with the current version, either typed by the user or set by the portal for the action
+    /// that made the version.
     /// </summary>
     /// <example>Created</example>
     public string Comment { get; set; }
@@ -95,19 +100,19 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public string WebUrl { get; set; }
 
     /// <summary>
-    /// Specifies whether the file is encrypted or not.
+    /// True when the file is end-to-end encrypted in a private room; absent otherwise.
     /// </summary>
     /// <example>false</example>
     public bool? Encrypted { get; set; }
 
     /// <summary>
-    /// Specifies whether the file is locked or not.
+    /// True when the file is locked, so that only the user who locked it can edit it; absent otherwise.
     /// </summary>
     /// <example>false</example>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// The user name of whoever locked the file.
+    /// The name of the user who locked the file, when `locked` is true.
     /// </summary>
     /// <example>Mike Zanyatski</example>
     public string LockedBy { get; set; }
@@ -120,25 +125,25 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Specifies whether a custom filter is enabled for the file or not.
+    /// True when custom filtering is turned on for the spreadsheet; absent otherwise.
     /// </summary>
     /// <example>false</example>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
-    /// The user name of whoever enabled the custom filter.
+    /// The name of the user who turned the custom filter on, when `customFilterEnabled` is true.
     /// </summary>
     /// <example>Mike Zanyatski</example>
     public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
-    /// The UTC date when the file was last opened.
+    /// When the file was last opened, in UTC; absent when that is not known.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public DateTime? LastOpened { get; set; }
 
     /// <summary>
-    /// The AI vectorization status of the file.
+    /// The state of the file's indexing for the AI features of the portal; absent when it does not apply.
     /// </summary>
     /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }

@@ -45,23 +45,25 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// The automatic retries the integration-test profile configures: <see cref="ProfileRetryCount"/> of them,
-    /// <see cref="ProfileRetryInterval"/> apart (<c>webhooks:retryIntervals</c> in ConnectionStringManager.AddBaseConfig),
-    /// instead of the production schedule of minutes to hours.
+    /// <see cref="ProfileRetryInterval"/> apart, instead of the production schedule of minutes to hours. The values are
+    /// the ones the AppHost passes to the services (<c>webhooks:retryIntervals</c>), read from the same constants.
     /// </summary>
-    protected const int ProfileRetryCount = 3;
+    protected const int ProfileRetryCount = ASC.AppHost.Configuration.Constants.WebhookTestRetryCount;
 
     /// <inheritdoc cref="ProfileRetryCount"/>
-    protected static TimeSpan ProfileRetryInterval { get; } = TimeSpan.FromMilliseconds(500);
+    protected static TimeSpan ProfileRetryInterval => ASC.AppHost.Configuration.Constants.WebhookTestRetryInterval;
 
     /// <summary>
-    /// How long one attempt waits for the target in the integration-test profile (<c>webhooks:requestTimeout</c> in
-    /// ConnectionStringManager.AddBaseConfig), instead of the production 30 seconds.
+    /// How long one attempt waits for the target in the integration-test profile (<c>webhooks:requestTimeout</c>, the
+    /// constant the AppHost passes to the services), instead of the production 30 seconds.
     /// </summary>
-    protected static TimeSpan ProfileRequestTimeout { get; } = TimeSpan.FromSeconds(12);
+    protected static TimeSpan ProfileRequestTimeout => ASC.AppHost.Configuration.Constants.WebhookTestRequestTimeout;
 
     /// <summary>
-    /// How long the sender in Web.Studio sleeps between two polls when nothing is due (the waiting period of
-    /// WorkerService): a due retry can wait that long before it is claimed.
+    /// How long the sender in Web.Studio sleeps between two polls when nothing is due: a due retry can wait that long
+    /// before it is claimed. A copy of <c>WorkerService._waitingPeriod</c> (web/ASC.Web.Studio/WebHooks/Services), a
+    /// private field of a service the test project does not reference and not a setting of the profile, so it cannot
+    /// be shared; keep the two in step.
     /// </summary>
     protected static TimeSpan SenderPollPeriod { get; } = TimeSpan.FromSeconds(5);
 
@@ -118,19 +120,28 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
+    /// The delivery log of one subscription as the generated SDK reads it, as the owner, newest first. Enough for
+    /// everything but the retry fields the pinned SDK model does not carry (<see cref="GetDeliveryRecordsAsync"/>).
+    /// </summary>
+    protected async Task<List<WebhooksLogDto>> GetLogAsync(int configId)
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        return (await _webhooksApi.GetWebhooksLogsAsync(
+            configId: configId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
     /// Polls the delivery log of one subscription until it holds <paramref name="count"/> records that have
     /// each been attempted (a non-zero status), and returns the last observed records either way.
     /// </summary>
     protected async Task<List<WebhooksLogDto>> WaitForAttemptedDeliveriesAsync(int configId, int count = 1)
     {
-        await _webApiClient.Authenticate(Owner);
-
         var deadline = DateTime.UtcNow.AddSeconds(90);
 
         while (true)
         {
-            var logs = (await _webhooksApi.GetWebhooksLogsAsync(
-                configId: configId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            var logs = await GetLogAsync(configId);
 
             if (logs.Count(l => l.Status != 0) >= count || DateTime.UtcNow >= deadline)
             {
@@ -142,22 +153,27 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// Polls one delivery record until it has been attempted (a non-zero status), and returns the last observed
-    /// state either way. The <c>eventId</c> filter also returns the manual retries of an original record, so the
-    /// record is picked out of them by its own id.
+    /// Polls one delivery record as the owner until it has been attempted (a non-zero status), and returns the last
+    /// observed state either way; fails when the record is not in the log at all. The <c>eventId</c> filter takes the
+    /// id of the event's first record and returns it with every manual retry of it, so the record is picked out of
+    /// them by its own id: a retry's own id matches no event.
     /// </summary>
-    protected async Task<WebhooksLogDto?> WaitForAttemptAsync(int deliveryId)
+    protected async Task<WebhooksLogDto> WaitForAttemptAsync(int eventId, int deliveryId)
     {
+        await _webApiClient.Authenticate(Owner);
+
         var deadline = DateTime.UtcNow.AddSeconds(90);
 
         while (true)
         {
             var record = (await _webhooksApi.GetWebhooksLogsAsync(
-                eventId: deliveryId, cancellationToken: TestContext.Current.CancellationToken)).Response.SingleOrDefault(r => r.Id == deliveryId);
+                eventId: eventId, cancellationToken: TestContext.Current.CancellationToken)).Response.FirstOrDefault(r => r.Id == deliveryId);
 
             if (record is { Status: not 0 } || DateTime.UtcNow >= deadline)
             {
-                return record;
+                record.Should().NotBeNull("delivery record {0} should be in the log", deliveryId);
+
+                return record!;
             }
 
             await Task.Delay(1000, TestContext.Current.CancellationToken);
@@ -180,9 +196,10 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// The delivery records of one subscription with the retry fields the SDK model does not carry yet
-    /// (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>, <c>retriedBy</c>), read as raw JSON as the owner,
-    /// newest first.
+    /// The delivery records of one subscription with the retry fields the pinned SDK model (<see cref="WebhooksLogDto"/>
+    /// of DocSpace.API.SDK 4.0.0) does not carry yet (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>,
+    /// <c>retriedBy</c>), read as raw JSON as the owner, newest first. Anything else goes through
+    /// <see cref="GetLogAsync"/>; move these reads there too once the SDK is regenerated with the fields.
     /// </summary>
     protected async Task<List<DeliveryRecord>> GetDeliveryRecordsAsync(int configId)
     {
@@ -195,20 +212,27 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// Polls the delivery records of one subscription until there is one and it satisfies
-    /// <paramref name="until"/>, and returns the last observed record either way.
+    /// Polls the delivery records of one subscription until there is exactly one and it satisfies
+    /// <paramref name="until"/>, and returns that record, or the only record there is at the deadline whether it
+    /// satisfies <paramref name="until"/> or not, so the caller asserts what it waited for. Fails with the records it
+    /// saw when the subscription has none or more than one by the deadline.
     /// </summary>
-    protected async Task<DeliveryRecord?> WaitForRecordAsync(int configId, Func<DeliveryRecord, bool> until, int timeoutSeconds = 90)
+    protected async Task<DeliveryRecord> WaitForRecordAsync(int configId, Func<DeliveryRecord, bool> until, int timeoutSeconds = 90)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
         while (true)
         {
-            var record = (await GetDeliveryRecordsAsync(configId)).SingleOrDefault();
+            var records = await GetDeliveryRecordsAsync(configId);
 
-            if (record is not null && until(record) || DateTime.UtcNow >= deadline)
+            if (records is [var record] && until(record))
             {
                 return record;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return records.Should().ContainSingle("subscription {0} should have exactly one delivery record", configId).Subject;
             }
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
@@ -216,7 +240,7 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// Polls the delivery records of one subscription until one carries a payload that satisfies
+    /// Polls the delivery log of one subscription until one record carries a payload that satisfies
     /// <paramref name="match"/>, and returns that payload, or null when none did by the deadline. The record
     /// holds the body as published until it is sent and as sent afterwards; the payload is the same in both.
     /// </summary>
@@ -226,7 +250,7 @@ public abstract class WebhookDeliveryTestBase(
 
         while (true)
         {
-            var payloads = (await GetDeliveryRecordsAsync(configId)).Select(r => PayloadOf(r.RequestPayload));
+            var payloads = (await GetLogAsync(configId)).Select(r => PayloadOf(r.RequestPayload));
 
             foreach (var payload in payloads)
             {
@@ -246,8 +270,8 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// Polls the delivery records of one subscription until one was published for <paramref name="trigger"/>, named as
-    /// it appears in <c>event.trigger</c>, with a payload that satisfies <paramref name="match"/>, and returns that
+    /// Polls the delivery log of one subscription until one record was published for <paramref name="trigger"/>, named
+    /// as it appears in <c>event.trigger</c>, with a payload that satisfies <paramref name="match"/>, and returns that
     /// payload, or null when none did by the deadline. Matching the name rather than the subscription's trigger
     /// bits lets a catch-all subscription stand in for the triggers the pinned SDK enum does not list yet (agent.*).
     /// </summary>
@@ -257,7 +281,7 @@ public abstract class WebhookDeliveryTestBase(
 
         while (true)
         {
-            foreach (var record in await GetDeliveryRecordsAsync(configId))
+            foreach (var record in await GetLogAsync(configId))
             {
                 using var document = JsonDocument.Parse(record.RequestPayload);
                 var root = document.RootElement;
@@ -389,16 +413,15 @@ public abstract class WebhookDeliveryTestBase(
     protected async Task ChangeTypeAsync(User member, EmployeeType type)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
-        var userTypeApi = new UserTypeApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
 
         await _peopleClient.Authenticate(Owner);
-        await userTypeApi.StartUserTypeUpdateAsync(new StartUpdateUserTypeDto(type, member.Id), cancellationToken);
+        await _userTypeApi.StartUserTypeUpdateAsync(new StartUpdateUserTypeDto(type, member.Id), cancellationToken);
 
         var deadline = DateTime.UtcNow.AddSeconds(60);
 
         while (true)
         {
-            var progress = (await userTypeApi.GetUserTypeUpdateProgressAsync(member.Id, cancellationToken)).Response;
+            var progress = (await _userTypeApi.GetUserTypeUpdateProgressAsync(member.Id, cancellationToken)).Response;
 
             if (progress.IsCompleted || DateTime.UtcNow >= deadline)
             {
@@ -443,6 +466,37 @@ public abstract class WebhookDeliveryTestBase(
         }
 
         return room.Id;
+    }
+
+    /// <summary>
+    /// Creates an empty document with a fresh title in <paramref name="folderId"/> as the owner, which publishes
+    /// <c>file.created</c>, and returns its id and title.
+    /// </summary>
+    protected async Task<(int Id, string Title)> CreateFileAsync(int folderId)
+    {
+        var title = $"file-{Guid.NewGuid():N}.docx";
+
+        await _filesClient.Authenticate(Owner);
+
+        var file = await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(title), TestContext.Current.CancellationToken);
+
+        return (file.Response.Id, title);
+    }
+
+    /// <summary>
+    /// <paramref name="subject"/> renames themselves, which publishes <c>user.updated</c>, and returns the new first
+    /// name. Only the user themselves can change the name: the same call made by the owner leaves it as it is and
+    /// publishes nothing.
+    /// </summary>
+    protected async Task<string> RenameAsync(User subject)
+    {
+        var firstName = $"Renamed{Initializer.Faker.Random.String2(8, "abcdefghijklmnopqrstuvwxyz")}";
+
+        await _peopleClient.Authenticate(subject);
+        await _profilesApi.UpdateMemberAsync(
+            subject.Id.ToString(), new UpdateMemberRequestDto { FirstName = firstName }, TestContext.Current.CancellationToken);
+
+        return firstName;
     }
 
     /// <summary>The HMAC-SHA256 the portal signs a body with, as the hex string of the signature header.</summary>

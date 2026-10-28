@@ -131,19 +131,21 @@ public class UserWebhookDtoHelper(
     }
 
     /// <summary>
-    /// The summary as a subscriber without contacts access may receive it: without the profile link, unless the
-    /// summary is the subscriber themselves. The summary is shared by every subscriber of the event, so it is
-    /// copied rather than changed.
+    /// The summary as a subscriber without contacts access may receive it: without the profile link and without the
+    /// user name, which is the local part of the email address, unless the summary is the subscriber themselves.
+    /// The REST API shows such a reader neither of them. The summary is shared by every subscriber of the event, so it
+    /// is copied rather than changed.
     /// </summary>
     public static UserSummaryWebhookDto RestrictSummaryForSubscriber(UserSummaryWebhookDto summary, Guid subscriberId)
     {
-        if (summary?.ProfileUrl == null || summary.Id == subscriberId)
+        if (summary == null || summary.Id == subscriberId || (summary.ProfileUrl == null && summary.UserName == null))
         {
             return summary;
         }
 
         var result = summary.Clone();
         result.ProfileUrl = null;
+        result.UserName = null;
 
         return result;
     }
@@ -162,14 +164,13 @@ public class UserWebhookDtoHelper(
             return null;
         }
 
-        return new UserSummaryWebhookDto
-        {
-            Id = userInfo.Id,
-            DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo),
-            UserName = userInfo.UserName,
-            Avatar = await userFieldsHelper.GetAvatarUrlAsync(userInfo, absolute: true),
-            ProfileUrl = await userFieldsHelper.GetProfileUrlAsync(userInfo.Id)
-        };
+        var result = userInfo.MapToSummaryWebhookDto();
+
+        result.DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo);
+        result.Avatar = await userFieldsHelper.GetAvatarUrlAsync(userInfo, absolute: true);
+        result.ProfileUrl = await userFieldsHelper.GetProfileUrlAsync(userInfo.Id);
+
+        return result;
     }
 
     private async Task FillGroupsAsync(UserWebhookDto result, UserInfo userInfo)

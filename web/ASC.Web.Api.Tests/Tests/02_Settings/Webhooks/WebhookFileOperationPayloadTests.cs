@@ -141,31 +141,15 @@ public class WebhookFileOperationPayloadTests(
         payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
     }
 
-    private async Task<(int Id, string Title)> CreateFileAsync(int roomId)
-    {
-        var title = $"file-{Guid.NewGuid():N}.docx";
-
-        await _filesClient.Authenticate(Owner);
-
-        var file = await _filesApi.CreateFileAsync(roomId, new CreateFileRequest(title), TestContext.Current.CancellationToken);
-
-        return (file.Response.Id, title);
-    }
-
     private async Task TrashAsync(int fileId)
     {
         await _filesClient.Authenticate(Owner);
         await _filesApi.DeleteFileAsync(fileId, new DeleteFileRequest { Immediately = false }, true, TestContext.Current.CancellationToken);
     }
 
-    /// <summary>
-    /// Copies or moves one file into <paramref name="destinationId"/> as the owner. The suite has no operations
-    /// client of its own, so one is bound to the Files client here.
-    /// </summary>
+    /// <summary>Copies or moves one file into <paramref name="destinationId"/> as the owner.</summary>
     private async Task RunBatchAsync(bool copy, int fileId, int destinationId)
     {
-        var operationsApi = new DocSpace.API.SDK.Api.Files.OperationsApi(
-            _filesClient, new Configuration { BasePath = _filesClient.BaseAddress!.ToString().TrimEnd('/') });
         var request = new BatchRequestDto
         {
             ReturnSingleOperation = true,
@@ -178,11 +162,11 @@ public class WebhookFileOperationPayloadTests(
 
         if (copy)
         {
-            await operationsApi.CopyBatchItemsAsync(request, TestContext.Current.CancellationToken);
+            await _operationsApi.CopyBatchItemsAsync(request, TestContext.Current.CancellationToken);
         }
         else
         {
-            await operationsApi.MoveBatchItemsAsync(request, TestContext.Current.CancellationToken);
+            await _operationsApi.MoveBatchItemsAsync(request, TestContext.Current.CancellationToken);
         }
     }
 

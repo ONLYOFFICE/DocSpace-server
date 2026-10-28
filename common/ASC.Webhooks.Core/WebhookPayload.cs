@@ -44,10 +44,12 @@ public class WebhookPayload<T1, T2>
     public WebhookPayloadEventInfo Event { get; set; }
 
     /// <summary>
-    /// The trigger-specific body. Left untyped so that codegen stays clean in all 9 target languages; the runtime
-    /// narrows it.
+    /// The user, group, file, folder, room, agent or form submission the event is about. Its schema follows from
+    /// `event.trigger`: a user.* event carries a user, a file.* event a file, and so on.
     /// </summary>
-    // written by its runtime type: a payload built as FileEntryWebhookDto<T> still carries its file, folder or room fields
+    // Left untyped in the contract so that codegen stays clean in all 9 target languages; the receiver narrows it by
+    // the trigger. Written by its runtime type: a payload built as FileEntryWebhookDto<T> still carries its file, folder
+    // or room fields.
     [JsonConverter(typeof(RuntimeTypeJsonConverterFactory))]
     public T1 Payload { get; set; }
 

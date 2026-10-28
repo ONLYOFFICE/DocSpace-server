@@ -59,8 +59,7 @@ public class WebhookDeliveryTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.Delivery.Should().NotBeNull();
         record.Attempts.Should().Be(1);
         record.NextAttemptOn.Should().BeNull();
@@ -83,7 +82,7 @@ public class WebhookDeliveryTests(
         using var body = JsonDocument.Parse(delivery.Body);
         var eventInfo = body.RootElement.GetProperty("event");
 
-        eventInfo.GetProperty("id").GetInt32().Should().Be(record!.Id);
+        eventInfo.GetProperty("id").GetInt32().Should().Be(record.Id);
         delivery.Header("x-docspace-event-id").Should().Be(record.Id.ToString());
 
         DateTime.Parse(delivery.Header("x-docspace-event-timestamp")!).ToUniversalTime()
@@ -106,8 +105,7 @@ public class WebhookDeliveryTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.Attempts.Should().Be(3);
         record.NextAttemptOn.Should().BeNull();
 
@@ -131,8 +129,7 @@ public class WebhookDeliveryTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Attempts >= AttemptsInAll && r.NextAttemptOn is null, timeoutSeconds: 120);
 
-        record.Should().NotBeNull();
-        record!.Attempts.Should().Be(AttemptsInAll);
+        record.Attempts.Should().Be(AttemptsInAll);
         record.NextAttemptOn.Should().BeNull("the retries have run out");
         record.Delivery.Should().BeNull();
         record.Status.Should().Be(500);
@@ -179,7 +176,7 @@ public class WebhookDeliveryTests(
         var failed = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
         await ExecuteSqlAsync(
             "UPDATE webhooks_logs SET status = 500, delivery = NULL, next_attempt_on = UTC_TIMESTAMP() + INTERVAL 1 DAY WHERE id = @id",
-            ("@id", failed!.Id));
+            ("@id", failed.Id));
 
         await _webApiClient.Authenticate(Owner);
         await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
@@ -196,8 +193,7 @@ public class WebhookDeliveryTests(
         // Assert: the sender drops it instead of sending it
         var record = await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is null);
 
-        record.Should().NotBeNull();
-        record!.NextAttemptOn.Should().BeNull();
+        record.NextAttemptOn.Should().BeNull();
         record.Attempts.Should().Be(1, "the retry was cancelled, not attempted");
 
         // WireMock journals a request as it arrives, before the sender writes its outcome, and a record without a
@@ -213,7 +209,7 @@ public class WebhookDeliveryTests(
         var subscription = await CreateSubscriptionAsync(receiver);
 
         await FireEventAsync();
-        (await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null)).Should().NotBeNull();
+        (await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null)).Delivery.Should().NotBeNull("the first event is delivered at once");
 
         // Act: the second event fails once and is retried
         await FireEventAsync();

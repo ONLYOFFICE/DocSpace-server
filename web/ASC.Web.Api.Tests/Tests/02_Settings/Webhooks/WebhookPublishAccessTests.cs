@@ -60,7 +60,7 @@ public class WebhookPublishAccessTests(
         var roomId = await CreateRoomAsync();
 
         // Act
-        var title = await CreateFileAsync(roomId);
+        var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
         await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
@@ -143,7 +143,7 @@ public class WebhookPublishAccessTests(
         await TerminateAsync(member);
 
         // Act
-        var title = await CreateFileAsync(roomId);
+        var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
         await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
@@ -163,7 +163,7 @@ public class WebhookPublishAccessTests(
             new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Act
-        var title = await CreateFileAsync(roomId);
+        var (_, title) = await CreateFileAsync(roomId);
 
         // Assert: the member may no longer use the developer tools, so their subscription receives nothing either
         await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
@@ -173,17 +173,7 @@ public class WebhookPublishAccessTests(
     {
         (await WaitForPayloadAsync(control.Id, match)).Should().NotBeNull("the owner's control subscription gets the event");
 
-        (await GetDeliveryRecordsAsync(subject.Id)).Should().BeEmpty("the creator of this subscription is not entitled to the event");
-    }
-
-    private async Task<string> CreateFileAsync(int roomId)
-    {
-        var title = $"file-{Guid.NewGuid():N}.docx";
-
-        await _filesClient.Authenticate(Owner);
-        await _filesApi.CreateFileAsync(roomId, new CreateFileRequest(title), TestContext.Current.CancellationToken);
-
-        return title;
+        (await GetLogAsync(subject.Id)).Should().BeEmpty("the creator of this subscription is not entitled to the event");
     }
 
     private async Task<Guid> CreateGroupAsync()

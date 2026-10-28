@@ -33,135 +33,140 @@
 
 namespace ASC.Files.Core.ApiModels.WebhookDto;
 
+// A copy of FileEntryDto, deliberately not derived from it, and populated straight from the domain entity rather than
+// through FileEntryDtoHelper. Three groups of the REST fields are not carried:
+// - caller-relative state: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared,
+//   sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. A delivery has no
+//   caller; who may receive it is already decided by WebhookFileEntryAccessChecker against the subscription owner, and
+//   putting one user's permission matrix on the wire would be both meaningless and a disclosure.
+// - anything the REST helper pays for per request: thumbnails, image dimensions (it opens the file stream), form-filling
+//   roles, view accessibility, external share links.
+// - subtype fields belong on the subtype; the earlier untyped payload erased the File and Folder members through the
+//   declared parameter type, so they never reached the wire at all.
+// Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime.
+
 /// <summary>
 /// What every file, folder and room webhook payload has in common.
 /// </summary>
 /// <remarks>
-/// A copy of FileEntryDto, deliberately not derived from it, and populated straight from the domain entity
-/// rather than through FileEntryDtoHelper. Three groups of the REST fields are not carried:
-/// <list type="bullet">
-/// <item>caller-relative state - access, security, securityByUsers, availableShareRights, shareSettings, canShare,
-/// shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. A delivery
-/// has no caller;
-/// who may receive it is already decided by WebhookFileEntryAccessChecker against the subscription owner, and
-/// putting one user's permission matrix on the wire would be both meaningless and a disclosure.</item>
-/// <item>anything the REST helper pays for per request - thumbnails, image dimensions (it opens the file
-/// stream), form-filling roles, view accessibility, external share links.</item>
-/// <item>subtype fields belong on the subtype, unlike the previous payload where File and Folder members were
-/// erased by the declared parameter type and never reached the wire at all.</item>
-/// </list>
-/// Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime.
+/// All dates are in UTC. A delivery goes only to a subscription owner who may see the entry, and it carries no
+/// per-user state: no access rights, share settings, favourite flag or thumbnail. Read those from the REST API by the
+/// entry ID when they are needed.
 /// </remarks>
 public abstract class FileEntryWebhookDto<T>
 {
     /// <summary>
-    /// The file entry ID.
+    /// The ID of the file, folder or room the event is about: a number for an entry in the portal's own storage, a
+    /// string for one in a connected third-party storage.
     /// </summary>
     /// <example>10</example>
     public T Id { get; set; }
 
     /// <summary>
-    /// The parent folder ID of the file entry.
+    /// The ID of the folder or room that directly contains the entry.
     /// </summary>
     /// <example>1</example>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// The root folder ID of the file entry.
+    /// The ID of the top-level section the entry sits in, such as My documents, Rooms, Archive or Trash;
+    /// `rootFolderType` says which one.
     /// </summary>
     /// <example>1</example>
     public T RootFolderId { get; set; }
 
     /// <summary>
-    /// The file entry title.
+    /// The name of the entry as shown in the portal; for a file it includes the extension.
     /// </summary>
-    /// <example>Some title.txt</example>
+    /// <example>Contract 2026.docx</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// The file entry type: 1 for a folder, 2 for a file. Present on every entry payload.
+    /// Tells a folder or room payload (1) from a file payload (2), so a receiver can pick the schema to read the rest
+    /// of the object with.
     /// </summary>
     /// <example>2</example>
     public abstract FileEntryType FileEntryType { get; }
 
     /// <summary>
-    /// The UTC date when the file entry was created.
+    /// When the entry was created, in UTC.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public DateTime Created { get; set; }
 
     /// <summary>
-    /// The file entry author.
+    /// The user who created the entry; absent when that user has been deleted from the portal.
     /// </summary>
     public UserSummaryWebhookDto CreatedBy { get; set; }
 
     /// <summary>
-    /// The UTC date when the file entry was last updated.
+    /// When the entry was last changed, in UTC; equal to `created` for an entry that has not changed since.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public DateTime Updated { get; set; }
 
     /// <summary>
-    /// The user who last updated the file entry.
+    /// The user who last changed the entry; absent when that user has been deleted from the portal.
     /// </summary>
     public UserSummaryWebhookDto UpdatedBy { get; set; }
 
     /// <summary>
-    /// The root folder type of the file entry.
+    /// The kind of top-level section the entry sits in, such as My documents, Rooms, Archive or Trash.
     /// </summary>
-    /// <example>0</example>
+    /// <example>14</example>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// The parent room type of the file entry.
+    /// The type of the room the entry is inside, at any depth; absent for an entry outside rooms.
     /// </summary>
-    /// <example>0</example>
+    /// <example>19</example>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// The origin ID of the file entry, set when it sits in the trash.
+    /// For an entry in the trash, the ID of the folder it was deleted from; absent anywhere else.
     /// </summary>
     /// <example>12</example>
     public T OriginId { get; set; }
 
     /// <summary>
-    /// The origin room ID of the file entry, set when it sits in the trash.
+    /// For an entry in the trash, the ID of the room it was deleted from; absent anywhere else and for an entry that
+    /// was not in a room.
     /// </summary>
     /// <example>22</example>
     public T OriginRoomId { get; set; }
 
     /// <summary>
-    /// The origin title of the file entry.
+    /// For an entry in the trash, the name of the folder it was deleted from.
     /// </summary>
     /// <example>Original Title</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
-    /// The origin room title of the file entry.
+    /// For an entry in the trash, the name of the room it was deleted from.
     /// </summary>
     /// <example>Original Room</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
-    /// Specifies whether the file entry is backed by a third-party provider or not.
+    /// True when the entry lives in a connected third-party storage; absent for the portal's own storage.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
-    /// The third-party provider key of the file entry.
+    /// The connected third-party storage the entry lives in; absent for the portal's own storage.
     /// </summary>
-    /// <example>google-drive</example>
+    /// <example>GoogleDrive</example>
     public string ProviderKey { get; set; }
 
     /// <summary>
-    /// The third-party provider ID of the file entry.
+    /// The ID of the third-party storage connection the entry comes through; absent for the portal's own storage.
     /// </summary>
     /// <example>1</example>
     public int? ProviderId { get; set; }
 
     /// <summary>
-    /// The position of the file entry within an indexed room.
+    /// The position of the entry in a room with indexing turned on; meaningful only inside such a room.
     /// </summary>
     /// <example>1</example>
     public int Order { get; set; }

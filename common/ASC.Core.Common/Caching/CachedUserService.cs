@@ -368,9 +368,20 @@ public class CachedUserService : IUserService
         return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
-    public Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
+    // Counted from the cached membership refs and the cached users of the tenant, under the same conditions as the
+    // database query of the inner service: core_usergroup has no index that starts with the group, so that query reads
+    // every membership row of the tenant. Both caches are already invalidated by their tags on every membership and
+    // user change, so the count needs no cache entry of its own.
+    public async Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
     {
-        return _service.GetGroupMembersCountAsync(tenant, groupId);
+        var refs = await GetUserGroupRefsAsync(tenant);
+        var users = await GetUsersAsync(tenant);
+
+        return users.Count(u =>
+            !u.Removed &&
+            u.Status != EmployeeStatus.Terminated &&
+            refs.TryGetValue(UserGroupRef.CreateKey(tenant, u.Id, groupId, UserGroupRefType.Contains), out var r) &&
+            !r.Removed);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)

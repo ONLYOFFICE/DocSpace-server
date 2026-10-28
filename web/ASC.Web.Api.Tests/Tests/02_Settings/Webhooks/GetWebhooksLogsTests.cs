@@ -161,25 +161,18 @@ public class GetWebhooksLogsTests(
     private async Task<(User Member, WebhookSubscription OwnerSubscription, WebhookSubscription MemberSubscription)> CreateRecordsOfOwnerAndMemberAsync(
         EmployeeType employeeType)
     {
-        var cancellationToken = TestContext.Current.CancellationToken;
         var member = await InviteContact(employeeType);
-
-        await _filesClient.Authenticate(Owner);
-        var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(title: $"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom), cancellationToken)).Response;
-        await _roomsApi.SetRoomSecurityAsync(
-            room.Id,
-            new RoomInvitationRequest(invitations: [new RoomInvitation(member.Id, DocSpace.API.SDK.Model.FileShare.Read)], notify: false),
-            cancellationToken);
+        var roomId = await CreateRoomAsync(member);
 
         var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
         var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
 
-        await _filesClient.Authenticate(Owner);
-        await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest($"file-{Guid.NewGuid():N}.docx"), cancellationToken);
+        await CreateFileAsync(roomId);
 
-        (await WaitForRecordAsync(ownerSubscription.Id, _ => true)).Should().NotBeNull("the owner's subscription gets the event");
-        (await WaitForRecordAsync(memberSubscription.Id, _ => true)).Should().NotBeNull("the member may read the room the file is in");
+        // each wait fails unless its subscription has the record: the owner's gets the event, and the member may read
+        // the room the file is in
+        await WaitForRecordAsync(ownerSubscription.Id, _ => true);
+        await WaitForRecordAsync(memberSubscription.Id, _ => true);
 
         return (member, ownerSubscription, memberSubscription);
     }

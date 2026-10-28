@@ -33,15 +33,14 @@
 
 namespace ASC.Files.Core.ApiModels.WebhookDto;
 
+// A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload (RoomWebhookDto) even though
+// both come from Folder<T>, because room.* and folder.* are separate triggers whose contracts should be free to move
+// independently. Not carried: inRoom, mute and new, all of them per-viewer state.
+
 /// <summary>
-/// The folder carried by a folder.* webhook.
+/// The folder carried by a folder.* webhook. A room is never sent in this shape: room.* webhooks carry their own
+/// payload.
 /// </summary>
-/// <remarks>
-/// A copy of FolderDto reduced to what a plain folder has. Rooms are a separate payload
-/// (<see cref="RoomWebhookDto{T}"/>) even though both come from Folder&lt;T&gt;, because room.* and folder.*
-/// are separate triggers whose contracts should be free to move independently. Not carried: inRoom, mute and new,
-/// all of them per-viewer state.
-/// </remarks>
 public class FolderWebhookDto<T> : FileEntryWebhookDto<T>
 {
     /// <inheritdoc/>
@@ -60,13 +59,14 @@ public class FolderWebhookDto<T> : FileEntryWebhookDto<T>
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// The folder type.
+    /// The kind of folder: an ordinary one, or one the portal creates and maintains itself, such as the folders of a
+    /// form-filling room.
     /// </summary>
     /// <example>0</example>
     public FolderType? Type { get; set; }
 
     /// <summary>
-    /// Specifies whether the folder can be shared or not.
+    /// True when the folder can be shared; absent otherwise.
     /// </summary>
     /// <example>true</example>
     public bool? IsShareable { get; set; }

@@ -59,8 +59,7 @@ public class WebhookDeliveryEdgeTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.Attempts.Should().Be(2, "404 failed the first attempt");
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
     }
@@ -79,8 +78,7 @@ public class WebhookDeliveryEdgeTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.Attempts.Should().Be(2, "the redirect failed the first attempt");
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
         (await receiver.CountRedirectedRequestsAsync()).Should().Be(0, "a sender that followed the redirect would have asked there");
@@ -99,7 +97,7 @@ public class WebhookDeliveryEdgeTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.ResponsePayload.Should().HaveLength(MaxStoredResponseBytes, "only the start of a long answer is kept");
     }
 
@@ -116,7 +114,7 @@ public class WebhookDeliveryEdgeTests(
         // Assert
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
 
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.ResponsePayload.Should().Be("beforeafter");
     }
 
@@ -131,7 +129,7 @@ public class WebhookDeliveryEdgeTests(
         await FireEventAsync();
 
         // Assert
-        (await WaitForRecordAsync(subscription.Id, r => r.Status != 0)).Should().NotBeNull();
+        (await WaitForRecordAsync(subscription.Id, r => r.Status != 0)).Status.Should().Be(500, "the target answered 500");
 
         var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastFailureOn is not null);
 
@@ -156,8 +154,7 @@ public class WebhookDeliveryEdgeTests(
         // Assert: the 200 decided the outcome; the late body only left a note in the record
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0, timeoutSeconds: 120);
 
-        record.Should().NotBeNull();
-        record!.Status.Should().Be(200);
+        record.Status.Should().Be(200);
         record.Delivery.Should().NotBeNull();
         record.Attempts.Should().Be(1);
         record.NextAttemptOn.Should().BeNull("a delivered event is not sent again");

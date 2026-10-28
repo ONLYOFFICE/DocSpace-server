@@ -58,13 +58,18 @@ public class WebhookSendCheckTests(
         await ExecuteSqlAsync("UPDATE webhooks_config SET uri = 'http://10.0.0.1/hook' WHERE id = @id", ("@id", subscription.Id));
 
         // Act
-        await RequeueAsUnsentAsync(record!.Id);
+        await RequeueAsUnsentAsync(record.Id);
 
         // Assert
         var config = await WaitForSubscriptionAsync(subscription.Id, c => c is null);
 
         config.Should().BeNull("a target in a blacklisted network is removed, not just switched off");
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("nothing went out after the URL changed");
+
+        // The receiver cannot tell whether a request went out: after the URL change it would go to 10.0.0.1, never to
+        // WireMock. Nor can the record: webhooks_logs rows go with their subscription (ON DELETE CASCADE). The removal
+        // itself is the proof that the URL was checked before sending, since only that check removes a subscription
+        // (WebhookSender.DisableWebhook); what is left to assert is that the journal holds nothing for it afterwards
+        (await GetLogAsync(subscription.Id)).Should().BeEmpty("the records of a removed subscription go with it");
     }
 
     [Fact]
@@ -79,7 +84,7 @@ public class WebhookSendCheckTests(
         await ExecuteSqlAsync("UPDATE webhooks_config SET `ssl` = 1 WHERE id = @id", ("@id", subscription.Id));
 
         // Act
-        await RequeueAsUnsentAsync(record!.Id);
+        await RequeueAsUnsentAsync(record.Id);
 
         // Assert
         var config = await WaitForSubscriptionAsync(subscription.Id, c => c is { Enabled: false });
@@ -88,7 +93,7 @@ public class WebhookSendCheckTests(
         config!.Enabled.Should().BeFalse();
 
         var after = await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is null);
-        after!.NextAttemptOn.Should().BeNull("the attempt is dropped, not retried");
+        after.NextAttemptOn.Should().BeNull("the attempt is dropped, not retried");
         after.Attempts.Should().Be(0, "no request was made");
         (await receiver.GetDeliveriesAsync()).Should().ContainSingle();
     }
@@ -101,7 +106,7 @@ public class WebhookSendCheckTests(
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
-        await RequeueAsUnsentAsync(record!.Id, due: false);
+        await RequeueAsUnsentAsync(record.Id, due: false);
 
         await _webApiClient.Authenticate(Owner);
         await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
@@ -118,7 +123,7 @@ public class WebhookSendCheckTests(
         // Assert: the first attempt is dropped like a retry would be
         var after = await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is null);
 
-        after!.NextAttemptOn.Should().BeNull();
+        after.NextAttemptOn.Should().BeNull();
         after.Attempts.Should().Be(0, "a disabled subscription receives nothing, the first attempt included");
         (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the delivery made before the switch-off");
     }

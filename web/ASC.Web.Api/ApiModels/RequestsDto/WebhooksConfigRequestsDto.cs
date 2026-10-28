@@ -85,11 +85,12 @@ public class CreateWebhooksConfigRequestsDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Whether the target certificate is verified. Setting it demands an `https` target with a valid certificate;
-    /// leaving it off delivers without checking the certificate at all.
+    /// Whether the target certificate is verified. `true` demands an `https` address with a valid certificate; `false`
+    /// delivers without checking the certificate, and is what a plain `http` target needs. Left out, it is on for an
+    /// `https` target and off for an `http` one.
     /// </summary>
     /// <example>true</example>
-    public bool SSL { get; set; }
+    public bool? SSL { get; set; }
 
     /// <summary>
     /// The events the subscription listens for, as a bitmask combining the flags; 0 subscribes to all of them. Take

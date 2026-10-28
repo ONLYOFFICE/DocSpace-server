@@ -40,4 +40,10 @@ internal static partial class WorkerServiceLogger
 
     [LoggerMessage(LogLevel.Debug, "Procedure: Finish.")]
     public static partial void DebugProcedureFinish(this ILogger<WorkerService> logger);
+
+    [LoggerMessage(LogLevel.Information, "Webhook journal upkeep: {moved} due entries of inactive portals postponed or unscheduled, {deleted} expired entries deleted")]
+    public static partial void InfoUpkeepDone(this ILogger<WorkerService> logger, int moved, int deleted);
+
+    [LoggerMessage(LogLevel.Error, "Webhook journal upkeep failed")]
+    public static partial void ErrorUpkeep(this ILogger<WorkerService> logger, Exception exception);
 }

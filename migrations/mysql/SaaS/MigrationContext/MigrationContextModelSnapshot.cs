@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Legacy.DbMcpServer", b =>
@@ -6709,6 +6709,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasName("PRIMARY");
 
                     b.HasIndex("ConfigId");
+
+                    b.HasIndex("CreationTime")
+                        .HasDatabaseName("creation_time");
 
                     b.HasIndex("NextAttemptOn")
                         .HasDatabaseName("next_attempt_on");

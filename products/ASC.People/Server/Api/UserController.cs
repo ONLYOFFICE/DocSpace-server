@@ -756,6 +756,7 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/{userId}</path>
     [RaisesWebhook(WebhookTrigger.UserDeleted)]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
@@ -1563,6 +1564,7 @@ public class UserController(
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.UserDeleted, When = "for every account it deletes; an account the caller may not delete is skipped without one")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every deleted account that shared files or folders from its personal section, once the queued data deletion creates the folder in the caller's personal section that takes them over")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
@@ -2650,6 +2652,7 @@ public class UserController(
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>
     [RaisesWebhook(WebhookTrigger.UserUpdated, When = "once the queued type change finishes successfully, not when it is cancelled or fails")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every room and AI agent the account owns, once the queued type change hands it over to the recipient; the payload is the room")]
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]

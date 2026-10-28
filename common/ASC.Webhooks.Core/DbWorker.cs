@@ -277,7 +277,11 @@ public class DbWorker(
             q = q.Take(limit);
         }
 
-        foreach (var r in q)
+        // read in full before the caller sees the first row: the caller awaits a mapping per row, and a reader left
+        // open across those awaits would hold the connection for the whole response
+        var page = await q.ToListAsync();
+
+        foreach (var r in page)
         {
             yield return r;
         }
@@ -429,7 +433,7 @@ public class DbWorker(
                 return new WebhookRetryResult(WebhookRetryStatus.NotFound);
             }
 
-            if (await webhooksDbContext.WebhooksEventPredatesAttemptsAsync(source.TenantId, eventId))
+            if (await webhooksDbContext.WebhooksEventPredatesAttemptsAsync(source.TenantId, eventId, PreviousVersionNote))
             {
                 return new WebhookRetryResult(WebhookRetryStatus.Outdated);
             }
@@ -469,6 +473,28 @@ public class DbWorker(
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
         await webhooksDbContext.CancelWebhooksLogAttemptsAsync(tenantId, id, leaseId);
+    }
+
+    /// <summary>
+    /// Ends the attempts of a claimed row, with <paramref name="note"/> as its response to say why.
+    /// </summary>
+    public async Task StopJournalAttemptsAsync(int tenantId, int id, Guid leaseId, string note)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.StopWebhooksLogWithNoteAsync(tenantId, id, leaseId, note);
+    }
+
+    /// <summary>
+    /// Extends the lease of a claimed row to <paramref name="leaseUntil"/> right before its request goes out. False
+    /// when the row is no longer leased with <paramref name="leaseId"/>: another instance has claimed it since, or it
+    /// was stopped, and the request must not be sent.
+    /// </summary>
+    public async Task<bool> RenewJournalLeaseAsync(int tenantId, int id, Guid leaseId, DateTime leaseUntil)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await webhooksDbContext.RenewWebhooksLogLeaseAsync(tenantId, id, leaseId, leaseUntil) > 0;
     }
 
     /// <summary>
@@ -538,24 +564,41 @@ public class DbWorker(
     /// <summary>
     /// Deletes the delivery records of every portal created before <paramref name="before"/> that nothing will send
     /// any more, oldest first, in batches of <see cref="PostponeBatchSize"/> and at most <see cref="MaxPostponeRounds"/>
-    /// of them per call; what is left goes on the next one. Returns how many were deleted.
+    /// of them per call; what is left goes on the next one. The original row of an event stays while a manual retry
+    /// points to it (see <see cref="WebhooksDbContext.ExpiredWebhooksLogIdsAsync"/>). Returns how many were deleted.
     /// </summary>
-    public async Task<int> DeleteExpiredJournalAsync(DateTime before)
+    public async Task<int> DeleteExpiredJournalAsync(DateTime before, CancellationToken cancellationToken)
     {
-        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
         var deleted = 0;
 
-        for (var round = 0; round < MaxPostponeRounds; round++)
+        for (var round = 0; round < MaxPostponeRounds && !cancellationToken.IsCancellationRequested; round++)
         {
-            var ids = await webhooksDbContext.ExpiredWebhooksLogIdsAsync(before, PostponeBatchSize).ToListAsync();
+            var ids = await webhooksDbContext.ExpiredWebhooksLogIdsAsync(before, PostponeBatchSize).ToListAsync(cancellationToken);
 
             if (ids.Count == 0)
             {
                 break;
             }
 
-            deleted += await webhooksDbContext.DeleteExpiredWebhooksLogsAsync(ids);
+            deleted += await strategy.ExecuteAsync(async () =>
+            {
+                await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
+
+                // a manual retry that added a row for one of these events after the read above holds, or has
+                // committed, the lock of its original row; once these locks are taken, the read below sees its row
+                await webhooksDbContext.LockExpiredWebhooksLogsAsync(ids);
+
+                var retried = await webhooksDbContext.RetriedWebhooksLogIdsAsync(ids).ToHashSetAsync();
+                var toDelete = retried.Count == 0 ? ids : ids.Where(id => !retried.Contains(id)).ToList();
+                var count = toDelete.Count == 0 ? 0 : await webhooksDbContext.DeleteExpiredWebhooksLogsAsync(toDelete);
+
+                await tx.CommitAsync();
+
+                return count;
+            });
 
             if (ids.Count < PostponeBatchSize)
             {
@@ -571,6 +614,13 @@ public class DbWorker(
     /// </summary>
     public const string PreviousVersionNote =
         "Not sent: the event was published by a service of the previous version, in the old payload format";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that was not sent because the creator of its subscription may
+    /// no longer receive the event.
+    /// </summary>
+    public const string CreatorNotEntitledNote =
+        "Not sent: the creator of the subscription may no longer receive this event";
 
     /// <summary>
     /// Marks a row written by a publisher of the previous version as never to be sent: see
@@ -597,6 +647,8 @@ public class DbWorker(
         await webhooksDbContext.ScheduleWebhooksLogAttemptAsync(tenantId, id, leaseId, attempts, nextAttemptOn);
     }
 
+    // Not precompiled on purpose: the filters of the journal are composed per call, and the page and the count share
+    // them. The event filter goes through the compiled WebhooksEventRowIdsAsync.
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
         WebhooksDbContext webhooksDbContext,
         DateTime? deliveryFrom,
@@ -609,6 +661,15 @@ public class DbWorker(
         WebhookTrigger? trigger)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
+
+        // the rows of the event, (retry_of ?? id) == eventId, are found first by primary key and the retry_of index;
+        // an OR of the two in the query below would read the tenant's whole range, for the page and for the count
+        List<int> eventRowIds = null;
+
+        if (eventId != null)
+        {
+            eventRowIds = await webhooksDbContext.WebhooksEventRowIdsAsync(tenantId, eventId.Value).ToListAsync();
+        }
 
         var q = webhooksDbContext.WebhooksLogs
             .OrderByDescending(t => t.Id)
@@ -647,9 +708,9 @@ public class DbWorker(
             q = q.Where(r => r.Log.ConfigId == configId);
         }
 
-        if (eventId != null)
+        if (eventRowIds != null)
         {
-            q = q.Where(r => r.Log.Id == eventId || r.Log.RetryOf == eventId);
+            q = q.Where(r => eventRowIds.Contains(r.Log.Id));
         }
 
         if (webhookGroupStatus != null && webhookGroupStatus != WebhookGroupStatus.None)

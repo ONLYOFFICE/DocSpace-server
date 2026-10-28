@@ -124,7 +124,7 @@ public class WebhookUserPayloadTests(
         // the member's would have it too
         (await WaitForUserPayloadAsync(ownerSubscription.Id, subject, firstName)).Should().NotBeNull();
 
-        (await GetDeliveryRecordsAsync(memberSubscription.Id)).Should().BeEmpty();
+        (await GetLogAsync(memberSubscription.Id)).Should().BeEmpty();
     }
 
     [Fact]
@@ -204,22 +204,6 @@ public class WebhookUserPayloadTests(
             TestContext.Current.CancellationToken);
 
         return subject;
-    }
-
-    /// <summary>
-    /// <paramref name="subject"/> renames themselves, which publishes <c>user.updated</c>. Only the user
-    /// themselves can change the name: the same call made by the owner leaves it as it is and publishes
-    /// nothing.
-    /// </summary>
-    private async Task<string> RenameAsync(User subject)
-    {
-        var firstName = $"Renamed{Initializer.Faker.Random.String2(8, "abcdefghijklmnopqrstuvwxyz")}";
-
-        await _peopleClient.Authenticate(subject);
-        await _profilesApi.UpdateMemberAsync(
-            subject.Id.ToString(), new UpdateMemberRequestDto { FirstName = firstName }, TestContext.Current.CancellationToken);
-
-        return firstName;
     }
 
     private Task<JsonElement?> WaitForUserPayloadAsync(int configId, User subject, string firstName)

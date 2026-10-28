@@ -78,9 +78,14 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
         if (prepared && table.Name == "webhooks_logs")
         {
-            // a restored portal must not resend what the source portal had already scheduled or was sending: the
-            // schedule and the lease belong to the delivery pipeline of the source, not to the delivery history
-            SetNull(preparedRow, "next_attempt_on");
+            // The schedule is kept, so a delivery waiting for its next attempt resumes on the target: a portal transfer
+            // (TransferPortalTask restores through this same path) would otherwise lose every pending retry, since the
+            // source portal stops sending once it is no longer active. Only the lease is cleared: it names an instance
+            // of the source's sender, and a row that was in flight is due again once its lease time (held in
+            // next_attempt_on while leased) has passed. The cost for a plain restore: pending rows of the archive are
+            // sent by the restored portal, those whose time has passed right after the portal is active again, under
+            // new ids (event.id); a delivery the portal had already completed after the backup was taken reaches the
+            // receiver a second time.
             SetNull(preparedRow, "lease_id");
 
             return (true, preparedRow);
@@ -212,8 +217,8 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             // tenant points to no row (a foreign key error on insert) or to an unrelated one. For config_id, that is a
             // subscription dropped with its creator who could not be mapped, and its delivery records go with it. For
             // retry_of, the receiver would get that id as event.id; the original row of an event is always restored
-            // before its retries, since RestoreDbModuleTask orders the rows of a self relation as a tree, parents first,
-            // whatever order the archive holds them in
+            // before its retries, since RestoreDbModuleTask passes the rows of a self relation parents first, whatever
+            // order the archive holds them in
             if (value == null || value == DBNull.Value)
             {
                 return true;

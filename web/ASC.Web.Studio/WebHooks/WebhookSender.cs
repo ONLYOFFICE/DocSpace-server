@@ -58,6 +58,17 @@ public class WebhookSender(
 
     private readonly TimeSpan _requestTimeout = settings.RequestTimeout ?? WebhookDelivery.DefaultRequestTimeout;
 
+    /// <summary>
+    /// Time a claimed row needs after its request goes out besides the request itself: the bookkeeping of the attempt.
+    /// </summary>
+    private static readonly TimeSpan _attemptBookkeeping = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// How long one attempt may hold its row: the lease is renewed for this long right before the request goes out,
+    /// and the batch lease of <see cref="WorkerService"/> is a multiple of it.
+    /// </summary>
+    public TimeSpan AttemptLease => _requestTimeout + _attemptBookkeeping;
+
     private const int MaxRequestPayloadLength = ushort.MaxValue;
     private const int MaxResponsePayloadBytes = 8 * 1024;
 
@@ -116,6 +127,17 @@ public class WebhookSender(
                 return;
             }
 
+            // the publisher checked the creator when the event was published; a retry, automatic or manual, sends the
+            // stored body again, possibly hours later, to an address the creator controls. A creator who was removed,
+            // blocked or downgraded since then gets nothing more, and the journal says why
+            if (entry.Config.CreatedBy is { } creatorId &&
+                !await scope.ServiceProvider.GetRequiredService<WebhookCreatorEntitlement>().IsEntitledAsync(creatorId, entry.Trigger))
+            {
+                logger.InfoCreatorNotEntitled(tenantId, webhookLogId, entry.ConfigId, entry.Trigger);
+                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.CreatorNotEntitledNote);
+                return;
+            }
+
             var validationResult = await urlValidator.ValidateAsync(entry.Config.Uri, new UrlValidationOptions
             {
                 RequireHttps = entry.Config.SSL
@@ -170,6 +192,14 @@ public class WebhookSender(
 
             var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
             var httpClient = clientFactory.CreateClient(httpClientName);
+
+            // the batch lease may have run out while the row waited for its turn, and another instance may have claimed
+            // the row since: the request goes out only while the row is still this attempt's, for long enough to finish
+            if (!await dbWorker.RenewJournalLeaseAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + AttemptLease))
+            {
+                logger.DebugLeaseTakenOver(webhookLogId);
+                return;
+            }
 
             try
             {
