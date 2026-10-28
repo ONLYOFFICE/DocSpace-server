@@ -72,20 +72,21 @@ public class RoomHistoryLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task ClearAsync_FileInTrash_KeepsItsHistory()
     {
-        // Arrange
-        var room = await CreateCustomRoomAsync("Audit cleanup: file in trash");
-        var file = await CreateFileAsync(room.Id, "Trashed.docx");
+        // Arrange: in My documents, not in a room. A file event is also in the history of every folder above the file
+        // that is not a section root, so in a room the room alone would keep it; My documents and the trash are both
+        // section roots, so here the file's own references are the only thing keeping its history.
+        var file = await CreateFileAsync(await GetMyDocumentsIdAsync(), "Trashed.docx");
 
-        await PollRoomHistoryAsync(room.Id, MessageAction.FileCreated);
+        await PollHistoryEventsAsync(file.Id, FileEntry, AuditAction.FileCreated);
 
         await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest(immediately: false), cancellationToken: TestContext.Current.CancellationToken);
         await WaitLongOperationAsync();
 
-        var roomHistory = await PollRoomHistoryAsync(room.Id, MessageAction.FileMovedToTrash);
-        roomHistory.Should().Contain(MessageAction.FileMovedToTrash);
+        var fileHistory = await PollHistoryEventsAsync(file.Id, FileEntry, AuditAction.FileCreated, AuditAction.FileMovedToTrash);
+        fileHistory.Should().HaveCountGreaterThanOrEqualTo(2, "the history of the file holds its creation and its move to the trash");
+        (await HistoriesOfAsync(fileHistory)).Should().BeEquivalentTo([(file.Id, FileEntry)]);
 
-        var fileHistory = await HistoryEventsAsync(file.Id, FileEntry);
-        fileHistory.Should().NotBeEmpty("a file in the trash keeps the references to its history");
+        var outsideHistory = await SeedEventAsync(0);
 
         await AgeAuditTrailAsync(PastEveryRetention);
 
@@ -94,6 +95,7 @@ public class RoomHistoryLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
 
         // Assert
         (await RemainingEventsAsync(fileHistory)).Should().BeEquivalentTo(fileHistory);
+        (await RemainingEventsAsync([outsideHistory])).Should().BeEmpty();
     }
 
     [Fact]
@@ -113,6 +115,8 @@ public class RoomHistoryLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
 
         (await HistoryEventsAsync(file.Id, FileEntry)).Should().BeEmpty("deleting a file for good removes the references to its history");
 
+        var outsideHistory = await SeedEventAsync(0);
+
         await AgeAuditTrailAsync(PastEveryRetention);
 
         // Act
@@ -120,6 +124,7 @@ public class RoomHistoryLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
 
         // Assert: the file's events are still referenced by the room they happened in.
         (await RemainingEventsAsync(fileHistory)).Should().BeEquivalentTo(fileHistory);
+        (await RemainingEventsAsync([outsideHistory])).Should().BeEmpty();
 
         var roomHistory = (await _foldersApi.GetFolderHistoryAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         roomHistory.ConvertAll(e => e.Action?.Id).Should().Contain(MessageAction.FileCreated);
@@ -139,6 +144,9 @@ public class RoomHistoryLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
 
         await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken);
         await WaitLongOperationAsync();
+
+        // Deleting the room removes the references, not the events: whatever removes them below is the pass.
+        (await RemainingEventsAsync(history)).Should().BeEquivalentTo(history);
 
         await AgeAuditTrailAsync(PastEveryRetention);
 

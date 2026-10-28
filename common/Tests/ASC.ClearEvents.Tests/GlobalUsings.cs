@@ -62,8 +62,9 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
 // The suite's namespaces sit under ASC.ClearEvents, whose Configuration namespace would win over the
-// SDK's Configuration class; the billing types share their names with SDK models.
+// SDK's Configuration class; the billing types and the audit MessageAction share their names with SDK models.
 global using ApiConfiguration = DocSpace.API.SDK.Client.Configuration;
+global using AuditAction = ASC.MessagingSystem.Core.MessageAction;
 global using ITariffService = ASC.Core.Billing.ITariffService;
 global using Tariff = ASC.Core.Billing.Tariff;
 global using TariffState = ASC.Core.Billing.TariffState;

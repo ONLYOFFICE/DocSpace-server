@@ -39,8 +39,9 @@ namespace ASC.ClearEvents.Tests.Infrastructure;
 /// </summary>
 /// <remarks>
 /// The cleanup asks <see cref="ITariffService"/> exactly two things — the tariff of a tenant and whether it is a
-/// free one — so <see cref="Service"/> answers those two and fails loudly on anything else, rather than standing
-/// in for the fifty other members of the interface. <see cref="Tariff.Id"/> carries the tenant id from the
+/// free one — so <see cref="Service"/> answers those two and rejects anything else, rather than standing in for
+/// the fifty other members of the interface. The pass logs and skips a tenant it fails on, so a rejected call is
+/// also recorded in <see cref="UnexpectedCalls"/>, which every pass a test runs is checked against. <see cref="Tariff.Id"/> carries the tenant id from the
 /// first call to the second: the real service identifies a tariff by its quotas, which this one has none of.
 /// </remarks>
 public static class TestTariffs
@@ -49,6 +50,9 @@ public static class TestTariffs
     private static readonly ConcurrentDictionary<int, int> _lookups = new();
 
     public static ITariffService Service { get; } = DispatchProxy.Create<ITariffService, TariffServiceProxy>();
+
+    /// <summary>The members of <see cref="ITariffService"/> a pass called that <see cref="Service"/> does not answer.</summary>
+    public static ConcurrentQueue<string> UnexpectedCalls { get; } = new();
 
     /// <summary>How many times a pass has asked for the tariff of <paramref name="tenantId"/>.</summary>
     public static int LookupsOf(int tenantId)
@@ -90,6 +94,8 @@ public static class TestTariffs
                     return Task.FromResult(Get(tariff.Id).FreeQuota);
 
                 default:
+                    UnexpectedCalls.Enqueue(targetMethod?.Name ?? "?");
+
                     throw new NotSupportedException(
                         $"The audit cleanup was not expected to call ITariffService.{targetMethod?.Name}; teach {nameof(TestTariffs)} to answer it.");
             }
