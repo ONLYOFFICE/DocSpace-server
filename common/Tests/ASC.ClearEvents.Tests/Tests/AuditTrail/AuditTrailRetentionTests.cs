@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Tests.Tests;
+namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// How long a portal keeps its audit trail: the free retention unless its tariff is paid — paid or in the

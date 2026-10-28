@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Tests.Tests;
+namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// The audit events that make up the history of a file, folder or room — those with a row in
