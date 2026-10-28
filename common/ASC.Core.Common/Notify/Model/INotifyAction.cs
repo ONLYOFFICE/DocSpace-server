@@ -38,4 +38,15 @@ public interface INotifyAction
     string ID { get; }
     List<Pattern> Patterns { get; }
     List<ITagValue> Tags { get; set; }
+
+    /// <summary>
+    /// How long a repeat of this letter to the same recipient is suppressed: null takes the configured period, TimeSpan.Zero turns the check off.
+    /// </summary>
+    TimeSpan? DeduplicationPeriod => null;
+
+    /// <summary>
+    /// Tags whose values become part of the duplicate key. Only values the server controls (ids, enum states) belong here,
+    /// never free text such as titles or messages: a caller could vary it and get the letter sent again.
+    /// </summary>
+    string[] DeduplicationTags => [];
 }

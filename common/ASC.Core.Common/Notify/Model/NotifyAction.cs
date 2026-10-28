@@ -41,7 +41,11 @@ public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
     public abstract List<Pattern> Patterns { get; }
     
     public List<ITagValue> Tags { get; set; }
-    
+
+    public virtual TimeSpan? DeduplicationPeriod => null;
+
+    public virtual string[] DeduplicationTags => [];
+
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
         return new NotifyActionItem
