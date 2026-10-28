@@ -63,11 +63,20 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
 
     /**
-     * The cURL commands of the example tabs instead of the pages: one file, with a command per
-     * operation (see CallSnippets.configure). A call over HTTP has no SDK to be generated from and
-     * lives on these pages only, so it is rendered by the generator of the pages.
+     * The calls over HTTP of the example tabs instead of the pages: one file, with a call per
+     * operation (see CallSnippets.configure). Such a call has no SDK to be generated from and lives
+     * on these pages only, so it is rendered by the generator of the pages.
      */
     private boolean snippetsOnly;
+
+    /**
+     * The tab the calls are rendered for, as the command passes it: "javascript" has them written as
+     * JavaScript fetch calls, any other as cURL commands.
+     */
+    private static final String SNIPPETS_TAB = "snippetsTab";
+
+    /** The language the template marks the code block with. */
+    private static final String SNIPPETS_FENCE = "snippetsFence";
 
     private Snippets snippets;
 
@@ -303,6 +312,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
         snippetsOnly = CallSnippets.configure(this);
         if (snippetsOnly) {
+            additionalProperties.put(SNIPPETS_FENCE, isFetch() ? "javascript" : "bash");
             return;
         }
 
@@ -408,7 +418,8 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         // The commands need nothing of what the pages are marked up with below.
         if (snippetsOnly) {
             if (snippets == null) {
-                snippets = new Snippets(openAPI, allModels, String.valueOf(additionalProperties.get("snippetsServerUrl")));
+                snippets = new Snippets(openAPI, allModels,
+                        String.valueOf(additionalProperties.get("snippetsServerUrl")), isFetch());
             }
 
             CallSnippets.attach(results, snippets::attach);
@@ -441,6 +452,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         return results;
+    }
+
+    private boolean isFetch() {
+        return "javascript".equals(String.valueOf(additionalProperties.get(SNIPPETS_TAB)));
     }
 
     @Override
@@ -705,17 +720,19 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     }
 
     /**
-     * Builds the cURL command of one operation: the request as it goes over the wire, written for a
-     * POSIX shell. What the command carries follows the call snippets of the languages (see
-     * {@link MyCSharpClientCodegen}): the required parameters, the files and the minimal body - a
-     * model with its required fields only, with the values the document states for them.
+     * Builds the call over HTTP of one operation: the request as it goes over the wire, written as a
+     * cURL command for a POSIX shell or as a JavaScript fetch call for Node. What the call carries
+     * follows the call snippets of the languages (see {@link MyCSharpClientCodegen}): the required
+     * parameters, the files and the minimal body - a model with its required fields only, with the
+     * values the document states for them. Both forms are written from the same request, so the two
+     * tabs send the same thing.
      * <p>
-     * The command is assembled here rather than in the template: every option it takes depends on the
+     * The call is assembled here rather than in the template: every part of it depends on the
      * operation, and the template has nothing around them to hold.
      */
     private static final class Snippets {
 
-        static final String COMMAND = "x-snippet-command";
+        static final String CODE = "x-snippet-code";
 
         private static final int MAX_DEPTH = 4;
 
@@ -724,6 +741,12 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
         /** The body stands on an option line; its fields go a level deeper. */
         private static final String BODY_INDENT = "  ";
+
+        /** The tail of a fetch call: the response printed as it comes, as the old reference panel had it. */
+        private static final String FETCH_TAIL = "\n"
+                + "  .then((response) => response.text())\n"
+                + "  .then((result) => console.log(result))\n"
+                + "  .catch((error) => console.error(error));";
 
         private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -749,14 +772,16 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         private final OpenAPI openAPI;
         private final Map<String, CodegenModel> models;
         private final String serverUrl;
+        private final boolean fetch;
 
         /** Values the document states no example for, as "operationId: name", for the run's log. */
         private final List<String> placeholders = new ArrayList<>();
 
-        Snippets(OpenAPI openAPI, List<ModelMap> allModels, String serverUrl) {
+        Snippets(OpenAPI openAPI, List<ModelMap> allModels, String serverUrl, boolean fetch) {
             this.openAPI = openAPI;
             this.models = CallSnippets.models(allModels);
             this.serverUrl = serverUrl;
+            this.fetch = fetch;
         }
 
         List<String> placeholders() {
@@ -764,19 +789,31 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         void attach(CodegenOperation operation) {
+            Request request = request(operation);
+            operation.vendorExtensions.put(CODE, fetch ? fetch(request) : curl(request));
+        }
+
+        /** What the call sends, whichever way it is written. */
+        private Request request(CodegenOperation operation) {
+            Request request = new Request();
+            request.method = operation.httpMethod.toUpperCase(Locale.ROOT);
+            request.streams = streams(operation);
+            request.multipart = Boolean.TRUE.equals(operation.isMultipart);
+
+            Field credential = credential(operation);
+            if (credential != null) {
+                request.fields.add(credential);
+            }
+
             String path = operation.path;
             List<String> query = new ArrayList<>();
-            List<String> options = new ArrayList<>(authorization(operation));
-            List<String> form = new ArrayList<>();
-            String body = null;
 
             for (CodegenParameter parameter : operation.allParams) {
                 String where = operation.operationIdOriginal + ": " + parameter.baseName;
                 Shape shape = Shape.of(parameter);
 
                 if (parameter.isBodyParam) {
-                    Object value = body(operation, shape, CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
-                    body = json(value, BODY_INDENT);
+                    request.body = body(operation, shape, CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
                     continue;
                 }
 
@@ -785,7 +822,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 }
 
                 if (parameter.isFormParam && (shape.isFile || shape.isFileList)) {
-                    form.add("-F " + shellQuote(parameter.baseName + "=@" + FILE));
+                    request.form.add(new Field(Field.FILE, parameter.baseName, FILE));
                     continue;
                 }
 
@@ -799,36 +836,125 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 } else if (parameter.isQueryParam) {
                     query(query, parameter.baseName, value);
                 } else if (parameter.isHeaderParam) {
-                    options.add("-H " + shellQuote(parameter.baseName + ": " + text(value)));
+                    request.fields.add(new Field(Field.HEADER, parameter.baseName, text(value)));
                 } else if (parameter.isCookieParam) {
-                    options.add("-b " + shellQuote(parameter.baseName + "=" + text(value)));
+                    request.fields.add(new Field(Field.COOKIE, parameter.baseName, text(value)));
                 } else if (parameter.isFormParam) {
-                    form.add(formField(operation, parameter.baseName, text(value)));
+                    request.form.add(new Field(Field.TEXT, parameter.baseName, text(value)));
                 }
             }
 
-            String url = serverUrl + path + (query.isEmpty() ? "" : "?" + String.join("&", query));
+            request.url = serverUrl + path + (query.isEmpty() ? "" : "?" + String.join("&", query));
+            return request;
+        }
 
+        /** The request as a cURL command, an option per line. */
+        private static String curl(Request request) {
             StringBuilder first = new StringBuilder("curl");
-            if (streams(operation)) {
+            if (request.streams) {
                 // The response comes as a stream, which curl would otherwise hold back until it ends.
                 first.append(" -N");
             }
-            if (!"GET".equalsIgnoreCase(operation.httpMethod)) {
-                first.append(" -X ").append(operation.httpMethod.toUpperCase(Locale.ROOT));
+            if (!"GET".equals(request.method)) {
+                first.append(" -X ").append(request.method);
             }
-            first.append(' ').append(shellQuote(url));
+            first.append(' ').append(shellQuote(request.url));
 
             List<String> lines = new ArrayList<>();
             lines.add(first.toString());
-            lines.addAll(options);
-            if (body != null) {
-                lines.add("-H \"Content-Type: application/json\"");
-                lines.add("-d '" + body.replace("'", "'\\''") + "'");
+            for (Field field : request.fields) {
+                lines.add(field.kind == Field.COOKIE
+                        ? "-b " + shellQuote(field.name + "=" + field.value)
+                        : "-H " + shellQuote(field.name + ": " + field.value));
             }
-            lines.addAll(form);
+            if (request.body != null) {
+                lines.add("-H \"Content-Type: application/json\"");
+                lines.add("-d '" + json(request.body, BODY_INDENT).replace("'", "'\\''") + "'");
+            }
+            for (Field field : request.form) {
+                lines.add(field.kind == Field.FILE
+                        ? "-F " + shellQuote(field.name + "=@" + field.value)
+                        : formField(request.multipart, field.name, field.value));
+            }
 
-            operation.vendorExtensions.put(COMMAND, String.join(NEXT_OPTION, lines));
+            return String.join(NEXT_OPTION, lines);
+        }
+
+        /**
+         * The request as a fetch call, in the form the reference panel of the earlier site version
+         * wrote it: the headers, the body and the options in variables of their own, then the call.
+         * It is written for Node: a file is read from the disk there, and the cookie an OAuth
+         * endpoint is authorized with is a header Node sends, where a browser refuses to.
+         */
+        private static String fetch(Request request) {
+            List<String> blocks = new ArrayList<>();
+
+            boolean files = false;
+            for (Field field : request.form) {
+                files |= field.kind == Field.FILE;
+            }
+            if (files) {
+                blocks.add("const fs = require(\"node:fs\");");
+            }
+
+            List<String> headers = new ArrayList<>();
+            if (request.body != null) {
+                headers.add(append("myHeaders", "Content-Type", "application/json"));
+            }
+            List<String> cookies = new ArrayList<>();
+            for (Field field : request.fields) {
+                if (field.kind == Field.COOKIE) {
+                    cookies.add(field.name + "=" + field.value);
+                } else {
+                    headers.add(append("myHeaders", field.name, field.value));
+                }
+            }
+            // Cookies travel in one header, the way a client joins them.
+            if (!cookies.isEmpty()) {
+                headers.add(append("myHeaders", "Cookie", String.join("; ", cookies)));
+            }
+            if (!headers.isEmpty()) {
+                blocks.add("const myHeaders = new Headers();\n" + String.join("\n", headers));
+            }
+
+            String body = null;
+            if (request.body != null) {
+                body = "raw";
+                blocks.add("const raw = JSON.stringify(" + json(request.body, "") + ");");
+            } else if (!request.form.isEmpty()) {
+                // A form needs no Content-Type of its own: fetch sets it, with the boundary of a multipart one.
+                body = request.multipart ? "formdata" : "urlencoded";
+                List<String> lines = new ArrayList<>();
+                lines.add(request.multipart
+                        ? "const formdata = new FormData();"
+                        : "const urlencoded = new URLSearchParams();");
+                for (Field field : request.form) {
+                    lines.add(field.kind == Field.FILE
+                            ? body + ".append(" + jsonString(field.name) + ", new Blob([fs.readFileSync("
+                                    + jsonString(field.value) + ")]), " + jsonString(field.value) + ");"
+                            : append(body, field.name, field.value));
+                }
+                blocks.add(String.join("\n", lines));
+            }
+
+            List<String> options = new ArrayList<>();
+            options.add("  method: " + jsonString(request.method));
+            if (!headers.isEmpty()) {
+                options.add("  headers: myHeaders");
+            }
+            if (body != null) {
+                options.add("  body: " + body);
+            }
+            options.add("  redirect: \"follow\"");
+            blocks.add("const requestOptions = {\n" + String.join(",\n", options) + "\n};");
+
+            blocks.add("fetch(" + jsonString(request.url) + ", requestOptions)" + FETCH_TAIL);
+
+            return String.join("\n\n", blocks);
+        }
+
+        private static String append(String target, String name, String value) {
+            return target + ".append(" + jsonString(name) + ", " + jsonString(value) + ");";
         }
 
         /**
@@ -836,14 +962,14 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
          * a bearer scheme or OAuth 2.0, which every other tab sends too, or else a key in a cookie or a
          * header. An operation that states none sends nothing.
          */
-        private static List<String> authorization(CodegenOperation operation) {
+        private static Field credential(CodegenOperation operation) {
             if (operation.authMethods == null) {
-                return Collections.emptyList();
+                return null;
             }
 
             for (CodegenSecurity security : operation.authMethods) {
                 if (Boolean.TRUE.equals(security.isBasicBearer) || Boolean.TRUE.equals(security.isOAuth)) {
-                    return Collections.singletonList("-H \"Authorization: Bearer YOUR_API_KEY\"");
+                    return new Field(Field.HEADER, "Authorization", "Bearer YOUR_API_KEY");
                 }
             }
 
@@ -851,15 +977,15 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 if (Boolean.TRUE.equals(security.isApiKey) && security.keyParamName != null) {
                     String key = "YOUR_" + security.keyParamName.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]+", "_");
                     if (Boolean.TRUE.equals(security.isKeyInCookie)) {
-                        return Collections.singletonList("-b " + shellQuote(security.keyParamName + "=" + key));
+                        return new Field(Field.COOKIE, security.keyParamName, key);
                     }
                     if (Boolean.TRUE.equals(security.isKeyInHeader)) {
-                        return Collections.singletonList("-H " + shellQuote(security.keyParamName + ": " + key));
+                        return new Field(Field.HEADER, security.keyParamName, key);
                     }
                 }
             }
 
-            return Collections.emptyList();
+            return null;
         }
 
         /** Whether the operation answers with a stream of events or of JSON lines. */
@@ -895,8 +1021,8 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
          * A field of a form body. A multipart field takes -F, or --form-string where curl would read the
          * value as a file or as its own field options; an urlencoded one is encoded by curl.
          */
-        private static String formField(CodegenOperation operation, String name, String value) {
-            if (!Boolean.TRUE.equals(operation.isMultipart)) {
+        private static String formField(boolean multipart, String name, String value) {
+            if (!multipart) {
                 return "--data-urlencode " + shellQuote(name + "=" + value);
             }
 
@@ -1421,7 +1547,42 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                     .replace("`", "\\`") + "\"";
         }
 
-        /** What the command needs to know about the type of a parameter or a property. */
+        /** The request a call sends: what the cURL command and the fetch call are both written from. */
+        private static final class Request {
+            String method;
+            String url;
+            boolean streams;
+            boolean multipart;
+
+            /** The headers and cookies, the credentials first, then the parameters in their order. */
+            final List<Field> fields = new ArrayList<>();
+
+            /** The JSON body, as the value it is written from; null when there is none. */
+            Object body;
+
+            /** The fields of a form body, in the order of the parameters. */
+            final List<Field> form = new ArrayList<>();
+        }
+
+        /** A header, a cookie or a form field of the request; a file field holds the file's name. */
+        private static final class Field {
+            static final int HEADER = 0;
+            static final int COOKIE = 1;
+            static final int TEXT = 2;
+            static final int FILE = 3;
+
+            final int kind;
+            final String name;
+            final String value;
+
+            Field(int kind, String name, String value) {
+                this.kind = kind;
+                this.name = name;
+                this.value = value;
+            }
+        }
+
+        /** What the call needs to know about the type of a parameter or a property. */
         private static final class Shape {
             String dataType;
             String complexType;

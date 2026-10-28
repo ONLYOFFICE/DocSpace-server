@@ -441,6 +441,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             AddProperty(arguments, "snippetsFile", fileName);
             AddProperty(arguments, "snippetsServerUrl", markdown.ServerUrl);
 
+            // A generator can render more than one tab: the Markdown one writes both the cURL and the
+            // JavaScript calls, and tells which from the tab it is run for.
+            AddProperty(arguments, "snippetsTab", source.Tab.Value);
+
             if (await RunGeneratorAsync(source.Generator, arguments, cancellationToken) != 0)
             {
                 return null;
