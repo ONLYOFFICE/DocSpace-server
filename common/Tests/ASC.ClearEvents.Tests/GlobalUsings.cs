@@ -31,18 +31,38 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.ClearEvents.Log;
-internal static partial class ClearAuditEventsServiceLogger
-{
-    [LoggerMessage(LogLevel.Warning, "Clear Audit Events Service will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), batch size {batchSize} and period {period} are not a usable configuration.")]
-    public static partial void WarningInvalidConfiguration(this ILogger<ClearAuditEventsService> logger, int paidLifeTimeDays, int freeLifeTimeDays, int batchSize, TimeSpan period);
 
-    [LoggerMessage(LogLevel.Debug, "Removed {count} audit event(s) older than {threshold} for tenant {tenantId} (paid tariff: {paid}).")]
-    public static partial void DebugRemovedAuditEvents(this ILogger<ClearAuditEventsService> logger, int count, DateTime threshold, int tenantId, bool paid);
+global using System.Collections.Concurrent;
+global using System.Reflection;
 
-    [LoggerMessage(LogLevel.Information, "Removed {count} audit event(s) in {tenantCount} tenant(s).")]
-    public static partial void InformationRemovedAuditEvents(this ILogger<ClearAuditEventsService> logger, int count, int tenantCount);
+global using ASC.Api.Core.Extensions;
+global using ASC.ClearEvents.Configuration;
+global using ASC.ClearEvents.Services;
+global using ASC.ClearEvents.Tests.ApiFactories;
+global using ASC.ClearEvents.Tests.Infrastructure;
+global using ASC.Common.DependencyInjection;
+global using ASC.Core.Common.EF.Model;
+global using ASC.MessagingSystem.EF.Context;
+global using ASC.MessagingSystem.EF.Model;
+global using ASC.Tests.Common.ApiFactories;
+global using ASC.Tests.Common.Data;
 
-    [LoggerMessage(LogLevel.Warning, "Could not clear the audit trail of tenant {tenantId}.")]
-    public static partial void WarningClearTenantFailed(this ILogger<ClearAuditEventsService> logger, int tenantId, Exception exception);
-}
+global using Autofac;
+
+global using DocSpace.API.SDK.Api.Files;
+global using DocSpace.API.SDK.Api.Rooms;
+global using DocSpace.API.SDK.Model;
+
+global using FluentAssertions;
+
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+
+// The suite's namespaces sit under ASC.ClearEvents, whose Configuration namespace would win over the
+// SDK's Configuration class; the billing types share their names with SDK models.
+global using ApiConfiguration = DocSpace.API.SDK.Client.Configuration;
+global using ITariffService = ASC.Core.Billing.ITariffService;
+global using Tariff = ASC.Core.Billing.Tariff;
+global using TariffState = ASC.Core.Billing.TariffState;

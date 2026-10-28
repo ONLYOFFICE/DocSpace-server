@@ -29,6 +29,7 @@
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
   <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
+  <Project Path="common/Tests/ASC.ClearEvents.Tests/ASC.ClearEvents.Tests.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Core.Tests/ASC.Data.Backup.Core.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Tests/ASC.Data.Backup.Tests.csproj" />
