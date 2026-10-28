@@ -46,7 +46,8 @@ public class TenantAuditSettingsRequestDto
 }
 
 /// <summary>
-/// How long the portal keeps its two security logs.
+/// The lifetimes of the portal's two security logs: how long login events are kept, and how far back the audit trail
+/// is shown.
 /// </summary>
 public class SetAuditLifetimeSettingsRequest
 {
@@ -57,7 +58,7 @@ public class SetAuditLifetimeSettingsRequest
     public int LoginHistoryLifeTime { get; set; }
 
     /// <summary>
-    /// How many days audit trail events are kept, from 1 to 180.
+    /// How many days back the audit trail is shown and reported, from 1 to 180.
     /// </summary>
     /// <example>90</example>
     public int AuditTrailLifeTime { get; set; }

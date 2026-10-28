@@ -43,10 +43,10 @@ namespace ASC.Web.Api.Controllers;
 
 /// <remarks>
 /// Portal security: the audit trail and the login history the portal records, the reports built out of them and the
-/// retention that bounds both, the Content Security Policy the portal serves to browsers, and the JWT that identifies
-/// the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
+/// lifetimes that bound what they show, the Content Security Policy the portal serves to browsers, and the JWT that
+/// identifies the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
 /// administrator, and in a cloud installation the matching section has to be enabled for the portal as well: the two
-/// operations ending in `last` need nothing more, while filtering, reports and retention changes also need the audit
+/// operations ending in `last` need nothing more, while filtering, reports and lifetime changes also need the audit
 /// option of the portal's pricing plan, and the filtering operations quietly fall back to the twenty most recent
 /// events when that option is missing. Reports are built in the background, one per caller and kind, and land in the
 /// caller's My documents section. The connections a user currently has open live under
@@ -568,16 +568,17 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns how long this portal keeps its two security logs: `loginHistoryLifeTime` for login events and
-    /// `auditTrailLifeTime` for audit events, both counted in days, together with `lastModified`, the moment the pair
-    /// was last saved. The caller needs the portal-settings right of a DocSpace administrator, and in a cloud
-    /// installation the login history and audit trail section must be enabled for the portal, otherwise the call is
-    /// answered with 402; the audit option of the pricing plan is not required to read the values. Both numbers lie
-    /// between 1 and 180 days, and a portal that never changed them reports the default of 180. They define the
-    /// window the rest of the audit operations work in: `GET api/2.0/security/audit/events/last` looks exactly this
-    /// far back, and the reports started by `POST api/2.0/security/audit/login/report` and
-    /// `POST api/2.0/security/audit/events/report` cover exactly this period. The operation is read-only; change the
-    /// values with `POST api/2.0/security/audit/settings/lifetime`.
+    /// Returns the lifetimes of the portal's two security logs, in days: `loginHistoryLifeTime`, how long login events
+    /// are kept before they are deleted, and `auditTrailLifeTime`, how far back the audit trail is shown and reported,
+    /// together with `lastModified`, the moment the pair was last saved. The caller needs the portal-settings right of a
+    /// DocSpace administrator, and in a cloud installation the login history and audit trail section must be enabled
+    /// for the portal, otherwise the call is answered with 402; the audit option of the pricing plan is not required to
+    /// read the values. Both numbers lie between 1 and 180 days, and a portal that never changed them reports the
+    /// default of 180. They define the window the rest of the audit operations work in:
+    /// `GET api/2.0/security/audit/events/last` looks exactly this far back, and the reports started by
+    /// `POST api/2.0/security/audit/login/report` and `POST api/2.0/security/audit/events/report` cover exactly this
+    /// period. Audit events are not deleted by `auditTrailLifeTime`: how long they are stored is a policy of the
+    /// installation. The operation is read-only; change the values with `POST api/2.0/security/audit/settings/lifetime`.
     /// </remarks>
     /// <summary>
     /// Get audit lifetime settings
@@ -600,14 +601,17 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Sets how long this portal keeps its login history and its audit trail, in days, and returns the pair as it was
-    /// stored. The caller needs the portal-settings right of a DocSpace administrator plus the audit option of the
+    /// Sets the lifetimes of the portal's two security logs, in days - how long login events are kept, and how far back
+    /// the audit trail is shown and reported - and returns the pair as it was stored. The caller needs the
+    /// portal-settings right of a DocSpace administrator plus the audit option of the
     /// portal's pricing plan, otherwise the call is answered with 402. Send both numbers inside `settings`: each has
     /// to be between 1 and 180 days, and a value outside that range is refused with 400 without either number being
     /// saved, so read the current pair from `GET api/2.0/security/audit/settings/lifetime` and resend the one that
     /// should stay as it is. The call replaces the stored settings rather than merging them, is idempotent, and takes
     /// effect at once: the period covered by `GET api/2.0/security/audit/events/last` and by both audit reports
-    /// shrinks or grows with it, and events older than the new lifetime stop being reported. The change is itself
+    /// shrinks or grows with it. A shorter login history lifetime lets the daily cleanup delete the older login events
+    /// for good, while a shorter audit trail lifetime only stops older audit events from being shown: they stay stored
+    /// under the installation's retention policy and are shown again when the lifetime grows. The change is itself
     /// recorded in the audit trail.
     /// </remarks>
     /// <summary>
