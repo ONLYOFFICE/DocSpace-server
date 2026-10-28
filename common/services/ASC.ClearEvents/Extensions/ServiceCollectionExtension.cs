@@ -37,7 +37,15 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddClearEventsServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHostedService<ClearEventsService>();
-        services.AddActivePassiveHostedService<ClearAuditEventsService>(configuration);
+
+        // Only when enabled: registered, the active/passive pair keeps an instance registration row up to date and
+        // has every passive replica poll it each second, for a pass that would return at once.
+        var retention = configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>();
+
+        if (retention?.Enabled == true)
+        {
+            services.AddActivePassiveHostedService<ClearAuditEventsService>(configuration);
+        }
 
         return services;
     }
