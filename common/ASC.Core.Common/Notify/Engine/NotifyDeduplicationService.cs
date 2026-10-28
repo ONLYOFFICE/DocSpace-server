@@ -88,7 +88,9 @@ public class NotifyDeduplicationService(
                 return true;
             }
 
-            await hybridCache.SetAsync(key, true, period);
+            // a new mark replaces nothing another node holds in memory - a miss is never kept there - so the backplane
+            // message would only make every node evict a key it does not have, once per letter of a bulk send
+            await hybridCache.SetAsync(key, true, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
         }
 
         return false;
