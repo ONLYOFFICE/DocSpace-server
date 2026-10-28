@@ -37,6 +37,8 @@ namespace ASC.Notify.Engine;
 /// Lets the same letter reach the same recipient through the same channel only once per period, however many times
 /// the event that produces it is repeated. The mark lives in the distributed cache because letters of one tenant are
 /// produced by several services and their replicas; the lock keeps parallel sends from slipping past the check.
+/// With <c>Redis:Enabled=false</c> the cache has no distributed level, so the mark is seen only by the process that
+/// set it and a repeat produced by another process goes out - enough for a single-node installation, not for a cluster.
 /// </summary>
 [Singleton]
 public class NotifyDeduplicationService(
