@@ -83,7 +83,11 @@ internal sealed class CleanerHost : IAsyncDisposable
                                  ["Redis:Enabled"] = "false",
                                  ["RabbitMQ:Enabled"] = "false",
 
-                                 ["openTelemetry:enable"] = "false"
+                                 ["openTelemetry:enable"] = "false",
+
+                                 // The daily pass is never started here; a test runs its own passes through
+                                 // AuditTrailCleaner with settings of its own, whatever the local config says.
+                                 [$"{AuditTrailRetentionConfiguration.SectionName}:enabled"] = "false"
                              });
 
         builder.Host.ConfigureDefault();

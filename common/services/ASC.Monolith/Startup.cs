@@ -84,8 +84,7 @@ public class Startup : BaseStartup
         services.AddTelegramServices(_configuration);
 
         // === ASC.ClearEvents ===
-        services.AddHostedService<ClearEventsService>();
-        services.AddActivePassiveHostedService<ClearAuditEventsService>(_configuration);
+        services.AddClearEventsServices(_configuration);
 
         // === ASC.ApiSystem authentication schemes ===
         services.AddApiSystemAuthServices();

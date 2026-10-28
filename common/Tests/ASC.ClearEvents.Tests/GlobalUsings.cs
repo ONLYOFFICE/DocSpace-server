@@ -37,6 +37,7 @@ global using System.Reflection;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.ClearEvents.Configuration;
+global using ASC.ClearEvents.Extensions;
 global using ASC.ClearEvents.Services;
 global using ASC.ClearEvents.Tests.ApiFactories;
 global using ASC.ClearEvents.Tests.Infrastructure;
