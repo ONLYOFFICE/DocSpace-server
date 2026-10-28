@@ -311,7 +311,6 @@ public abstract record AiModelPricing<TPrice>
     /// <summary>
     /// The gateway revision of the model, the id BYOK keys are stored under.
     /// </summary>
-    [JsonPropertyName("revision_id")]
     public required Guid RevisionId { get; init; }
 
     /// <summary>
