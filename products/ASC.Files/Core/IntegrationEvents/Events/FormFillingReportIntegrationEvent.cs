@@ -41,7 +41,7 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
 
     }
 
-    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, int originalFormVersion, string baseUri, bool terminate = false, bool isNewFile = false, IDictionary<string, string> headers = null)
+    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, int originalFormVersion, string baseUri, bool terminate = false, bool isNewFile = false, IDictionary<string, string> headers = null, bool recover = false)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
@@ -51,6 +51,7 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
         IsNewFile = isNewFile;
         BaseUri = baseUri;
         Headers = headers;
+        Recover = recover;
     }
 
     [ProtoMember(1)]
@@ -73,4 +74,8 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(7)]
     public bool IsNewFile { get; set; }
+
+    // Set only by an explicit report request: the task first indexes completed forms missing from the search index.
+    [ProtoMember(8)]
+    public bool Recover { get; set; }
 }

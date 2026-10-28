@@ -46,6 +46,7 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_fckuploads", "TenantID") {InsertMethod = InsertMethod.None},
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
+        new("app_settings", "tenant_id") {DateColumns = new Dictionary<string, bool> {{"last_modified", false}}},
         new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
         new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];

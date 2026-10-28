@@ -75,7 +75,9 @@ on them.
    assume. Yes when controllers/DTOs/Swagger annotations changed since the last regeneration; no
    when only generator configs or templates changed.
 3. If yes → stage A, and stop on failure. Then stage B.
-4. Report the resolved paths, which documents changed, which languages ran, and the diffs — including
+4. Run the case check over every SDK directory that ran (see *Case-only renames* below) and fix what
+   it finds before reporting.
+5. Report the resolved paths, which documents changed, which languages ran, and the diffs — including
    the indexes outside the SDK submodules that the run dirtied (see *Reporting the result*).
 
 ## Resolving the paths (do this before touching anything)
@@ -219,6 +221,39 @@ such steps, and where they write, is the tool's business and changes without not
 generator yourself silently skips them and produces a half-updated SDK with exit code 0. The
 duplicated Maven build is the price of not encoding that knowledge here.
 
+## Case-only renames
+
+When a schema is renamed by case alone — `IPRestrictionArrayWrapper` → `IpRestrictionArrayWrapper`,
+`STRINGArrayWrapper` → `StringArrayWrapper` — and stage B runs on a case-insensitive file system
+(Windows, default macOS, where git has `core.ignorecase=true`), the generator overwrites the old file
+in place. The content carries the new name, the file keeps the old one, and git records only a content
+change. Nothing fails locally. It surfaces later, on Linux:
+
+- Java CI: `class IpRestrictionArrayWrapper is public, should be declared in a file named
+  IpRestrictionArrayWrapper.java` — the build is red;
+- PHP: the PSR-4 autoloader looks for `IpRestrictionArrayWrapper.php` and finds nothing at runtime;
+- C#, Kotlin, Swift build, but file and type names disagree;
+- every SDK: `docs/*.md` links in the README point at a file name that does not exist on GitHub.
+
+So after stage B, run the check over the resolved output directory of **every** language that ran:
+
+```bash
+python .claude/skills/generate-sdk/scripts/fix_case_renames.py <sdk dir> [<sdk dir> ...]
+```
+
+It compares each source file's primary type (`.java`, `.kt`, `.cs`, `.swift`, `.php`) with its file
+name, and each relative Markdown link with the file it points to, and lists case-only mismatches.
+Exit code 0 means clean. On mismatches rerun with `--apply`: it does `git mv` to the expected case,
+leaving the renames staged in the submodule. A `CONFLICT` line (exit 2) means the two signals disagree
+about one file — do not guess, report it.
+
+A directory that is not a repository root (`Go`/`Ruby` before they get a submodule) is skipped: an
+untracked directory has no stale tracked name to fix.
+
+The check does not cover modules whose file names are derived and lower-cased (`Python`, `Go`,
+`Ruby`, `TypeScript` sources) — a case-only rename cannot leave them stale, only their `docs/*.md`,
+which the link check does cover.
+
 ## Prerequisites
 
 `dotnet`, a JDK, `mvn`, `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`), and
@@ -334,6 +369,10 @@ None of this applies when the version number was bumped: a new version is a new 
   the language through the tool.
 - Everything regenerated and green, but a consumer in this repo still behaves as before the change —
   the stale NuGet cache entry, see the section above. Nothing in the logs hints at it.
+- Linux CI fails with `class X is public, should be declared in a file named X.java` (or PHP cannot
+  autoload a model) while the local build was green — a case-only rename on a case-insensitive file
+  system, see *Case-only renames*. Run the check with `--apply` and commit the renames in the
+  submodule.
 
 Known-harmless noise, do not chase it and do not report it as a failure:
 
