@@ -428,6 +428,7 @@ public class FileSharingAceHelper(
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
                     w.Email,
+                    entry.UniqID,
                     entry.Title,
                     shortenLink,
                     entry is IFolder { FolderType: FolderType.AiRoom },
@@ -440,7 +441,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.UniqID, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 

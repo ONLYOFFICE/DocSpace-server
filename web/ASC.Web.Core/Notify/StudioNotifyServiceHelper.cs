@@ -59,13 +59,24 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     {
         await SendNoticeToAsync(action, recipients, senderNames, false, baseUri);
     }
-    
+
+    // objectId names the entity the letter is about (a room, a user): repeats about the same entity are suppressed for a while
+    public async Task SendNoticeToAsync(INotifyAction action, string objectId, IRecipient[] recipients, string[] senderNames)
+    {
+        await SendNoticeToAsync(action, objectId, recipients, senderNames, false, null);
+    }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)
+    {
+        await SendNoticeToAsync(action, null, recipients, senderNames, checkSubsciption, baseUri);
+    }
+
+    private async Task SendNoticeToAsync(INotifyAction action, string objectId, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)
     {
         var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             Action = (NotifyAction)action,
+            ObjectId = objectId ?? "",
             CheckSubsciption = checkSubsciption,
             BaseUrl = baseUri ?? commonLinkUtility.GetFullAbsolutePath("")
         };

@@ -58,6 +58,9 @@ public sealed class DocuSignStatusNotifyAction(TenantManager tenantManager) : No
 {
     public override string ID => "DocuSignStatus";
 
+    // one letter per signing envelope status, they are not requests a caller can repeat
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
+
     public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_DocuSignStatus, () => FilesPatternResource.pattern_DocuSignStatus)
@@ -77,6 +80,9 @@ public sealed class DocuSignStatusNotifyAction(TenantManager tenantManager) : No
 public sealed class MailMergeEndNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "MailMergeEnd";
+
+    // reports the result of one mail merge run; consecutive runs are different results
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
 
     public override List<Pattern> Patterns =>
     [
@@ -343,6 +349,8 @@ public class RoomUpdateAccessForUserNotifyAction(TenantManager tenantManager) : 
 {
     public override string ID => "RoomUpdateAccessForUser";
 
+    public override string[] DeduplicationTags => [CommonTags.RoomRole];
+
     public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
@@ -425,6 +433,9 @@ public sealed class DocumentsUploadedToRoomNotifyAction(TenantManager tenantMana
 {
     public override string ID => "DocumentsUploadedTo";
 
+    // a summary of one upload batch; the next batch in the same room is news, not a repeat
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
+
     public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentsUploadedTo_push)
@@ -471,6 +482,9 @@ public class FormStartedFillingNotifyAction(TenantManager tenantManager, BaseCom
 {
     public override string ID => "FormStartedFilling";
 
+    // the object id is the room, the file tells apart the forms filled in it
+    public override string[] DeduplicationTags => [NotifyConstants.TagFileId];
+
     public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormStartedFilling, () => FilesPatternResource.pattern_FormStartedFilling),
@@ -486,7 +500,8 @@ public class FormStartedFillingNotifyAction(TenantManager tenantManager, BaseCom
             new TagValue(NotifyConstants.RoomTitle, room.Title),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
             new TagValue(CommonTags.FromUserName, userName),
-            new TagValue(CommonTags.FromUserLink, userUrl)
+            new TagValue(CommonTags.FromUserLink, userUrl),
+            new TagValue(NotifyConstants.TagFileId, file.Id)
         ];
     }
 }
@@ -530,6 +545,7 @@ public sealed class StoppedFormFillingNotifyAction(TenantManager tenantManager, 
 public static class NotifyConstants
 {
     public static readonly string TagFolderID = "FolderID";
+    public static readonly string TagFileId = "FileID";
     public static readonly string TagFolderParentId = "FolderParentId";
     public static readonly string TagFolderRootFolderType = "FolderRootFolderType";
     public static readonly string TagDocumentTitle = "DocumentTitle";

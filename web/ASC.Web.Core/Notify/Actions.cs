@@ -460,6 +460,9 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
 {
     public override string ID => "for_admin_notify";
 
+    // a letter carries what one person wrote, so a second one is a different message rather than a repeat
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -490,6 +493,9 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
 public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "for_sales_notify";
+
+    // a letter carries what one person wrote, so a second one is a different message rather than a repeat
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
 
     public override List<Pattern> Patterns
     {
@@ -585,6 +591,9 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
 public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "suspicious_login";
+
+    // every suspicious sign-in has to be reported, it is a security alert rather than a request somebody can repeat
+    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
 
     public override List<Pattern> Patterns
     {
@@ -3547,6 +3556,8 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "user_type_changed";
 
+    public override string[] DeduplicationTags => ["UserType"];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3574,6 +3585,8 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "user_role_changed";
+
+    public override string[] DeduplicationTags => ["UserRole"];
 
     public override List<Pattern> Patterns
     {
@@ -3604,6 +3617,8 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "user_agent_role_changed";
+
+    public override string[] DeduplicationTags => ["UserRole"];
 
     public override List<Pattern> Patterns
     {
