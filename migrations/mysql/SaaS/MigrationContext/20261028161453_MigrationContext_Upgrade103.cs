@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,11 +6,56 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade105 : Migration
+    public partial class MigrationContext_Upgrade103 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<int>(
+                name: "attempts",
+                table: "webhooks_logs",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<string>(
+                name: "lease_id",
+                table: "webhooks_logs",
+                type: "varchar(36)",
+                nullable: true,
+                collation: "utf8_general_ci")
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "next_attempt_on",
+                table: "webhooks_logs",
+                type: "datetime",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "retried_by",
+                table: "webhooks_logs",
+                type: "varchar(36)",
+                nullable: true,
+                collation: "utf8_general_ci")
+                .Annotation("MySql:CharSet", "utf8");
+
+            migrationBuilder.AddColumn<int>(
+                name: "retry_of",
+                table: "webhooks_logs",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "next_attempt_on",
+                table: "webhooks_logs",
+                column: "next_attempt_on");
+
+            migrationBuilder.CreateIndex(
+                name: "tenant_id_retry_of",
+                table: "webhooks_logs",
+                columns: new[] { "tenant_id", "retry_of" });
+
             migrationBuilder.CreateIndex(
                 name: "creation_time",
                 table: "webhooks_logs",
@@ -28,7 +74,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             // the last one included, and holds them to the end of the statement: every insert would wait for the whole
             // scan. READ COMMITTED takes no gap locks and lets go of each row that does not match as soon as it is read,
             // so only the few marked rows stay locked, and none of them is one a publisher writes. The level is set for
-            // the session (the CREATE INDEX above has committed whatever transaction was open, so the UPDATE starts a
+            // the session (the DDL above has committed whatever transaction was open, so the UPDATE starts a
             // new one under it) and put back as it was right after. READ COMMITTED needs row-based binary logging
             // (binlog_format ROW, the default, or MIXED); a server that logs by statement refuses the UPDATE.
             // PostgreSQL: this branch carries the webhook migrations for MySQL SaaS only. When the PostgreSQL migration
@@ -37,13 +83,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             // rows there stay unmarked. The manual retry also refuses an old-format body by its shape
             // (DbWorker.IsPreviousVersionBody), but the journal would still show those rows as never sent with no note.
             // PostgreSQL takes no gap locks at any level, so the isolation statements are MySQL only.
-            migrationBuilder.Sql("SET @upgrade105_isolation = @@SESSION.transaction_isolation");
+            migrationBuilder.Sql("SET @upgrade103_isolation = @@SESSION.transaction_isolation");
             migrationBuilder.Sql("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED");
             migrationBuilder.Sql(
                 "UPDATE webhooks_logs SET response_payload = 'Not sent: the event was published by a service of the previous version, in the old payload format' " +
                 "WHERE retry_of IS NULL AND attempts = 0 AND next_attempt_on IS NULL AND lease_id IS NULL " +
                 "AND request_headers IS NULL AND response_payload IS NULL");
-            migrationBuilder.Sql("SET SESSION transaction_isolation = @upgrade105_isolation");
+            migrationBuilder.Sql("SET SESSION transaction_isolation = @upgrade103_isolation");
         }
 
         /// <inheritdoc />
@@ -51,6 +97,34 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         {
             migrationBuilder.DropIndex(
                 name: "creation_time",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropIndex(
+                name: "tenant_id_retry_of",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropIndex(
+                name: "next_attempt_on",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
+                name: "attempts",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
+                name: "lease_id",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
+                name: "next_attempt_on",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
+                name: "retried_by",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
+                name: "retry_of",
                 table: "webhooks_logs");
         }
     }

@@ -814,7 +814,7 @@ public class DbWorker(
     }
 
     /// <summary>
-    /// What the journal shows as the response of a row a publisher of the previous version wrote. Upgrade105 writes
+    /// What the journal shows as the response of a row a publisher of the previous version wrote. Upgrade103 writes
     /// the same text into the rows it marks, and the backup restore compares with it: keep them equal.
     /// </summary>
     public const string PreviousVersionNote =

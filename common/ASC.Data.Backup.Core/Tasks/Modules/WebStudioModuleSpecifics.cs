@@ -107,7 +107,7 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             }
 
             // An archive of the previous version has no attempts column, and its unsent rows are in the old payload
-            // format, which must never be sent: they get the note Upgrade105 gives such rows in place.
+            // format, which must never be sent: they get the note Upgrade103 gives such rows in place.
             if (!HasColumn(preparedRow, "attempts") && IsNull(preparedRow, "request_headers") && IsNull(preparedRow, "response_payload"))
             {
                 SetValue(preparedRow, "response_payload", DbWorker.PreviousVersionNote);
