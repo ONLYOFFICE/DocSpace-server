@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Otağı saxlamaq üçün bu qovluqdan istifadə etmək mümkün deyil</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Bağlantının URL ünvanı yanlışdır</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Yanlış başlıq</value>
   </data>
