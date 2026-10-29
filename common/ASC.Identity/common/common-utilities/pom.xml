@@ -32,6 +32,11 @@
 
         <!-- Caching Dependencies -->
         <dependency>
+          <groupId>org.springframework.data</groupId>
+          <artifactId>spring-data-redis</artifactId>
+          <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>${caffeine.caching.version}</version>

@@ -36,141 +36,79 @@ package com.asc.registration.application.service;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.common.utilities.cache.CompositeCache;
+import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
 import com.asc.registration.application.transfer.CachedClient;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
-import java.time.Duration;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of {@link ClientCacheService} using Redis as distributed cache.
+ * {@link ClientCacheService} on a {@link CompositeCache}: an in-process tier in front of Redis.
  *
  * <p>The cache is automatically populated and evicted based on domain events processed
- * transactionally, ensuring consistency across multiple application instances.
+ * transactionally, ensuring consistency across multiple application instances. Entries are keyed by
+ * client id alone, which lets {@link #getAnyTenant(ClientId)} read an entry without knowing the
+ * tenant up front: the tenant comes out of the snapshot itself.
  *
- * <p>Entries are keyed by client id alone and carry the namespace version of their tenant, so
- * evicting a tenant is a single counter increment rather than a search for the keys that belong to
- * it. Keying by client id keeps one entry per client regardless of how often its tenant is evicted,
- * and lets {@link #getAnyTenant(ClientId)} read an entry without knowing the tenant up front: the
- * tenant comes out of the snapshot itself. No operation scans the keyspace.
- *
- * <p>This service is only loaded when Redis classes are available on the classpath.
+ * <p>This service is only loaded when Redis classes are available on the classpath and {@code
+ * client.cache.redis.enabled=true}, the same switch that enables {@link
+ * com.asc.registration.application.configuration.ClientCacheConfiguration}, which provides its
+ * Redis beans. Otherwise {@link NoOpClientCacheService} takes its place.
  *
  * @see ClientCacheService
- * @see CacheNamespaceRegistry
+ * @see CompositeCache
  * @see Client
  */
 @Slf4j
 @Service
 @ConditionalOnClass(RedisTemplate.class)
-public class RedisClientCacheService implements ClientCacheService {
-  private static final String CACHE_KEY_SEPARATOR = ":";
+@ConditionalOnProperty(prefix = "client.cache.redis", name = "enabled", havingValue = "true")
+public class RedisClientCacheService extends CompositeCache<Client> implements ClientCacheService {
   private static final String CACHE_PREFIX = "identity:registration:client";
-
-  private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 3;
-
-  private final CacheNamespaceRegistry versionRegistry;
-  private final RedisTemplate<String, Object> redisTemplate;
 
   /**
    * Constructs a new RedisClientCacheService.
    *
    * @param versionRegistry The registry resolving per-tenant namespace versions.
    * @param redisTemplate The Redis template for cache entries.
+   * @param invalidationBus The bus broadcasting evictions to the in-process tier of every instance.
    */
   public RedisClientCacheService(
       CacheNamespaceRegistry versionRegistry,
-      @Qualifier("clientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate) {
-    this.versionRegistry = versionRegistry;
-    this.redisTemplate = redisTemplate;
+      @Qualifier("clientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate,
+      CacheInvalidationBus invalidationBus) {
+    super(CACHE_PREFIX, invalidationBus, versionRegistry, redisTemplate);
   }
 
-  /**
-   * Builds a cache key for a client.
-   *
-   * @param clientId The client ID to build the cache key from.
-   * @return The cache key in format: identity:registration:client:{clientId}
-   */
-  private String buildCacheKey(String clientId) {
-    return CACHE_PREFIX + CACHE_KEY_SEPARATOR + clientId;
-  }
-
-  /**
-   * Returns the ID of the tenant owning a client, or {@code null} when the snapshot carries no
-   * tenant information.
-   *
-   * @param client The client to read the tenant ID from.
-   * @return The tenant ID, or {@code null} if absent.
-   */
-  private Long extractTenantId(Client client) {
+  @Override
+  protected Long tenantOf(Client client) {
     if (client == null || client.getClientTenantInfo() == null) return null;
 
     var tenantId = client.getClientTenantInfo().tenantId();
     return tenantId == null ? null : tenantId.getValue();
   }
 
-  /**
-   * Tells whether a cached snapshot may still be served.
-   *
-   * @param cached The snapshot read from Redis.
-   * @param tenantId The tenant owning the cached client.
-   * @param requiredTenantId The tenant the caller asked for, or {@code null} if any tenant will do.
-   * @return {@code true} if the snapshot belongs to the requested tenant and its namespace is still
-   *     current.
-   */
-  private boolean isCurrent(CachedClient cached, long tenantId, Long requiredTenantId) {
-    if (requiredTenantId != null && requiredTenantId != tenantId) return false;
+  @Override
+  protected Object toStored(String namespace, Client client) {
+    return new CachedClient(namespace, client);
+  }
 
-    return Objects.equals(cached.getCacheNamespace(), versionRegistry.namespaceOf(tenantId));
+  @Override
+  protected Stamped<Client> fromStored(Object stored) {
+    return stored instanceof CachedClient cached
+        ? new Stamped<>(cached.getCacheNamespace(), cached.getClient())
+        : null;
   }
 
   /**
-   * Reads a cached client, accepting it only while the namespace it was stamped with is still
-   * current.
-   *
-   * <p>If deserialization fails, the corrupted entry is removed from cache and an empty Optional is
-   * returned.
-   *
-   * @param clientId The ID of the client to read.
-   * @param requiredTenantId The tenant the entry must belong to, or {@code null} to accept the
-   *     entry whichever tenant owns it.
-   * @return An Optional containing the client if found and still current, empty otherwise.
-   */
-  private Optional<Client> read(String clientId, Long requiredTenantId) {
-    var key = buildCacheKey(clientId);
-    try {
-      if (redisTemplate.opsForValue().get(key) instanceof CachedClient cached) {
-        var client = cached.getClient();
-        var tenantId = extractTenantId(client);
-        if (tenantId != null && isCurrent(cached, tenantId, requiredTenantId)) {
-          log.info("Cache hit for client ID: {} and tenant ID: {}", clientId, tenantId);
-          return Optional.of(client);
-        }
-      }
-    } catch (Exception e) {
-      log.error("Failed to retrieve client from Redis cache: {}", clientId, e);
-      try {
-        redisTemplate.delete(key);
-      } catch (Exception dex) {
-        log.error("Failed to delete corrupted cache entry for client ID: {}", clientId, dex);
-      }
-    }
-
-    log.info("Cache miss for client ID: {}", clientId);
-    return Optional.empty();
-  }
-
-  /**
-   * Stores a client in Redis cache, stamped with the current namespace of its tenant.
-   *
-   * <p>If serialization fails, the error is logged. If the client, its ID or its tenant information
-   * is null, the operation is skipped with a warning.
+   * Stores a client in both tiers, stamped with the current namespace of its tenant.
    *
    * @param client The client entity to cache. Must not be null and must have a non-null ID.
    */
@@ -181,35 +119,7 @@ public class RedisClientCacheService implements ClientCacheService {
       return;
     }
 
-    var tenantId = extractTenantId(client);
-    if (tenantId == null) {
-      log.warn(
-          "Attempted to cache client without tenant information: {}", client.getId().getValue());
-      return;
-    }
-
-    var clientId = client.getId().getValue().toString();
-    var namespace = versionRegistry.namespaceOf(tenantId);
-    if (namespace == null) {
-      log.warn(
-          "Skipped caching client with ID: {} because its namespace could not be resolved",
-          clientId);
-      return;
-    }
-
-    var key = buildCacheKey(clientId);
-    try {
-      redisTemplate
-          .opsForValue()
-          .set(
-              key,
-              new CachedClient(namespace, client),
-              Duration.ofMinutes(CACHE_EXPIRE_AFTER_WRITE_MINUTES));
-
-      log.info("Cached client with ID: {}, Redis key: {}", clientId, key);
-    } catch (Exception e) {
-      log.error("Failed to cache client in Redis: {}", clientId, e);
-    }
+    write(client.getId().getValue().toString(), client);
   }
 
   /**
@@ -224,14 +134,13 @@ public class RedisClientCacheService implements ClientCacheService {
   public Optional<Client> get(ClientId clientId, TenantId tenantId) {
     if (clientId == null || tenantId == null) return Optional.empty();
 
-    return read(clientId.getValue().toString(), tenantId.getValue());
+    return read(clientId.getValue().toString())
+        .filter(client -> tenantId.getValue().equals(tenantOf(client)));
   }
 
   /**
    * Retrieves a client from the cache by client ID only, taking its tenant from the cached
    * snapshot.
-   *
-   * <p>Useful when tenant context is not available but cache lookup is still desired.
    *
    * @param clientId The ID of the client to retrieve. If null, returns empty Optional.
    * @return An Optional containing the matching client if found, or empty if not found.
@@ -240,11 +149,11 @@ public class RedisClientCacheService implements ClientCacheService {
   public Optional<Client> getAnyTenant(ClientId clientId) {
     if (clientId == null) return Optional.empty();
 
-    return read(clientId.getValue().toString(), null);
+    return read(clientId.getValue().toString());
   }
 
   /**
-   * Removes a client from Redis cache.
+   * Removes a client from Redis and from the in-process tier of every instance.
    *
    * @param clientId The ID of the client to evict from cache. If null, no operation is performed.
    * @param tenantId The tenant owning the client. If null, no operation is performed.
@@ -256,21 +165,11 @@ public class RedisClientCacheService implements ClientCacheService {
       return;
     }
 
-    var id = clientId.getValue().toString();
-    try {
-      redisTemplate.unlink(buildCacheKey(id));
-      log.info("Evicted client from cache with ID: {} for tenant: {}", id, tenantId.getValue());
-    } catch (Exception e) {
-      log.error("Failed to evict client from cache: {}", id, e);
-    }
+    remove(clientId.getValue().toString());
   }
 
   /**
-   * Removes all clients belonging to a specific tenant from Redis cache.
-   *
-   * <p>Advances the tenant's namespace version, which detaches every entry cached under the
-   * previous version in constant time. The detached entries stop being served immediately and are
-   * replaced in place by the next write, or reclaimed by their own TTL if no write comes.
+   * Removes all clients belonging to a specific tenant from the cache.
    *
    * @param tenantId The tenant ID whose clients should be evicted. If null, no operation is
    *     performed.
@@ -282,19 +181,12 @@ public class RedisClientCacheService implements ClientCacheService {
       return;
     }
 
-    versionRegistry.invalidateTenant(tenantId.getValue());
-    log.info("Evicted all cached clients for tenant ID: {}", tenantId.getValue());
+    removeTenant(tenantId.getValue());
   }
 
-  /**
-   * Clears the entire client cache.
-   *
-   * <p>Advances the global namespace, which detaches every cached entry at once regardless of how
-   * many there are. The detached entries are reclaimed by their own TTL.
-   */
+  /** Clears the entire client cache. */
   @Override
   public void clear() {
-    versionRegistry.invalidateAll();
-    log.info("Cleared entire client cache");
+    removeAll();
   }
 }

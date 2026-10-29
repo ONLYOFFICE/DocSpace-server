@@ -31,16 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.application.security.oauth.service;
+package com.asc.common.utilities.cache;
 
-import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
- * Redis-backed {@link CacheNamespaceCounterStore} backing this service's {@link
- * com.asc.common.utilities.cache.CacheNamespaceRegistry}.
+ * Redis-backed {@link CacheNamespaceCounterStore} backing a {@link CacheNamespaceRegistry}.
  *
  * <p>A thin adapter: it holds no policy of its own, only translating the store's contract onto
  * {@link RedisTemplate} calls.

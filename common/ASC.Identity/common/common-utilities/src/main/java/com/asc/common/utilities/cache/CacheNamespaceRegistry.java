@@ -167,6 +167,37 @@ public class CacheNamespaceRegistry {
   }
 
   /**
+   * Drops the memoized namespace of a tenant without advancing its counter, so the next resolution
+   * reads the counter store again. Used when another instance has already advanced the counter.
+   *
+   * @param tenantId the tenant whose memoized namespace should be dropped.
+   */
+  public void forgetTenant(long tenantId) {
+    localNamespaces.invalidate(tenantId);
+  }
+
+  /**
+   * Drops every memoized namespace without advancing any counter. Used when another instance has
+   * already advanced the global counter.
+   */
+  public void forgetAll() {
+    localNamespaces.invalidateAll();
+  }
+
+  /**
+   * Tells whether an entry stamped with {@code namespace} still belongs to the tenant's current
+   * namespace.
+   *
+   * @param tenantId the tenant owning the entry.
+   * @param namespace the namespace the entry was stamped with.
+   * @return {@code true} if the namespace is still current; {@code false} if it was advanced or
+   *     cannot be resolved.
+   */
+  public boolean isCurrent(long tenantId, String namespace) {
+    return namespace != null && namespace.equals(namespaceOf(tenantId));
+  }
+
+  /**
    * Moves a single tenant to a new namespace, invalidating every entry cached under the previous
    * one.
    *
@@ -176,7 +207,7 @@ public class CacheNamespaceRegistry {
     if (advance(tenantVersionKey(tenantId)))
       log.info("Advanced cache namespace of tenant {} under prefix {}", tenantId, globalVersionKey);
 
-    localNamespaces.invalidate(tenantId);
+    forgetTenant(tenantId);
   }
 
   /** Moves every tenant to a new namespace, invalidating the cache as a whole. */
@@ -184,6 +215,6 @@ public class CacheNamespaceRegistry {
     if (advance(globalVersionKey))
       log.info("Advanced global cache namespace for prefix {}", globalVersionKey);
 
-    localNamespaces.invalidateAll();
+    forgetAll();
   }
 }

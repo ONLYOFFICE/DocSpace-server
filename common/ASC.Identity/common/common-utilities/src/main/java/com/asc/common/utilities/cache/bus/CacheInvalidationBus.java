@@ -31,50 +31,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.registration.application.service;
+package com.asc.common.utilities.cache.bus;
 
-import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
-import java.time.Duration;
-import java.util.List;
-import org.springframework.data.redis.core.RedisTemplate;
+import java.util.function.Consumer;
 
-/**
- * Redis-backed {@link CacheNamespaceCounterStore} backing this service's {@link
- * com.asc.common.utilities.cache.CacheNamespaceRegistry}.
- *
- * <p>A thin adapter: it holds no policy of its own, only translating the store's contract onto
- * {@link RedisTemplate} calls.
- */
-public class RedisCacheNamespaceCounterStore implements CacheNamespaceCounterStore {
-  private final RedisTemplate<String, String> redisTemplate;
+public interface CacheInvalidationBus {
 
-  public RedisCacheNamespaceCounterStore(RedisTemplate<String, String> redisTemplate) {
-    this.redisTemplate = redisTemplate;
-  }
+  /**
+   * Broadcasts a message to every subscriber, including the publishing instance.
+   *
+   * @param message the encoded invalidation.
+   */
+  void publish(String message);
 
-  @Override
-  public List<String> multiGet(List<String> keys) {
-    return redisTemplate.opsForValue().multiGet(keys);
-  }
-
-  @Override
-  public String get(String key) {
-    return redisTemplate.opsForValue().get(key);
-  }
-
-  @Override
-  public boolean setIfAbsent(String key, String value, Duration ttl) {
-    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
-  }
-
-  @Override
-  public void increment(String key, Duration ttl) {
-    redisTemplate.opsForValue().increment(key);
-    redisTemplate.expire(key, ttl);
-  }
-
-  @Override
-  public void refreshTtl(String key, Duration ttl) {
-    redisTemplate.expire(key, ttl);
-  }
+  /**
+   * Registers a listener that receives every message broadcast on this bus.
+   *
+   * @param listener the listener to call with each encoded invalidation.
+   */
+  void subscribe(Consumer<String> listener);
 }
