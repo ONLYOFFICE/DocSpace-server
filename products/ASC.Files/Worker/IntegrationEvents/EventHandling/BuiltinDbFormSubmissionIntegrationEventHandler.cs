@@ -58,12 +58,20 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
 
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-                await formFillingReportCreator.ExportToBuiltinDbAsync(
-                    @event.FileId,
-                    @event.OriginalFormId,
-                    @event.OriginalFormVersion,
-                    @event.RoomId,
-                    @event.FormsDataUrl);
+                // Sent by the sync button or the form recovery: no new submission, only the table is completed from the index.
+                if (string.IsNullOrEmpty(@event.FormsDataUrl))
+                {
+                    await formFillingReportCreator.SyncBuiltinDbTableAsync(@event.OriginalFormId, @event.OriginalFormVersion, @event.RoomId);
+                }
+                else
+                {
+                    await formFillingReportCreator.ExportToBuiltinDbAsync(
+                        @event.FileId,
+                        @event.OriginalFormId,
+                        @event.OriginalFormVersion,
+                        @event.RoomId,
+                        @event.FormsDataUrl);
+                }
             }
             catch (Exception ex)
             {

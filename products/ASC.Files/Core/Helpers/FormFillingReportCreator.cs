@@ -85,10 +85,18 @@ public class FormFillingReportCreator(
         }
     }
 
-    public Task SyncExternalDbAsync(Folder<int> room, int originalFormId, int originalFormVersion)
+    public async Task SyncExternalDbAsync(Folder<int> room, int originalFormId, int originalFormVersion)
     {
-        return PublishExternalDbSubmissionAsync(room.SettingsSendFormToExternalDB, originalFormId, originalFormVersion,
+        await PublishExternalDbSubmissionAsync(room.SettingsSendFormToExternalDB, originalFormId, originalFormVersion,
             room.Id, fileId: 0, resultFormNumber: 0, formsDataUrl: null);
+
+        // The built-in database is completed from the index at once too, without waiting for the next use of the form.
+        if (GetBuiltinDb() != null)
+        {
+            await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
+                authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
+                room.Id, fileId: 0, resultFormNumber: 0, formsDataUrl: null, commonLinkUtility.ServerRootPath));
+        }
     }
 
     private async Task PublishExternalDbSubmissionAsync(bool sendFormToExternalDB, int originalFormId, int originalFormVersion, int roomId, int fileId, int resultFormNumber, string formsDataUrl)
@@ -243,6 +251,41 @@ public class FormFillingReportCreator(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Adds to the built-in table of the form version the submissions the search index holds and the table lacks, or
+    /// restores the table, at once rather than at most once in a few minutes as on use.
+    /// </summary>
+    public async Task SyncBuiltinDbTableAsync(int originalFormId, int originalFormVersion, int roomId)
+    {
+        if (GetBuiltinDb() == null)
+        {
+            return;
+        }
+
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            var formFilling = await GetFormFillingAsync(originalFormId);
+            var tableVersion = GetTableVersion(formFilling, originalFormVersion);
+            var tableName = GetTableName(originalFormId, tableVersion);
+
+            await using (await AcquireTableLockAsync(tableName))
+            {
+                formFilling = await GetFormFillingAsync(originalFormId);
+                if (GetTableVersion(formFilling, originalFormVersion) != tableVersion)
+                {
+                    continue;
+                }
+
+                if (await EnsureTableLockedAsync(builtinFormsDatabaseClient, tableName, originalFormId, tableVersion, roomId, formFilling))
+                {
+                    await FillTableGapsLockedAsync(builtinFormsDatabaseClient, tableName, originalFormId, originalFormVersion, tableVersion, roomId, formFilling);
+                }
+
+                return;
+            }
+        }
     }
 
     // Submissions whose export failed are added from the index, at most once in a few minutes per table. Best effort.
