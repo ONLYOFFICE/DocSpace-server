@@ -37,4 +37,7 @@ internal static partial class WebhookManagerLogger
 {
     [LoggerMessage(LogLevel.Error, "The {trigger} webhook could not be prepared, so it is not sent for {entryId}.")]
     public static partial void ErrorPrepareWebhook(this ILogger<WebhookManager> logger, WebhookTrigger trigger, string entryId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "The data of the {trigger} webhooks could not be read for the whole batch, so each webhook reads its own.")]
+    public static partial void WarnPrefetchWebhook(this ILogger<WebhookManager> logger, WebhookTrigger trigger, Exception exception);
 }

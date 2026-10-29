@@ -270,6 +270,9 @@ internal class FileDownloadOperation<T> : FileOperation<FileDownloadOperationDat
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         var webhookManager = serviceScope.ServiceProvider.GetRequiredService<WebhookManager>();
 
+        // the lock and custom-filter tags of the payloads, one query for all the files instead of one per file
+        await webhookManager.PrefetchAsync(WebhookTrigger.FileDownloaded, filesForSend.OfType<File<T>>().ToList());
+
         foreach (var file in filesForSend)
         {
             var key = file.Id;

@@ -81,7 +81,7 @@ public class WebhookFilePayloadTests(
     }
 
     [Fact]
-    public async Task RoomUpdated_QuotaLimit_GoesOnlyToASubscriberWhoMayEditTheRoom()
+    public async Task RoomUpdated_QuotaLimit_IsWithheldFromAMemberWhoMayOnlyReadTheRoom()
     {
         // Arrange: room quotas on, and a member who may only read the room
         const int defaultQuota = 512 * 1024 * 1024;

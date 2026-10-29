@@ -36,7 +36,7 @@ namespace ASC.Webhooks.Contract;
 /// <summary>
 /// Reads the documentation of types and properties from the XML documentation files the compiler writes next to
 /// each assembly: a type is described by its <c>&lt;summary&gt;</c> and <c>&lt;remarks&gt;</c>, a property by its
-/// <c>&lt;summary&gt;</c>.
+/// <c>&lt;summary&gt;</c> and illustrated by its <c>&lt;example&gt;</c>.
 /// </summary>
 internal sealed class XmlDocumentation
 {
@@ -92,13 +92,33 @@ internal sealed class XmlDocumentation
     /// </summary>
     public string GetSummary(PropertyInfo property)
     {
+        return GetText(FindDeclaration(property)?.Element("summary"));
+    }
+
+    /// <summary>
+    /// The <c>&lt;example&gt;</c> of the declaration of <paramref name="property"/> as written, trimmed but otherwise
+    /// untouched, so that a JSON value in it can still be parsed; null without one.
+    /// </summary>
+    public string GetExample(PropertyInfo property)
+    {
+        var example = FindDeclaration(property)?.Element("example")?.Value.Trim();
+
+        return string.IsNullOrEmpty(example) ? null : example;
+    }
+
+    /// <summary>
+    /// The documentation member of <paramref name="property"/>, following <c>&lt;inheritdoc/&gt;</c> to the
+    /// overridden property.
+    /// </summary>
+    private XElement FindDeclaration(PropertyInfo property)
+    {
         for (var current = property; current != null; current = GetOverridden(current))
         {
             var member = Find("P:" + GetId(current.DeclaringType) + "." + current.Name);
 
             if (member?.Element("inheritdoc") == null)
             {
-                return GetText(member?.Element("summary"));
+                return member;
             }
         }
 

@@ -77,9 +77,34 @@ public class WebhookSocketManager(
         return SendAsync("delete-webhook", config, new { id = config.Id });
     }
 
-    /// <summary>A delivery record was added: an event was published to the subscription, or a manual retry queued.</summary>
+    /// <summary>
+    /// How long, after a subscription's journal was announced as grown, the next record of it written in the same scope
+    /// is not announced again.
+    /// </summary>
+    public static readonly TimeSpan AddWebhookLogWindow = TimeSpan.FromSeconds(1);
+
+    // when the journal of each subscription was last announced as grown in this scope, by subscription id
+    private readonly Dictionary<int, long> _logAddedAnnouncedAt = new();
+
+    /// <summary>
+    /// A delivery record was added: an event was published to the subscription, or a manual retry queued. The event is
+    /// a nudge to re-read the journal, and a bulk action writes a record per entry and subscription: so within one scope
+    /// (one request of the publisher) a subscription's journal is announced as grown at most once per
+    /// <see cref="AddWebhookLogWindow"/>, with the id of the record that opened the window. A record written later in the
+    /// window is not lost to an open journal: every record the sender claims is announced with update-webhook-log once
+    /// its attempt ends, and the next window of a longer action announces the journal again.
+    /// </summary>
     public Task AddWebhookLogAsync(DbWebhooksConfig config, int id)
     {
+        var now = TimeProvider.GetTimestamp();
+
+        if (_logAddedAnnouncedAt.TryGetValue(config.Id, out var announcedAt) && TimeProvider.GetElapsedTime(announcedAt, now) < AddWebhookLogWindow)
+        {
+            return Task.CompletedTask;
+        }
+
+        _logAddedAnnouncedAt[config.Id] = now;
+
         return SendAsync("add-webhook-log", config, new { id, configId = config.Id });
     }
 
@@ -95,9 +120,12 @@ public class WebhookSocketManager(
         return SendAsync("update-webhook-log", config, new { id, configId = config.Id });
     }
 
+    /// <summary>The clock of the window of <see cref="AddWebhookLogAsync"/>.</summary>
+    protected virtual TimeProvider TimeProvider => TimeProvider.System;
+
     // best effort: the change the event announces is already stored, so a failure to announce it, the resolution of the
     // recipients included, is logged and never fails the caller
-    private async Task SendAsync(string method, DbWebhooksConfig config, object data)
+    protected virtual async Task SendAsync(string method, DbWebhooksConfig config, object data)
     {
         try
         {

@@ -381,6 +381,33 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
+    /// Asserts that a subscription keeps satisfying <paramref name="stays"/> for a while, on every read. The sender
+    /// writes the delivery record first and only then the subscription's bookkeeping (its last failure, and the switch
+    /// that disables it), so a state that must NOT change — "stays enabled" above all — cannot be read once right after
+    /// the record shows up: a wrong switch would land after that read and the test would still pass. It is watched for
+    /// <see cref="SenderPollPeriod"/> plus a margin, longer than those steps of the attempt can take.
+    /// </summary>
+    protected async Task AssertSubscriptionStaysAsync(int configId, Func<WebhooksConfigDto, bool> stays, string because)
+    {
+        var deadline = DateTime.UtcNow + SenderPollPeriod + TimeSpan.FromSeconds(3);
+
+        while (true)
+        {
+            var config = await GetSubscriptionAsync(configId);
+
+            config.Should().NotBeNull("the subscription must still exist");
+            stays(config!).Should().BeTrue(because);
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                return;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Makes a settled delivery record look like one a sender is sending right now: leased, with the lease running
     /// for a day. No sender holds it, so nothing ever finishes it; the record stays "in flight" for the test.
     /// </summary>

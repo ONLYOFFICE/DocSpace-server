@@ -485,8 +485,10 @@ changes.
 
 ### `oneOf` support varies sharply by generator
 
-`EntryId` (`integer | string`) is the one `oneOf` in the contract, and it is
-where the generators differ most. This is worth knowing before trusting an id:
+`EntryId` (`integer | string`) and `WebhookTargetId` (the same two types: the
+envelope's `target.id`, a GUID string for `user.*`/`group.*`) are the `oneOf`s in
+the contract, and they are where the generators differ most. Each mapping below
+applies to both. This is worth knowing before trusting an id:
 
 | Quality | Languages | Behaviour |
 |---|---|---|

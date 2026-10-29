@@ -210,7 +210,9 @@ public class RestorePortalTask(DbFactory dbFactory,
             {
                 var key1 = Path.Combine(KeyHelper.GetDatabaseSchema(), keys[i + j]);
                 var key2 = Path.Combine(KeyHelper.GetDatabaseData(), keys[i + j]);
-                tasks.Add(RestoreFromDumpFile(dataReader, key1, key2));
+                tasks.Add(keys[i + j] == WebhooksLogsTable
+                    ? RestoreWebhooksLogsFromDumpFileAsync(dataReader, key1, key2)
+                    : RestoreFromDumpFile(dataReader, key1, key2));
             }
 
             Task.WaitAll(tasks.ToArray(), _cancellationToken);
@@ -225,34 +227,175 @@ public class RestorePortalTask(DbFactory dbFactory,
             await SetStepCompleted();
         }
 
+        // the journal was loaded with its schedule cleared statement by statement (RestoreWebhooksLogsFromDumpFileAsync);
+        // this pass takes the leases left on rows that were not due, and anything an upgrade script above scheduled
         await ClearWebhookScheduleAsync();
+    }
+
+    private const string WebhooksLogsTable = "webhooks_logs";
+
+    // The webhook journal of a dump carries the schedule of the source's senders, and the live WorkerService claims
+    // every row that is due on an active portal within seconds, while the other tables, the portals among them, are
+    // still loading and the upgrades have not run. So each statement of its data is committed in one transaction with
+    // the update that takes its rows off the schedule (CreateClearWebhookScheduleCommand): no sender ever sees a
+    // restored row with the schedule it had on the source, whatever order the tables load in, and a failure of the
+    // update rolls back the rows it was for and fails the restore instead of leaving them due. The table's own
+    // schema file goes first and leaves it empty (drop and create), so nothing of the live journal stays due either.
+    private async Task RestoreWebhooksLogsFromDumpFileAsync(IDataReadOperator dataReader, string schemaFileName, string dataFileName)
+    {
+        options.DebugRestoreFrom(schemaFileName);
+        await using (var stream = dataReader.GetEntry(schemaFileName))
+        {
+            await RunMysqlFile(stream, null);
+        }
+
+        await SetStepCompleted();
+
+        options.DebugRestoreFrom(dataFileName);
+        await using (var stream = dataReader.GetEntry(dataFileName))
+        {
+            if (stream != null)
+            {
+                await LoadWebhooksLogsDataAsync(stream);
+            }
+        }
+
+        await SetStepCompleted();
+    }
+
+    private async Task LoadWebhooksLogsDataAsync(Stream stream)
+    {
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+
+        await using var connection = DbFactory.OpenConnection();
+        var setup = connection.CreateCommand();
+        setup.CommandText = "SET FOREIGN_KEY_CHECKS=0;";
+        await setup.ExecuteNonQueryAsync(_cancellationToken);
+
+        // a dump of a version without the delivery schedule has nothing to clear: its table has no such columns
+        var clearSchedule = true;
+        var cleared = 0;
+
+        await foreach (var statement in ReadDumpStatementsAsync(reader))
+        {
+            for (var attempt = 0; ; attempt++)
+            {
+                var inserted = false;
+
+                try
+                {
+                    await using var tx = await connection.BeginTransactionAsync(_cancellationToken);
+
+                    var insert = connection.CreateCommand();
+                    insert.Transaction = tx;
+                    insert.CommandText = statement;
+                    await insert.ExecuteNonQueryAsync(_cancellationToken);
+
+                    inserted = true;
+
+                    if (clearSchedule)
+                    {
+                        try
+                        {
+                            cleared += await CreateClearWebhookScheduleCommand(connection, tx, scheduledOnly: true).ExecuteNonQueryAsync(_cancellationToken);
+                        }
+                        catch (DbException ex) when (IsMissingSchemaObject(ex))
+                        {
+                            // MySQL keeps the transaction, and the inserted rows with it, after a failed statement
+                            options.WarningCantClearWebhookSchedule(ex);
+                            clearSchedule = false;
+                        }
+                    }
+
+                    await tx.CommitAsync(_cancellationToken);
+
+                    break;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException && attempt < 5)
+                {
+                    // a deadlock or a lock wait with a claim of the live sender: the transaction is rolled back as a
+                    // whole, the rows of the statement with it, so the statement runs again from the start
+                    await Task.Delay(TimeSpan.FromSeconds(1), _cancellationToken);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException && !inserted)
+                {
+                    // a statement that keeps failing is skipped, as RunMysqlFile skips one of any other table
+                    options.ErrorRestore(ex);
+
+                    break;
+                }
+            }
+        }
+
+        options.DebugClearWebhookSchedule(cleared);
+    }
+
+    /// <summary>
+    /// The statements of a dump file, read the way <see cref="PortalTaskBase.RunMysqlFile(Stream, string, string)"/>
+    /// reads them: one ends at a line that ends with the delimiter.
+    /// </summary>
+    internal static async IAsyncEnumerable<string> ReadDumpStatementsAsync(StreamReader reader, string delimiter = ";")
+    {
+        string commandText;
+
+        while ((commandText = await reader.ReadLineAsync()) != null)
+        {
+            if (!commandText.EndsWith(delimiter))
+            {
+                var sb = new StringBuilder(commandText);
+                var newline = "";
+
+                while (!newline.EndsWith(delimiter))
+                {
+                    newline = await reader.ReadLineAsync();
+                    if (string.IsNullOrEmpty(newline))
+                    {
+                        break;
+                    }
+
+                    sb.Append(newline);
+                }
+
+                commandText = sb.ToString();
+            }
+
+            yield return commandText;
+        }
     }
 
     // A dump brings back a past state of every portal, as an archive does (WebStudioModuleSpecifics.TryPrepareRow):
     // the portals may have delivered the pending events after the dump was taken, so the schedule and the leases of
     // the source's senders are dropped, and a row that was never attempted says why it never was. The dump keeps the
     // ids, so the rows are changed in place. response_payload goes first: MySQL assigns left to right and would
-    // otherwise see next_attempt_on already cleared.
+    // otherwise see next_attempt_on already cleared. scheduledOnly limits it to the rows a sender could claim, which
+    // the next_attempt_on index finds without reading the rest of the journal.
+    private static DbCommand CreateClearWebhookScheduleCommand(DbConnection connection, DbTransaction transaction, bool scheduledOnly)
+    {
+        var command = connection.CreateCommand().WithTimeout(120);
+        command.Transaction = transaction;
+        command.CommandText =
+            "update webhooks_logs " +
+            "set " +
+            "  response_payload = case when response_payload is null and attempts = 0 and next_attempt_on is not null then @note else response_payload end, " +
+            "  next_attempt_on = null, " +
+            "  lease_id = null " +
+            (scheduledOnly ? "where next_attempt_on is not null" : "where next_attempt_on is not null or lease_id is not null");
+
+        var note = command.CreateParameter();
+        note.ParameterName = "@note";
+        note.Value = DbWorker.RestoredFromBackupNote;
+        command.Parameters.Add(note);
+
+        return command;
+    }
+
     private async Task ClearWebhookScheduleAsync()
     {
         try
         {
             await using var connection = DbFactory.OpenConnection();
-            var command = connection.CreateCommand().WithTimeout(120);
-            command.CommandText =
-                "update webhooks_logs " +
-                "set " +
-                "  response_payload = case when response_payload is null and attempts = 0 and next_attempt_on is not null then @note else response_payload end, " +
-                "  next_attempt_on = null, " +
-                "  lease_id = null " +
-                "where next_attempt_on is not null or lease_id is not null";
 
-            var note = command.CreateParameter();
-            note.ParameterName = "@note";
-            note.Value = DbWorker.RestoredFromBackupNote;
-            command.Parameters.Add(note);
-
-            var count = await command.ExecuteNonQueryAsync(_cancellationToken);
+            var count = await CreateClearWebhookScheduleCommand(connection, null, scheduledOnly: false).ExecuteNonQueryAsync(_cancellationToken);
             options.DebugClearWebhookSchedule(count);
         }
         catch (DbException ex) when (IsMissingSchemaObject(ex))

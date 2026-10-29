@@ -46,9 +46,12 @@ namespace ASC.Api.Core.Webhook.Payloads;
 /// The user a user.* webhook is about.
 /// </summary>
 /// <remarks>
-/// All dates are in UTC. The quota fields go only to a DocSpace admin and to the user themselves, and the author of the
-/// account only to a DocSpace admin. A subscription owner of the `User` or `Guest` type, who may not see the contacts of
-/// other users, gets someone else's profile without the groups, the department and the profile link.
+/// All dates are in UTC. The fields are cut for the owner of the receiving subscription by the rules the REST API
+/// applies to that owner as a reader. The quota fields (`usedSpace`, `quotaLimit`, `isCustomQuota`) go only to a
+/// DocSpace admin and to the user themselves, and the author of the account (`createdBy`) only to a DocSpace admin. A
+/// subscription owner of the `User` or `Guest` type, who may not see the contacts of other users, gets someone else's
+/// profile without any contact data: `groups`, `department`, `profileUrl`, `userName`, `email`, `mobilePhone` and
+/// `contacts` are all left out.
 /// </remarks>
 public class UserWebhookDto
 {

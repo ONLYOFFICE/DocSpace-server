@@ -84,10 +84,6 @@ public class WebhookFixtureCaptureTests(
 
         _capturedTriggers.Where(t => !captured.ContainsKey(t)).Should().BeEmpty("every family the suite drives should have been delivered");
 
-        // two files are created and their deliveries may arrive in either order; the fixture is always the first file
-        captured["file.created"] = (await receiver.GetDeliveriesAsync())
-            .Should().Contain(d => TriggerOf(d.Body) == "file.created" && d.Body.Contains("\"title\":\"Report.docx\""), "the first file was created").Which;
-
         // user.updated comes from the subscription scoped to that member, so the fixture carries webhook.target; of
         // the rename and the termination it takes the rename, which shows an active member
         captured["user.updated"] = (await targetReceiver.WaitForDeliveriesAsync(2))
@@ -169,7 +165,9 @@ public class WebhookFixtureCaptureTests(
 
     /// <summary>
     /// Polls the receiver until it holds a delivery of every captured trigger, and returns the first delivery of each
-    /// trigger it got, by <c>event.trigger</c>.
+    /// trigger it got, by <c>event.trigger</c>. Two files are created and their deliveries may arrive in either order;
+    /// the file.created fixture is always the first file, so only its delivery counts for that trigger and the poll
+    /// goes on until it is there.
     /// </summary>
     private static async Task<Dictionary<string, ReceivedDelivery>> WaitForTriggersAsync(WebhookReceiver receiver)
     {
@@ -181,7 +179,14 @@ public class WebhookFixtureCaptureTests(
 
             foreach (var delivery in await receiver.GetDeliveriesAsync())
             {
-                byTrigger.TryAdd(TriggerOf(delivery.Body), delivery);
+                var trigger = TriggerOf(delivery.Body);
+
+                if (trigger == "file.created" && !delivery.Body.Contains("\"title\":\"Report.docx\"", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                byTrigger.TryAdd(trigger, delivery);
             }
 
             if (_capturedTriggers.All(byTrigger.ContainsKey) || DateTime.UtcNow >= deadline)

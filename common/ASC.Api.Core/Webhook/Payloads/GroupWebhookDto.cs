@@ -90,7 +90,7 @@ public class GroupWebhookDto
     /// <summary>
     /// The user who manages the group. Absent when the group has no manager. A
     /// subscription owner of the `User` or `Guest` type, who may not see the contacts of other users, gets it without
-    /// the user name and the profile link.
+    /// the user name and the profile link, unless that owner is the manager.
     /// </summary>
     public UserSummaryWebhookDto Manager { get; set; }
 

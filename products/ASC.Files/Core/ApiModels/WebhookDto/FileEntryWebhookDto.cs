@@ -178,8 +178,10 @@ public abstract class FileEntryWebhookDto<T>
 }
 
 /// <summary>
-/// The flat part of a file.*, folder.*, room.*, agent.* or form.* webhook payload. The links and the author and
-/// last editor need services and are filled in by <see cref="FileEntryWebhookDtoHelper"/>.
+/// The flat part of a file.*, folder.*, room.*, agent.* or form.* webhook payload. The links, the author and last
+/// editor, the type of the parent room and, for a third-party entry, the section it sits in need services and are
+/// filled in by <see cref="FileEntryWebhookDtoHelper"/>: a plain DAO read of the entry, which every payload is built
+/// from, leaves the parent room type unset (only listings fill it) and has the storage root as the root.
 /// </summary>
 /// <remarks>
 /// Mapperly cannot generate an open generic mapping, and IncludeMappingConfiguration does not carry over from
@@ -231,6 +233,7 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(File<int>.Encrypted), nameof(FileWebhookDto<int>.Encrypted), Use = nameof(NullIfFalse))]
     [MapProperty(nameof(File<int>.IsPdf), nameof(FileWebhookDto<int>.IsForm), Use = nameof(NullIfFalse))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.UpdatedBy))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ViewUrl))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.WebUrl))]
@@ -250,6 +253,7 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(File<int>.Encrypted), nameof(FileWebhookDto<int>.Encrypted), Use = nameof(NullIfFalse))]
     [MapProperty(nameof(File<int>.IsPdf), nameof(FileWebhookDto<int>.IsForm), Use = nameof(NullIfFalse))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.UpdatedBy))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.ViewUrl))]
     [MapperIgnoreTarget(nameof(FileWebhookDto<int>.WebUrl))]
@@ -265,8 +269,8 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(Folder<int>.ProviderId), nameof(FolderWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
     [MapPropertyFromSource(nameof(FolderWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
     [MapProperty(nameof(Folder<int>.FolderType), nameof(FolderWebhookDto<int>.Type))]
-    [MapProperty(nameof(Folder<int>.Shareable), nameof(FolderWebhookDto<int>.IsShareable), Use = nameof(NullIfFalse))]
     [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.UpdatedBy))]
     private static partial FolderWebhookDto<int> MapFolderInt(Folder<int> source);
 
@@ -276,8 +280,8 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(Folder<int>.ProviderId), nameof(FolderWebhookDto<int>.ProviderId), Use = nameof(NullIfZero))]
     [MapPropertyFromSource(nameof(FolderWebhookDto<int>.Updated), Use = nameof(GetUpdated))]
     [MapProperty(nameof(Folder<int>.FolderType), nameof(FolderWebhookDto<int>.Type))]
-    [MapProperty(nameof(Folder<int>.Shareable), nameof(FolderWebhookDto<int>.IsShareable), Use = nameof(NullIfFalse))]
     [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(FolderWebhookDto<int>.UpdatedBy))]
     private static partial FolderWebhookDto<string> MapFolderString(Folder<string> source);
 
@@ -296,6 +300,7 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(Folder<int>.Counter), nameof(RoomWebhookDto<int>.UsedSpace))]
     [MapProperty(nameof(Folder<int>.SettingsQuota), nameof(RoomWebhookDto<int>.QuotaLimit), Use = nameof(GetQuotaLimit))]
     [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.UpdatedBy))]
     private static partial RoomWebhookDto<int> MapRoomInt(Folder<int> source);
 
@@ -314,6 +319,7 @@ public static partial class FileEntryWebhookDtoMapper
     [MapProperty(nameof(Folder<int>.Counter), nameof(RoomWebhookDto<int>.UsedSpace))]
     [MapProperty(nameof(Folder<int>.SettingsQuota), nameof(RoomWebhookDto<int>.QuotaLimit), Use = nameof(GetQuotaLimit))]
     [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.CreatedBy))]
+    [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.ParentRoomType))]
     [MapperIgnoreTarget(nameof(RoomWebhookDto<int>.UpdatedBy))]
     private static partial RoomWebhookDto<string> MapRoomString(Folder<string> source);
 

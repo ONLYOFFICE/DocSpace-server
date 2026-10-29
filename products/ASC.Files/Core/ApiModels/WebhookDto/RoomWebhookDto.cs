@@ -93,8 +93,9 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
 
     /// <summary>
     /// The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has no quota of its own,
-    /// so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's
-    /// creator may not edit the room. Unlike `quotaLimit` of the REST API, it is the stored value whether or not room
+    /// so the portal's default room quota applies, if room quotas are on, and absent as well for a subscription whose
+    /// creator the REST API would not show a room quota to: one who may neither edit the room nor create in it and is
+    /// not its editor, or, for a room in the archive, may not delete it. Unlike `quotaLimit` of the REST API, it is the stored value whether or not room
     /// quotas are turned on and wherever the room lies, the archive included, and it carries no default quota.
     /// </summary>
     /// <example>10737418240</example>

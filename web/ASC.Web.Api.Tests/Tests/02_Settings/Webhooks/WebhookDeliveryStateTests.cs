@@ -200,7 +200,8 @@ public class WebhookDeliveryStateTests(
         record.Attempts.Should().Be(2);
 
         var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null);
-        config!.Enabled.Should().BeTrue("a subscription is disabled only once the retries of an event have run out");
+        config!.LastSuccessOn.Should().NotBeNull();
+        await AssertSubscriptionStaysAsync(subscription.Id, c => c.Enabled, "a subscription is disabled only once the retries of an event have run out");
     }
 
     [Fact]
@@ -222,7 +223,6 @@ public class WebhookDeliveryStateTests(
 
         record.Attempts.Should().Be(ProfileRetryCount + 1);
 
-        var config = await GetSubscriptionAsync(subscription.Id);
-        config!.Enabled.Should().BeTrue();
+        await AssertSubscriptionStaysAsync(subscription.Id, c => c.Enabled, "a success an hour ago keeps the subscription from being disabled");
     }
 }

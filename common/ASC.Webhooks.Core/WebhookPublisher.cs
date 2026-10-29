@@ -284,6 +284,8 @@ public class WebhookPublisher(
     // Once the row is written the delivery happens: the sender's sweep claims a due row whether or not the event that
     // wakes it arrives. So the row is announced right after the write, and the event is best effort like the
     // announcement (which logs its own failure): a bus that is down must not hide the record from the open journals.
+    // A bulk action writes a row per entry and subscription; the socket manager coalesces their announcements per
+    // subscription within the scope (WebhookSocketManager.AddWebhookLogAsync), so this stays one call per row.
     private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog, DbWebhooksConfig webhookConfig)
     {
         webhookLog.Attempts = 0;

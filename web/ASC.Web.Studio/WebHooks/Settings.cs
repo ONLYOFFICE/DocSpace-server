@@ -52,12 +52,13 @@ public class Settings
 
         RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : [.. WebhookDelivery.DefaultRetryIntervals];
 
-        // an interval of zero or less schedules the retry at once, so a failing event would use up its attempts back to
-        // back, and a negative one shortens the retry window the unsent rows are stopped by
-        var badInterval = Array.FindIndex(RetryIntervals, i => i <= TimeSpan.Zero);
-        if (badInterval >= 0)
+        // an interval of zero or less, or one of a few milliseconds, schedules the retry at once, so a failing event
+        // would use up its attempts back to back, and then disable its subscription; a negative one also shortens the
+        // retry window the unsent rows are stopped by
+        var shortInterval = Array.FindIndex(RetryIntervals, i => i < MinRetryInterval);
+        if (shortInterval >= 0)
         {
-            logger.WarningRetryIntervalNotPositive(RetryIntervals[badInterval]);
+            logger.WarningRetryIntervalTooShort(RetryIntervals[shortInterval], MinRetryInterval);
             RetryIntervals = [.. WebhookDelivery.DefaultRetryIntervals];
         }
 
@@ -94,7 +95,15 @@ public class Settings
         }
 
         Blacklist = cfg.Blacklist ?? [];
-        RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : WebhookDelivery.DefaultRequestTimeout;
+        RequestTimeout = cfg.RequestTimeout ?? WebhookDelivery.DefaultRequestTimeout;
+
+        // a deadline of a few milliseconds times out every attempt before any target can answer, so every event would
+        // use up its retries and every subscription of every portal would be disabled
+        if (RequestTimeout < MinRequestTimeout)
+        {
+            logger.WarningRequestTimeoutTooShort(RequestTimeout.Value, MinRequestTimeout, WebhookDelivery.DefaultRequestTimeout);
+            RequestTimeout = WebhookDelivery.DefaultRequestTimeout;
+        }
 
         // the lease of a claimed batch is derived from the request timeout (WorkerService), so an unbounded value would
         // keep the rows of an instance that died mid-send, and every manual retry of their events, waiting for as long
@@ -112,6 +121,12 @@ public class Settings
     }
 
     /// <summary>
+    /// The shortest webhooks:retryIntervals entry taken; a list with a shorter one is replaced by the default intervals.
+    /// Half a second still spaces attempts at the sender's own pace; the integration-test profile retries that fast.
+    /// </summary>
+    public static readonly TimeSpan MinRetryInterval = TimeSpan.FromMilliseconds(500);
+
+    /// <summary>
     /// The longest webhooks:retryIntervals entry taken; a list with a longer one is replaced by the default intervals.
     /// </summary>
     public static readonly TimeSpan MaxRetryInterval = TimeSpan.FromDays(7);
@@ -125,6 +140,11 @@ public class Settings
     /// The most days webhooks:trustedDaysCount and webhooks:journalRetentionDays may name; a larger value is cut to it.
     /// </summary>
     public const int MaxDays = 3650;
+
+    /// <summary>
+    /// The shortest webhooks:requestTimeout taken; a shorter one is replaced by the default timeout.
+    /// </summary>
+    public static readonly TimeSpan MinRequestTimeout = TimeSpan.FromSeconds(1);
 
     /// <summary>
     /// The longest webhooks:requestTimeout taken; a longer one is cut to it.

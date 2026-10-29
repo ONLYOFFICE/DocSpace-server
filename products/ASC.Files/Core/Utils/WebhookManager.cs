@@ -43,6 +43,61 @@ public class WebhookManager(
     FileEntryWebhookDtoHelper fileEntryWebhookDtoHelper,
     ILogger<WebhookManager> logger)
 {
+    // the origins of trashed files a bulk operation has read for a whole batch (PrefetchAsync); a per-operation memo,
+    // each entry taken once by the payload of its file
+    private readonly Dictionary<int, OriginData> _prefetchedOrigins = new();
+
+    /// <summary>
+    /// Reads, in one query each, what the payloads of a batch of files need beyond the files themselves - the lock
+    /// and custom-filter tags, and the origins of the files in the trash - for a bulk operation about to publish
+    /// <paramref name="trigger"/> for every file of the batch. Without it each payload reads them for its own file.
+    /// Best effort: nothing is read for a trigger nobody subscribes to, and a failure is logged and leaves each payload
+    /// to read its own.
+    /// </summary>
+    public async Task PrefetchAsync<T>(WebhookTrigger trigger, IReadOnlyCollection<File<T>> files)
+    {
+        try
+        {
+            if (files.Count == 0 || !await webhookPublisher.HasWebhookConfigsAsync(trigger))
+            {
+                return;
+            }
+
+            await fileEntryWebhookDtoHelper.PrefetchTagsAsync(files);
+
+            var trashed = files.OfType<File<int>>().Where(f => f.RootFolderType == FolderType.TRASH).Select(f => f.Id).ToList();
+
+            if (trashed.Count == 0)
+            {
+                return;
+            }
+
+            var trashedIds = trashed.Select(id => id.ToString()).ToHashSet();
+            var origins = new Dictionary<int, OriginData>();
+
+            await foreach (var data in daoFactory.GetFolderDao<int>().GetOriginsDataAsync(trashed))
+            {
+                foreach (var (id, type) in data.Entries)
+                {
+                    if (type == FileEntryType.File && trashedIds.Contains(id))
+                    {
+                        origins[int.Parse(id)] = data;
+                    }
+                }
+            }
+
+            // a file of the batch with no origin data gets none either way: it is not read again for that
+            foreach (var id in trashed)
+            {
+                _prefetchedOrigins[id] = origins.GetValueOrDefault(id);
+            }
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.WarnPrefetchWebhook(trigger, e);
+        }
+    }
+
     /// <summary>
     /// Whether some subscription to <paramref name="trigger"/> has a creator who may receive it now, regardless of the
     /// entry: the check a bulk operation makes once before it prepares the event of every entry. False as well when
@@ -111,7 +166,7 @@ public class WebhookManager(
         var entry = await GetPureFileEntry(fileEntry) ?? fileEntry;
         await SetTrashOriginsAsync(entry);
 
-        var payload = await fileEntryWebhookDtoHelper.GetAsync(entry);
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(entry, trigger);
 
         return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, entry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, entry, subscriberId));
@@ -122,7 +177,7 @@ public class WebhookManager(
     /// <paramref name="fileEntry"/>: who receives the event and what each of them may see in it (the quota of a room
     /// goes only to those who may edit the room) is decided while the entry and its access records still exist.
     /// </summary>
-    public async Task<Func<Task>> PrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    private async Task<Func<Task>> PrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
         if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
         {
@@ -142,7 +197,7 @@ public class WebhookManager(
         // an entry deleted from the trash carries the origins its file.trashed or folder.trashed carried
         await SetTrashOriginsAsync(pureFileEntry);
 
-        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry, trigger);
 
         return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, pureFileEntry, subscriberId));
@@ -224,7 +279,7 @@ public class WebhookManager(
             return () => Task.CompletedTask;
         }
 
-        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry, trigger);
 
         return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, pureFileEntry, subscriberId));
@@ -279,8 +334,11 @@ public class WebhookManager(
             return;
         }
 
-        var data = await daoFactory.GetFolderDao<int>().GetOriginsDataAsync([internalEntry.Id])
-            .FirstOrDefaultAsync(d => d.Entries.Contains(new KeyValuePair<string, FileEntryType>(internalEntry.Id.ToString(), internalEntry.FileEntryType)));
+        // read for the whole batch by PrefetchAsync, and taken once: a later event about the entry reads it again
+        var data = internalEntry.FileEntryType == FileEntryType.File && _prefetchedOrigins.Remove(internalEntry.Id, out var prefetched)
+            ? prefetched
+            : await daoFactory.GetFolderDao<int>().GetOriginsDataAsync([internalEntry.Id])
+                .FirstOrDefaultAsync(d => d.Entries.Contains(new KeyValuePair<string, FileEntryType>(internalEntry.Id.ToString(), internalEntry.FileEntryType)));
 
         if (data?.OriginRoom != null && data.OriginRoom.FolderType.IsRoom())
         {

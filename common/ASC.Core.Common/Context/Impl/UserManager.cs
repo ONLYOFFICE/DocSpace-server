@@ -649,9 +649,9 @@ public class UserManager(
     }
 
     /// <summary>
-    /// How many active and pending members a group that is not a system group has, counted from the cached membership
-    /// refs and users of the tenant. The members of a system group follow from the user types: count those with
-    /// <see cref="GetUsersByGroupAsync"/>.
+    /// How many active and pending members a group that is not a system group has, counted by one uncached SQL query
+    /// over the membership rows and users of the tenant (the user cache passes it straight through). The members of a
+    /// system group follow from the user types: count those with <see cref="GetUsersByGroupAsync"/>.
     /// </summary>
     public Task<int> GetGroupMembersCountAsync(Guid groupId)
     {

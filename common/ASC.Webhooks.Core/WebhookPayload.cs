@@ -123,6 +123,7 @@ public class WebhookPayloadEventInfo
     /// retry is a delivery-log record of its own, but it still sends the ID of the first one. The same ID therefore
     /// always means the same logical event. It is also echoed in the x-docspace-event-id header.
     /// </summary>
+    /// <example>1234</example>
     public int Id { get; set; }
 
     /// <summary>
@@ -130,21 +131,25 @@ public class WebhookPayloadEventInfo
     /// says nothing about when the request was sent: a freshness check on it would reject legitimate retries, and the
     /// replay defence is deduplication on `id`. Echoed in the unsigned x-docspace-event-timestamp header.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
     /// The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for background jobs.
     /// </summary>
+    /// <example>9924256a-739c-462b-be1a-e1d3a1d6f2d4</example>
     public Guid CreateBy { get; set; }
 
     /// <summary>
     /// The trigger name, e.g. "file.created". "*" only in the legacy-payload fallback.
     /// </summary>
+    /// <example>file.created</example>
     public string Trigger { get; set; }
 
     /// <summary>
     /// The bit value of the trigger. Omitted when 0, the "*" fallback.
     /// </summary>
+    /// <example>128</example>
     public long TriggerId { get; set; }
 }
 
@@ -154,7 +159,8 @@ public class WebhookPayloadEventInfo
 public class WebhookPayloadTargetInfo<T>
 {
     /// <summary>
-    /// The ID of the entity.
+    /// The ID of the entity: the GUID of the user or group for user.* and group.* events, the entry ID of the file,
+    /// folder or room otherwise.
     /// </summary>
     public T Id { get; set; }
 
@@ -163,6 +169,7 @@ public class WebhookPayloadTargetInfo<T>
     /// Deliberately not an enum: every new trigger family adds a value, and a receiver built against an older
     /// contract must keep parsing it.
     /// </summary>
+    /// <example>file</example>
     public string Type { get; set; }
 }
 
@@ -174,21 +181,25 @@ public class WebhookPayloadConfigInfo<T2>
     /// <summary>
     /// The subscription ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The subscription name given by its creator.
     /// </summary>
+    /// <example>Room activity</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The URL the delivery is posted to.
     /// </summary>
+    /// <example>https://example.com/hooks/docspace</example>
     public string Url { get; set; }
 
     /// <summary>
     /// The subscribed events, or ["*"] for the catch-all.
     /// </summary>
+    /// <example>["file.created", "file.updated"]</example>
     public string[] Triggers { get; set; }
 
     /// <summary>
@@ -200,18 +211,21 @@ public class WebhookPayloadConfigInfo<T2>
     /// When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry, together with
     /// `retryCount`; absent on a first attempt, the first attempt of a manual retry included.
     /// </summary>
+    /// <example>2024-01-15T10:29:00Z</example>
     public DateTime? LastFailureOn { get; set; }
 
     /// <summary>
     /// What the receiver answered, or the network error, when the last delivery to this subscription failed. Sent
     /// only on an automatic retry, like `lastFailureOn`.
     /// </summary>
+    /// <example>502 Bad Gateway</example>
     public string LastFailureContent { get; set; }
 
     /// <summary>
     /// When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry, like
     /// `lastFailureOn`; absent there too when no delivery has succeeded yet.
     /// </summary>
+    /// <example>2024-01-15T09:12:00Z</example>
     public DateTime? LastSuccessOn { get; set; }
 
     /// <summary>
@@ -220,10 +234,12 @@ public class WebhookPayloadConfigInfo<T2>
     /// `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated `event.id` shows that the event was sent
     /// before.
     /// </summary>
+    /// <example>2</example>
     public int RetryCount { get; set; }
 
     /// <summary>
     /// When this retry was sent, in UTC, cut to whole seconds. Sent only on an automatic retry, like `lastFailureOn`.
     /// </summary>
+    /// <example>2024-01-15T10:31:00Z</example>
     public DateTime? RetryOn { get; set; }
 }

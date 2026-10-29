@@ -136,8 +136,7 @@ public class WebhookDeliveryTests(
 
         (await receiver.GetDeliveriesAsync()).Should().HaveCount(AttemptsInAll);
 
-        var config = await GetSubscriptionAsync(subscription.Id);
-        config!.Enabled.Should().BeTrue("a subscription is only disabled once it has gone days without a success");
+        await AssertSubscriptionStaysAsync(subscription.Id, c => c.Enabled, "a subscription is only disabled once it has gone days without a success");
     }
 
     [Fact]

@@ -35,7 +35,8 @@ namespace ASC.Webhooks.Contract;
 
 /// <summary>
 /// The part of the contract the payload types cannot say: <c>info</c> with the serialization and transport notes,
-/// the description of the trigger map and the <see cref="SchemaBuilder.EntryIdSchema"/> schema. Built as
+/// the description of the trigger map and the <see cref="SchemaBuilder.EntryIdSchema"/> and
+/// <see cref="SchemaBuilder.TargetIdSchema"/> schemas. Built as
 /// <c>Microsoft.OpenApi</c> objects, as the REST documents build theirs in <c>OpenApiExtension</c>, with the
 /// transport numbers and header names read from <see cref="WebhookDelivery"/>, so the text follows the sender.
 /// </summary>
@@ -88,7 +89,7 @@ internal static class ContractHeader
     /// </summary>
     private static readonly Dictionary<WebhookTrigger, string> _notRaisedFor = new()
     {
-        [WebhookTrigger.UserUpdated] = "Not raised when only the groups of a user change - adding to, moving between or removing from a group, or becoming its manager: that is `group.updated` of each group concerned, and the `groups` of the user's payload are read again from the next `user.*` event."
+        [WebhookTrigger.UserUpdated] = "Not raised when the groups of a user are changed through the group API - `PUT api/2.0/group/{id}`, `POST`, `PUT` and `DELETE api/2.0/group/{id}/members`, `PUT api/2.0/group/{fromId}/members/{toId}` and `PUT api/2.0/group/{id}/manager`: those raise `group.updated` of each group concerned instead, and the `groups` of the user's payload are read again from the next `user.*` event. A change of the `department` list through `PUT api/2.0/people/{userId}` is the other way round: it arrives as `user.updated` of that user, and the groups it adds the user to or removes them from raise no `group.updated`; `department` given on creating a profile arrives within its `user.created` only."
     };
 
     /// <summary>
@@ -116,6 +117,15 @@ internal static class ContractHeader
             OneOf = [new OpenApiSchema { Type = JsonSchemaType.Integer }, new OpenApiSchema { Type = JsonSchemaType.String }]
         };
 
+        var targetId = new OpenApiSchema
+        {
+            Description = "The ID of the entity a subscription is scoped to, which depends on the trigger family: the " +
+                          "GUID of the user or group, as a string, for user.* and group.* events, and an entry ID for " +
+                          "file, folder, room, form and agent events - an integer for DocSpace's own storage, a string " +
+                          "for a third-party provider.\n",
+            OneOf = [new OpenApiSchema { Type = JsonSchemaType.Integer }, new OpenApiSchema { Type = JsonSchemaType.String }]
+        };
+
         return new YamlMappingNode
         {
             { "openapi", "3.1.0" },
@@ -127,7 +137,13 @@ internal static class ContractHeader
             {
                 "components", new YamlMappingNode
                 {
-                    { "schemas", new YamlMappingNode { { SchemaBuilder.EntryIdSchema, ToYaml(entryId.SerializeAsV31) } } }
+                    {
+                        "schemas", new YamlMappingNode
+                        {
+                            { SchemaBuilder.EntryIdSchema, ToYaml(entryId.SerializeAsV31) },
+                            { SchemaBuilder.TargetIdSchema, ToYaml(targetId.SerializeAsV31) }
+                        }
+                    }
                 }
             }
         };

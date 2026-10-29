@@ -41,8 +41,11 @@ internal static partial class SettingsLogger
     [LoggerMessage(LogLevel.Warning, "webhooks:repeatcount is no longer read: retries follow webhooks:retryIntervals, a list of TimeSpan values")]
     public static partial void WarningObsoleteRepeatCount(this ILogger<Settings> logger);
 
-    [LoggerMessage(LogLevel.Warning, "webhooks:retryIntervals has an interval of {interval}, which is not positive: the default intervals are taken instead")]
-    public static partial void WarningRetryIntervalNotPositive(this ILogger<Settings> logger, TimeSpan interval);
+    [LoggerMessage(LogLevel.Warning, "webhooks:retryIntervals has an interval of {interval}, shorter than {minInterval}: the default intervals are taken instead")]
+    public static partial void WarningRetryIntervalTooShort(this ILogger<Settings> logger, TimeSpan interval, TimeSpan minInterval);
+
+    [LoggerMessage(LogLevel.Warning, "webhooks:requestTimeout {requestTimeout} is shorter than {minRequestTimeout}: {defaultRequestTimeout} is taken instead")]
+    public static partial void WarningRequestTimeoutTooShort(this ILogger<Settings> logger, TimeSpan requestTimeout, TimeSpan minRequestTimeout, TimeSpan defaultRequestTimeout);
 
     [LoggerMessage(LogLevel.Warning, "webhooks:retryIntervals has an interval of {interval}, longer than {maxInterval}: the default intervals are taken instead")]
     public static partial void WarningRetryIntervalTooLong(this ILogger<Settings> logger, TimeSpan interval, TimeSpan maxInterval);

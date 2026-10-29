@@ -684,7 +684,7 @@ public abstract class FilesController<T>(
     /// Lock a file
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
-    [RaisesWebhook(WebhookTrigger.FileUpdated)]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "on every successful call, even one that changes nothing; with `lockFile=false` on a file of the portal storage it is raised twice, once for the unlocking note appended to the version comment and once for the unlock itself")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with its lock state as it now stands", typeof(FileDto<int>))]
     [SwaggerResponse(403, "The caller may not lock or unlock the file")]

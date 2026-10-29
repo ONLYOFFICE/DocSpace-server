@@ -47,8 +47,8 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
 
         result.IsSystem = isSystem ? true : null;
 
-        // a count over the cached membership refs for an ordinary group; the members of a system group follow from the
-        // user types, which only the full list resolves
+        // an uncached SQL count of the membership rows for an ordinary group; the members of a system group follow from
+        // the user types, which only the full list resolves
         result.MembersCount = isSystem
             ? (await userManager.GetUsersByGroupAsync(group.ID)).Length
             : await userManager.GetGroupMembersCountAsync(group.ID);

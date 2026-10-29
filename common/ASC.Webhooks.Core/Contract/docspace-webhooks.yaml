@@ -204,7 +204,7 @@ webhooks:
         - `PUT api/2.0/people/{userId}/photo` (Update a user photo)
         - `DELETE api/2.0/people/{userId}/photo` (Delete a user photo), even when the profile had no avatar
 
-        Not raised when only the groups of a user change - adding to, moving between or removing from a group, or becoming its manager: that is `group.updated` of each group concerned, and the `groups` of the user's payload are read again from the next `user.*` event.
+        Not raised when the groups of a user are changed through the group API - `PUT api/2.0/group/{id}`, `POST`, `PUT` and `DELETE api/2.0/group/{id}/members`, `PUT api/2.0/group/{fromId}/members/{toId}` and `PUT api/2.0/group/{id}/manager`: those raise `group.updated` of each group concerned instead, and the `groups` of the user's payload are read again from the next `user.*` event. A change of the `department` list through `PUT api/2.0/people/{userId}` is the other way round: it arrives as `user.updated` of that user, and the groups it adds the user to or removes them from raise no `group.updated`; `department` given on creating a profile arrives within its `user.created` only.
       tags:
         - user
       parameters:
@@ -595,7 +595,7 @@ webhooks:
         - `POST api/2.0/docs/builder` (Run a document builder script), for each file the queued script saves: `file.created` for a new file, `file.updated` for an existing one
         - `PUT api/2.0/files/file/{fileId}` (Update a file), for a rename that takes effect, and again for a switch to `lastVersion`
         - `PUT api/2.0/files/file/{fileId}/comment` (Update a comment)
-        - `PUT api/2.0/files/file/{fileId}/lock` (Lock a file)
+        - `PUT api/2.0/files/file/{fileId}/lock` (Lock a file), on every successful call, even one that changes nothing; with `lockFile=false` on a file of the portal storage it is raised twice, once for the unlocking note appended to the version comment and once for the unlock itself
         - `POST api/2.0/files/file/{fileId}/restoreversion` (Restore a file version)
         - `PUT api/2.0/files/file/{fileId}/saveediting` (Save edited file content)
         - `PUT api/2.0/files/fileops/deleteversion` (Delete file versions), once for every removed version
@@ -1034,6 +1034,7 @@ webhooks:
         - `PUT api/2.0/files/order` (Set order of files), for every folder in the list whose order changes
         - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
         - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
+        - `PUT api/2.0/files/rooms/{id}` (Update a room), instead when the ID is a folder inside a room rather than the room itself, which a manager of that room may pass and the operation does not refuse
         - `PUT internal/ai/agents/agentquota` (Change the AI agent quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
         - `PUT internal/ai/agents/resetquota` (Reset the AI agents quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
       tags:
@@ -1398,9 +1399,9 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/files/rooms` (Create a room)
+        - `POST api/2.0/files/rooms` (Create a room), unless `roomType` is `AiRoom`
         - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), once the queued operation builds the room
-        - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room)
+        - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room), unless `roomType` is `AiRoom`
         - `POST api/2.0/files/roomtemplate` (Create a room template), for the new template, once the queued operation builds it
         - `POST api/2.0/migration/migrate` (Start migration), for every room the queued import creates
       tags:
@@ -1876,6 +1877,8 @@ webhooks:
 
         Raised by these REST API operations:
 
+        - `POST api/2.0/files/rooms` (Create a room), instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section
+        - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room), instead when `roomType` is `AiRoom`
         - `POST internal/ai/agents` (Create an ai agent)
       tags:
         - agent
@@ -2085,6 +2088,15 @@ components:
       description: >
         Entry identifier. Generic T in the domain types: integer for entries in DocSpace's own storage,
         string for entries backed by a third-party provider. Both occur on the same portal.
+    WebhookTargetId:
+      oneOf:
+        - type: integer
+        - type: string
+      description: >
+        The ID of the entity a subscription is scoped to, which depends on the trigger family: the GUID
+        of the user or group, as a string, for user.* and group.* events, and an entry ID for file, folder,
+        room, form and agent events - an integer for DocSpace's own storage, a string for a third-party
+        provider.
     WebhookEnvelope:
       type: object
       description: >-
@@ -2112,6 +2124,7 @@ components:
             admin UI alike: a manual retry is a delivery-log record of its own, but it still sends the
             ID of the first one. The same ID therefore always means the same logical event. It is also
             echoed in the x-docspace-event-id header.
+          example: 1234
         createOn:
           type: string
           format: date-time
@@ -2120,19 +2133,23 @@ components:
             or manual, so it says nothing about when the request was sent: a freshness check on it would
             reject legitimate retries, and the replay defence is deduplication on `id`. Echoed in the
             unsigned x-docspace-event-timestamp header.
+          example: "2024-01-15T10:30:00Z"
         createBy:
           type: string
           format: uuid
           description: >-
             The ID of the user whose action caused the event. Omitted when it is the empty GUID, as for
             background jobs.
+          example: "9924256a-739c-462b-be1a-e1d3a1d6f2d4"
         trigger:
           type: string
           description: The trigger name, e.g. "file.created". "*" only in the legacy-payload fallback.
+          example: "file.created"
         triggerId:
           type: integer
           format: int64
           description: The bit value of the trigger. Omitted when 0, the "*" fallback.
+          example: 128
     WebhookConfigInfo:
       type: object
       description: The subscription, plus its delivery state at send time.
@@ -2141,17 +2158,23 @@ components:
           type: integer
           format: int32
           description: The subscription ID.
+          example: 1
         name:
           type: string
           description: The subscription name given by its creator.
+          example: "Room activity"
         url:
           type: string
           description: The URL the delivery is posted to.
+          example: "https://example.com/hooks/docspace"
         triggers:
           type: array
           items:
             type: string
           description: The subscribed events, or ["*"] for the catch-all.
+          example:
+            - "file.created"
+            - "file.updated"
         target:
           $ref: '#/components/schemas/WebhookTargetInfo'
         lastFailureOn:
@@ -2161,17 +2184,20 @@ components:
             When the last delivery to this subscription failed, in UTC. Sent only on an automatic retry,
             together with `retryCount`; absent on a first attempt, the first attempt of a manual retry
             included.
+          example: "2024-01-15T10:29:00Z"
         lastFailureContent:
           type: string
           description: >-
             What the receiver answered, or the network error, when the last delivery to this subscription
             failed. Sent only on an automatic retry, like `lastFailureOn`.
+          example: "502 Bad Gateway"
         lastSuccessOn:
           type: string
           format: date-time
           description: >-
             When the last delivery to this subscription succeeded, in UTC. Sent only on an automatic retry,
             like `lastFailureOn`; absent there too when no delivery has succeeded yet.
+          example: "2024-01-15T09:12:00Z"
         retryCount:
           type: integer
           format: int32
@@ -2180,12 +2206,14 @@ components:
             (0); present from attempt 2. A manual retry is a new delivery and starts again from 0, so
             its first attempt carries no `retryCount`, `lastFailureOn` or `lastSuccessOn`; only the repeated
             `event.id` shows that the event was sent before.
+          example: 2
         retryOn:
           type: string
           format: date-time
           description: >-
             When this retry was sent, in UTC, cut to whole seconds. Sent only on an automatic retry, like
             `lastFailureOn`.
+          example: "2024-01-15T10:31:00Z"
     WebhookTargetInfo:
       type: object
       description: >-
@@ -2193,40 +2221,46 @@ components:
         entity.
       properties:
         id:
-          $ref: '#/components/schemas/EntryId'
+          $ref: '#/components/schemas/WebhookTargetId'
         type:
           type: string
           description: >-
             The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent
             today. Deliberately not an enum: every new trigger family adds a value, and a receiver built
             against an older contract must keep parsing it.
+          example: "file"
     UserPayload:
       type: object
       description: |-
         The user a user.* webhook is about.
 
-        All dates are in UTC. The quota fields go only to a DocSpace admin and to the user themselves, and the author of the account only to a DocSpace admin. A subscription owner of the `User` or `Guest` type, who may not see the contacts of other users, gets someone else's profile without the groups, the department and the profile link.
+        All dates are in UTC. The fields are cut for the owner of the receiving subscription by the rules the REST API applies to that owner as a reader. The quota fields (`usedSpace`, `quotaLimit`, `isCustomQuota`) go only to a DocSpace admin and to the user themselves, and the author of the account (`createdBy`) only to a DocSpace admin. A subscription owner of the `User` or `Guest` type, who may not see the contacts of other users, gets someone else's profile without any contact data: `groups`, `department`, `profileUrl`, `userName`, `email`, `mobilePhone` and `contacts` are all left out.
       properties:
         id:
           type: string
           format: uuid
           description: The ID of the user the event is about; `GET api/2.0/people/{userid}` returns the
             full profile by it.
+          example: "9924256a-739c-462b-be1a-e1d3a1d6f2d4"
         displayName:
           type: string
           description: The user's full name in the name order set for the portal, HTML-encoded.
+          example: "Mike Zanyatski"
         firstName:
           type: string
           description: The user's first name as entered in the profile.
+          example: "Mike"
         lastName:
           type: string
           description: The user's last name as entered in the profile.
+          example: "Zanyatski"
         userName:
           type: string
           description: >-
             The unique login name of the user, made from the local part of their email address when the
             account is created. Absent when the subscription's creator is a User or a Guest, who may not
             see the contacts of other users, unless this user is that creator.
+          example: "mike.zanyatski"
         email:
           type: string
           format: email
@@ -2234,6 +2268,7 @@ components:
             The email address the user signs in with and receives notifications at. Absent when the subscription's
             creator is a User or a Guest, who may not see the contacts of other users, unless this user
             is that creator.
+          example: "mike.zanyatski@example.com"
         contacts:
           type: array
           items:
@@ -2248,22 +2283,26 @@ components:
             Whether the account is active or disabled. A disabled user cannot sign in; `terminated` says
             since when. Flags of `EmployeeStatus`: 1 = Active, 2 = Terminated, 4 = Pending, 5 = Default,
             7 = All.
+          example: "Active"
         activationStatus:
           type: integer
           description: >-
             Whether the user has confirmed their email address. The `AutoGenerated` flag is never set
             here. Flags of `EmployeeActivationStatus`: 0 = NotActivated, 1 = Activated, 2 = Pending, 4
             = AutoGenerated.
+          example: "Activated"
         terminated:
           type: string
           format: date-time
           description: When the account was disabled, in UTC. Absent while the account is active.
+          example: "2008-04-10T06:30:00Z"
         department:
           type: string
           description: >-
             The comma-separated names of the groups the user belongs to, as plain text rather than HTML-encoded;
             empty when the user is in no group. Omitted when the subscription owner is a `User` or a `Guest`
             and the event is about someone else.
+          example: "Marketing Team, Sales"
         groups:
           type: array
           items:
@@ -2274,61 +2313,75 @@ components:
         location:
           type: string
           description: The location the user entered in the profile; empty or absent when not filled in.
+          example: "Palo Alto"
         notes:
           type: string
           description: The free-text notes on the user's profile; empty or absent when not filled in.
+          example: "Notes to worker"
         isAdmin:
           type: boolean
           description: >-
             True when the user is a DocSpace admin, who manages the portal settings and every room. False
             for the portal owner, who has every admin right as well: read `isOwner` for that user.
+          example: false
         isRoomAdmin:
           type: boolean
           description: True when the user's type is Room admin, who may create rooms and manage the rooms
             they own.
+          example: false
         isOwner:
           type: boolean
           description: True for the portal owner, the single account that owns the portal.
+          example: false
         isVisitor:
           type: boolean
           description: >-
             True when the user's type is Guest, an external account that works only in the rooms it was
             invited to.
+          example: false
         isCollaborator:
           type: boolean
           description: >-
             True when the user's type is User, who works in the rooms they are invited to but cannot create
             rooms.
+          example: false
         isLDAP:
           type: boolean
           description: True when the account is synchronized from an LDAP directory, which then owns its
             name and email.
+          example: false
         isSSO:
           type: boolean
           description: True when the account came from single sign-on and signs in through the identity
             provider.
+          example: false
         listAdminModules:
           type: array
           items:
             type: string
           description: The IDs of the product modules the user administers. Absent when the user administers
             none.
+          example:
+            - "e67be73d-f9ae-4ce1-8fec-1880cb518cb4"
         cultureName:
           type: string
           description: >-
             The interface language the user chose, as a culture code. Absent when the user follows the
             portal's language.
+          example: "en-US"
         mobilePhone:
           type: string
           description: >-
             The mobile phone number from the user's profile; absent when none is set, and when the subscription's
             creator is a User or a Guest, who may not see the contacts of other users, unless this user
             is that creator.
+          example: "+1 916 555 0100"
         mobilePhoneActivationStatus:
           type: integer
           description: >-
             Whether the mobile phone number has been confirmed, as SMS sign-in confirmation requires.
             Flags of `MobilePhoneActivationStatus`: 0 = NotActivated, 1 = Activated.
+          example: "Activated"
         quotaLimit:
           type: integer
           format: int64
@@ -2336,45 +2389,55 @@ components:
             How much storage the user may use, in bytes; -1 when the limit is switched off for this user.
             Absent when user quotas are turned off on the portal or the portal keeps no storage statistics,
             and for any subscription owner other than a `DocSpaceAdmin` or the user themselves.
+          example: 10737418240
         usedSpace:
           type: number
           format: double
           description: >-
             How much storage the user's files take, in bytes. Absent when the portal keeps no storage
             statistics, and for any subscription owner other than a `DocSpaceAdmin` or the user themselves.
+          example: 12345
         isCustomQuota:
           type: boolean
           description: >-
             True when `quotaLimit` was set for this user individually, false when it is the portal's default
             user quota. Absent whenever `quotaLimit` is absent because quotas are off or statistics are
             not kept, and for any subscription owner other than a `DocSpaceAdmin` or the user themselves.
+          example: false
         createdBy:
           $ref: '#/components/schemas/UserSummaryPayload'
         registrationDate:
           type: string
           format: date-time
           description: When the account was created, in UTC.
+          example: "2008-04-10T06:30:00Z"
         hasAvatar:
           type: boolean
           description: False when the user has not uploaded a photo; the avatar URLs then point to the
             default picture.
+          example: true
         avatar:
           type: string
           description: >-
             The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile
             does.
+          example: "https://example.com/avatar.jpg"
         avatarOriginal:
           type: string
           description: The absolute URL of the original avatar, with the same hash parameter.
+          example: "https://example.com/avatar_original.jpg"
         avatarMax:
           type: string
           description: The absolute URL of the 200x200 avatar, with the same hash parameter.
+          example: "https://example.com/avatar_max.jpg"
         avatarMedium:
           type: string
           description: The absolute URL of the 48x48 avatar, with the same hash parameter.
+          example: "https://example.com/avatar_medium.jpg"
         avatarSmall:
           type: string
           description: The absolute URL of the 32x32 avatar, with the same hash parameter.
+          example: "https://example.com/avatar_small.jpg"
         profileUrl:
           type: string
           description: >-
@@ -2382,6 +2445,7 @@ components:
             it is a search of that list by the user's email address. Absent when the subscription's creator
             is a User or a Guest, who may not see the contacts of other users, unless this user is that
             creator.
+          example: "https://example.onlyoffice.com/accounts/people/filter?search=mike.zanyatski%40example.com"
     ContactPayload:
       type: object
       description: An additional contact from a user's profile.
@@ -2389,10 +2453,12 @@ components:
         type:
           type: string
           description: The kind of contact as stored in the profile, such as `mail`, `phone` or `facebook`.
+          example: "mail"
         value:
           type: string
           description: 'The contact itself: an address, a number or a profile link, as the user entered
             it.'
+          example: "mike.zanyatski@example.com"
     GroupSummaryPayload:
       type: object
       description: A group referenced from another webhook payload.
@@ -2402,18 +2468,22 @@ components:
           format: uuid
           description: The ID of the group; `GET api/2.0/group/{id}` returns the group with its members
             by it.
+          example: "c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c"
         name:
           type: string
           description: The name of the group as it is shown in the portal.
+          example: "Marketing Team"
         manager:
           type: string
           description: The user name of the user who manages the group, not an ID. Absent when the group
             has no manager.
+          example: "Mike.Zanyatski"
         isSystem:
           type: boolean
           description: >-
             `true` for a built-in system group, whose members follow from the user types rather than from
             membership changes. Absent for every other group, never `false`.
+          example: true
     UserSummaryPayload:
       type: object
       description: >-
@@ -2425,20 +2495,24 @@ components:
           format: uuid
           description: The ID of the referenced user; `GET api/2.0/people/{userid}` returns the full profile
             by it.
+          example: "9924256a-739c-462b-be1a-e1d3a1d6f2d4"
         displayName:
           type: string
           description: The user's full name in the name order set for the portal, HTML-encoded.
+          example: "Mike Zanyatski"
         userName:
           type: string
           description: >-
             The unique login name of the user, made from the local part of their email address when the
             account is created. Absent when the subscription's creator is a User or a Guest, who may not
             see the contacts of other users, unless this user is that creator.
+          example: "mike.zanyatski"
         avatar:
           type: string
           description: >-
             The absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile
             does.
+          example: "https://example.com/avatar.jpg"
         profileUrl:
           type: string
           description: >-
@@ -2446,6 +2520,7 @@ components:
             it is a search of that list by the user's email address. Absent when the subscription's creator
             is a User or a Guest, who may not see the contacts of other users, unless this user is that
             creator.
+          example: "https://example.onlyoffice.com/accounts/people/filter?search=mike.zanyatski%40example.com"
     GroupPayload:
       type: object
       description: |-
@@ -2459,29 +2534,35 @@ components:
           description: >-
             The ID of the group the event is about; `GET api/2.0/group/{id}` returns the group with its
             members by it.
+          example: "c652dd0b-fa6e-4bb7-a3b2-9a2e4e6b7d1c"
         name:
           type: string
           description: The name of the group as it is shown in the portal, after a rename the new one.
+          example: "Marketing Team"
         parent:
           type: string
           format: uuid
           description: The parent group ID; absent for a top-level group.
+          example: "3f5c2a1e-8b7d-4e6f-9a0b-1c2d3e4f5a6b"
         category:
           type: string
           format: uuid
           description: >-
             The ID of the group category: the empty GUID for the groups members create, and one fixed
             category ID for the built-in system groups.
+          example: "00000000-0000-0000-0000-000000000000"
         isLDAP:
           type: boolean
           description: >-
             Whether the group is synchronized from an LDAP directory, where its name and members are managed;
             `false` for a group created in the portal.
+          example: false
         isSystem:
           type: boolean
           description: >-
             `true` for a built-in system group, whose members follow from the user types rather than from
             membership changes. Absent for every other group, never `false`.
+          example: true
         manager:
           $ref: '#/components/schemas/UserSummaryPayload'
         membersCount:
@@ -2490,6 +2571,7 @@ components:
           description: >-
             How many users belong to the group at the time of the event, disabled accounts not counted;
             0 for a group without members.
+          example: 12
     FilePayload:
       description: |-
         The file carried by a file.* webhook, and by form.filled.out and form.stopped.
@@ -2504,16 +2586,19 @@ components:
               format: int32
               description: The number of the current version of the file, starting at 1 and growing with
                 every saved version.
+              example: 1
             versionGroup:
               type: integer
               format: int32
               description: >-
                 The number of the version group the current version belongs to; the versions saved during
                 one editing session share a group.
+              example: 1
             contentLength:
               type: integer
               format: int64
               description: The size of the current version of the file in bytes.
+              example: 12345
             fileType:
               type: integer
               description: >-
@@ -2521,29 +2606,36 @@ components:
                 a presentation, a PDF, an image and so on. Values of `FileType`: 0 = Unknown, 1 = Archive,
                 2 = Video, 3 = Audio, 4 = Image, 5 = Spreadsheet, 6 = Presentation, 7 = Document, 10 =
                 Pdf, 11 = Diagram.
+              example: 7
             fileExst:
               type: string
               description: The file extension, including the leading dot.
+              example: ".docx"
             comment:
               type: string
               description: >-
                 The comment saved with the current version, either typed by the user or set by the portal
                 for the action that made the version.
+              example: "Created"
             viewUrl:
               type: string
               description: The URL the file content can be downloaded from. Carries no share token.
+              example: "https://example.com/filehandler.ashx?action=download&fileid=10"
             webUrl:
               type: string
               description: The URL the file can be opened at in a browser. Carries no share token.
+              example: "https://example.com/doceditor?fileid=10"
             encrypted:
               type: boolean
               description: True when the file is end-to-end encrypted in a private room; absent otherwise.
+              example: false
             locked:
               type: boolean
               description: >-
                 True when the file is locked, so that only the user who locked it can edit it; absent
                 otherwise. A file.updated raised by locking or unlocking the file tells the two apart
                 by this field.
+              example: true
             lockedBy:
               $ref: '#/components/schemas/UserSummaryPayload'
             isForm:
@@ -2552,9 +2644,11 @@ components:
                 True for every PDF file, with or without form fields, since the editor can open any PDF
                 as a form; absent for other files. It does not tell a fillable form from an ordinary PDF
                 document.
+              example: true
             customFilterEnabled:
               type: boolean
               description: True when custom filtering is turned on for the spreadsheet; absent otherwise.
+              example: true
             customFilterEnabledBy:
               $ref: '#/components/schemas/UserSummaryPayload'
             vectorizationStatus:
@@ -2562,6 +2656,7 @@ components:
               description: >-
                 The state of the file's indexing for the AI features of the portal; absent when it does
                 not apply. Values of `VectorizationStatus`: 0 = InProgress, 1 = Completed, 2 = Failed.
+              example: 0
     FileEntryPayload:
       type: object
       description: |-
@@ -2578,15 +2673,18 @@ components:
         title:
           type: string
           description: The name of the entry as shown in the portal; for a file it includes the extension.
+          example: "Contract 2026.docx"
         fileEntryType:
           type: integer
           description: >-
             Tells a folder or room payload (1) from a file payload (2), so a receiver can pick the schema
             to read the rest of the object with. Flags of `FileEntryType`: 1 = Folder, 2 = File.
+          example: 2
         created:
           type: string
           format: date-time
           description: When the entry was created, in UTC.
+          example: "2021-01-01T00:00:00Z"
         createdBy:
           $ref: '#/components/schemas/UserSummaryPayload'
         updated:
@@ -2594,6 +2692,7 @@ components:
           format: date-time
           description: When the entry was last changed, in UTC; equal to `created` for an entry that has
             not changed since.
+          example: "2021-01-01T00:00:00Z"
         updatedBy:
           $ref: '#/components/schemas/UserSummaryPayload'
         rootFolderType:
@@ -2606,6 +2705,7 @@ components:
             22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone,
             28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32
             = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+          example: 14
         parentRoomType:
           type: integer
           description: >-
@@ -2616,6 +2716,7 @@ components:
             22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone,
             28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32
             = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+          example: 19
         originId:
           $ref: '#/components/schemas/EntryId'
         originRoomId:
@@ -2623,32 +2724,39 @@ components:
         originTitle:
           type: string
           description: For an entry in the trash, the name of the folder it was deleted from.
+          example: "Q3 Reports"
         originRoomTitle:
           type: string
           description: For an entry in the trash, the name of the room it was deleted from.
+          example: "Marketing Room"
         providerItem:
           type: boolean
           description: True when the entry lives in a connected third-party storage; absent for the portal's
             own storage.
+          example: true
         providerKey:
           type: string
           description: The connected third-party storage the entry lives in; absent for the portal's own
             storage.
+          example: "GoogleDrive"
         providerId:
           type: integer
           format: int32
           description: >-
             The ID of the third-party storage connection the entry comes through; absent for the portal's
             own storage.
+          example: 1
         order:
           type: integer
           format: int32
           description: The position of the entry in a room with indexing turned on; meaningful only inside
             such a room.
+          example: 1
     FolderPayload:
       description: >-
-        The folder carried by a folder.* webhook. A room is never sent in this shape: room.* webhooks
-        carry their own payload.
+        The folder carried by a folder.* webhook. room.* and agent.* webhooks carry a room in their own
+        payload; a room a folder.* webhook is about (folder.downloaded of a whole room) comes in this
+        shape, told apart by `type`.
       allOf:
         - $ref: '#/components/schemas/FileEntryPayload'
         - type: object
@@ -2657,24 +2765,25 @@ components:
               type: integer
               format: int32
               description: The number of files the folder directly contains.
+              example: 0
             foldersCount:
               type: integer
               format: int32
               description: The number of subfolders the folder directly contains.
+              example: 0
             type:
               type: integer
               description: >-
-                The kind of folder: an ordinary one, or one the portal creates and maintains itself, such
-                as the folders of a form-filling room. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON,
-                2 = BUNCH, 3 = TRASH, 5 = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent,
-                12 = Templates, 13 = Privacy, 14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom,
-                19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder,
-                26 = InProcessFormFolder, 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress,
-                29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs,
-                34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
-            isShareable:
-              type: boolean
-              description: True when the folder can be shared; absent otherwise.
+                The kind of folder: an ordinary one, one the portal creates and maintains itself, such
+                as the folders of a form-filling room, or, for a room a folder.* webhook is about, the
+                kind of room. Values of `FolderType`: 0 = DEFAULT, 1 = COMMON, 2 = BUNCH, 3 = TRASH, 5
+                = USER, 6 = SHARE, 8 = Projects, 10 = Favorites, 11 = Recent, 12 = Templates, 13 = Privacy,
+                14 = VirtualRooms, 15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive,
+                21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder,
+                27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30
+                = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates,
+                36 = Forms, 37 = Ai.
+              example: 0
     RoomPayload:
       description: |-
         The room carried by a room.* webhook, and the AI agent carried by every agent.* webhook.
@@ -2690,6 +2799,7 @@ components:
                 The kind of room, which decides what the room is for and which roles it offers. Values
                 of `RoomType`: 1 = FillingFormsRoom, 2 = EditingRoom, 5 = CustomRoom, 6 = PublicRoom,
                 8 = VirtualDataRoom, 9 = AiRoom.
+              example: 2
             type:
               type: integer
               description: >-
@@ -2701,47 +2811,59 @@ components:
                 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom,
                 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37
                 = Ai.
+              example: 16
             filesCount:
               type: integer
               format: int32
               description: The number of files the room directly contains.
+              example: 0
             foldersCount:
               type: integer
               format: int32
               description: The number of folders the room directly contains.
+              example: 0
             private:
               type: boolean
               description: True for a private room, whose files are end-to-end encrypted.
+              example: false
             indexing:
               type: boolean
               description: >-
                 True when the room numbers its files and folders in a fixed order; `order` on each entry
                 is that number.
+              example: false
             denyDownload:
               type: boolean
               description: >-
                 True when downloading, copying and printing the room's files is restricted for those who
                 may only view them.
+              example: false
             quotaLimit:
               type: integer
               format: int64
               description: >-
                 The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has
                 no quota of its own, so the portal's default room quota applies, if room quotas are on,
-                and absent as well when the subscription's creator may not edit the room. Unlike `quotaLimit`
-                of the REST API, it is the stored value whether or not room quotas are turned on and wherever
-                the room lies, the archive included, and it carries no default quota.
+                and absent as well for a subscription whose creator the REST API would not show a room
+                quota to: one who may neither edit the room nor create in it and is not its editor, or,
+                for a room in the archive, may not delete it. Unlike `quotaLimit` of the REST API, it
+                is the stored value whether or not room quotas are turned on and wherever the room lies,
+                the archive included, and it carries no default quota.
+              example: 10737418240
             usedSpace:
               type: integer
               format: int64
               description: The space used by the room in bytes.
+              example: 12345
             color:
               type: string
               description: The background colour of the room icon, as a hex RGB code.
+              example: "#4781D1"
             cover:
               type: string
               description: The name of the cover picture chosen for the room icon; absent when none is
                 chosen.
+              example: "cover-1"
     FormSubmitPayload:
       type: object
       description: |-

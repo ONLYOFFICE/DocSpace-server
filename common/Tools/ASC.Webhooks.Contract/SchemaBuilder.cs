@@ -40,12 +40,16 @@ namespace ASC.Webhooks.Contract;
 /// The property list comes from the publisher's own <see cref="JsonSerializerOptions"/>, so names, casing and
 /// <c>[JsonIgnore]</c> follow the wire. Types are read from the open generic definitions: a property typed by the
 /// entry ID parameter <c>T</c> (an <c>int</c> for DocSpace storage, a <c>string</c> for a third-party provider)
-/// becomes the hand-written <see cref="EntryIdSchema"/>. A <c>$ref</c> property carries no description of its own,
-/// because several generators turn a <c>$ref</c> with siblings into a new inline model.
+/// becomes the hand-written <see cref="EntryIdSchema"/>, except the ID of the envelope's target, which can also be the
+/// GUID of a user or a group and becomes the hand-written <see cref="TargetIdSchema"/>. A property's
+/// <c>&lt;example&gt;</c> becomes its <c>example</c>. A <c>$ref</c> property carries neither a description nor an
+/// example of its own, because several generators turn a <c>$ref</c> with siblings into a new inline model.
 /// </remarks>
 internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentation documentation)
 {
     public const string EntryIdSchema = "EntryId";
+
+    public const string TargetIdSchema = "WebhookTargetId";
 
     public const string EnvelopeSchema = "WebhookEnvelope";
 
@@ -170,13 +174,13 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
             var declaration = GetDeclaration((PropertyInfo)property.AttributeProvider);
             var summary = GetDescription(documentation.GetSummary(declaration), $"{definition.FullName}.{declaration.Name}");
 
-            properties.Add(property.Name, BuildProperty(declaration, summary));
+            properties.Add(property.Name, BuildProperty(declaration, summary, documentation.GetExample(declaration)));
         }
 
         return properties;
     }
 
-    private YamlMappingNode BuildProperty(PropertyInfo declaration, string summary)
+    private YamlMappingNode BuildProperty(PropertyInfo declaration, string summary, string example)
     {
         var type = declaration.PropertyType;
 
@@ -196,13 +200,97 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
         {
             var enumType = Nullable.GetUnderlyingType(type) ?? type;
             AddDescription(schema, enumType.IsEnum && summary != null ? summary + " " + DescribeEnum(enumType, IsWrittenAsString(enumType)) : summary);
+
+            if (example != null)
+            {
+                schema.Add("example", BuildExample(example, schema));
+            }
         }
 
         return schema;
     }
 
+    /// <summary>
+    /// The <c>&lt;example&gt;</c> as the value the schema describes: parsed as JSON where it parses into a value of
+    /// the schema's type (<c>42</c> for an integer, <c>true</c> for a boolean, <c>["file.created"]</c> for an array),
+    /// and taken as the plain string otherwise, so that <c>2024-01-15T10:30:00Z</c> stays a string and an entry ID
+    /// <c>10</c> of a string property is not published as a number.
+    /// </summary>
+    private static YamlNode BuildExample(string example, YamlMappingNode schema)
+    {
+        var type = schema.Children.TryGetValue("type", out var typeNode) ? ((YamlScalarNode)typeNode).Value : null;
+
+        JsonNode parsed;
+
+        try
+        {
+            parsed = JsonNode.Parse(example);
+        }
+        catch (JsonException)
+        {
+            parsed = null;
+        }
+
+        var kind = parsed?.GetValueKind();
+
+        var matches = type switch
+        {
+            "integer" => kind == JsonValueKind.Number && parsed.AsValue().TryGetValue<long>(out _),
+            "number" => kind == JsonValueKind.Number,
+            "boolean" => kind is JsonValueKind.True or JsonValueKind.False,
+            "string" => kind == JsonValueKind.String,
+            "array" => kind == JsonValueKind.Array,
+            "object" => kind == JsonValueKind.Object,
+            null => parsed != null,
+            _ => false
+        };
+
+        return matches ? ToYaml(parsed) : Quoted(example);
+    }
+
+    private static YamlNode ToYaml(JsonNode node)
+    {
+        switch (node)
+        {
+            case JsonObject obj:
+                var mapping = new YamlMappingNode();
+
+                foreach (var (key, value) in obj)
+                {
+                    mapping.Add(key, ToYaml(value));
+                }
+
+                return mapping;
+
+            case JsonArray array:
+                return new YamlSequenceNode(array.Select(ToYaml));
+
+            case JsonValue value when value.TryGetValue<string>(out var text):
+                return Quoted(text);
+
+            default:
+                return new YamlScalarNode(node?.ToJsonString() ?? "null") { Style = ScalarStyle.Plain };
+        }
+    }
+
+    /// <summary>
+    /// A string example is always quoted: written plain, a string such as <c>10</c>, <c>true</c> or a timestamp would
+    /// be read back by a YAML parser as a number, a boolean or a date.
+    /// </summary>
+    private static YamlScalarNode Quoted(string value)
+    {
+        return new YamlScalarNode(value) { Style = ScalarStyle.DoubleQuoted };
+    }
+
     private YamlMappingNode BuildType(Type type, PropertyInfo declaration)
     {
+        // the target of the envelope is the entity the subscription is scoped to, which for user.* and group.* events
+        // is a user or a group, so its ID is not an entry ID
+        if (type.IsGenericParameter && type.DeclaringType == typeof(WebhookPayloadTargetInfo<>))
+        {
+            return Ref(TargetIdSchema);
+        }
+
         if (type.IsGenericParameter)
         {
             return Ref(EntryIdSchema);

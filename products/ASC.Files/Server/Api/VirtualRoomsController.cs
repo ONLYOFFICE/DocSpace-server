@@ -95,7 +95,8 @@ public class VirtualRoomsInternalController(
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated)]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "unless `roomType` is `AiRoom`")]
+    [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
@@ -393,7 +394,8 @@ public class VirtualRoomsThirdPartyController(
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated)]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "unless `roomType` is `AiRoom`")]
+    [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
@@ -482,6 +484,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "on every successful call, even one that changes nothing")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead when the ID is a folder inside a room rather than the room itself, which a manager of that room may pass and the operation does not refuse")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]

@@ -168,9 +168,7 @@ public class WebhookSender(
             // ordinary failed attempt below, with its retry. Only a definitive rejection (scheme, https, blacklist) stops
             if (!validationResult.IsValid && !validationResult.Transient)
             {
-                // a blacklisted target removes the subscription, and its records with it; otherwise the record stays
-                await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.TargetRejectedNote + validationResult.ErrorMessage);
-                await DisableWebhook(validationResult, entry, dbWorker, messageService, socketManager);
+                await DisableWebhook(validationResult, entry, leaseId, dbWorker, messageService, socketManager);
                 return;
             }
 
@@ -292,28 +290,29 @@ public class WebhookSender(
             {
                 throw;
             }
-            catch (HttpRequestException e)
+            // a fault after a 2xx (reading the response for the record) skips these two: the delivery stands, see below
+            catch (HttpRequestException e) when (!succeeded)
             {
                 if (e.StatusCode.HasValue)
                 {
                     status = (int)e.StatusCode.Value;
                 }
 
-                if (e.StatusCode == HttpStatusCode.Gone)
-                {
-                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId, leaseId);
-                    await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-                    messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
-                    await socketManager.DeleteWebhookAsync(entry.Config);
-                    return;
-                }
-
                 responsePayload = e.Message;
                 mayAutoDisable = true;
 
                 logger.WarningWithException(e);
+
+                // the target asks for the subscription to go. Its removal takes this row with it (the records cascade
+                // with their subscription), so it comes first and nothing is left to record; a removal that fails
+                // leaves the row as it was, still leased, and the 410 is recorded below as an ordinary failed attempt,
+                // whose retry asks again
+                if (e.StatusCode == HttpStatusCode.Gone && await TryRemoveGoneWebhookAsync(entry, dbWorker, messageService, socketManager))
+                {
+                    return;
+                }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (!succeeded)
             {
                 responsePayload = $"The target did not answer within {_requestTimeout.TotalSeconds:0} seconds";
                 mayAutoDisable = true;
@@ -322,10 +321,18 @@ public class WebhookSender(
             }
             catch (Exception e)
             {
-                responsePayload = e.Message;
-
-                status = (int)HttpStatusCode.InternalServerError;
                 logger.ErrorWithException(e);
+
+                if (succeeded)
+                {
+                    // the target accepted the request: the delivery and its 2xx stay, the fault only leaves a note
+                    responsePayload = $"Delivered, but the response could not be recorded in full: {e.Message}";
+                }
+                else
+                {
+                    responsePayload = e.Message;
+                    status = (int)HttpStatusCode.InternalServerError;
+                }
             }
 
             var autoDisabled = false;
@@ -603,11 +610,41 @@ public class WebhookSender(
         return DateTime.UtcNow + intervals[attempts - 1] * jitter;
     }
 
-    private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
+    /// <summary>
+    /// Removes the subscription whose target answered 410 Gone, with its records. False, with the fault logged, when
+    /// the removal failed: the row is then still leased, for the caller to record the attempt.
+    /// </summary>
+    private async Task<bool> TryRemoveGoneWebhookAsync(DbWebhooksLog entry, DbWorker dbWorker, MessageService messageService,
+        WebhookSocketManager socketManager)
+    {
+        try
+        {
+            await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorAfterAttempt(entry.Id, "remove the subscription its target reports gone", e);
+
+            return false;
+        }
+
+        messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
+        await socketManager.DeleteWebhookAsync(entry.Config);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Takes a subscription whose target was rejected out of delivery, then ends the attempts of the row. The
+    /// subscription goes first: the row keeps its lease until then, so a failure of that step leaves it to be handed
+    /// back and tried again, rather than stopped with a note that says the subscription was disabled when it was not.
+    /// </summary>
+    private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, Guid leaseId, DbWorker dbWorker,
         MessageService messageService, WebhookSocketManager socketManager)
     {
         if (validationResult.Blacklisted)
         {
+            // the records go with the subscription, this row among them, so nothing is left to stop
             await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
             messageService.SendHeadersMessage(MessageAction.WebhookDeleted,
                 MessageTarget.Create(entry.ConfigId), null,
@@ -617,14 +654,22 @@ public class WebhookSender(
             return;
         }
 
-        // the record stays, with the note of why it was not sent
-        await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);
+        var disabled = await dbWorker.DisableWebhookConfigAsync(entry.TenantId, entry.ConfigId, entry.Config.Uri);
 
-        if (await dbWorker.DisableWebhookConfigAsync(entry.TenantId, entry.ConfigId, entry.Config.Uri))
+        // the audit right after the change it records, so a later step cannot lose it
+        if (disabled)
         {
             messageService.SendHeadersMessage(MessageAction.WebhookUpdated,
                 MessageTarget.Create(entry.ConfigId), null,
                 $"{entry.Config.Name} ({validationResult.ErrorMessage})");
+        }
+
+        // the record stays, with the note of why it was not sent
+        await dbWorker.StopJournalAttemptsAsync(entry.TenantId, entry.Id, leaseId, DbWorker.TargetRejectedNote + validationResult.ErrorMessage);
+        await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);
+
+        if (disabled)
+        {
             await socketManager.UpdateWebhookAsync(entry.Config);
         }
     }

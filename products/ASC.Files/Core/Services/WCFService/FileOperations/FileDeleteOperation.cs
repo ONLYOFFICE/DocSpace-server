@@ -793,6 +793,9 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
         // longer receive the event pays no entry read and no access check per file. A failure drops only the webhook
         if (((hasHeaders && isNeedSendActions) || !hasHeaders) && await webhookManager.HasEntitledSubscribersAsync(WebhookTrigger.FileDeleted))
         {
+            // the tags and the trash origins of the payloads, one query each for the batch instead of per file
+            await webhookManager.PrefetchAsync(WebhookTrigger.FileDeleted, files);
+
             foreach (var file in files)
             {
                 publishByFile[file.Id] = await webhookManager.TryPrepareAsync(WebhookTrigger.FileDeleted, file);

@@ -94,7 +94,7 @@ public class WebhooksController(
     /// absolute `http` or `https` address outside the installation's own network that answers a HEAD request with a
     /// success code, redirects not followed. `secretKey` is mandatory, has to satisfy the password rules of `GET
     /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
-    /// of the subscribed events, 0 standing for all of them; a flag the caller's role may not use is rejected, so take
+    /// of the subscribed events, 0 standing for every event the creator's role may receive; a flag the caller's role may not use is rejected, so take
     /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl` demands an `https` target with a valid
     /// certificate, `false` leaves the certificate unchecked, and left out it is `true` for an `https` target and
     /// `false` for an `http` one.
@@ -130,7 +130,7 @@ public class WebhooksController(
     /// <remarks>
     /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
     /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`
-    /// or `targetId` resets them to off, all events and no target: read the current values with `GET
+    /// or `targetId` resets them to off, the catch-all `0` and no target: read the current values with `GET
     /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:
     /// an empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a
     /// left-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and

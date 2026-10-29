@@ -70,4 +70,62 @@ public class WebhookContractTests
             "Web.Studio serves the contract built into ASC.Webhooks.Core at {0}, so the build must embed the file itself",
             WebhookContract.Route);
     }
+
+    /// <summary>
+    /// The SDK docs and every tool that builds a sample body read the property's <c>example</c>; without one a
+    /// receiver guesses the format of an ID or a timestamp. Checked on the generated document rather than the
+    /// committed one, so it holds for every DTO the generator reaches, envelope included.
+    /// </summary>
+    [Fact]
+    public void GeneratedContract_GivesEveryScalarPropertyAnExample()
+    {
+        var stream = new YamlDotNet.RepresentationModel.YamlStream();
+        stream.Load(new StringReader(WebhookContractGenerator.Generate()));
+
+        var root = (YamlDotNet.RepresentationModel.YamlMappingNode)stream.Documents[0].RootNode;
+        var schemas = (YamlDotNet.RepresentationModel.YamlMappingNode)root["components"]["schemas"];
+
+        string[] scalarTypes = ["string", "integer", "number", "boolean"];
+        var missing = new List<string>();
+        var checkedCount = 0;
+
+        foreach (var (schemaName, schemaNode) in schemas.Children)
+        {
+            var schema = (YamlDotNet.RepresentationModel.YamlMappingNode)schemaNode;
+
+            // a derived payload declares its own properties in the second part of its allOf
+            var parts = schema.Children.TryGetValue("allOf", out var allOf)
+                ? ((YamlDotNet.RepresentationModel.YamlSequenceNode)allOf).Children.Append(schema)
+                : Enumerable.Repeat<YamlDotNet.RepresentationModel.YamlNode>(schema, 1);
+
+            foreach (var part in parts.OfType<YamlDotNet.RepresentationModel.YamlMappingNode>())
+            {
+                if (!part.Children.TryGetValue("properties", out var properties))
+                {
+                    continue;
+                }
+
+                foreach (var (propertyName, propertyNode) in ((YamlDotNet.RepresentationModel.YamlMappingNode)properties).Children)
+                {
+                    var property = (YamlDotNet.RepresentationModel.YamlMappingNode)propertyNode;
+
+                    if (!property.Children.TryGetValue("type", out var type) ||
+                        !scalarTypes.Contains(((YamlDotNet.RepresentationModel.YamlScalarNode)type).Value))
+                    {
+                        continue;
+                    }
+
+                    checkedCount++;
+
+                    if (!property.Children.ContainsKey("example"))
+                    {
+                        missing.Add($"{schemaName}.{propertyName}");
+                    }
+                }
+            }
+        }
+
+        checkedCount.Should().BePositive("the contract publishes scalar properties, so the walk must reach them");
+        missing.Should().BeEmpty("every scalar property of a webhook DTO needs an <example> in its doc comment");
+    }
 }
