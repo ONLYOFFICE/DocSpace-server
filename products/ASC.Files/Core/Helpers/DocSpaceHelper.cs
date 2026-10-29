@@ -67,19 +67,6 @@ public static class DocSpaceHelper
         {
             return folderType is FolderType.Knowledge or FolderType.KnowledgeRoom;
         }
-    }
-
-    /// <summary>
-    /// True when a file placed directly in <paramref name="folderType"/> inside a room of
-    /// <paramref name="roomType"/> belongs to a knowledge base and must be vectorized.
-    /// </summary>
-    public static bool IsKnowledgeScope(FolderType folderType, FolderType roomType)
-    {
-        return folderType.IsKnowledgeStorage() || roomType == FolderType.KnowledgeRoom;
-    }
-
-    extension(FolderType folderType)
-    {
 
         /// <summary>
         /// A section root the whole portal shares (created without a user, see <c>FolderDao.GetFolderID*</c>):

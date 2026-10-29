@@ -108,7 +108,8 @@ public class FileStorageService //: IFileStorageService
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
-    EncryptionLoginProvider encryptionLoginProvider)
+    EncryptionLoginProvider encryptionLoginProvider,
+    AiAccessibility aiAccessibility)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
@@ -670,6 +671,7 @@ public class FileStorageService //: IFileStorageService
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
         await CheckPublicRoomCreationAsync(folderType);
+        await CheckKnowledgeRoomCreationAsync(folderType);
 
         return await CreateRoomAsync(async () =>
         {
@@ -748,6 +750,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
+
+        if (folderType == FolderType.KnowledgeRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
 
         await CheckPublicRoomCreationAsync(folderType);
 
@@ -971,6 +978,7 @@ public class FileStorageService //: IFileStorageService
         var template = await folderDao.GetFolderAsync(templateId);
 
         await CheckPublicRoomCreationAsync(template.FolderType);
+        await CheckKnowledgeRoomCreationAsync(template.FolderType);
 
         WatermarkRequestDto watermarkDto = null;
         if (watermark != null)
@@ -1156,7 +1164,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -6593,6 +6601,19 @@ public class FileStorageService //: IFileStorageService
         if (await externalShare.IsPublicRoomCreationRestrictedAsync())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
+
+    private async Task CheckKnowledgeRoomCreationAsync(FolderType folderType)
+    {
+        if (folderType != FolderType.KnowledgeRoom)
+        {
+            return;
+        }
+
+        if (!await aiAccessibility.IsVectorizationEnabledAsync())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
     }
 

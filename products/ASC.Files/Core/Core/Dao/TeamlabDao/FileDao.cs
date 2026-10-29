@@ -513,11 +513,20 @@ internal class FileDao(
         }
 
         var (roomId, _, roomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-        // A knowledge room vectorizes every supported file it holds, new versions included;
-        // unsupported or oversized files stay in the room as ordinary files.
-        var inKnowledgeRoom = roomType == FolderType.KnowledgeRoom &&
-                              vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) &&
-                              file.ContentLength <= vectorizationGlobalSettings.MaxContentLength;
+        var inKnowledgeRoom = roomType == FolderType.KnowledgeRoom;
+        if (inKnowledgeRoom)
+        {
+            if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            }
+
+            if (file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+            {
+                throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
+            }
+        }
+
         UserInfo user = null;
         string quotaLockKey;
         TenantEntityQuotaSettings roomQuotaSettings = null;
@@ -1308,13 +1317,12 @@ internal class FileDao(
         var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
-        var needVectorization = toFolder.FolderType is FolderType.Knowledge ||
-                                (toRoomType == FolderType.KnowledgeRoom &&
-                                 vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) &&
-                                 fileContentLength <= vectorizationGlobalSettings.MaxContentLength);
-        // Re-vectorization replaces the chunks by file id, so the old vectors are dropped only
-        // when the file leaves every knowledge base.
-        var needDeleteVectors = DocSpaceHelper.IsKnowledgeScope(fromFolder.FolderType, fromRoomType) && !needVectorization;
+        var fromKnowledgeBase = fromFolder.FolderType is FolderType.Knowledge || fromRoomType == FolderType.KnowledgeRoom;
+        var toKnowledgeBase = toFolder.FolderType is FolderType.Knowledge || toRoomType == FolderType.KnowledgeRoom;
+        var sameKnowledgeBase = fromKnowledgeBase && toKnowledgeBase && fromRoomId == toRoomId;
+
+        var needVectorization = toKnowledgeBase && !sameKnowledgeBase;
+        var needDeleteVectors = fromKnowledgeBase && !toKnowledgeBase;
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
