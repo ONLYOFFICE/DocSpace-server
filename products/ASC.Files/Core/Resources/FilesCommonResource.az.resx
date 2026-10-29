@@ -613,9 +613,6 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Söhbət çıxışları</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Otaqda artıq .ai qovluğu var</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Bir otaq onu istifadə edərkən yaddaş əlaqəsi kəsilə bilməz. Bunun əvəzinə otağı silin</value>
   </data>

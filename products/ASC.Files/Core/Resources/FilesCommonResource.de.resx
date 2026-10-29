@@ -616,9 +616,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Der Speicher kann nicht getrennt werden, solange ein Raum ihn verwendet. Löschen Sie stattdessen den Raum</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Der Raum enthält bereits den Ordner .ai</value>
-  </data>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>In Datei-Metadaten suchen</value>
   </data>

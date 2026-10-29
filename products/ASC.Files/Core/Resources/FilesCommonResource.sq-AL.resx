@@ -613,9 +613,6 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Rezultatet e bisedës</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Dhoma përmban tashmë dosjen .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Ruajtja nuk mund të shkëputet ndërsa një dhomë e përdor atë. Fshini dhomën në vend të kësaj</value>
   </data>

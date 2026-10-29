@@ -613,9 +613,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Sorties du chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>La salle contient déjà le dossier .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Le stockage ne peut pas être déconnecté tant qu'une salle l'utilise. Supprimez plutôt la salle</value>
   </data>

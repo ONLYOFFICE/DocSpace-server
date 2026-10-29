@@ -610,9 +610,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Излази чата</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Соба већ садржи фасциклу .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Складиште не може бити искључено док га соба користи. Уместо тога избришите собу</value>
   </data>

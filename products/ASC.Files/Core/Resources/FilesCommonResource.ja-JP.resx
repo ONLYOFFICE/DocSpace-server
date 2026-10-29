@@ -613,9 +613,6 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>チャットの出力</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>ルームにはすでに .ai フォルダーが含まれています</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>ルームが使用中のため、ストレージを切断できません。代わりにルームを削除してください</value>
   </data>

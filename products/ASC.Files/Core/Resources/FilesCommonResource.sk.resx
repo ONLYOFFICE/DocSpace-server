@@ -610,9 +610,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Výstupy chatu</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Miestnosť už obsahuje priečinok .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Úložisko nemožno odpojiť, kým ho miestnosť používa. Namiesto toho miestnosť odstráňte</value>
   </data>

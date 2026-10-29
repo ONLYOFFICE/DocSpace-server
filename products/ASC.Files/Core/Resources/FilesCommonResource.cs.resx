@@ -613,9 +613,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Výstupy chatu</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Místnost již obsahuje složku .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Úložiště nelze odpojit, dokud ho používá místnost. Místo toho místnost odstraňte</value>
   </data>

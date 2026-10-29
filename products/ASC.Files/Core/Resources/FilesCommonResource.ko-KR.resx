@@ -613,9 +613,6 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>채팅 출력</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>룸에 이미 .ai 폴더가 있습니다</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>룸이 사용 중인 동안에는 스토리지를 연결 해제할 수 없습니다. 대신 룸을 삭제하세요</value>
   </data>

@@ -75,7 +75,7 @@ async function assertUsableChatProfile(profileId: string): Promise<void> {
 // Project ids are int folder ids on the .NET side (`RoomIdRequestDto<int>`).
 // Reject anything non-integer up front with a clean 400 instead of letting
 // the upstream model-binder fail opaquely.
-function projectIdParam(value: string | undefined): string {
+export function projectIdParam(value: string | undefined): string {
   if (!value || !/^\d+$/.test(value)) {
     badRequest("project id must be a positive integer");
   }
@@ -84,7 +84,7 @@ function projectIdParam(value: string | undefined): string {
 
 // Forward the caller's flat string query params to the .NET endpoint
 // unchanged. Array/object query values are dropped rather than guessed at.
-function forwardQuery(query: Record<string, unknown>): Record<string, QueryValue> {
+export function forwardQuery(query: Record<string, unknown>): Record<string, QueryValue> {
   const out: Record<string, QueryValue> = {};
   for (const [key, value] of Object.entries(query)) {
     if (typeof value === "string") {
@@ -94,7 +94,7 @@ function forwardQuery(query: Record<string, unknown>): Record<string, QueryValue
   return out;
 }
 
-function bodyOf(raw: unknown): JsonObject {
+export function bodyOf(raw: unknown): JsonObject {
   return isObject(raw) ? raw : {};
 }
 
@@ -102,7 +102,7 @@ function bodyOf(raw: unknown): JsonObject {
 // here, before the room is touched, as agentsController does (Bug 82922):
 // `aiProject.profileId` is a UUID of a chat profile, or null for the portal
 // default.
-async function assertProjectProfile(body: JsonObject): Promise<void> {
+export async function assertProjectProfile(body: JsonObject): Promise<void> {
   const settings = getObject(body, "aiProject");
   if (!settings || !("profileId" in settings) || settings["profileId"] === null) {
     return;
@@ -112,6 +112,24 @@ async function assertProjectProfile(body: JsonObject): Promise<void> {
     badRequest("aiProject.profileId must be a UUID or null");
   }
   await assertUsableChatProfile(profileId);
+}
+
+// Knowledge rooms are searched through vectorization: while it is off on the
+// portal (`GET internal/ai/config` → `vectorizationEnabled: false`) linking
+// one to a project would promise a knowledge base that no round can search,
+// so a non-empty `aiProject.knowledgeRoomIds` is refused. `[]` (unlinking)
+// and an absent list go through. A config that cannot be read does not
+// block the save: the C# side validates the rooms again.
+export async function assertKnowledgeRoomsLinkable(body: JsonObject): Promise<void> {
+  const settings = getObject(body, "aiProject");
+  const roomIds = settings?.["knowledgeRoomIds"];
+  if (!Array.isArray(roomIds) || roomIds.length === 0) {
+    return;
+  }
+  const config = await aiService.get("/config").catch(() => undefined);
+  if (isObject(config) && config["vectorizationEnabled"] === false) {
+    badRequest("Knowledge rooms cannot be linked while vectorization is disabled on this portal");
+  }
 }
 
 // The C# side words its 4xx answers for the user (AiProjectResource), so a
@@ -172,6 +190,7 @@ export const aiProjectsController = {
   createProject: projectHandler(async (req, res) => {
     const body = bodyOf(req.body);
     await assertProjectProfile(body);
+    await assertKnowledgeRoomsLinkable(body);
     res.json(await aiService.post("/projects", body, { raw: true }));
   }),
 
@@ -188,6 +207,7 @@ export const aiProjectsController = {
     const id = projectIdParam(req.params["id"]);
     const body = bodyOf(req.body);
     await assertProjectProfile(body);
+    await assertKnowledgeRoomsLinkable(body);
     res.json(await aiService.put(`/projects/${id}`, body, { raw: true }));
   }),
 

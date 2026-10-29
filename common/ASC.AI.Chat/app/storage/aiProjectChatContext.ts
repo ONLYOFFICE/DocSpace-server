@@ -39,10 +39,26 @@
 // (skills) rooms, the Knowledge rooms as knowledge bases.
 
 import { aiService } from "./httpClient.js";
-import { resolveAiProjectEntityId } from "./docspaceFilesApi.js";
+import { getMyDocumentsFolderId, resolveAiProjectEntityId } from "./docspaceFilesApi.js";
+import { refreshContextRoomSkills } from "./contextRoomSkills.js";
 import { getArray, getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
+import { mockProjectTitle } from "./aiProjectsMock/registry.js";
+import * as aiProjectsMock from "./aiProjectsMock/store.js";
+import type { MockReply } from "./aiProjectsMock/store.js";
+
+// The payload of a mock answer, or its failure as the upstream one would be.
+function fromMock(reply: MockReply): unknown {
+  const body = isObject(reply.body) ? reply.body : {};
+  if (reply.status !== 200) {
+    throw Object.assign(new Error(getString(body, "error") ?? "AI projects mock failure"), {
+      status: reply.status,
+      expose: reply.status < 500,
+    });
+  }
+  return body["response"];
+}
 
 /** `AiProjectChatContextDto` on the C# side. */
 export interface AiProjectChatContext {
@@ -107,7 +123,11 @@ export async function readAiProjectChatContext(
   if (!projectId) {
     return undefined;
   }
-  const context = parseChatContext(await aiService.get(`/projects/${projectId}/chat-context`));
+  const context = parseChatContext(
+    mockProjectTitle(projectId) !== undefined
+      ? fromMock(await aiProjectsMock.chatContext(projectId))
+      : await aiService.get(`/projects/${projectId}/chat-context`),
+  );
   if (!context) {
     throw new Error(`chat-context of AI project ${projectId}: unparseable response`);
   }
@@ -123,7 +143,10 @@ async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<J
     return [];
   }
   try {
-    const raw = await aiService.get(`/projects/${projectId}/skills`);
+    const raw =
+      mockProjectTitle(projectId) !== undefined
+        ? fromMock(await aiProjectsMock.chatSkills(String(projectId)))
+        : await aiService.get(`/projects/${projectId}/skills`);
     const rooms = isObject(raw) ? (getObjectArray(raw, "rooms") ?? []) : [];
     const byId = new Map<number, JsonObject>();
     for (const room of rooms) {
@@ -166,11 +189,17 @@ async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<J
  * `profileId` becomes the project's effective model, `actionArgs.contextRooms`
  * the linked Instructions rooms with their skills and
  * `actionArgs.knowledgeRooms` the linked Knowledge rooms (each limited to the
- * rooms the caller can read, in linked order). `contextEntityId` is the
- * caller's and is left as sent. Returns the refusal to answer instead of the
- * round — 403 when the caller may not chat in the project, 409
- * `projectModelUnavailable` when its model is gone or cannot chat — or `null`
- * to go on.
+ * rooms the caller can read, in linked order). The Context folder is the one
+ * the caller picked in the project (`actionArgs.folderContext`); with none
+ * picked it is the caller's My documents, which a project has no location
+ * of its own to offer — set as `contextEntityId` (the scope of the file
+ * tools) and as the folder context (the location line of the prompt).
+ * Returns the refusal to answer instead of the round — 403 when the caller
+ * may not chat in the project, 409 `projectModelUnavailable` when its model
+ * is gone or cannot chat — or `null` to go on.
+ *
+ * Outside a project the body keeps what the composer sent, except that the
+ * skills of the picked Instructions rooms are read again for this round.
  */
 export async function applyAiProjectChatContext(
   body: unknown,
@@ -181,6 +210,7 @@ export async function applyAiProjectChatContext(
   const entityId = typeof body["entityId"] === "string" ? body["entityId"] : undefined;
   const context = await readAiProjectChatContext(entityId);
   if (!context) {
+    await refreshContextRoomSkills(body);
     return null;
   }
   if (!context.canChat) {
@@ -221,6 +251,21 @@ export async function applyAiProjectChatContext(
     delete nextArgs["knowledgeRooms"];
   }
   delete nextArgs["knowledgeRoom"];
+  const folderContext = isObject(nextArgs["folderContext"]) ? nextArgs["folderContext"] : undefined;
+  const pickedFolderId = folderContext ? getString(folderContext, "id") : undefined;
+  if (pickedFolderId) {
+    body["contextEntityId"] = pickedFolderId;
+  } else {
+    const myDocumentsId = await getMyDocumentsFolderId();
+    if (myDocumentsId) {
+      body["contextEntityId"] = myDocumentsId;
+      nextArgs["folderContext"] = { id: myDocumentsId };
+    } else {
+      logger.warn(`AI project ${context.projectId}: My documents not resolved, the round has no folder context`);
+      delete body["contextEntityId"];
+      delete nextArgs["folderContext"];
+    }
+  }
   body["actionArgs"] = nextArgs;
 
   if (context.unavailableRoomIds.length > 0) {

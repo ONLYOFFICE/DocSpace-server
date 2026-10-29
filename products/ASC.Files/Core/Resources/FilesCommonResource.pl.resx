@@ -613,9 +613,6 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Wyniki czatu</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Pokój zawiera już folder .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Nie można odłączyć magazynu, gdy pokój go używa. Zamiast tego usuń pokój</value>
   </data>
