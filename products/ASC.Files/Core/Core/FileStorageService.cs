@@ -1882,7 +1882,8 @@ public class FileStorageService //: IFileStorageService
                             folder.FolderType != FolderType.RoomTemplates &&
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
-                            folder.FolderType != FolderType.Forms;
+                            folder.FolderType != FolderType.Forms &&
+                            folder.FolderType != FolderType.KnowledgeRoom;
 
             if (!canCreate)
             {
