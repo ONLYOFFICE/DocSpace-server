@@ -37,7 +37,7 @@
 [submodule "sdk/docspace-api-spec"]
 	path = sdk/docspace-api-spec
 	url = https://github.com/ONLYOFFICE/docspace-api-spec.git
-	branch = release/v4.0.0
+	branch = release/v4.1.0
 [submodule "sdk/docspace-api-sdk-go"]
 	path = sdk/docspace-api-sdk-go
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-go.git
