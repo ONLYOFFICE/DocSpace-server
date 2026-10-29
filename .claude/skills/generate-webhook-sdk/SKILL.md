@@ -15,7 +15,8 @@ add webhook commands to that tool as a side effect.
 The skill does three things:
 
 1. **Check the contract** against the code it describes — always — and **regenerate it** when the user says so.
-2. **Generate and verify** the requested languages, step by step, with no shell script — stage A.
+2. **Generate and verify** the requested languages, step by step, with no shell script, and pack
+   the TypeScript package — stage A.
 3. **Report** what changed and how each language verified; on request, **check the packages** —
    stage B.
 
@@ -548,6 +549,35 @@ stands. It is one single-quoted argument in both shells, so `$f` and `$(tr ...)`
 - The images: `php:8.3-cli`, `ruby:3.4-slim`, `swift:6.1`. The Swift package needs network access
   for swift-crypto on its first build.
 
+### A6. Pack the TypeScript package
+
+The counterpart of the `npm pack` that the `TypeScript` command of `ASC.Api.Documentation` runs for
+the API SDK (`GenerateTypeScriptSdkCommand`), which leaves `onlyoffice-docspace-api-sdk-<ver>.tgz`
+committed in the root of `sdk/docspace-api-sdk-typescript`. The webhook package goes next to it.
+Run this step whenever `typescript` was generated and A4 built it; skip it when the build failed or
+verification was skipped, and say so in the report.
+
+Remove the previous archive first, so that a version bump does not leave the old one behind, then
+pack into the repository root. `npm pack` runs the package's `prepare` (`tsc`) over the
+`node_modules` that A4 installed with `npm ci`.
+
+```bash
+# POSIX shell
+rm -f sdk/docspace-api-sdk-typescript/onlyoffice-docspace-webhooks-sdk-*.tgz
+npm pack ./sdk/docspace-api-sdk-typescript/webhooks --pack-destination sdk/docspace-api-sdk-typescript >> <out>/.verify.log 2>&1
+```
+
+```powershell
+# PowerShell
+Remove-Item sdk/docspace-api-sdk-typescript/onlyoffice-docspace-webhooks-sdk-*.tgz -Force -ErrorAction SilentlyContinue
+npm pack ./sdk/docspace-api-sdk-typescript/webhooks --pack-destination sdk/docspace-api-sdk-typescript >> <out>/.verify.log 2>&1
+```
+
+Keep the `./` in the first argument (see Stage B). A non-zero exit is **PACK FAILED — see
+`<out>/.verify.log`**. The archive is `onlyoffice-docspace-webhooks-sdk-<version>.tgz`, the version
+from `<root>/package.json`; it is committed in the TypeScript SDK repository together with the
+regenerated `<root>`, like the API SDK's archive next to it.
+
 ## Stage B — package check (on request)
 
 Stage A proves the models compile and parse. It does not prove the package a user installs
@@ -557,7 +587,7 @@ from — and therefore where a fix belongs:
 | Language | Package file | Owner |
 | --- | --- | --- |
 | C# | `<root>/src/DocSpace.Webhooks.SDK/DocSpace.Webhooks.SDK.csproj` | hand-written |
-| Go | `<out>/go.mod`, `go.sum` | generator (`supportingFiles` + `--git-user-id/--git-repo-id` in `targets.conf`); `<out>` is `<root>`, the module root, so the import path is `github.com/ONLYOFFICE/docspace-api-sdk-go/webhooks` and a release is a tag `webhooks/v<version>` |
+| Go | `<out>/go.mod`, `go.sum` | `<tools>/templates/go/go.mod.mustache` (the generator's own template with the `go` directive raised; re-copy it from the jar when the pinned generator version changes) + `supportingFiles` and `--git-user-id/--git-repo-id` in `targets.conf`; `<out>` is `<root>`, the module root, so the import path is `github.com/ONLYOFFICE/docspace-api-sdk-go/webhooks` and a release is a tag `webhooks/v<version>` |
 | Java / Kotlin | `<root>/pom.xml`, `<root>/pom.xml` | hand-written |
 | PHP | `<out>/composer.json` | `<tools>/templates/php/composer.mustache` |
 | Python | `<out>/pyproject.toml`, package `__init__.py` | `<tools>/templates/python/pyproject.mustache`, `__init__package.mustache` |
@@ -596,6 +626,8 @@ SDK would compile `webhooks/` as well.
 
 - Per language: generated / built / each fixture ok — or exactly which step failed and the log path.
 - The `NOT VERIFIED` list, verbatim.
+- For TypeScript, the path of the packed `onlyoffice-docspace-webhooks-sdk-<version>.tgz` (A6), or
+  why it was not packed; `git -C sdk/docspace-api-sdk-typescript status --short` shows it.
 - `git -C <root> status --short .` for every generated language, and
   `git -C sdk/docspace-api-spec status --short webhooks` -- the generated diff, which belongs in the
   commit. Every `<root>` and the published contract are committed in **their** repositories (the API

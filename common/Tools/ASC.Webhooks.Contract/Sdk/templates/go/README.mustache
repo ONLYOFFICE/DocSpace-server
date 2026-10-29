@@ -8,7 +8,7 @@ For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](ht
 
 ## Requirements
 
-Go 1.23+
+Go 1.26+
 
 ## Installation
 

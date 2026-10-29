@@ -8,7 +8,7 @@ For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](ht
 
 ## Requirements
 
-Node.js 18+
+Node.js 22+
 
 ## Installation
 

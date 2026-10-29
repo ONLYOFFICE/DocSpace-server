@@ -8,7 +8,7 @@ For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](ht
 
 ## Requirements
 
-Ruby 2.7+
+Ruby 3.3+
 
 ## Installation
 

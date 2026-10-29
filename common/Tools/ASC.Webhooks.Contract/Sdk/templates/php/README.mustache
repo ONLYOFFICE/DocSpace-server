@@ -8,7 +8,7 @@ For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](ht
 
 ## Requirements
 
-PHP 8.1+
+PHP 8.2+
 
 ## Installation
 

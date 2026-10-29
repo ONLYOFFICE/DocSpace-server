@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.homepage    = "https://www.onlyoffice.com"
   s.summary     = "Payload models for ONLYOFFICE DocSpace webhook deliveries"
   s.description = "Models for the body of every DocSpace webhook delivery, generated from the webhook wire contract."
-  s.license     = "AGPL-3.0-only"
-  s.required_ruby_version = ">= 2.7"
+  s.license     = "Apache-2.0"
+  s.required_ruby_version = ">= 3.3"
 
   s.files         = Dir["lib/**/*.rb"]
   s.require_paths = ["lib"]

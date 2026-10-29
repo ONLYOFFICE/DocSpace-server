@@ -226,7 +226,7 @@ invent any.
 `mvn clean package` by calling `openapi-generator-cli` (or `mvn`, or `npm`) directly, however
 tempting it looks with several languages queued up. Some commands do more than generate: `CSharp`
 then runs `dotnet build` and copies a
-`.nupkg`, `TypeScript` then runs `npm install` + `npm pack` and copies a `.tgz`. Which commands have
+`.nupkg`, `TypeScript` then runs `npm install` + `npm pack`, which writes a `.tgz`. Which commands have
 such steps, and where they write, is the tool's business and changes without notice — calling the
 generator yourself silently skips them and produces a half-updated SDK with exit code 0. The
 duplicated Maven build is the price of not encoding that knowledge here.
@@ -313,20 +313,19 @@ Report both. The second one is easy to miss precisely because nothing asked for 
 shows only a moved submodule pointer, and the actual change is one level down. The `Markdown`
 command adds to the same submodule through the Markdown bundle (`markdown.bundle`).
 
-**Post-generation steps write packages outside the SDK directory, into places `git status` in this
-repo will not show you.** Verified destinations, both of which are *tracked* files that a run leaves
-modified:
+**Post-generation steps write packages that `git status` of the SDK directory alone will not
+explain.** Verified destinations, both of which are *tracked* files that a run leaves modified:
 
 | Language | Package | Lands in | Whose index |
 | --- | --- | --- | --- |
 | `CSharp` | `DocSpace.API.SDK.<ver>.nupkg` | `.nuget/packages/` at this repo's root | **this** repo — a generation run dirties a tracked binary here |
-| `TypeScript` | `onlyoffice-docspace-api-sdk-<ver>.tgz` | `client/libs/ui-kit/`, a sibling of `server/` | the **client** repo, inside its own `ui-kit` submodule |
+| `TypeScript` | `onlyoffice-docspace-api-sdk-<ver>.tgz` | the root of `sdk/docspace-api-sdk-typescript`, where `npm pack` writes it | the TypeScript SDK submodule — nothing copies it anywhere else (ui-kit lives in a repository of its own now) |
 
-So a `CSharp`/`TypeScript` run touches up to **four** indexes: the language's own SDK submodule,
-`sdk/docspace-api-spec` (the joiner's published contract — unavoidable, every run), this repo (the
-`.nupkg`, plus the submodule pointers), and a neighbouring repository (the `.tgz`). Say so when
-reporting. These destinations are the tool's business and can change: re-read them out of the matching `Commands/Generate<Lang>SdkCommand.cs` (`CopyPackages`)
-instead of trusting this table if anything looks off.
+So a `CSharp`/`TypeScript` run touches up to **three** indexes: the language's own SDK submodule
+(for TypeScript including the `.tgz`), `sdk/docspace-api-spec` (the joiner's published contract —
+unavoidable, every run) and this repo (the `.nupkg`, plus the submodule pointers). Say so when
+reporting. These destinations are the tool's business and can change: re-read them out of the
+matching `Commands/Generate<Lang>SdkCommand.cs` instead of trusting this table if anything looks off.
 
 ## Consumers keep building against the old SDK until the NuGet cache is dropped
 

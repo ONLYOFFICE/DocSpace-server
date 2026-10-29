@@ -8,7 +8,7 @@ For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](ht
 
 ## Requirements
 
-Python 3.9+
+Python 3.11+
 
 ## Installation
 
