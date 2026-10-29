@@ -1365,6 +1365,34 @@ public class FileSecurity(
             }
         }
 
+        if (file != null && room is { FolderType: FolderType.KnowledgeRoom })
+        {
+            if (action is not
+                (FilesSecurityActions.Read or
+                FilesSecurityActions.Download or
+                FilesSecurityActions.Delete or
+                FilesSecurityActions.Vectorization or
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.AskAi))
+            {
+                return false;
+            }
+
+            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
+            {
+                return false;
+            }
+        }
+
+        if (folder != null &&
+            (folder.FolderType == FolderType.KnowledgeRoom || room is { FolderType: FolderType.KnowledgeRoom }) &&
+            (action is FilesSecurityActions.Create or FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo ||
+             (folder.FolderType == FolderType.KnowledgeRoom && action is FilesSecurityActions.Copy or FilesSecurityActions.Duplicate)) &&
+            !await aiAccessibility.IsVectorizationEnabledAsync())
+        {
+            return false;
+        }
+
         if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
         {
             return false;
@@ -2596,7 +2624,7 @@ public class FileSecurity(
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access == FileShare.RoomManager && file is { VectorizationStatus: VectorizationStatus.Failed })
+                        if (e.Access == FileShare.RoomManager)
                         {
                             return true;
                         }

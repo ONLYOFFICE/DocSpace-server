@@ -556,7 +556,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                         {
                                             // Duplicate keeps both folders, so - as a copy does - the moved one arrives under
                                             // the first free title of the destination
-                                            var newTitle = await GetDuplicateTitleAsync(folder.Title, folder.ParentId, toFolderId, folderDao.GetAvailableTitleAsync);
+                                            var newTitle = await GetDuplicateTitleAsync(folder.Title, folder.ParentId, toFolderId, _resolveType, folderDao.GetAvailableTitleAsync);
 
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
@@ -682,6 +682,8 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
 
+        var resolveType = toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
+
         // files of one operation usually share a handful of parents
         var parentFoldersCache = new Dictionary<T, Folder<T>>();
 
@@ -703,8 +705,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         if (!copy && typeof(T) == typeof(int) && toFolder.Id is int &&
             !toFolder.ProviderEntry &&
             toFolder.RootFolderType is not (FolderType.TRASH or FolderType.Archive or FolderType.Privacy) &&
-            !toFolder.FolderType.IsKnowledgeStorage() &&
-            !toParentFolders.Any(f => f.FolderType == FolderType.KnowledgeRoom))
+            toFolder.FolderType is not FolderType.Knowledge)
         {
             fileIdsToProcess = await MoveFileBatchAsync(scope, fileIds, toFolder, toParentFolders, needToMark, sb, GetParentFolderAsync, checkPermissions);
         }
@@ -715,7 +716,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
             var file = await FileDao.GetFileAsync(fileId);
 
-            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
+            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, resolveType);
 
             var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
@@ -736,7 +737,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 var parentFolder = await GetParentFolderAsync(file.ParentId);
                 try
                 {
-                    var conflict = _resolveType == FileConflictResolveType.Duplicate ||
+                    var conflict = resolveType == FileConflictResolveType.Duplicate ||
                                    file.RootFolderType == FolderType.Privacy ||
                                    file.Encrypted ||
                                    toFolder.FolderType == FolderType.Knowledge
@@ -806,7 +807,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                 // Duplicate keeps both files, so - as a copy does - the moved one arrives under the
                                 // first free title of the destination
-                                var newTitle = await GetDuplicateTitleAsync(file.Title, file.ParentId, toFolderId, fileDao.GetAvailableTitleAsync);
+                                var newTitle = await GetDuplicateTitleAsync(file.Title, file.ParentId, toFolderId, resolveType, fileDao.GetAvailableTitleAsync);
 
                                 TTo newFileId = default;
                                 await socketManager.DeleteFileAsync(file, action: async () =>
@@ -908,7 +909,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     }
                     else
                     {
-                        if (_resolveType == FileConflictResolveType.Overwrite)
+                        if (resolveType == FileConflictResolveType.Overwrite)
                         {
                             if (checkPermissions && !await FilesSecurity.CanEditAsync(conflict) && !await FilesSecurity.CanFillFormsAsync(conflict))
                             {
@@ -1025,7 +1026,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                 }
                             }
                         }
-                        else if (_resolveType == FileConflictResolveType.Skip)
+                        else if (resolveType == FileConflictResolveType.Skip)
                         {
                             //nothing
                         }
@@ -1058,9 +1059,9 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
     /// destination when its own is taken there, otherwise null - the entry keeps its title. A move inside the
     /// same folder keeps the title as well.
     /// </summary>
-    private async Task<string> GetDuplicateTitleAsync<TTo>(string title, T parentId, TTo toFolderId, Func<string, TTo, Task<string>> getAvailableTitle)
+    private static async Task<string> GetDuplicateTitleAsync<TTo>(string title, T parentId, TTo toFolderId, FileConflictResolveType resolveType, Func<string, TTo, Task<string>> getAvailableTitle)
     {
-        if (_resolveType != FileConflictResolveType.Duplicate || Equals(parentId?.ToString(), toFolderId.ToString()))
+        if (resolveType != FileConflictResolveType.Duplicate || Equals(parentId?.ToString(), toFolderId.ToString()))
         {
             return null;
         }
@@ -1145,22 +1146,11 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
             if (parent == null ||
                 parent.RootFolderType is FolderType.TRASH ||
-                parent.FolderType.IsKnowledgeStorage() ||
+                parent.FolderType is FolderType.Knowledge ||
                 parent.RootCreateBy != toFolder.RootCreateBy)
             {
                 fallback.Add(fileId);
                 continue;
-            }
-
-            // Leaving a knowledge room drops the file's vectors, which only the per-file move does.
-            if (parent.RootFolderType == FolderType.VirtualRooms)
-            {
-                var (_, _, parentRoomType) = await FolderDao.GetParentRoomInfoFromFileEntryAsync(parent);
-                if (parentRoomType == FolderType.KnowledgeRoom)
-                {
-                    fallback.Add(fileId);
-                    continue;
-                }
             }
 
             if (!parentRoomCache.TryGetValue(parent.Id, out var fromRoomId))
