@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Document Builder -skripti avasi tiedoston: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Sovellus otettu käyttöön: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Sovellus otettu pois käytöstä: {0}</value>
+  </data>
 </root>
