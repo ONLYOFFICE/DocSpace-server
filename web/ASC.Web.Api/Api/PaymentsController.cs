@@ -1037,25 +1037,26 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists the top-ups of the portal's wallet - the payments into it - one page at a time, which is what a list of
-    /// payments with their invoices is built from. The portal has to be a billing customer already, otherwise the
-    /// call answers 404. Only the payer or the portal owner may read it, as with the invoices, and the call is
-    /// read-only. Every filter is optional: `startDate` and `endDate` default to the portal creation date and the
-    /// present moment, a value without `Z` or an offset is read in the portal time zone, and `status` narrows to how
-    /// a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next to `totalQuantity`, `totalPage`
-    /// and `currentPage`; a negative `offset` or a `limit` outside 1 to 100 fails with 400. An empty result means the portal has no wallet at the accounting service yet or that
-    /// service could not be read; a period without top-ups gives an empty `collection`. A top-up with `hasInvoice`
-    /// true has an invoice, opened with `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. For the full
-    /// wallet history, charges and refunds included, use `GET api/2.0/portal/payment/customer/operations`.
+    /// payments with their invoices is built from. A portal that is not a billing customer yet has no top-ups and
+    /// gets an empty result rather than an error. Only the payer or the portal owner may read it, as with the
+    /// invoices, and the call is read-only. Every filter is optional: `startDate` and `endDate` default to the
+    /// portal creation date and the present moment, a value without `Z` or an offset is read in the portal time
+    /// zone, and `status` narrows to how a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next
+    /// to `totalQuantity`, `totalPage` and `currentPage`; a negative `offset` or a `limit` outside 1 to 100 fails
+    /// with 400. An empty result means the portal is not a billing customer, has no wallet at the accounting service
+    /// yet, or that service could not be read; a period without top-ups gives an empty `collection`. A top-up with
+    /// `hasInvoice` true has an invoice, opened with `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`.
+    /// For the full wallet history, charges and refunds included, use
+    /// `GET api/2.0/portal/payment/customer/operations`.
     /// </remarks>
     /// <summary>
     /// Get the wallet top-ups
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/deposits</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal has no wallet at the accounting service yet or that service could not be read", typeof(DepositReportDto))]
+    [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal is not a billing customer, has no wallet at the accounting service yet, or that service could not be read", typeof(DepositReportDto))]
     [SwaggerResponse(400, "`offset` is negative, `limit` is outside 1 to 100, or a parameter cannot be read, such as a `status` that is not one of its values or a date that is not ISO 8601")]
     [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer")]
     [HttpGet("customer/deposits")]
     public async Task<DepositReportDto> GetCustomerDeposits(GetCustomerDepositsRequestDto inDto)
     {
@@ -1066,7 +1067,7 @@ public class PaymentController(
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
         if (customerInfo == null)
         {
-            throw new ItemNotFoundException("Customer could not be found");
+            return null;
         }
 
         await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
