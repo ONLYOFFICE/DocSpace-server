@@ -28,6 +28,10 @@ A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire re
 `PortalClients` deriving from `PortalClientsBase`, which calls `CreateClient(ResourceNames.X)` per
 service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
 registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
+Services only some classes need go in `LazyResources` instead: they start with the stack but the run
+does not wait for them, and a class that uses them overrides `NeedsLazyResources` (so far only in the
+Web.Api `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
+before the portal is registered.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.
@@ -254,13 +258,14 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-class`,
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
-The webhook delivery tests (`WebhookDeliveryTestBase` in `ASC.Web.Api.Tests`) post to a WireMock
+The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to a WireMock
 receiver that the `integration-test` profile publishes on the loopback alias `127.0.0.2:18089`
 (`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
 `127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
 `127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
-the receiver container cannot bind and every delivery test fails — an environment problem, not
-a product regression.
+the receiver container cannot bind. The receiver is a lazy resource, so the rest of the suite
+still runs, but every class that creates a subscription (`NeedsLazyResources`) fails on waiting
+for it — an environment problem, not a product regression.
 
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both

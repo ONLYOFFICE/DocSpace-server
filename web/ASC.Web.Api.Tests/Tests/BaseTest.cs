@@ -113,7 +113,8 @@ public class BaseTest(
 
         if (NeedsLazyResources)
         {
-            await fixture.WaitForLazyResourcesAsync();
+            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
         }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.

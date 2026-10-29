@@ -125,5 +125,6 @@ public static class Constants
     // The services that get WebhookTestBlacklist: Web.Api checks the target of a subscription when it is saved, and
     // Web.Studio sends the deliveries. Every other UrlValidator caller of the profile keeps the default list, so the
     // SSRF tests of the other suites run against what production refuses.
-    public static IReadOnlyList<string> WebhookTestBlacklistServices { get; } = ["onlyoffice-web-api", "onlyoffice-web-studio"];
+    public static IReadOnlyList<string> WebhookTestBlacklistServices { get; } =
+        [ProjectConfigurator.GetProjectName<ASC_Web_Api>(), ProjectConfigurator.GetProjectName<ASC_Web_Studio>()];
 }

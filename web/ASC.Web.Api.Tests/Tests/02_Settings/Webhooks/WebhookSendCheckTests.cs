@@ -95,6 +95,8 @@ public class WebhookSendCheckTests(
         var after = await WaitForRecordAsync(subscription.Id, r => r.NextAttemptOn is null);
         after.NextAttemptOn.Should().BeNull("the attempt is dropped, not retried");
         after.Attempts.Should().Be(0, "no request was made");
+        after.ResponsePayload.Should().StartWith(ASC.Webhooks.Core.DbWorker.TargetRejectedNote, "the record says why it was not sent")
+            .And.NotBe(ASC.Webhooks.Core.DbWorker.TargetRejectedNote, "the validator's reason follows the note");
         (await receiver.GetDeliveriesAsync()).Should().ContainSingle();
     }
 
@@ -125,6 +127,7 @@ public class WebhookSendCheckTests(
 
         after.NextAttemptOn.Should().BeNull();
         after.Attempts.Should().Be(0, "a disabled subscription receives nothing, the first attempt included");
+        after.ResponsePayload.Should().Be(ASC.Webhooks.Core.DbWorker.SubscriptionDisabledNote, "the record says why it was not sent");
         (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the delivery made before the switch-off");
     }
 }

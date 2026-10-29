@@ -5498,7 +5498,7 @@
           "Files / Files"
         ],
         "summary": "Set order of files",
-        "description": "Puts several files and folders at given positions in one go and answers with the entries that were moved, each\r\nwith the position it now holds. Every item of `items` names an entry by its identifier and its kind - a file\r\nor a folder - and the position it is to take, counting from 1; a position may also be sent as a dotted path,\r\nas in \"1.2.3\", of which only the last segment is read. The items are applied one after another in the order\r\nthey are sent, and each of them shifts its neighbours, so the result depends on that order; the whole request\r\nis not one transaction, and a failure in the middle leaves the items before it moved. Every item has to lie in\r\na room the caller may administer, which the room admin and a DocSpace admin acting as room manager do:\r\nread-only access, a guest and an anonymous caller are refused, and an identifier that matches nothing is\r\nanswered as not found. Ordering only means something in rooms whose contents are indexed. The call is\r\nmutating. For a single file use `PUT api/2.0/files/{fileId}/order`.\n\nRaises the `folder.updated` webhook for every folder in the list whose order changes. Raises the `file.updated` webhook for every file in the list.",
+        "description": "Puts several files and folders at given positions in one go and answers with the entries that were moved, each\r\nwith the position it now holds. Every item of `items` names an entry by its identifier and its kind - a file\r\nor a folder - and the position it is to take, counting from 1; a position may also be sent as a dotted path,\r\nas in \"1.2.3\", of which only the last segment is read. The items are applied one after another in the order\r\nthey are sent, and each of them shifts its neighbours, so the result depends on that order; the whole request\r\nis not one transaction, and a failure in the middle leaves the items before it moved. Every item has to lie in\r\na room the caller may administer, which the room admin and a DocSpace admin acting as room manager do:\r\nread-only access, a guest and an anonymous caller are refused, and an identifier that matches nothing is\r\nanswered as not found. Ordering only means something in rooms whose contents are indexed. The call is\r\nmutating. For a single file use `PUT api/2.0/files/{fileId}/order`.\n\nRaises the `folder.updated` webhook for every folder in the list whose order changes. Raises the `file.updated` webhook for every file in the list whose order changes.",
         "operationId": "setFilesOrder",
         "requestBody": {
           "content": {
@@ -5609,7 +5609,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "file.updated",
-            "when": "for every file in the list"
+            "when": "for every file in the list whose order changes"
           },
           {
             "trigger": "folder.updated",
@@ -25651,7 +25651,7 @@
           "Files / Sharing"
         ],
         "summary": "Change the room or file owner",
-        "description": "Hands the ownership of the listed rooms and files over to a single account, and returns the entries as they\r\nlook afterwards. Among folders only rooms are accepted - take their identifiers from\r\n`GET api/2.0/files/rooms`; a plain folder is refused. A file is accepted only while it lies in the portal's\r\ncommon section, so a file kept inside a room or in a personal section is refused as well, and so is a file\r\nthat is locked or currently open in the editor. The new owner has to be an active account that is allowed to\r\nmanage rooms, and a private room additionally requires that this account has already set up its encryption\r\nkeys; a deactivated account, a guest or a plain member is rejected. The caller must be the creator of every\r\nlisted room, or a portal administrator. The call mutates the entries one at a time and stops at the first item\r\nit may not touch, leaving the entries already processed changed, so a partial answer is possible; an item\r\nwhose owner is already the target account is returned untouched, which makes a repeat safe. The previous owner\r\nkeeps access to a transferred room as its manager, while a transferred file is saved as a new version authored\r\nby the new owner. An entry that lives on a connected third-party account is quietly left out.\n\nRaises the `folder.updated` webhook for every listed folder whose owner changes, rooms included. Raises the `file.updated` webhook for every file whose owner changes.",
+        "description": "Hands the ownership of the listed rooms and files over to a single account, and returns the entries as they\r\nlook afterwards. Among folders only rooms are accepted - take their identifiers from\r\n`GET api/2.0/files/rooms`; a plain folder is refused. A file is accepted only while it lies in the portal's\r\ncommon section, so a file kept inside a room or in a personal section is refused as well, and so is a file\r\nthat is locked or currently open in the editor. The new owner has to be an active account that is allowed to\r\nmanage rooms, and a private room additionally requires that this account has already set up its encryption\r\nkeys; a deactivated account, a guest or a plain member is rejected. The caller must be the creator of every\r\nlisted room, or a portal administrator. The call mutates the entries one at a time and stops at the first item\r\nit may not touch, leaving the entries already processed changed, so a partial answer is possible; an item\r\nwhose owner is already the target account is returned untouched, which makes a repeat safe. The previous owner\r\nkeeps access to a transferred room as its manager, while a transferred file is saved as a new version authored\r\nby the new owner. An entry that lives on a connected third-party account is quietly left out.\n\nRaises the `room.updated` webhook for every listed room whose owner changes. Raises the `agent.updated` webhook instead for a listed AI agent whose owner changes. Raises the `folder.updated` webhook for every listed folder that is not a room whose owner changes. Raises the `file.updated` webhook for every file whose owner changes.",
         "operationId": "changeFileOwner",
         "requestBody": {
           "content": {
@@ -25756,7 +25756,15 @@
           },
           {
             "trigger": "folder.updated",
-            "when": "for every listed folder whose owner changes, rooms included"
+            "when": "for every listed folder that is not a room whose owner changes"
+          },
+          {
+            "trigger": "room.updated",
+            "when": "for every listed room whose owner changes"
+          },
+          {
+            "trigger": "agent.updated",
+            "when": "instead for a listed AI agent whose owner changes"
           }
         ]
       }

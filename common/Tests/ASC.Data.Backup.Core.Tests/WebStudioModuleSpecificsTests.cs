@@ -160,17 +160,17 @@ public class WebStudioModuleSpecificsTests
     }
 
     [Fact]
-    public async Task TryPrepareRow_WebhooksLogs_PendingAttemptOfATransfer_KeepsScheduleAndDropsLease()
+    public async Task TryPrepareRow_WebhooksLogs_PendingAttemptOfATransfer_KeepsSchedule()
     {
-        // Arrange — a record that was due for its next attempt, and leased by a sender, when the portal was moved
+        // Arrange — a record that was waiting for its next attempt, and not leased by a sender, when the portal was moved
         var specifics = CreateSpecifics();
         var nextAttemptOn = DateTime.UtcNow.AddMinutes(5);
-        var row = PendingRow(nextAttemptOn, responsePayload: null);
+        var row = PendingRow(nextAttemptOn, responsePayload: null, attempts: 1, leased: false);
 
         // Act
         var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(portalTransfer: true), DeclaredTable(specifics, "webhooks_logs"), row);
 
-        // Assert — the pending retry survives a portal transfer, the lease of the source's sender does not
+        // Assert — the pending retry survives a portal transfer
         prepared.Should().BeTrue();
         preparedRow!["next_attempt_on"].Should().Be(nextAttemptOn);
         preparedRow["lease_id"].Should().BeNull();
@@ -179,11 +179,29 @@ public class WebStudioModuleSpecificsTests
     }
 
     [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_InFlightRowOfATransfer_IsNotSentAgainAndSaysWhy()
+    {
+        // Arrange — a first attempt a sender of the source held a lease on when the portal was moved; next_attempt_on
+        // is the lease expiry then
+        var specifics = CreateSpecifics();
+        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), responsePayload: null, attempts: 0);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(portalTransfer: true), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — the source may have finished the request: sending it again under a new event.id would be a duplicate
+        prepared.Should().BeTrue();
+        preparedRow!["next_attempt_on"].Should().BeNull();
+        preparedRow["lease_id"].Should().BeNull();
+        preparedRow["response_payload"].Should().Be(DbWorker.RestoredFromBackupNote);
+    }
+
+    [Fact]
     public async Task TryPrepareRow_WebhooksLogs_UnsentRowOfARestore_IsNotSentAndSaysWhy()
     {
         // Arrange — an event waiting for its first attempt when the backup was taken
         var specifics = CreateSpecifics();
-        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), responsePayload: null);
+        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), responsePayload: null, attempts: 0);
 
         // Act
         var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
@@ -196,12 +214,28 @@ public class WebStudioModuleSpecificsTests
     }
 
     [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_UnansweredAttemptsOfARestore_AreNotCalledNotSent()
+    {
+        // Arrange — attempts that never got an answer (a timeout, a refused connection), the next one still pending
+        var specifics = CreateSpecifics();
+        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), responsePayload: null, attempts: 3);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — the retry is dropped, but the event was sent, so the journal must not say it was not
+        prepared.Should().BeTrue();
+        preparedRow!["next_attempt_on"].Should().BeNull();
+        preparedRow["response_payload"].Should().BeNull();
+    }
+
+    [Fact]
     public async Task TryPrepareRow_WebhooksLogs_RetryOfARestore_IsNotSentAndKeepsTheLastAnswer()
     {
         // Arrange — a failed attempt waiting for its retry when the backup was taken
         const string lastAnswer = """{"error":"busy"}""";
         var specifics = CreateSpecifics();
-        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), lastAnswer);
+        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), lastAnswer, attempts: 1);
 
         // Act
         var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
@@ -212,18 +246,18 @@ public class WebStudioModuleSpecificsTests
         preparedRow["response_payload"].Should().Be(lastAnswer);
     }
 
-    private static DataRowInfo PendingRow(DateTime nextAttemptOn, string? responsePayload)
+    private static DataRowInfo PendingRow(DateTime nextAttemptOn, string? responsePayload, int attempts, bool leased = true)
     {
         var row = new DataRowInfo("webhooks_logs");
         row.SetValue("id", OldOriginalLogId);
         row.SetValue("tenant_id", OldTenantId);
         row.SetValue("config_id", OldConfigId);
         row.SetValue("uid", _oldUser);
-        row.SetValue("attempts", 1);
+        row.SetValue("attempts", attempts);
         row.SetValue("request_headers", "{}");
         row.SetValue("response_payload", responsePayload);
         row.SetValue("next_attempt_on", nextAttemptOn);
-        row.SetValue("lease_id", Guid.NewGuid().ToString());
+        row.SetValue("lease_id", leased ? Guid.NewGuid().ToString() : null);
 
         return row;
     }

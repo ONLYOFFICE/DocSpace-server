@@ -40,7 +40,8 @@ public class WebhookManager(
     IDaoFactory daoFactory,
     IWebhookPublisher webhookPublisher,
     IServiceProvider serviceProvider,
-    FileEntryWebhookDtoHelper fileEntryWebhookDtoHelper)
+    FileEntryWebhookDtoHelper fileEntryWebhookDtoHelper,
+    ILogger<WebhookManager> logger)
 {
     /// <summary>
     /// Finds the subscriptions an event about <paramref name="fileEntry"/> goes to while the caller can still read it,
@@ -90,6 +91,25 @@ public class WebhookManager(
 
         return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
+    }
+
+    /// <summary>
+    /// <see cref="PrepareAsync{T}"/> for an action that must go ahead whatever happens to its webhook: the payload is
+    /// built before the action removes what it describes, and a failure to build it must not stop the action itself,
+    /// so the webhook is dropped (and logged) instead.
+    /// </summary>
+    public async Task<Func<Task>> TryPrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        try
+        {
+            return await PrepareAsync(trigger, fileEntry);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorPrepareWebhook(trigger, fileEntry.Id.ToString(), e);
+
+            return () => Task.CompletedTask;
+        }
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)

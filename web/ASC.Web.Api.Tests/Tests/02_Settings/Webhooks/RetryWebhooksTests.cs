@@ -85,6 +85,30 @@ public class RetryWebhooksTests(
     }
 
     [Fact]
+    public async Task RetryWebhooks_TwoRecordsOfTheSameEvent_QueuesOneRetry()
+    {
+        // Arrange: an event's first record and a manual retry of it, attempted, so nothing of the event is in flight
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        var firstRetry = (await _webhooksApi.RetryWebhookAsync(original.Id, TestContext.Current.CancellationToken)).Response;
+        (await WaitForAttemptAsync(original.Id, firstRetry.Id)).Status.Should().NotBe(0, "the first retry should have been attempted by now");
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([original.Id, firstRetry.Id]), TestContext.Current.CancellationToken);
+
+        // Assert: one new record for the event; a second one would stop the first as soon as it was queued
+        var retry = result.Response.Should().ContainSingle().Subject;
+        retry.Id.Should().NotBe(original.Id).And.NotBe(firstRetry.Id);
+
+        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        records.Should().HaveCount(3, "the event's first record, the earlier retry and the one queued now");
+        records.Single(r => r.Id == retry.Id).EventId.Should().Be(original.Id);
+    }
+
+    [Fact]
     public async Task RetryWebhooks_UnknownId_IsSkippedInSilence()
     {
         // Arrange

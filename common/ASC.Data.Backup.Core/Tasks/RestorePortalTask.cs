@@ -224,6 +224,42 @@ public class RestorePortalTask(DbFactory dbFactory,
             RunMysqlFile(u, true);
             await SetStepCompleted();
         }
+
+        await ClearWebhookScheduleAsync();
+    }
+
+    // A dump brings back a past state of every portal, as an archive does (WebStudioModuleSpecifics.TryPrepareRow):
+    // the portals may have delivered the pending events after the dump was taken, so the schedule and the leases of
+    // the source's senders are dropped, and a row that was never attempted says why it never was. The dump keeps the
+    // ids, so the rows are changed in place. response_payload goes first: MySQL assigns left to right and would
+    // otherwise see next_attempt_on already cleared.
+    private async Task ClearWebhookScheduleAsync()
+    {
+        try
+        {
+            await using var connection = DbFactory.OpenConnection();
+            var command = connection.CreateCommand().WithTimeout(120);
+            command.CommandText =
+                "update webhooks_logs " +
+                "set " +
+                "  response_payload = case when response_payload is null and attempts = 0 and next_attempt_on is not null then @note else response_payload end, " +
+                "  next_attempt_on = null, " +
+                "  lease_id = null " +
+                "where next_attempt_on is not null or lease_id is not null";
+
+            var note = command.CreateParameter();
+            note.ParameterName = "@note";
+            note.Value = DbWorker.RestoredFromBackupNote;
+            command.Parameters.Add(note);
+
+            var count = await command.ExecuteNonQueryAsync(_cancellationToken);
+            options.DebugClearWebhookSchedule(count);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // a dump of a version without the delivery schedule has nothing to clear
+            options.WarningCantClearWebhookSchedule(ex);
+        }
     }
 
     private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName1, string fileName2 = null, string db = null)

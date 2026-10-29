@@ -47,9 +47,6 @@ internal static class ContractHeader
         "Machine-readable trigger -> payload schema map. Source of truth for the SDK dispatch layer. Generated " +
         "from the trigger table in common/Tools/ASC.Webhooks.Contract.\n";
 
-    // the column, inside the Headers block of the description, where the text of each header starts
-    private const int HeaderColumn = 26;
-
     private const string DeliverySuffix = "Delivery";
 
     private const string PayloadSuffix = "Payload";
@@ -304,95 +301,66 @@ internal static class ContractHeader
         var jitter = (int)Math.Round(WebhookDelivery.RetryJitter * 100);
         var schedule = string.Join(", ", intervals.Take(intervals.Count - 1).Select(Short)) + " and " + Short(intervals[^1]);
 
+        // CommonMark, as an OpenAPI description is, and published as the overview page of the webhooks reference:
+        // no line may start with four spaces of indentation outside a list, or it turns into a code block there, and
+        // the text speaks of what a receiver sees, never of the classes that produce it
         return $"""
-            Wire contract for OUTBOUND DocSpace webhook deliveries.
+            Wire contract for **outbound** DocSpace webhook deliveries.
 
-            This document is NOT the REST API spec and shares no schemas with it. Webhook
-            payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto,
-            FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).
+            This document is not the REST API spec and shares no schemas with it. The payloads are models of their
+            own (`UserWebhookDto`, `GroupWebhookDto`, `FileWebhookDto`, `FolderWebhookDto`, `RoomWebhookDto`,
+            `FormSubmitWebhookDto`).
 
-            Every trigger is an entry of `webhooks` below, and its body is the *{DeliverySuffix}
-            schema of its payload: the envelope with `payload` typed. The same mapping, in
-            machine-readable form, is {TriggerMapKey}.
+            Every trigger is an entry of `webhooks` below, and its body is the `*{DeliverySuffix}` schema of its
+            payload: the envelope with `payload` typed. The same mapping, in machine-readable form, is
+            `{TriggerMapKey}`.
 
-            SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)
-              1. PropertyNamingPolicy = CamelCase.
-              2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and
-                 default-valued property is OMITTED. Consequently almost nothing here is
-                 `required`, and absence never means "unset" -- it means "default".
-              3. [JsonIgnore] on the domain type is honoured.
-              4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is
-                 set only on the sender's options, by which point `payload` is an opaque
-                 JsonElement, so it never applies to payload bodies.
-              5. Every timestamp, in the envelope and in the payload alike, is UTC
-                 ISO-8601 in whole seconds with a Z, e.g. 2026-09-17T10:22:56Z.
-              6. Entry ids are generic T: int for internal storage, string for
-                 third-party providers. Modelled here as oneOf[integer, string].
+            ## Serialization
 
-            TRANSPORT
-              POST, Content-Type: application/json; charset=utf-8
-              Redirects are not followed. Each request waits {Short(WebhookDelivery.DefaultRequestTimeout)} for a response by
-              default (configurable per installation as {WebhookDelivery.RequestTimeoutKey}), so
-              receivers must acknowledge fast and process out of band. Any non-2xx
-              answer, timeout or network error is a failed attempt; a failed delivery
-              is retried after {schedule} (each +-{jitter}% jitter), i.e.
-              {intervals.Count + 1} attempts over ~{hours}h by default (ASC.Webhooks.Core/WebhookDelivery.cs,
-              configurable per installation as {WebhookDelivery.RetryIntervalsKey}), and then abandoned.
-              A portal admin or the subscription's creator can retry it manually from the
-              delivery log, which starts a fresh series under the same event.id.
+            1. Property names are camelCase.
+            2. A property that holds its default value - `null`, `false`, `0` or the default member of an enum - is
+               left out of the body. Consequently almost nothing here is `required`, and an absent property never
+               means "unset": it means the default value.
+            3. A body carries the properties of its schema and no others; the computed ones among them are sent
+               like the rest.
+            4. Every timestamp, in the envelope and in the payload alike, is a UTC ISO-8601 value in whole seconds
+               ending in `Z`, e.g. `2026-09-17T10:22:56Z`.
+            5. An entry id is a number for an entry kept in the portal's own storage and a string for one in
+               third-party storage, modelled here as `oneOf` integer and string.
 
-              Headers:
-            {HeaderLine(WebhookDelivery.SignatureHeader,
-                "sha256=<UPPERCASE hex HMAC-SHA256 of the raw",
-                "body>. GitHub emits lowercase hex, so compare",
-                "case-insensitively. This is the only header",
-                "that is authenticated.")}
-            {HeaderLine(WebhookDelivery.EventIdHeader, "Copy of event.id.")}
-            {HeaderLine(WebhookDelivery.EventTimestampHeader,
-                "Copy of event.createOn, same ISO-8601 UTC",
-                "spelling, e.g. 2026-09-17T10:22:56Z.")}
+            ## Transport
 
-              The last two exist so a receiver can drop an already-seen delivery
-              without parsing the body. They are NOT covered by the signature, which is
-              computed over the body alone, so anything in transit can rewrite them.
-              Reject on them freely -- dropping a delivery is fail-safe, and whoever can
-              rewrite a header could drop the request instead -- but never ACCEPT on
-              them: after verifying, read event.id from the parsed body, it is the
-              authoritative value.
+            Every delivery is a `POST` with `Content-Type: application/json; charset=utf-8`. Redirects are not
+            followed. Each request waits {Short(WebhookDelivery.DefaultRequestTimeout)} for a response by default (an installation can change it with the
+            `{WebhookDelivery.RequestTimeoutKey}` setting), so a receiver must acknowledge fast and process out of
+            band. Any non-2xx answer, timeout or network error is a failed attempt. A failed delivery is retried
+            after {schedule} (each +/-{jitter}% jitter), i.e. {intervals.Count + 1} attempts over about {hours} hours by
+            default (an installation can change the schedule with the `{WebhookDelivery.RetryIntervalsKey}`
+            setting), and then abandoned. A portal admin or the subscription's creator can retry it manually from
+            the delivery log, which starts a fresh series under the same `event.id`.
 
-              The signature covers the body only; it does not prove when the request was
-              sent. event.createOn is the moment of the event, not of the request: it
-              stays the same through the automatic retries (about {hours} hours on the
-              default schedule) and through a manual retry at any later time, so a
-              freshness window on it, or on the timestamp header, rejects legitimate
-              retries. Deduplicate on event.id instead: keep the ids already processed
-              and drop a delivery whose id is among them. That is the replay defence.
+            ## Headers
+
+            - `{WebhookDelivery.SignatureHeader}` - `sha256=` followed by the uppercase hex HMAC-SHA256 of the raw
+              body, keyed with the subscription's secret. GitHub emits lowercase hex, so compare case-insensitively.
+              This is the only header that is authenticated.
+            - `{WebhookDelivery.EventIdHeader}` - a copy of `event.id`.
+            - `{WebhookDelivery.EventTimestampHeader}` - a copy of `event.createOn`, in the same ISO-8601 UTC
+              spelling, e.g. `2026-09-17T10:22:56Z`.
+
+            The last two exist so a receiver can drop an already-seen delivery without parsing the body. They are
+            **not** covered by the signature, which is computed over the body alone, so anything in transit can
+            rewrite them. Reject on them freely - dropping a delivery is fail-safe, and whoever can rewrite a header
+            could drop the request instead - but never accept on them: after verifying, read `event.id` from the
+            parsed body, it is the authoritative value.
+
+            The signature covers the body only; it does not prove when the request was sent. `event.createOn` is the
+            moment of the event, not of the request: it stays the same through the automatic retries (about {hours}
+            hours on the default schedule) and through a manual retry at any later time, so a freshness window on
+            it, or on the timestamp header, rejects legitimate retries. Deduplicate on `event.id` instead: keep the
+            ids already processed and drop a delivery whose id is among them. That is the replay defence.
 
             """;
-    }
-
-    /// <summary>
-    /// One entry of the Headers block: the name, then its text from <see cref="HeaderColumn"/> on, starting on the
-    /// next line when the name leaves no room for it. Named apart from <see cref="HeaderParameter"/>: under one name a
-    /// single line of text bound to that overload and wrote the parameter's YAML into the description.
-    /// </summary>
-    private static string HeaderLine(string name, params string[] lines)
-    {
-        var text = new StringBuilder("    ").Append(name);
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            if (i == 0 && name.Length + 2 <= HeaderColumn)
-            {
-                text.Append(' ', HeaderColumn - name.Length).Append(lines[i]);
-            }
-            else
-            {
-                text.Append('\n').Append(' ', HeaderColumn + 4).Append(lines[i]);
-            }
-        }
-
-        return text.ToString();
     }
 
     /// <summary>

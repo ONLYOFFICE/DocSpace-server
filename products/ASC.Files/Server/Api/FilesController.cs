@@ -1060,7 +1060,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/order</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every folder in the list whose order changes")]
-    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file in the list")]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file in the list whose order changes")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The files and folders that were moved, with the positions they now hold", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, or an `order` is below 1 or is neither a number nor a dotted path ending in one")]

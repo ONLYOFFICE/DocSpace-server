@@ -256,7 +256,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     ? WebhookTrigger.AgentDeleted
                                     : WebhookTrigger.RoomDeleted
                                 : WebhookTrigger.FolderDeleted;
-                            publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
+                            publishWebhook = await webhookManager.TryPrepareAsync(webhookTrigger, folder);
                         }
 
                         await socketManager.DeleteFolder(folder, action: async () => await ProviderDao.RemoveProviderInfoAsync(folder.ProviderId));
@@ -328,7 +328,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                         ? WebhookTrigger.AgentDeleted
                                         : WebhookTrigger.RoomDeleted
                                     : WebhookTrigger.FolderDeleted;
-                                publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
+                                publishWebhook = await webhookManager.TryPrepareAsync(webhookTrigger, folder);
                             }
 
                             // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
@@ -446,7 +446,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                             ? WebhookTrigger.AgentDeleted
                                             : WebhookTrigger.RoomDeleted
                                         : WebhookTrigger.FolderDeleted;
-                                    publishWebhook = await webhookManager.PrepareAsync(webhookTrigger, folder);
+                                    publishWebhook = await webhookManager.TryPrepareAsync(webhookTrigger, folder);
                                 }
 
                                 // the counter of a form filling room is kept on the Forms root folder, not on the VirtualRooms root;
@@ -797,7 +797,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             {
                 foreach (var file in files)
                 {
-                    publishByFile[file.Id] = await webhookManager.PrepareAsync(WebhookTrigger.FileDeleted, file);
+                    publishByFile[file.Id] = await webhookManager.TryPrepareAsync(WebhookTrigger.FileDeleted, file);
                 }
             }
         }

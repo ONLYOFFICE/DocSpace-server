@@ -57,6 +57,36 @@ public class WebhookRetryRequestTests(
     }
 
     [Fact]
+    public async Task RetryWebhooks_100Ids_IsAccepted()
+    {
+        // Arrange: the most one call takes; none of them names a record, so nothing is queued
+        await _webApiClient.Authenticate(Owner);
+        var ids = Enumerable.Range(int.MaxValue - 99, 100).ToList();
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(new WebhookRetryRequestDto(ids), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.StatusCode.Should().Be(200);
+        result.Response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_MoreThan100Ids_ThrowsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var ids = Enumerable.Range(int.MaxValue - 100, 101).ToList();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.RetryWebhooksAsync(new WebhookRetryRequestDto(ids), TestContext.Current.CancellationToken));
+
+        // Assert: a longer batch has to be split into several calls
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Fact]
     public async Task RetryWebhooks_BodyWithoutIds_ReturnsEmptyResult()
     {
         // Arrange: a body with no ids property at all, which the typed model always writes (tests.md, raw carve-outs)

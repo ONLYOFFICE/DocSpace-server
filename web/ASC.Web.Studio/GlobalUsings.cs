@@ -44,6 +44,8 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Tenants;

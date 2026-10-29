@@ -171,8 +171,10 @@ public class WebhooksController(
 
         // the triggers are the owner's to receive, so they are checked against the owner's role, not the editor's
         var ownerId = existingWebhook.CreatedBy ?? authContext.CurrentAccount.ID;
-        // left out, ssl keeps the stored value: a client written before the field became optional never sends it, and
-        // must not switch certificate checking on for a subscription that was saved with it off
+        // left out, ssl keeps the stored value, so a client that omits it does not switch certificate checking on for a
+        // subscription saved with it off. That covers only clients that really omit it: the C# SDK, generated while ssl
+        // was a plain boolean, always sends the field - false unless the caller sets it - so an update through it turns
+        // checking off until the SDK is regenerated from the nullable spec, which follows the merge of this change
         var ssl = inDto.SSL ?? existingWebhook.SSL;
         var targetId = await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, ssl, inDto.Triggers, inDto.TargetId, ownerId, false);
 
@@ -198,10 +200,10 @@ public class WebhooksController(
 
     /// <remarks>
     /// Switches one webhook subscription on or off, leaving the rest of its parameters as they are. Only `id` and
-    /// `enabled` are read from the body: `name`, `uri`, `secretKey`, `ssl`, `triggers` and `targetId` are demanded by
-    /// the schema but ignored here, so change any of them with `PUT api/2.0/settings/webhook` instead. Switching a
-    /// subscription on re-checks what is already stored: the saved URL is probed with a HEAD request, the saved secret
-    /// is checked against the current password rules, and the saved triggers against the current role of the
+    /// `enabled` are read from the body: `name` and `uri` must be present because the schema requires them, but their
+    /// values are ignored here, as are `secretKey`, `ssl`, `triggers` and `targetId` when sent - change any of them
+    /// with `PUT api/2.0/settings/webhook` instead. Switching a subscription on re-checks what is already stored: the
+    /// saved URL is probed with a HEAD request, the saved secret is checked against the current password rules, and the saved triggers against the current role of the
     /// subscription's creator. The call is refused with 400 when any of these fails, so a subscription whose target has
     /// gone away cannot be switched on until it is updated. Switching one off is not validated. While a subscription is
     /// off its events are dropped rather than queued. A `DocSpaceAdmin` may switch any subscription in the portal,

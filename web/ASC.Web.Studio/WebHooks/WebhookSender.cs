@@ -77,6 +77,16 @@ public class WebhookSender(
     /// </summary>
     private static readonly TimeSpan _unsentAttemptDelay = TimeSpan.FromMinutes(1);
 
+    /// <summary>
+    /// How long after its creation a row may still be sent: every retry interval at its longest, an attempt's lease for
+    /// each attempt, and an hour of grace for a passing fault at the last retry. A row that is older and still not
+    /// sent, because its attempts keep failing before the request goes out or its portal is not active, stops.
+    /// </summary>
+    public TimeSpan RetryWindow =>
+        TimeSpan.FromTicks((long)(settings.RetryIntervals.Sum(i => i.Ticks) * (1 + WebhookDelivery.RetryJitter))) +
+        AttemptLease * (settings.RetryIntervals.Length + 1) +
+        TimeSpan.FromHours(1);
+
     public async Task Send(int tenantId, int webhookLogId, Guid leaseId, CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
@@ -154,7 +164,9 @@ public class WebhookSender(
             {
                 RequireHttps = entry.Config.SSL
             });
-            if (!validationResult.IsValid)
+            // a host that could not be resolved is not a rejection: DNS may answer on the next try, so that is an
+            // ordinary failed attempt below, with its retry. Only a definitive rejection (scheme, https, blacklist) stops
+            if (!validationResult.IsValid && !validationResult.Transient)
             {
                 // a blacklisted target removes the subscription, and its records with it; otherwise the record stays
                 await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.TargetRejectedNote + validationResult.ErrorMessage);
@@ -168,9 +180,10 @@ public class WebhookSender(
             {
                 webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
             }
-            catch (JsonException e)
+            catch (Exception e) when (e is JsonException or ArgumentNullException)
             {
-                // the body will not become readable on a later attempt
+                // the body will not become readable on a later attempt; a missing one (the column is nullable on
+                // PostgreSQL) fails the same way, with ArgumentNullException
                 logger.ErrorFailedToSend(tenantId, webhookLogId, e);
                 await dbWorker.StopJournalAttemptsAsync(tenantId, webhookLogId, leaseId, DbWorker.UnreadableBodyNote);
                 await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
@@ -220,7 +233,10 @@ public class WebhookSender(
             var httpClient = clientFactory.CreateClient(httpClientName);
 
             // the claim lease may have run out during the checks above, and another instance may have claimed the row
-            // since: the request goes out only while the row is still this attempt's, for long enough to finish
+            // since: the request goes out only while the row is still this attempt's, for long enough to finish. A row
+            // claimed as the service began to stop is handed back at once instead (the catch below), not renewed
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (!await dbWorker.RenewJournalLeaseAsync(tenantId, webhookLogId, leaseId, DateTime.UtcNow + AttemptLease))
             {
                 logger.DebugLeaseTakenOver(webhookLogId);
@@ -231,6 +247,12 @@ public class WebhookSender(
 
             try
             {
+                if (!validationResult.IsValid)
+                {
+                    // the host did not resolve: the attempt fails the way the handler's own lookup would have failed it
+                    throw new HttpRequestException(HttpRequestError.NameResolutionError, validationResult.ErrorMessage);
+                }
+
                 using var request = new HttpRequestMessage(HttpMethod.Post, validationResult.ParsedUri);
                 request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
 
@@ -245,6 +267,8 @@ public class WebhookSender(
 
                 requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
 
+                // tied to the stopping token: a slow target must not hold the shutdown for up to the request timeout; a
+                // request cut that way is handed back below and may reach the target twice, which the event id dedupes
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeoutCts.CancelAfter(_requestTimeout);
 
@@ -359,15 +383,24 @@ public class WebhookSender(
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // the service is stopping; an accepted request is recorded, or it would go out again once the lease expires,
-            // and a row whose request never went out is handed back at once, rather than held for the rest of its lease
-            if (deliveredOn.HasValue && !journalUpdated)
+            // and any other row is handed back at once, rather than held for the rest of its lease: one whose request
+            // never went out, and one whose request was cut by the stop, which counts no attempt since the target was
+            // never given the chance to answer
+            if (journalUpdated)
+            {
+                throw;
+            }
+
+            if (deliveredOn.HasValue)
             {
                 await RegisterDeliveryAsync(dbWorker, tenantId, webhookLogId, leaseId, deliveredStatus, deliveredOn.Value, attempts);
             }
-            else if (!requestSent)
+            else
             {
                 await ReleaseAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId, DateTime.UtcNow);
             }
+
+            await AnnounceJournalChangeAsync(socketManager, entry, tenantId, webhookLogId);
 
             throw;
         }
@@ -388,7 +421,8 @@ public class WebhookSender(
             else if (!requestSent)
             {
                 // nothing reached the target (the database or a check failed first): the row is handed back for a
-                // later try that does not count, so a transient fault does not use up the retries of the event
+                // later try that does not count, so a transient fault does not use up the retries of the event. A
+                // fault that never passes would bring it back every minute for ever: past the retry window it stops
                 await ReleaseUnsentAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
             }
             else
@@ -396,10 +430,28 @@ public class WebhookSender(
                 await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId);
             }
 
-            if (entry != null)
-            {
-                await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
-            }
+            await AnnounceJournalChangeAsync(socketManager, entry, tenantId, webhookLogId);
+        }
+    }
+
+    /// <summary>
+    /// Tells the open journals that the row changed on a path that failed or was cut short. Best effort: the row is
+    /// already written, and a failure here must not replace the exception that led to it.
+    /// </summary>
+    private async Task AnnounceJournalChangeAsync(WebhookSocketManager socketManager, DbWebhooksLog entry, int tenantId, int webhookLogId)
+    {
+        if (entry == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await socketManager.UpdateWebhookLogAsync(entry.Config, webhookLogId);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFailedToAnnounce(tenantId, webhookLogId, e);
         }
     }
 
@@ -415,9 +467,21 @@ public class WebhookSender(
         }
     }
 
-    private Task ReleaseUnsentAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
+    private async Task ReleaseUnsentAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId)
     {
-        return ReleaseAttemptAsync(dbWorker, tenantId, webhookLogId, leaseId, DateTime.UtcNow + _unsentAttemptDelay);
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            if (!await dbWorker.ReleaseUnsentJournalAttemptAsync(tenantId, webhookLogId, leaseId, now + _unsentAttemptDelay, now - RetryWindow))
+            {
+                logger.WarningUnsentTooLong(tenantId, webhookLogId, RetryWindow);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFailedToRegisterAttempt(tenantId, webhookLogId, e);
+        }
     }
 
     private async Task ReleaseAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId, Guid leaseId, DateTime nextAttemptOn)

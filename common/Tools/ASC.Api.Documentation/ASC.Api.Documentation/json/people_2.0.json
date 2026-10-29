@@ -1569,7 +1569,7 @@
           "Group"
         ],
         "summary": "Move group members",
-        "description": "Moves every member of one group into another group, emptying the first one.\r\nThe caller needs the permissions to edit groups and to add and remove users, and both IDs have to belong to\r\ngroups that have not been deleted, otherwise the operation answers 404.\r\nThe source group is kept, only without members, so delete it separately through\r\n`DELETE api/2.0/group/{id}` if it is no longer needed.\r\nMembers that cannot be group members any more are silently skipped rather than failing the call, and an\r\naccount that already belongs to the destination is simply left there.\r\nThe answer is the destination group with its members, not the source one.\r\nTo move a chosen few instead of everybody, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook twice, once for the source and once for the destination group, and not at all when both IDs name the same group.",
+        "description": "Moves every member of one group into another group, emptying the first one.\r\nThe caller needs the permissions to edit groups and to add and remove users, and both IDs have to belong to\r\ngroups that have not been deleted, otherwise the operation answers 404.\r\nThe source group is kept, only without members, so delete it separately through\r\n`DELETE api/2.0/group/{id}` if it is no longer needed.\r\nMembers that cannot be group members any more are silently skipped rather than failing the call, and an\r\naccount that already belongs to the destination is simply left there.\r\nThe answer is the destination group with its members, not the source one.\r\nTo move a chosen few instead of everybody, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent.",
         "operationId": "moveMembersTo",
         "parameters": [
           {
@@ -1705,7 +1705,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "twice, once for the source and once for the destination group, and not at all when both IDs name the same group"
+            "when": "once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent"
           }
         ]
       }
@@ -1716,7 +1716,7 @@
           "Group"
         ],
         "summary": "Replace group members",
-        "description": "Replaces the whole member list of a group with the accounts given in the request, removing everybody who is\r\nnot in that list.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAt least one of the listed accounts has to be usable as a group member, otherwise the call is rejected with\r\n400 and the group is left untouched; the accounts that cannot be members - a guest, a disabled account or an\r\nID that matches nobody - are then silently skipped while the rest are applied.\r\nThe replacement is not atomic: the current members are removed first and the new ones added afterwards, so a\r\nfailure in between can leave the group empty.\r\nThe answer is the group with the members it ends up with, which is why it should be read instead of assuming\r\nthe request was applied verbatim.\r\nTo add or remove a few accounts without touching the others, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook.",
+        "description": "Replaces the whole member list of a group with the accounts given in the request, removing everybody who is\r\nnot in that list.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAt least one of the listed accounts has to be usable as a group member, otherwise the call is rejected with\r\n400 and the group is left untouched; the accounts that cannot be members - a guest, a disabled account or an\r\nID that matches nobody - are then silently skipped while the rest are applied.\r\nThe replacement is not atomic: the current members are removed first and the new ones added afterwards, so a\r\nfailure in between can leave the group empty.\r\nThe answer is the group with the members it ends up with, which is why it should be read instead of assuming\r\nthe request was applied verbatim.\r\nTo add or remove a few accounts without touching the others, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent.",
         "operationId": "setMembersTo",
         "parameters": [
           {
@@ -1843,7 +1843,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.updated"
+            "trigger": "group.updated",
+            "when": "only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent"
           }
         ]
       },
@@ -1852,7 +1853,7 @@
           "Group"
         ],
         "summary": "Add group members",
-        "description": "Adds the listed accounts to a group, keeping the members it already has.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAccounts that cannot be group members - a guest, a disabled account or an ID that matches nobody - are\r\nsilently skipped instead of failing the call, so compare the members in the answer with what was sent to see\r\nwhat was actually applied.\r\nThe call is idempotent for an account that is already a member, and it does not change who manages the group;\r\nuse `PUT api/2.0/group/{id}/manager` for that.\r\nThe answer is the group with its members after the addition.\r\nTo replace the whole list instead of extending it, use `POST api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook.",
+        "description": "Adds the listed accounts to a group, keeping the members it already has.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAccounts that cannot be group members - a guest, a disabled account or an ID that matches nobody - are\r\nsilently skipped instead of failing the call, so compare the members in the answer with what was sent to see\r\nwhat was actually applied.\r\nThe call is idempotent for an account that is already a member, and it does not change who manages the group;\r\nuse `PUT api/2.0/group/{id}/manager` for that.\r\nThe answer is the group with its members after the addition.\r\nTo replace the whole list instead of extending it, use `POST api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent.",
         "operationId": "addMembersTo",
         "parameters": [
           {
@@ -1986,7 +1987,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.updated"
+            "trigger": "group.updated",
+            "when": "only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent"
           }
         ]
       },
@@ -1995,7 +1997,7 @@
           "Group"
         ],
         "summary": "Remove group members",
-        "description": "Removes the listed accounts from a group, leaving the rest of its members in place.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe accounts themselves are kept; only their membership in this group ends, together with the access they had\r\nthrough it.\r\nThe call is idempotent and forgiving: an ID that is not a member, and one that matches no account at all, are\r\nboth skipped without an error, and an empty list simply changes nothing.\r\nThe answer is the group with the members that remain.\r\nEmptying a group cannot be done through `POST api/2.0/group/{id}/members`, which needs at least one valid\r\naccount, so list every member here, or move them away with `PUT api/2.0/group/{fromId}/members/{toId}`.\n\nRaises the `group.updated` webhook.",
+        "description": "Removes the listed accounts from a group, leaving the rest of its members in place.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe accounts themselves are kept; only their membership in this group ends, together with the access they had\r\nthrough it.\r\nThe call is idempotent and forgiving: an ID that is not a member, and one that matches no account at all, are\r\nboth skipped without an error, and an empty list simply changes nothing.\r\nThe answer is the group with the members that remain.\r\nEmptying a group cannot be done through `POST api/2.0/group/{id}/members`, which needs at least one valid\r\naccount, so list every member here, or move them away with `PUT api/2.0/group/{fromId}/members/{toId}`.\n\nRaises the `group.updated` webhook only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent.",
         "operationId": "removeMembersFrom",
         "parameters": [
           {
@@ -2129,7 +2131,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.updated"
+            "trigger": "group.updated",
+            "when": "only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent"
           }
         ]
       }
@@ -2140,7 +2143,7 @@
           "Group"
         ],
         "summary": "Set a group manager",
-        "description": "Makes an account the manager of a group, replacing whoever managed it before.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nBoth the group and the account have to exist: the operation answers 404 when the ID in the route matches no\r\nlive group and also when `userId` matches no account, so the message of the error says which of the two was\r\nnot found.\r\nThe account is added to the group at the same time, so a manager does not have to be a member beforehand, and\r\nthe previous manager stays in the group as an ordinary member.\r\nA group has one manager, which makes the call idempotent when it names the account that manages it already.\r\nThe answer is the group with its new manager.\r\nTo change the members rather than the manager, use `PUT api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook.",
+        "description": "Makes an account the manager of a group, replacing whoever managed it before.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nBoth the group and the account have to exist: the operation answers 404 when the ID in the route matches no\r\nlive group and also when `userId` matches no account, so the message of the error says which of the two was\r\nnot found.\r\nThe account is added to the group at the same time, so a manager does not have to be a member beforehand, and\r\nthe previous manager stays in the group as an ordinary member.\r\nA group has one manager, which makes the call idempotent when it names the account that manages it already.\r\nThe answer is the group with its new manager.\r\nTo change the members rather than the manager, use `PUT api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent.",
         "operationId": "setGroupManager",
         "parameters": [
           {
@@ -2267,7 +2270,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.updated"
+            "trigger": "group.updated",
+            "when": "only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent"
           }
         ]
       }
@@ -11561,7 +11565,7 @@
           "People / User type"
         ],
         "summary": "Start updating user type",
-        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.\n\nRaises the `user.updated` webhook once the queued type change finishes successfully, not when it is cancelled or fails. Raises the `folder.updated` webhook for every room and AI agent the account owns, once the queued type change hands it over to the recipient; the payload is the room.",
+        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.\n\nRaises the `user.updated` webhook once the queued type change finishes successfully, not when it is cancelled or fails. Raises the `room.updated` webhook for every room the account owns, once the queued type change hands it over to the recipient. Raises the `agent.updated` webhook instead for an AI agent the account owns.",
         "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -11672,8 +11676,12 @@
             "when": "once the queued type change finishes successfully, not when it is cancelled or fails"
           },
           {
-            "trigger": "folder.updated",
-            "when": "for every room and AI agent the account owns, once the queued type change hands it over to the recipient; the payload is the room"
+            "trigger": "room.updated",
+            "when": "for every room the account owns, once the queued type change hands it over to the recipient"
+          },
+          {
+            "trigger": "agent.updated",
+            "when": "instead for an AI agent the account owns"
           }
         ]
       }

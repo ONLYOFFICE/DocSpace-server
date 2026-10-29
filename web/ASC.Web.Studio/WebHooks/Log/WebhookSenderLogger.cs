@@ -56,6 +56,12 @@ internal static partial class WebhookSenderLogger
     [LoggerMessage(LogLevel.Error, "Failed to schedule the next attempt of webhook tenant: {tenantId}, log: {logId}")]
     public static partial void ErrorFailedToRegisterAttempt(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "Webhook tenant: {tenantId}, log: {logId} is not sent: its attempts kept failing before the request went out for longer than {retryWindow}")]
+    public static partial void WarningUnsentTooLong(this ILogger<WebhookSender> logger, int tenantId, int logId, TimeSpan retryWindow);
+
+    [LoggerMessage(LogLevel.Error, "Failed to announce the change of webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToAnnounce(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
     [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: not sent, another instance has claimed the entry since this one did")]
     public static partial void DebugLeaseTakenOver(this ILogger<WebhookSender> logger, int logId);
 

@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
-
 namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)

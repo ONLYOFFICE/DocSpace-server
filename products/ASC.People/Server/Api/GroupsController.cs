@@ -342,7 +342,7 @@ public class GroupController(
     /// Move group members
     /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "twice, once for the source and once for the destination group, and not at all when both IDs name the same group")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The destination group with its members", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -364,6 +364,13 @@ public class GroupController(
 
         var users = await userManager.GetUsersByGroupAsync(fromGroup.ID);
 
+        if (users.Length == 0)
+        {
+            return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
+        }
+
+        var toGroupBefore = await GetMembershipAsync(toGroup);
+
         foreach (var userInfo in users)
         {
             await TransferUserToDepartmentAsync(userInfo.Id, toGroup, false);
@@ -371,7 +378,7 @@ public class GroupController(
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, fromGroup);
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, toGroup);
+        await PublishIfChangedAsync(toGroup, toGroupBefore);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
     }
@@ -395,7 +402,7 @@ public class GroupController(
     /// Replace group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members it ends up with", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member")]
@@ -421,6 +428,8 @@ public class GroupController(
             throw new ArgumentException(nameof(inDto.Members.Members));
         }
 
+        var before = await GetMembershipAsync(group);
+
         foreach (var user in await userManager.GetUsersByGroupAsync(group.ID))
         {
             await RemoveUserFromDepartmentAsync(user.Id, group);
@@ -431,7 +440,7 @@ public class GroupController(
             await TransferUserToDepartmentAsync(userId, group, false);
         }
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+        await PublishIfChangedAsync(group, before);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
@@ -452,7 +461,7 @@ public class GroupController(
     /// Add group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its members after the addition", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -464,15 +473,17 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        if (inDto.Members.Members != null)
+        if (inDto.Members.Members?.Any() == true)
         {
+            var before = await GetMembershipAsync(group);
+
             foreach (var userId in inDto.Members.Members)
             {
                 await TransferUserToDepartmentAsync(userId, group, false);
             }
-        }
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+            await PublishIfChangedAsync(group, before);
+        }
 
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
@@ -493,7 +504,7 @@ public class GroupController(
     /// Set a group manager
     /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its new manager", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
@@ -506,16 +517,16 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
-        if (await userManager.UserExistsAsync(inDto.SetManager.UserId))
-        {
-            await TransferUserToDepartmentAsync(inDto.SetManager.UserId, group, true);
-        }
-        else
+        if (!await userManager.UserExistsAsync(inDto.SetManager.UserId))
         {
             throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+        var before = await GetMembershipAsync(group);
+
+        await TransferUserToDepartmentAsync(inDto.SetManager.UserId, group, true);
+
+        await PublishIfChangedAsync(group, before);
 
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
@@ -536,7 +547,7 @@ public class GroupController(
     /// Remove group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members that remain", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -547,13 +558,19 @@ public class GroupController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(inDto.Id);
+        var userIds = inDto.Members?.Members ?? [];
 
-        foreach (var userId in inDto.Members?.Members ?? [])
+        if (userIds.Any())
         {
-            await RemoveUserFromDepartmentAsync(userId, group);
-        }
+            var before = await GetMembershipAsync(group);
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+            foreach (var userId in userIds)
+            {
+                await RemoveUserFromDepartmentAsync(userId, group);
+            }
+
+            await PublishIfChangedAsync(group, before);
+        }
 
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
@@ -567,6 +584,29 @@ public class GroupController(
         }
 
         return group;
+    }
+
+    /// <summary>
+    /// The members and the manager of a group, taken before a membership call so that <see cref="PublishIfChangedAsync"/>
+    /// can tell whether the call changed anything: `group.updated` is sent only for a real change.
+    /// </summary>
+    private async Task<(Guid Manager, HashSet<Guid> Members)> GetMembershipAsync(GroupInfo group)
+    {
+        var members = (await userManager.GetUsersByGroupAsync(group.ID, EmployeeStatus.All)).Select(u => u.Id).ToHashSet();
+
+        return (await userManager.GetDepartmentManagerAsync(group.ID), members);
+    }
+
+    private async Task PublishIfChangedAsync(GroupInfo group, (Guid Manager, HashSet<Guid> Members) before)
+    {
+        var after = await GetMembershipAsync(group);
+
+        if (after.Manager == before.Manager && after.Members.SetEquals(before.Members))
+        {
+            return;
+        }
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
     }
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager, bool validate = true)

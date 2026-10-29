@@ -101,6 +101,47 @@ public class UpdateWebhookTests(
         (await GetSubscriptionAsync(subscription.Id))!.Ssl.Should().BeFalse();
     }
 
+    /// <summary>
+    /// A request that leaves <c>ssl</c> out keeps the stored setting rather than resetting it. The stored value on is
+    /// planted, since the API refuses it for the plain-http receiver, and the kept value is what refuses the update:
+    /// reset to off, the same request would pass. Sent raw, because the SDK model's <c>Ssl</c> is a non-nullable bool
+    /// written with <c>EmitDefaultValue = true</c>, so the generated client always sends <c>"ssl": false</c> and cannot
+    /// leave the field out (tests.md, raw carve-outs).
+    /// </summary>
+    [Fact]
+    public async Task UpdateWebhook_WithoutSsl_KeepsTheStoredSslOn()
+    {
+        // Arrange
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        await ExecuteSqlAsync("UPDATE webhooks_config SET `ssl` = 1 WHERE id = @id", ("@id", subscription.Id));
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        using var response = await _webApi.PutAsync(
+            "api/2.0/settings/webhook", RawUpdateWithoutSsl(subscription), TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the kept ssl demands an https target");
+        (await GetSubscriptionAsync(subscription.Id))!.Ssl.Should().BeTrue();
+    }
+
+    /// <inheritdoc cref="UpdateWebhook_WithoutSsl_KeepsTheStoredSslOn"/>
+    [Fact]
+    public async Task UpdateWebhook_WithoutSsl_KeepsTheStoredSslOff()
+    {
+        // Arrange
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        using var response = await _webApi.PutAsync(
+            "api/2.0/settings/webhook", RawUpdateWithoutSsl(subscription), TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await GetSubscriptionAsync(subscription.Id))!.Ssl.Should().BeFalse();
+    }
+
     [Fact]
     public async Task UpdateWebhook_EmptySecret_KeepsTheStoredSecret()
     {
@@ -224,6 +265,12 @@ public class UpdateWebhookTests(
         // Assert
         result.Response.Triggers.Should().Be(WebhookTrigger.FileCreated | WebhookTrigger.FileUpdated);
         result.Response.CreatedBy!.Id.Should().Be(member.Id, "an admin's edit does not change whose subscription it is");
+    }
+
+    /// <summary>The raw body of an update that changes nothing of <paramref name="subscription"/> and has no <c>ssl</c>.</summary>
+    private static object RawUpdateWithoutSsl(WebhookSubscription subscription)
+    {
+        return new { id = subscription.Id, name = subscription.Name, uri = subscription.Uri, secretKey = subscription.SecretKey, enabled = true };
     }
 
     /// <summary>The update that keeps everything of <paramref name="subscription"/> but what is named.</summary>

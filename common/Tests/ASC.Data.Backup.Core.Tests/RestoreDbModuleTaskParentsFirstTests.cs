@@ -113,6 +113,25 @@ public class RestoreDbModuleTaskParentsFirstTests
     }
 
     [Fact]
+    public void ParentsFirst_ArchiveWithoutTheParentColumn_KeepsTheRowsAsRoots()
+    {
+        // Arrange: an archive taken before webhooks_logs referred to itself has no retry_of column at all
+        var rows = new[] { 2, 1, 3 }.Select(id =>
+        {
+            var row = new DataRowInfo(Table);
+            row.SetValue("id", id);
+
+            return row;
+        });
+
+        // Act
+        var ids = IdsInOrder(rows);
+
+        // Assert: reading the missing column must not fail the restore of the table
+        ids.Should().Equal(2, 1, 3);
+    }
+
+    [Fact]
     public void ParentsFirst_RowsReadFromAnArchive_MatchTheParentAndChildKeys()
     {
         // Arrange: the reader gives both columns as strings, so a passed parent is recognised by its child only when

@@ -250,9 +250,14 @@ public class WebhookPublisher(
 
         result.Log.Config = webhookLog.Config;
 
-        // the new record, and the one retried: a retry ends the pending attempts of the event's earlier records
+        // the new record, and every earlier record of the event, the one retried among them: a retry ends the pending
+        // attempts of all of them, so a client watching any of them sees its nextAttemptOn go
         await webhookSocketManager.AddWebhookLogAsync(webhookLog.Config, result.Log.Id);
-        await webhookSocketManager.UpdateWebhookLogAsync(webhookLog.Config, webhookLog.Id);
+
+        foreach (var stoppedId in result.StoppedIds)
+        {
+            await webhookSocketManager.UpdateWebhookLogAsync(webhookLog.Config, stoppedId);
+        }
 
         return result;
     }

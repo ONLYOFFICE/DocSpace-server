@@ -97,8 +97,8 @@ public class WebhooksLogDto
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// When this delivery record was queued, as a UTC instant - unlike the dates of the subscription itself, which come
-    /// in the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the
+    /// When this delivery record was queued, as a UTC instant ending in `Z` - unlike the dates of the subscription
+    /// itself, which carry the offset of the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the
     /// moment of the retry. Records come back newest first by this moment.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
@@ -139,8 +139,11 @@ public class WebhooksLogDto
     public string ResponseHeaders { get; set; }
 
     /// <summary>
-    /// The body the target answered with, truncated for storage. Empty under the same conditions as
-    /// `responseHeaders`, and also for a target that answers with no body at all.
+    /// The body the target answered with on the latest attempt, truncated for storage. Empty under the same
+    /// conditions as `responseHeaders`, and also for a target that answers with no body at all. A record the portal
+    /// stopped without sending holds the portal's own note here instead - a text that starts with `Not sent:` and
+    /// gives the reason - which is not an answer of the target: on a record that never went out `status` is then `0`
+    /// and `responseHeaders` is empty, while on one stopped after failed attempts they still describe the last of them.
     /// </summary>
     /// <example>{"ok":true}</example>
     public string ResponsePayload { get; set; }
@@ -154,8 +157,8 @@ public class WebhooksLogDto
     public int Status { get; set; }
 
     /// <summary>
-    /// When the successful answer came back, as a UTC instant like `creationTime`. It stays empty until an attempt
-    /// succeeds, and for good once the portal has given up retrying.
+    /// When the successful answer came back, as a UTC instant ending in `Z` like `creationTime`. It stays empty until an
+    /// attempt succeeds, and for good once the portal has given up retrying.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Delivery { get; set; }
@@ -170,11 +173,14 @@ public class WebhooksLogDto
     public int Attempts { get; set; }
 
     /// <summary>
-    /// When the next attempt is due, as a UTC instant like `creationTime`. While an attempt is being sent right now
-    /// it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry; it
-    /// changes again once the attempt ends. It is empty once the record is delivered, once the retries run out,
-    /// once the subscription is disabled or removed, and once a manual retry of the same event takes over from this
-    /// record.
+    /// When the next attempt is due, as a UTC instant ending in `Z` like `creationTime`. While an attempt is being sent
+    /// right now it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry;
+    /// it changes again once the attempt ends. Empty means no attempt will follow: the record is delivered, its retries
+    /// ran out, a manual retry of the same event took over from it, or the portal stopped it - because the subscription
+    /// was disabled or removed or its address rejected, the subscription's creator may no longer receive the event,
+    /// the stored body cannot be read or is in the payload format of a previous version, the portal is removed, the
+    /// record waited longer than the retry schedule allows, or the portal was restored from a backup taken before the
+    /// record was answered. A stopped record that was never answered says why in `responsePayload`.
     /// </summary>
     /// <example>2024-01-15T10:35:00Z</example>
     public DateTime? NextAttemptOn { get; set; }

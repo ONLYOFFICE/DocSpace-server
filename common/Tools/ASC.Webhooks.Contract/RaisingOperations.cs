@@ -37,7 +37,8 @@ namespace ASC.Webhooks.Contract;
 /// One REST API operation that raises a webhook, as the generated API documents describe it.
 /// </summary>
 /// <param name="Method">The HTTP method, upper case.</param>
-/// <param name="Path">The route, without the leading slash, as the API descriptions name operations.</param>
+/// <param name="Path">The route a caller sends the request to, without the leading slash, as the API descriptions name
+/// operations: <c>api/2.0/...</c> for the portal services, <c>apisystem/...</c> for the ApiSystem service.</param>
 /// <param name="Summary">The operation's title.</param>
 /// <param name="When">The condition under which it raises the trigger, or null when it always does.</param>
 public sealed record RaisingOperation(string Method, string Path, string Summary, string When);
@@ -56,6 +57,16 @@ public static class RaisingOperations
     private const string ExtensionName = "x-docspace-webhooks";
 
     private static readonly string[] _methods = ["get", "post", "put", "patch", "delete"];
+
+    /// <summary>
+    /// The route prefix of a document whose paths leave it out. The ApiSystem service publishes its paths relative to
+    /// the `apisystem/` mount point the router puts it under, while the documents of the portal services carry the
+    /// whole route (`/api/2.0/...`); an operation is listed under the route a caller sends it to.
+    /// </summary>
+    private static readonly Dictionary<string, string> _routePrefixes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["apisystem_common.json"] = "apisystem/"
+    };
 
     /// <summary>
     /// The directory of the generated API documents, below the repository root.
@@ -85,6 +96,8 @@ public static class RaisingOperations
                 continue;
             }
 
+            var routePrefix = _routePrefixes.GetValueOrDefault(Path.GetFileName(file), string.Empty);
+
             foreach (var (path, item) in paths)
             {
                 foreach (var method in _methods)
@@ -109,7 +122,7 @@ public static class RaisingOperations
 
                         list.Add(new RaisingOperation(
                             method.ToUpperInvariant(),
-                            path.TrimStart('/'),
+                            routePrefix + path.TrimStart('/'),
                             operation["summary"]?.GetValue<string>(),
                             entry["when"]?.GetValue<string>()));
                     }

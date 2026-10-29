@@ -31,101 +31,27 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-
 namespace ASC.Core.Common.Tests.Webhooks;
 
 /// <summary>
 /// Which roles may subscribe to which triggers, as <c>[AvailableFor]</c> on <see cref="WebhookTrigger"/> declares it.
 /// A pure check of the enum: the API side, what a User is refused when creating a subscription, is covered by the
-/// People suite (WebhookTest).
+/// People suite (WebhookTest). This class checks the catalog as a whole; the role checks per trigger are split across
+/// <see cref="WebhookAdminOnlyTriggerAvailabilityTests"/> and the <see cref="WebhookAllRolesTriggerAvailabilityTestBase"/>
+/// classes, to keep each class small enough to run in parallel with the others.
 /// </summary>
 [Trait("Category", "Webhooks")]
 public class WebhookTriggerAvailabilityTests
 {
-    public static TheoryData<WebhookTrigger> AdminOnlyTriggers =>
-    [
-        WebhookTrigger.UserCreated,
-        WebhookTrigger.UserInvited,
-        WebhookTrigger.GroupCreated,
-        WebhookTrigger.GroupUpdated,
-        WebhookTrigger.GroupDeleted,
-        WebhookTrigger.RoomCreated,
-        WebhookTrigger.RoomCopied,
-        WebhookTrigger.AgentCreated,
-    ];
-
-    public static TheoryData<WebhookTrigger> AllRolesTriggers =>
-    [
-        WebhookTrigger.All,
-        WebhookTrigger.UserUpdated,
-        WebhookTrigger.UserDeleted,
-        WebhookTrigger.FileCreated,
-        WebhookTrigger.FileUploaded,
-        WebhookTrigger.FileUpdated,
-        WebhookTrigger.FileTrashed,
-        WebhookTrigger.FileDeleted,
-        WebhookTrigger.FileRestored,
-        WebhookTrigger.FileCopied,
-        WebhookTrigger.FileMoved,
-        WebhookTrigger.FolderCreated,
-        WebhookTrigger.FolderUpdated,
-        WebhookTrigger.FolderTrashed,
-        WebhookTrigger.FolderDeleted,
-        WebhookTrigger.FolderRestored,
-        WebhookTrigger.FolderCopied,
-        WebhookTrigger.FolderMoved,
-        WebhookTrigger.RoomUpdated,
-        WebhookTrigger.RoomArchived,
-        WebhookTrigger.RoomDeleted,
-        WebhookTrigger.RoomRestored,
-        WebhookTrigger.FormSubmit,
-        WebhookTrigger.FormFilledOut,
-        WebhookTrigger.FormStopped,
-        WebhookTrigger.AgentUpdated,
-        WebhookTrigger.AgentDeleted,
-        WebhookTrigger.FileDownloaded,
-        WebhookTrigger.FolderDownloaded,
-    ];
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_DocSpaceAdmin_ReturnsTrue(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_RoomAdmin_ReturnsTrue(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_User_ReturnsFalse(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.User).Should().BeFalse();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_DocSpaceAdmin_ReturnsTrue(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_RoomAdmin_ReturnsTrue(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_User_ReturnsTrue(WebhookTrigger trigger)
-        => trigger.IsAvailableFor(EmployeeType.User).Should().BeTrue();
-
     /// <summary>
-    /// Every trigger sits in exactly one of the two lists above, so a trigger added later cannot go untested by
-    /// the role checks: it fails here until it is classified.
+    /// Every trigger sits in exactly one of the two lists of <see cref="WebhookTriggerAvailabilityData"/>, so a trigger
+    /// added later cannot go untested by the role checks: it fails here until it is classified.
     /// </summary>
     [Fact]
     public void AllTriggers_AreClassifiedInExactlyOneList()
     {
-        var adminOnly = AdminOnlyTriggers.Select(row => row.Data).ToList();
-        var allRoles = AllRolesTriggers.Select(row => row.Data).ToList();
+        var adminOnly = WebhookTriggerAvailabilityData.AdminOnlyTriggers.Select(row => row.Data).ToList();
+        var allRoles = WebhookTriggerAvailabilityData.AllRolesTriggers.Select(row => row.Data).ToList();
 
         adminOnly.Should().NotIntersectWith(allRoles);
         adminOnly.Concat(allRoles).Should().BeEquivalentTo(Enum.GetValues<WebhookTrigger>());

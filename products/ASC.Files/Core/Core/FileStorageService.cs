@@ -5350,7 +5350,7 @@ public class FileStorageService //: IFileStorageService
                 var createByInfo = await userManager.GetUsersAsync(createBy);
                 await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id.ToString(), userInfo.DisplayUserName(false, displayUserSettingsHelper), createByInfo.Id.ToString(), createByInfo.DisplayUserName(false, displayUserSettingsHelper));
 
-                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
+                await webhookManager.PublishAsync(isRoom ? newFolder.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, newFolder);
             }
 
             yield return newFolder;

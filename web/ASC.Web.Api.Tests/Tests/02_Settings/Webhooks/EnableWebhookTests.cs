@@ -42,6 +42,9 @@ public class EnableWebhookTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    // every subscription it creates is probed at the webhook receiver
+    protected override bool NeedsLazyResources => true;
+
     [Fact]
     public async Task EnableWebhook_Owner_TogglesEnabledState()
     {

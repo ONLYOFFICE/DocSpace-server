@@ -61,7 +61,7 @@ public class ColumnMapper
 
     public void SetDateMapping(string tableName, KeyValuePair<string, bool> column, object oldValue)
     {
-        // an empty date stays empty: mapping it would give a nullable column (webhooks_logs.next_attempt_on) a value
+        // an empty date stays empty: mapping it would give a nullable date column a value
         if (oldValue is null or DBNull)
         {
             return;

@@ -48,9 +48,7 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("app_settings", "tenant_id") {DateColumns = new Dictionary<string, bool> {{"last_modified", false}}},
         new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
-        // next_attempt_on is a moment in the future and moves with the restored dates; creation_time and delivery record
-        // what has already happened and stay as they were
-        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"], DateColumns = new Dictionary<string, bool> { { "next_attempt_on", true } } }
+        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];
 
     private readonly RelationInfo[] _relations =
@@ -80,8 +78,8 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
         if (prepared && table.Name == "webhooks_logs")
         {
-            // The lease names an instance of the source's sender; a row that was in flight is due again once its lease
-            // time (held in next_attempt_on while leased) has passed.
+            // The lease names an instance of the source's sender and means nothing on the target.
+            var leased = !IsNull(preparedRow, "lease_id");
             SetNull(preparedRow, "lease_id");
 
             // A portal transfer keeps the schedule, so a delivery waiting for its next attempt resumes on the target:
@@ -89,12 +87,14 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             // A restore from an archive brings back a past state instead: the portal may have delivered those events
             // after the backup was taken, and sending them again, under new ids (event.id, and webhook.id, which the
             // sender rewrites from the restored subscription), would reach the receiver a second time with nothing
-            // to tell it so. The schedule is dropped, and a row that had not been answered yet says why it never was.
-            if (!columnMapper.PortalTransfer && !IsNull(preparedRow, "next_attempt_on"))
+            // to tell it so. The same holds for a row that was in flight when a transfer began (its next_attempt_on
+            // is then the lease expiry): the source may still have finished that request. The schedule is dropped,
+            // and a row that was never attempted says why it never was.
+            if ((!columnMapper.PortalTransfer || leased) && !IsNull(preparedRow, "next_attempt_on"))
             {
                 SetNull(preparedRow, "next_attempt_on");
 
-                if (IsNull(preparedRow, "response_payload"))
+                if (IsNull(preparedRow, "response_payload") && !WasAttempted(preparedRow))
                 {
                     SetValue(preparedRow, "response_payload", DbWorker.RestoredFromBackupNote);
                 }
@@ -141,6 +141,14 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
     private static bool HasColumn(Dictionary<string, object> preparedRow, string column)
     {
         return FindColumn(preparedRow, column) != null;
+    }
+
+    // An archive of the previous version has no attempts column: its rows count as never attempted.
+    private static bool WasAttempted(Dictionary<string, object> preparedRow)
+    {
+        var key = FindColumn(preparedRow, "attempts");
+
+        return key != null && preparedRow[key] is not (null or DBNull) && Convert.ToInt32(preparedRow[key], CultureInfo.InvariantCulture) > 0;
     }
 
     private static bool IsNull(Dictionary<string, object> preparedRow, string column)

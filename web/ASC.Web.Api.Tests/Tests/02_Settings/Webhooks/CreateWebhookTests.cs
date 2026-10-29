@@ -42,6 +42,9 @@ public class CreateWebhookTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    // every subscription it creates is probed at the webhook receiver
+    protected override bool NeedsLazyResources => true;
+
     [Fact]
     public async Task CreateWebhook_Owner_ReturnsCreatedWebhook()
     {
@@ -118,6 +121,34 @@ public class CreateWebhookTests(
 
         stored.Ssl.Should().BeFalse();
         stored.Enabled.Should().BeFalse();
+    }
+
+    /// <summary>
+    /// A request that leaves <c>ssl</c> out gets the check for the target's scheme: off for an http one, which it would
+    /// otherwise refuse. Sent raw, because the SDK model's <c>Ssl</c> is a non-nullable bool written with
+    /// <c>EmitDefaultValue = true</c>, so the generated client always sends <c>"ssl": false</c> and cannot leave the
+    /// field out (tests.md, raw carve-outs). The https half (on by default) needs an https target with a valid
+    /// certificate, which this suite does not have: against the plain-http receiver both settings fail alike.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_WithoutSslForAnHttpTarget_StoresSslOff()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+
+        // Act
+        using var response = await _webApi.PostAsync(
+            "api/2.0/settings/webhook",
+            new { name = dto.Name, uri = dto.Uri, secretKey = dto.SecretKey, enabled = false },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        var created = await _webApi.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        var id = created.GetProperty("id").GetInt32();
+
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+        list.Response.Should().ContainSingle(w => w.Configs.Id == id).Which.Configs.Ssl.Should().BeFalse();
     }
 
     [Fact]

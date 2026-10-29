@@ -49,9 +49,10 @@ internal static class WebhookMarkdown
 {
     /// <summary>
     /// An endpoint named in code in a description, as the contract lists the operations that raise a trigger:
-    /// <c>`PUT api/2.0/files/fileops/move`</c>.
+    /// <c>`PUT api/2.0/files/fileops/move`</c>, or <c>`POST apisystem/portal/...`</c> for an operation of the
+    /// ApiSystem service. One the API reference has no page for stays plain code.
     /// </summary>
-    private static readonly Regex _endpoint = new(@"`(GET|POST|PUT|PATCH|DELETE) (api/[^`]+)`", RegexOptions.Compiled);
+    private static readonly Regex _endpoint = new(@"`(GET|POST|PUT|PATCH|DELETE) ((?:api|apisystem)/[^`]+)`", RegexOptions.Compiled);
 
     private static readonly Regex _lineBreak = new(@"\s*\n\s*", RegexOptions.Compiled);
 

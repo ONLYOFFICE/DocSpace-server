@@ -201,11 +201,12 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     // rows stay at the head of the next_attempt_on index, and every poll of every instance would read them again.
     // This finds a batch of them, oldest first, and says which ones leave the schedule: those of a portal being
     // removed or already removed. A plain read without locks, so it never holds the rows of active portals it scans
-    // past; the UPDATEs that follow touch the rows it returned by primary key only.
+    // past; the UPDATEs that follow touch the rows it returned by primary key only. A row created before createdBefore
+    // is marked as expired: its retries would have run out by now, so it stops waiting for its portal.
     [PreCompileQuery]
-    public IAsyncEnumerable<InactiveTenantWebhooksLog> InactiveTenantsDueWebhooksLogsAsync(DateTime now, int count)
+    public IAsyncEnumerable<InactiveTenantWebhooksLog> InactiveTenantsDueWebhooksLogsAsync(DateTime now, DateTime createdBefore, int count)
     {
-        return Queries.InactiveTenantsDueWebhooksLogsAsync(this, now, count);
+        return Queries.InactiveTenantsDueWebhooksLogsAsync(this, now, createdBefore, count);
     }
 
     // The oldest delivery records created before `before` that nothing will send any more, across all portals, for
@@ -276,6 +277,33 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
             .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
             .ExecuteUpdateAsync(q => q
                 .SetProperty(p => p.NextAttemptOn, postponeTo)
+                .SetProperty(p => p.LeaseId, (Guid?)null));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Takes rows found by InactiveTenantsDueWebhooksLogsAsync off the schedule like UnscheduleWebhooksLogsAsync, and
+    // says why in the response: those of a portal that may come back, whose retries would have run out by now.
+    public Task<int> UnscheduleWebhooksLogsWithNoteAsync(IEnumerable<int> ids, DateTime now, string note)
+    {
+        return WebhooksLogs
+            .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.ResponsePayload, note)
+                .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
+                .SetProperty(p => p.LeaseId, (Guid?)null));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Ends the attempts of a claimed row created before createdBefore like StopWebhooksLogWithNoteAsync; a younger
+    // row is left as it is. Used for a row whose attempts keep failing before the request goes out, which counts no
+    // attempt and would otherwise come back for ever.
+    public Task<int> StopExpiredWebhooksLogWithNoteAsync(int tenantId, int id, Guid leaseId, DateTime createdBefore, string note)
+    {
+        return WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id && r.LeaseId == leaseId && r.CreationTime < createdBefore)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.ResponsePayload, note)
+                .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
 
@@ -523,9 +551,9 @@ static file class Queries
                     .Where(it => ids.Contains(it.Id) && it.NextAttemptOn == null && it.LeaseId == null)
                     .ExecuteDelete());
 
-    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<InactiveTenantWebhooksLog>> InactiveTenantsDueWebhooksLogsAsync =
+    public static readonly Func<WebhooksDbContext, DateTime, DateTime, int, IAsyncEnumerable<InactiveTenantWebhooksLog>> InactiveTenantsDueWebhooksLogsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, DateTime now, int count) =>
+            (WebhooksDbContext ctx, DateTime now, DateTime createdBefore, int count) =>
                 ctx.WebhooksLogs
                     .Where(it => it.NextAttemptOn != null && it.NextAttemptOn <= now &&
                                  !ctx.Tenants.Any(t => t.Id == it.TenantId && t.Status == TenantStatus.Active))
@@ -534,7 +562,8 @@ static file class Queries
                     .Select(it => new InactiveTenantWebhooksLog
                     {
                         Id = it.Id,
-                        Unschedule = !ctx.Tenants.Any(t => t.Id == it.TenantId && t.Status != TenantStatus.RemovePending)
+                        Unschedule = !ctx.Tenants.Any(t => t.Id == it.TenantId && t.Status != TenantStatus.RemovePending),
+                        Expired = it.CreationTime < createdBefore
                     })
                     .Take(count));
 

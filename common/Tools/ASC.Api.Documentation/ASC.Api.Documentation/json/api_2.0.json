@@ -1984,7 +1984,7 @@
           "Migration"
         ],
         "summary": "Start migration",
-        "description": "Starts the import itself: the users, the groups and the files selected in the request body are created on this\r\nportal from the backup that the parse pass has read. Run `POST api/2.0/migration/init/{migratorName}` first\r\nand wait for `isCompleted` in `GET api/2.0/migration/status`, then send `parseResult` from that answer back\r\nhere with `shouldImport` set on the users and groups to take and the `import...Files` flags set for the\r\ncontent to copy. A DocSpace administrator is required, and importing a user as `DocSpaceAdmin` additionally\r\nrequires the caller to be the portal owner unless a user with that email is an administrator of this portal\r\nalready, otherwise the whole call is rejected with 403 before anything is imported. The job is queued and the\r\ncall answers with an empty body at once: watch `progress`, `successedUsers`, `failedUsers` and `error` in\r\n`GET api/2.0/migration/status` and read what each step did from `GET api/2.0/migration/logs`. The import\r\nwrites to the portal and cannot be undone, and a repeat is no help: a call made while the job runs is ignored,\r\nand once the job has ended the uploaded backup is deleted, so a new call has nothing to read until the archive\r\nis uploaded and parsed again. When the import is done, close it with `POST api/2.0/migration/finish`, which can\r\nalso mail the imported users their activation link.\n\nRaises the `room.created` webhook for every room the queued import creates. Raises the `folder.created` webhook for every folder the queued import creates, including the one in the personal section of each imported user that receives that user's files. Raises the `folder.updated` webhook for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin; the payload is the room.",
+        "description": "Starts the import itself: the users, the groups and the files selected in the request body are created on this\r\nportal from the backup that the parse pass has read. Run `POST api/2.0/migration/init/{migratorName}` first\r\nand wait for `isCompleted` in `GET api/2.0/migration/status`, then send `parseResult` from that answer back\r\nhere with `shouldImport` set on the users and groups to take and the `import...Files` flags set for the\r\ncontent to copy. A DocSpace administrator is required, and importing a user as `DocSpaceAdmin` additionally\r\nrequires the caller to be the portal owner unless a user with that email is an administrator of this portal\r\nalready, otherwise the whole call is rejected with 403 before anything is imported. The job is queued and the\r\ncall answers with an empty body at once: watch `progress`, `successedUsers`, `failedUsers` and `error` in\r\n`GET api/2.0/migration/status` and read what each step did from `GET api/2.0/migration/logs`. The import\r\nwrites to the portal and cannot be undone, and a repeat is no help: a call made while the job runs is ignored,\r\nand once the job has ended the uploaded backup is deleted, so a new call has nothing to read until the archive\r\nis uploaded and parsed again. When the import is done, close it with `POST api/2.0/migration/finish`, which can\r\nalso mail the imported users their activation link.\n\nRaises the `room.created` webhook for every room the queued import creates. Raises the `folder.created` webhook for every folder the queued import creates, including the one in the personal section of each imported user that receives that user's files. Raises the `room.updated` webhook for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin.",
         "operationId": "startMigration",
         "requestBody": {
           "content": {
@@ -2088,12 +2088,12 @@
             "when": "for every folder the queued import creates, including the one in the personal section of each imported user that receives that user's files"
           },
           {
-            "trigger": "folder.updated",
-            "when": "for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin; the payload is the room"
-          },
-          {
             "trigger": "room.created",
             "when": "for every room the queued import creates"
+          },
+          {
+            "trigger": "room.updated",
+            "when": "for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin"
           }
         ]
       }
@@ -28426,7 +28426,7 @@
           "Settings / Webhooks"
         ],
         "summary": "Update a webhook",
-        "description": "Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the\r\npath. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `ssl`,\r\n`triggers` or `targetId` resets them to off, `ssl` following the scheme of the target (`true` for `https`,\r\n`false` for `http`), all events and no target: read the current values with `GET\r\napi/2.0/settings/webhook` first and send back whatever should stay. `secretKey` is the one exception, an empty\r\nvalue keeping the existing secret and a new one having to satisfy the portal password rules. A `DocSpaceAdmin`\r\nmay update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`\r\ngives 404 and another member's subscription 403 before the payload is validated. The payload is then validated\r\nas on creation, except that trigger flags are checked against the role of the subscription's creator rather than\r\nthe caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to\r\nswitch a subscription on or off without touching anything else.",
+        "description": "Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the\r\npath. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`\r\nor `targetId` resets them to off, all events and no target: read the current values with `GET\r\napi/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:\r\nan empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a\r\nleft-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and\r\n`https`. A `DocSpaceAdmin`\r\nmay update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`\r\ngives 404 and another member's subscription 403 before the payload is validated. The payload is then validated\r\nas on creation, except that trigger flags are checked against the role of the subscription's creator rather than\r\nthe caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to\r\nswitch a subscription on or off without touching anything else.",
         "operationId": "updateWebhook",
         "requestBody": {
           "content": {
@@ -28535,7 +28535,7 @@
           "Settings / Webhooks"
         ],
         "summary": "Switch a webhook on or off",
-        "description": "Switches one webhook subscription on or off, leaving the rest of its parameters as they are. Only `id` and\r\n`enabled` are read from the body: `name`, `uri`, `secretKey`, `ssl`, `triggers` and `targetId` are demanded by\r\nthe schema but ignored here, so change any of them with `PUT api/2.0/settings/webhook` instead. Switching a\r\nsubscription on re-checks what is already stored: the saved URL is probed with a HEAD request, the saved secret\r\nis checked against the current password rules, and the saved triggers against the current role of the\r\nsubscription's creator. The call is refused with 400 when any of these fails, so a subscription whose target has\r\ngone away cannot be switched on until it is updated. Switching one off is not validated. While a subscription is\r\noff its events are dropped rather than queued. A `DocSpaceAdmin` may switch any subscription in the portal,\r\nanyone else only their own, and a `Guest` is refused. The response carries the subscription in its new state,\r\nand repeating the call changes nothing further.",
+        "description": "Switches one webhook subscription on or off, leaving the rest of its parameters as they are. Only `id` and\r\n`enabled` are read from the body: `name` and `uri` must be present because the schema requires them, but their\r\nvalues are ignored here, as are `secretKey`, `ssl`, `triggers` and `targetId` when sent - change any of them\r\nwith `PUT api/2.0/settings/webhook` instead. Switching a subscription on re-checks what is already stored: the\r\nsaved URL is probed with a HEAD request, the saved secret is checked against the current password rules, and the saved triggers against the current role of the\r\nsubscription's creator. The call is refused with 400 when any of these fails, so a subscription whose target has\r\ngone away cannot be switched on until it is updated. Switching one off is not validated. While a subscription is\r\noff its events are dropped rather than queued. A `DocSpaceAdmin` may switch any subscription in the portal,\r\nanyone else only their own, and a `Guest` is refused. The response carries the subscription in its new state,\r\nand repeating the call changes nothing further.",
         "operationId": "enableWebhook",
         "requestBody": {
           "content": {
@@ -50841,7 +50841,7 @@
               "2024-01-15T10:30:00Z"
             ],
             "type": "string",
-            "description": "When this delivery record was queued, as a UTC instant - unlike the dates of the subscription itself, which come\r\nin the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the\r\nmoment of the retry. Records come back newest first by this moment.",
+            "description": "When this delivery record was queued, as a UTC instant ending in `Z` - unlike the dates of the subscription\r\nitself, which carry the offset of the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the\r\nmoment of the retry. Records come back newest first by this moment.",
             "format": "date-time"
           },
           "method": {
@@ -50902,7 +50902,7 @@
               "null",
               "string"
             ],
-            "description": "The body the target answered with, truncated for storage. Empty under the same conditions as\r\n`responseHeaders`, and also for a target that answers with no body at all."
+            "description": "The body the target answered with on the latest attempt, truncated for storage. Empty under the same\r\nconditions as `responseHeaders`, and also for a target that answers with no body at all. A record the portal\r\nstopped without sending holds the portal's own note here instead - a text that starts with `Not sent:` and\r\ngives the reason - which is not an answer of the target: on a record that never went out `status` is then `0`\r\nand `responseHeaders` is empty, while on one stopped after failed attempts they still describe the last of them."
           },
           "status": {
             "examples": [
@@ -50920,7 +50920,7 @@
               "null",
               "string"
             ],
-            "description": "When the successful answer came back, as a UTC instant like `creationTime`. It stays empty until an attempt\r\nsucceeds, and for good once the portal has given up retrying.",
+            "description": "When the successful answer came back, as a UTC instant ending in `Z` like `creationTime`. It stays empty until an\r\nattempt succeeds, and for good once the portal has given up retrying.",
             "format": "date-time"
           },
           "attempts": {
@@ -50939,7 +50939,7 @@
               "null",
               "string"
             ],
-            "description": "When the next attempt is due, as a UTC instant like `creationTime`. While an attempt is being sent right now\r\nit holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry; it\r\nchanges again once the attempt ends. It is empty once the record is delivered, once the retries run out,\r\nonce the subscription is disabled or removed, and once a manual retry of the same event takes over from this\r\nrecord.",
+            "description": "When the next attempt is due, as a UTC instant ending in `Z` like `creationTime`. While an attempt is being sent\r\nright now it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry;\r\nit changes again once the attempt ends. Empty means no attempt will follow: the record is delivered, its retries\r\nran out, a manual retry of the same event took over from it, or the portal stopped it - because the subscription\r\nwas disabled or removed or its address rejected, the subscription's creator may no longer receive the event,\r\nthe stored body cannot be read or is in the payload format of a previous version, the portal is removed, the\r\nrecord waited longer than the retry schedule allows, or the portal was restored from a backup taken before the\r\nrecord was answered. A stopped record that was never answered says why in `responsePayload`.",
             "format": "date-time"
           }
         },

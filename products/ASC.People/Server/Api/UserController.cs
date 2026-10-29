@@ -2652,7 +2652,8 @@ public class UserController(
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>
     [RaisesWebhook(WebhookTrigger.UserUpdated, When = "once the queued type change finishes successfully, not when it is cancelled or fails")]
-    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every room and AI agent the account owns, once the queued type change hands it over to the recipient; the payload is the room")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the account owns, once the queued type change hands it over to the recipient")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for an AI agent the account owns")]
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]

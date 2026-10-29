@@ -59,4 +59,9 @@ public enum WebhookRetryStatus
     Outdated
 }
 
-public record WebhookRetryResult(WebhookRetryStatus Status, DbWebhooksLog Log = null);
+/// <summary>
+/// The outcome of a manual retry. When it was queued, <paramref name="Log"/> is the new row and
+/// <paramref name="StoppedIds"/> the ids of the event's earlier rows, the original one and its earlier retries, whose
+/// automatic retries still due the new row ended; a row that had none left is listed as well.
+/// </summary>
+public record WebhookRetryResult(WebhookRetryStatus Status, DbWebhooksLog Log = null, IReadOnlyList<int> StoppedIds = null);

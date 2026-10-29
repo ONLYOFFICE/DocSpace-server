@@ -43,7 +43,7 @@ public abstract class WebhookDeliveryTestBase(
 {
     private readonly AspireAppFixture _fixture = fixture;
 
-    // Web.Studio sends the deliveries, and Files publishes the file events
+    // the receiver takes the deliveries, Web.Studio sends them, and Files publishes the file events
     protected override bool NeedsLazyResources => true;
 
     /// <summary>

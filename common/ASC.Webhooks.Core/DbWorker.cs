@@ -433,7 +433,11 @@ public class DbWorker(
                 return new WebhookRetryResult(WebhookRetryStatus.NotFound);
             }
 
-            if (await webhooksDbContext.WebhooksEventPredatesAttemptsAsync(source.TenantId, eventId, PreviousVersionNote))
+            // the marks miss one row: written by a publisher of the previous version after the migration, its event
+            // handled by a Web.Studio of that version which stopped before sending, so nothing marked it. Its body
+            // gives it away, and the body is what the retry would send
+            if (await webhooksDbContext.WebhooksEventPredatesAttemptsAsync(source.TenantId, eventId, PreviousVersionNote) ||
+                IsPreviousVersionBody(source.RequestPayload))
             {
                 return new WebhookRetryResult(WebhookRetryStatus.Outdated);
             }
@@ -464,8 +468,63 @@ public class DbWorker(
             await webhooksDbContext.SaveChangesAsync();
             await tx.CommitAsync();
 
-            return new WebhookRetryResult(WebhookRetryStatus.Requeued, retry);
+            return new WebhookRetryResult(WebhookRetryStatus.Requeued, retry, [eventId, .. retryIds]);
         });
+    }
+
+    /// <summary>
+    /// Whether a stored body is in the payload format of the version before the attempt counter. That publisher
+    /// serialized the domain objects themselves rather than the webhook payload types, and each of them carried a
+    /// property none of those types has: a file or a folder <c>createOn</c> and <c>modifiedOn</c>, a user
+    /// <c>lastModified</c>, a group <c>authenticationType</c>; a submitted form carried two files one level down. The
+    /// envelope was the same, so only <c>payload</c> and its direct children are looked at. A body that is not JSON
+    /// is not judged here: the sender refuses it with its own note.
+    /// </summary>
+    internal static bool IsPreviousVersionBody(string requestPayload)
+    {
+        if (string.IsNullOrEmpty(requestPayload))
+        {
+            return false;
+        }
+
+        // the payload is any of the domain types the old publisher sent, so its shape is read as it comes rather than
+        // into a type
+        try
+        {
+            using var document = JsonDocument.Parse(requestPayload);
+
+            if (document.RootElement.ValueKind != JsonValueKind.Object ||
+                !document.RootElement.TryGetProperty("payload", out var payload) ||
+                payload.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            foreach (var property in payload.EnumerateObject())
+            {
+                if (IsPreviousVersionProperty(property.Name))
+                {
+                    return true;
+                }
+
+                if (property.Value.ValueKind == JsonValueKind.Object &&
+                    property.Value.EnumerateObject().Any(child => IsPreviousVersionProperty(child.Name)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsPreviousVersionProperty(string name)
+    {
+        return name is "createOn" or "modifiedOn" or "lastModified" or "authenticationType";
     }
 
     public async Task CancelJournalAttemptsAsync(int tenantId, int id, Guid leaseId)
@@ -508,6 +567,26 @@ public class DbWorker(
     }
 
     /// <summary>
+    /// Hands back a claimed row whose attempt failed before its request went out, like
+    /// <see cref="ReleaseJournalAttemptAsync"/>; such an attempt counts for nothing, so a row created before
+    /// <paramref name="expiredBefore"/> ends its attempts instead, with <see cref="UnsentTooLongNote"/>, rather than
+    /// come back for ever. False when the row was stopped.
+    /// </summary>
+    public async Task<bool> ReleaseUnsentJournalAttemptAsync(int tenantId, int id, Guid leaseId, DateTime nextAttemptOn, DateTime expiredBefore)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        if (await webhooksDbContext.StopExpiredWebhooksLogWithNoteAsync(tenantId, id, leaseId, expiredBefore, UnsentTooLongNote) > 0)
+        {
+            return false;
+        }
+
+        await webhooksDbContext.ReleaseWebhooksLogAsync(tenantId, id, leaseId, nextAttemptOn);
+
+        return true;
+    }
+
+    /// <summary>
     /// Records an attempt the target accepted, when the regular bookkeeping after it failed, so that it is not retried.
     /// </summary>
     public async Task RecordJournalDeliveryAsync(int tenantId, int id, Guid leaseId, int status, DateTime delivery, int attempts)
@@ -521,9 +600,12 @@ public class DbWorker(
     /// Moves the due rows of portals that are not active, or no longer exist, out of the way of the claim: see
     /// <see cref="WebhooksDbContext.InactiveTenantsDueWebhooksLogsAsync"/>. Works in batches of
     /// <see cref="PostponeBatchSize"/>, each one a short statement of its own, and stops after
-    /// <see cref="MaxPostponeRounds"/> of them; what is left waits for the next run.
+    /// <see cref="MaxPostponeRounds"/> of them; what is left waits for the next run. A row of a portal that may come
+    /// back stops waiting, with <see cref="InactiveTooLongNote"/>, once it was created before
+    /// <paramref name="expiredBefore"/>: its retries would have run out by then, and a portal unfrozen months later
+    /// must not send everything it piled up.
     /// </summary>
-    public async Task<int> PostponeInactiveTenantsJournalAsync()
+    public async Task<int> PostponeInactiveTenantsJournalAsync(DateTime expiredBefore)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -532,7 +614,7 @@ public class DbWorker(
         for (var round = 0; round < MaxPostponeRounds; round++)
         {
             var now = DateTime.UtcNow;
-            var rows = await webhooksDbContext.InactiveTenantsDueWebhooksLogsAsync(now, PostponeBatchSize).ToListAsync();
+            var rows = await webhooksDbContext.InactiveTenantsDueWebhooksLogsAsync(now, expiredBefore, PostponeBatchSize).ToListAsync();
 
             if (rows.Count == 0)
             {
@@ -540,11 +622,17 @@ public class DbWorker(
             }
 
             var unschedule = rows.Where(r => r.Unschedule).Select(r => r.Id).ToList();
-            var postpone = rows.Where(r => !r.Unschedule).Select(r => r.Id).ToList();
+            var expired = rows.Where(r => !r.Unschedule && r.Expired).Select(r => r.Id).ToList();
+            var postpone = rows.Where(r => !r.Unschedule && !r.Expired).Select(r => r.Id).ToList();
 
             if (unschedule.Count > 0)
             {
                 moved += await webhooksDbContext.UnscheduleWebhooksLogsAsync(unschedule, now);
+            }
+
+            if (expired.Count > 0)
+            {
+                moved += await webhooksDbContext.UnscheduleWebhooksLogsWithNoteAsync(expired, now, InactiveTooLongNote);
             }
 
             if (postpone.Count > 0)
@@ -654,6 +742,20 @@ public class DbWorker(
     /// </summary>
     public const string RestoredFromBackupNote =
         "Not sent: the portal was restored from a backup taken before the event was delivered";
+
+    /// <summary>
+    /// What the journal shows as the response of a row that stopped waiting for its portal to become active again
+    /// because its retries would have run out by now.
+    /// </summary>
+    public const string InactiveTooLongNote =
+        "Not sent: the portal was not active for longer than the retries of the event last";
+
+    /// <summary>
+    /// What the journal shows as the response of a row whose attempts kept failing before the request went out for
+    /// longer than the retries of the event last.
+    /// </summary>
+    public const string UnsentTooLongNote =
+        "Not sent: the event could not be prepared for sending for longer than its retries last";
 
     /// <summary>
     /// Marks a row written by a publisher of the previous version as never to be sent: see
@@ -793,6 +895,12 @@ public class InactiveTenantWebhooksLog
     /// True when the portal is being removed or is gone: the row leaves the schedule instead of waiting.
     /// </summary>
     public bool Unschedule { get; init; }
+
+    /// <summary>
+    /// True when the row was created so long ago that its retries would have run out by now: it leaves the schedule
+    /// instead of waiting for its portal.
+    /// </summary>
+    public bool Expired { get; init; }
 }
 
 /// <summary>

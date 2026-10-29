@@ -40,9 +40,12 @@ public class WorkerService(
     Settings settings,
     IEventBus eventBus,
     IServiceScopeFactory scopeFactory,
-    WorkerSignal signal)
+    WorkerSignal signal,
+    IDistributedLockProvider distributedLockProvider)
     : BackgroundService
 {
+    private const string UpkeepLockKey = "lock_webhooks_journal_upkeep";
+
     private readonly int _threadCount = settings.ThreadCount ?? 10;
     private readonly TimeSpan _waitingPeriod = TimeSpan.FromSeconds(5);
 
@@ -52,9 +55,9 @@ public class WorkerService(
     // should it still run out, the renewal finds a row another instance has taken and does not send it.
     private readonly TimeSpan _lease = TimeSpan.FromTicks(Math.Max(TimeSpan.FromMinutes(10).Ticks, webhookSender.AttemptLease.Ticks));
 
-    // how often this instance moves the due rows of inactive portals out of the claim's way, and deletes the delivery
-    // records older than webhooks:journalRetentionDays when that is set. Runs beside the delivery loop, never in it, so
-    // a slow upkeep statement cannot hold up the claim
+    // how often the upkeep moves the due rows of inactive portals out of the claim's way, and deletes the delivery
+    // records older than webhooks:journalRetentionDays when that is set; one instance at a time does it (UpkeepLockKey).
+    // Runs beside the delivery loop, never in it, so a slow upkeep statement cannot hold up the claim
     private readonly TimeSpan _upkeepPeriod = TimeSpan.FromMinutes(10);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -174,43 +177,108 @@ public class WorkerService(
 
     private async Task RunUpkeepAsync(CancellationToken stoppingToken)
     {
+        // a random start per instance, so instances started together do not all reach for the upkeep at once
+        if (!await DelayAsync(_upkeepPeriod * Random.Shared.NextDouble(), stoppingToken))
+        {
+            return;
+        }
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            // one instance does the upkeep: the one holding the lock keeps it, and runs every round, until it stops;
+            // the others try again every period and take over once it has gone. Without the lock this round is
+            // skipped, the upkeep only tidies up and can wait
+            IDistributedLockHandle upkeepLock = null;
+
             try
             {
-                await using var scope = scopeFactory.CreateAsyncScope();
-                var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
-
-                var moved = await dbWorker.PostponeInactiveTenantsJournalAsync();
-                var deleted = 0;
-
-                if (settings.JournalRetentionDays is { } retentionDays)
-                {
-                    deleted = await dbWorker.DeleteExpiredJournalAsync(DateTime.UtcNow.AddDays(-retentionDays), stoppingToken);
-                }
-
-                if (moved > 0 || deleted > 0)
-                {
-                    logger.InfoUpkeepDone(moved, deleted);
-                }
+                upkeepLock = await distributedLockProvider.TryAcquireLockAsync(UpkeepLockKey, cancellationToken: stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 return;
+            }
+            catch (DistributedLockException)
+            {
+                logger.DebugUpkeepElsewhere();
             }
             catch (Exception e)
             {
                 logger.ErrorUpkeep(e);
             }
 
+            if (upkeepLock == null)
+            {
+                if (!await DelayAsync(_upkeepPeriod, stoppingToken))
+                {
+                    return;
+                }
+
+                continue;
+            }
+
             try
             {
-                await Task.Delay(_upkeepPeriod, stoppingToken);
+                do
+                {
+                    await RunUpkeepRoundAsync(stoppingToken);
+                }
+                while (await DelayAsync(_upkeepPeriod, stoppingToken));
             }
-            catch (OperationCanceledException)
+            finally
             {
-                return;
+                try
+                {
+                    await upkeepLock.DisposeAsync();
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorUpkeep(e);
+                }
             }
+        }
+    }
+
+    private async Task RunUpkeepRoundAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+
+            var moved = await dbWorker.PostponeInactiveTenantsJournalAsync(DateTime.UtcNow - webhookSender.RetryWindow);
+            var deleted = 0;
+
+            if (settings.JournalRetentionDays is { } retentionDays)
+            {
+                deleted = await dbWorker.DeleteExpiredJournalAsync(DateTime.UtcNow.AddDays(-retentionDays), stoppingToken);
+            }
+
+            if (moved > 0 || deleted > 0)
+            {
+                logger.InfoUpkeepDone(moved, deleted);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception e)
+        {
+            logger.ErrorUpkeep(e);
+        }
+    }
+
+    private static async Task<bool> DelayAsync(TimeSpan delay, CancellationToken stoppingToken)
+    {
+        try
+        {
+            await Task.Delay(delay, stoppingToken);
+
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace ASC.Webhooks.Core;
 
 /// <summary>
 /// Tells the open clients that a webhook subscription or a record of its delivery journal changed, so they re-read
-/// it through <c>GET api/2.0/settings/webhooks</c> or <c>GET api/2.0/settings/webhooks/log</c>. A subscription is not a
+/// it through <c>GET api/2.0/settings/webhook</c> or <c>GET api/2.0/settings/webhooks/log</c>. A subscription is not a
 /// file or a folder, so there is no room of the entry to send to: the event goes to the users who may read the
 /// subscription under the rule of those endpoints - the DocSpace admins and the owner, while the owner may use the
 /// developer tools - each in the private room <c>{tenantId}-private-{userId}</c> the socket service puts them in.
@@ -114,7 +114,26 @@ public class WebhookSocketManager(
         }
     }
 
+    // A scoped memo, not a cache: it lives as long as this scoped service, i.e. one request of the publisher or one
+    // delivery of the sender, so a bulk publish (one row per subscription and event) and the events of one attempt
+    // resolve the recipients of a subscription once. The recipients depend on the portal and the subscription's
+    // creator only; nothing outlives the scope, so a change of the admins or of the settings is seen by the next one.
+    private readonly Dictionary<(int TenantId, Guid? CreatedBy), HashSet<Guid>> _recipients = new();
+
     private async Task<HashSet<Guid>> GetRecipientsAsync(DbWebhooksConfig config)
+    {
+        var key = (config.TenantId, config.CreatedBy);
+
+        if (!_recipients.TryGetValue(key, out var recipients))
+        {
+            recipients = await ResolveRecipientsAsync(config);
+            _recipients[key] = recipients;
+        }
+
+        return recipients;
+    }
+
+    private async Task<HashSet<Guid>> ResolveRecipientsAsync(DbWebhooksConfig config)
     {
         var tenant = await _tenantManager.GetTenantAsync(config.TenantId);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);

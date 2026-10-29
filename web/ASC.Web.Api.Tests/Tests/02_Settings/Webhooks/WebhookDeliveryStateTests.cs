@@ -48,14 +48,12 @@ public class WebhookDeliveryStateTests(
     [Fact]
     public async Task Attempt_LeaseTakenOverWhileSending_DoesNotOverwriteTheRecord()
     {
-        // Arrange: a receiver slow enough to hold the attempt in flight while the test steps in, and a second,
-        // fast subscription to the same events that serves as a marker. The answer comes 3 seconds before the attempt
-        // would give up on the target, which leaves 9 seconds for the wait, the read and the SQL below even on a busy
-        // machine: a shorter delay let the attempt finish first under parallel load
+        // Arrange: a receiver slow enough to hold the attempt in flight while the test steps in. The answer comes
+        // 3 seconds before the attempt would give up on the target, which leaves 9 seconds for the wait, the read and
+        // the SQL below even on a busy machine: a shorter delay let the attempt finish first under parallel load
         var answerDelay = ProfileRequestTimeout - TimeSpan.FromSeconds(3);
         var receiver = await CreateReceiverAsync(delayMilliseconds: (int)answerDelay.TotalMilliseconds);
         var subscription = await CreateSubscriptionAsync(receiver, WebhookTrigger.UserCreated);
-        var marker = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserCreated);
         await FireEventAsync();
         await receiver.WaitForDeliveriesAsync(1);
         var record = (await GetLogAsync(subscription.Id)).Should().ContainSingle().Subject;
@@ -71,20 +69,27 @@ public class WebhookDeliveryStateTests(
         config.Should().NotBeNull();
         config!.LastSuccessOn.Should().NotBeNull("the target answered 200, which the subscription records");
 
-        // The sender claims nothing new until every attempt of its current batch has ended, the one above included.
-        // So once an event published only now has been delivered to the marker, the attempt has written whatever it
-        // was going to write: no fixed pause is needed. (The integration-test profile runs one Web.Studio.)
-        var markerRecords = (await GetLogAsync(marker.Id)).Count;
-        await FireEventAsync();
+        // The attempt writes the subscription first and the record right after it, so a success already on the
+        // subscription does not mean the record write has been tried yet. The record is watched for a few seconds
+        // instead, and any change to it fails the test. Nobody else may touch it meanwhile: the planted lease belongs
+        // to no sender, and the expiry it inherited from the attempt (the request timeout plus a minute) is far off.
+        var deadline = DateTime.UtcNow.AddSeconds(5);
 
-        (await WaitForAttemptedDeliveriesAsync(marker.Id, markerRecords + 1)).Count(l => l.Status != 0).Should()
-            .BeGreaterThanOrEqualTo(markerRecords + 1, "the marker's new event must have been attempted before the record is read");
+        while (true)
+        {
+            var after = (await GetDeliveryRecordsAsync(subscription.Id)).Single(r => r.Id == record.Id);
 
-        var after = (await GetDeliveryRecordsAsync(subscription.Id)).Single(r => r.Id == record.Id);
+            after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
+            after.Delivery.Should().BeNull();
+            after.Attempts.Should().Be(0);
 
-        after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
-        after.Delivery.Should().BeNull();
-        after.Attempts.Should().Be(0);
+            if (DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
     [Fact]

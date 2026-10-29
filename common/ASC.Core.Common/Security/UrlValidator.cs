@@ -75,7 +75,8 @@ public class UrlValidationOptions
 /// <param name="Blacklisted">True if URL resolves to a blacklisted IP address.</param>
 /// <param name="ParsedUri">Parsed URI object if validation succeeded.</param>
 /// <param name="ResolvedAddresses">IP addresses resolved during validation. Populated on success so callers can pin TCP connections to the already-checked IPs, preventing DNS rebinding.</param>
-public record UrlValidationResult(bool IsValid, string ErrorMessage = null, bool Blacklisted = false, Uri ParsedUri = null, IPAddress[] ResolvedAddresses = null);
+/// <param name="Transient">True when the URL itself was not rejected, but its host could not be resolved (a failure or timeout of DNS): the same URL may pass a later validation.</param>
+public record UrlValidationResult(bool IsValid, string ErrorMessage = null, bool Blacklisted = false, Uri ParsedUri = null, IPAddress[] ResolvedAddresses = null, bool Transient = false);
 
 [Singleton(typeof(IUrlValidator))]
 public class UrlValidator(
@@ -192,13 +193,13 @@ public class UrlValidator(
         catch (Exception ex)
         {
             logger.ErrorDnsResolutionFailed(parsedUri.Host, ex);
-            return new UrlValidationResult(false, $"DNS resolution failed for {parsedUri.Host}");
+            return new UrlValidationResult(false, $"DNS resolution failed for {parsedUri.Host}", Transient: true);
         }
 
         if (addresses.Length == 0)
         {
             logger.ErrorDnsResolutionFailed(parsedUri.Host, new InvalidOperationException("No addresses returned"));
-            return new UrlValidationResult(false, $"DNS resolution returned no addresses for {parsedUri.Host}");
+            return new UrlValidationResult(false, $"DNS resolution returned no addresses for {parsedUri.Host}", Transient: true);
         }
 
         // 6. Check all resolved addresses against the blacklist

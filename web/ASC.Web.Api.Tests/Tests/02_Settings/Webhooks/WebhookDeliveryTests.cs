@@ -195,6 +195,7 @@ public class WebhookDeliveryTests(
 
         record.NextAttemptOn.Should().BeNull();
         record.Attempts.Should().Be(1, "the retry was cancelled, not attempted");
+        record.ResponsePayload.Should().Be(ASC.Webhooks.Core.DbWorker.SubscriptionDisabledNote, "the record says why the retry was not sent");
 
         // WireMock journals a request as it arrives, before the sender writes its outcome, and a record without a
         // next attempt is never claimed again: no pause is needed to know that nothing more will come
