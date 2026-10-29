@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -125,7 +125,7 @@ public static class WebhookContractGenerator
     /// the trigger table.</exception>
     public static string Generate()
     {
-        var options = WebhookPublisher.CreateSerializerOptions(null);
+        var options = WebhookPublisher.SerializerOptions;
         options.MakeReadOnly(true);
 
         var assemblies = _payloadsByFamily.Values

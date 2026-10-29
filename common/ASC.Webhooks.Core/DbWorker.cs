@@ -40,7 +40,8 @@ public class DbWorker(
     IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
     AuthContext authContext,
-    WebhookCache webhookCache)
+    WebhookCache webhookCache,
+    ILogger<DbWorker> logger)
 {
     /// <summary>
     /// How many times one claim reads candidates again after other instances won part of its batch.
@@ -62,6 +63,11 @@ public class DbWorker(
     /// How many batches of <see cref="PostponeBatchSize"/> one run of the upkeep handles at most.
     /// </summary>
     private const int MaxPostponeRounds = 20;
+
+    /// <summary>
+    /// The length of webhooks_config.last_failure_content.
+    /// </summary>
+    private const int MaxFailureContentLength = 200;
 
     private static string GetCacheKey(int tenantId)
     {
@@ -201,6 +207,13 @@ public class DbWorker(
     public async Task RecordWebhookConfigFailureAsync(int tenantId, int id, DateTime failureOn, string failureContent)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // the column is varchar(200) on MySQL, and an over-long value fails the update in strict mode; a failure message
+        // (a DNS error with the host name, an exception text) is not bounded by anything else
+        if (failureContent?.Length > MaxFailureContentLength)
+        {
+            failureContent = failureContent[..MaxFailureContentLength];
+        }
 
         await webhooksDbContext.RecordWebhooksConfigFailureAsync(tenantId, id, failureOn, failureContent);
     }
@@ -348,32 +361,64 @@ public class DbWorker(
         var leaseId = Guid.NewGuid();
         var claimed = new List<(int TenantId, int Id, Guid LeaseId)>();
 
-        // Instances polling at the same moment read the same candidates and each UPDATE takes only the rows still due,
-        // so a batch can come back short because another instance won part of it. Reading again fills it from the rows
-        // behind; a round that won everything it read, or found nothing, means there is nothing more to take.
-        for (var round = 0; round < MaxClaimRounds && claimed.Count < count; round++)
+        // every candidate a round tried to lease: on a failure, those not in `claimed` may hold this lease unreturned
+        var attempted = new List<int>();
+
+        try
         {
-            var now = DateTime.UtcNow;
-            var candidates = await webhooksDbContext.DueWebhooksLogIdsAsync(now, count - claimed.Count).ToListAsync();
-
-            if (candidates.Count == 0)
+            // Instances polling at the same moment read the same candidates and each UPDATE takes only the rows still
+            // due, so a batch can come back short because another instance won part of it. Reading again fills it from
+            // the rows behind; a round that won everything it read, or found nothing, means there is nothing more to take.
+            for (var round = 0; round < MaxClaimRounds && claimed.Count < count; round++)
             {
-                break;
-            }
+                var now = DateTime.UtcNow;
+                var candidates = await webhooksDbContext.DueWebhooksLogIdsAsync(now, count - claimed.Count).ToListAsync();
 
-            var won = await webhooksDbContext.ClaimWebhooksLogsAsync(candidates, now, now + lease, leaseId);
-
-            if (won > 0)
-            {
-                await foreach (var row in webhooksDbContext.ClaimedWebhooksLogsAsync(candidates, leaseId))
+                if (candidates.Count == 0)
                 {
-                    claimed.Add((row.TenantId, row.Id, leaseId));
+                    break;
+                }
+
+                attempted.AddRange(candidates);
+
+                var won = await webhooksDbContext.ClaimWebhooksLogsAsync(candidates, now, now + lease, leaseId);
+
+                if (won > 0)
+                {
+                    await foreach (var row in webhooksDbContext.ClaimedWebhooksLogsAsync(candidates, leaseId))
+                    {
+                        claimed.Add((row.TenantId, row.Id, leaseId));
+                    }
+                }
+
+                if (won == candidates.Count)
+                {
+                    break;
+                }
+            }
+        }
+        catch (Exception) when (attempted.Count > 0)
+        {
+            // the lease of a round is committed before its rows are read back: rows leased but never returned would
+            // wait out the whole lease unsent, and a manual retry of their events would be refused as in flight. They
+            // are handed back; the rows already returned are sent as usual, and with none the fault goes to the caller
+            var unreturned = attempted.Except(claimed.Select(r => r.Id)).ToList();
+
+            if (unreturned.Count > 0)
+            {
+                try
+                {
+                    await webhooksDbContext.ReleaseClaimedWebhooksLogsAsync(unreturned, leaseId, DateTime.UtcNow);
+                }
+                catch (Exception e) when (claimed.Count > 0)
+                {
+                    logger.ErrorReleaseClaim(leaseId, e);
                 }
             }
 
-            if (won == candidates.Count)
+            if (claimed.Count == 0)
             {
-                break;
+                throw;
             }
         }
 

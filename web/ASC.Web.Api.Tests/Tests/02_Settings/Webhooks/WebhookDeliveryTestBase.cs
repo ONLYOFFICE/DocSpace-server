@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -336,14 +336,15 @@ public abstract class WebhookDeliveryTestBase(
 
     /// <summary>
     /// Writes to the stack's database directly, for the states no API call can produce on demand: a
-    /// subscription that has been failing for days, or a delivery record taken over by another sender.
+    /// subscription that has been failing for days, or a delivery record taken over by another sender. Returns the
+    /// number of rows the statement changed.
     /// </summary>
     /// <remarks>
     /// MySQL only: the connection is the MySQL container of the integration-test profile, and the statements the
     /// tests pass are written in its dialect (<c>UTC_TIMESTAMP() - INTERVAL 4 DAY</c>, GUIDs as <c>varchar(36)</c>).
     /// A run of the suite against PostgreSQL needs both this helper and those statements ported.
     /// </remarks>
-    protected async Task ExecuteSqlAsync(string sql, params (string Name, object Value)[] parameters)
+    protected async Task<int> ExecuteSqlAsync(string sql, params (string Name, object Value)[] parameters)
     {
         await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
         await using var command = connection.CreateCommand();
@@ -355,7 +356,7 @@ public abstract class WebhookDeliveryTestBase(
             command.Parameters.AddWithValue(name, value);
         }
 
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        return await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>

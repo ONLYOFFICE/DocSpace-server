@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -138,13 +138,13 @@ public abstract class FileEntryWebhookDto<T>
     /// <summary>
     /// For an entry in the trash, the name of the folder it was deleted from.
     /// </summary>
-    /// <example>Original Title</example>
+    /// <example>Q3 Reports</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
     /// For an entry in the trash, the name of the room it was deleted from.
     /// </summary>
-    /// <example>Original Room</example>
+    /// <example>Marketing Room</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>

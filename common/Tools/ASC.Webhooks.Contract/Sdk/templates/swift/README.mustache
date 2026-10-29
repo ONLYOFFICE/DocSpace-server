@@ -48,7 +48,11 @@ func verify(body: Data, signature: String?) -> Bool {
     guard let signature,
           signature.lowercased().hasPrefix("sha256=") else { return false }
 
+    // an HMAC-SHA256 digest is 64 hex characters; anything else is refused before
+    // it is decoded, since stepping two characters past the end would trap
     let hex = signature.dropFirst("sha256=".count)
+    guard hex.count == 64 else { return false }
+
     var expected = Data(capacity: hex.count / 2)
     var index = hex.startIndex
     while index < hex.endIndex {

@@ -47,8 +47,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "creationTime": "2024-01-15T10:30:00Z",
 ///   "method": "POST",
 ///   "route": "https://example.com/hooks/docspace",
-///   "requestHeaders": "{\"x-docspace-signature\":\"9f86d081884c7d65\"}",
-///   "requestPayload": "{\"id\":42,\"title\":\"report.docx\"}",
+///   "requestHeaders": "{\"Accept\":[\"*/*\"],\"x-docspace-event-id\":[\"1\"],\"x-docspace-event-timestamp\":[\"2024-01-15T10:30:00Z\"],\"x-docspace-signature-256\":[\"sha256=9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08\"]}",
+///   "requestPayload": "{\"event\":{\"id\":1,\"createOn\":\"2024-01-15T10:30:00Z\",\"trigger\":\"file.created\",\"triggerId\":128},\"payload\":{\"id\":42,\"title\":\"Report.docx\"},\"webhook\":{\"id\":7,\"name\":\"Room activity\"}}",
 ///   "responseHeaders": "{\"content-type\":\"application/json\"}",
 ///   "responsePayload": "{\"ok\":true}",
 ///   "status": 200,
@@ -121,14 +121,14 @@ public class WebhooksLogDto
     /// The headers the portal sent, serialised as one string, including the signature header a receiver verifies
     /// the payload with.
     /// </summary>
-    /// <example>{"x-docspace-signature":"9f86d081884c7d65"}</example>
+    /// <example>{"Accept":["*/*"],"x-docspace-event-id":["1"],"x-docspace-event-timestamp":["2024-01-15T10:30:00Z"],"x-docspace-signature-256":["sha256=9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08"]}</example>
     public string RequestHeaders { get; set; }
 
     /// <summary>
     /// The body the portal sent, which is the event payload as JSON text. It is stored as it was sent, so it
     /// still describes the entity as it looked at the time of the event.
     /// </summary>
-    /// <example>{"id":42,"title":"report.docx"}</example>
+    /// <example>{"event":{"id":1,"createOn":"2024-01-15T10:30:00Z","trigger":"file.created","triggerId":128},"payload":{"id":42,"title":"Report.docx"},"webhook":{"id":7,"name":"Room activity"}}</example>
     public string RequestPayload { get; set; }
 
     /// <summary>

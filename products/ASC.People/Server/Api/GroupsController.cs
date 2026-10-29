@@ -50,7 +50,8 @@ public class GroupController(
     PermissionContext permissionContext,
     FileSecurity fileSecurity,
     UserSocketManager socketManager,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    ILogger<GroupController> logger)
     : ControllerBase
 {
     /// <remarks>
@@ -588,20 +589,58 @@ public class GroupController(
 
     /// <summary>
     /// The members and the manager of a group, taken before a membership call so that <see cref="PublishIfChangedAsync"/>
-    /// can tell whether the call changed anything: `group.updated` is sent only for a real change.
+    /// can tell whether the call changed anything: `group.updated` is sent only for a real change. Null when no
+    /// subscription listens to `group.updated`: the snapshot reads every member of the group, which only an event pays for.
+    /// Null as well when it cannot be read: the webhook is best effort and must not stop the membership call.
     /// </summary>
-    private async Task<(Guid Manager, HashSet<Guid> Members)> GetMembershipAsync(GroupInfo group)
+    private async Task<(Guid Manager, HashSet<Guid> Members)?> GetMembershipAsync(GroupInfo group)
+    {
+        try
+        {
+            if (!await webhookManager.HasSubscribersAsync(WebhookTrigger.GroupUpdated))
+            {
+                return null;
+            }
+
+            return await ReadMembershipAsync(group);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorReadGroupMembership(group.ID, e);
+
+            return null;
+        }
+    }
+
+    private async Task<(Guid Manager, HashSet<Guid> Members)> ReadMembershipAsync(GroupInfo group)
     {
         var members = (await userManager.GetUsersByGroupAsync(group.ID, EmployeeStatus.All)).Select(u => u.Id).ToHashSet();
 
         return (await userManager.GetDepartmentManagerAsync(group.ID), members);
     }
 
-    private async Task PublishIfChangedAsync(GroupInfo group, (Guid Manager, HashSet<Guid> Members) before)
+    private async Task PublishIfChangedAsync(GroupInfo group, (Guid Manager, HashSet<Guid> Members)? before)
     {
-        var after = await GetMembershipAsync(group);
+        if (before is not { } snapshot)
+        {
+            return;
+        }
 
-        if (after.Manager == before.Manager && after.Members.SetEquals(before.Members))
+        // the change is made by now: a failure to read it back drops the webhook rather than failing the request
+        (Guid Manager, HashSet<Guid> Members) after;
+
+        try
+        {
+            after = await ReadMembershipAsync(group);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorReadGroupMembership(group.ID, e);
+
+            return;
+        }
+
+        if (after.Manager == snapshot.Manager && after.Members.SetEquals(snapshot.Members))
         {
             return;
         }

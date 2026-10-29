@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -58,22 +58,21 @@ public class WebhookDeliveryStateTests(
         await receiver.WaitForDeliveriesAsync(1);
         var record = (await GetLogAsync(subscription.Id)).Should().ContainSingle().Subject;
 
-        // Act: while the attempt waits for its answer, the record passes to another sender
-        await ExecuteSqlAsync(
-            "UPDATE webhooks_logs SET lease_id = @leaseId WHERE id = @id",
+        // Act: while the attempt waits for its answer, the record passes to another sender. The statement changes the
+        // record only while it is still unanswered, so a machine too slow for the receiver's delay loses the race
+        // visibly instead of passing without one
+        var planted = await ExecuteSqlAsync(
+            "UPDATE webhooks_logs SET lease_id = @leaseId WHERE id = @id AND status = 0 AND delivery IS NULL",
             ("@leaseId", Guid.NewGuid().ToString()), ("@id", record.Id));
 
-        // Assert: the subscription records the success, just before the attempt tries to write the record
-        var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null);
+        planted.Should().Be(1, "the lease must change hands while the attempt is in flight; the receiver's delay was not enough");
 
-        config.Should().NotBeNull();
-        config!.LastSuccessOn.Should().NotBeNull("the target answered 200, which the subscription records");
-
-        // The attempt writes the subscription first and the record right after it, so a success already on the
-        // subscription does not mean the record write has been tried yet. The record is watched for a few seconds
-        // instead, and any change to it fails the test. Nobody else may touch it meanwhile: the planted lease belongs
-        // to no sender, and the expiry it inherited from the attempt (the request timeout plus a minute) is far off.
-        var deadline = DateTime.UtcNow.AddSeconds(5);
+        // Assert: the attempt gets its answer within the receiver's delay and then finds the record taken. Neither the
+        // record nor the subscription may show its outcome: the subscription's last success follows only an attempt
+        // the record keeps. Nothing tells the test when the attempt is over, so both are watched for longer than the
+        // answer can take. Nobody else may touch the record meanwhile: the planted lease belongs to no sender, and the
+        // expiry it inherited from the attempt (the request timeout plus a minute) is far off
+        var deadline = DateTime.UtcNow + answerDelay + TimeSpan.FromSeconds(5);
 
         while (true)
         {
@@ -82,6 +81,10 @@ public class WebhookDeliveryStateTests(
             after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
             after.Delivery.Should().BeNull();
             after.Attempts.Should().Be(0);
+
+            var config = await GetSubscriptionAsync(subscription.Id);
+
+            config!.LastSuccessOn.Should().BeNull("the success of an attempt the record does not keep is not the subscription's either");
 
             if (DateTime.UtcNow >= deadline)
             {
@@ -145,7 +148,8 @@ public class WebhookDeliveryStateTests(
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
         record.Status.Should().Be(200);
 
-        var config = await GetSubscriptionAsync(subscription.Id);
+        // the subscription's bookkeeping follows the record, so it is read once it shows the success
+        var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null);
 
         config!.Name.Should().Be(newName, "the attempt writes only its own bookkeeping, not the subscription it read before the edit");
         config.Enabled.Should().BeTrue();
@@ -171,7 +175,8 @@ public class WebhookDeliveryStateTests(
 
         record.Attempts.Should().Be(ProfileRetryCount + 1);
 
-        var config = await GetSubscriptionAsync(subscription.Id);
+        // the subscription is disabled right after the record is written, so it is polled rather than read once
+        var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.Enabled == false);
         config!.Enabled.Should().BeFalse();
     }
 
@@ -194,7 +199,7 @@ public class WebhookDeliveryStateTests(
 
         record.Attempts.Should().Be(2);
 
-        var config = await GetSubscriptionAsync(subscription.Id);
+        var config = await WaitForSubscriptionAsync(subscription.Id, c => c?.LastSuccessOn is not null);
         config!.Enabled.Should().BeTrue("a subscription is disabled only once the retries of an event have run out");
     }
 

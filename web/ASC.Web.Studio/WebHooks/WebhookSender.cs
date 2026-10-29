@@ -331,6 +331,24 @@ public class WebhookSender(
             var autoDisabled = false;
             var nextAttemptOn = succeeded ? null : GetNextAttemptOn(attempts);
 
+            // the column holds bytes, not characters: a body of Cyrillic text under the limit in characters may not fit
+            if (Encoding.UTF8.GetByteCount(requestPayload) > MaxRequestPayloadBytes)
+            {
+                requestPayload = entry.RequestPayload;
+            }
+
+            // the record first: the subscription's last success or failure, and its auto-disable, follow only an attempt
+            // the record keeps. One whose row was requeued or claimed again meanwhile belongs to the attempt that has it
+            var recorded = await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, leaseId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn);
+
+            journalUpdated = true;
+
+            if (!recorded)
+            {
+                logger.DebugLeaseLost(entry.Id);
+                return;
+            }
+
             if (succeeded)
             {
                 await dbWorker.RecordWebhookConfigSuccessAsync(tenantId, entry.ConfigId, delivery.Value);
@@ -357,19 +375,6 @@ public class WebhookSender(
             {
                 logger.WarningDeliveryGivenUp(entry.Id, attempts);
             }
-
-            // the column holds bytes, not characters: a body of Cyrillic text under the limit in characters may not fit
-            if (Encoding.UTF8.GetByteCount(requestPayload) > MaxRequestPayloadBytes)
-            {
-                requestPayload = entry.RequestPayload;
-            }
-
-            if (!await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, leaseId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn))
-            {
-                logger.DebugLeaseLost(entry.Id);
-            }
-
-            journalUpdated = true;
 
             // the record, and the subscription, whose last success or failure every attempt moves
             await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);

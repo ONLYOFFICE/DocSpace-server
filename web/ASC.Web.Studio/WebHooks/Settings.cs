@@ -51,6 +51,16 @@ public class Settings
         }
 
         RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : [.. WebhookDelivery.DefaultRetryIntervals];
+
+        // an interval of zero or less schedules the retry at once, so a failing event would use up its attempts back to
+        // back, and a negative one shortens the retry window the unsent rows are stopped by
+        var badInterval = Array.FindIndex(RetryIntervals, i => i <= TimeSpan.Zero);
+        if (badInterval >= 0)
+        {
+            logger.WarningRetryIntervalNotPositive(RetryIntervals[badInterval]);
+            RetryIntervals = [.. WebhookDelivery.DefaultRetryIntervals];
+        }
+
         // a parallel loop of no threads throws, which would stop the delivery of every webhook
         ThreadCount = cfg.ThreadCount is > 0 ? cfg.ThreadCount : 10;
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;

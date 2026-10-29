@@ -73,8 +73,10 @@ internal static class ContractHeader
     {
         [WebhookTrigger.FileCreated] = "an AI agent during a chat, for every document, presentation or form it creates with its editor tools",
         [WebhookTrigger.FileUpdated] = "the editor, every time it saves a document, a force-save included; submitting a filled form raises `form.submit` instead",
+        [WebhookTrigger.FileUploaded] = "an upload of the parts to the `location` link that creating an upload session returns, once the last part arrives or that link finalizes the session",
+        [WebhookTrigger.FileTrashed] = "the clean-up of a room with a file lifetime, for every expired file it moves to the trash",
         [WebhookTrigger.FileDownloaded] = "a download through the file's `viewUrl`, once per download",
-        [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, for every file it deletes",
+        [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, and the clean-up of a room with a file lifetime set to delete permanently, for every file they delete",
         [WebhookTrigger.FolderCreated] = "the automatic clean-up of a guest's personal folder left unchanged for 30 days, once for the folder it creates in the personal section of the member who takes over the files and folders the guest shared from it",
         [WebhookTrigger.FormSubmit] = "the editor when a user submits a filled form",
         [WebhookTrigger.FormFilledOut] = "the editor when the last role of a form in a virtual data room submits it"

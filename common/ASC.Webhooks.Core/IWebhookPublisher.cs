@@ -35,6 +35,12 @@ namespace ASC.Webhooks.Core;
 
 public interface IWebhookPublisher
 {
+    /// <summary>
+    /// Whether any active subscription of the portal listens to <paramref name="trigger"/>, from the cached list and
+    /// before any access check: a caller asks it first to skip the work of building an event nobody receives.
+    /// </summary>
+    Task<bool> HasWebhookConfigsAsync(WebhookTrigger trigger);
+
     Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source);
 
     Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId);

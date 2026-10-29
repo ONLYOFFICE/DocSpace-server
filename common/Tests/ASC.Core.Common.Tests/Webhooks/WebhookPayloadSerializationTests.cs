@@ -43,7 +43,7 @@ public class WebhookPayloadSerializationTests
 {
     // The publisher's own options, so a change to them reaches these tests. No TenantUtil: it is read only for a
     // DateTimeKind.Local value, and every date in these bodies is UTC or default.
-    private static readonly JsonSerializerOptions _options = WebhookPublisher.CreateSerializerOptions(null);
+    private static readonly JsonSerializerOptions _options = WebhookPublisher.SerializerOptions;
 
     [Fact]
     public void EntryPayload_KeepsSubtypeFields_WhenDeclaredAsBase()

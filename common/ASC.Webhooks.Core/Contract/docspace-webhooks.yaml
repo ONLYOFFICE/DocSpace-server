@@ -535,6 +535,8 @@ webhooks:
         - `POST api/2.0/files/{folderId}/session/{sessionId}` (Upload the next chunk), on the request that completes the upload, without `file.created`
         - `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` (Finalize an upload session), without `file.created`
         - `POST api/2.0/files/{folderId}/upload` (Upload a file), whether the upload creates a new file or is saved as a new version of an existing file
+
+        Also raised by an upload of the parts to the `location` link that creating an upload session returns, once the last part arrives or that link finalizes the session.
       tags:
         - file
       parameters:
@@ -649,6 +651,8 @@ webhooks:
 
         - `DELETE api/2.0/files/file/{fileId}` (Delete a file), once the queued operation moves the file to the trash
         - `PUT api/2.0/files/fileops/delete` (Delete files and folders), for every listed file the queued operation moves to the trash; the files inside listed folders raise none
+
+        Also raised by the clean-up of a room with a file lifetime, for every expired file it moves to the trash.
       tags:
         - file
       parameters:
@@ -703,7 +707,7 @@ webhooks:
         - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed file that is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage
         - `PUT api/2.0/files/fileops/emptytrash` (Empty the "Trash" folder), for every file lying directly in the trash; the files inside trashed folders raise none
 
-        Also raised by the automatic clean-up of the trash, for every file it deletes.
+        Also raised by the automatic clean-up of the trash, and the clean-up of a room with a file lifetime set to delete permanently, for every file they delete.
       tags:
         - file
       parameters:

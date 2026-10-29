@@ -51,8 +51,8 @@ server/
 ## Build & Run
 
 **Solution files:**
-- `ASC.Web.slnx` — main solution. Use this one
-- `ASC.Web.sln` — **deprecated**, kept for tooling that cannot read `.slnx` yet. As of 2026-09-03 it still mirrors the `.slnx` exactly (the same 48 projects, `Solution Items` and `migrations` folder, the same Debug/Release configurations), but it is no longer the source of truth: add new projects to `ASC.Web.slnx`, and only mirror them into the `.sln` if you actually need it
+- `ASC.Web.slnx` — main solution. Use this one. It holds the services and the libraries they are built from — not every project of the repo. A tool needed only to produce the documentation or by the tests stays out of it: `common/Tools/ASC.Webhooks.Contract` is run with `dotnet run --project` after the API documents are emitted and is built through `ASC.Tests.slnx`, whose `ASC.Core.Common.Tests` references it
+- `ASC.Web.sln` — **deprecated**, kept for tooling that cannot read `.slnx` yet. As of 2026-09-03 it still mirrors the `.slnx` exactly (the same 48 projects, `Solution Items` and `migrations` folder, the same Debug/Release configurations), but it is no longer the source of truth: add new service and library projects to `ASC.Web.slnx`, and only mirror them into the `.sln` if you actually need it
 - `ASC.Tests.slnx` — test solution (there is NO `ASC.Tests.sln`)
 - `ASC.Migrations.sln` — database migrations
 - `thirdparty.sln` — third-party libraries

@@ -197,6 +197,18 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Hands back the rows of ids that a claim leased with leaseId but never returned to its sender, because the claim
+    // failed after its UPDATE: they are due again at once instead of waiting out the lease unsent.
+    public Task<int> ReleaseClaimedWebhooksLogsAsync(List<int> ids, Guid leaseId, DateTime nextAttemptOn)
+    {
+        return WebhooksLogs
+            .Where(r => ids.Contains(r.Id) && r.LeaseId == leaseId)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.NextAttemptOn, nextAttemptOn)
+                .SetProperty(p => p.LeaseId, (Guid?)null));
+    }
+
     // The claim skips the due rows of portals that are not active, and of portals whose tenant row is gone, but those
     // rows stay at the head of the next_attempt_on index, and every poll of every instance would read them again.
     // This finds a batch of them, oldest first, and says which ones leave the schedule: those of a portal being

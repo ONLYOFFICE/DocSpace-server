@@ -50866,7 +50866,7 @@
           },
           "requestHeaders": {
             "examples": [
-              "{\"x-docspace-signature\":\"9f86d081884c7d65\"}"
+              "{\"Accept\":[\"*/*\"],\"x-docspace-event-id\":[\"1\"],\"x-docspace-event-timestamp\":[\"2024-01-15T10:30:00Z\"],\"x-docspace-signature-256\":[\"sha256=9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08\"]}"
             ],
             "type": [
               "null",
@@ -50876,7 +50876,7 @@
           },
           "requestPayload": {
             "examples": [
-              "{\"id\":42,\"title\":\"report.docx\"}"
+              "{\"event\":{\"id\":1,\"createOn\":\"2024-01-15T10:30:00Z\",\"trigger\":\"file.created\",\"triggerId\":128},\"payload\":{\"id\":42,\"title\":\"Report.docx\"},\"webhook\":{\"id\":7,\"name\":\"Room activity\"}}"
             ],
             "type": [
               "null",

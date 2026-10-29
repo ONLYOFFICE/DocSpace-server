@@ -44,16 +44,27 @@ public class UserWebhookManager(
     GroupWebhookDtoHelper groupWebhookDtoHelper,
     ILogger<UserWebhookManager> logger)
 {
+    /// <summary>
+    /// Whether any active subscription listens to <paramref name="trigger"/>, from the cached list: a caller that has
+    /// work of its own to do before an event (a snapshot to compare with) asks it first.
+    /// </summary>
+    public Task<bool> HasSubscribersAsync(WebhookTrigger trigger)
+    {
+        return webhookPublisher.HasWebhookConfigsAsync(trigger);
+    }
+
+    // Called once the action has taken effect: a failure to build the payload must not fail a request whose change is
+    // already made, so the webhook is dropped (and logged) instead, as before an action (TryPrepareAsync).
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        var publish = await PrepareAsync(trigger, userInfo);
+        var publish = await TryPrepareAsync(trigger, userInfo.Id, () => PrepareAsync(trigger, userInfo));
 
         await publish();
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        var publish = await PrepareAsync(trigger, groupInfo);
+        var publish = await TryPrepareAsync(trigger, groupInfo.ID, () => PrepareAsync(trigger, groupInfo));
 
         await publish();
     }
@@ -76,8 +87,8 @@ public class UserWebhookManager(
         await publish();
     }
 
-    // The payload is built before the action, which removes what it describes; a failure to build it must not stop
-    // the action itself, so the webhook is dropped instead.
+    // The payload is built before the action, which removes what it describes, or after one that has taken effect; a
+    // failure to build it must stop neither, so the webhook is dropped instead.
     private async Task<Func<Task>> TryPrepareAsync(WebhookTrigger trigger, Guid entityId, Func<Task<Func<Task>>> prepare)
     {
         try

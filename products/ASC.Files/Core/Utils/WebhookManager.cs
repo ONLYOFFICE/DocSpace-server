@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -51,6 +51,11 @@ public class WebhookManager(
     /// </summary>
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
+        if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
+        {
+            return [];
+        }
+
         var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var pureFileEntry = await GetPureFileEntry(fileEntry);
 
@@ -59,15 +64,27 @@ public class WebhookManager(
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
+        var publish = await TryBuildAsync(trigger, fileEntry, () => PrepareAfterMoveAsync(trigger, webhookConfigs, fileEntry));
+
+        await publish();
+    }
+
+    private async Task<Func<Task>> PrepareAfterMoveAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
+    {
         if (!webhookConfigs.Any())
         {
-            return;
+            return () => Task.CompletedTask;
         }
 
-        var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
+        // the caller's object still describes the entry where it was before the action (moving it updates the
+        // database only), so it is read again, and in the trash it gets the origins the trash listing shows
+        var entry = await GetPureFileEntry(fileEntry) ?? fileEntry;
+        await SetTrashOriginsAsync(entry);
 
-        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
-            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(entry);
+
+        return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, entry.Id,
+            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, entry, subscriberId));
     }
 
     /// <summary>
@@ -77,6 +94,11 @@ public class WebhookManager(
     /// </summary>
     public async Task<Func<Task>> PrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
+        if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
+        {
+            return () => Task.CompletedTask;
+        }
+
         var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var pureFileEntry = await GetPureFileEntry(fileEntry) ?? fileEntry;
 
@@ -87,10 +109,10 @@ public class WebhookManager(
             return () => Task.CompletedTask;
         }
 
-        var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
 
-        return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, fileEntry.Id,
-            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, fileEntry, subscriberId));
+        return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
+            (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, pureFileEntry, subscriberId));
     }
 
     /// <summary>
@@ -98,11 +120,27 @@ public class WebhookManager(
     /// built before the action removes what it describes, and a failure to build it must not stop the action itself,
     /// so the webhook is dropped (and logged) instead.
     /// </summary>
-    public async Task<Func<Task>> TryPrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    public Task<Func<Task>> TryPrepareAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        return TryBuildAsync(trigger, fileEntry, () => PrepareAsync(trigger, fileEntry));
+    }
+
+    /// <summary>
+    /// Publishes an event about an action that has taken effect. A failure to build it must not fail a request whose
+    /// change is already made, so the webhook is dropped (and logged) instead, as for <see cref="TryPrepareAsync{T}"/>.
+    /// </summary>
+    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    {
+        var publish = await TryBuildAsync(trigger, fileEntry, () => PrepareAfterAsync(trigger, fileEntry));
+
+        await publish();
+    }
+
+    private async Task<Func<Task>> TryBuildAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry, Func<Task<Func<Task>>> prepare)
     {
         try
         {
-            return await PrepareAsync(trigger, fileEntry);
+            return await prepare();
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
@@ -112,8 +150,15 @@ public class WebhookManager(
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    private async Task<Func<Task>> PrepareAfterAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
+        // the cached subscription list answers before the entry is read again, so a portal without a subscription to
+        // this trigger pays no query for an event nobody receives
+        if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
+        {
+            return () => Task.CompletedTask;
+        }
+
         if (trigger is WebhookTrigger.FormSubmit)
         {
             var formChecker =  serviceProvider.GetService<WebhookSubmittedFormAccessChecker<T>>();
@@ -121,20 +166,19 @@ public class WebhookManager(
 
             if (formData.OriginalForm is null)
             {
-                return;
+                return () => Task.CompletedTask;
             }
 
             var formConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, formChecker, formData);
 
             if (formConfigs.Count == 0)
             {
-                return;
+                return () => Task.CompletedTask;
             }
 
             var formPayload = await GetFormSubmitPayloadAsync(formData);
 
-            await PublishForSubscribersAsync(trigger, formConfigs, formPayload, formData.OriginalForm.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync);
-            return;
+            return await PrepareForSubscribersAsync(trigger, formConfigs, formPayload, formData.OriginalForm.Id, fileEntryWebhookDtoHelper.RestrictForSubscriberAsync);
         }
 
         var checker =  serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
@@ -144,12 +188,12 @@ public class WebhookManager(
 
         if (webhookConfigs.Count == 0)
         {
-            return;
+            return () => Task.CompletedTask;
         }
 
         var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
 
-        await PublishForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
+        return await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, pureFileEntry.Id,
             (entryPayload, subscriberId) => fileEntryWebhookDtoHelper.RestrictForSubscriberAsync(entryPayload, pureFileEntry, subscriberId));
     }
 
@@ -157,18 +201,6 @@ public class WebhookManager(
     /// The payload is built once per event, but what it may show depends on the subscription owner (the profile
     /// links of the users in it, the quota of a room), so each owner's subscriptions get the payload cut for that owner.
     /// </summary>
-    private async Task PublishForSubscribersAsync<TPayload, TId>(
-        WebhookTrigger trigger,
-        IEnumerable<DbWebhooksConfig> webhookConfigs,
-        TPayload payload,
-        TId dataId,
-        Func<TPayload, Guid?, Task<TPayload>> restrictForSubscriber)
-    {
-        var publish = await PrepareForSubscribersAsync(trigger, webhookConfigs, payload, dataId, restrictForSubscriber);
-
-        await publish();
-    }
-
     private async Task<Func<Task>> PrepareForSubscribersAsync<TPayload, TId>(
         WebhookTrigger trigger,
         IEnumerable<DbWebhooksConfig> webhookConfigs,
@@ -201,6 +233,33 @@ public class WebhookManager(
             OriginalForm = await fileEntryWebhookDtoHelper.GetFileAsync(formData.OriginalForm),
             SubmittedForm = await fileEntryWebhookDtoHelper.GetFileAsync(formData.SubmittedForm)
         };
+    }
+
+    /// <summary>
+    /// Fills the origins of an entry in the trash, the folder and the room it was moved from, as the trash listing
+    /// does; only the entries of the portal's own storage keep them.
+    /// </summary>
+    private async Task SetTrashOriginsAsync<T>(FileEntry<T> entry)
+    {
+        if (entry.RootFolderType != FolderType.TRASH || entry is not FileEntry<int> internalEntry)
+        {
+            return;
+        }
+
+        var data = await daoFactory.GetFolderDao<int>().GetOriginsDataAsync([internalEntry.Id])
+            .FirstOrDefaultAsync(d => d.Entries.Contains(new KeyValuePair<string, FileEntryType>(internalEntry.Id.ToString(), internalEntry.FileEntryType)));
+
+        if (data?.OriginRoom != null && data.OriginRoom.FolderType.IsRoom())
+        {
+            internalEntry.OriginRoomId = data.OriginRoom.Id;
+            internalEntry.OriginRoomTitle = data.OriginRoom.Title;
+        }
+
+        if (data?.OriginFolder != null)
+        {
+            internalEntry.OriginId = data.OriginFolder.Id;
+            internalEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.Files : data.OriginFolder.Title;
+        }
     }
 
     private async Task<FileEntry<T>> GetPureFileEntry<T>(FileEntry<T> fileEntry)

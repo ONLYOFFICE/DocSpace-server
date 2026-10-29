@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -51,14 +51,11 @@ public class WebhookPublisher(
     private static readonly JsonSerializerOptions _serializerOptions = CreateSerializerOptions(() => _serializingTenantUtil.Value);
 
     /// <summary>
-    /// The options every webhook body is serialized with. Public so the payload tests serialize exactly what goes
-    /// on the wire instead of a copy of these settings; <paramref name="tenantUtil"/> is only consulted for a
-    /// <see cref="DateTimeKind.Local"/> value.
+    /// The options every webhook body is serialized with, the very instance the publisher uses: the payload tests and
+    /// the contract generator see exactly what goes on the wire, and nothing can allocate options per call. Outside a
+    /// publish no TenantUtil is set, so a <see cref="DateTimeKind.Local"/> value cannot be written there.
     /// </summary>
-    public static JsonSerializerOptions CreateSerializerOptions(TenantUtil tenantUtil)
-    {
-        return CreateSerializerOptions(() => tenantUtil);
-    }
+    public static JsonSerializerOptions SerializerOptions => _serializerOptions;
 
     private static JsonSerializerOptions CreateSerializerOptions(Func<TenantUtil> tenantUtil)
     {
@@ -113,6 +110,12 @@ public class WebhookPublisher(
         }
     }
 
+    public async Task<bool> HasWebhookConfigsAsync(WebhookTrigger trigger)
+    {
+        var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
+
+        return webhookConfigs.Any(config => config.Triggers == WebhookTrigger.All || config.Triggers.HasFlag(trigger));
+    }
 
     public async Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source)
     {
