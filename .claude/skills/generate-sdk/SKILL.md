@@ -1,6 +1,6 @@
 ---
 name: generate-sdk
-description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates."
+description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates, the webhook SDKs in the webhooks/ folders of the SDK submodules (generate-webhook-sdk)."
 ---
 
 # Generating SDKs
@@ -71,6 +71,16 @@ on them.
    the API reference into `sdk/docspace-api-spec`. It is a normal stage-B command like the others —
    the build no longer runs it, so it has to be asked for explicitly whenever the reference needs
    refreshing. Pass through any extra parameters the user gives.
+   The same command renders the **webhooks reference** from the webhooks contract named in
+   `markdown.webhooks.contract` of `appsettings.json` (`common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`):
+   a page per trigger, per trigger family and per delivery model, published in
+   `static/docspace/api-backend/webhooks/` beside `usage-api/` and listed in the `## Webhooks` section of
+   `llms.txt`. A trigger page links the API operations that raise it to their pages in the API reference, so
+   both references come from one run. The pages show the contract as committed: when a `[RaisesWebhook]`
+   attribute or a payload DTO changed, regenerate the contract first (step 1 of the `generate-webhook-sdk` skill,
+   after stage A here). The model pages are cut by the same generator and slicer as the API models; the trigger,
+   family and index pages are written by `WebhookMarkdown`, because openapi-generator renders `paths` only, not
+   the `webhooks` section of a document.
 2. **Always ask whether to regenerate the OpenAPI documents** (`AskUserQuestion`, yes/no) — never
    assume. Yes when controllers/DTOs/Swagger annotations changed since the last regeneration; no
    when only generator configs or templates changed.

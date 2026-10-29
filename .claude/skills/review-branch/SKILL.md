@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -21,6 +21,15 @@ with the rest of the report.
   review file.
 - **Re-check** — "the fixes are merged, check", "re-check", a path to a previous review `.md`, or an
   earlier review in this conversation. Go to §7 after §1.
+- **Saturation** — "find all the findings", "why does every run find something new", "review until
+  nothing is left". Go to §9: two independent full passes on one frozen sha and an estimate of what
+  is still unfound.
+
+One review covers **one sha**. While fix rounds keep landing, a fresh first review of the whole
+branch finds new things every time for two reasons that look the same in the report: bugs in the
+code the fix commits just added, and old code the earlier runs did not reach. §4 tells them apart
+(origin); the fix is the process, not more reviewers: a full pass on a frozen sha, all its findings
+fixed in one batch, then §7 on the diff of that batch only.
 
 Arguments the user may pass in words: a branch other than the checked-out one, a base, "including
 uncommitted changes" (→ `--worktree`), "run the tests" (→ §6 runs, not just proposes).
@@ -37,7 +46,8 @@ checklist only, dotnet-diag not installed"), so a thinner review is never mistak
 | LSP (`csharp-lsp` plugin) | `.claude/settings.json` `enabledPlugins` | say so once; navigate with `codegraph_explore` if `.codegraph/` exists, otherwise by reading the files. Blast-radius claims ("all call sites") are then marked unverified |
 | `codegraph_explore` | user-installed, per-machine index | skip it silently, LSP only (`csharp-lsp.md`) |
 | `dotnet-diag:analyzing-dotnet-performance` | `dotnet-diag` plugin, marketplace `dotnet/skills` | reviewer D walks its own checklist (§3 D.3) plus the manual list in `csharp-style.md` → Performance work |
-| `claude-security` | user-level plugin, not in the repo settings | do not offer the deep scan; reviewer E's checklist is the whole security pass || `dotnet` SDK / a free build | machine; a running DocSpace locks DLLs | §5 reports "not built" with the reason; the review continues on reading |
+| `claude-security` | user-level plugin, not in the repo settings | do not offer the deep scan; reviewer E's checklist is the whole security pass |
+| `dotnet` SDK / a free build | machine; a running DocSpace locks DLLs | §5 reports "not built" with the reason; the review continues on reading |
 | repo skills (`run-tests`, `db-migrations`, `notify-emails`) | `.claude/skills/` | always present with the repo |
 
 How to tell: a skill is available only if it is in the session's skill list; calling an absent one
@@ -82,6 +92,9 @@ is read in context. What each section is for:
 | API contract and SDK | §3 C |
 | Localized resources (.resx) | §3 F. `!! placeholder mismatch` is a finding once you have looked at the value (a tag lost or renamed in a translation renders as literal `$Tag` or as nothing); "neutral changed, translation untouched" is one only if the commits do not declare it ("English only for now") |
 | Tests | §3 A3 and §6 |
+| Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
+| Stateful / background processing | the files reviewer G walks (§3 G) |
+| Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
@@ -95,6 +108,63 @@ Agent tool (`general-purpose`), so they run in parallel. Skip a reviewer whose a
 not touch. Each prompt must be self-contained: base, merge-base, branch sha, the file list for its
 area, the relevant scan hints, the rule files to read, and the return format below.
 
+### Coverage — enumerate, do not sample
+
+A reviewer handed 9 000 changed lines reads some of them closely and skims the rest, and the
+next run skims a different part, so every run of a large branch finds something new in code the
+previous one counted as covered. So:
+
+- **Chunk the deep lenses.** B, D, E and G each get at most ~1 500 added product lines per agent
+  (the scan's "Size" section gives the count). Split by subsystem, not alphabetically — the sender
+  with its worker, the payload DTOs with their helpers — so a chunk holds the code that interacts.
+  A chunk over the limit is split further, never handed over whole. One agent per chunk carries
+  all four lenses for it (six chunks = six agents, not twenty-four); a small branch is one chunk.
+- **Every reviewer returns its coverage**: the files it read in full, and the ones it only skimmed
+  or did not open. A skimmed file of its chunk goes to a follow-up agent, or to "Not verified" in
+  the report — never silently counted as reviewed.
+- **Every finding is a class, not an instance.** The reviewer names the pattern ("a side effect
+  after the action can fail the action", "a config value used without a lower bound") and sweeps
+  the whole diff for it, not only its chunk: `siblings` in the return format lists every other
+  place with the pattern, each marked as affected or fine. The fixer then fixes the class at once;
+  a fix of the one cited line leaves the same finding to come back from its siblings.
+- **Start where the last run did not look.** If a previous review file of this branch has a
+  `Coverage` section (§8 Saving), give its "skimmed or not opened" files to the chunk reviewers as
+  read-first. Hand over the coverage only, never the previous findings — a reviewer given the list
+  checks the list.
+
+**A0. Cross-cutting matrix** — always, when the scan lists changed endpoints or the branch adds a
+write path (a service method, a background job, an event handler that changes data). One row per
+endpoint/write path, one column per cross-cutting check from CLAUDE.md that applies: socket event
+(`socket-events.md`), `[RaisesWebhook]` and its condition (`openapi-endpoint-docs.md` §2.1), audit
+`MessageAction`, every status code it can return has a `[SwaggerResponse]`, backup/restore of any
+table it writes (`backup-tables.md`), DTO through Mapperly (`dto-mapping.md`), section coverage
+(`files-sections.md`), search index (`full-text-search.md`). Every cell is filled: `yes (path:line)`,
+`n/a (why)` or `missing` — a `missing` is a finding. The matrix is mechanical on purpose: a
+free-form rules reviewer does not visit every endpoint, and a cross-cutting check it skips stays
+missed however many times the review runs. Include
+the matrix in the report only as its `missing` cells.
+
+**M. Class matrices** — the same idea for the classes of defect that free reading keeps missing on
+one run and finding on the next. A matrix enumerates **every** instance in the diff and answers one
+question per row, so within its class the result is complete, not a sample. Build each one whose
+rows exist in the diff; give a large one its own agent. Rows are listed by a mechanical search
+(LSP `findReferences`/`documentSymbol`, or grep for non-symbol text), and the agent returns the row
+count with the search it used, so a short matrix is visible as short.
+
+| Matrix | One row per | The cell answers |
+|---|---|---|
+| M1 payload fill | property of every new or changed response, event or webhook DTO | which code fills it on the path that builds **this** DTO (not on another path of the same entity — a listing fills fields a plain DAO read does not); `never` is a finding |
+| M2 after-action effects | call of a notification, webhook, socket, event bus or index update after the action took effect | is a failure caught and logged so the request neither fails nor rolls back; is it built from the entry in the state it describes |
+| M3 config bounds | read of a configuration value (`IConfiguration`, a `*Settings` bound from config) | lower bound, upper bound, what 0 / negative / huge does |
+| M4 loop termination | retry, requeue, hand-back, re-schedule or polling loop | where it ends (count, age window, terminal state), and what happens when the step throws after its side effect |
+| M5 catch blocks | `catch` added or changed in the diff | is the exception logged, rethrown or deliberately dropped with a comment; can a second fault replace the first |
+| M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column, both databases |
+| M7 out-of-band sources | call site of a cross-cutting publish outside controllers (jobs, handlers, editor callbacks) | is it declared where the contract lists such sources (`_otherSources` for webhooks, `socket-events.md` recipients) |
+
+A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
+out to be a class that has no matrix yet and can be enumerated, say so in the report as a candidate
+row for this table (the review itself edits nothing).
+
 **A. Rules compliance.** The set of rules to check is **not** fixed in this skill — it is the
 "Applicable rules" section of the scan, which reads `.claude/rules/*.md` and matches each rule's
 `paths:` frontmatter against the diff. A rule added to the repo tomorrow shows up there without any
@@ -105,7 +175,8 @@ edit here. Distribute every applicable rule to a reviewer:
   when it is short) — never drop it because this skill does not mention it;
 - a rule listed as "always" (no `paths:`) is checked only if it constrains the code itself;
   `csharp-lsp.md` constrains how *you* navigate and is not a review criterion;
-- the bullet lists are reminders of what past reviews caught, not the rule. The reviewer reads the
+  `fixing-findings.md` constrains how findings are fixed — it is checked only in re-check mode (§7);
+- the bullet lists are reminders of common misses, not the rule. The reviewer reads the
   rule file in full and checks against it — including its Definition of done, if it has one.
 
 - **A1** — `csharp-style.md`, `logging.md`, `caching.md`, `http-clients.md` over the changed
@@ -131,7 +202,20 @@ edit here. Distribute every applicable rule to a reviewer:
   in a security check, a default changed) — not necessarily wrong, but it must be named;
 - **blast radius**: for every changed member whose meaning changed (`IsForm` began to mean "any
   PDF"), run `findReferences` and walk the call sites — security filters, share rights, DTO
-  mapping, sockets. This is where the expensive findings were in past reviews;
+  mapping, sockets. This is where the expensive findings are;
+- **the other path of each change**: a default added on create — what does update do when the field
+  is left out; a filter narrowed for one caller — what about the caller that relied on the old
+  result; a new column — rows written before it existed, archives taken before it existed, the
+  other database (`migrations/postgre`); a new failure mode — the success path and the opposite
+  failure (a refused URL vs a DNS timeout);
+- **side effects after the primary action**: a notification, webhook, socket event or index update
+  that runs after the action took effect must not fail the request or roll the action back — it is
+  logged and dropped. One built *from* the entry must be built while the entry is in the state it
+  describes (before the delete, after the move re-read);
+- **values that cross a boundary**: a string written to a column — its length against the column
+  (`HasMaxLength`, `varchar(N)`); a limit counted in characters where storage counts bytes; a date
+  converted to UTC twice or not at all; a configuration value at 0, negative, or above a framework
+  limit (`HttpClient.Timeout` is 100 s by default);
 - before calling a semantic flag a defect, read its documented meaning (XML doc, commit message):
   a `Visible` flag documented as "shown in UI pickers" is not an access control. When the code
   matches the documented intent and only the intent is debatable — it is a question, not a bug.
@@ -226,6 +310,27 @@ Severity: a lost or broken placeholder in a value that is rendered — blocker (
 neutral text, the translation and a back-translation side by side; untranslated cultures — a remark
 only when the branch does not say so on purpose. Do not report wording taste.
 
+**G. Stateful and background processing** — when the scan's "Stateful / background processing"
+section lists files (queues, workers, retries, leases, locks, event handlers, retention jobs). Per
+request code is reviewed for what one call does; this code has to be reviewed for what happens
+over time, across instances and across failures. For each loop, job and state transition:
+
+- **termination**: every retry, requeue and hand-back path ends — by count, by an age window or by
+  a terminal state. "Failure X does not count as an attempt" without a bound is an endless loop;
+- **more than one instance**: two hosts run the same loop at the same moment — is a row claimed
+  atomically, can a lease expire while the work is still running (lease vs timeout), does a
+  periodic upkeep job need a distributed lock;
+- **shutdown and cancellation mid-step**: a claimed or leased item whose work has not started is
+  handed back, not left leased until expiry; in-flight work is awaited before the host stops;
+- **partial failure**: for each pair of writes, what a crash or exception between them leaves
+  behind; which write must come first so the record and the counters never disagree;
+- **fairness**: one slow or failing item (a dead target, a huge payload) cannot hold a batch or
+  the slots of the others;
+- **queries that run on a timer**: an index on every filtered column; the cost when nothing
+  qualifies (a `LIMIT` stops early only when rows match — an empty result scans the table);
+- **mixed versions**: rows, messages and archives produced by the previous version during a
+  rolling update or before a restore — read, ignored or refused, never mis-sent.
+
 **Return format for every reviewer** (ask for exactly this):
 
 ```
@@ -234,9 +339,16 @@ only when the branch does not say so on purpose. Do not report wording taste.
   where: path:line
   rule: <rule file §section>  (or "—" for a correctness finding)
   what: one sentence
+  pattern: the class this instance belongs to, in one line
+  siblings: every other place in the diff with the same pattern — path:line affected | fine (why)
   scenario: concrete input/state → wrong result (for bugs), or the rule text it breaks
-  fix: one sentence
+  fix: one sentence, for the class
+  guard: a test or check that would fail for every instance of the class, or "none" (why)
   introduced_by_branch: yes | no (exists in the merge-base already)
+
+coverage:
+  read in full: path, path, ...
+  skimmed or not opened: path (why), ...
 ```
 
 Tell them: read the rule file in full before judging; navigate with LSP, not grep, for symbols;
@@ -247,10 +359,23 @@ cite only code they have actually opened; do not edit anything; no praise sectio
 Reviewers over-report. For every finding, open the code at `where` yourself and confirm it:
 
 - the line exists on the reviewed sha and says what the finding claims;
-- `introduced_by_branch: no` → drop it, or keep it in one line under "not from this branch" only when the
-  branch makes it worse (moved it onto a hot path, widened its reach);
+- the **scenario's input can reach that line**: trace the value back to where it is produced, not only
+  forward to the sink. A column that cannot hold a value and a call that writes a variable into it
+  prove nothing until it is shown that the variable can hold that value on the path in question. A
+  blocker that has not been traced from its input is a remark;
+- `introduced_by_branch: no` → check it with git before acting on it (`git log -S'<line>' <merge-base>..HEAD`,
+  or the method in `git show <merge-base>:<path>`): "similar code existed" is not "this code existed",
+  and a wrong `no` silently hides a real finding. Confirmed → drop it, or keep it in one line under
+  "not from this branch" only when the branch makes it worse (moved it onto a hot path, widened its reach);
+- `siblings` checked: open the places listed as `fine` too, and look for the pattern in the chunks
+  of other reviewers. All affected places go into **one** finding, so the fix covers the class;
 - a rule finding cites a rule that really says that (open the rule, check the section);
-- duplicates across reviewers merged; a finding that needs a product decision moved to "Questions".
+- duplicates across reviewers merged; a finding that needs a product decision moved to "Questions";
+- **origin**: `git blame` the line (`git log -S` when blame lands on a normalization commit) and
+  record the commit that introduced it. When an earlier review of this branch exists, each finding
+  is either **new code** (the commit is later than that review) or **missed earlier** (the code was
+  already there). The report gives both counts: the first says the fix rounds add bugs, the second
+  says the earlier coverage had holes — they need different remedies, and the user will ask.
 
 Drop what you cannot confirm. A short report of true findings beats a long one the user has to
 re-check.
@@ -290,13 +415,33 @@ conversation). Re-scan (§1) and then:
    (how, with `path:line`), **Partially fixed**, **Not fixed**. Do not trust the commit message
    ("review fixes") — check each item.
 2. Review only what changed since the previous review (`git log <prev-sha>..HEAD`, diff of those
-   commits) with §3–§4 for **New** — a fix commit is where new bugs come from.
-3. If an earlier finding turns out to be wrong, say so plainly and withdraw it.
+   commits) with §3–§4 for **New** — a fix commit is where new bugs come from: a
+   filter narrowed for one caller loses another caller's lookup, a default added on create changes
+   every update, "this failure is not an attempt" makes a row retry for ever, a restore change fails
+   on archives without the new column. For **each fix** ask, beyond §3 B:
+   - which paths share the changed code and were not the subject of the finding (§3 B "the other
+     path") — and does a test cover them;
+   - does the fix add a loop, a requeue or a fallback — then §3 G "termination";
+   - does it change what old data means (rows, archives, settings saved before it);
+   - did it fix the **class** or only the cited line — run the finding's `siblings` again;
+   - does it come with a test that fails without it; a behavioural fix without one is a remark;
+   - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
+3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
+   with §3 B and G. A reviewer handed the earlier list checks that list; the fresh one finds what
+   the list did not name.
+4. Re-evaluate findings that were dropped or accepted earlier ("acceptable", "not from this
+   branch") when a fix changed the code around them.
+5. If an earlier finding turns out to be wrong, say so plainly and withdraw it.
 
 ## 8. Report
 
 Header line: branch, base, number of commits and files, sha reviewed, what was run (build / format
 / tests) and what was **not** — "verified by reading the code, tests not run" when that is the case.
+Coverage line: how many chunks, and the files no reviewer read in full (they also go to "Not
+verified"), the class matrices built with their row counts, and which findings you opened yourself
+in §4 versus took from a reviewer's citation. Origin line (§4): how many findings are in new code,
+how many were missed earlier. A review that says nothing about coverage reads as complete when it
+was not.
 
 Then, omitting empty sections:
 
@@ -325,6 +470,33 @@ findings to a file.
 
 ### Saving to a file
 
-On request ("save to md"), write only the findings — no header statistics, no "Fixed"
-unless asked — to `<branch-name-with-dashes>-review.md` at the repo root. Make each item readable
-without this conversation: place, scenario, fix. The file stays untracked; never `git add` it.
+On request ("save to md"), write the findings — no header statistics, no "Fixed"
+unless asked — to `<branch-name-with-dashes>-review.md` at the repo root (or the folder the user
+named). Make each item readable without this conversation: place, scenario, fix, guard. The file
+stays untracked; never `git add` it.
+
+End the file with a `Coverage` section the next run reads (§3 Coverage): the reviewed sha and date,
+the matrices built with their row counts, and the files no reviewer read in full. Every run of a
+branch saves one, also when the user did not ask for the findings: offer it in the closing line,
+since without it the next run cannot tell what is new from what was missed.
+
+## 9. Saturation mode
+
+Asked to find **all** findings, say first that reading cannot guarantee that; what it can give is
+completeness inside the enumerated classes (§3 M) and a measured estimate of the rest. Then:
+
+1. **Freeze the sha.** Every pass reviews that sha; nothing landing during the run is included. If
+   the branch moves, finish on the frozen sha and leave the new commits to §7.
+2. **Build every class matrix (§3 M) once.** Their rows are exhaustive, so they are not repeated
+   per pass.
+3. **Two independent full passes** of §3 B, D, E, G: two sets of chunk agents with different chunk
+   cuts (by subsystem in one, by call path in the other), neither seeing the other's findings or any
+   earlier review's findings. Verify both through §4 separately.
+4. **Match** the verified findings of the two passes by class and place. With `n1` and `n2` findings
+   and `m` in common, the estimated total is `n1 × n2 / m` (capture–recapture); the estimate minus
+   the union is roughly what is still unfound. `m = 0`, or a tiny `m`, means the passes sample
+   different code — the estimate is meaningless; run a third pass with the files both left skimmed.
+5. **Stop** when the estimate is within one or two of the union, or the user stops. Report the
+   union once (§8), with the two counts, `m` and the estimate in the header.
+
+Saturation costs two to three times a normal review; say so before starting.

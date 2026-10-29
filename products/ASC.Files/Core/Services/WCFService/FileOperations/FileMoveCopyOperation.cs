@@ -1091,7 +1091,6 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var (filesMessageService, fileMarker, _, _, _, _) = scopeClass;
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
-        var webhookPublisher = scope.ServiceProvider.GetService<IWebhookPublisher>();
         var fileDao = scope.ServiceProvider.GetService<IFileDao<TTo>>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<TTo>>();
         var permissionsManager = scope.ServiceProvider.GetService<PermissionCheckStarter<T, TTo>>();
@@ -1214,7 +1213,8 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             }
         }
 
-        var anyWebhooks = (await webhookPublisher.GetWebhookConfigsAsync<File<TTo>>(WebhookTrigger.FileMoved, null, null)).Any();
+        // asked once for the whole batch; a failure to read the subscriptions drops the webhooks (logged), never the move
+        var anyWebhooks = await webhookManager.HasEntitledSubscribersAsync(WebhookTrigger.FileMoved);
         var isToFolder = Equals(toFolder.Id, _daoFolderId);
 
         foreach (var candidateChunk in toMove.Chunk(MoveBatchSize))

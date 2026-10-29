@@ -46,6 +46,7 @@ public interface IUserService
     Task<IEnumerable<Group>> GetGroupsAsync(int tenant);
     IAsyncEnumerable<Group> GetGroupsAsync(int tenant, string text, Guid userId, bool manager, GroupSortType sortBy, bool sortOrderAsc, int offset = 0, int count = -1);
     Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager);
+    Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(IEnumerable<Guid> userIds);
     Task<IEnumerable<UserInfo>> GetUsersAllTenantsAsync(string email, EmployeeActivationStatus? status);
     Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType);

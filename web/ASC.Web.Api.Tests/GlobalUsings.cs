@@ -35,6 +35,7 @@ extern alias ASCPeople;
 extern alias ASCWebApi;
 
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
@@ -45,10 +46,10 @@ global using ASC.Tests.Common.Data;
 global using ASC.Web.Api.Tests.ApiFactories;
 
 global using DocSpace.API.SDK.Api.Authentication;
+global using DocSpace.API.SDK.Api.Capabilities;
 // OAuth20 also declares AuthorizationApi and DiscoveryApi; the explicit aliases below win over
 // namespace imports, so the bare names keep resolving to the Settings/OAuth20 types as aliased.
 global using DocSpace.API.SDK.Api.OAuth20;
-global using DocSpace.API.SDK.Api.Capabilities;
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;
 global using DocSpace.API.SDK.Client;
@@ -63,15 +64,21 @@ global using ApiKeysApi = DocSpace.API.SDK.Api.ApiKeys.ApiKeysApi;
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
+global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
+global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
+// Not the whole Group namespace: its SearchApi would collide with the People one.
+global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 global using LoginHistoryApi = DocSpace.API.SDK.Api.Security.LoginHistoryApi;
 global using MigrationApi = DocSpace.API.SDK.Api.Migration.MigrationApi;
 global using OAuth2Api = DocSpace.API.SDK.Api.Security.OAuth2Api;
+global using OperationsApi = DocSpace.API.SDK.Api.Files.OperationsApi;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
 global using PortalGuestsApi = DocSpace.API.SDK.Api.Portal.GuestsApi;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;
 global using PortalSettingsApi = DocSpace.API.SDK.Api.Portal.SettingsApi;
 global using PortalUsersApi = DocSpace.API.SDK.Api.Portal.UsersApi;
+global using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 global using SecurityAccessToDevToolsApi = DocSpace.API.SDK.Api.Security.AccessToDevToolsApi;
 global using SecurityBannersVisibilityApi = DocSpace.API.SDK.Api.Security.BannersVisibilityApi;
 global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;

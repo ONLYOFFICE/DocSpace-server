@@ -131,14 +131,14 @@ public class PhotoController(
     /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
     /// The removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new
     /// avatar has to be uploaded through `POST api/2.0/people/{userId}/photo` to replace it.
-    /// The call is idempotent, so removing an avatar from a profile that has none succeeds as well, and it raises a
-    /// `UserUpdated` webhook.
+    /// The call is idempotent, so removing an avatar from a profile that has none succeeds as well.
     /// The answer still holds the URLs of every size, now pointing at the default image.
     /// </remarks>
     /// <summary>
     /// Delete a user photo
     /// </summary>
     /// <path>api/2.0/people/{userId}/photo</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "even when the profile had no avatar")]
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of every photo size, now pointing at the default image", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
@@ -206,14 +206,14 @@ public class PhotoController(
     /// over HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.
     /// Passing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use
     /// `DELETE api/2.0/people/{userId}/photo` to remove an avatar rather than sending an empty value.
-    /// The downloaded image replaces the stored avatar and all of its sizes at once, raises a `UserUpdated` webhook,
-    /// and is subject to the portal limit on image size.
+    /// The downloaded image replaces the stored avatar and all of its sizes at once and is subject to the portal limit on image size.
     /// To send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userId}/photo`.
     /// </remarks>
     /// <summary>
     /// Update a user photo
     /// </summary>
     /// <path>api/2.0/people/{userId}/photo</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated)]
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo sizes built from the downloaded image", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(400, "The request body cannot be read, or the files field is empty")]
@@ -265,12 +265,12 @@ public class PhotoController(
     /// set to false and a human-readable `message`, and it does so for a missing file, an unreadable format, an
     /// oversized image and a rejected permission alike, so a client has to check `success` and must not rely on the
     /// status alone.
-    /// A successful upload raises a `UserUpdated` webhook only in the `autosave` case.
     /// </remarks>
     /// <summary>
     /// Upload a user photo
     /// </summary>
     /// <path>api/2.0/people/{userId}/photo</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "only when `autosave` is true and the image is saved to the profile")]
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The upload result: on success the photo URLs or the temporary file name in data, and on failure success set to false with the reason in message", typeof(FileUploadResultDto))]
     [HttpPost("{userId}/photo")]

@@ -45,6 +45,7 @@ public class ToolsController(ToolService toolService) : ControllerBase
         return await toolService.GetToolsAsync(inDto);
     }
 
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "for every file an editor tool among the calls creates: a generated document, presentation or form")]
     [HttpPost("tools/call")]
     public async Task<IReadOnlyList<ToolCallResult>> CallAsync(ToolsCallRequestDto inDto)
     {

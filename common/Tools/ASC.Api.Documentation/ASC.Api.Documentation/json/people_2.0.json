@@ -938,7 +938,7 @@
           "Group"
         ],
         "summary": "Add a new group",
-        "description": "Creates a group with the given name and, optionally, a manager and a first set of members.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nThe name is required and cannot be blank, and unlike the operations that add members later, this one checks\r\nevery listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a\r\ndisabled account or an ID that matches nobody.\r\nThe call is not idempotent: names are not unique, so repeating it creates a second group with the same name.\r\nCreating a group raises a `GroupCreated` webhook, and the answer holds the new group with its members\r\nincluded.\r\nMembers can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.",
+        "description": "Creates a group with the given name and, optionally, a manager and a first set of members.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nThe name is required and cannot be blank, and unlike the operations that add members later, this one checks\r\nevery listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a\r\ndisabled account or an ID that matches nobody.\r\nThe call is not idempotent: names are not unique, so repeating it creates a second group with the same name.\r\nThe answer holds the new group with its members included.\r\nMembers can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.\n\nRaises the `group.created` webhook once for the new group. The `user.*` payloads of its manager and members are not re-sent.",
         "operationId": "addGroup",
         "requestBody": {
           "content": {
@@ -1041,6 +1041,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.created",
+            "when": "once for the new group. The `user.*` payloads of its manager and members are not re-sent"
           }
         ]
       }
@@ -1188,7 +1194,7 @@
           "Group"
         ],
         "summary": "Update a group",
-        "description": "Changes the name and the manager of a group and adds or removes members, in one call.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nEvery field is optional and the ones that are left out are kept: omitting `groupName` keeps the current name,\r\nand omitting `groupManager` keeps the current manager rather than clearing it.\r\nAccounts in `membersToAdd` that cannot be group members - a guest, a disabled account or an ID that matches\r\nnobody - are silently skipped instead of failing the call, so compare the members in the answer with what was\r\nsent to see what was actually applied.\r\nMembers are added first and removed afterwards, an account listed in both lists therefore ends up removed,\r\nand removing an account that is not a member changes nothing.\r\nThe change raises a `GroupUpdated` webhook, and the answer holds the group as it is after the update.",
+        "description": "Changes the name and the manager of a group and adds or removes members, in one call.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nEvery field is optional and the ones that are left out are kept: omitting `groupName` keeps the current name,\r\nand omitting `groupManager` keeps the current manager rather than clearing it.\r\nAccounts in `membersToAdd` that cannot be group members - a guest, a disabled account or an ID that matches\r\nnobody - are silently skipped instead of failing the call, so compare the members in the answer with what was\r\nsent to see what was actually applied.\r\nMembers are added first and removed afterwards, an account listed in both lists therefore ends up removed,\r\nand removing an account that is not a member changes nothing.\r\nThe answer holds the group as it is after the update.\n\nRaises the `group.updated` webhook only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent.",
         "operationId": "updateGroup",
         "parameters": [
           {
@@ -1312,6 +1318,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent"
+          }
         ]
       },
       "delete": {
@@ -1319,7 +1331,7 @@
           "Group"
         ],
         "summary": "Delete a group",
-        "description": "Deletes a group and withdraws the access it had been granted to rooms, folders and files.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the\r\ngroup loses that share, so members who had access only through this group lose it too.\r\nThe accounts themselves are kept - only their membership disappears.\r\nThe call answers 204 with no body and raises a `GroupDeleted` webhook; a second call with the same ID answers\r\n404 rather than succeeding again.\r\nTo empty a group without deleting it, move its members away with\r\n`PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.",
+        "description": "Deletes a group and withdraws the access it had been granted to rooms, folders and files.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the\r\ngroup loses that share, so members who had access only through this group lose it too.\r\nThe accounts themselves are kept - only their membership disappears.\r\nThe call answers 204 with no body; a second call with the same ID answers\r\n404 rather than succeeding again.\r\nTo empty a group without deleting it, move its members away with\r\n`PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.deleted` webhook once for the deleted group. The `user.*` payloads of its former members are not re-sent.",
         "operationId": "deleteGroup",
         "parameters": [
           {
@@ -1419,6 +1431,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.deleted",
+            "when": "once for the deleted group. The `user.*` payloads of its former members are not re-sent"
           }
         ]
       }
@@ -1554,7 +1572,7 @@
           "Group"
         ],
         "summary": "Move group members",
-        "description": "Moves every member of one group into another group, emptying the first one.\r\nThe caller needs the permissions to edit groups and to add and remove users, and both IDs have to belong to\r\ngroups that have not been deleted, otherwise the operation answers 404.\r\nThe source group is kept, only without members, so delete it separately through\r\n`DELETE api/2.0/group/{id}` if it is no longer needed.\r\nMembers that cannot be group members any more are silently skipped rather than failing the call, and an\r\naccount that already belongs to the destination is simply left there.\r\nThe answer is the destination group with its members, not the source one.\r\nTo move a chosen few instead of everybody, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.",
+        "description": "Moves every member of one group into another group, emptying the first one.\r\nThe caller needs the permissions to edit groups and to add and remove users, and both IDs have to belong to\r\ngroups that have not been deleted, otherwise the operation answers 404.\r\nThe source group is kept, only without members, so delete it separately through\r\n`DELETE api/2.0/group/{id}` if it is no longer needed.\r\nMembers that cannot be group members any more are silently skipped rather than failing the call, and an\r\naccount that already belongs to the destination is simply left there.\r\nThe answer is the destination group with its members, not the source one.\r\nTo move a chosen few instead of everybody, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent.",
         "operationId": "moveMembersTo",
         "parameters": [
           {
@@ -1686,6 +1704,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent"
+          }
         ]
       }
     },
@@ -1695,7 +1719,7 @@
           "Group"
         ],
         "summary": "Replace group members",
-        "description": "Replaces the whole member list of a group with the accounts given in the request, removing everybody who is\r\nnot in that list.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAt least one of the listed accounts has to be usable as a group member, otherwise the call is rejected with\r\n400 and the group is left untouched; the accounts that cannot be members - a guest, a disabled account or an\r\nID that matches nobody - are then silently skipped while the rest are applied.\r\nThe replacement is not atomic: the current members are removed first and the new ones added afterwards, so a\r\nfailure in between can leave the group empty.\r\nThe answer is the group with the members it ends up with, which is why it should be read instead of assuming\r\nthe request was applied verbatim.\r\nTo add or remove a few accounts without touching the others, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.",
+        "description": "Replaces the whole member list of a group with the accounts given in the request, removing everybody who is\r\nnot in that list.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAt least one of the listed accounts has to be usable as a group member, otherwise the call is rejected with\r\n400 and the group is left untouched; the accounts that cannot be members - a guest, a disabled account or an\r\nID that matches nobody - are then silently skipped while the rest are applied.\r\nThe replacement is not atomic: the current members are removed first and the new ones added afterwards, so a\r\nfailure in between can leave the group empty.\r\nThe answer is the group with the members it ends up with, which is why it should be read instead of assuming\r\nthe request was applied verbatim.\r\nTo add or remove a few accounts without touching the others, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent.",
         "operationId": "setMembersTo",
         "parameters": [
           {
@@ -1819,6 +1843,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent"
+          }
         ]
       },
       "put": {
@@ -1826,7 +1856,7 @@
           "Group"
         ],
         "summary": "Add group members",
-        "description": "Adds the listed accounts to a group, keeping the members it already has.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAccounts that cannot be group members - a guest, a disabled account or an ID that matches nobody - are\r\nsilently skipped instead of failing the call, so compare the members in the answer with what was sent to see\r\nwhat was actually applied.\r\nThe call is idempotent for an account that is already a member, and it does not change who manages the group;\r\nuse `PUT api/2.0/group/{id}/manager` for that.\r\nThe answer is the group with its members after the addition.\r\nTo replace the whole list instead of extending it, use `POST api/2.0/group/{id}/members`.",
+        "description": "Adds the listed accounts to a group, keeping the members it already has.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nAccounts that cannot be group members - a guest, a disabled account or an ID that matches nobody - are\r\nsilently skipped instead of failing the call, so compare the members in the answer with what was sent to see\r\nwhat was actually applied.\r\nThe call is idempotent for an account that is already a member, and it does not change who manages the group;\r\nuse `PUT api/2.0/group/{id}/manager` for that.\r\nThe answer is the group with its members after the addition.\r\nTo replace the whole list instead of extending it, use `POST api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent.",
         "operationId": "addMembersTo",
         "parameters": [
           {
@@ -1957,6 +1987,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent"
+          }
         ]
       },
       "delete": {
@@ -1964,7 +2000,7 @@
           "Group"
         ],
         "summary": "Remove group members",
-        "description": "Removes the listed accounts from a group, leaving the rest of its members in place.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe accounts themselves are kept; only their membership in this group ends, together with the access they had\r\nthrough it.\r\nThe call is idempotent and forgiving: an ID that is not a member, and one that matches no account at all, are\r\nboth skipped without an error, and an empty list simply changes nothing.\r\nThe answer is the group with the members that remain.\r\nEmptying a group cannot be done through `POST api/2.0/group/{id}/members`, which needs at least one valid\r\naccount, so list every member here, or move them away with `PUT api/2.0/group/{fromId}/members/{toId}`.",
+        "description": "Removes the listed accounts from a group, leaving the rest of its members in place.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe accounts themselves are kept; only their membership in this group ends, together with the access they had\r\nthrough it.\r\nThe call is idempotent and forgiving: an ID that is not a member, and one that matches no account at all, are\r\nboth skipped without an error, and an empty list simply changes nothing.\r\nThe answer is the group with the members that remain.\r\nEmptying a group cannot be done through `POST api/2.0/group/{id}/members`, which needs at least one valid\r\naccount, so list every member here, or move them away with `PUT api/2.0/group/{fromId}/members/{toId}`.\n\nRaises the `group.updated` webhook only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent.",
         "operationId": "removeMembersFrom",
         "parameters": [
           {
@@ -2095,6 +2131,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent"
+          }
         ]
       }
     },
@@ -2104,7 +2146,7 @@
           "Group"
         ],
         "summary": "Set a group manager",
-        "description": "Makes an account the manager of a group, replacing whoever managed it before.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nBoth the group and the account have to exist: the operation answers 404 when the ID in the route matches no\r\nlive group and also when `userId` matches no account, so the message of the error says which of the two was\r\nnot found.\r\nThe account is added to the group at the same time, so a manager does not have to be a member beforehand, and\r\nthe previous manager stays in the group as an ordinary member.\r\nA group has one manager, which makes the call idempotent when it names the account that manages it already.\r\nThe answer is the group with its new manager.\r\nTo change the members rather than the manager, use `PUT api/2.0/group/{id}/members`.",
+        "description": "Makes an account the manager of a group, replacing whoever managed it before.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nBoth the group and the account have to exist: the operation answers 404 when the ID in the route matches no\r\nlive group and also when `userId` matches no account, so the message of the error says which of the two was\r\nnot found.\r\nThe account is added to the group at the same time, so a manager does not have to be a member beforehand, and\r\nthe previous manager stays in the group as an ordinary member.\r\nA group has one manager, which makes the call idempotent when it names the account that manages it already.\r\nThe answer is the group with its new manager.\r\nTo change the members rather than the manager, use `PUT api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent.",
         "operationId": "setGroupManager",
         "parameters": [
           {
@@ -2227,6 +2269,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "group.updated",
+            "when": "only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent"
           }
         ]
       }
@@ -3921,7 +3969,7 @@
           "People / Photos"
         ],
         "summary": "Delete a user photo",
-        "description": "Removes the avatar of a profile, so that the profile falls back to the default placeholder image.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new\r\navatar has to be uploaded through `POST api/2.0/people/{userId}/photo` to replace it.\r\nThe call is idempotent, so removing an avatar from a profile that has none succeeds as well, and it raises a\r\n`UserUpdated` webhook.\r\nThe answer still holds the URLs of every size, now pointing at the default image.",
+        "description": "Removes the avatar of a profile, so that the profile falls back to the default placeholder image.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new\r\navatar has to be uploaded through `POST api/2.0/people/{userId}/photo` to replace it.\r\nThe call is idempotent, so removing an avatar from a profile that has none succeeds as well.\r\nThe answer still holds the URLs of every size, now pointing at the default image.\n\nRaises the `user.updated` webhook even when the profile had no avatar.",
         "operationId": "deleteMemberPhoto",
         "parameters": [
           {
@@ -4038,6 +4086,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "even when the profile had no avatar"
           }
         ]
       },
@@ -4171,7 +4225,7 @@
           "People / Photos"
         ],
         "summary": "Update a user photo",
-        "description": "Sets the avatar of a profile from an image the portal downloads itself from the URL given in `files`, which is\r\nthe way to reuse a picture that is already published somewhere.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe URL has to be absolute or relative to the portal, and it has to use HTTPS unless the request itself came\r\nover HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.\r\nPassing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use\r\n`DELETE api/2.0/people/{userId}/photo` to remove an avatar rather than sending an empty value.\r\nThe downloaded image replaces the stored avatar and all of its sizes at once, raises a `UserUpdated` webhook,\r\nand is subject to the portal limit on image size.\r\nTo send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userId}/photo`.",
+        "description": "Sets the avatar of a profile from an image the portal downloads itself from the URL given in `files`, which is\r\nthe way to reuse a picture that is already published somewhere.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe URL has to be absolute or relative to the portal, and it has to use HTTPS unless the request itself came\r\nover HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.\r\nPassing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use\r\n`DELETE api/2.0/people/{userId}/photo` to remove an avatar rather than sending an empty value.\r\nThe downloaded image replaces the stored avatar and all of its sizes at once and is subject to the portal limit on image size.\r\nTo send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userId}/photo`.\n\nRaises the `user.updated` webhook.",
         "operationId": "updateMemberPhoto",
         "parameters": [
           {
@@ -4287,6 +4341,11 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated"
+          }
         ]
       },
       "post": {
@@ -4294,7 +4353,7 @@
           "People / Photos"
         ],
         "summary": "Upload a user photo",
-        "description": "Uploads an image as multipart form data and either makes it the avatar of a profile straight away or keeps it\r\nas a temporary file to be cropped afterwards.\r\nWith `autosave` set to true the image becomes the avatar immediately, all of its sizes are built and their\r\nURLs come back in `data`, each with a `hash` query parameter that changes whenever the avatar does, so a\r\nclient can cache them safely.\r\nWith `autosave` left false the image is only stored as a temporary file and `data` holds its name, which has\r\nto be passed as `tmpFile` to `POST api/2.0/people/{userId}/photo/thumbnails` to choose the crop; nothing\r\nchanges on the profile until that second call succeeds.\r\nA caller may only do this to their own profile, the ID in the route has to be the calling account, and the\r\nimage has to be a format the portal can read and stay within the portal limit on image size.\r\nThis operation reports every problem in the body instead of as a status code: it answers 200 with `success`\r\nset to false and a human-readable `message`, and it does so for a missing file, an unreadable format, an\r\noversized image and a rejected permission alike, so a client has to check `success` and must not rely on the\r\nstatus alone.\r\nA successful upload raises a `UserUpdated` webhook only in the `autosave` case.",
+        "description": "Uploads an image as multipart form data and either makes it the avatar of a profile straight away or keeps it\r\nas a temporary file to be cropped afterwards.\r\nWith `autosave` set to true the image becomes the avatar immediately, all of its sizes are built and their\r\nURLs come back in `data`, each with a `hash` query parameter that changes whenever the avatar does, so a\r\nclient can cache them safely.\r\nWith `autosave` left false the image is only stored as a temporary file and `data` holds its name, which has\r\nto be passed as `tmpFile` to `POST api/2.0/people/{userId}/photo/thumbnails` to choose the crop; nothing\r\nchanges on the profile until that second call succeeds.\r\nA caller may only do this to their own profile, the ID in the route has to be the calling account, and the\r\nimage has to be a format the portal can read and stay within the portal limit on image size.\r\nThis operation reports every problem in the body instead of as a status code: it answers 200 with `success`\r\nset to false and a human-readable `message`, and it does so for a missing file, an unreadable format, an\r\noversized image and a rejected permission alike, so a client has to check `success` and must not rely on the\r\nstatus alone.\n\nRaises the `user.updated` webhook only when `autosave` is true and the image is saved to the profile.",
         "operationId": "uploadMemberPhoto",
         "parameters": [
           {
@@ -4442,6 +4501,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "only when `autosave` is true and the image is saved to the profile"
+          }
         ]
       }
     },
@@ -4548,7 +4613,7 @@
           "People / Profiles"
         ],
         "summary": "Add a user",
-        "description": "Creates a portal profile, either by an administrator adding somebody directly or by a person accepting an\r\ninvitation link, which is why the operation accepts both an authenticated session and an invitation\r\nconfirmation token.\r\nSet `fromInviteLink` to true and pass the invitation `key` for the second case: the resulting type then comes\r\nfrom the link and the `type` in the request is ignored, and an invalid or expired link answers 403.\r\nWithout a link the caller needs the permission to add users of the requested type, cannot create a guest\r\nthrough this operation at all, has to be a DocSpace admin to create a room admin and the portal owner to\r\ncreate another DocSpace admin; either way the portal has to allow inviting members, or guests when the link\r\nsays so.\r\nThe password is optional: `passwordHash` is taken as it is, a plain `password` is checked against the portal\r\npassword policy and rejected with 400 when it is too weak, and when both are omitted a random password is\r\ngenerated and the account is created without anybody knowing it.\r\nWhen the portal has no free paid seat the account is still created, silently as a `User` instead of the\r\nrequested type, so read the `type` in the answer rather than assuming the request was honoured.\r\nCreating a profile raises a `UserCreated` webhook, downloads the avatar named in `files` if one is given, and\r\nanswers with the new profile including its ID.\r\nTo invite several people by email at once instead, use `POST api/2.0/people/invite`.",
+        "description": "Creates a portal profile, either by an administrator adding somebody directly or by a person accepting an\r\ninvitation link, which is why the operation accepts both an authenticated session and an invitation\r\nconfirmation token.\r\nSet `fromInviteLink` to true and pass the invitation `key` for the second case: the resulting type then comes\r\nfrom the link and the `type` in the request is ignored, and an invalid or expired link answers 403.\r\nWithout a link the caller needs the permission to add users of the requested type, cannot create a guest\r\nthrough this operation at all, has to be a DocSpace admin to create a room admin and the portal owner to\r\ncreate another DocSpace admin; either way the portal has to allow inviting members, or guests when the link\r\nsays so.\r\nThe password is optional: `passwordHash` is taken as it is, a plain `password` is checked against the portal\r\npassword policy and rejected with 400 when it is too weak, and when both are omitted a random password is\r\ngenerated and the account is created without anybody knowing it.\r\nWhen the portal has no free paid seat the account is still created, silently as a `User` instead of the\r\nrequested type, so read the `type` in the answer rather than assuming the request was honoured.\r\nCreating a profile downloads the avatar named in `files` if one is given and\r\nanswers with the new profile including its ID.\r\nTo invite several people by email at once instead, use `POST api/2.0/people/invite`.\n\nRaises the `user.created` webhook once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent.",
         "operationId": "addMember",
         "requestBody": {
           "content": {
@@ -4644,6 +4709,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.created",
+            "when": "once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent"
           }
         ]
       },
@@ -4829,7 +4900,7 @@
           "People / Profiles"
         ],
         "summary": "Invite users",
-        "description": "Invites people to the portal by email, creating a pending profile for each address and mailing it an\r\ninvitation link.\r\nThe caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to\r\nallow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting\r\nanother DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.\r\nAn address that already belongs to a profile is not mailed again: the existing account is only related to the\r\ncaller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects\r\nthe whole call with 400.\r\nThe whole call is rejected before anything is sent when the invitations would need more paid seats than the\r\ntariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a\r\nbatch but applied one address at a time - a failure partway through leaves the earlier invitations sent.\r\nThe answer is not the result of this call: it lists every profile of the portal that is still pending and\r\nthat the caller may see, so previously invited people appear in it as well.\r\nEach newly invited profile raises a `UserInvited` webhook, and repeated calls are throttled.\r\nUse `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a\r\nprofile without mailing anybody.",
+        "description": "Invites people to the portal by email, creating a pending profile for each address and mailing it an\r\ninvitation link.\r\nThe caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to\r\nallow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting\r\nanother DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.\r\nAn address that already belongs to a profile is not mailed again: the existing account is only related to the\r\ncaller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects\r\nthe whole call with 400.\r\nThe whole call is rejected before anything is sent when the invitations would need more paid seats than the\r\ntariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a\r\nbatch but applied one address at a time - a failure partway through leaves the earlier invitations sent.\r\nThe answer is not the result of this call: it lists every profile of the portal that is still pending and\r\nthat the caller may see, so previously invited people appear in it as well.\r\nRepeated calls are throttled.\r\nUse `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a\r\nprofile without mailing anybody.\n\nRaises the `user.invited` webhook for every address that does not belong to a profile yet.",
         "operationId": "inviteUsers",
         "requestBody": {
           "content": {
@@ -4909,6 +4980,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.invited",
+            "when": "for every address that does not belong to a profile yet"
           }
         ]
       },
@@ -5065,7 +5142,7 @@
           "People / Profiles"
         ],
         "summary": "Delete a user",
-        "description": "Deletes a portal profile and queues the erasure of the data behind it.\r\nThe account has to be disabled first - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}`, otherwise the operation answers 403 - and it must not be a system\r\naccount or one imported from LDAP.\r\nThe caller needs the permission to add and remove users, and has to be the portal owner to delete a DocSpace\r\nadministrator.\r\nThe profile disappears at once, together with its avatar, its group memberships, its file shares and its\r\nOAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nThe removal is permanent and cannot be undone, so hand the rooms and the shared files over first through\r\n`POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.\r\nThe call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.\r\nTo delete several accounts at once use `PUT api/2.0/people/delete`.",
+        "description": "Deletes a portal profile and queues the erasure of the data behind it.\r\nThe account has to be disabled first - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}`, otherwise the operation answers 403 - and it must not be a system\r\naccount or one imported from LDAP.\r\nThe caller needs the permission to add and remove users, and has to be the portal owner to delete a DocSpace\r\nadministrator.\r\nThe profile disappears at once, together with its avatar, its group memberships, its file shares and its\r\nOAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nThe removal is permanent and cannot be undone, so hand the rooms and the shared files over first through\r\n`POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.\r\nThe call answers with the profile as it was just before it was removed.\r\nTo delete several accounts at once use `PUT api/2.0/people/delete`.\n\nRaises the `user.deleted` webhook. Raises the `folder.created` webhook once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none.",
         "operationId": "deleteMember",
         "parameters": [
           {
@@ -5175,6 +5252,15 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.deleted"
+          },
+          {
+            "trigger": "folder.created",
+            "when": "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none"
           }
         ]
       },
@@ -5308,7 +5394,7 @@
           "People / Profiles"
         ],
         "summary": "Update a user",
-        "description": "Updates a portal profile, and which fields it accepts depends on whose profile it is - the two halves of this\r\noperation do not overlap.\r\nOn the caller's own profile it applies `firstName`, `lastName`, `location`, `comment`, `spam`, `contacts`,\r\n`department` and the avatar named in `files`, while `disable` and `isUser` are ignored; on somebody else's\r\nprofile only `disable` and `isUser` are applied and every descriptive field is ignored, so an administrator\r\ncannot rename another account through this operation.\r\nThe caller needs the permission to edit that profile, cannot touch the portal owner, and has to be the portal\r\nowner to touch another DocSpace administrator; on an account imported from LDAP or SSO the name and the\r\nlocation are silently left alone even on one's own profile.\r\nOmitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true\r\ngives the account the `Terminated` status and ends every session it has, which is the state\r\n`DELETE api/2.0/people/{userId}` then requires.\r\nThe `isUser` flag turns the account into a guest when true and back into a member when false, both of which\r\ncan answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace\r\nadministrator or a module administrator a guest is ignored without an error.\r\nA change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it\r\ninstead of assuming the request was applied.\r\nFor the language use `PUT api/2.0/people/{userId}/culture`, for the type\r\n`PUT api/2.0/people/type/{type}`, and for the status of several accounts at once\r\n`PUT api/2.0/people/status/{status}`.",
+        "description": "Updates a portal profile, and which fields it accepts depends on whose profile it is - the two halves of this\r\noperation do not overlap.\r\nOn the caller's own profile it applies `firstName`, `lastName`, `location`, `comment`, `spam`, `contacts`,\r\n`department` and the avatar named in `files`, while `disable` and `isUser` are ignored; on somebody else's\r\nprofile only `disable` and `isUser` are applied and every descriptive field is ignored, so an administrator\r\ncannot rename another account through this operation.\r\nThe caller needs the permission to edit that profile, cannot touch the portal owner, and has to be the portal\r\nowner to touch another DocSpace administrator; on an account imported from LDAP or SSO the name and the\r\nlocation are silently left alone even on one's own profile.\r\nOmitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true\r\ngives the account the `Terminated` status and ends every session it has, which is the state\r\n`DELETE api/2.0/people/{userId}` then requires.\r\nThe `isUser` flag turns the account into a guest when true and back into a member when false, both of which\r\ncan answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace\r\nadministrator or a module administrator a guest is ignored without an error.\r\nThe answer holds the profile as it is afterwards, so read it\r\ninstead of assuming the request was applied.\r\nFor the language use `PUT api/2.0/people/{userId}/culture`, for the type\r\n`PUT api/2.0/people/type/{type}`, and for the status of several accounts at once\r\n`PUT api/2.0/people/status/{status}`.\n\nRaises the `user.updated` webhook when the call changes the profile; on another member's profile only `disable` and `isUser` change anything.",
         "operationId": "updateMember",
         "parameters": [
           {
@@ -5427,6 +5513,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "when the call changes the profile; on another member's profile only `disable` and `isUser` change anything"
+          }
         ]
       }
     },
@@ -5436,7 +5528,7 @@
           "People / Profiles"
         ],
         "summary": "Close my own profile",
-        "description": "Closes the calling account at its owner's request: it does not erase the profile, it disables it, ends every\r\nsession it has and tells the portal administrators that the account asked to be removed.\r\nIt is the second step of the self-service removal - the first is `PUT api/2.0/people/self/delete`, which mails\r\nthe confirmation link - so the request has to carry the confirmation token from that link rather than an\r\nordinary session.\r\nIt always acts on the calling account and takes no parameters; the portal owner and an account imported from\r\nLDAP cannot close themselves and get 403.\r\nAfter the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and\r\ngroup memberships are untouched, which is why an administrator still has to erase it through\r\n`DELETE api/2.0/people/{userId}` - that operation requires exactly this disabled state.\r\nThe step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`\r\nrestores it.\r\nThe call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.",
+        "description": "Closes the calling account at its owner's request: it does not erase the profile, it disables it, ends every\r\nsession it has and tells the portal administrators that the account asked to be removed.\r\nIt is the second step of the self-service removal - the first is `PUT api/2.0/people/self/delete`, which mails\r\nthe confirmation link - so the request has to carry the confirmation token from that link rather than an\r\nordinary session.\r\nIt always acts on the calling account and takes no parameters; the portal owner and an account imported from\r\nLDAP cannot close themselves and get 403.\r\nAfter the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and\r\ngroup memberships are untouched, which is why an administrator still has to erase it through\r\n`DELETE api/2.0/people/{userId}` - that operation requires exactly this disabled state.\r\nThe step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`\r\nrestores it.\r\nThe call answers with the profile in its new state.\n\nRaises the `user.updated` webhook rather than `user.deleted`: the profile is only disabled.",
         "operationId": "deleteProfile",
         "responses": {
           "200": {
@@ -5529,6 +5621,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "rather than `user.deleted`: the profile is only disabled"
           }
         ]
       },
@@ -5772,7 +5870,7 @@
           "People / Profiles"
         ],
         "summary": "Delete users",
-        "description": "Deletes several portal profiles in one call and queues the erasure of the data behind each of them.\r\nEvery listed account has to be disabled already - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}` first, because a single account that is still active rejects the whole\r\ncall with 403 - and the caller needs the permission to add and remove users.\r\nSystem and LDAP accounts are dropped from the list without an error, and so are the accounts the caller may\r\nnot delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not\r\nthe portal owner.\r\nThe answer lists every account that was asked for, including the ones that were skipped, so it is not proof\r\nthat an account was deleted - read `GET api/2.0/people/{userId}` for that, which then answers 404.\r\nThe removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while\r\nits data is erased by a queued job that can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nHand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with\r\nan unfinished reassignment cannot be deleted.",
+        "description": "Deletes several portal profiles in one call and queues the erasure of the data behind each of them.\r\nEvery listed account has to be disabled already - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}` first, because a single account that is still active rejects the whole\r\ncall with 403 - and the caller needs the permission to add and remove users.\r\nSystem and LDAP accounts are dropped from the list without an error, and so are the accounts the caller may\r\nnot delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not\r\nthe portal owner.\r\nThe answer lists every account that was asked for, including the ones that were skipped, so it is not proof\r\nthat an account was deleted - read `GET api/2.0/people/{userId}` for that, which then answers 404.\r\nThe removal is permanent and cannot be undone, and the data of each deleted account is\r\nerased by a queued job that can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nHand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with\r\nan unfinished reassignment cannot be deleted.\n\nRaises the `user.deleted` webhook for every account it deletes; an account the caller may not delete is skipped without one. Raises the `folder.created` webhook for every deleted account that shared files or folders from its personal section, once the queued data deletion creates the folder in the caller's personal section that takes them over.",
         "operationId": "removeUsers",
         "requestBody": {
           "content": {
@@ -5869,6 +5967,16 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.deleted",
+            "when": "for every account it deletes; an account the caller may not delete is skipped without one"
+          },
+          {
+            "trigger": "folder.created",
+            "when": "for every deleted account that shared files or folders from its personal section, once the queued data deletion creates the folder in the caller's personal section that takes them over"
+          }
         ]
       }
     },
@@ -5878,7 +5986,7 @@
           "People / Profiles"
         ],
         "summary": "Update a user culture",
-        "description": "Changes the interface language of a profile, which decides the language of the portal for that account and of\r\nthe emails it receives.\r\nThe culture has to be one the portal has enabled, otherwise the operation answers 400; read the enabled list\r\nfrom the portal settings rather than guessing a code.\r\nA caller may only change their own language - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying\r\nthe new `cultureName`.\r\nOther profile fields are not touched here; use `PUT api/2.0/people/{userId}` for those.",
+        "description": "Changes the interface language of a profile, which decides the language of the portal for that account and of\r\nthe emails it receives.\r\nThe culture has to be one the portal has enabled, otherwise the operation answers 400; read the enabled list\r\nfrom the portal settings rather than guessing a code.\r\nA caller may only change their own language - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe change takes effect immediately and answers with the profile carrying\r\nthe new `cultureName`.\r\nOther profile fields are not touched here; use `PUT api/2.0/people/{userId}` for those.\n\nRaises the `user.updated` webhook even when the culture does not change.",
         "operationId": "updateMemberCulture",
         "parameters": [
           {
@@ -5999,6 +6107,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "even when the culture does not change"
           }
         ]
       }
@@ -9467,7 +9581,7 @@
           "People / Third-party accounts"
         ],
         "summary": "Sign up with a provider",
-        "description": "Creates a portal profile from a third-party identity and joins the invitation the `key` belongs to, which is\r\nhow a person accepts an invitation by signing in with a provider instead of setting a password.\r\nIt needs no authentication, but it does need a valid invitation: `key` has to be the key of a live invitation\r\nlink, and `serializedProfile` has to be the profile a completed provider authorization produced.\r\nThe resulting type comes from the invitation link itself, and `employeeType` only says which type to look the\r\nlink up as, defaulting to `RoomAdmin`.\r\nWhen the identity or its email already belongs to a portal profile, that existing profile is returned and the\r\nprovider is linked to it instead of a second account being created, so the call can be repeated safely.\r\nThe answer is the profile the caller ends up with - and it is empty, still with status 200, when the provider\r\nauthorization was cancelled or when the profile could not be created, so check for an empty body instead of\r\nrelying on the status alone.\r\nA `weixin` or `nextcloud` identity carries no email address, so the portal generates one and the profile stays\r\nin the `AutoGenerated` activation state; every other provider has to supply an email.",
+        "description": "Creates a portal profile from a third-party identity and joins the invitation the `key` belongs to, which is\r\nhow a person accepts an invitation by signing in with a provider instead of setting a password.\r\nIt needs no authentication, but it does need a valid invitation: `key` has to be the key of a live invitation\r\nlink, and `serializedProfile` has to be the profile a completed provider authorization produced.\r\nThe resulting type comes from the invitation link itself, and `employeeType` only says which type to look the\r\nlink up as, defaulting to `RoomAdmin`.\r\nWhen the identity or its email already belongs to a portal profile, that existing profile is returned and the\r\nprovider is linked to it instead of a second account being created, so the call can be repeated safely.\r\nThe answer is the profile the caller ends up with - and it is empty, still with status 200, when the provider\r\nauthorization was cancelled or when the profile could not be created, so check for an empty body instead of\r\nrelying on the status alone.\r\nA `weixin` or `nextcloud` identity carries no email address, so the portal generates one and the profile stays\r\nin the `AutoGenerated` activation state; every other provider has to supply an email.\n\nRaises the `user.created` webhook when the third-party account is not linked to a profile yet and a new profile is created.",
         "operationId": "signupThirdPartyAccount",
         "requestBody": {
           "content": {
@@ -9555,6 +9669,12 @@
             "OpenId": [ ]
           },
           { }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.created",
+            "when": "when the third-party account is not linked to a profile yet and a new profile is created"
+          }
         ]
       }
     },
@@ -9802,7 +9922,7 @@
           "People / User data"
         ],
         "summary": "Start the data reassignment",
-        "description": "Queues an asynchronous job that transfers the rooms and the shared files owned by one portal user to another.\r\nThe source user must already have the `Terminated` status - disable the account through\r\n`PUT api/2.0/people/status/{status}` before calling this - and the destination user must be an active room\r\nadmin or DocSpace admin, so a guest, a system account or a disabled account is rejected.\r\nThe caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to\r\nreassign the data of another DocSpace administrator or of a People module administrator.\r\nThe transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userId}` with the\r\nsource user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.\r\nPass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied\r\nprofile is kept.\r\nUse `GET api/2.0/people/reassign/necessary` first to find out whether the user owns anything that has to be\r\nreassigned at all.",
+        "description": "Queues an asynchronous job that transfers the rooms and the shared files owned by one portal user to another.\r\nThe source user must already have the `Terminated` status - disable the account through\r\n`PUT api/2.0/people/status/{status}` before calling this - and the destination user must be an active room\r\nadmin or DocSpace admin, so a guest, a system account or a disabled account is rejected.\r\nThe caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to\r\nreassign the data of another DocSpace administrator or of a People module administrator.\r\nThe transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userId}` with the\r\nsource user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.\r\nPass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied\r\nprofile is kept.\r\nUse `GET api/2.0/people/reassign/necessary` first to find out whether the user owns anything that has to be\r\nreassigned at all.\n\nRaises the `user.deleted` webhook for the source account when `deleteProfile` is true, once the reassignment finishes successfully. Raises the `folder.created` webhook once the queued reassignment creates the folder in the recipient's personal section that takes over the files and folders the source account shared from its own; not when it shared none.",
         "operationId": "startReassign",
         "requestBody": {
           "content": {
@@ -9905,6 +10025,16 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.deleted",
+            "when": "for the source account when `deleteProfile` is true, once the reassignment finishes successfully"
+          },
+          {
+            "trigger": "folder.created",
+            "when": "once the queued reassignment creates the folder in the recipient's personal section that takes over the files and folders the source account shared from its own; not when it shared none"
           }
         ]
       }
@@ -10421,7 +10551,7 @@
           "People / User data"
         ],
         "summary": "Start the data deletion",
-        "description": "Queues an asynchronous job that erases the data of the user with the ID specified in the request.\r\nThe account must already have the `Terminated` status - disable it through\r\n`PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.\r\nThe caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,\r\nand has to be the portal owner to erase the data of another DocSpace admin.\r\nThe erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userId}` with the same\r\nuser ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.\r\nThis operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account\r\ninstead, transfer them first through `POST api/2.0/people/reassign/start`.\r\nAn unknown ID and a rejected precondition both answer 400 and name the ID they rejected.",
+        "description": "Queues an asynchronous job that erases the data of the user with the ID specified in the request.\r\nThe account must already have the `Terminated` status - disable it through\r\n`PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.\r\nThe caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,\r\nand has to be the portal owner to erase the data of another DocSpace admin.\r\nThe erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userId}` with the same\r\nuser ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.\r\nThis operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account\r\ninstead, transfer them first through `POST api/2.0/people/reassign/start`.\r\nAn unknown ID and a rejected precondition both answer 400 and name the ID they rejected.\n\nRaises the `folder.created` webhook once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none.",
         "operationId": "startRemove",
         "requestBody": {
           "content": {
@@ -10524,6 +10654,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "folder.created",
+            "when": "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none"
           }
         ]
       }
@@ -10640,7 +10776,7 @@
           "People / User data"
         ],
         "summary": "Delete the personal folder",
-        "description": "Queues an asynchronous job that empties the personal folder of the authenticated account.\r\nThe operation takes no parameters and always acts on the caller, so it cannot be used to empty the folder of\r\nanother user.\r\nOnly an account whose type is `Guest` may call it; every other type is rejected, because only a guest has a\r\npersonal folder that can be emptied this way.\r\nThe job does not finish within this call: poll `GET api/2.0/people/delete/personal/progress` until\r\n`isCompleted` is true.\r\nThe job deletes the files permanently and cannot be undone or cancelled - there is no terminate operation for\r\nthis flow, unlike the user data deletion.",
+        "description": "Queues an asynchronous job that empties the personal folder of the authenticated account.\r\nThe operation takes no parameters and always acts on the caller, so it cannot be used to empty the folder of\r\nanother user.\r\nOnly an account whose type is `Guest` may call it; every other type is rejected, because only a guest has a\r\npersonal folder that can be emptied this way.\r\nThe job does not finish within this call: poll `GET api/2.0/people/delete/personal/progress` until\r\n`isCompleted` is true.\r\nThe job deletes the files permanently and cannot be undone or cancelled - there is no terminate operation for\r\nthis flow, unlike the user data deletion.\n\nRaises the `folder.created` webhook once the queued job creates the folder that takes over the files and folders the caller shared from the personal folder, in the personal section of the member who last changed that folder or of the portal owner; not when the caller shared none.",
         "operationId": "startDeletePersonalFolder",
         "responses": {
           "200": {
@@ -10730,6 +10866,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "folder.created",
+            "when": "once the queued job creates the folder that takes over the files and folders the caller shared from the personal folder, in the personal section of the member who last changed that folder or of the portal owner; not when the caller shared none"
           }
         ]
       }
@@ -11022,7 +11164,7 @@
           "People / User status"
         ],
         "summary": "Change a user status",
-        "description": "Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting\r\nthem and to bring them back later.\r\nOnly `Active` and `Terminated` are accepted in the route; any other status answers 400.\r\nThe caller needs the permission to edit users, and the whole list is checked before anything is applied: a\r\nsystem account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the\r\nportal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.\r\nDisabling ends every session of the account and takes its seat back, while enabling takes a seat again and\r\ncan therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one\r\nby one, so a quota failure partway through leaves the earlier ones enabled.\r\nEnabling only affects accounts that were disabled, and an account that had never filled in its name comes\r\nback as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the\r\nanswer instead of assuming it matches the request.\r\nEach changed account raises a `UserUpdated` webhook, and disabling is what\r\n`DELETE api/2.0/people/{userId}` requires before it will delete an account.",
+        "description": "Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting\r\nthem and to bring them back later.\r\nOnly `Active` and `Terminated` are accepted in the route; any other status answers 400.\r\nThe caller needs the permission to edit users, and the whole list is checked before anything is applied: a\r\nsystem account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the\r\nportal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.\r\nDisabling ends every session of the account and takes its seat back, while enabling takes a seat again and\r\ncan therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one\r\nby one, so a quota failure partway through leaves the earlier ones enabled.\r\nEnabling only affects accounts that were disabled, and an account that had never filled in its name comes\r\nback as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the\r\nanswer instead of assuming it matches the request.\r\nDisabling is what\r\n`DELETE api/2.0/people/{userId}` requires before it will delete an account.\n\nRaises the `user.updated` webhook for every listed account, whether or not its status changes.",
         "operationId": "updateUserStatus",
         "parameters": [
           {
@@ -11143,6 +11285,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "for every listed account, whether or not its status changes"
+          }
         ]
       }
     },
@@ -11152,7 +11300,7 @@
           "People / User status"
         ],
         "summary": "Set my activation status",
-        "description": "Sets the activation state of the calling account, which is how a person finishes confirming their email\r\naddress after following the link they were sent.\r\nThe request has to carry the confirmation token from that link rather than an ordinary session, and the\r\naccount must be allowed to edit its own profile.\r\nDespite taking a list, it accepts exactly one ID and that ID has to be the calling account: an empty list,\r\nmore than one entry, or somebody else's ID is answered with 400, so it cannot be used to activate other\r\npeople.\r\nSetting `Activated` on the portal owner sends the administrator welcome email, once per portal.\r\nThe change raises a `UserUpdated` webhook, and the answer holds the profile in its new state - or nothing at\r\nall when the account has meanwhile disappeared, which is skipped without an error.\r\nThe account status is a different thing and is changed through `PUT api/2.0/people/status/{status}`.",
+        "description": "Sets the activation state of the calling account, which is how a person finishes confirming their email\r\naddress after following the link they were sent.\r\nThe request has to carry the confirmation token from that link rather than an ordinary session, and the\r\naccount must be allowed to edit its own profile.\r\nDespite taking a list, it accepts exactly one ID and that ID has to be the calling account: an empty list,\r\nmore than one entry, or somebody else's ID is answered with 400, so it cannot be used to activate other\r\npeople.\r\nSetting `Activated` on the portal owner sends the administrator welcome email, once per portal.\r\nThe answer holds the profile in its new state - or nothing at\r\nall when the account has meanwhile disappeared, which is skipped without an error.\r\nThe account status is a different thing and is changed through `PUT api/2.0/people/status/{status}`.\n\nRaises the `user.updated` webhook.",
         "operationId": "updateUserActivationStatus",
         "parameters": [
           {
@@ -11270,6 +11418,11 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated"
+          }
         ]
       }
     },
@@ -11279,7 +11432,7 @@
           "People / User type"
         ],
         "summary": "Change a user type",
-        "description": "Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.\r\nThe caller needs the permission to add and remove users of the requested type, cannot change their own type or\r\nthe type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to\r\n`Guest` additionally requires the portal to allow inviting guests.\r\nEvery listed account has to be visible to the caller and must not be disabled.\r\nThe change is applied immediately: each converted user gets a notification email and raises a `UserUpdated`\r\nwebhook, and the accounts are processed one by one, so a rejection in the middle leaves the users before it\r\nalready converted - re-read them before retrying.\r\nThe answer streams the converted users with their detailed information, in the order they were processed.\r\nConverting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the\r\npaid-user quota does not allow one more.\r\nThis operation only moves the type and leaves the rooms and the shared files of the account where they are -\r\nto hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.",
+        "description": "Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.\r\nThe caller needs the permission to add and remove users of the requested type, cannot change their own type or\r\nthe type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to\r\n`Guest` additionally requires the portal to allow inviting guests.\r\nEvery listed account has to be visible to the caller and must not be disabled.\r\nThe change is applied immediately: each converted user gets a notification email, and the accounts are\r\nprocessed one by one, so a rejection in the middle leaves the users before it\r\nalready converted - re-read them before retrying.\r\nThe answer streams the converted users with their detailed information, in the order they were processed.\r\nConverting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the\r\npaid-user quota does not allow one more.\r\nThis operation only moves the type and leaves the rooms and the shared files of the account where they are -\r\nto hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.\n\nRaises the `user.updated` webhook for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent.",
         "operationId": "updateUserType",
         "parameters": [
           {
@@ -11400,6 +11553,12 @@
           {
             "OpenId": [ ]
           }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent"
+          }
         ]
       }
     },
@@ -11409,7 +11568,7 @@
           "People / User type"
         ],
         "summary": "Start updating user type",
-        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.",
+        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.\n\nRaises the `user.updated` webhook once the queued type change finishes successfully, not when it is cancelled or fails. Raises the `room.updated` webhook for every room the account owns, once the queued type change hands it over to the recipient. Raises the `agent.updated` webhook instead for an AI agent the account owns.",
         "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -11512,6 +11671,20 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "user.updated",
+            "when": "once the queued type change finishes successfully, not when it is cancelled or fails"
+          },
+          {
+            "trigger": "room.updated",
+            "when": "for every room the account owns, once the queued type change hands it over to the recipient"
+          },
+          {
+            "trigger": "agent.updated",
+            "when": "instead for an AI agent the account owns"
           }
         ]
       }
@@ -13156,6 +13329,10 @@
                 ],
                 "description": "Specifies if the user has a custom quota or not."
               },
+              "aiServicesLimit": {
+                "description": "The spending limit on the AI services in force for this user - the personal one, or else the limit for every\r\nuser - with what the user spent against it. Null when no such limit applies to the user, when the portal has no\r\nbilling service, or when the caller is neither a DocSpace administrator nor the user; the limit of the portal as\r\na whole is not reflected here. The value, and the spending in particular, can lag by a few minutes.",
+                "$ref": "#/components/schemas/UserServiceLimitDto"
+              },
               "loginEventId": {
                 "examples": [
                   123
@@ -14220,6 +14397,79 @@
         "description": "The type of CAPTCHA validation used.",
         "x-enum-type": "integer"
       },
+      "ServiceLimitPeriod": {
+        "oneOf": [
+          {
+            "examples": [
+              "Day"
+            ],
+            "enum": [
+              "Day",
+              "Week",
+              "Month",
+              "Lifetime"
+            ],
+            "type": "string",
+            "description": "[Day - Day, Week - Week, Month - Month, Lifetime - Lifetime]"
+          },
+          {
+            "examples": [
+              1
+            ],
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[1 - Day, 2 - Week, 3 - Month, 4 - Lifetime]",
+            "x-enum-varnames": [
+              "Day",
+              "Week",
+              "Month",
+              "Lifetime"
+            ]
+          }
+        ],
+        "description": "The window a service limit counts the spending over, in UTC. The windows are calendar-aligned rather than rolling,\r\nexcept for a lifetime limit, which never resets. Numbered as the accounting service numbers it.",
+        "x-enum-type": "integer"
+      },
+      "ServiceLimitScope": {
+        "oneOf": [
+          {
+            "examples": [
+              "Total"
+            ],
+            "enum": [
+              "Total",
+              "Global",
+              "Custom"
+            ],
+            "type": "string",
+            "description": "[Total - Total, Global - Global, Custom - Custom]"
+          },
+          {
+            "examples": [
+              1
+            ],
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[1 - Total, 2 - Global, 3 - Custom]",
+            "x-enum-varnames": [
+              "Total",
+              "Global",
+              "Custom"
+            ]
+          }
+        ],
+        "description": "Whom a service limit applies to. Numbered as the accounting service numbers it.",
+        "x-enum-type": "integer"
+      },
       "SetManagerRequest": {
         "required": [
           "userId"
@@ -15237,6 +15487,68 @@
           }
         ],
         "description": "The user invitation parameters."
+      },
+      "UserServiceLimitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              42
+            ],
+            "type": "integer",
+            "description": "The service limit ID, used to read, change, switch off or delete the limit through the\r\n`api/2.0/portal/payment/servicelimit` operations. For the limit for every user it is the same for all users.",
+            "format": "int32"
+          },
+          "scope": {
+            "description": "Whether the limit is the user's own (`Custom`) or the limit for every user (`Global`) the user falls back to.",
+            "$ref": "#/components/schemas/ServiceLimitScope"
+          },
+          "amountValue": {
+            "examples": [
+              40
+            ],
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "The most money the AI services may cost the user per period, in `currency`. It is the only threshold a limit on\r\nthe AI services has: their services count in different units, so a threshold on a quantity is refused for them.",
+            "format": "double"
+          },
+          "amountConsumed": {
+            "examples": [
+              12.5
+            ],
+            "type": "number",
+            "description": "The money the AI services cost the user in the current period, in `currency`; 0 when nothing was spent yet,\r\nincluding a user who has never used the AI services.",
+            "format": "double"
+          },
+          "currency": {
+            "examples": [
+              "USD"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The currency `amountValue` and `amountConsumed` are expressed in; null when the limit has no money threshold."
+          },
+          "period": {
+            "description": "The window the threshold applies to. It resets at the start of the next day, week or month in UTC (a week on\r\nMonday), not a fixed time after the first charge; a lifetime limit never resets.",
+            "$ref": "#/components/schemas/ServiceLimitPeriod"
+          },
+          "periodEnd": {
+            "examples": [
+              "2026-10-20T23:59:59.9999999Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The moment the current period ends and the spending starts over from zero, in UTC. Null for a lifetime limit,\r\nwhich never resets.",
+            "format": "date-time"
+          }
+        },
+        "description": "The spending limit on the AI services in force for one user: the user's personal limit, or else the limit for every\r\nuser, together with the money the user spent against it in the current period."
       }
     },
     "headers": {

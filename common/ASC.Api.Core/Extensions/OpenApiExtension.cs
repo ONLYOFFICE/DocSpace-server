@@ -318,6 +318,9 @@ public static class OpenApiExtension
                     c.IncludeXmlComments(() => doc);
                 }
             }
+
+            // after the XML comments: their filter sets the description this one appends to
+            c.OperationFilter<WebhookOperationFilter>();
         });
     }
 
@@ -618,6 +621,66 @@ public static class OpenApiExtension
             {
                 properties.TryAdd(name, property);
             }
+        }
+    }
+
+    /// <summary>
+    /// Publishes the webhooks an action declares with <see cref="RaisesWebhookAttribute"/>: each trigger with its
+    /// condition in <c>x-docspace-webhooks</c>, and one sentence per attribute at the end of the description.
+    /// </summary>
+    /// <remarks>
+    /// The sentence is for everything that only shows the description - Scalar, the SDK doc comments, an agent's tool
+    /// definition. The extension is what the webhooks contract is built from: ASC.Webhooks.Contract reads it from the
+    /// generated documents and lists, under every trigger, the operations that raise it. The trigger names are the
+    /// ones a receiver sees in <c>event.trigger</c>, not the enum member names.
+    /// </remarks>
+    private class WebhookOperationFilter : IOperationFilter
+    {
+        private const string ExtensionName = "x-docspace-webhooks";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var raises = context.MethodInfo.GetCustomAttributes<RaisesWebhookAttribute>().ToList();
+            if (raises.Count == 0)
+            {
+                return;
+            }
+
+            var entries = raises
+                .SelectMany(r => r.Triggers.Select(t => (Trigger: t, r.When)))
+                .OrderBy(e => e.Trigger.GetOrder())
+                .Select(e =>
+                {
+                    var entry = new JsonObject { ["trigger"] = e.Trigger.ToCustomString() };
+
+                    if (e.When is not null)
+                    {
+                        entry["when"] = e.When;
+                    }
+
+                    return (JsonNode)entry;
+                })
+                .ToArray();
+
+            operation.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            operation.Extensions[ExtensionName] = new JsonNodeExtension(new JsonArray(entries));
+
+            var sentences = string.Join(" ", raises.Select(Describe));
+
+            operation.Description = string.IsNullOrWhiteSpace(operation.Description)
+                ? sentences
+                : $"{operation.Description.TrimEnd()}\n\n{sentences}";
+        }
+
+        private static string Describe(RaisesWebhookAttribute raises)
+        {
+            var names = raises.Triggers.OrderBy(t => t.GetOrder()).Select(t => $"`{t.ToCustomString()}`").ToList();
+            var list = names.Count == 1 ? names[0] : $"{string.Join(", ", names[..^1])} and {names[^1]}";
+            var noun = names.Count == 1 ? "webhook" : "webhooks";
+
+            return raises.When is null
+                ? $"Raises the {list} {noun}."
+                : $"Raises the {list} {noun} {raises.When}.";
         }
     }
 

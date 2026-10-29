@@ -368,6 +368,15 @@ public class CachedUserService : IUserService
         return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
+    // Not cached and not counted from the cached tenant lists: the count is read for the group webhooks, right after the
+    // membership or user change that raised them, and that change has just invalidated those lists - counting from them
+    // reloaded every user of the tenant for one number. The query of the inner service reads the membership rows of the
+    // tenant (core_usergroup has no index that starts with the group), which is far less than that.
+    public Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
+    {
+        return _service.GetGroupMembersCountAsync(tenant, groupId);
+    }
+
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)
     {
         if (exp == null)
