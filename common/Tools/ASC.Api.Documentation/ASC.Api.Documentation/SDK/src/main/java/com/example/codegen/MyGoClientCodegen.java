@@ -773,7 +773,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         /**
          * A oneOf or anyOf model: a struct with a pointer field per variant, named after the variant's
-         * type. The variant set is the one the example fits, or the first one when there is no example.
+         * type. The variant set is the one {@link CallSnippets#variant} picks.
          */
         private String composed(CodegenModel model, Object example, String where, int depth) {
             // A variant can be a oneOf of its own and lead back here, so the struct stops at the depth
@@ -782,22 +782,10 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 return qualify(model.classname) + "{}";
             }
 
-            List<String> variants = new ArrayList<>(model.oneOf != null && !model.oneOf.isEmpty() ? model.oneOf : model.anyOf);
+            CallSnippets.Choice<String> choice = CallSnippets.variant(openAPI, model, example, this::fits);
+            String chosen = choice.variant;
 
-            String chosen = null;
-            for (String variant : variants) {
-                if (fits(variant, example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
-
-            if (chosen == null) {
-                chosen = variants.get(0);
-                example = null;
-            }
-
-            String value = typed(chosen, example, where, depth + 1);
+            String value = typed(chosen, choice.example, where, depth + 1);
 
             return qualify(model.classname) + "{" + fieldName.apply(chosen) + ": " + pointer(chosen, value) + "}";
         }

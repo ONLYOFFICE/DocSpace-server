@@ -28,10 +28,12 @@ import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.utils.ModelUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 /**
@@ -149,7 +151,66 @@ final class CallSnippets {
     }
 
     static boolean isComposed(CodegenModel model) {
-        return (model.oneOf != null && !model.oneOf.isEmpty()) || (model.anyOf != null && !model.anyOf.isEmpty());
+        return !variants(model).isEmpty();
+    }
+
+    /** The variants of a oneOf or anyOf model: its oneOf, or else its anyOf; none for any other model. */
+    static List<String> variants(CodegenModel model) {
+        if (model.oneOf != null && !model.oneOf.isEmpty()) {
+            return new ArrayList<>(model.oneOf);
+        }
+
+        return model.anyOf != null ? new ArrayList<>(model.anyOf) : new ArrayList<>();
+    }
+
+    /** The variant a value of a oneOf or anyOf goes into, and the example the value is built from, if any. */
+    static final class Choice<T> {
+        final T variant;
+        final Object example;
+
+        private Choice(T variant, Object example) {
+            this.variant = variant;
+            this.example = example;
+        }
+    }
+
+    /** {@link #variant(OpenAPI, CodegenModel, List, Object, BiPredicate)} out of all the model's variants. */
+    static Choice<String> variant(OpenAPI openAPI, CodegenModel model, Object example,
+                                  BiPredicate<String, Object> fits) {
+        return variant(openAPI, model, variants(model), example, fits);
+    }
+
+    /**
+     * The variant of a oneOf or anyOf model a value goes into, with the example it is built from: the
+     * variant the value's own example fits; failing that, the variant an example its variants state
+     * fits, with that example; failing both, the first variant, with no example.
+     */
+    static <T> Choice<T> variant(OpenAPI openAPI, CodegenModel model, List<T> variants, Object example,
+                                 BiPredicate<T, Object> fits) {
+        T chosen = fitting(variants, example, fits);
+        if (chosen != null) {
+            return new Choice<>(chosen, example);
+        }
+
+        for (Object stated : SpecExamples.variantExamples(openAPI, model.name)) {
+            Object plain = plain(stated);
+            chosen = fitting(variants, plain, fits);
+            if (chosen != null) {
+                return new Choice<>(chosen, plain);
+            }
+        }
+
+        return new Choice<>(variants.get(0), null);
+    }
+
+    private static <T> T fitting(List<T> variants, Object example, BiPredicate<T, Object> fits) {
+        for (T variant : variants) {
+            if (fits.test(variant, example)) {
+                return variant;
+            }
+        }
+
+        return null;
     }
 
     /** A string literal in double quotes, escaped the way C# and Go both read it. */

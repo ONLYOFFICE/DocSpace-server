@@ -936,8 +936,8 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         }
 
         /**
-         * A oneOf or anyOf: a union of its variants to the SDK, so it takes the value of the variant the
-         * example fits, or else of the first one.
+         * A oneOf or anyOf: a union of its variants to the SDK, so it takes the value of the variant
+         * {@link CallSnippets#variant} picks.
          */
         private String composed(CodegenModel model, Object example, String name, String where, int depth) {
             // A variant can be a oneOf of its own and lead back here, so it stops at the depth the models do.
@@ -947,22 +947,9 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
                 return "{} as " + model.classname;
             }
 
-            List<String> variants = new ArrayList<>(model.oneOf != null && !model.oneOf.isEmpty() ? model.oneOf : model.anyOf);
+            CallSnippets.Choice<String> choice = CallSnippets.variant(openAPI, model, example, this::fits);
 
-            String chosen = null;
-            for (String variant : variants) {
-                if (fits(variant, example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
-
-            if (chosen == null) {
-                chosen = variants.get(0);
-                example = null;
-            }
-
-            return typed(chosen, example, name, where, depth + 1);
+            return typed(choice.variant, choice.example, name, where, depth + 1);
         }
 
         private boolean fits(String type, Object example) {

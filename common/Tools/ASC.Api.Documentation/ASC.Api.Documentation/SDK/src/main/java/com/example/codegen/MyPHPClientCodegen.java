@@ -653,8 +653,8 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
 
         /**
          * A value of a oneOf or anyOf. The SDK's class for it holds no value, and the serializer writes
-         * whatever it is given as it is, so the snippet gives the variant that fits the example in its
-         * place, or the first one.
+         * whatever it is given as it is, so the snippet gives the variant {@link CallSnippets#variant} picks
+         * in its place.
          */
         private String composed(CodegenModel model, Object example, String name, String where, int depth) {
             // A variant can be a oneOf of its own and lead back here, so it stops at the depth the models do.
@@ -663,22 +663,9 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
                 return "null";
             }
 
-            List<String> variants = new ArrayList<>(model.oneOf != null && !model.oneOf.isEmpty() ? model.oneOf : model.anyOf);
+            CallSnippets.Choice<String> choice = CallSnippets.variant(openAPI, model, example, this::fits);
 
-            String chosen = null;
-            for (String variant : variants) {
-                if (fits(variant, example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
-
-            if (chosen == null) {
-                chosen = variants.get(0);
-                example = null;
-            }
-
-            return typed(chosen, example, name, where, depth + 1);
+            return typed(choice.variant, choice.example, name, where, depth + 1);
         }
 
         private boolean fits(String type, Object example) {

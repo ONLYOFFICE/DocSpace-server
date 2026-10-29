@@ -30,6 +30,8 @@ import org.openapitools.codegen.utils.ModelUtils;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -62,7 +64,7 @@ final class SpecExamples {
             return null;
         }
 
-        return schemaExample((Schema<?>) property);
+        return propertyExample(openAPI, (Schema<?>) property);
     }
 
     /**
@@ -83,7 +85,7 @@ final class SpecExamples {
         }
 
         if (schema.getProperties() != null && schema.getProperties().get(propertyName) instanceof Schema) {
-            return schemaExample((Schema<?>) schema.getProperties().get(propertyName));
+            return propertyExample(openAPI, (Schema<?>) schema.getProperties().get(propertyName));
         }
 
         if (schema.getAllOf() != null) {
@@ -98,6 +100,65 @@ final class SpecExamples {
         }
 
         return null;
+    }
+
+    /**
+     * The example a property states.
+     * <p>
+     * A property that is a bare reference to a oneOf or anyOf schema takes that schema's example. Mostly
+     * the generator made it one: it moves a property that is a oneOf or anyOf out into a schema of its
+     * own (`CopyAsRequest_destFolderId`), leaves the property a reference to it and takes the example
+     * along. A reference to a oneOf or anyOf schema the document declares itself looks the same, and is
+     * read the same way. References to other schemas are not followed: the example of an enum or an
+     * object a property refers to belongs to that schema, not to the property.
+     */
+    private static Object propertyExample(OpenAPI openAPI, Schema<?> property) {
+        Object example = schemaExample(property);
+        if (example != null || property.get$ref() == null) {
+            return example;
+        }
+
+        Schema<?> target = schema(openAPI, ModelUtils.getSimpleRef(property.get$ref()));
+        return variants(target).isEmpty() ? null : schemaExample(target);
+    }
+
+    /**
+     * The examples the variants of a oneOf or anyOf schema state, in the document's order; a variant
+     * that refers to a schema states the example of that schema.
+     */
+    static List<Object> variantExamples(OpenAPI openAPI, String schemaName) {
+        List<Object> examples = new ArrayList<>();
+
+        for (Object part : variants(schema(openAPI, schemaName))) {
+            if (!(part instanceof Schema)) {
+                continue;
+            }
+
+            Schema<?> variant = (Schema<?>) part;
+            Object example = schemaExample(variant);
+            if (example == null && variant.get$ref() != null) {
+                example = schemaExample(schema(openAPI, ModelUtils.getSimpleRef(variant.get$ref())));
+            }
+
+            if (example != null) {
+                examples.add(example);
+            }
+        }
+
+        return examples;
+    }
+
+    /** The variants of a oneOf or anyOf schema: its oneOf, or else its anyOf; none for any other schema. */
+    private static List<?> variants(Schema<?> schema) {
+        if (schema == null) {
+            return Collections.emptyList();
+        }
+
+        if (schema.getOneOf() != null && !schema.getOneOf().isEmpty()) {
+            return schema.getOneOf();
+        }
+
+        return schema.getAnyOf() != null ? schema.getAnyOf() : Collections.emptyList();
     }
 
     /**

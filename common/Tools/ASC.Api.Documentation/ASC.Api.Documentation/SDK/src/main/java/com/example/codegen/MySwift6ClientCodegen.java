@@ -812,8 +812,10 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         }
 
         /**
-         * A oneOf or anyOf: the case of the variant the example fits, or else of the first one, holding
-         * the variant's value - `CopyAsRequestDestFolderId.typeInt(1)`.
+         * A oneOf or anyOf: the case of the variant {@link CallSnippets#variant} picks, holding
+         * the variant's value - `CopyAsRequestDestFolderId.typeInt(1)`. At the depth the models are built
+         * to it is the first variant that is not a struct or a oneOf of its own, with no example, and the
+         * place is logged.
          */
         private String oneOf(CodegenModel model, Object example, String name, String where, int depth) {
             List<String> variants = new ArrayList<>(model.oneOf);
@@ -822,26 +824,22 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             // only a variant that is not one ends the chain, and the place is left to the reader. A
             // oneOf of models alone cannot be built there.
             boolean stopped = depth + 1 >= MAX_DEPTH;
+            String chosen;
             if (stopped) {
                 variants.removeIf(this::isStructure);
                 if (variants.isEmpty()) {
                     placeholders.add(where);
                     return model.classname + "()";
                 }
-                example = null;
-            }
 
-            String chosen = null;
-            for (String variant : variants) {
-                if (fits(variant, example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
-
-            if (chosen == null) {
+                // The place is left to the reader, so no example is looked for either.
                 chosen = variants.get(0);
                 example = null;
+            } else {
+                CallSnippets.Choice<String> choice = CallSnippets.variant(openAPI, model, variants, example,
+                        this::fits);
+                chosen = choice.variant;
+                example = choice.example;
             }
 
             int logged = placeholders.size();

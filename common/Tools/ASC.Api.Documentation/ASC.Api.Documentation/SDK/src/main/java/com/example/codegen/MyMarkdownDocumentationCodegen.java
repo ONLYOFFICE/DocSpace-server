@@ -1180,8 +1180,8 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         }
 
         /**
-         * A oneOf or anyOf: on the wire it is the value of one of its variants, the one the example fits,
-         * or else the first one.
+         * A oneOf or anyOf: on the wire it is the value of one of its variants, the one
+         * {@link CallSnippets#variant} picks.
          */
         private Object composed(CodegenModel model, Object example, String name, String where, int depth) {
             List<CodegenProperty> variants = new ArrayList<>();
@@ -1200,20 +1200,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 return new LinkedHashMap<String, Object>();
             }
 
-            CodegenProperty chosen = null;
-            for (CodegenProperty variant : variants) {
-                if (fits(Shape.of(variant), example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
+            CallSnippets.Choice<CodegenProperty> choice = CallSnippets.variant(openAPI, model, variants, example,
+                    (candidate, stated) -> fits(Shape.of(candidate), stated));
 
-            if (chosen == null) {
-                chosen = variants.get(0);
-                example = null;
-            }
-
-            return value(Shape.of(chosen), example, name, where, depth + 1);
+            return value(Shape.of(choice.variant), choice.example, name, where, depth + 1);
         }
 
         private boolean fits(Shape shape, Object example) {

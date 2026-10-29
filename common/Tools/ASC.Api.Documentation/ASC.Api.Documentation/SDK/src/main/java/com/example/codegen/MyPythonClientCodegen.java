@@ -716,7 +716,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
 
         /**
          * A oneOf or anyOf model: a wrapper that takes the variant as its only positional argument. The
-         * variant is the one the example fits, or the first one when there is no example.
+         * variant is the one {@link CallSnippets#variant} picks.
          */
         private String composed(CodegenModel model, Object example, String where, int depth) {
             modelNames.add(model.classname);
@@ -727,22 +727,9 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
                 return model.classname + ".model_construct()";
             }
 
-            List<String> variants = new ArrayList<>(model.oneOf != null && !model.oneOf.isEmpty() ? model.oneOf : model.anyOf);
+            CallSnippets.Choice<String> choice = CallSnippets.variant(openAPI, model, example, this::fits);
 
-            String chosen = null;
-            for (String variant : variants) {
-                if (fits(variant, example)) {
-                    chosen = variant;
-                    break;
-                }
-            }
-
-            if (chosen == null) {
-                chosen = variants.get(0);
-                example = null;
-            }
-
-            return model.classname + "(" + typed(chosen, example, where, depth + 1) + ")";
+            return model.classname + "(" + typed(choice.variant, choice.example, where, depth + 1) + ")";
         }
 
         private boolean fits(String type, Object example) {
