@@ -43,4 +43,13 @@ internal static partial class SettingsLogger
 
     [LoggerMessage(LogLevel.Warning, "webhooks:retryIntervals has an interval of {interval}, which is not positive: the default intervals are taken instead")]
     public static partial void WarningRetryIntervalNotPositive(this ILogger<Settings> logger, TimeSpan interval);
+
+    [LoggerMessage(LogLevel.Warning, "webhooks:retryIntervals has an interval of {interval}, longer than {maxInterval}: the default intervals are taken instead")]
+    public static partial void WarningRetryIntervalTooLong(this ILogger<Settings> logger, TimeSpan interval, TimeSpan maxInterval);
+
+    [LoggerMessage(LogLevel.Warning, "{key} is {value}, which is not positive: {defaultValue} is taken instead")]
+    public static partial void WarningValueNotPositive(this ILogger<Settings> logger, string key, int value, int defaultValue);
+
+    [LoggerMessage(LogLevel.Warning, "{key} is {value}, more than {maxValue}, which is taken instead")]
+    public static partial void WarningValueTooLarge(this ILogger<Settings> logger, string key, int value, int maxValue);
 }

@@ -50,7 +50,9 @@ public class WorkerService(
     private readonly TimeSpan _waitingPeriod = TimeSpan.FromSeconds(5);
 
     // Rows are claimed only for the slots that are free, and each one is sent as soon as it is claimed, so a claimed row
-    // never waits for others: one slow target holds its own slot and nothing else. The claim lease only has to cover the
+    // never waits for others. The claim takes due rows in one order for every portal and subscription, though, with no
+    // cap per subscription: a target that answers slowly and has many rows due holds as many slots as it has rows
+    // claimed, and the rows of other subscriptions wait behind it until its attempts time out. The claim lease only has to cover the
     // checks before the request, where the row's lease is renewed for the attempt itself (WebhookSender.AttemptLease);
     // should it still run out, the renewal finds a row another instance has taken and does not send it.
     private readonly TimeSpan _lease = TimeSpan.FromTicks(Math.Max(TimeSpan.FromMinutes(10).Ticks, webhookSender.AttemptLease.Ticks));
@@ -183,49 +185,49 @@ public class WorkerService(
             return;
         }
 
-        while (!stoppingToken.IsCancellationRequested)
+        do
         {
-            // one instance does the upkeep: the one holding the lock keeps it, and runs every round, until it stops;
-            // the others try again every period and take over once it has gone. Without the lock this round is
-            // skipped, the upkeep only tidies up and can wait
-            IDistributedLockHandle upkeepLock = null;
+            await RunLockedUpkeepRoundAsync(stoppingToken);
+        }
+        while (await DelayAsync(_upkeepPeriod, stoppingToken));
+    }
 
-            try
-            {
-                upkeepLock = await distributedLockProvider.TryAcquireLockAsync(UpkeepLockKey, cancellationToken: stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-            catch (DistributedLockException)
-            {
-                logger.DebugUpkeepElsewhere();
-            }
-            catch (Exception e)
-            {
-                logger.ErrorUpkeep(e);
-            }
+    // The lock is taken for one round and released after it, so it never outlives the round that needs it: held for
+    // the life of a process instead, a lock lost to a failover of its store would leave two instances doing the upkeep
+    // until one restarted. A lock held by another instance skips the round. A lock that cannot be asked for at all (the
+    // store is down) does not: the upkeep would stop on every instance for as long as the outage lasts, and every
+    // statement of a round tolerates a second instance running it at the same time - the rows are moved and deleted by
+    // primary key under conditions re-checked in the statement itself.
+    private async Task RunLockedUpkeepRoundAsync(CancellationToken stoppingToken)
+    {
+        IDistributedLockHandle upkeepLock = null;
 
-            if (upkeepLock == null)
-            {
-                if (!await DelayAsync(_upkeepPeriod, stoppingToken))
-                {
-                    return;
-                }
+        try
+        {
+            upkeepLock = await distributedLockProvider.TryAcquireLockAsync(UpkeepLockKey, cancellationToken: stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (DistributedLockException)
+        {
+            logger.DebugUpkeepElsewhere();
 
-                continue;
-            }
+            return;
+        }
+        catch (Exception e)
+        {
+            logger.WarningUpkeepLock(e);
+        }
 
-            try
-            {
-                do
-                {
-                    await RunUpkeepRoundAsync(stoppingToken);
-                }
-                while (await DelayAsync(_upkeepPeriod, stoppingToken));
-            }
-            finally
+        try
+        {
+            await RunUpkeepRoundAsync(stoppingToken);
+        }
+        finally
+        {
+            if (upkeepLock != null)
             {
                 try
                 {

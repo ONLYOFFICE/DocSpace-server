@@ -115,6 +115,67 @@ public class WebhookFilePayloadTests(
         memberPayload!.Value.TryGetProperty("quotaLimit", out _).Should().BeFalse("the member may not edit the room");
     }
 
+    /// <summary>
+    /// The lock lives in a tag, which the plain read of the file that every payload is built from does not fill: the
+    /// file.updated raised by locking a file said nothing about the lock, so a receiver could not tell a lock from an
+    /// unlock. The payload now reads the tag, with the user who locked the file.
+    /// </summary>
+    [Fact]
+    public async Task FileUpdated_ByLockingTheFile_CarriesTheLockAndWhoSetIt()
+    {
+        // Arrange
+        var roomId = await CreateRoomAsync();
+        var (fileId, _) = await CreateFileAsync(roomId);
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileUpdated);
+
+        // Act
+        await _filesClient.Authenticate(Owner);
+        await _filesApi.LockFileAsync(fileId, new LockFileRequest(lockFile: true), TestContext.Current.CancellationToken);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.updated",
+            p => p.GetProperty("id").GetInt32() == fileId && p.TryGetProperty("locked", out _));
+
+        payload.Should().NotBeNull("locking the file raises file.updated with the lock in it");
+        payload!.Value.GetProperty("locked").GetBoolean().Should().BeTrue();
+        payload.Value.GetProperty("lockedBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
+    }
+
+    /// <summary>
+    /// A folder deleted at once loses its content before the folder row goes, and the payload, built from a fresh read
+    /// of the folder after that, described an emptied folder (<c>filesCount</c> 0). It is now built before the content
+    /// is deleted, so it describes the folder as the delete found it.
+    /// </summary>
+    [Fact]
+    public async Task FolderDeleted_Immediately_DescribesTheFolderWithItsContent()
+    {
+        // Arrange: a folder with two files in a room
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var roomId = await CreateRoomAsync();
+
+        await _filesClient.Authenticate(Owner);
+
+        var title = $"folder-{Guid.NewGuid():N}";
+        var folder = (await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), cancellationToken)).Response;
+
+        await CreateFileAsync(folder.Id);
+        await CreateFileAsync(folder.Id);
+
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderDeleted);
+
+        // Act: deleted at once, not moved to the trash
+        await _filesClient.Authenticate(Owner);
+        await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest(deleteAfter: false, immediately: true), cancellationToken);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.deleted", p => p.GetProperty("title").GetString() == title, 60);
+
+        payload.Should().NotBeNull("deleting the folder raises folder.deleted once the queued operation deletes it");
+        // a count of 0 is left out of the body
+        var filesCount = payload!.Value.TryGetProperty("filesCount", out var count) ? count.GetInt32() : 0;
+        filesCount.Should().Be(2, "the payload describes the folder as it was deleted, not after its files went");
+    }
+
     private Task<JsonElement?> WaitForFilePayloadAsync(int configId, string title)
     {
         return WaitForPayloadAsync(configId, p => p.TryGetProperty("title", out var t) && t.GetString() == title);

@@ -37,4 +37,7 @@ internal static partial class DbWorkerLogger
 {
     [LoggerMessage(LogLevel.Error, "The webhook rows leased by claim {leaseId} but not returned could not be handed back; they are due again once the lease expires")]
     public static partial void ErrorReleaseClaim(this ILogger<DbWorker> logger, Guid leaseId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Claim {leaseId} failed after it had leased {count} webhook rows; those rows are sent and the rest wait for the next poll")]
+    public static partial void WarningClaimCutShort(this ILogger<DbWorker> logger, Guid leaseId, int count, Exception exception);
 }

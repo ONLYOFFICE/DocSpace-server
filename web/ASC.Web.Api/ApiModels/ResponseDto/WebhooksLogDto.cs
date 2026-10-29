@@ -97,8 +97,8 @@ public class WebhooksLogDto
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// When this delivery record was queued, as a UTC instant ending in `Z` - unlike the dates of the subscription
-    /// itself, which carry the offset of the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the
+    /// When this delivery record was queued, as a UTC instant ending in `Z`. For the first delivery that is when the
+    /// event happened; for a manual retry it is the
     /// moment of the retry. Records come back newest first by this moment.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
@@ -111,8 +111,8 @@ public class WebhooksLogDto
     public string Method { get; set; }
 
     /// <summary>
-    /// The address the delivery was sent to, which is the subscription's URL as it stood at the time - so an
-    /// older record can name an address the subscription no longer uses.
+    /// The address the delivery is sent to: the subscription's URL as it stands now. The journal does not keep the
+    /// address of each attempt, so after the subscription's URL changes, an older record names the new one too.
     /// </summary>
     /// <example>https://example.com/hooks/docspace</example>
     public string Route { get; set; }
@@ -167,7 +167,9 @@ public class WebhooksLogDto
     /// How many times the portal has tried to deliver this record so far. A failed attempt is retried with
     /// growing pauses - on the default schedule about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, though
     /// an installation may configure its own - all of them under the same record and the same
-    /// `x-docspace-event-id` header, so a receiver can drop a delivery it has already processed.
+    /// `x-docspace-event-id` header, so a receiver can drop a delivery it has already processed. The one exception
+    /// is a portal moved to another region while retries are pending: the moved records get new IDs, so the attempts
+    /// made there carry a new `x-docspace-event-id`.
     /// </summary>
     /// <example>1</example>
     public int Attempts { get; set; }
@@ -179,15 +181,16 @@ public class WebhooksLogDto
     /// ran out, a manual retry of the same event took over from it, or the portal stopped it - because the subscription
     /// was disabled or removed or its address rejected, the subscription's creator may no longer receive the event,
     /// the stored body cannot be read or is in the payload format of a previous version, the portal is removed, the
-    /// record waited longer than the retry schedule allows, or the portal was restored from a backup taken before the
-    /// record was answered. A stopped record that was never answered says why in `responsePayload`.
+    /// record waited longer than the retry schedule allows, the portal was restored from a backup taken before the
+    /// record was answered, or the portal was moved to another region while the record was being sent. A stopped
+    /// record that was never attempted says why in `responsePayload`; one that was keeps the target's last answer there.
     /// </summary>
     /// <example>2024-01-15T10:35:00Z</example>
     public DateTime? NextAttemptOn { get; set; }
 }
 
 [Scope]
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public partial class WebhooksLogDtoMapper(EmployeeDtoHelper employeeDtoHelper)
 {
     public async Task<WebhooksLogDto> MapAsync(DbWebhooksLog source)
@@ -200,6 +203,8 @@ public partial class WebhooksLogDtoMapper(EmployeeDtoHelper employeeDtoHelper)
     }
 
     [MapperIgnoreTarget(nameof(WebhooksLogDto.RetriedBy))]
+    [MapValue(nameof(WebhooksLogDto.Method), "POST")]
+    [MapProperty(new[] { nameof(DbWebhooksLog.Config), nameof(DbWebhooksConfig.Uri) }, nameof(WebhooksLogDto.Route))]
     private partial WebhooksLogDto Map(DbWebhooksLog source);
 
     // the journal stores UTC instants, which a datetime column reads back as Unspecified: mark them, do not convert

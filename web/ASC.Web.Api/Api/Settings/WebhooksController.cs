@@ -135,8 +135,9 @@ public class WebhooksController(
     /// an empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a
     /// left-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and
     /// `https`. A `DocSpaceAdmin`
-    /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`
-    /// gives 404 and another member's subscription 403 before the payload is validated. The payload is then validated
+    /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused. Once the body
+    /// passes the schema checks (a missing `name` or `uri` gives 400 first), an unknown `id` gives 404 and another
+    /// member's subscription 403 before the target, the secret and the triggers are checked. The payload is then validated
     /// as on creation, except that trigger flags are checked against the role of the subscription's creator rather than
     /// the caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to
     /// switch a subscription on or off without touching anything else.

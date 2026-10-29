@@ -230,6 +230,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/agentquota</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "for every listed agent, even when its quota does not change")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead for a listed ID that is an ordinary room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/agentquota")]
@@ -275,6 +277,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/resetquota</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "for every listed agent")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead for a listed ID that is an ordinary room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/resetquota")]

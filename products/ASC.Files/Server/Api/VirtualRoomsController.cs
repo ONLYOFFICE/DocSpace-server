@@ -513,6 +513,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room, even when its quota does not change")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
@@ -566,6 +567,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]

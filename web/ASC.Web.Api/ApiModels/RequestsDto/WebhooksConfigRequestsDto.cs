@@ -100,10 +100,14 @@ public class CreateWebhooksConfigRequestsDto
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// The single entity the subscription is narrowed to, by its identifier - a room or a file, for instance.
-    /// Leaving it out delivers events about every entity the subscribed triggers cover.
+    /// The single entity the subscription is narrowed to, by its identifier in the API that owns it. For user events
+    /// it is the GUID of a user (`id` of `GET api/2.0/people`), for group events the GUID of a group (`id` of `GET
+    /// api/2.0/group`), and either must be one the subscription's creator may see; for file, folder, room and form
+    /// events it is the entry ID from the Files API (`id` of `GET api/2.0/files/rooms` or of a folder listing), a
+    /// number for the portal's own storage and a string for third-party storage. Leaving it out delivers events
+    /// about every entity the subscribed triggers cover.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000001</example>
+    /// <example>9924256a-739c-462b-be1a-e1d3a1d6f2d4</example>
     [StringLength(255)]
     public string TargetId { get; set; }
 }

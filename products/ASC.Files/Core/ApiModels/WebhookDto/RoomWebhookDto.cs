@@ -35,7 +35,8 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 
 // A copy of the room-shaped half of FolderDto. Agent rooms use this payload too: an agent is an AI room and has the
 // same shape today, so agent.* sends it as well. Not carried: logo, watermark, lifetime, tags and chatSettings. Each
-// needs per-request URL building or an extra query that a delivery should not pay for.
+// needs per-request URL building or an extra query that a delivery should not pay for. Nor pinned, which is the
+// reading user's own pin and means nothing to a subscriber.
 
 /// <summary>
 /// The room carried by a room.* webhook, and the AI agent carried by every agent.* webhook.
@@ -57,7 +58,7 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     /// <summary>
     /// The same kind of room as `roomType`, in the numbering the portal uses for folders.
     /// </summary>
-    /// <example>5</example>
+    /// <example>16</example>
     public FolderType? Type { get; set; }
 
     /// <summary>
@@ -91,15 +92,10 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// Specifies whether the room is pinned or not.
-    /// </summary>
-    /// <example>false</example>
-    public bool Pinned { get; set; }
-
-    /// <summary>
     /// The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has no quota of its own,
     /// so the portal's default room quota applies, if room quotas are on, and absent as well when the subscription's
-    /// creator may not edit the room: as in the REST API, only those who may edit a room see its quota.
+    /// creator may not edit the room. Unlike `quotaLimit` of the REST API, it is the stored value whether or not room
+    /// quotas are turned on and wherever the room lies, the archive included, and it carries no default quota.
     /// </summary>
     /// <example>10737418240</example>
     public long? QuotaLimit { get; set; }

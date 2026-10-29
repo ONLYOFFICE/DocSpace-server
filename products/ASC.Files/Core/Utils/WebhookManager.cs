@@ -44,6 +44,26 @@ public class WebhookManager(
     ILogger<WebhookManager> logger)
 {
     /// <summary>
+    /// Whether some subscription to <paramref name="trigger"/> has a creator who may receive it now, regardless of the
+    /// entry: the check a bulk operation makes once before it prepares the event of every entry. False as well when
+    /// the subscriptions cannot be read, which drops the webhooks of the batch (logged) and never the operation.
+    /// </summary>
+    public async Task<bool> HasEntitledSubscribersAsync(WebhookTrigger trigger)
+    {
+        try
+        {
+            return await webhookPublisher.HasWebhookConfigsAsync(trigger) &&
+                   (await webhookPublisher.GetWebhookConfigsAsync<object>(trigger, null, null)).Count > 0;
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorPrepareWebhook(trigger, null, e);
+
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Finds the subscriptions an event about <paramref name="fileEntry"/> goes to while the caller can still read it,
     /// for an action that moves it where they no longer can (the trash); the payload is built later, by
     /// <see cref="PublishAsync{T}(WebhookTrigger, IEnumerable{DbWebhooksConfig}, FileEntry{T})"/>, from the entry as it
@@ -118,6 +138,9 @@ public class WebhookManager(
         {
             return () => Task.CompletedTask;
         }
+
+        // an entry deleted from the trash carries the origins its file.trashed or folder.trashed carried
+        await SetTrashOriginsAsync(pureFileEntry);
 
         var payload = await fileEntryWebhookDtoHelper.GetAsync(pureFileEntry);
 

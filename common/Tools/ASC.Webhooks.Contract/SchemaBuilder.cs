@@ -195,7 +195,7 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
         if (!schema.Children.ContainsKey("$ref"))
         {
             var enumType = Nullable.GetUnderlyingType(type) ?? type;
-            AddDescription(schema, enumType.IsEnum && summary != null ? summary + " " + DescribeEnum(enumType) : summary);
+            AddDescription(schema, enumType.IsEnum && summary != null ? summary + " " + DescribeEnum(enumType, IsWrittenAsString(enumType)) : summary);
         }
 
         return schema;
@@ -297,14 +297,17 @@ internal sealed class SchemaBuilder(JsonSerializerOptions options, XmlDocumentat
     }
 
     /// <summary>
-    /// The members of an enum the payload sends as a number, so that a receiver can read the value without the
-    /// server sources.
+    /// The members of an enum, so that a receiver can read the value without the server sources: as `number = name`
+    /// for one the payload sends as a number, and as the names the body carries for one it sends as a string. Decided
+    /// by the same check as the schema's `type`, so the two cannot disagree.
     /// </summary>
-    private static string DescribeEnum(Type enumType)
+    private string DescribeEnum(Type enumType, bool writtenAsString)
     {
         var values = Enum.GetValues(enumType)
             .Cast<object>()
-            .Select(v => $"{Convert.ToInt64(v)} = {Enum.GetName(enumType, v)}");
+            .Select(v => writtenAsString
+                ? $"`{JsonSerializer.Serialize(v, enumType, options).Trim('"')}`"
+                : $"{Convert.ToInt64(v)} = {Enum.GetName(enumType, v)}");
 
         var kind = enumType.GetCustomAttribute<FlagsAttribute>() != null ? "Flags" : "Values";
 

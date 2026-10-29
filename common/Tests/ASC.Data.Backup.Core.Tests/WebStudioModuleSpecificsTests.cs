@@ -193,7 +193,24 @@ public class WebStudioModuleSpecificsTests
         prepared.Should().BeTrue();
         preparedRow!["next_attempt_on"].Should().BeNull();
         preparedRow["lease_id"].Should().BeNull();
-        preparedRow["response_payload"].Should().Be(DbWorker.RestoredFromBackupNote);
+        preparedRow["response_payload"].Should().Be(DbWorker.MovedInFlightNote, "nothing was restored: the portal was moved");
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_InFlightRetryOfATransfer_KeepsTheLastAnswer()
+    {
+        // Arrange — a retry in flight when the portal was moved, after the target had answered an earlier attempt
+        const string lastAnswer = "Service Unavailable";
+        var specifics = CreateSpecifics();
+        var row = PendingRow(DateTime.UtcNow.AddMinutes(5), responsePayload: lastAnswer, attempts: 2);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(portalTransfer: true), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — not sent again, and the record still shows what the target said
+        prepared.Should().BeTrue();
+        preparedRow!["next_attempt_on"].Should().BeNull();
+        preparedRow["response_payload"].Should().Be(lastAnswer);
     }
 
     [Fact]
@@ -339,6 +356,20 @@ public class WebStudioModuleSpecificsTests
 
         // Assert — an owner-less subscription would skip the access checks made for its owner
         prepared.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("webhooks_config")]
+    [InlineData("webhooks_logs")]
+    public void WebhookTable_DeclaresNoDateColumns_SoARestoreKeepsTheHistory(string tableName)
+    {
+        // Act
+        var table = DeclaredTable(CreateSpecifics(), tableName);
+
+        // Assert — the dates are UTC moments of what has already happened (an event queued, an attempt made, the last
+        // success of a subscription); a restore that replaces dates must not rewrite them, and the schedule is
+        // handled by TryPrepareRow instead
+        table.DateColumns.Should().BeEmpty();
     }
 
     private static TableInfo DeclaredTable(TestableWebStudioModuleSpecifics specifics, string name)

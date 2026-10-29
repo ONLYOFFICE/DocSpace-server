@@ -49,4 +49,7 @@ internal static partial class WorkerServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Webhook journal upkeep failed")]
     public static partial void ErrorUpkeep(this ILogger<WorkerService> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "The lock of the webhook journal upkeep could not be asked for; the round runs without it")]
+    public static partial void WarningUpkeepLock(this ILogger<WorkerService> logger, Exception exception);
 }

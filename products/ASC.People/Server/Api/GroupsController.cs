@@ -172,7 +172,7 @@ public class GroupController(
     /// Add a new group
     /// </summary>
     /// <path>api/2.0/group</path>
-    [RaisesWebhook(WebhookTrigger.GroupCreated)]
+    [RaisesWebhook(WebhookTrigger.GroupCreated, When = "once for the new group. The `user.*` payloads of its manager and members are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The new group, with its members", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist")]
@@ -241,7 +241,7 @@ public class GroupController(
     /// Update a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated)]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group as it is after the update", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `groupName` is longer than 128 characters")]
@@ -253,6 +253,11 @@ public class GroupController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditGroups, Constants.Action_AddRemoveUser);
 
         var group = await GetGroupInfoAsync(inDto.Id);
+
+        // group.updated goes out only for a real change: the name is compared here, the manager and the members by
+        // PublishIfChangedAsync, as the membership calls do
+        var nameBefore = group.Name;
+        var membershipBefore = await GetMembershipAsync(group);
 
         group.Name = inDto.Update.GroupName ?? group.Name;
         await userManager.SaveGroupInfoAsync(group);
@@ -281,7 +286,14 @@ public class GroupController(
 
         await socketManager.UpdateGroupAsync(dto);
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+        if (!string.Equals(group.Name, nameBefore, StringComparison.Ordinal))
+        {
+            await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+        }
+        else
+        {
+            await PublishIfChangedAsync(group, membershipBefore);
+        }
 
         return dto;
     }
@@ -302,7 +314,7 @@ public class GroupController(
     /// Delete a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupDeleted)]
+    [RaisesWebhook(WebhookTrigger.GroupDeleted, When = "once for the deleted group. The `user.*` payloads of its former members are not re-sent")]
     [Tags("Group")]
     [SwaggerResponse(204, "The group is deleted. No content is returned")]
     [SwaggerResponse(403, "No permissions to perform this action")]

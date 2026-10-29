@@ -255,11 +255,18 @@ public class RestorePortalTask(DbFactory dbFactory,
             var count = await command.ExecuteNonQueryAsync(_cancellationToken);
             options.DebugClearWebhookSchedule(count);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (DbException ex) when (IsMissingSchemaObject(ex))
         {
-            // a dump of a version without the delivery schedule has nothing to clear
+            // a dump of a version without the delivery schedule has nothing to clear. Any other fault (a timeout, a
+            // deadlock) fails the restore: left as it is, the whole schedule of every restored portal would go out again
             options.WarningCantClearWebhookSchedule(ex);
         }
+    }
+
+    // unknown column or table, by the SQLSTATE of MySQL (42S22, 42S02) and of PostgreSQL (42703, 42P01)
+    private static bool IsMissingSchemaObject(DbException ex)
+    {
+        return ex.SqlState is "42S22" or "42S02" or "42703" or "42P01";
     }
 
     private async Task RestoreFromDumpFile(IDataReadOperator dataReader, string fileName1, string fileName2 = null, string db = null)

@@ -785,7 +785,7 @@
           "AI / Agents"
         ],
         "summary": "Change the AI agent quota limit",
-        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent, even when its quota does not change.",
+        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent, even when its quota does not change. Raises the `room.updated` webhook instead for a listed ID that is an ordinary room, which the operation does not refuse. Raises the `folder.updated` webhook instead for a listed ID that is a folder rather than a room, which the operation does not refuse.",
         "operationId": "updateAgentsQuota",
         "requestBody": {
           "content": {
@@ -896,6 +896,14 @@
         ],
         "x-docspace-webhooks": [
           {
+            "trigger": "folder.updated",
+            "when": "instead for a listed ID that is a folder rather than a room, which the operation does not refuse"
+          },
+          {
+            "trigger": "room.updated",
+            "when": "instead for a listed ID that is an ordinary room, which the operation does not refuse"
+          },
+          {
             "trigger": "agent.updated",
             "when": "for every listed agent, even when its quota does not change"
           }
@@ -908,7 +916,7 @@
           "AI / Agents"
         ],
         "summary": "Reset the AI agents quota limit",
-        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent.",
+        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.\n\nRaises the `agent.updated` webhook for every listed agent. Raises the `room.updated` webhook instead for a listed ID that is an ordinary room, which the operation does not refuse. Raises the `folder.updated` webhook instead for a listed ID that is a folder rather than a room, which the operation does not refuse.",
         "operationId": "resetAgentsQuota",
         "requestBody": {
           "content": {
@@ -1018,6 +1026,14 @@
           }
         ],
         "x-docspace-webhooks": [
+          {
+            "trigger": "folder.updated",
+            "when": "instead for a listed ID that is a folder rather than a room, which the operation does not refuse"
+          },
+          {
+            "trigger": "room.updated",
+            "when": "instead for a listed ID that is an ordinary room, which the operation does not refuse"
+          },
           {
             "trigger": "agent.updated",
             "when": "for every listed agent"

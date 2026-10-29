@@ -938,7 +938,7 @@
           "Group"
         ],
         "summary": "Add a new group",
-        "description": "Creates a group with the given name and, optionally, a manager and a first set of members.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nThe name is required and cannot be blank, and unlike the operations that add members later, this one checks\r\nevery listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a\r\ndisabled account or an ID that matches nobody.\r\nThe call is not idempotent: names are not unique, so repeating it creates a second group with the same name.\r\nThe answer holds the new group with its members included.\r\nMembers can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.\n\nRaises the `group.created` webhook.",
+        "description": "Creates a group with the given name and, optionally, a manager and a first set of members.\r\nThe caller needs the permissions to edit groups and to add and remove users.\r\nThe name is required and cannot be blank, and unlike the operations that add members later, this one checks\r\nevery listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a\r\ndisabled account or an ID that matches nobody.\r\nThe call is not idempotent: names are not unique, so repeating it creates a second group with the same name.\r\nThe answer holds the new group with its members included.\r\nMembers can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.\n\nRaises the `group.created` webhook once for the new group. The `user.*` payloads of its manager and members are not re-sent.",
         "operationId": "addGroup",
         "requestBody": {
           "content": {
@@ -1045,7 +1045,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.created"
+            "trigger": "group.created",
+            "when": "once for the new group. The `user.*` payloads of its manager and members are not re-sent"
           }
         ]
       }
@@ -1193,7 +1194,7 @@
           "Group"
         ],
         "summary": "Update a group",
-        "description": "Changes the name and the manager of a group and adds or removes members, in one call.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nEvery field is optional and the ones that are left out are kept: omitting `groupName` keeps the current name,\r\nand omitting `groupManager` keeps the current manager rather than clearing it.\r\nAccounts in `membersToAdd` that cannot be group members - a guest, a disabled account or an ID that matches\r\nnobody - are silently skipped instead of failing the call, so compare the members in the answer with what was\r\nsent to see what was actually applied.\r\nMembers are added first and removed afterwards, an account listed in both lists therefore ends up removed,\r\nand removing an account that is not a member changes nothing.\r\nThe answer holds the group as it is after the update.\n\nRaises the `group.updated` webhook.",
+        "description": "Changes the name and the manager of a group and adds or removes members, in one call.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nEvery field is optional and the ones that are left out are kept: omitting `groupName` keeps the current name,\r\nand omitting `groupManager` keeps the current manager rather than clearing it.\r\nAccounts in `membersToAdd` that cannot be group members - a guest, a disabled account or an ID that matches\r\nnobody - are silently skipped instead of failing the call, so compare the members in the answer with what was\r\nsent to see what was actually applied.\r\nMembers are added first and removed afterwards, an account listed in both lists therefore ends up removed,\r\nand removing an account that is not a member changes nothing.\r\nThe answer holds the group as it is after the update.\n\nRaises the `group.updated` webhook only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent.",
         "operationId": "updateGroup",
         "parameters": [
           {
@@ -1320,7 +1321,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.updated"
+            "trigger": "group.updated",
+            "when": "only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent"
           }
         ]
       },
@@ -1329,7 +1331,7 @@
           "Group"
         ],
         "summary": "Delete a group",
-        "description": "Deletes a group and withdraws the access it had been granted to rooms, folders and files.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the\r\ngroup loses that share, so members who had access only through this group lose it too.\r\nThe accounts themselves are kept - only their membership disappears.\r\nThe call answers 204 with no body; a second call with the same ID answers\r\n404 rather than succeeding again.\r\nTo empty a group without deleting it, move its members away with\r\n`PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.deleted` webhook.",
+        "description": "Deletes a group and withdraws the access it had been granted to rooms, folders and files.\r\nThe caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a\r\ngroup that has not been deleted, otherwise the operation answers 404.\r\nThe removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the\r\ngroup loses that share, so members who had access only through this group lose it too.\r\nThe accounts themselves are kept - only their membership disappears.\r\nThe call answers 204 with no body; a second call with the same ID answers\r\n404 rather than succeeding again.\r\nTo empty a group without deleting it, move its members away with\r\n`PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.deleted` webhook once for the deleted group. The `user.*` payloads of its former members are not re-sent.",
         "operationId": "deleteGroup",
         "parameters": [
           {
@@ -1433,7 +1435,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "group.deleted"
+            "trigger": "group.deleted",
+            "when": "once for the deleted group. The `user.*` payloads of its former members are not re-sent"
           }
         ]
       }

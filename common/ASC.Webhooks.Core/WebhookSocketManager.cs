@@ -85,9 +85,10 @@ public class WebhookSocketManager(
 
     /// <summary>
     /// A delivery record changed: an attempt ended, the record was dropped with a note, or a manual retry took over
-    /// its schedule. Not announced: the moves of the lease while an attempt is in flight, and the upkeep of the sender,
-    /// which postpones the rows of inactive portals and deletes the records past the retention period in batches across
-    /// portals.
+    /// its schedule. Not announced: the moves of the lease while an attempt is in flight, and every change the upkeep of
+    /// the sender makes in batches across portals - the rows of inactive portals it postpones, those it takes off the
+    /// schedule with a note (InactiveTooLongNote), and the records past the retention period it deletes. An open journal
+    /// shows those changes on its next read.
     /// </summary>
     public Task UpdateWebhookLogAsync(DbWebhooksConfig config, int id)
     {

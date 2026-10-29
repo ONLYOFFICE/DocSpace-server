@@ -419,7 +419,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room whose owner changes")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent whose owner changes")]
-    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every listed folder that is not a room whose owner changes")]
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file whose owner changes")]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]

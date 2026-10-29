@@ -28426,7 +28426,7 @@
           "Settings / Webhooks"
         ],
         "summary": "Update a webhook",
-        "description": "Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the\r\npath. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`\r\nor `targetId` resets them to off, all events and no target: read the current values with `GET\r\napi/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:\r\nan empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a\r\nleft-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and\r\n`https`. A `DocSpaceAdmin`\r\nmay update any subscription in the portal, anyone else only their own, and a `Guest` is refused; an unknown `id`\r\ngives 404 and another member's subscription 403 before the payload is validated. The payload is then validated\r\nas on creation, except that trigger flags are checked against the role of the subscription's creator rather than\r\nthe caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to\r\nswitch a subscription on or off without touching anything else.",
+        "description": "Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the\r\npath. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`\r\nor `targetId` resets them to off, all events and no target: read the current values with `GET\r\napi/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:\r\nan empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a\r\nleft-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and\r\n`https`. A `DocSpaceAdmin`\r\nmay update any subscription in the portal, anyone else only their own, and a `Guest` is refused. Once the body\r\npasses the schema checks (a missing `name` or `uri` gives 400 first), an unknown `id` gives 404 and another\r\nmember's subscription 403 before the target, the secret and the triggers are checked. The payload is then validated\r\nas on creation, except that trigger flags are checked against the role of the subscription's creator rather than\r\nthe caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to\r\nswitch a subscription on or off without touching anything else.",
         "operationId": "updateWebhook",
         "requestBody": {
           "content": {
@@ -33823,7 +33823,7 @@
           },
           "targetId": {
             "examples": [
-              "00000000-0000-0000-0000-000000000001"
+              "9924256a-739c-462b-be1a-e1d3a1d6f2d4"
             ],
             "maxLength": 255,
             "minLength": 0,
@@ -33831,7 +33831,7 @@
               "null",
               "string"
             ],
-            "description": "The single entity the subscription is narrowed to, by its identifier - a room or a file, for instance.\r\nLeaving it out delivers events about every entity the subscribed triggers cover."
+            "description": "The single entity the subscription is narrowed to, by its identifier in the API that owns it. For user events\r\nit is the GUID of a user (`id` of `GET api/2.0/people`), for group events the GUID of a group (`id` of `GET\r\napi/2.0/group`), and either must be one the subscription's creator may see; for file, folder, room and form\r\nevents it is the entry ID from the Files API (`id` of `GET api/2.0/files/rooms` or of a folder listing), a\r\nnumber for the portal's own storage and a string for third-party storage. Leaving it out delivers events\r\nabout every entity the subscribed triggers cover."
           }
         },
         "description": "The target a webhook subscription calls, the events it listens for, and the secret it signs with."
@@ -50841,7 +50841,7 @@
               "2024-01-15T10:30:00Z"
             ],
             "type": "string",
-            "description": "When this delivery record was queued, as a UTC instant ending in `Z` - unlike the dates of the subscription\r\nitself, which carry the offset of the portal time zone. For the first delivery that is when the event happened; for a manual retry it is the\r\nmoment of the retry. Records come back newest first by this moment.",
+            "description": "When this delivery record was queued, as a UTC instant ending in `Z`. For the first delivery that is when the\r\nevent happened; for a manual retry it is the\r\nmoment of the retry. Records come back newest first by this moment.",
             "format": "date-time"
           },
           "method": {
@@ -50862,7 +50862,7 @@
               "null",
               "string"
             ],
-            "description": "The address the delivery was sent to, which is the subscription's URL as it stood at the time - so an\r\nolder record can name an address the subscription no longer uses."
+            "description": "The address the delivery is sent to: the subscription's URL as it stands now. The journal does not keep the\r\naddress of each attempt, so after the subscription's URL changes, an older record names the new one too."
           },
           "requestHeaders": {
             "examples": [
@@ -50928,7 +50928,7 @@
               1
             ],
             "type": "integer",
-            "description": "How many times the portal has tried to deliver this record so far. A failed attempt is retried with\r\ngrowing pauses - on the default schedule about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, though\r\nan installation may configure its own - all of them under the same record and the same\r\n`x-docspace-event-id` header, so a receiver can drop a delivery it has already processed.",
+            "description": "How many times the portal has tried to deliver this record so far. A failed attempt is retried with\r\ngrowing pauses - on the default schedule about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, though\r\nan installation may configure its own - all of them under the same record and the same\r\n`x-docspace-event-id` header, so a receiver can drop a delivery it has already processed. The one exception\r\nis a portal moved to another region while retries are pending: the moved records get new IDs, so the attempts\r\nmade there carry a new `x-docspace-event-id`.",
             "format": "int32"
           },
           "nextAttemptOn": {
@@ -50939,7 +50939,7 @@
               "null",
               "string"
             ],
-            "description": "When the next attempt is due, as a UTC instant ending in `Z` like `creationTime`. While an attempt is being sent\r\nright now it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry;\r\nit changes again once the attempt ends. Empty means no attempt will follow: the record is delivered, its retries\r\nran out, a manual retry of the same event took over from it, or the portal stopped it - because the subscription\r\nwas disabled or removed or its address rejected, the subscription's creator may no longer receive the event,\r\nthe stored body cannot be read or is in the payload format of a previous version, the portal is removed, the\r\nrecord waited longer than the retry schedule allows, or the portal was restored from a backup taken before the\r\nrecord was answered. A stopped record that was never answered says why in `responsePayload`.",
+            "description": "When the next attempt is due, as a UTC instant ending in `Z` like `creationTime`. While an attempt is being sent\r\nright now it holds the moment that attempt's lease expires, a few minutes ahead, rather than a scheduled retry;\r\nit changes again once the attempt ends. Empty means no attempt will follow: the record is delivered, its retries\r\nran out, a manual retry of the same event took over from it, or the portal stopped it - because the subscription\r\nwas disabled or removed or its address rejected, the subscription's creator may no longer receive the event,\r\nthe stored body cannot be read or is in the payload format of a previous version, the portal is removed, the\r\nrecord waited longer than the retry schedule allows, the portal was restored from a backup taken before the\r\nrecord was answered, or the portal was moved to another region while the record was being sent. A stopped\r\nrecord that was never attempted says why in `responsePayload`; one that was keeps the target's last answer there.",
             "format": "date-time"
           }
         },

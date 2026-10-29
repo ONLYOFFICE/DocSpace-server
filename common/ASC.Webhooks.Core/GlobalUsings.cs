@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Collections.Frozen;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;

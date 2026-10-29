@@ -88,4 +88,15 @@ public static class WebhookDelivery
         TimeSpan.FromHours(5),
         TimeSpan.FromHours(10)
     ];
+
+    /// <summary>
+    /// The configuration key that overrides <see cref="DefaultTrustedDays"/>.
+    /// </summary>
+    public const string TrustedDaysKey = "webhooks:trustedDaysCount";
+
+    /// <summary>
+    /// How many days a subscription may go without a successful delivery before it is disabled: checked when a
+    /// delivery has used up its retries, so a subscription that last succeeded longer ago than this is switched off.
+    /// </summary>
+    public const int DefaultTrustedDays = 3;
 }

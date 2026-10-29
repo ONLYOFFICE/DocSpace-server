@@ -20298,7 +20298,7 @@
           "Files / Quota"
         ],
         "summary": "Change the room quota limit",
-        "description": "Sets the same custom storage limit, in bytes, on every listed room and streams the updated rooms back in the\r\norder they were given. The per-room quota feature has to be on for the portal, and the value must stay within\r\nthe portal own limit, otherwise the call is refused before anything is written. The caller must be a manager\r\nof each listed room, and an archived room or a room in the trash is refused. The list is not transactional:\r\nrooms processed before the offending one keep their new limit, so a failed call has to be checked room by\r\nroom. Only numeric room ids are processed, which means ids of rooms stored in a connected third-party account\r\nare silently skipped. A room whose limit already equals the requested value is left untouched and still\r\nreturned. To go back to the portal default use `PUT api/2.0/files/rooms/resetquota`, and to drop the custom\r\nlimit entirely send a quota of -1 to `PUT api/2.0/files/rooms/{id}`.\n\nRaises the `room.updated` webhook for every listed room, even when its quota does not change. Raises the `agent.updated` webhook instead for a listed AI agent.",
+        "description": "Sets the same custom storage limit, in bytes, on every listed room and streams the updated rooms back in the\r\norder they were given. The per-room quota feature has to be on for the portal, and the value must stay within\r\nthe portal own limit, otherwise the call is refused before anything is written. The caller must be a manager\r\nof each listed room, and an archived room or a room in the trash is refused. The list is not transactional:\r\nrooms processed before the offending one keep their new limit, so a failed call has to be checked room by\r\nroom. Only numeric room ids are processed, which means ids of rooms stored in a connected third-party account\r\nare silently skipped. A room whose limit already equals the requested value is left untouched and still\r\nreturned. To go back to the portal default use `PUT api/2.0/files/rooms/resetquota`, and to drop the custom\r\nlimit entirely send a quota of -1 to `PUT api/2.0/files/rooms/{id}`.\n\nRaises the `room.updated` webhook for every listed room, even when its quota does not change. Raises the `agent.updated` webhook instead for a listed AI agent. Raises the `folder.updated` webhook instead for a listed ID that is a folder rather than a room, which the operation does not refuse.",
         "operationId": "updateRoomsQuota",
         "requestBody": {
           "content": {
@@ -20405,6 +20405,10 @@
         ],
         "x-docspace-webhooks": [
           {
+            "trigger": "folder.updated",
+            "when": "instead for a listed ID that is a folder rather than a room, which the operation does not refuse"
+          },
+          {
             "trigger": "room.updated",
             "when": "for every listed room, even when its quota does not change"
           },
@@ -20421,7 +20425,7 @@
           "Files / Quota"
         ],
         "summary": "Reset the room quota limit",
-        "description": "Returns every listed room to the default room quota of the portal and streams the updated rooms back in the\r\norder they were given. This is not the same as removing the limit: the room stops carrying its own value and\r\nstarts following the portal default, which a portal administrator can change at any time. The per-room quota\r\nfeature has to be on, the caller must be a manager of each listed room, and an archived room or a room in the\r\ntrash is refused. The list is not transactional, so rooms processed before a failing one keep the default and\r\nthe rest keep what they had. Only numeric room ids are processed, which means ids of rooms stored in a\r\nconnected third-party account are silently skipped. Use `PUT api/2.0/files/rooms/roomquota` to set an explicit\r\nvalue, and a quota of -1 in `PUT api/2.0/files/rooms/{id}` to leave the room with no custom limit at all.\n\nRaises the `room.updated` webhook for every listed room. Raises the `agent.updated` webhook instead for a listed AI agent.",
+        "description": "Returns every listed room to the default room quota of the portal and streams the updated rooms back in the\r\norder they were given. This is not the same as removing the limit: the room stops carrying its own value and\r\nstarts following the portal default, which a portal administrator can change at any time. The per-room quota\r\nfeature has to be on, the caller must be a manager of each listed room, and an archived room or a room in the\r\ntrash is refused. The list is not transactional, so rooms processed before a failing one keep the default and\r\nthe rest keep what they had. Only numeric room ids are processed, which means ids of rooms stored in a\r\nconnected third-party account are silently skipped. Use `PUT api/2.0/files/rooms/roomquota` to set an explicit\r\nvalue, and a quota of -1 in `PUT api/2.0/files/rooms/{id}` to leave the room with no custom limit at all.\n\nRaises the `room.updated` webhook for every listed room. Raises the `agent.updated` webhook instead for a listed AI agent. Raises the `folder.updated` webhook instead for a listed ID that is a folder rather than a room, which the operation does not refuse.",
         "operationId": "resetRoomQuota",
         "requestBody": {
           "content": {
@@ -20527,6 +20531,10 @@
           }
         ],
         "x-docspace-webhooks": [
+          {
+            "trigger": "folder.updated",
+            "when": "instead for a listed ID that is a folder rather than a room, which the operation does not refuse"
+          },
           {
             "trigger": "room.updated",
             "when": "for every listed room"
@@ -25651,7 +25659,7 @@
           "Files / Sharing"
         ],
         "summary": "Change the room or file owner",
-        "description": "Hands the ownership of the listed rooms and files over to a single account, and returns the entries as they\r\nlook afterwards. Among folders only rooms are accepted - take their identifiers from\r\n`GET api/2.0/files/rooms`; a plain folder is refused. A file is accepted only while it lies in the portal's\r\ncommon section, so a file kept inside a room or in a personal section is refused as well, and so is a file\r\nthat is locked or currently open in the editor. The new owner has to be an active account that is allowed to\r\nmanage rooms, and a private room additionally requires that this account has already set up its encryption\r\nkeys; a deactivated account, a guest or a plain member is rejected. The caller must be the creator of every\r\nlisted room, or a portal administrator. The call mutates the entries one at a time and stops at the first item\r\nit may not touch, leaving the entries already processed changed, so a partial answer is possible; an item\r\nwhose owner is already the target account is returned untouched, which makes a repeat safe. The previous owner\r\nkeeps access to a transferred room as its manager, while a transferred file is saved as a new version authored\r\nby the new owner. An entry that lives on a connected third-party account is quietly left out.\n\nRaises the `room.updated` webhook for every listed room whose owner changes. Raises the `agent.updated` webhook instead for a listed AI agent whose owner changes. Raises the `folder.updated` webhook for every listed folder that is not a room whose owner changes. Raises the `file.updated` webhook for every file whose owner changes.",
+        "description": "Hands the ownership of the listed rooms and files over to a single account, and returns the entries as they\r\nlook afterwards. Among folders only rooms are accepted - take their identifiers from\r\n`GET api/2.0/files/rooms`; a plain folder is refused. A file is accepted only while it lies in the portal's\r\ncommon section, so a file kept inside a room or in a personal section is refused as well, and so is a file\r\nthat is locked or currently open in the editor. The new owner has to be an active account that is allowed to\r\nmanage rooms, and a private room additionally requires that this account has already set up its encryption\r\nkeys; a deactivated account, a guest or a plain member is rejected. The caller must be the creator of every\r\nlisted room, or a portal administrator. The call mutates the entries one at a time and stops at the first item\r\nit may not touch, leaving the entries already processed changed, so a partial answer is possible; an item\r\nwhose owner is already the target account is returned untouched, which makes a repeat safe. The previous owner\r\nkeeps access to a transferred room as its manager, while a transferred file is saved as a new version authored\r\nby the new owner. An entry that lives on a connected third-party account is quietly left out.\n\nRaises the `room.updated` webhook for every listed room whose owner changes. Raises the `agent.updated` webhook instead for a listed AI agent whose owner changes. Raises the `file.updated` webhook for every file whose owner changes.",
         "operationId": "changeFileOwner",
         "requestBody": {
           "content": {
@@ -25753,10 +25761,6 @@
           {
             "trigger": "file.updated",
             "when": "for every file whose owner changes"
-          },
-          {
-            "trigger": "folder.updated",
-            "when": "for every listed folder that is not a room whose owner changes"
           },
           {
             "trigger": "room.updated",

@@ -110,4 +110,38 @@ public class WebhookGroupPayloadTests(
         updated.GetProperty("membersCount").GetInt32().Should().Be(countBefore + 1, "the member added by the update is counted");
         updated.GetProperty("manager").GetProperty("id").GetGuid().Should().Be(Owner.Id);
     }
+
+    /// <summary>
+    /// An update that repeats the current name and manager and lists no members changes nothing, and published
+    /// group.updated all the same. It is now sent only for a real change, as the membership calls do.
+    /// </summary>
+    [Fact]
+    public async Task GroupUpdated_ByAnUpdateThatChangesNothing_IsNotPublished()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupUpdated);
+        var groupName = $"group-{Guid.NewGuid():N}";
+
+        await _peopleClient.Authenticate(Owner);
+        var group = (await _groupApi.AddGroupAsync(
+            new GroupRequestDto(groupName: groupName, groupManager: Owner.Id), cancellationToken)).Response;
+
+        // Act: the same values, then a rename as the control the first call is measured against
+        await _groupApi.UpdateGroupAsync(group.Id, new UpdateGroupRequest(groupManager: Owner.Id, groupName: groupName), cancellationToken);
+
+        var newName = $"renamed-{Guid.NewGuid():N}";
+        await _groupApi.UpdateGroupAsync(group.Id, new UpdateGroupRequest(groupManager: Owner.Id, groupName: newName), cancellationToken);
+
+        // Assert: the event of the rename is there, and it is the only one; both calls publish before they answer
+        var renamed = await WaitForEventPayloadAsync(subscription.Id, "group.updated", p => p.GetProperty("name").GetString() == newName);
+        renamed.Should().NotBeNull("the rename is a change");
+
+        var events = (await GetLogAsync(subscription.Id))
+            .Select(r => JsonDocument.Parse(r.RequestPayload).RootElement)
+            .Where(r => r.GetProperty("payload").GetProperty("id").GetGuid() == group.Id)
+            .ToList();
+
+        events.Should().ContainSingle("the update that repeated the current values changed nothing");
+    }
 }

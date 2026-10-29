@@ -47,6 +47,10 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("app_settings", "tenant_id") {DateColumns = new Dictionary<string, bool> {{"last_modified", false}}},
+        // No DateColumns, deliberately, for both webhook tables. Their dates are UTC moments of what has already happened
+        // (an event queued, an attempt made, the last success or failure of a subscription) and are restored as they
+        // were: a restore that replaces dates would otherwise rewrite the history of the journal. The schedule
+        // (next_attempt_on, lease_id) is not shifted either: TryPrepareRow drops it on a restore and keeps it on a transfer.
         new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
         new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];
@@ -94,9 +98,11 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             {
                 SetNull(preparedRow, "next_attempt_on");
 
+                // a row that was attempted keeps the target's last answer; the note says why there is no next attempt
+                // in the words of what happened: a transfer, or a restore
                 if (IsNull(preparedRow, "response_payload") && !WasAttempted(preparedRow))
                 {
-                    SetValue(preparedRow, "response_payload", DbWorker.RestoredFromBackupNote);
+                    SetValue(preparedRow, "response_payload", columnMapper.PortalTransfer ? DbWorker.MovedInFlightNote : DbWorker.RestoredFromBackupNote);
                 }
             }
 

@@ -35,7 +35,9 @@ namespace ASC.Files.Core.ApiModels.WebhookDto;
 
 // A copy of FileDto. Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus, hasDraft and the
 // form-role fields. Each needs per-request work the REST helper does and a delivery must not; dimensions in particular
-// opens the file stream to measure the image.
+// opens the file stream to measure the image. Nor lastOpened, which is the reading user's own (the Recent section).
+// The lock and the custom filter are read from their tags by FileEntryWebhookDtoHelper: a plain DAO read of the file,
+// which every payload is built from, does not fill them.
 
 /// <summary>
 /// The file carried by a file.* webhook, and by form.filled.out and form.stopped.
@@ -106,16 +108,16 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     public bool? Encrypted { get; set; }
 
     /// <summary>
-    /// True when the file is locked, so that only the user who locked it can edit it; absent otherwise.
+    /// True when the file is locked, so that only the user who locked it can edit it; absent otherwise. A file.updated
+    /// raised by locking or unlocking the file tells the two apart by this field.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// The name of the user who locked the file, when `locked` is true.
+    /// The user who locked the file; absent when `locked` is absent, or when that user has been deleted from the portal.
     /// </summary>
-    /// <example>Mike Zanyatski</example>
-    public string LockedBy { get; set; }
+    public UserSummaryWebhookDto LockedBy { get; set; }
 
     /// <summary>
     /// True for every PDF file, with or without form fields, since the editor can open any PDF as a form; absent for
@@ -127,20 +129,14 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     /// <summary>
     /// True when custom filtering is turned on for the spreadsheet; absent otherwise.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
-    /// The name of the user who turned the custom filter on, when `customFilterEnabled` is true.
+    /// The user who turned the custom filter on; absent when `customFilterEnabled` is absent, or when that user has been
+    /// deleted from the portal.
     /// </summary>
-    /// <example>Mike Zanyatski</example>
-    public string CustomFilterEnabledBy { get; set; }
-
-    /// <summary>
-    /// When the file was last opened, in UTC; absent when that is not known.
-    /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
-    public DateTime? LastOpened { get; set; }
+    public UserSummaryWebhookDto CustomFilterEnabledBy { get; set; }
 
     /// <summary>
     /// The state of the file's indexing for the AI features of the portal; absent when it does not apply.

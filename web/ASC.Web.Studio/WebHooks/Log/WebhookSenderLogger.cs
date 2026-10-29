@@ -59,6 +59,9 @@ internal static partial class WebhookSenderLogger
     [LoggerMessage(LogLevel.Warning, "Webhook tenant: {tenantId}, log: {logId} is not sent: its attempts kept failing before the request went out for longer than {retryWindow}")]
     public static partial void WarningUnsentTooLong(this ILogger<WebhookSender> logger, int tenantId, int logId, TimeSpan retryWindow);
 
+    [LoggerMessage(LogLevel.Error, "Webhook log {logId}: the attempt is recorded, but the step after it failed: {step}")]
+    public static partial void ErrorAfterAttempt(this ILogger<WebhookSender> logger, int logId, string step, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "Failed to announce the change of webhook tenant: {tenantId}, log: {logId}")]
     public static partial void ErrorFailedToAnnounce(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
 

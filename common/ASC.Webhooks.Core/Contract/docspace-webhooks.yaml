@@ -9,8 +9,8 @@ info:
     Wire contract for **outbound** DocSpace webhook deliveries.
 
     This document is not the REST API spec and shares no schemas with it. The payloads are models of their
-    own (`UserWebhookDto`, `GroupWebhookDto`, `FileWebhookDto`, `FolderWebhookDto`, `RoomWebhookDto`,
-    `FormSubmitWebhookDto`).
+    own (`UserPayload`, `GroupPayload`, `FilePayload`, `FolderPayload`, `RoomPayload`,
+    `FormSubmitPayload`).
 
     Every trigger is an entry of `webhooks` below, and its body is the `*Delivery` schema of its
     payload: the envelope with `payload` typed. The same mapping, in machine-readable form, is
@@ -38,7 +38,10 @@ info:
     after 1m, 5m, 30m, 2h, 5h and 10h (each +/-10% jitter), i.e. 7 attempts over about 18 hours by
     default (an installation can change the schedule with the `webhooks:retryIntervals`
     setting), and then abandoned. A portal admin or the subscription's creator can retry it manually from
-    the delivery log, which starts a fresh series under the same `event.id`.
+    the delivery log, which starts a fresh series under the same `event.id`. When a delivery is abandoned and
+    the subscription has had no successful delivery for more than 3 days by default (an
+    installation can change it with the `webhooks:trustedDaysCount` setting), the subscription is
+    disabled: nothing is sent to it until a portal admin or its creator enables it again.
 
     ## Headers
 
@@ -200,6 +203,8 @@ webhooks:
         - `POST api/2.0/people/{userId}/photo` (Upload a user photo), only when `autosave` is true and the image is saved to the profile
         - `PUT api/2.0/people/{userId}/photo` (Update a user photo)
         - `DELETE api/2.0/people/{userId}/photo` (Delete a user photo), even when the profile had no avatar
+
+        Not raised when only the groups of a user change - adding to, moving between or removing from a group, or becoming its manager: that is `group.updated` of each group concerned, and the `groups` of the user's payload are read again from the next `user.*` event.
       tags:
         - user
       parameters:
@@ -303,7 +308,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/group` (Add a new group)
+        - `POST api/2.0/group` (Add a new group), once for the new group. The `user.*` payloads of its manager and members are not re-sent
       tags:
         - group
       parameters:
@@ -355,7 +360,7 @@ webhooks:
         Raised by these REST API operations:
 
         - `PUT api/2.0/group/{fromId}/members/{toId}` (Move group members), once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent
-        - `PUT api/2.0/group/{id}` (Update a group)
+        - `PUT api/2.0/group/{id}` (Update a group), only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent
         - `PUT api/2.0/group/{id}/manager` (Set a group manager), only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent
         - `POST api/2.0/group/{id}/members` (Replace group members), only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent
         - `PUT api/2.0/group/{id}/members` (Add group members), only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent
@@ -410,7 +415,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `DELETE api/2.0/group/{id}` (Delete a group)
+        - `DELETE api/2.0/group/{id}` (Delete a group), once for the deleted group. The `user.*` payloads of its former members are not re-sent
       tags:
         - group
       parameters:
@@ -1027,7 +1032,10 @@ webhooks:
         - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), when the title changes
         - `PUT api/2.0/files/folder/{folderId}/order` (Set folder order), when the order changes
         - `PUT api/2.0/files/order` (Set order of files), for every folder in the list whose order changes
-        - `POST api/2.0/files/owner` (Change the room or file owner), for every listed folder that is not a room whose owner changes
+        - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
+        - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
+        - `PUT internal/ai/agents/agentquota` (Change the AI agent quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
+        - `PUT internal/ai/agents/resetquota` (Reset the AI agents quota limit), instead for a listed ID that is a folder rather than a room, which the operation does not refuse
       tags:
         - folder
       parameters:
@@ -1133,6 +1141,8 @@ webhooks:
         - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed folder deleted at once
         - `PUT api/2.0/files/fileops/emptytrash` (Empty the "Trash" folder), for every folder lying directly in the trash
         - `DELETE api/2.0/files/folder/{folderId}` (Delete a folder), instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage
+
+        Also raised by the automatic clean-up of the trash, for every expired folder lying directly in the trash that it deletes.
       tags:
         - folder
       parameters:
@@ -1455,6 +1465,8 @@ webhooks:
         - `POST api/2.0/files/roomtemplate` (Create a room template), after it when `quota` is given
         - `POST api/2.0/migration/migrate` (Start migration), for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin
         - `POST api/2.0/people/type` (Start updating user type), for every room the account owns, once the queued type change hands it over to the recipient
+        - `PUT internal/ai/agents/agentquota` (Change the AI agent quota limit), instead for a listed ID that is an ordinary room, which the operation does not refuse
+        - `PUT internal/ai/agents/resetquota` (Reset the AI agents quota limit), instead for a listed ID that is an ordinary room, which the operation does not refuse
       tags:
         - room
       parameters:
@@ -2267,8 +2279,9 @@ components:
           description: The free-text notes on the user's profile; empty or absent when not filled in.
         isAdmin:
           type: boolean
-          description: True when the user is a DocSpace admin, who manages the portal settings and every
-            room.
+          description: >-
+            True when the user is a DocSpace admin, who manages the portal settings and every room. False
+            for the portal owner, who has every admin right as well: read `isOwner` for that user.
         isRoomAdmin:
           type: boolean
           description: True when the user's type is Room admin, who may create rooms and manage the rooms
@@ -2527,11 +2540,12 @@ components:
               description: True when the file is end-to-end encrypted in a private room; absent otherwise.
             locked:
               type: boolean
-              description: True when the file is locked, so that only the user who locked it can edit
-                it; absent otherwise.
+              description: >-
+                True when the file is locked, so that only the user who locked it can edit it; absent
+                otherwise. A file.updated raised by locking or unlocking the file tells the two apart
+                by this field.
             lockedBy:
-              type: string
-              description: The name of the user who locked the file, when `locked` is true.
+              $ref: '#/components/schemas/UserSummaryPayload'
             isForm:
               type: boolean
               description: >-
@@ -2542,13 +2556,7 @@ components:
               type: boolean
               description: True when custom filtering is turned on for the spreadsheet; absent otherwise.
             customFilterEnabledBy:
-              type: string
-              description: The name of the user who turned the custom filter on, when `customFilterEnabled`
-                is true.
-            lastOpened:
-              type: string
-              format: date-time
-              description: When the file was last opened, in UTC; absent when that is not known.
+              $ref: '#/components/schemas/UserSummaryPayload'
             vectorizationStatus:
               type: integer
               description: >-
@@ -2714,17 +2722,15 @@ components:
               description: >-
                 True when downloading, copying and printing the room's files is restricted for those who
                 may only view them.
-            pinned:
-              type: boolean
-              description: Specifies whether the room is pinned or not.
             quotaLimit:
               type: integer
               format: int64
               description: >-
                 The room's own quota in bytes, -1 for an explicit "no limit". Absent when the room has
                 no quota of its own, so the portal's default room quota applies, if room quotas are on,
-                and absent as well when the subscription's creator may not edit the room: as in the REST
-                API, only those who may edit a room see its quota.
+                and absent as well when the subscription's creator may not edit the room. Unlike `quotaLimit`
+                of the REST API, it is the stored value whether or not room quotas are turned on and wherever
+                the room lies, the archive included, and it carries no default quota.
             usedSpace:
               type: integer
               format: int64

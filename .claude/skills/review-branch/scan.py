@@ -147,10 +147,8 @@ LINE_CHECKS = [
     ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
      re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
     ("correctness", "* configuration value read - bounds checked (0, negative, above a framework limit)?",
-     re.compile(r"\.GetValue<\s*(int|long|double|TimeSpan|int\[\])|configuration\[\s*\""),
+     re.compile(r"\.GetValue<\s*(int|long|double|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
      lambda p: is_cs(p) and not is_test(p)),
-    ("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?",
-     re.compile(r"catch\s*(\([^)]*\))?\s*\{\s*\}"), lambda p: is_cs(p) and not is_test(p)),
     ("http-clients.md", "`new HttpClient(` (IHttpClientFactory required)",
      re.compile(r"new\s+HttpClient\s*\("), is_cs),
     ("http-clients.md", "new named HttpClient registered",
@@ -225,6 +223,9 @@ LINE_CHECKS = [
     ("ts-ai-style.md", "`any` / console.* in ASC.AI.Chat",
      re.compile(r":\s*any\b|\bas\s+any\b|console\.(log|error|warn|info)"), lambda p: p.endswith(".ts")),
 ]
+
+
+EMPTY_CATCH = re.compile(r"catch\s*(?:\([^)]*\))?\s*(?:when\s*\((?:[^()]|\([^()]*\))*\)\s*)?\{\s*(?://[^\n]*\s*)*\}")
 
 
 # --- localized resources (.resx) -----------------------------------------------------------------
@@ -343,7 +344,21 @@ def print_resx_section(files: list[tuple[str, str]], base: str, head: str | None
 
 HTTP_ATTR = re.compile(r'^\s*\[Http(Get|Post|Put|Delete|Patch)(?:\(\s*"([^"]*)")?')
 ACTION = re.compile(r"^\s*public\s+(?:async\s+)?[\w<>\[\],.? ]+?\s+(\w+)\s*\(")
-CLASS_ROUTE = re.compile(r'^\s*\[Route\(\s*"([^"]*)"')
+# the controllers here name their route with [ApiEndpoint("...")]; [Route] is the plain ASP.NET form
+CLASS_ROUTE = re.compile(r'^\s*\[(?:Route|ApiEndpoint)\(\s*"([^"]*)"')
+
+
+def method_end(lines: list[str], start: int) -> int:
+    """The 1-based line of the brace that closes the member declared on line `start`: the first `}` at the
+    member's own indentation (or the end of an expression-bodied member)."""
+    indent = len(lines[start - 1]) - len(lines[start - 1].lstrip())
+    for i in range(start, len(lines)):
+        text = lines[i]
+        if text.strip() == "}" and len(text) - len(text.lstrip()) == indent:
+            return i + 1
+        if i == start - 1 and text.rstrip().endswith(";"):
+            return i + 1
+    return len(lines)
 
 
 def print_endpoints_section(files, added, read_head) -> None:
@@ -367,10 +382,11 @@ def print_endpoints_section(files, added, read_head) -> None:
                 lo = pending[0]
                 while lo > 1 and lines[lo - 2].strip().startswith(("///", "[")):
                     lo -= 1
-                actions.append([lo, pending[0], pending[1], pending[2], m.group(1)])
+                actions.append([lo, pending[0], pending[1], pending[2], m.group(1), method_end(lines, i)])
                 pending = None
-        for k, (lo, attr, verb, route, name) in enumerate(actions):
-            hi = actions[k + 1][0] - 1 if k + 1 < len(actions) else len(lines)
+        for k, (lo, attr, verb, route, name, end) in enumerate(actions):
+            # the action ends at its own closing brace: the private helpers and any class below it are not its lines
+            hi = min(end, actions[k + 1][0] - 1) if k + 1 < len(actions) else end
             n = sum(1 for x in changed if lo <= x <= hi)
             if n:
                 mark = "new" if attr in changed else f"{n} changed line(s)"
@@ -381,7 +397,7 @@ def print_endpoints_section(files, added, read_head) -> None:
 
 STATEFUL = re.compile(
     r"\b(BackgroundService|IHostedService|PeriodicTimer|Channel<|SemaphoreSlim|IDistributedLockProvider|"
-    r"DistributedLock|StopAsync|IIntegrationEventHandler|Lease\w*|NextAttempt\w*|Retry\w*|Interlocked)\b")
+    r"DistributedLock|StopAsync|IIntegrationEventHandler|Interlocked)\b|(\w*(?:lease|nextattempt|retry)\w*)", re.I)
 
 
 def print_stateful_section(added) -> None:
@@ -390,7 +406,7 @@ def print_stateful_section(added) -> None:
     for path, lines in sorted(added.items()):
         if not is_cs(path) or is_test(path):
             continue
-        kinds = sorted({m.group(1) for _, t in lines for m in STATEFUL.finditer(t)})
+        kinds = sorted({m.group(1) or m.group(2) for _, t in lines for m in STATEFUL.finditer(t)})
         if len(kinds) >= 2:
             rows.append(f"  {path}: {', '.join(kinds[:8])}")
     print("\n".join(rows) if rows else "  none")
@@ -521,6 +537,21 @@ def main() -> None:
             if loop_indent is not None and re.search(r"\bawait\b", text):
                 hits[("performance", "* await inside a loop - N+1 round-trips?")].append(f"{path}:{loop_line}")
                 loop_indent = None
+
+    # empty catch / swallowed failure, across lines (the braces are on lines of their own here), with or without a
+    # `when` filter; a catch whose body is only a comment counts as empty too
+    for path, lines in added.items():
+        if not is_cs(path) or is_test(path):
+            continue
+        blob = Path(path).read_bytes() if a.worktree and Path(path).exists() else git_bytes("show", f"{a.head}:{path}")
+        if not blob:
+            continue
+        text = blob.decode("utf-8", "replace")
+        added_numbers = {n for n, _ in lines}
+        for m in EMPTY_CATCH.finditer(text):
+            line = text.count("\n", 0, m.start()) + 1
+            if added_numbers & set(range(line, line + m.group(0).count("\n") + 1)):
+                hits[("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?")].append(f"{path}:{line}")
 
     # license header on new source files
     for st, p in files:

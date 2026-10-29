@@ -368,23 +368,13 @@ public class CachedUserService : IUserService
         return _service.GetGroupsCountAsync(tenant, text, userId, manager);
     }
 
-    // Counted from the cached membership refs and the cached users of the tenant, under the same conditions as the
-    // database query of the inner service: core_usergroup has no index that starts with the group, so that query reads
-    // every membership row of the tenant. Both caches are already invalidated by their tags on every membership and
-    // user change, so the count needs no cache entry of its own. It walks every user of the tenant, an in-memory pass
-    // that is cheap once per event (the group webhooks) but not per listed group: a listing needs a batched count.
-    // Walking the group's refs instead would need the status of each member, and the per-user cache entries are cold
-    // where the tenant list is not, so a large group would cost one query per member.
-    public async Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
+    // Not cached and not counted from the cached tenant lists: the count is read for the group webhooks, right after the
+    // membership or user change that raised them, and that change has just invalidated those lists - counting from them
+    // reloaded every user of the tenant for one number. The query of the inner service reads the membership rows of the
+    // tenant (core_usergroup has no index that starts with the group), which is far less than that.
+    public Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
     {
-        var refs = await GetUserGroupRefsAsync(tenant);
-        var users = await GetUsersAsync(tenant);
-
-        return users.Count(u =>
-            !u.Removed &&
-            u.Status != EmployeeStatus.Terminated &&
-            refs.TryGetValue(UserGroupRef.CreateKey(tenant, u.Id, groupId, UserGroupRefType.Contains), out var r) &&
-            !r.Removed);
+        return _service.GetGroupMembersCountAsync(tenant, groupId);
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)

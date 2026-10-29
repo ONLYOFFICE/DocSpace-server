@@ -243,11 +243,7 @@ public class WebhookPublisher(
             RequestPayload = payloadStr
         };
 
-        var newWebhooksLog = await PublishAsync(webhooksLog);
-
-        await webhookSocketManager.AddWebhookLogAsync(webhookConfig, newWebhooksLog.Id);
-
-        return newWebhooksLog;
+        return await PublishAsync(webhooksLog, webhookConfig);
     }
 
 
@@ -260,7 +256,16 @@ public class WebhookPublisher(
             return result;
         }
 
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, result.Log.TenantId, result.Log.Id));
+        // the retry is committed: the event only wakes the sender sooner, and the sweep claims the due row without it,
+        // so a bus failure must not answer 500 and invite a second retry of the same event
+        try
+        {
+            await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, result.Log.TenantId, result.Log.Id));
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorRetryEventBus(result.Log.Id, e);
+        }
 
         result.Log.Config = webhookLog.Config;
 
@@ -276,16 +281,26 @@ public class WebhookPublisher(
         return result;
     }
 
-    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    // Once the row is written the delivery happens: the sender's sweep claims a due row whether or not the event that
+    // wakes it arrives. So the row is announced right after the write, and the event is best effort like the
+    // announcement (which logs its own failure): a bus that is down must not hide the record from the open journals.
+    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog, DbWebhooksConfig webhookConfig)
     {
         webhookLog.Attempts = 0;
         webhookLog.NextAttemptOn = webhookLog.CreationTime;
 
         var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
 
-        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);
+        await webhookSocketManager.AddWebhookLogAsync(webhookConfig, newWebhooksLog.Id);
 
-        await eventBus.PublishAsync(@event);
+        try
+        {
+            await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id));
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorWakeSender(newWebhooksLog.Id, e);
+        }
 
         return newWebhooksLog;
     }

@@ -49,7 +49,8 @@ public class FileEntryWebhookDtoHelper(
     CommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    IDaoFactory daoFactory)
 {
     /// <summary>
     /// Maps any entry to the payload its trigger expects: a file, a room or a plain folder.
@@ -72,7 +73,8 @@ public class FileEntryWebhookDtoHelper(
     /// <summary>
     /// Cuts a payload built by <see cref="GetAsync{T}"/> from <paramref name="source"/> for one subscription owner, as
     /// the REST API shows the entry to them: a User or a Guest gets the author and the last editor without the profile
-    /// link and the user name, and the quota of a room goes only to an owner who may edit the room.
+    /// link and the user name, the quota of a room goes only to an owner who may edit the room, and the origins of an
+    /// entry in the trash only to an owner who may read the folder or the room it was deleted from.
     /// </summary>
     public async Task<FileEntryWebhookDto<T>> RestrictForSubscriberAsync<T>(FileEntryWebhookDto<T> entry, FileEntry<T> source, Guid? subscriberId)
     {
@@ -93,7 +95,54 @@ public class FileEntryWebhookDtoHelper(
             result = withoutQuota;
         }
 
+        result = await RestrictOriginsForSubscriberAsync(result, entry, subscriberId.Value);
+
         return result;
+    }
+
+    // The trash listing shows the origins to the owner of the trash only. A subscriber who may read the deleted entry
+    // itself (a file shared with them out of someone's private folder) must not learn the name and the ID of a folder
+    // or a room they cannot read.
+    private async Task<FileEntryWebhookDto<T>> RestrictOriginsForSubscriberAsync<T>(FileEntryWebhookDto<T> result, FileEntryWebhookDto<T> entry, Guid subscriberId)
+    {
+        var hasFolder = !EqualityComparer<T>.Default.Equals(result.OriginId, default);
+        var hasRoom = !EqualityComparer<T>.Default.Equals(result.OriginRoomId, default);
+
+        if (!hasFolder && !hasRoom)
+        {
+            return result;
+        }
+
+        var hideFolder = hasFolder && !await CanReadFolderAsync(result.OriginId, subscriberId);
+        var hideRoom = hasRoom && !await CanReadFolderAsync(result.OriginRoomId, subscriberId);
+
+        if (!hideFolder && !hideRoom)
+        {
+            return result;
+        }
+
+        var restricted = ReferenceEquals(result, entry) ? result.Clone() : result;
+
+        if (hideFolder)
+        {
+            restricted.OriginId = default;
+            restricted.OriginTitle = null;
+        }
+
+        if (hideRoom)
+        {
+            restricted.OriginRoomId = default;
+            restricted.OriginRoomTitle = null;
+        }
+
+        return restricted;
+    }
+
+    private async Task<bool> CanReadFolderAsync<T>(T folderId, Guid subscriberId)
+    {
+        var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
+
+        return folder != null && await fileSecurity.CanReadAsync(folder, subscriberId);
     }
 
     /// <summary>
@@ -125,6 +174,12 @@ public class FileEntryWebhookDtoHelper(
         result.CreatedBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(entry.CreatedBy, subscriberId);
         result.UpdatedBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(entry.UpdatedBy, subscriberId);
 
+        if (result is FileWebhookDto<T> file)
+        {
+            file.LockedBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(file.LockedBy, subscriberId);
+            file.CustomFilterEnabledBy = UserWebhookDtoHelper.RestrictSummaryForSubscriber(file.CustomFilterEnabledBy, subscriberId);
+        }
+
         return result;
     }
 
@@ -136,8 +191,33 @@ public class FileEntryWebhookDtoHelper(
         result.WebUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version));
 
         await FillAuthorsAsync(result, file);
+        await FillTagStateAsync(result, file);
 
         return result;
+    }
+
+    /// <summary>
+    /// The lock and the custom filter live in tags, which a plain DAO read of the file does not fill: read them here,
+    /// with the user who set each, independent of who caused the event. One query per file payload.
+    /// </summary>
+    private async Task FillTagStateAsync<T>(FileWebhookDto<T> result, File<T> file)
+    {
+        await foreach (var tag in daoFactory.GetTagDao<T>().GetTagsAsync([TagType.Locked, TagType.CustomFilter], [file]))
+        {
+            // the same reading as EntryManager.SetFileStatusAsync gives the REST API: a lock tag without an owner is
+            // an unlocked file, and the custom filter counts only for a file the editor can filter
+            switch (tag.Type)
+            {
+                case TagType.Locked when tag.Owner != Guid.Empty:
+                    result.Locked = true;
+                    result.LockedBy = await userWebhookDtoHelper.GetSummaryAsync(tag.Owner);
+                    break;
+                case TagType.CustomFilter when fileUtility.CanWebCustomFilterEditing(file.Title):
+                    result.CustomFilterEnabled = true;
+                    result.CustomFilterEnabledBy = tag.Owner == Guid.Empty ? null : await userWebhookDtoHelper.GetSummaryAsync(tag.Owner);
+                    break;
+            }
+        }
     }
 
     public async Task<FolderWebhookDto<T>> GetFolderAsync<T>(Folder<T> folder)

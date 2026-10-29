@@ -61,9 +61,38 @@ public class Settings
             RetryIntervals = [.. WebhookDelivery.DefaultRetryIntervals];
         }
 
-        // a parallel loop of no threads throws, which would stop the delivery of every webhook
+        // a huge interval overflows the date of the next attempt, which is computed after the request went out: the
+        // attempt would then never be recorded, and the row sent again after every lease, for ever
+        var longInterval = Array.FindIndex(RetryIntervals, i => i > MaxRetryInterval);
+        if (longInterval >= 0)
+        {
+            logger.WarningRetryIntervalTooLong(RetryIntervals[longInterval], MaxRetryInterval);
+            RetryIntervals = [.. WebhookDelivery.DefaultRetryIntervals];
+        }
+
+        // a parallel loop of no threads throws, which would stop the delivery of every webhook; a huge one makes every
+        // poll walk that many slots and claim with an IN list of that size
         ThreadCount = cfg.ThreadCount is > 0 ? cfg.ThreadCount : 10;
-        TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
+        if (ThreadCount > MaxThreadCount)
+        {
+            logger.WarningValueTooLarge("webhooks:threadCount", ThreadCount.Value, MaxThreadCount);
+            ThreadCount = MaxThreadCount;
+        }
+
+        // 0 or less would disable a subscription the first time a delivery uses up its retries, even one that
+        // succeeded a minute earlier; a huge value overflows the date the check compares with
+        TrustedDaysCount = cfg.TrustedDaysCount ?? WebhookDelivery.DefaultTrustedDays;
+        if (TrustedDaysCount < 1)
+        {
+            logger.WarningValueNotPositive(WebhookDelivery.TrustedDaysKey, TrustedDaysCount.Value, WebhookDelivery.DefaultTrustedDays);
+            TrustedDaysCount = WebhookDelivery.DefaultTrustedDays;
+        }
+        else if (TrustedDaysCount > MaxDays)
+        {
+            logger.WarningValueTooLarge(WebhookDelivery.TrustedDaysKey, TrustedDaysCount.Value, MaxDays);
+            TrustedDaysCount = MaxDays;
+        }
+
         Blacklist = cfg.Blacklist ?? [];
         RequestTimeout = cfg.RequestTimeout is { } requestTimeout && requestTimeout > TimeSpan.Zero ? requestTimeout : WebhookDelivery.DefaultRequestTimeout;
 
@@ -75,7 +104,27 @@ public class Settings
             RequestTimeout = MaxRequestTimeout;
         }
         JournalRetentionDays = cfg.JournalRetentionDays is > 0 ? cfg.JournalRetentionDays : null;
+        if (JournalRetentionDays > MaxDays)
+        {
+            logger.WarningValueTooLarge("webhooks:journalRetentionDays", JournalRetentionDays.Value, MaxDays);
+            JournalRetentionDays = MaxDays;
+        }
     }
+
+    /// <summary>
+    /// The longest webhooks:retryIntervals entry taken; a list with a longer one is replaced by the default intervals.
+    /// </summary>
+    public static readonly TimeSpan MaxRetryInterval = TimeSpan.FromDays(7);
+
+    /// <summary>
+    /// The most delivery slots webhooks:threadCount may ask for; a larger value is cut to it.
+    /// </summary>
+    public const int MaxThreadCount = 100;
+
+    /// <summary>
+    /// The most days webhooks:trustedDaysCount and webhooks:journalRetentionDays may name; a larger value is cut to it.
+    /// </summary>
+    public const int MaxDays = 3650;
 
     /// <summary>
     /// The longest webhooks:requestTimeout taken; a longer one is cut to it.

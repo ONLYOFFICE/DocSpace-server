@@ -349,21 +349,33 @@ public class WebhookSender(
                 return;
             }
 
+            // every step below follows a recorded attempt and is best effort on its own: a failure of one (a deadlock on
+            // the subscription row) is logged and must neither skip the others nor send the row back into the catch
+            // below, which would treat the recorded attempt as unrecorded
             if (succeeded)
             {
-                await dbWorker.RecordWebhookConfigSuccessAsync(tenantId, entry.ConfigId, delivery.Value);
+                await RunAfterAttemptAsync(entry.Id, "record the success", () => dbWorker.RecordWebhookConfigSuccessAsync(tenantId, entry.ConfigId, delivery.Value));
             }
             else
             {
                 var failureOn = DateTime.UtcNow;
 
-                await dbWorker.RecordWebhookConfigFailureAsync(tenantId, entry.ConfigId, failureOn, responsePayload);
+                await RunAfterAttemptAsync(entry.Id, "record the failure", () => dbWorker.RecordWebhookConfigFailureAsync(tenantId, entry.ConfigId, failureOn, responsePayload));
 
                 // only once the retries of this event are used up: a subscription that hears rarely from the portal
                 // would otherwise be disabled by its first failure after a quiet spell, before any retry could succeed
                 if (mayAutoDisable && !nextAttemptOn.HasValue)
                 {
-                    autoDisabled = await dbWorker.DisableStaleWebhookConfigAsync(tenantId, entry.ConfigId, failureOn - TimeSpan.FromDays(settings.TrustedDaysCount ?? 3));
+                    await RunAfterAttemptAsync(entry.Id, "disable the stale subscription", async () =>
+                    {
+                        autoDisabled = await dbWorker.DisableStaleWebhookConfigAsync(tenantId, entry.ConfigId, failureOn - TimeSpan.FromDays(settings.TrustedDaysCount ?? WebhookDelivery.DefaultTrustedDays));
+
+                        // the audit right after the change it records, so a later step cannot lose it
+                        if (autoDisabled)
+                        {
+                            messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
+                        }
+                    });
                 }
             }
 
@@ -379,11 +391,6 @@ public class WebhookSender(
             // the record, and the subscription, whose last success or failure every attempt moves
             await socketManager.UpdateWebhookLogAsync(entry.Config, entry.Id);
             await socketManager.UpdateWebhookAsync(entry.Config);
-
-            if (autoDisabled)
-            {
-                messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
-            }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -436,6 +443,18 @@ public class WebhookSender(
             }
 
             await AnnounceJournalChangeAsync(socketManager, entry, tenantId, webhookLogId);
+        }
+    }
+
+    private async Task RunAfterAttemptAsync(int webhookLogId, string step, Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorAfterAttempt(webhookLogId, step, e);
         }
     }
 

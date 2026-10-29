@@ -77,9 +77,18 @@ internal static class ContractHeader
         [WebhookTrigger.FileTrashed] = "the clean-up of a room with a file lifetime, for every expired file it moves to the trash",
         [WebhookTrigger.FileDownloaded] = "a download through the file's `viewUrl`, once per download",
         [WebhookTrigger.FileDeleted] = "the automatic clean-up of the trash, and the clean-up of a room with a file lifetime set to delete permanently, for every file they delete",
+        [WebhookTrigger.FolderDeleted] = "the automatic clean-up of the trash, for every expired folder lying directly in the trash that it deletes",
         [WebhookTrigger.FolderCreated] = "the automatic clean-up of a guest's personal folder left unchanged for 30 days, once for the folder it creates in the personal section of the member who takes over the files and folders the guest shared from it",
         [WebhookTrigger.FormSubmit] = "the editor when a user submits a filled form",
         [WebhookTrigger.FormFilledOut] = "the editor when the last role of a form in a virtual data room submits it"
+    };
+
+    /// <summary>
+    /// What a receiver may expect a trigger to cover and it does not, written as a sentence of its own after the sources.
+    /// </summary>
+    private static readonly Dictionary<WebhookTrigger, string> _notRaisedFor = new()
+    {
+        [WebhookTrigger.UserUpdated] = "Not raised when only the groups of a user change - adding to, moving between or removing from a group, or becoming its manager: that is `group.updated` of each group concerned, and the `groups` of the user's payload are read again from the next `user.*` event."
     };
 
     /// <summary>
@@ -261,6 +270,11 @@ internal static class ContractHeader
             text.Append($"\nAlso raised by {other}.\n");
         }
 
+        if (_notRaisedFor.TryGetValue(trigger, out var notRaised))
+        {
+            text.Append($"\n{notRaised}\n");
+        }
+
         return text.ToString();
     }
 
@@ -310,8 +324,8 @@ internal static class ContractHeader
             Wire contract for **outbound** DocSpace webhook deliveries.
 
             This document is not the REST API spec and shares no schemas with it. The payloads are models of their
-            own (`UserWebhookDto`, `GroupWebhookDto`, `FileWebhookDto`, `FolderWebhookDto`, `RoomWebhookDto`,
-            `FormSubmitWebhookDto`).
+            own (`UserPayload`, `GroupPayload`, `FilePayload`, `FolderPayload`, `RoomPayload`,
+            `FormSubmitPayload`).
 
             Every trigger is an entry of `webhooks` below, and its body is the `*{DeliverySuffix}` schema of its
             payload: the envelope with `payload` typed. The same mapping, in machine-readable form, is
@@ -339,7 +353,10 @@ internal static class ContractHeader
             after {schedule} (each +/-{jitter}% jitter), i.e. {intervals.Count + 1} attempts over about {hours} hours by
             default (an installation can change the schedule with the `{WebhookDelivery.RetryIntervalsKey}`
             setting), and then abandoned. A portal admin or the subscription's creator can retry it manually from
-            the delivery log, which starts a fresh series under the same `event.id`.
+            the delivery log, which starts a fresh series under the same `event.id`. When a delivery is abandoned and
+            the subscription has had no successful delivery for more than {WebhookDelivery.DefaultTrustedDays} days by default (an
+            installation can change it with the `{WebhookDelivery.TrustedDaysKey}` setting), the subscription is
+            disabled: nothing is sent to it until a portal admin or its creator enables it again.
 
             ## Headers
 

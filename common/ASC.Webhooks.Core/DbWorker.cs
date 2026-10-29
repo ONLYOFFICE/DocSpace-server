@@ -65,6 +65,13 @@ public class DbWorker(
     private const int MaxPostponeRounds = 20;
 
     /// <summary>
+    /// How long one run of the upkeep keeps deleting expired journal rows. A fixed number of batches would cap the
+    /// deletion rate below what a busy SaaS installation writes, and the backlog would then never shrink; the time
+    /// budget keeps a run short while letting it delete as fast as the database allows.
+    /// </summary>
+    private static readonly TimeSpan _retentionRunBudget = TimeSpan.FromMinutes(2);
+
+    /// <summary>
     /// The length of webhooks_config.last_failure_content.
     /// </summary>
     private const int MaxFailureContentLength = 200;
@@ -222,11 +229,15 @@ public class DbWorker(
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;
 
-        updateObj.LastFailureOn = dbWebhooksConfig.LastFailureOn;
-        updateObj.LastFailureContent = dbWebhooksConfig.LastFailureContent;
-        updateObj.LastSuccessOn = dbWebhooksConfig.LastSuccessOn;
+        // last_success_on, last_failure_on and last_failure_content are not copied from the caller's entity: the sender
+        // writes them with targeted updates while an attempt is in flight, and an edit read before that attempt ended
+        // would put the stale outcome back - an old last_success_on is what the stale-subscription disable goes by.
+        // Update marks every column, so they are unmarked again: even the value read above can be milliseconds old
+        var entry = webhooksDbContext.WebhooksConfigs.Update(updateObj);
 
-        webhooksDbContext.WebhooksConfigs.Update(updateObj);
+        entry.Property(r => r.LastSuccessOn).IsModified = false;
+        entry.Property(r => r.LastFailureOn).IsModified = false;
+        entry.Property(r => r.LastFailureContent).IsModified = false;
 
         await webhooksDbContext.SaveChangesAsync();
 
@@ -441,7 +452,7 @@ public class DbWorker(
                 }
             }
         }
-        catch (Exception) when (attempted.Count > 0)
+        catch (Exception e) when (attempted.Count > 0)
         {
             // the lease of a round is committed before its rows are read back: rows leased but never returned would
             // wait out the whole lease unsent, and a manual retry of their events would be refused as in flight. They
@@ -450,13 +461,14 @@ public class DbWorker(
 
             if (unreturned.Count > 0)
             {
+                // a failed hand-back is logged, not thrown: the fault the caller has to see is the one that broke the claim
                 try
                 {
                     await webhooksDbContext.ReleaseClaimedWebhooksLogsAsync(unreturned, leaseId, DateTime.UtcNow);
                 }
-                catch (Exception e) when (claimed.Count > 0)
+                catch (Exception releaseException)
                 {
-                    logger.ErrorReleaseClaim(leaseId, e);
+                    logger.ErrorReleaseClaim(leaseId, releaseException);
                 }
             }
 
@@ -464,6 +476,8 @@ public class DbWorker(
             {
                 throw;
             }
+
+            logger.WarningClaimCutShort(leaseId, claimed.Count, e);
         }
 
         return claimed;
@@ -569,7 +583,7 @@ public class DbWorker(
     /// envelope was the same, so only <c>payload</c> and its direct children are looked at. A body that is not JSON
     /// is not judged here: the sender refuses it with its own note.
     /// </summary>
-    internal static bool IsPreviousVersionBody(string requestPayload)
+    public static bool IsPreviousVersionBody(string requestPayload)
     {
         if (string.IsNullOrEmpty(requestPayload))
         {
@@ -611,9 +625,16 @@ public class DbWorker(
         }
     }
 
+    /// <summary>
+    /// The properties that mark a body of the previous version (see <see cref="IsPreviousVersionBody"/>). No current
+    /// webhook payload type may have one at the top level or one level down, or each manual retry of its trigger would
+    /// be refused as outdated; a test holds the payload types to that.
+    /// </summary>
+    public static readonly FrozenSet<string> PreviousVersionProperties = FrozenSet.ToFrozenSet(["createOn", "modifiedOn", "lastModified", "authenticationType"]);
+
     private static bool IsPreviousVersionProperty(string name)
     {
-        return name is "createOn" or "modifiedOn" or "lastModified" or "authenticationType";
+        return PreviousVersionProperties.Contains(name);
     }
 
     public async Task CancelJournalAttemptsAsync(int tenantId, int id, Guid leaseId)
@@ -741,8 +762,8 @@ public class DbWorker(
 
     /// <summary>
     /// Deletes the delivery records of every portal created before <paramref name="before"/> that nothing will send
-    /// any more, oldest first, in batches of <see cref="PostponeBatchSize"/> and at most <see cref="MaxPostponeRounds"/>
-    /// of them per call; what is left goes on the next one. The original row of an event stays while a manual retry
+    /// any more, oldest first, in batches of <see cref="PostponeBatchSize"/> for at most <see cref="_retentionRunBudget"/>
+    /// per call; what is left goes on the next one. The original row of an event stays while a manual retry
     /// points to it (see <see cref="WebhooksDbContext.ExpiredWebhooksLogIdsAsync"/>). Returns how many were deleted.
     /// </summary>
     public async Task<int> DeleteExpiredJournalAsync(DateTime before, CancellationToken cancellationToken)
@@ -751,8 +772,9 @@ public class DbWorker(
 
         var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
         var deleted = 0;
+        var deadline = DateTime.UtcNow + _retentionRunBudget;
 
-        for (var round = 0; round < MaxPostponeRounds && !cancellationToken.IsCancellationRequested; round++)
+        while (DateTime.UtcNow < deadline && !cancellationToken.IsCancellationRequested)
         {
             var ids = await webhooksDbContext.ExpiredWebhooksLogIdsAsync(before, PostponeBatchSize).ToListAsync(cancellationToken);
 
@@ -761,7 +783,7 @@ public class DbWorker(
                 break;
             }
 
-            deleted += await strategy.ExecuteAsync(async () =>
+            var roundDeleted = await strategy.ExecuteAsync(async () =>
             {
                 await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
 
@@ -778,7 +800,11 @@ public class DbWorker(
                 return count;
             });
 
-            if (ids.Count < PostponeBatchSize)
+            deleted += roundDeleted;
+
+            // a short batch means nothing older is left; a batch of which nothing could go (every row was retried
+            // meanwhile) would be read again as it is, so the run ends there instead of spinning on it until the deadline
+            if (ids.Count < PostponeBatchSize || roundDeleted == 0)
             {
                 break;
             }
@@ -832,6 +858,13 @@ public class DbWorker(
     /// </summary>
     public const string RestoredFromBackupNote =
         "Not sent: the portal was restored from a backup taken before the event was delivered";
+
+    /// <summary>
+    /// What the journal shows as the response of a row whose first attempt was being sent when the portal was moved
+    /// to another region: the source may have finished that request, so the target does not send it again.
+    /// </summary>
+    public const string MovedInFlightNote =
+        "Not sent again: the event was being delivered when the portal was moved to another region, and may have arrived";
 
     /// <summary>
     /// What the journal shows as the response of a row that stopped waiting for its portal to become active again

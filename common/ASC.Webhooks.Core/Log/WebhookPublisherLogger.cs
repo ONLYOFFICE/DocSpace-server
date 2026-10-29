@@ -37,4 +37,10 @@ internal static partial class WebhookPublisherLogger
 {
     [LoggerMessage(LogLevel.Error, "The {trigger} webhook for {dataId} could not be published to subscription {configId}; it is dropped for that subscription only")]
     public static partial void ErrorPublishWebhook(this ILogger<WebhookPublisher> logger, WebhookTrigger trigger, string dataId, int configId, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "The delivery record {logId} is written, but the event that wakes the sender could not be published; the sender's sweep sends it")]
+    public static partial void ErrorWakeSender(this ILogger<WebhookPublisher> logger, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "The manual retry {logId} is queued, but the event that wakes the sender could not be published; the sender's sweep sends it")]
+    public static partial void ErrorRetryEventBus(this ILogger<WebhookPublisher> logger, int logId, Exception exception);
 }

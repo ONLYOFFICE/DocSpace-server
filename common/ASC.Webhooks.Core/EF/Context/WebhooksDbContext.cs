@@ -295,12 +295,15 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     // Takes rows found by InactiveTenantsDueWebhooksLogsAsync off the schedule like UnscheduleWebhooksLogsAsync, and
     // says why in the response: those of a portal that may come back, whose retries would have run out by now.
+    // The note of this and of every method below that writes one goes only into a row nothing was sent for yet: once
+    // an attempt was made, the response is the target's last answer, which the journal keeps (the restore of an
+    // archive follows the same rule, WebStudioModuleSpecifics.WasAttempted).
     public Task<int> UnscheduleWebhooksLogsWithNoteAsync(IEnumerable<int> ids, DateTime now, string note)
     {
         return WebhooksLogs
             .Where(r => ids.Contains(r.Id) && r.NextAttemptOn != null && r.NextAttemptOn <= now)
             .ExecuteUpdateAsync(q => q
-                .SetProperty(p => p.ResponsePayload, note)
+                .SetProperty(p => p.ResponsePayload, p => p.Attempts == 0 ? note : p.ResponsePayload)
                 .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
@@ -314,7 +317,7 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return WebhooksLogs
             .Where(r => r.TenantId == tenantId && r.Id == id && r.LeaseId == leaseId && r.CreationTime < createdBefore)
             .ExecuteUpdateAsync(q => q
-                .SetProperty(p => p.ResponsePayload, note)
+                .SetProperty(p => p.ResponsePayload, p => p.Attempts == 0 ? note : p.ResponsePayload)
                 .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }
@@ -371,7 +374,7 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return WebhooksLogs
             .Where(r => r.TenantId == tenantId && r.Id == id && r.LeaseId == leaseId)
             .ExecuteUpdateAsync(q => q
-                .SetProperty(p => p.ResponsePayload, note)
+                .SetProperty(p => p.ResponsePayload, p => p.Attempts == 0 ? note : p.ResponsePayload)
                 .SetProperty(p => p.NextAttemptOn, (DateTime?)null)
                 .SetProperty(p => p.LeaseId, (Guid?)null));
     }

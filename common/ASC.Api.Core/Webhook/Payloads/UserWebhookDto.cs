@@ -144,7 +144,8 @@ public class UserWebhookDto
     public string Notes { get; set; }
 
     /// <summary>
-    /// True when the user is a DocSpace admin, who manages the portal settings and every room.
+    /// True when the user is a DocSpace admin, who manages the portal settings and every room. False for the portal
+    /// owner, who has every admin right as well: read `isOwner` for that user.
     /// </summary>
     /// <example>false</example>
     public bool IsAdmin { get; set; }
