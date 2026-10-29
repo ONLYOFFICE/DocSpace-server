@@ -69,6 +69,47 @@ public class DbWorker(
     /// </summary>
     private const int MaxFailureContentLength = 200;
 
+    /// <summary>
+    /// Makes free text fit the utf8 (utf8mb3) text columns of the webhook tables: response_payload and
+    /// last_failure_content take three bytes per character at most, so a character outside the Basic Multilingual Plane
+    /// (an emoji in a target's answer) fails the statement in strict mode; it becomes U+FFFD, and a NUL is dropped.
+    /// Every free text written to those columns goes through it here, whoever produced the text.
+    /// </summary>
+    public static string ToStorableText(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return value;
+        }
+
+        var builder = new StringBuilder(value.Length);
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+
+            if (c == '\0')
+            {
+                continue;
+            }
+
+            if (char.IsSurrogate(c))
+            {
+                if (char.IsHighSurrogate(c) && i + 1 < value.Length && char.IsLowSurrogate(value[i + 1]))
+                {
+                    i++;
+                }
+
+                builder.Append('�');
+                continue;
+            }
+
+            builder.Append(c);
+        }
+
+        return builder.ToString();
+    }
+
     private static string GetCacheKey(int tenantId)
     {
         return $"webhooks_configs_{tenantId}";
@@ -208,8 +249,11 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // the column is varchar(200) on MySQL, and an over-long value fails the update in strict mode; a failure message
-        // (a DNS error with the host name, an exception text) is not bounded by anything else
+        // the column is varchar(200) utf8 on MySQL, and an over-long value or a four-byte character fails the update in
+        // strict mode; a failure message (an exception text, a DNS error with the host name) is bounded by neither.
+        // Cleaned first, so the cut cannot split a surrogate pair
+        failureContent = ToStorableText(failureContent);
+
         if (failureContent?.Length > MaxFailureContentLength)
         {
             failureContent = failureContent[..MaxFailureContentLength];
@@ -349,7 +393,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var updated = await webhooksDbContext.CompleteWebhooksLogAttemptAsync(tenantId, id, leaseId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders, attempts, nextAttemptOn);
+        var updated = await webhooksDbContext.CompleteWebhooksLogAttemptAsync(tenantId, id, leaseId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn);
 
         return updated > 0;
     }
@@ -586,7 +630,8 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.StopWebhooksLogWithNoteAsync(tenantId, id, leaseId, note);
+        // a note may carry a validator's message about the target's host name, which is not limited to the BMP
+        await webhooksDbContext.StopWebhooksLogWithNoteAsync(tenantId, id, leaseId, ToStorableText(note));
     }
 
     /// <summary>

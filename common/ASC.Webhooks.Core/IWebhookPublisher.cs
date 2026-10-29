@@ -43,6 +43,11 @@ public interface IWebhookPublisher
 
     Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source);
 
+    /// <summary>
+    /// Writes the event to the journal of every subscription in <paramref name="webhookConfigs"/> and hands it to the
+    /// sender. Best effort: it is called once the action the event reports has taken effect, so a failure for one
+    /// subscription is logged and skipped, and nothing but a cancellation is thrown.
+    /// </summary>
     Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId);
 
     Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog);

@@ -502,7 +502,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                 if (isNeedSendActions)
                                 {
                                     webhookTrigger = WebhookTrigger.FolderTrashed;
-                                    webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, folder);
+                                    webhookConfigs = await webhookManager.TryGetWebhookConfigsAsync(webhookTrigger, folder);
                                 }
 
                                 await socketManager.DeleteFolder(folder, action: async () => await FolderDao.MoveFolderAsync(folder.Id, _trashId, CancellationToken));
@@ -718,7 +718,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                         if (isNeedSendActions)
                         {
                             webhookTrigger = WebhookTrigger.FileTrashed;
-                            webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, file);
+                            webhookConfigs = await webhookManager.TryGetWebhookConfigsAsync(webhookTrigger, file);
                         }
 
                         await socketManager.DeleteFileAsync(file, action: async () => await FileDao.MoveFileAsync(file.Id, _trashId, file.RootFolderType == FolderType.USER));
@@ -770,7 +770,6 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
     {
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
-        var webhookPublisher = scope.ServiceProvider.GetService<IWebhookPublisher>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -789,16 +788,11 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
         if ((hasHeaders && isNeedSendActions) || !hasHeaders)
         {
-            // per-file configs re-read the entry, so skip the loop entirely when
-            // the tenant has no webhooks for the trigger at all
-            var anyConfigs = (await webhookPublisher.GetWebhookConfigsAsync<File<T>>(WebhookTrigger.FileDeleted, null, null)).Any();
-
-            if (anyConfigs)
+            // TryPrepareAsync asks the cached subscription list first, so a portal without a file.deleted subscription
+            // pays no entry read per file, and a failure drops only the webhook, never the deletion
+            foreach (var file in files)
             {
-                foreach (var file in files)
-                {
-                    publishByFile[file.Id] = await webhookManager.TryPrepareAsync(WebhookTrigger.FileDeleted, file);
-                }
+                publishByFile[file.Id] = await webhookManager.TryPrepareAsync(WebhookTrigger.FileDeleted, file);
             }
         }
 

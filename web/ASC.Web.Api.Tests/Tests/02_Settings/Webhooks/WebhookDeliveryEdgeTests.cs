@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -137,6 +137,24 @@ public class WebhookDeliveryEdgeTests(
         config!.LastFailureOn.Should().NotBeNull();
         config.LastFailureContent.Should().Contain("500", "the subscription keeps what the target answered");
         config.LastSuccessOn.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Delivery_ResponseBodyWithAFourByteCharacter_IsStoredWithItReplaced()
+    {
+        // Arrange: response_payload is utf8 (three bytes at most), so the emoji would fail the write of the whole
+        // record in strict mode; only a delivered answer is stored (a failed one is stored as the error text)
+        var receiver = await CreateReceiverAsync(body: "\U0001F525 ok");
+        var subscription = await CreateSubscriptionAsync(receiver);
+
+        // Act
+        await FireEventAsync();
+
+        // Assert
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        record.Status.Should().Be(200);
+        record.ResponsePayload.Should().Be("\uFFFD ok", "the journal keeps the answer with the emoji replaced");
     }
 
     [Fact]

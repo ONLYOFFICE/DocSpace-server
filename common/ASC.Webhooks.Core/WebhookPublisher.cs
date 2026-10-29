@@ -41,7 +41,8 @@ public class WebhookPublisher(
     AuthContext authContext,
     UserManager userManager,
     SettingsManager settingsManager,
-    WebhookSocketManager webhookSocketManager)
+    WebhookSocketManager webhookSocketManager,
+    ILogger<WebhookPublisher> logger)
     : IWebhookPublisher
 {
     // One instance for the process: the serializer builds its metadata per options instance, so options created
@@ -212,7 +213,17 @@ public class WebhookPublisher(
     {
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, payload, dataId);
+            // every caller publishes after its action has taken effect (or right after removing what the event
+            // describes), so a failure here must neither fail that action nor drop the event for the other
+            // subscriptions. A row written before the event bus failed is still due, and the sender's sweep claims it
+            try
+            {
+                _ = await PublishAsync(trigger, config, payload, dataId);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                logger.ErrorPublishWebhook(trigger, dataId?.ToString(), config.Id, e);
+            }
         }
     }
 

@@ -47,19 +47,29 @@ public class WebhookManager(
     /// Finds the subscriptions an event about <paramref name="fileEntry"/> goes to while the caller can still read it,
     /// for an action that moves it where they no longer can (the trash); the payload is built later, by
     /// <see cref="PublishAsync{T}(WebhookTrigger, IEnumerable{DbWebhooksConfig}, FileEntry{T})"/>, from the entry as it
-    /// is after the action.
+    /// is after the action. It runs before that action, which must go ahead whatever happens to its webhook, so a
+    /// failure to find them drops the webhook (and is logged) instead, as <see cref="TryPrepareAsync{T}"/> does.
     /// </summary>
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
+    public async Task<IEnumerable<DbWebhooksConfig>> TryGetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
+        try
         {
+            if (!await webhookPublisher.HasWebhookConfigsAsync(trigger))
+            {
+                return [];
+            }
+
+            var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
+            var pureFileEntry = await GetPureFileEntry(fileEntry) ?? fileEntry;
+
+            return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, pureFileEntry);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorPrepareWebhook(trigger, fileEntry.Id.ToString(), e);
+
             return [];
         }
-
-        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
-        var pureFileEntry = await GetPureFileEntry(fileEntry);
-
-        return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, pureFileEntry);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)

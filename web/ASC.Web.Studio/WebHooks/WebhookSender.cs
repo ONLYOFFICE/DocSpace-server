@@ -339,7 +339,7 @@ public class WebhookSender(
 
             // the record first: the subscription's last success or failure, and its auto-disable, follow only an attempt
             // the record keeps. One whose row was requeued or claimed again meanwhile belongs to the attempt that has it
-            var recorded = await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, leaseId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn);
+            var recorded = await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, leaseId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders, attempts, nextAttemptOn);
 
             journalUpdated = true;
 
@@ -568,41 +568,6 @@ public class WebhookSender(
     private static DateTime? ToBodyTimestamp(DateTime? value)
     {
         return value is { } stored ? new DateTime(stored.Ticks - stored.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Utc) : null;
-    }
-
-    private static string ToStorableText(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return value;
-        }
-
-        var builder = new StringBuilder(value.Length);
-
-        for (var i = 0; i < value.Length; i++)
-        {
-            var c = value[i];
-
-            if (c == '\0')
-            {
-                continue;
-            }
-
-            if (char.IsSurrogate(c))
-            {
-                if (char.IsHighSurrogate(c) && i + 1 < value.Length && char.IsLowSurrogate(value[i + 1]))
-                {
-                    i++;
-                }
-
-                builder.Append('\uFFFD');
-                continue;
-            }
-
-            builder.Append(c);
-        }
-
-        return builder.ToString();
     }
 
     private DateTime? GetNextAttemptOn(int attempts)
