@@ -162,7 +162,7 @@ public class FormFillingReportBuilder(
     }
 
     // Consecutive versions are written as a range: "v1-v3, v5".
-    private static string GetSheetName(IReadOnlyList<int> versions)
+    internal static string GetSheetName(IReadOnlyList<int> versions)
     {
         var runs = new List<string>();
         for (var i = 0; i < versions.Count; i++)

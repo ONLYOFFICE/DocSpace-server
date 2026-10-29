@@ -626,7 +626,7 @@ public class FormFillingReportCreator(
 
     private static bool IsOpenQuestion(FormVersionLink link) => link.Renames?.Count > 0 && link.Confirmed == null;
 
-    private static List<int> GetDecidedVersions(FormFillingProperties<int> formFilling)
+    internal static List<int> GetDecidedVersions(FormFillingProperties<int> formFilling)
     {
         return (formFilling?.PendingVersionLinks ?? []).Where(p => !IsOpenQuestion(p)).Select(p => p.Version).ToList();
     }
@@ -726,12 +726,12 @@ public class FormFillingReportCreator(
     }
 
     // The version whose table the form version writes to: the version it continues, or its own.
-    private static int GetTableVersion(FormFillingProperties<int> formFilling, int version)
+    internal static int GetTableVersion(FormFillingProperties<int> formFilling, int version)
     {
         return formFilling?.VersionLinks?.FirstOrDefault(l => l.Version == version)?.TableVersion ?? version;
     }
 
-    private static int[] GetTableVersions(FormFillingProperties<int> formFilling, int tableVersion)
+    internal static int[] GetTableVersions(FormFillingProperties<int> formFilling, int tableVersion)
     {
         return (formFilling?.VersionLinks ?? [])
             .Where(l => l.TableVersion == tableVersion)
@@ -742,7 +742,7 @@ public class FormFillingReportCreator(
 
     // A column of the version under its name in the table: the renames of the later versions linked to the same table
     // are applied in order.
-    private static string MapToTableColumn(FormFillingProperties<int> formFilling, int version, string column)
+    internal static string MapToTableColumn(FormFillingProperties<int> formFilling, int version, string column)
     {
         foreach (var link in GetLaterLinks(formFilling, version))
         {
@@ -856,7 +856,7 @@ public class FormFillingReportCreator(
         state.FieldsCheckedStamp = form.ModifiedOn.Ticks;
     }
 
-    private static bool SameRenames(FormVersionLink a, FormVersionLink b)
+    internal static bool SameRenames(FormVersionLink a, FormVersionLink b)
     {
         return a.TableVersion == b.TableVersion
             && a.Renames.Select(r => (r.OldKey, r.NewKey)).SequenceEqual(b.Renames.Select(r => (r.OldKey, r.NewKey)));
@@ -1011,7 +1011,7 @@ public class FormFillingReportCreator(
     }
 
     // The tips the form author set, by field key; empty when the script could not read them.
-    private static Dictionary<string, string> ParseTips(string json)
+    internal static Dictionary<string, string> ParseTips(string json)
     {
         using var document = JsonDocument.Parse(json);
         if (!document.RootElement.TryGetProperty("tips", out var tips) || tips.ValueKind != JsonValueKind.Object)
@@ -1186,7 +1186,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    private static void RetargetLinks(FormFillingProperties<int> state, FormVersionLink link, List<FormVersionLink> continuing, int tableVersion)
+    internal static void RetargetLinks(FormFillingProperties<int> state, FormVersionLink link, List<FormVersionLink> continuing, int tableVersion)
     {
         link.TableVersion = tableVersion;
         link.Confirmed = null;
@@ -1199,7 +1199,7 @@ public class FormFillingReportCreator(
     }
 
     // The field descriptions only serve the question, so an applied link keeps the keys alone.
-    private static void AddLink(FormFillingProperties<int> state, FormVersionLink link)
+    internal static void AddLink(FormFillingProperties<int> state, FormVersionLink link)
     {
         foreach (var rename in link.Renames ?? [])
         {
@@ -1214,7 +1214,7 @@ public class FormFillingReportCreator(
     }
 
     // The renames of the links in order, as column names.
-    private static List<(string OldName, string NewName)> GetColumnRenames(IEnumerable<FormVersionLink> links)
+    internal static List<(string OldName, string NewName)> GetColumnRenames(IEnumerable<FormVersionLink> links)
     {
         return links
             .SelectMany(l => l.Renames ?? [])
@@ -1480,7 +1480,7 @@ public class FormFillingReportCreator(
 
     // The links as the user decided them: a decision waiting for the first submission of its version or for the database
     // already groups the report, which reads the index alone.
-    private static FormFillingProperties<int> WithDecidedLinks(FormFillingProperties<int> formFilling)
+    internal static FormFillingProperties<int> WithDecidedLinks(FormFillingProperties<int> formFilling)
     {
         var decided = formFilling?.PendingVersionLinks?.Where(p => !IsOpenQuestion(p)).OrderBy(p => p.Version).ToList();
         if (decided is not { Count: > 0 })
@@ -1511,7 +1511,7 @@ public class FormFillingReportCreator(
     }
 
     // A field key of the version under its name in the latest version linked to the same table.
-    private static string MapToLatestKey(FormFillingProperties<int> formFilling, int version, string key)
+    internal static string MapToLatestKey(FormFillingProperties<int> formFilling, int version, string key)
     {
         foreach (var link in GetLaterLinks(formFilling, version))
         {

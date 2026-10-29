@@ -533,7 +533,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     }
 
     // Renames in order; false when a new name is taken by another column.
-    private static bool TryRename(string tableName, char q, Dictionary<string, string> columns, IEnumerable<(string OldName, string NewName)> renames, List<string> statements)
+    internal static bool TryRename(string tableName, char q, Dictionary<string, string> columns, IEnumerable<(string OldName, string NewName)> renames, List<string> statements)
     {
         foreach (var rename in renames)
         {
@@ -555,7 +555,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return true;
     }
 
-    private static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType) => dbType switch
+    internal static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType) => dbType switch
     {
         ExternalDatabaseType.MySql => MapMySqlType(column),
         ExternalDatabaseType.Sqlite => MapSqliteType(column),
@@ -564,7 +564,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     // The kind of value a declared type holds, so that the types of the three databases compare: an option list is
     // text, and SQLite keeps booleans as integers.
-    private static string GetTypeClass(string type)
+    internal static string GetTypeClass(string type)
     {
         var t = type.ToLowerInvariant();
 
