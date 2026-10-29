@@ -613,9 +613,6 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Chat-uitvoer</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>De ruimte bevat al de map .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>De opslag kan niet worden losgekoppeld terwijl een ruimte deze gebruikt. Verwijder in plaats daarvan de ruimte</value>
   </data>

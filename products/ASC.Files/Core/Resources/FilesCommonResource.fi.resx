@@ -613,9 +613,6 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Chatin tulosteet</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Huone sisältää jo .ai-kansion</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Tallennustilaa ei voi irrottaa, kun huone käyttää sitä. Poista huone sen sijaan</value>
   </data>

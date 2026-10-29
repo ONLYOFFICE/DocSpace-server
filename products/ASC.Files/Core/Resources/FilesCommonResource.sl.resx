@@ -610,9 +610,6 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Izhodi klepeta</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Soba že vsebuje mapo .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Shrambe ni mogoče odklopiti, medtem ko jo uporablja soba. Namesto tega izbrišite sobo</value>
   </data>

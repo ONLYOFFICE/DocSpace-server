@@ -610,9 +610,6 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Izlazi čata</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Soba već sadrži fasciklu .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Skladište ne može biti isključeno dok ga soba koristi. Umesto toga izbrišite sobu</value>
   </data>

@@ -610,9 +610,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Sohbet çıktıları</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Oda zaten .ai klasörünü içeriyor</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Bir oda kullanırken depolama alanının bağlantısı kesilemez. Bunun yerine odayı silin</value>
   </data>

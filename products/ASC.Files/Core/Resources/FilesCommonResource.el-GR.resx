@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Έξοδοι συνομιλίας</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Το δωμάτιο περιέχει ήδη τον φάκελο .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Η αποθήκευση δεν μπορεί να αποσυνδεθεί ενώ ένα δωμάτιο τη χρησιμοποιεί. Διαγράψτε το δωμάτιο</value>
   </data>

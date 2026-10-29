@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Չատի արդյունքներ</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Սենյակն արդեն պարունակում է .ai թղթապանակ</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Պահոցը չի կարող անջատվել, մինչ սենյակն օգտագործում է այն։ Փոխարենը ջնջեք սենյակը</value>
   </data>

@@ -613,9 +613,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Ieșiri chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Camera conține deja folderul .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Spațiul de stocare nu poate fi deconectat cât timp o cameră îl utilizează. Ștergeți camera</value>
   </data>

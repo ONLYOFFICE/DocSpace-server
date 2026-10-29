@@ -616,9 +616,6 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Cerca nei metadati della cartella</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>La stanza contiene già la cartella .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>L'archiviazione non può essere disconnessa mentre una stanza la utilizza. Elimina invece la stanza</value>
   </data>

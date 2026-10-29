@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Ответы чата</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>В комнате уже есть папка .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Невозможно отключить хранилище, пока его использует комната. Вместо этого удалите комнату</value>
   </data>

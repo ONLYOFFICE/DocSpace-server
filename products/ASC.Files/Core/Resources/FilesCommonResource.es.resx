@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Salidas del chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>La sala ya contiene la carpeta .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>El almacenamiento no puede desconectarse mientras una sala lo utiliza. Elimine la sala</value>
   </data>

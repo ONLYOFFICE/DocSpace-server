@@ -613,9 +613,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Tērzēšanas izvades</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Telpa jau satur mapi .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Krātuvi nevar atvienot, kamēr to izmanto telpa. Tā vietā dzēsiet telpu</value>
   </data>
