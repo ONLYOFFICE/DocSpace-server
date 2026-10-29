@@ -36,9 +36,7 @@ package com.asc.authorization.messaging.listener;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
-import com.asc.authorization.data.consent.repository.JpaConsentRepository;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
@@ -49,15 +47,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationMessagingCleanupListenerTest {
   @InjectMocks AuthorizationMessagingCleanupListener cleanupListener;
   @Mock private Channel channel;
-  @Mock private PlatformTransactionManager transactionManager;
-  @Mock private JpaAuthorizationRepository jpaAuthorizationRepository;
-  @Mock private JpaConsentRepository jpaConsentRepository;
+  @Mock private AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
   @Mock private RegisteredClientCacheService registeredClientCacheService;
 
   @Test
@@ -67,21 +62,20 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
 
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByClientId("client");
-    verify(jpaConsentRepository).deleteAllConsentsByClientId("client");
+    verify(authorizationMessagingCleanupService).onClientRemoved("client");
     verify(registeredClientCacheService).evict(eq("client"), anyLong());
     verify(channel).basicAck(1L, false);
     verify(channel, never()).basicNack(anyLong(), anyBoolean(), anyBoolean());
   }
 
   @Test
-  void whenClientRemovedEvent_andRepositoryThrows_thenNacks() throws IOException {
+  void whenClientRemovedEvent_andCleanupThrows_thenNacks() throws IOException {
     var event = mock(ClientRemovedEvent.class);
 
     when(event.getClientId()).thenReturn("client");
     doThrow(new RuntimeException("Database Exception"))
-        .when(jpaAuthorizationRepository)
-        .deleteAllAuthorizationsByClientId("client");
+        .when(authorizationMessagingCleanupService)
+        .onClientRemoved("client");
 
     cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
 
@@ -98,36 +92,31 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByPrincipalId("user");
-    verify(jpaConsentRepository).deleteAllConsentsByPrincipalId("user");
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByOwner(42L, "user");
-    verify(jpaConsentRepository).deleteAllConsentsByOwner(42L, "user");
+    verify(authorizationMessagingCleanupService).onUserRemoved(42L, "user");
     verify(registeredClientCacheService).evictAllByTenantId(42L);
     verify(channel).basicAck(2L, false);
   }
 
   @Test
-  void whenUserClientsRemovedEvent_andTenantIdIsAbsent_thenSkipsOwnerScopedCleanupAndAcks()
+  void whenUserClientsRemovedEvent_andTenantIdIsAbsent_thenSkipsCacheEvictionAndAcks()
       throws IOException {
     var event = mock(UserClientsRemovedEvent.class);
     when(event.getUserId()).thenReturn("user");
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByPrincipalId("user");
-    verify(jpaAuthorizationRepository, never()).deleteAllAuthorizationsByOwner(anyLong(), any());
-    verify(jpaConsentRepository, never()).deleteAllConsentsByOwner(anyLong(), any());
+    verify(authorizationMessagingCleanupService).onUserRemoved(0L, "user");
     verify(registeredClientCacheService, never()).evictAllByTenantId(anyLong());
     verify(channel).basicAck(2L, false);
   }
 
   @Test
-  void whenUserClientsRemovedEvent_andRepositoryThrows_thenNacks() throws IOException {
+  void whenUserClientsRemovedEvent_andCleanupThrows_thenNacks() throws IOException {
     var event = mock(UserClientsRemovedEvent.class);
     when(event.getUserId()).thenReturn("user");
     doThrow(new RuntimeException("Database Exception"))
-        .when(jpaAuthorizationRepository)
-        .deleteAllAuthorizationsByPrincipalId("user");
+        .when(authorizationMessagingCleanupService)
+        .onUserRemoved(anyLong(), eq("user"));
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
@@ -143,10 +132,7 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveTenantClientsRemovedMessage(event, channel, 3L);
 
-    verify(jpaConsentRepository).deleteAllConsentsByTenantId(42);
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByTenantId(42);
-    verify(jpaConsentRepository).deleteAllConsentsByOwnerTenantId(42L);
-    verify(jpaAuthorizationRepository).deleteAllAuthorizationsByOwnerTenantId(42L);
+    verify(authorizationMessagingCleanupService).onTenantRemoved(42L);
     verify(registeredClientCacheService).evictAllByTenantId(42L);
     verify(channel).basicAck(3L, false);
   }

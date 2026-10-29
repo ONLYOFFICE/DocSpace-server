@@ -315,9 +315,9 @@ function paramExample(operationId: string, name: string): Json {
 const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // AI - chat rounds and tool-call resumption.
   aiSend:
-    "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
+    "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
   aiSendCustom:
-    "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. The shape of the answer depends on the body rather than on the route: with `isStream` set it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
+    "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
   aiSendWithStream:
     "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId` names a room the caller can open and that a profile resolves for it; the user message and the reply are persisted either way, and a new thread also gets a generated title. The model is settled in a fixed order - an agent's assignment in scope overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
   aiSendWithStreamOpenAI:
@@ -391,9 +391,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
-    "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room, and a room with no assignment of its own degrades to the portal-wide one. This fails when neither slot is set or the bound profile is gone, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
+    "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, the slot names a profile that no longer exists, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
   aiAssignmentsTryResolveForAction:
-    "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
+    "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room the caller can open - an unknown one answers 404 here as well. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
   aiAssignmentsAssign:
     "Binds a profile to one AI action portal-wide, creating the assignment or replacing it in place, and returns the result. Both `actionType` and `profileId` are required. The profile's declared capabilities are checked against the action, so a model that cannot generate images cannot be bound to `ImageGeneration` - the `Default` slot is exempt, because it stands in for every action. There is no room-scoped form of this write: a room's own binding is created by the agent that owns it, while reads accept an `entityId`.",
   aiAssignmentsUnassign:
@@ -427,34 +427,41 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiEditorToolsList:
     "Returns the catalogue of DocSpace tools the document editor's AI plugin may offer the model - the same composed set the DocSpace chat sees, minus the two web-search tools the editor already reaches through its own passthrough. `entityId` scopes the catalogue to a room, which decides the room-specific tools it contains. Each entry carries exactly four fields: the tool name, its description, its input schema, and whether calling it requires an approval dialog; nothing else is exposed, because the raw listings of system servers carry transport details that must not reach a browser. The approval flag follows the same policy the chat engine applies, and a read-only tool comes back needing none - execute a tool with `POST api/2.0/ai/editor-tools/call`, which accepts only the names this catalogue reports.",
   aiEditorToolsCall:
-    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be one of the tools `GET api/2.0/ai/editor-tools/list` reports; anything else, including a tool the editor is not allowed to reach, is refused. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
+    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be exactly one of the tools `GET api/2.0/ai/editor-tools/list` reports (surrounding whitespace is ignored, letter case is not); anything else, including a tool the editor is not allowed to reach, is refused with 400 before anything runs. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
 
   // Export.
   aiExportTextToDocx:
     "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
+  // Metadata.
+  aiMetaGenerate:
+    "Reads one file as text and asks the model bound to the `GenerateMeta` action - the `Default` slot when that action has no profile of its own - which custom metadata fields describe it, and what their values are. `kind` names the entry's table and `id` its integer identifier, the same way as `POST api/2.0/ai/meta/fill`; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note on the kind of fields the caller is interested in, which is passed to the model as a hint, never as an instruction. The text is the file itself, converted to plain text through the portal's own conversion (word-processing and presentation formats, pdf included, to txt; spreadsheets to csv), under the caller's rights, so a file the caller cannot read is skipped as `forbidden` rather than failing the call. Each document is cut at 40 000 characters and the whole set at 240 000, which `sources[].truncated` reports. The model runs once, without tools, and the answer is validated: field names are trimmed, deduplicated regardless of case and capped at 50, the portal's own limit for custom fields on one entry; each field carries the value the text supports as a string, or `null` when the text does not state one, since a custom field on the portal is text and cannot be saved empty. Nothing is written: the caller decides which fields to create and saves them through the Files metadata API.",
+
+  aiMetaFill:
+    "Fills the metadata of one file from its text and writes the result. `kind` names the entry's table and `id` its integer identifier; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`; `dryRun` (default true) resolves the values but writes nothing, so the caller shows them for confirmation and saves the accepted ones itself; only an explicit `dryRun: false` writes, and it is meant for a caller that has already collected the user's confirmation. The fields are the entry's own: every field of the visible templates it carries, assigned or inherited through a cascade - a hidden template is skipped as the UI and the search skip it - and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need; a write the portal refuses is reported per field as `write_failed`, and the call fails with the portal's status only when nothing was written at all. The answer carries `dryRun` as it was applied, the entry's metadata after the write (or as it stands, with `dryRun`), the values written or proposed, the fields left empty with the reason for each, and the documents that were read.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
-    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider verbatim - the payload is owned by the plugin's SDK on one end and the provider on the other. A client disconnect cancels the provider call.",
+    "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
   aiOpenaiImagesGenerations:
-    "OpenAI-compatible image generation for the document editor's AI plugin, working exactly as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider unchanged. The provider's status and body are relayed verbatim, so its 429 and its own error envelope surface as they stand. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+    "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - `prompt` has to be a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
 
   // Preferences - per-scope extended-thinking settings. One value is stored
   // per scope (the depth); deep mode is its on/off view.
   aiPreferencesGetDeepMode:
-    'Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes "off" from "unset" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.',
+    'Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400, as it is on the write. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes "off" from "unset" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.',
   aiPreferencesSetDeepMode:
     'Stores the deep-mode toggle of a scope. `false` stores the `off` depth; `true` keeps the depth already stored and falls back to the default depth (`medium`) when none is. `value` has to be a real boolean: a string, a number or an absent value is rejected rather than coerced, so the string "false" cannot silently switch the setting on and an empty request cannot silently switch it off. `entityId` picks a room and omitting it writes the portal-wide preference. It is idempotent, so there is no need to read the current value first.',
   aiPreferencesClearDeepMode:
     "Removes the stored extended-thinking setting of a scope (the depth and, with it, the deep-mode toggle), after which reads fall back to the configured default rather than to false. `entityId` picks a room and omitting it clears the portal-wide preference. Clearing a scope that has no stored value is not an error. This differs from storing false, which is an explicit choice a later read reports as set.",
   aiPreferencesIsDeepModeSet:
-    "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
+    "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference; a value that is not a room ID is refused with 400. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
   aiPreferencesGetReasoningLevel:
-    "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
+    "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
     "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
   aiPreferencesGetToolPermissionMode:
-    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored, though a value that is not a room ID is still refused with 400. The AI service's default is `auto`.",
   aiPreferencesSetToolPermissionMode:
     "Persists the tool permission mode of the calling user. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` is validated like on the other writes and otherwise ignored - the mode applies to every chat of the user. Idempotent.",
 
@@ -468,21 +475,21 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiProfilesGetById:
     "Returns one AI provider profile by its ID, with its secrets stripped: neither the API key nor the custom headers are ever sent back, on any portal. The ID is required and is read from the query, and an unknown one answers 404. The `baseUrl` in the answer is the one that was stored, not the internal gateway address a round actually dials, so it cannot be used to reach the provider directly. Use `GET api/2.0/ai/profiles/list` to enumerate profiles instead of reading them one by one.",
   aiProfilesList:
-    "Lists the portal's AI provider profiles with their secrets stripped, the same way the single-profile read does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
+    "Lists the portal's AI provider profiles. A portal administrator receives each profile in full, `key` and `headers` included, because the settings page edits them; every other caller gets them with those secrets stripped, as the single-profile read always does. It takes no parameters and is not paginated, because a portal holds few profiles. On a portal running the AI gateway the answer is synthesised from the gateway's own catalogue rather than from stored records. The IDs in the answer are what the assignment operations and every round's `profileId` accept.",
   aiProfilesListModels:
-    "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a missing profile or a caller without access keeps the status the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
+    "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
   aiProfilesListProviderModels:
-    "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
+    "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well, and so is an `apiKey` with characters that cannot travel in an HTTP header (anything outside printable ASCII), since no provider could ever accept it. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
   aiProfilesTestConnection:
-    "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter. The result is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
+    "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter, and a profile the caller cannot see answers 404 before anything is probed. The result of the probe itself is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
 
   // Prompts - the saved prompt library and its folders.
   aiPromptsCreate:
-    "Saves a new prompt in the caller's own prompt library and returns it. The name has to be non-empty and unique inside its folder, and `folderId` has to name an existing folder - omit it to save the prompt at the root. Prompts are per-user: another user's library is never visible here, and no permission beyond having AI enabled is needed. The answer carries the stored prompt including the ID to use with the update, move and delete operations.",
+    "Saves a new prompt in the caller's own prompt library and returns it. `name` and `text` have to be strings and `folderId`, when sent, a string or null, or the call answers 400 before the library is touched. The name has to be non-empty and unique inside its folder, and `folderId` has to name an existing folder - omit it to save the prompt at the root. A refusal keeps the `{ success: false, error }` body but answers 400 for an empty value, 404 for an unknown folder and 409 for a name already in use. Prompts are per-user: another user's library is never visible here, and no permission beyond having AI enabled is needed. The answer carries the stored prompt including the ID to use with the update, move and delete operations.",
   aiPromptsUpdate:
-    "Changes a saved prompt and returns the stored result. Only the fields present in `updates` are written, so a partial object leaves the rest of the prompt alone. The name and the folder reference are re-validated whenever either changes, which means an update can fail on a name another prompt in the same folder already uses. Use `PUT api/2.0/ai/prompts/move` to change only the folder.",
+    "Changes a saved prompt and returns the stored result. Only the fields present in `updates` are written, so a partial object leaves the rest of the prompt alone. The name and the folder reference are re-validated whenever either changes, which means an update can fail on a name another prompt in the same folder already uses - that answers 409, an unknown prompt or folder 404, an empty or non-string value 400, always with the `{ success: false, error }` body. Use `PUT api/2.0/ai/prompts/move` to change only the folder.",
   aiPromptsMove:
-    "Moves a saved prompt into another folder, or to the root when `folderId` is omitted or null. The name is re-validated in the target folder, so the move fails when a prompt of that name already sits there - rename it first with `PUT api/2.0/ai/prompts/update`. Nothing about the prompt other than its folder changes. The answer carries the moved prompt.",
+    "Moves a saved prompt into another folder, or to the root when `folderId` is omitted or null. The name is re-validated in the target folder, so the move fails with 409 when a prompt of that name already sits there - rename it first with `PUT api/2.0/ai/prompts/update`; an unknown prompt or folder answers 404. Nothing about the prompt other than its folder changes. The answer carries the moved prompt.",
   aiPromptsDelete:
     "Deletes one saved prompt from the caller's library. The ID may be sent in the body or as a query parameter, and it is required. An ID that does not exist, or that belongs to another user, is not reported: the call answers success without deleting anything. The deletion is permanent.",
   aiPromptsList:
@@ -490,9 +497,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiPromptsGetById:
     'Returns one saved prompt by its ID. The ID is required and is read from the query. An ID that is unknown, or that belongs to another user, is not reported as 404: the answer is an empty body with status 200, so treat a missing payload as "no such prompt". Prompt IDs come from `GET api/2.0/ai/prompts/list` or from the answer of the create operation.',
   aiPromptsCreateFolder:
-    "Creates a folder in the caller's prompt library and returns it. The name has to be non-empty and unique across that library. Folders do not nest: there is one flat level, so a folder cannot be created inside another. The answer carries the folder ID to use as `folderId` when saving or moving prompts.",
+    "Creates a folder in the caller's prompt library and returns it. The name has to be a non-empty string and unique across that library - a non-string or empty one answers 400, a name in use 409, both with the `{ success: false, error }` body. Folders do not nest: there is one flat level, so a folder cannot be created inside another. The answer carries the folder ID to use as `folderId` when saving or moving prompts.",
   aiPromptsRenameFolder:
-    "Renames a folder in the caller's prompt library, validating the new name against the folders already there. The prompts inside it are untouched and keep their IDs. The answer carries the renamed folder. A name that another folder already uses is rejected.",
+    "Renames a folder in the caller's prompt library, validating the new name against the folders already there. The prompts inside it are untouched and keep their IDs. The answer carries the renamed folder. A name that another folder already uses is rejected with 409, an unknown folder with 404 and a non-string or empty name with 400, always with the `{ success: false, error }` body.",
   aiPromptsDeleteFolder:
     "Deletes a folder together with every prompt inside it, permanently. The ID is required and may be sent in the body or as a query parameter. Unlike deleting a prompt, this checks first: a folder that does not exist, and one that belongs to another user, both answer 404 - the two cases are deliberately indistinguishable, so a foreign folder cannot be probed. Move the prompts out with `PUT api/2.0/ai/prompts/move` first if they should survive.",
   aiPromptsListFolders:
@@ -502,7 +509,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiPromptsExport:
     "Builds a versioned bundle of every prompt and folder in the caller's library and returns it, with no parameters. The bundle is self-contained: it carries its own format version so an older export can still be read back, and it is the input `POST api/2.0/ai/prompts/import-bundle` expects. This is also the only way to read the whole library at once, since listing is folder-scoped. Nothing is changed by the call.",
   aiPromptsImportBundle:
-    "Writes a bundle produced by `GET api/2.0/ai/prompts/export` back into the caller's library. `mode` decides how: `replace` deletes the current prompts and folders before writing, and `merge` writes the bundle on top of what is already there. The folder references inside the bundle are validated before anything is written, so a corrupt bundle is rejected whole rather than applied halfway. `replace` is destructive and cannot be undone - export first if the current library matters.",
+    "Writes a bundle produced by `GET api/2.0/ai/prompts/export` back into the caller's library. `mode` decides how: `replace` deletes the current prompts and folders before writing, and `merge` writes the bundle on top of what is already there. The bundle's shape - version 1, `folders` and `prompts` arrays of objects with string ids, names and texts - and the folder references inside it are validated before anything is written, so a corrupt bundle is rejected whole rather than applied halfway: 400 with the refusals in `errors`, or 409 when every refusal is a name that already exists in the library. `replace` is destructive and cannot be undone - export first if the current library matters.",
 
   // Settings - proxied to the .NET AI service.
   aiSettingsGet:
@@ -514,7 +521,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSettingsGetUser:
     "Returns the AI settings of the calling user, as opposed to the portal-wide ones. It takes no parameters - the user is the authenticated caller, and there is no way to read somebody else's settings - and is proxied unchanged to the DocSpace AI service. Use `GET api/2.0/ai/config` for the portal-wide configuration. This is a read-only operation.",
   aiSettingsSetUser:
-    "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+    "Replaces the AI settings of the calling user and returns the stored result. `chatRecommendedModelVisible` is required and has to be a real boolean - a body the JSON parser cannot read, such as one sent as text/plain, used to arrive empty and answer 200 having stored nothing. The body is then proxied to the DocSpace AI service, which validates the rest, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
   aiSettingsGetToolMode:
     "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
   aiSettingsSetToolMode:
@@ -526,7 +533,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsOpenOrCreate:
     "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; anything that is not an agent room folds to the global scope instead of being rejected.",
   aiThreadsAppendUserMessage:
-    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
   aiThreadsTouch:
     "Bumps a thread's last-edit date without adding a message, which resurfaces it in the list. Passing `profileId` also rebinds the thread to another model, so this is the operation to call when a model switch alone should count as activity. Nothing else about the thread changes and the answer only confirms the write. It is idempotent: repeating it simply moves the date forward again.",
   aiThreadsRename:
@@ -540,13 +547,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsList:
     'Lists the threads of a scope, most recently edited first, and searches their titles case-insensitively when `query` is given. Every parameter is optional: omitting `entityId` lists the global scope, and omitting `count` lets the engine apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{"id": <last thread id>, "lastEditDate": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.',
   aiThreadsReadMessages:
-    "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. Omitting `threadId` is not an error: the call answers 200 with an empty list, so an empty result does not distinguish a thread with no messages from a request that forgot the ID. A malformed cursor is ignored and the read starts from the beginning.",
+    "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. `threadId` is required and a missing one answers 400, so an empty list always means a thread with no messages. A malformed cursor is ignored and the read starts from the beginning.",
   aiThreadsGetById:
     "Returns one thread by its ID, without its messages - read those with `GET api/2.0/ai/threads/read-messages`. `threadId` is required and an unknown one answers 404, so the result is never an empty body. The answer carries the thread's title, its model binding and its last-edit date. This is a read-only operation and does not bump that date.",
   aiThreadsGetMessageById:
-    'Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required. Unlike `GET api/2.0/ai/threads/get-by-id` an unknown ID is not reported as 404: the answer is an empty body with status 200, so a client has to treat a missing payload as "no such message". Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.',
+    "Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required and, as with `GET api/2.0/ai/threads/get-by-id`, an unknown or deleted ID answers 404, so the result is never an empty body. Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.",
   aiThreadsUpdateMessage:
-    "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object. Neither the ID nor the payload is validated here, so a malformed request surfaces as an error relayed from storage rather than as a 400. The answer only confirms the write.",
+    "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object with a known `role` and a content that is a non-blank string or a part list with at least one real part - a tool-call-only assistant message counts, an empty list does not. The role has to match the stored message's: a user message cannot be turned into an assistant one. An unknown `messageId` answers 404. The answer only confirms the write.",
   aiThreadsDeleteMessage:
     "Deletes one message and leaves the rest of the thread untouched. `messageId` is required and may be sent either in the body or as a query parameter. An unknown ID is not reported: the call answers success without having deleted anything, so verify with `GET api/2.0/ai/threads/read-messages` when it matters. The deletion is permanent.",
 
@@ -564,15 +571,15 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiToolsReplaceAllCustomServers:
     'Replaces the whole custom MCP server registry of the scope with the supplied map in one write, which makes it the operation a settings screen saves with. `map` is required: without it the registry would be emptied, so a missing or non-object value is rejected rather than treated as "none". Every name in the map is validated as a routable path segment and every configuration is resolved before anything is written, so a map with one bad entry changes nothing. `entityId` has to name a room the caller can open - this is the operation where an unreachable one would otherwise have wiped the portal-wide registry.',
   aiToolsListSystemTools:
-    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
+    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers; for an agent room those are the servers enabled for that agent alone, never the portal-wide registry - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
-    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open.",
+    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
   aiToolsGetDisabled:
-    "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
+    "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. Without `scope` the answer is the caller's effective list, with the tools an administrator switched off for everyone folded in; `scope=tenant` reads that administrator list alone, which is what the settings page shows. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
   aiToolsIsToolDisabled:
     "Tells whether one named tool of one server type is switched off in the scope. Both `serverType` and `toolName` are required and are read from the query; `entityId` picks the scope. The answer is a bare boolean. It reflects only the disable list - a tool that is on offer may still require approval, which `GET api/2.0/ai/tools/is-allow-always` reports.",
   aiToolsSetAllowAlways:
-    "Adds one tool to the scope's always-allow list, or takes it off, which decides whether a call to it pauses the round for approval. `value` is coerced to a boolean, so any truthy value adds and any falsy one removes. Unlike the disable operation, `serverType` is not validated here: an unknown one is stored and then simply never matches, so a wrong value fails silently. `entityId` has to name a room the caller can open.",
+    "Adds one tool to the scope's always-allow list, or takes it off, which decides whether a call to it pauses the round for approval. `serverType` and `toolName` have to be non-empty strings and `value` a real boolean - `true` adds, `false` removes - and anything else is rejected before the list is touched, so a malformed body can no longer grant a permanent approval. Unlike the disable operation, `serverType` is not checked against the known server types: an unknown one is stored and then simply never matches. `entityId` has to name a room the caller can open.",
   aiToolsGetAllowAlways:
     "Returns the always-allow list of the scope - the tools whose calls run without pausing the round for approval. `entityId` picks the scope and omitting it reads the portal-wide setting. An empty answer means every tool call has to be approved through `POST api/2.0/ai/ai/approve-tool-call`. Use `GET api/2.0/ai/tools/is-allow-always` to ask about a single tool.",
   aiToolsIsAllowAlways:
@@ -596,9 +603,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiWebSearchClear:
     "Removes the portal's web-search configuration, after which web search is unavailable everywhere it was not configured separately. This is not scoped: it takes no `entityId` and any body sent with it is ignored, so it cannot be used to clear one room's configuration. Clearing an already-unconfigured portal is not an error and the call answers success either way. The stored provider key is destroyed with the configuration and has to be entered again.",
   aiWebSearchPassthroughSearch:
-    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. The provider's own status, body and content type are relayed as they stand, so a provider that rate-limits answers 429 and one that is unreachable answers 502. Closing the connection aborts the upstream request.",
+    "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, its detail stays in the server log and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
   aiWebSearchPassthroughContents:
-    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. The provider's status, body and content type are relayed verbatim, so its 429 and its failures surface unchanged. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
+    "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with the detail kept in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
 };
 
 // Resolve the prose for one operation, or `undefined` when the table does not
@@ -781,8 +788,23 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
 
   // Assignments - every write validates its action type first; reading all
   // assignments of a room resolves the room.
-  aiAssignmentsResolveForAction: { "400": "`actionType` is missing." },
-  aiAssignmentsTryResolveForAction: { "400": "`actionType` is missing." },
+  aiSend: {
+    "400":
+      "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+  },
+  aiSendCustom: {
+    "400":
+      "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, " +
+      "or `isStream` is not a boolean.",
+  },
+  aiAssignmentsResolveForAction: {
+    "400": "`actionType` is missing or unknown.",
+    "404": "No profile can serve the action, or `entityId` names a room that does not exist.",
+  },
+  aiAssignmentsTryResolveForAction: {
+    "400": "`actionType` is missing or unknown.",
+    "404": "`entityId` names a room that does not exist.",
+  },
   aiAssignmentsAssign: { "400": "`actionType` or `profileId` is missing." },
   aiAssignmentsUnassign: { "400": "`actionType` is missing." },
   aiAssignmentsBulkAssign: {
@@ -795,7 +817,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiAssignmentsCascadeProfileDelete: { "400": "`profileId` is missing." },
 
   // Attachments - `linkToMessage` is the only one that resolves a message.
-  aiAttachmentsSaveFile: { "400": "The attachment payload is malformed." },
+  aiAttachmentsSaveFile: {
+    "400": "The attachment payload is malformed, or `input.path` is missing or empty.",
+  },
   aiAttachmentsSaveFilesMany: {
     "400": "`inputs` is not an array, or one of its entries is malformed.",
   },
@@ -807,7 +831,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Editor tools.
-  aiEditorToolsCall: { "400": "The tool name is not one this portal exposes." },
+  aiEditorToolsCall: {
+    "400": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports.",
+  },
 
   // Export - asynchronous, so the success code is 202 rather than 200.
   aiExportTextToDocx: {
@@ -816,19 +842,56 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "413": "The transcript is larger than 15 MB, this route's own parser limit.",
   },
 
+  // Metadata.
+  aiMetaGenerate: {
+    "400":
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, or `prompt` is not a string.",
+    "403": "The caller cannot open the entry.",
+    "404": "The entry does not exist.",
+    "422": "The content could not be read as text; `skipped` says why.",
+    "402":
+      "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+    "429":
+      "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+    "502":
+      "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+    "504": "Reading the files or the model round did not finish within the time budget.",
+  },
+  aiMetaFill: {
+    "400":
+      "`kind` is not `file` (folders and rooms are not accepted for now), `id` is not an integer id, `prompt` is not a string, or `overwrite` / `dryRun` is not a boolean.",
+    "403": "The caller cannot read the entry, or cannot edit it when the values are written.",
+    "404": "The entry does not exist.",
+    "422":
+      "The entry has no metadata fields to fill, or none of its content could be read as text.",
+    "402":
+      "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+    "429":
+      "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+    "502":
+      "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
+    "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
+    "504": "Reading the files or the model round did not finish within the time budget.",
+  },
+
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
   // status it returns can reach the caller, 429 included.
   aiOpenaiChatCompletions: {
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
-    "502": true,
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
   aiOpenaiImagesGenerations: {
+    "400":
+      "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
     "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
-    "502": true,
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
 
   // Preferences.
@@ -836,6 +899,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
   },
   aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesIsDeepModeSet: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetReasoningLevel: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetToolPermissionMode: { "400": "`entityId` is not a room ID." },
+  aiSettingsSetUser: { "400": "`chatRecommendedModelVisible` is missing or not a boolean." },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
   },
@@ -846,31 +914,72 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Profiles - creating and updating are refused outright while the portal
   // runs on the AI gateway, and both validate the provider URL.
   aiProfilesCreate: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The provider URL is missing, malformed, or points at a private network address, or the key " +
+      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
+      "result shape, `success: false` and an `error` naming the `key` field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesUpdate: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The provider URL is missing, malformed, or points at a private network address, or the key " +
+      "holds characters that cannot travel in an HTTP header - that one answers with the profile " +
+      "result shape, `success: false` and an `error` naming the `key` field.",
     "403": "AI profiles are read-only on this portal because they are managed by the AI gateway.",
   },
   aiProfilesDelete: { "400": "The profile ID is missing." },
   aiProfilesListProviderModels: {
     "400":
-      "`baseUrl` is missing, points at a private network address, or the provider rejected " +
-      "the supplied API key.",
+      "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that " +
+      "cannot travel in an HTTP header, or the provider rejected the supplied API key.",
     "502": true,
   },
   aiProfilesListModels: {
     "400": "`profileId` is missing, or the provider rejected the profile's API key.",
+    "404": "No profile with this identifier exists for the caller.",
     "502": true,
   },
-  aiProfilesTestConnection: { "400": "`profileId` is missing." },
+  aiProfilesTestConnection: {
+    "400": "`profileId` is missing.",
+    "404": "No profile with this identifier exists for the caller.",
+  },
   aiProfilesGetById: {
     "400": "The profile ID is missing.",
     "404": "No profile has this ID.",
   },
 
   // Prompts.
+  aiPromptsCreate: {
+    "400":
+      "`name` or `text` is missing, empty or not a string, or `folderId` is neither a string nor null.",
+    "404": "`folderId` names no folder of the caller's.",
+    "409": "A prompt of that name already sits in the folder.",
+  },
+  aiPromptsUpdate: {
+    "400":
+      "`id` is missing, `updates` is not an object, or a field in it has the wrong type or is empty.",
+    "404": "No prompt has this ID, or `folderId` names no folder of the caller's.",
+    "409": "A prompt of that name already sits in the target folder.",
+  },
+  aiPromptsMove: {
+    "400": "`id` is missing or `folderId` is neither a string nor null.",
+    "404": "No prompt has this ID, or `folderId` names no folder of the caller's.",
+    "409": "A prompt of that name already sits in the target folder.",
+  },
+  aiPromptsCreateFolder: {
+    "400": "`name` is missing, empty or not a string.",
+    "409": "A folder of that name already exists.",
+  },
+  aiPromptsRenameFolder: {
+    "400": "`id` or `name` is missing, or `name` is empty or not a string.",
+    "404": "No folder has this ID.",
+    "409": "A folder of that name already exists.",
+  },
+  aiPromptsImportBundle: {
+    "400":
+      "The bundle is malformed, references a folder it does not carry, holds an empty entry or two entries of the same name, or `mode` is unknown.",
+    "409": "Every refused entry is a name that already exists in the library (`merge` only).",
+  },
   aiPromptsDelete: { "400": "The prompt ID is missing." },
   aiPromptsDeleteFolder: {
     "400": "The folder ID is missing.",
@@ -889,7 +998,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404":
       "The `entityId` names a room the caller cannot open, or no live AI profile is bound to it.",
   },
-  aiThreadsAppendUserMessage: { "400": "The message is longer than the limit allows." },
+  aiThreadsAppendUserMessage: {
+    "400":
+      "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
+  },
+  aiThreadsReadMessages: { "400": "`threadId` is missing." },
   aiThreadsRename: { "400": "`threadId` or the new title is missing." },
   aiThreadsDelete: {
     "400": "`threadId` is missing.",
@@ -901,7 +1014,15 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`threadId` is missing.",
     "404": "No thread has this ID.",
   },
-  aiThreadsGetMessageById: { "400": "`messageId` is missing." },
+  aiThreadsGetMessageById: {
+    "400": "`messageId` is missing.",
+    "404": "No message has this ID.",
+  },
+  aiThreadsUpdateMessage: {
+    "400":
+      "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
+    "404": "No message has this ID.",
+  },
   aiThreadsDeleteMessage: { "400": "`messageId` is missing." },
 
   // Tools - every operation that names a custom server validates the name,
@@ -920,9 +1041,17 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The body is not a map of server name to configuration, or a name is not routable.",
     "404": true,
   },
-  aiToolsSetDisabled: { "400": "The list of tools to disable is malformed.", "404": true },
+  aiToolsSetDisabled: {
+    "400":
+      "`toolNames` is missing or not an array of non-empty tool names, `serverType` is unknown, or `scope` is not `user` or `tenant`.",
+    "404": true,
+  },
+  aiToolsGetDisabled: { "400": "`scope` is not `user` or `tenant`." },
   aiToolsIsToolDisabled: { "400": "`serverType` or `toolName` is missing." },
-  aiToolsSetAllowAlways: { "404": true },
+  aiToolsSetAllowAlways: {
+    "400": "`serverType` or `toolName` is missing or empty, or `value` is not a boolean.",
+    "404": true,
+  },
   aiToolsIsAllowAlways: { "400": "`serverType` or `toolName` is missing." },
 
   // Web search - the four room-scoped operations resolve the room; the two
@@ -949,14 +1078,19 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404": true,
   },
   aiWebSearchPassthroughSearch: {
+    "400":
+      "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
-    "502": true,
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
   aiWebSearchPassthroughContents: {
+    "400": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
     "404": "Web search is not configured for this portal.",
     "429": true,
-    "502": true,
+    "502":
+      "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
   },
 };
 
@@ -1187,20 +1321,21 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   },
   aiOpenaiChatCompletions: {
     description:
-      "An OpenAI Chat Completions request, forwarded to the provider byte for byte. The shape " +
-      "is the provider's, not this API's, so consult the provider's own reference; the model " +
-      "and the credentials come from the profile in the path and must not be sent here.",
+      "An OpenAI Chat Completions request, forwarded to the provider as sent. The shape " +
+      "is the provider's, not this API's, so consult the provider's own reference. The " +
+      "credentials come from the profile in the path and must not be sent here; the profile's " +
+      "model is used when the body names none, and a `model` in the body takes precedence.",
   },
   aiOpenaiImagesGenerations: {
     description:
-      "An OpenAI image-generation request, forwarded to the provider byte for byte. The shape " +
-      "is the provider's, not this API's, and the credentials come from the profile in the path.",
+      "An OpenAI image-generation request, forwarded to the provider as sent once its documented " +
+      "fields pass a type check. The shape is the provider's, not this API's, and the credentials " +
+      "come from the profile in the path.",
   },
   aiSettingsSetUser: {
     description:
-      "The user's AI settings, proxied unchanged to the DocSpace AI service, which owns and " +
-      "validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send " +
-      "it back changed.",
+      "The user's AI settings: `chatRecommendedModelVisible` as a boolean, required. Read the " +
+      "current one with `GET api/2.0/ai/config/user` and send it back changed.",
   },
   aiSettingsSetToolMode: {
     description:
@@ -1222,13 +1357,14 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   aiWebSearchPassthroughSearch: {
     description:
       "A search request in the shape the portal's active web-search provider expects, forwarded " +
-      "to it unchanged. The endpoint and the key come from the stored configuration and must " +
-      "not be sent here.",
+      "to it once `query` and `numResults` pass a type check. The endpoint and the key come from " +
+      "the stored configuration and must not be sent here.",
   },
   aiWebSearchPassthroughContents: {
     description:
       "A page-contents request in the shape the portal's active web-search provider expects, " +
-      "forwarded to it unchanged. The endpoint and the key come from the stored configuration.",
+      "forwarded to it once `urls` passes a type check. The endpoint and the key come from the " +
+      "stored configuration.",
   },
 };
 
@@ -1362,10 +1498,18 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Confirms the export was queued. The file arrives in the target folder later, announced by " +
     "a folder-modified socket event.",
 
+  aiMetaGenerate:
+    "The proposed fields, each with a name and the value found or null, the documents the proposal was read from, " +
+    "and the entries that were left out with the reason for each.",
+
+  aiMetaFill:
+    "Whether it was a dry run, the entry's metadata, the values written or proposed, the fields left empty " +
+    "with the reason for each, and the documents the values were read from.",
+
   aiOpenaiChatCompletions:
-    "The provider's own response, relayed verbatim with its status and content type.",
+    "The provider's own response, relayed with its status and content type (a 5xx excepted).",
   aiOpenaiImagesGenerations:
-    "The provider's own response, relayed verbatim with its status and content type.",
+    "The provider's own response, relayed with its status and content type (a 5xx excepted).",
 
   aiPreferencesGetDeepMode:
     "Whether deep mode is on, falling back to the configured default when the scope has no value " +
@@ -1427,11 +1571,9 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiThreadsClearMessages: "Confirms the request was accepted. It does not mean the thread existed.",
   aiThreadsRegenerateTitle: "The newly generated title, already stored on the thread.",
   aiThreadsList: "The threads of the scope, most recently edited first.",
-  aiThreadsReadMessages:
-    "The thread's messages, oldest first unless `direction` reversed them. An empty list also " +
-    "means the request carried no thread ID.",
+  aiThreadsReadMessages: "The thread's messages, oldest first unless `direction` reversed them.",
   aiThreadsGetById: "The thread, without its messages.",
-  aiThreadsGetMessageById: "The message, or an empty body when no message has that ID.",
+  aiThreadsGetMessageById: "The message.",
   aiThreadsUpdateMessage: "Confirms the replacement was stored.",
   aiThreadsDeleteMessage:
     "Confirms the request was accepted, whether or not a message was deleted.",
@@ -1734,12 +1876,91 @@ const FIELD_OR_PLAIN_ERROR_SCHEMA: Json = {
   anyOf: [FIELD_ERROR_SCHEMA, ERROR_RESPONSE_REF],
 };
 
+// A refused engine mutation answers 4xx with the engine's own result -
+// `{ success: false, error }`, the field named and `code` saying why - so a
+// client reads a refusal the same way it reads a success. These routes also
+// raise plain `AiErrorResponse` refusals of their own before the engine runs
+// (a private-network URL, an inaccessible room), so their 4xx admit either.
+const PROMPT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiPromptMutationResult" };
+const FOLDER_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiFolderMutationResult" };
+const IMPORT_REFUSAL_SCHEMA: Json = { $ref: "#/components/schemas/AiImportResult" };
+const PROFILE_OR_PLAIN_ERROR_SCHEMA: Json = {
+  anyOf: [{ $ref: "#/components/schemas/AiProfileMutationResult" }, ERROR_RESPONSE_REF],
+};
+const WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA: Json = {
+  anyOf: [{ $ref: "#/components/schemas/AiWebSearchMutationResult" }, ERROR_RESPONSE_REF],
+};
+
+// A metadata route whose model round failed says how: `code` is the chat
+// library's stable classification of the provider's answer (the same one the
+// chat widget branches on) and `providerMessage` the provider's own words, so a
+// client can tell an exhausted balance from a throttled key instead of showing
+// "the request failed" for both. `AiErrorResponse` closes itself to extra
+// properties, so the body needs a schema of its own.
+const MODEL_CALL_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "Short reason, ready to be shown to the caller.",
+      examples: ["The model provider refused the request for lack of credit"],
+    },
+    code: {
+      type: "string",
+      description:
+        "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+      examples: ["insufficient_funds"],
+    },
+    providerMessage: {
+      type: "string",
+      description:
+        "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+      examples: ["402 Insufficient Balance"],
+    },
+  },
+  required: ["error", "code"],
+  additionalProperties: false,
+};
+const MODEL_CALL_ERRORS: Readonly<Record<string, Json>> = {
+  "402": MODEL_CALL_ERROR_SCHEMA,
+  "429": MODEL_CALL_ERROR_SCHEMA,
+  "502": MODEL_CALL_ERROR_SCHEMA,
+  "504": MODEL_CALL_ERROR_SCHEMA,
+};
+
 // operationId -> status code -> schema, with `*` standing for every code of that
 // operation. Anything not listed answers with `AiErrorResponse`.
 const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
   aiOpenaiChatCompletions: { "*": OPENAI_ERROR_SCHEMA },
   aiOpenaiImagesGenerations: { "*": OPENAI_ERROR_SCHEMA },
   aiProfilesListProviderModels: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
+  aiProfilesCreate: { "400": PROFILE_OR_PLAIN_ERROR_SCHEMA },
+  aiProfilesUpdate: { "400": PROFILE_OR_PLAIN_ERROR_SCHEMA },
+  aiPromptsCreate: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsUpdate: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsMove: {
+    "400": PROMPT_REFUSAL_SCHEMA,
+    "404": PROMPT_REFUSAL_SCHEMA,
+    "409": PROMPT_REFUSAL_SCHEMA,
+  },
+  aiPromptsCreateFolder: { "400": FOLDER_REFUSAL_SCHEMA, "409": FOLDER_REFUSAL_SCHEMA },
+  aiPromptsRenameFolder: {
+    "400": FOLDER_REFUSAL_SCHEMA,
+    "404": FOLDER_REFUSAL_SCHEMA,
+    "409": FOLDER_REFUSAL_SCHEMA,
+  },
+  aiPromptsImportBundle: { "400": IMPORT_REFUSAL_SCHEMA, "409": IMPORT_REFUSAL_SCHEMA },
+  aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
+  aiMetaGenerate: MODEL_CALL_ERRORS,
+  aiMetaFill: MODEL_CALL_ERRORS,
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {

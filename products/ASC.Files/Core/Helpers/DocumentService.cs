@@ -66,6 +66,22 @@ public static class DocumentService
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
+    /// <summary>
+    /// The document service takes the parameters of an uploaded source from inside the token, and the claim below
+    /// names the endpoint a token may be spent on, so that one cannot be replayed against another. The "from-file"
+    /// endpoints want the name of the plain endpoint: the document service also knows "converter-from-file" and
+    /// "docbuilder-from-file", but rejects both here, and a token with no operation at all comes back as error -8.
+    /// </summary>
+    private const string OperationClaim = "operation";
+    private const string ConverterOperation = "converter";
+    private const string DocbuilderOperation = "docbuilder";
+
+    private static readonly JsonSerializerOptions _tokenSettings = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private static readonly JsonSerializerOptions _commonSettings = new()
     {
         AllowTrailingCommas = true,
@@ -230,6 +246,90 @@ public static class DocumentService
         }
 
         return GetResponseUri(dataResponse);
+    }
+
+    /// <summary>
+    /// Converts a document that is uploaded with the request instead of being fetched from an address, which is what
+    /// lets a portal behind a private network hand the document service a file it could not reach on its own. The
+    /// answer carries the converted document itself rather than an address to download it from.
+    /// </summary>
+    /// <param name="documentConverterUrl">Url to the service of conversion that accepts an uploaded document</param>
+    /// <param name="file">The document content</param>
+    /// <param name="fileName">The name the document is uploaded under</param>
+    /// <param name="body">The conversion parameters, as the document service expects them</param>
+    /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="sslVerification">Enable SSL verification</param>
+    /// <param name="clientFactory"></param>
+    /// <returns>The converted document</returns>
+    public static Task<Stream> GetConvertedFileAsync(
+        string documentConverterUrl,
+        Stream file,
+        string fileName,
+        ConvertFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(documentConverterUrl);
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(body);
+
+        if (string.IsNullOrEmpty(body.OutputType))
+        {
+            throw new ArgumentException("Extension for conversion is not known", nameof(body));
+        }
+
+        return InternalGetConvertedFileAsync(documentConverterUrl, file, fileName, body, signatureSecret, sslVerification, clientFactory);
+    }
+
+    private static async Task<Stream> InternalGetConvertedFileAsync(
+        string documentConverterUrl,
+        Stream file,
+        string fileName,
+        ConvertFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        body.FileType = body.FileType?.Trim('.');
+        body.OutputType = body.OutputType.Trim('.');
+        body.Key = GenerateRevisionId(body.Key);
+
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string> {
+            { FilesLinkUtility.ShardKey, body.Key }
+        });
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, documentConverterUrl);
+
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
+
+        using var content = BuildFromFileContent(body, ConverterOperation, signatureSecret, file, fileName);
+        request.Content = content;
+
+        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+        try
+        {
+            // A document service that is down answers through its own proxy, with an html error page that would
+            // otherwise be saved as the converted document.
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"answered {(int)response.StatusCode} {response.StatusCode}", null, response.StatusCode);
+            }
+
+            // A failure comes back as the ordinary json error answer, a success as the document itself.
+            if (IsJson(response))
+            {
+                ThrowResponseError(await response.Content.ReadAsStringAsync());
+            }
+
+            return await ResponseStream.FromMessageAsync(response);
+        }
+        catch
+        {
+            response.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -410,6 +510,83 @@ public static class DocumentService
             dataResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
+        return ParseDocbuilderResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Runs a document builder script that is uploaded with the request instead of being fetched from an address,
+    /// which is what lets a portal behind a private network hand the document service a script it could not reach on
+    /// its own.
+    /// </summary>
+    /// <param name="docbuilderUrl">Url to the document builder service that accepts an uploaded script</param>
+    /// <param name="script">The script content</param>
+    /// <param name="scriptFileName">The name the script is uploaded under</param>
+    /// <param name="body">The request parameters, as the document service expects them</param>
+    /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="sslVerification">Enable SSL verification</param>
+    /// <param name="clientFactory"></param>
+    public static Task<(string DocBuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestFromFileAsync(
+        string docbuilderUrl,
+        Stream script,
+        string scriptFileName,
+        BuilderFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
+        ArgumentNullException.ThrowIfNull(script);
+        ArgumentNullException.ThrowIfNull(body);
+
+        return InternalDocbuilderRequestFromFileAsync(docbuilderUrl, script, scriptFileName, body, signatureSecret, sslVerification, clientFactory);
+    }
+
+    private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestFromFileAsync(
+        string docbuilderUrl,
+        Stream script,
+        string scriptFileName,
+        BuilderFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        if (!string.IsNullOrEmpty(body.Key))
+        {
+            docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
+                { FilesLinkUtility.ShardKey, body.Key }
+            });
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, docbuilderUrl);
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
+
+        using var content = BuildFromFileContent(body, DocbuilderOperation, signatureSecret, script, scriptFileName);
+        request.Content = content;
+
+        string dataResponse;
+
+        using (var response = await httpClient.SendAsync(request))
+        {
+            // A document service that is down answers through its own proxy, with an html error page that would
+            // otherwise reach the json reader and be reported as a stray character.
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"answered {(int)response.StatusCode} {response.StatusCode}");
+            }
+
+            dataResponse = await response.Content.ReadAsStringAsync();
+        }
+
+        return ParseDocbuilderResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Reads the answer of the document builder service: reports the error it names, and hands back the request key
+    /// together with the produced files once the build has ended. The urls stay null while it is still running, which
+    /// is what a caller polls on.
+    /// </summary>
+    private static (string DocBuilderKey, Dictionary<string, string> Urls) ParseDocbuilderResponse(string dataResponse)
+    {
         if (string.IsNullOrEmpty(dataResponse))
         {
             throw new Exception("Invalid response");
@@ -438,6 +615,60 @@ public static class DocumentService
         }
 
         return (responseFromService.Value<string>("key"), urls);
+    }
+
+    /// <summary>
+    /// Lays out the multipart body the "from-file" endpoints expect. The parameters travel signed, inside the token
+    /// part, because the document service is configured to take them from there; a portal with no signature secret
+    /// sends them unsigned as the json "params" part instead. The document itself is always a separate part, so the
+    /// document service never has to fetch the source on its own.
+    /// </summary>
+    private static MultipartFormDataContent BuildFromFileContent(FromFileBody body, string operation, string signatureSecret, Stream file, string fileName)
+    {
+        var content = new MultipartFormDataContent();
+
+        if (string.IsNullOrEmpty(signatureSecret))
+        {
+            content.Add(new StringContent(JsonSerializer.Serialize(body, body.GetType(), _tokenSettings), Encoding.UTF8, "application/json"), "params");
+        }
+        else
+        {
+            content.Add(new StringContent(EncodeFromFileToken(body, operation, signatureSecret)), "token");
+        }
+
+        content.Add(new StreamContent(file), "file", fileName);
+
+        return content;
+    }
+
+    /// <summary>
+    /// Signs the parameters as the document service wants them for an uploaded source: the payload is the parameters
+    /// themselves, with the claim that says which endpoint the token may be spent on. Both here and in the unsigned
+    /// case the runtime type is passed explicitly, or only the parameters this base type declares would be written.
+    /// </summary>
+    private static string EncodeFromFileToken(FromFileBody body, string operation, string signatureSecret)
+    {
+        var payload = JsonSerializer.SerializeToNode(body, body.GetType(), _tokenSettings).AsObject();
+
+        payload[OperationClaim] = operation;
+
+        return JsonWebToken.Encode(payload, signatureSecret);
+    }
+
+    private static bool IsJson(HttpResponseMessage response)
+    {
+        return response.Content.Headers.ContentType?.MediaType == "application/json";
+    }
+
+    /// <summary>
+    /// Reports the failure a "from-file" endpoint answered with. Success there is the document itself, so any json
+    /// answer is an error answer, and one without an error code is reported as an unknown failure.
+    /// </summary>
+    private static void ThrowResponseError(string dataResponse)
+    {
+        var errorElement = JObject.Parse(dataResponse).Value<string>("error");
+
+        DocumentServiceException.ProcessResponseError(errorElement ?? nameof(DocumentServiceException.ErrorCode.Unknown));
     }
 
     public static Task<bool> HealthcheckRequestAsync(string healthcheckUrl, IHttpClientFactory clientFactory)
@@ -515,6 +746,11 @@ public static class DocumentService
         /// The ONLYOFFICE Docs version.
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// The ONLYOFFICE Docs AI tools version, null when the AI tools are disabled or the editors are older than this field.
+        /// </summary>
+        public string AiToolsVersion { get; set; }
 
         /// <summary>
         /// The command response error type.
@@ -677,14 +913,49 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The PDF data.
+    /// The settings of a PDF result.
     /// </summary>
     public class PdfData
     {
         /// <summary>
-        /// Specifies if the PDF document is a PDF form or not.
+        /// Whether the result is a fillable PDF form: true keeps the form fields of the source as fields to fill in,
+        /// false saves a plain PDF.
         /// </summary>
         public bool Form { get; set; }
+    }
+
+    /// <summary>
+    /// The layout of forms printed as pdf documents or images.
+    /// </summary>
+    public class DocumentLayout
+    {
+        /// <summary>
+        /// Whether an empty form field shows its placeholder text in the result; false leaves it blank.
+        /// </summary>
+        public bool? DrawPlaceHolders { get; set; }
+
+        /// <summary>
+        /// Whether form fields keep their highlight colour in the result; false draws them without it.
+        /// </summary>
+        public bool? DrawFormHighlight { get; set; }
+
+        /// <summary>
+        /// Whether the print mode is turned on. It only applies to a docx converted into pdf: with the print mode off
+        /// the highlight flag does nothing and the placeholder flag saves the forms in the pdf.
+        /// </summary>
+        public bool? IsPrint { get; set; }
+    }
+
+    /// <summary>
+    /// How the text of a pdf, xps or oxps source is read back when converting from it.
+    /// </summary>
+    public class DocumentRenderer
+    {
+        /// <summary>
+        /// The rendering mode: blockChar reads the text by single characters, blockLine by separate lines, plainLine as
+        /// plain text with a paragraph per line, plainParagraph as plain text with lines combined into paragraphs.
+        /// </summary>
+        public string TextAssociation { get; set; }
     }
 
     /// <summary>
@@ -700,7 +971,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The thumbnail data.
+    /// The thumbnail data. A field left out takes the document service default.
     /// </summary>
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
@@ -709,28 +980,28 @@ public static class DocumentService
         /// The mode to fit the image to the height and width specified:
         /// 0 - stretch file to fit height and width;
         /// 1 - keep the aspect for the image;
-        /// 2 - in this case, the width and height settings are not used.
+        /// 2 - convert the metric size of the page into pixels at 96 dpi.
         /// </summary>
-        public int Aspect { get; set; }
+        public int? Aspect { get; set; }
 
         /// <summary>
         /// Specifies if the thumbnails should be generated for the first page only or for all the document pages.
         /// </summary>
-        public bool First { get; set; }
+        public bool? First { get; set; }
 
         /// <summary>
-        /// The thumbnail height in pixels.
+        /// The thumbnail height in pixels; not used with aspect 2.
         /// </summary>
-        public int Height { get; set; }
+        public int? Height { get; set; }
 
         /// <summary>
-        /// The thumbnail width in pixels.
+        /// The thumbnail width in pixels; not used with aspect 2.
         /// </summary>
-        public int Width { get; set; }
+        public int? Width { get; set; }
     }
 
     /// <summary>
-    /// The settings for converting the spreadsheet to pdf.
+    /// The settings for converting the spreadsheet to pdf. A field left out takes the document service default.
     /// </summary>
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
@@ -738,37 +1009,37 @@ public static class DocumentService
         /// <summary>
         /// Specifies whether to ignore the print area chosen for the spreadsheet file or not.
         /// </summary>
-        public bool IgnorePrintArea { get; set; }
+        public bool? IgnorePrintArea { get; set; }
 
         /// <summary>
-        /// The orientation of the output PDF file.
+        /// The page orientation of the output PDF file: portrait or landscape.
         /// </summary>
         public string Orientation { get; set; }
 
         /// <summary>
-        /// The height of the converted area, measured in the number of pages.
+        /// The number of pages the converted area is fitted into in height; 0 does not fit it.
         /// </summary>
-        public int FitToHeight { get; set; }
+        public int? FitToHeight { get; set; }
 
         /// <summary>
-        /// Allows to set the scale of the output PDF file.
+        /// The scale of the output PDF file, in percent.
         /// </summary>
         public int? Scale { get; set; }
 
         /// <summary>
-        /// The width of the converted area, measured in the number of pages.
+        /// The number of pages the converted area is fitted into in width; 0 does not fit it.
         /// </summary>
-        public int FitToWidth { get; set; }
+        public int? FitToWidth { get; set; }
 
         /// <summary>
         /// Specifies whether to include the headings to the output PDF file or not.
         /// </summary>
-        public bool Headings { get; set; }
+        public bool? Headings { get; set; }
 
         /// <summary>
         /// Specifies whether to include grid lines to the output PDF file or not.
         /// </summary>
-        public bool GridLines { get; set; }
+        public bool? GridLines { get; set; }
 
         /// <summary>
         /// The margins of the output PDF file.
@@ -781,7 +1052,7 @@ public static class DocumentService
         public LayoutPageSize PageSize { get; set; }
 
         /// <summary>
-        /// The margins of the output PDF file.
+        /// The margins of the output PDF file, each a length with its unit: mm, cm or in.
         /// </summary>
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
@@ -808,7 +1079,7 @@ public static class DocumentService
         }
 
         /// <summary>
-        /// The page size of the output PDF file.
+        /// The page size of the output PDF file, each side a length with its unit: mm, cm or in.
         /// </summary>
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize
@@ -826,32 +1097,79 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The conversion  body.
+    /// The parameters shared by every request that uploads its source with the request: whether the document service
+    /// answers straight away or is polled, the key that identifies the request, and the signature.
     /// </summary>
-    [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
-    private sealed class ConvertionBody
+    public abstract class FromFileBody
     {
         /// <summary>
-        /// Specifies whether the conversion is asynchronous or not.
+        /// Specifies whether the request to the document service is asynchronous or not.
         /// </summary>
         public bool Async { get; set; }
 
         /// <summary>
+        /// The request identifier used to unambiguously identify the request.
+        /// </summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        /// The encrypted signature added to the config in the form of a token.
+        /// </summary>
+        public string Token { get; set; }
+    }
+
+    /// <summary>
+    /// The document builder parameters without the address of the script: the shape of the "params" part of a
+    /// multipart document builder request, where the script travels as a separate part.
+    /// </summary>
+    public class BuilderFromFileBody : FromFileBody
+    {
+        /// <summary>
+        /// The values the script reads through the global Argument object.
+        /// </summary>
+        public JsonElement? Argument { get; set; }
+    }
+
+    /// <summary>
+    /// The conversion parameters without the address of the source document: the shape of the "params"
+    /// part of a multipart conversion request, where the document travels as a separate part.
+    /// </summary>
+    [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
+    public class ConvertFromFileBody : FromFileBody
+    {
+        /// <summary>
         /// The type of the document file to be converted.
         /// </summary>
         [JsonPropertyName("filetype")]
-        public required string FileType { get; init; }
+        public string FileType { get; set; }
 
         /// <summary>
-        /// The document identifier used to unambiguously identify the document file..
+        /// The encoding of a csv or txt source, as a code page number. Without it such a source is read in the
+        /// encoding the document service guesses, which garbles any non-latin text.
         /// </summary>
-        public required string Key { get; init; }
+        public int? CodePage { get; set; }
+
+        /// <summary>
+        /// The character separating the values of a csv source: 0 - none, 1 - tab, 2 - semicolon, 3 - colon,
+        /// 4 - comma, 5 - space.
+        /// </summary>
+        public int? Delimiter { get; set; }
+
+        /// <summary>
+        /// The layout of forms printed as pdf documents or images.
+        /// </summary>
+        public DocumentLayout DocumentLayout { get; set; }
+
+        /// <summary>
+        /// How the text of a pdf, xps or oxps source is read back.
+        /// </summary>
+        public DocumentRenderer DocumentRenderer { get; set; }
 
         /// <summary>
         /// The resulting converted document type.
         /// </summary>
         [JsonPropertyName("outputtype")]
-        public required string OutputType { get; init; }
+        public string OutputType { get; set; }
 
         /// <summary>
         /// The password for the document file if it is protected with a password.
@@ -861,7 +1179,7 @@ public static class DocumentService
         /// <summary>
         /// The converted file name.
         /// </summary>
-        public string Title { get; init; }
+        public string Title { get; set; }
 
         /// <summary>
         /// The thunmbnail settings.
@@ -874,14 +1192,9 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
 
         /// <summary>
-        /// The the absolute URL to the document to be converted.
-        /// </summary>
-        public required string Url { get; set; }
-
-        /// <summary>
         /// The default display format for currency and date and time when converting from spreadsheet format to PDF.
         /// </summary>
-        public required string Region { get; set; }
+        public string Region { get; set; }
 
         /// <summary>
         /// The properties of a watermark which is inserted into the PDF and image files during conversion.
@@ -889,15 +1202,30 @@ public static class DocumentService
         public WatermarkOnDraw Watermark { get; set; }
 
         /// <summary>
-        /// The encrypted signature added to the ONLYOFFICE Docs config in the form of a token.
-        /// </summary>
-        public string Token { get; set; }
-
-        /// <summary>
         /// The settings for converting document files to PDF.
         /// </summary>
         public PdfData Pdf { get; set; }
 
+        // the parameters that shape the result, so a conversion cached with other ones is not served for these
+        public string GetMD5Hash()
+        {
+            var parameters = JsonSerializer.Serialize(new { OutputType, CodePage, Delimiter, DocumentLayout, DocumentRenderer, Region, Thumbnail, SpreadsheetLayout, Pdf, Watermark }, _bodySettings);
+
+            var bytes = MD5.HashData(Encoding.UTF8.GetBytes(parameters));
+
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
+    }
+
+    /// <summary>
+    /// The conversion  body.
+    /// </summary>
+    private sealed class ConvertionBody : ConvertFromFileBody
+    {
+        /// <summary>
+        /// The the absolute URL to the document to be converted.
+        /// </summary>
+        public required string Url { get; set; }
     }
 
     /// <summary>

@@ -1354,6 +1354,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder is null)
+        {
+            return null;
+        }
+
         var isRoom = folder.IsRoom;
 
         // The per-entity quota is a portal feature: refuse to set or reset one while it is off.
@@ -1435,9 +1440,12 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var folder = await folderDao.GetFolderAsync(folderId);
+
+        // Missing room, same as in SetPinnedStatusAsync: 404, not the 403 the mapping of
+        // InvalidOperationException produced.
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var isRoom = folder.IsRoom;
@@ -2685,7 +2693,8 @@ public class FileStorageService //: IFileStorageService
         var file = await GetFileAsync(fileId, -1);
         var result = new FileLinkDto { FileType = FileUtility.GetFileExtension(file.Title), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)) };
 
-        result.Token = documentServiceHelper.GetSignature(result);
+        // The document service reads the signed payload by its own field names (fileType, url), not by the JSON of the response
+        result.Token = documentServiceHelper.GetSignature(new { fileType = result.FileType, url = result.Url });
 
         return result;
     }
@@ -6176,7 +6185,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
@@ -6253,7 +6262,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
@@ -6280,7 +6289,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.StartSyncAsync(roomId)
-            ?? throw new BadHttpRequestException(FilesCommonResource.ErrorMessage_BadRequest);
+            ?? throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
     }
 
     public async Task<ExternalDbSyncTask> GetExternalDbSyncTaskAsync(int roomId)

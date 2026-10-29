@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Հնարավոր չէ օգտագործել այս թղթապանակը սենյակը պահեստավորել համար</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Միացման URL հասցեն անվավեր է</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Սխալ վերնագիր</value>
   </data>

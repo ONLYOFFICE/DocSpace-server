@@ -800,8 +800,21 @@ public class DiscDataStore(
         //Build Dir
         var target = CrossPlatform.PathCombine(pathMap.PhysicalPath, PathUtils.Normalize(path));
         ValidatePath(target);
+        ValidateInsideRoot(pathMap.PhysicalPath, target);
 
         return target;
+    }
+
+    private static void ValidateInsideRoot(string root, string target)
+    {
+        var fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var fullTarget = Path.TrimEndingDirectorySeparator(Path.GetFullPath(target));
+
+        if (!fullTarget.Equals(fullRoot, StringComparison.Ordinal) &&
+            !fullTarget.StartsWith(fullRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+        {
+            throw new ArgumentException("bad path");
+        }
     }
 
     private static void ValidatePath(string target)

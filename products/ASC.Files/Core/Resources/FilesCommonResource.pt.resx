@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Não é possível utilizar esta pasta para armazenar a sala</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Endereço URL de ligação inválido</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Título incorreto</value>
   </data>

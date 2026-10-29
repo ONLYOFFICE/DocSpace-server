@@ -38,10 +38,19 @@ public class ToolService(
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FormAnalyzeIntent formAnalyzeIntent)
+    FormAnalyzeIntent formAnalyzeIntent,
+    UserManager userManager,
+    AuthContext authContext)
 {
+    private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
+
     public async Task<ToolListResponse> GetToolsAsync(ToolContext context)
     {
+        if (!await IsAllowedUserAsync())
+        {
+            return new ToolListResponse(string.Empty, []);
+        }
+
         var prompt = new StringBuilder();
         var descriptors = new List<ToolDescriptor>();
 
@@ -73,6 +82,11 @@ public class ToolService(
         IReadOnlyList<ToolCall> calls,
         ToolContext context)
     {
+        if (!await IsAllowedUserAsync())
+        {
+            return calls.Select(call => new ToolCallResult(call.Id, call.Name, Result: null, Error: "tool_not_available")).ToList();
+        }
+
         var resolvedContext = await ResolveContext(context);
 
         var factories = serviceProvider.GetServices<IAiToolFactory>().ToArray();
@@ -96,6 +110,12 @@ public class ToolService(
 
         var tasks = calls.Select(call => InvokeAsync(call, functions));
         return await Task.WhenAll(tasks);
+    }
+
+    private async Task<bool> IsAllowedUserAsync()
+    {
+        var type = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        return _allowedTypes.Contains(type);
     }
 
     private static async Task<ToolCallResult> InvokeAsync(

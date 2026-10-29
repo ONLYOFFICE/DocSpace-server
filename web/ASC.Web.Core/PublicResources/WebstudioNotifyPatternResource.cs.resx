@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Potvrzení ukončení účtu</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Kontaktovat podporu</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivace portálu</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Připojte se k místnosti</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Zachovat můj prostor</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Zachovat můj prostor a prostředky</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Zanechat zpětnou vazbu</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastavení hesla</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Sdílet zpětnou vazbu</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Zahájení bezplatné zkušební verze</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Odblokovat můj prostor</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Upgrade</value>
@@ -742,6 +757,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portál ${PortalUrl} byl zablokován zásadami uchovávání dat: nepoužíval se nebo nebylo obnoveno jeho předplatné. O který případ jde, ukazuje kategorie níže.
+
+*Portál:* ${PortalUrl}
+*Vlastník:* ${UserName} ${UserEmail}
+*Kategorie:* ${Category}
+*Datum odstranění:* ${DeleteDate}
+
+Pokud nebude odblokován, portál a všechna jeho data budou v tento den odstraněny.
+
+Pokud vlastník požádá o jeho zachování, znovu portál aktivujte před tímto datem.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Váš prostor je zablokován, ale zatím se nic neztratilo
+
+#if($Unpaid == "True")
+Protože předplatné vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* skončilo, prozatím jsme ho zablokovali. To znamená, že se teď nikdo z vašeho týmu nemůže přihlásit, ale všechny vaše dokumenty a nastavení jsou stále v bezpečí.
+#else
+Protože se váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* delší dobu nepoužíval, prozatím jsme ho zablokovali. To znamená, že se teď nikdo z vašeho týmu nemůže přihlásit, ale všechny vaše dokumenty a nastavení jsou stále v bezpečí.
+#end
+
+Vaše data u nás zůstanou do tohoto data: *$DeleteDate*. Poté budou prostor i veškerý jeho obsah trvale odstraněny.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Dobrá zpráva: ještě není pozdě. Stačí do $DeleteDateShort odblokovat prostor a pak obnovit předplatné, abyste se mohli vrátit k práci. Vše bude přesně tam, kde jste to nechali.
+#else
+Dobrá zpráva: ještě není pozdě. Stačí do $DeleteDateShort odblokovat prostor a vše bude přesně tam, kde jste to nechali.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaká data, odblokujte prostor a do $DeleteDateShort je zálohujte.
+#else
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, odblokujte prostor a do $DeleteDateShort si je stáhněte.
+#end
+#else
+Dobrá zpráva: ještě není pozdě. Stačí se do $DeleteDateShort obrátit na náš tým podpory a pomůžeme vám prostor obnovit přesně v podobě, v jaké jste ho nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, dejte nám vědět do $DeleteDateShort a pomůžeme vám k nim získat přístup.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Váš prostor byl odstraněn
+
+#if($Unpaid == "True")
+Protože předplatné vašeho prostoru ${LetterLogoText} *$PortalName* skončilo a nebylo obnoveno, odstranili jsme ho nyní i se všemi daty, jak je popsáno v našich "Zásadách ochrany osobních údajů":"$URL1".
+#else
+Protože se váš prostor ${LetterLogoText} *$PortalName* dlouho nepoužíval, odstranili jsme ho nyní i se všemi daty, jak je popsáno v našich "Zásadách ochrany osobních údajů":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Děkujeme, že jste s námi pracovali. Moc rádi bychom věděli, proč jste ho přestali používat: něco vám nefungovalo, našli jste vhodnější řešení, nebo jste ho prostě už nepotřebovali? Zabere to jen minutu a každá odpověď nám pomáhá se zlepšovat.
+#else
+Děkujeme, že jste ${LetterLogoText} vyzkoušeli. Moc rádi bychom věděli, proč jste ho přestali používat: něco vám nefungovalo, našli jste vhodnější řešení, nebo jste ho prostě už nepotřebovali? Zabere to jen minutu a každá odpověď nám pomáhá se zlepšovat.
+#end
+
+$OrangeButton
+
+Pokud se budete chtít někdy vrátit, jste vždy vítáni. Kdykoli si můžete "vytvořit nový prostor":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Váš prostor bude brzy odstraněn
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože jeho předplatné skončilo. Toto je přátelská poslední připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#else
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože jeho předplatné skončilo. Toto je přátelská připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože se delší dobu nepoužíval. Toto je přátelská poslední připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#else
+Váš prostor ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"* je stále zablokován, protože se delší dobu nepoužíval. Toto je přátelská připomínka: prostor a všechna jeho data budou trvale odstraněna v tento den: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Pokud si ho chcete ponechat, ještě je čas. Stačí do $DeleteDateShort odblokovat prostor a pak obnovit předplatné, abyste se mohli vrátit k práci. Vše bude přesně tam, kde jste to nechali.
+#else
+Pokud si ho chcete ponechat, ještě je čas. Stačí do $DeleteDateShort odblokovat prostor a vše bude přesně tam, kde jste to nechali.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaká data, odblokujte prostor a do $DeleteDateShort je zálohujte, protože potom je už nebudeme moci obnovit.
+#else
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, odblokujte prostor a do $DeleteDateShort si je stáhněte, protože potom je už nebudeme moci obnovit.
+#end
+#else
+Pokud si ho chcete ponechat, ještě je čas. Stačí se do $DeleteDateShort obrátit na náš tým podpory a pomůžeme vám prostor obnovit přesně v podobě, v jaké jste ho nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Pokud si chcete ponechat nějaké soubory, dejte nám vědět do $DeleteDateShort a pomůžeme vám k nim získat přístup, protože potom je už nebudeme moci obnovit.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Dlouho jsme vás neviděli
+
+Už nějakou dobu se nikdo nepřihlásil do vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Chtěli jsme se vám ozvat dříve, než se s vašimi dokumenty a nastavením něco stane.
+
+Aby vše fungovalo hladce pro všechny, blokujeme bezplatné prostory, které se delší dobu nepoužívají. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna.
+
+Dobrá zpráva: zachovat ho je snadné. Stačí se do $BlockDateShort jednou přihlásit a vše zůstane přesně tak, jak jste to zanechali.
+
+$OrangeButton
+
+Pokud prostor už nepotřebujete, nemusíte nic dělat. Jen si do $BlockDateShort nezapomeňte stáhnout soubory, které si chcete ponechat.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Vaše předplatné skončilo, ale váš prostor tu stále je
+
+Datum konce vašeho předplatného ${LetterLogoText} pro *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Děkujeme, že jste s námi pracovali. Doufáme, že vám ${LetterLogoText} práci alespoň trochu usnadnil.
+
+Aby vše fungovalo hladce, blokujeme prostory, kterým skončilo předplatné. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna.
+
+Dobrá zpráva: zachovat ho je snadné. Stačí do $BlockDateShort obnovit předplatné a vaše dokumenty, nastavení i tým zůstanou přesně tam, kde jste je nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDateShort nezapomeňte zálohovat data, která si chcete ponechat.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Vaše předplatné skončilo, ale váš prostor i prostředky tu stále jsou
+
+Datum konce vašeho předplatného ${LetterLogoText} pro *"${__VirtualRootPath}":"${__VirtualRootPath}"*: *$DueDate*. Děkujeme, že jste s námi pracovali. Ve vaší peněžence stále zbývají prostředky ("zkontrolovat zůstatek":"$URL1") a nechtěli jsme, abyste o ně přišli, aniž byste o tom věděli.
+
+Aby vše fungovalo hladce, blokujeme prostory, kterým skončilo předplatné. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna spolu s prostředky ve vaší peněžence.
+
+Dobrá zpráva: zachovat obojí je snadné. Stačí do $BlockDateShort obnovit předplatné a vaše dokumenty, nastavení i prostředky zůstanou přesně tam, kde jste je nechali. Zůstatek peněženky může dokonce pokrýt část ceny.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDateShort nezapomeňte zálohovat data, která si chcete ponechat.
+#else
+h1.Ve vašem prostoru na vás stále čekají prostředky
+
+Už nějakou dobu se nikdo nepřihlásil do vašeho prostoru ${LetterLogoText} *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ale v jeho "peněžence":"$URL1" stále zbývají prostředky. Nechtěli jsme, abyste o ně přišli, aniž byste o tom věděli.
+
+Aby vše fungovalo hladce, blokujeme neaktivní prostory. Pro ten váš to znamená:
+
+*$BlockDate*: váš prostor bude zablokován a nebudete se moci přihlásit.
+*$DeleteDate*: prostor a všechna jeho data budou trvale odstraněna spolu s prostředky ve vaší peněžence.
+
+Dobrá zpráva: zachovat obojí je snadné. Stačí se do $BlockDateShort jednou přihlásit a vaše dokumenty, nastavení i prostředky zůstanou přesně tam, kde jste je nechali.
+
+$OrangeButton
+
+Pokud jste se rozhodli jít dál, je to naprosto v pořádku. Jen si do $BlockDateShort nezapomeňte stáhnout soubory, které si chcete ponechat.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deaktivace "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
 
@@ -1142,30 +1337,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;smazán&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Již více než půl roku jste nevstoupili do svého ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Protože jste se rozhodli, že jej již nebudete používat, bude váš ${LetterLogoText} a všechna data smazána v souladu s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;zásadami ochrany osobních údajů&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Budeme vděčni za vaši zpětnou vazbu. Proč jste se rozhodli přestat používat ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Pokud chcete svůj ${LetterLogoText} používat i nadále, stačí do něj vstoupit a provést libovolnou akci.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;smazán&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Již 3 měsíce jste nevstoupili do svého ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Upozorňujeme: váš ${LetterLogoText} a všechna data budou po 6 měsících nečinnosti smazána. Stačí se nyní přihlásit, aby váš ${LetterLogoText} zůstal aktivní a mohli jste jej dále používat.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Získejte &lt;span style="color: #FF6F3D;"&gt;bezplatné&lt;/span&gt; aplikace ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -1180,32 +1351,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Chcete-li upravovat dokumenty na mobilních zařízeních, pořiďte si aplikaci Dokumenty ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Pro iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Pro Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;smazán&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Již více než půl roku jste nevstoupili do svého ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vzhledem k tomu, že jste se rozhodli jej již nepoužívat, bude váš ${LetterLogoText} a všechny údaje vymazány v souladu s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Zásadami ochrany osobních údajů&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Budeme vděční za vaši zpětnou vazbu. Proč jste se rozhodli přestat používat ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Pokud si myslíte, že se jedná o chybu, a chcete nadále používat službu ${LetterLogoText}, obraťte se na náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;tým podpory&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} bude &lt;span style="color: #FF6F3D;"&gt;smazán&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Již 3 měsíce jste nevstoupili do svého ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Protože jej nepoužíváte, bude váš ${LetterLogoText} a všechna data po 6 měsících nečinnosti smazána v souladu s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;zásadami ochrany osobních údajů&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Pokud si myslíte, že se jedná o chybu, a chcete nadále používat službu ${LetterLogoText}, obraťte se na náš &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;tým podpory&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1624,6 +1769,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Vaše heslo bylo úspěšně změněno</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portál ${PortalUrl} byl zablokován zásadami uchovávání dat</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} je zablokován, ale data jsou v bezpečí do $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} byl odstraněn</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Váš prostor ${LetterLogoText} bude brzy odstraněn (datum odstranění: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Poslední šance zachovat váš prostor ${LetterLogoText} (datum odstranění: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Vašemu prostoru ${LetterLogoText} chybíte (je třeba jednat do $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Ve vašem prostoru ${LetterLogoText} jsou stále prostředky (termín: $BlockDate)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Deaktivace ${__VirtualRootHost} portálu</value>
   </data>
@@ -1693,20 +1862,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Objevte 4 užitečné aplikace ve svém ${LetterLogoText}</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>Váš ${LetterLogoText} bude smazán</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>Váš ${LetterLogoText} bude smazán</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Získejte bezplatné aplikace ${LetterLogoText}</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>Váš ${LetterLogoText} bude smazán</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>Váš ${LetterLogoText} bude smazán</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Objevte obchodní předplatné ${LetterLogoText}</value>

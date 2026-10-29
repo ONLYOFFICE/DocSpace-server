@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>لا يمكن استخدام المجلد لتخزين الغرفة</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>عنوان URL للاتصال غير صالح</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>عنوان غير صحيح</value>
   </data>

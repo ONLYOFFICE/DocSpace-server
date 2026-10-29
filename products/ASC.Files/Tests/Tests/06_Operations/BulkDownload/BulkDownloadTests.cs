@@ -54,7 +54,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -76,7 +76,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file1.Id), new(file2.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file1.Id), new(file2.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -97,7 +97,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(folderIds: [new(folder.Id)], fileIds: [], fileConvertIds: []),
+            new DownloadRequestDto(folderIds: [new(folder.Id)], fileIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -120,7 +120,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(folderIds: [new(folder1.Id), new(folder2.Id)], fileIds: [], fileConvertIds: []),
+            new DownloadRequestDto(folderIds: [new(folder1.Id), new(folder2.Id)], fileIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -142,7 +142,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [new(folder.Id)], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [new(folder.Id)], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -163,7 +163,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(file.Id)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -206,7 +206,7 @@ public class BulkDownloadTests(
 
         // Act & Assert - an empty selection is a legal (if pointless) request, and must not throw.
         await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(folderIds: [], fileIds: [], fileConvertIds: []),
+            new DownloadRequestDto(folderIds: [], fileIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken);
     }
 
@@ -218,7 +218,7 @@ public class BulkDownloadTests(
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileIds: [new(999999999)], folderIds: [], fileConvertIds: []),
+            new DownloadRequestDto(fileIds: [new(999999999)], folderIds: [], fileConvertIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -233,7 +233,7 @@ public class BulkDownloadTests(
 
         // Act
         var results = (await _filesOperationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(fileConvertIds: [new DownloadRequestItemDto(new DownloadRequestItemDtoKey(file.Id), "pdf")], folderIds: [], fileIds: []),
+            new DownloadRequestDto(fileConvertIds: [new DownloadRequestItemDto(new DownloadRequestItemDtoKey(file.Id), "pdf")], folderIds: [], fileIds: []) { ReturnSingleOperation = true },
             cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert

@@ -45,7 +45,7 @@ import {
 } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
-import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
+import { DocspaceApiHttpError, resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import logger from "../log.js";
 
@@ -313,7 +313,19 @@ export async function agentServerWhitelist(
   if (!entityId) {
     return undefined;
   }
-  const agentId = await resolveAgentEntityId(entityId);
+  let agentId: string | undefined;
+  try {
+    agentId = await resolveAgentEntityId(entityId);
+  } catch (err) {
+    if (!(err instanceof DocspaceApiHttpError && err.status < 500)) {
+      logger.error(
+        `systemTools: failed to resolve entity ${entityId}: ${
+          err instanceof Error ? err.message : String(err)
+        } — serving only the portal MCP server`,
+      );
+    }
+    return new Set([PORTAL_MCP_SERVER_NAME]);
+  }
   if (!agentId) {
     return undefined;
   }

@@ -88,6 +88,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
                     MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
+                    MessageAction.PortalBlocked, MessageAction.PortalUnblocked,
                     MessageAction.SSOEnabled,MessageAction.SSODisabled,MessageAction.PortalAccessSettingsUpdated,
                     MessageAction.LdapEnabled,MessageAction.LdapDisabled,MessageAction.LdapSync,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
@@ -106,6 +107,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ApiKeyUpdated,
                     MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated,
                     MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated,
+                    MessageAction.CustomerServiceLimitUpdated, MessageAction.CustomerServiceLimitsSet, MessageAction.CustomerServiceLimitsDisabled,
                     MessageAction.SubscriptionBalanceMovedToWallet,
                     MessageAction.AIProviderUpdated,
                     MessageAction.AIDefaultProviderSet,
@@ -130,6 +132,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.WebhookCreated,
                     MessageAction.ApiKeyCreated,
                     MessageAction.CustomerOperationPerformed,
+                    MessageAction.CustomerServiceLimitCreated,
                     MessageAction.AIProviderCreated,
                     MessageAction.ServerCreated,
                     MessageAction.SetWebSearchSettings,
@@ -155,7 +158,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AiProfileDeleted,
                     MessageAction.AiProfileUnassigned,
                     MessageAction.WebpluginDeleted,
-                    MessageAction.ScheduledBackupDeleted
+                    MessageAction.ScheduledBackupDeleted,
+                    MessageAction.CustomerServiceLimitDeleted
                 ]
             },
             {

@@ -31,8 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ToolsEngine } from "@onlyoffice/ai-chat/core";
-import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { ToolsEngine, isToolPrefsScope } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, ToolPrefsScope } from "@onlyoffice/ai-chat/core";
 import {
   PORTAL_MCP_SERVER_NAME,
   DOCSPACE_INTEGRATION_SERVER_TYPE,
@@ -130,6 +130,46 @@ function redactSystemServer(
   config: McpServerConfig,
 ): McpServerConfig {
   return getSystemServerConfig(name) ? {} : config;
+}
+
+const INVALID_SCOPE = Symbol("invalid tool-prefs scope");
+
+// The optional `scope` of a disabled-list read or write (Bug 84381):
+// `"user"` (the caller's own list, what an absent value means) or
+// `"tenant"` (the list an administrator keeps for everyone, which the AI
+// service folds into every user's list on read). Anything else is a 400
+// rather than a silent fall-back to the user list, so a settings screen
+// cannot believe it switched a tool off for everyone when it did not.
+function parseToolPrefsScope(
+  value: unknown,
+): ToolPrefsScope | undefined | typeof INVALID_SCOPE {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  return isToolPrefsScope(value) ? value : INVALID_SCOPE;
+}
+
+function invalidScopeMessage(value: unknown): string {
+  return `unknown scope "${String(value)}"; valid values: tenant, user`;
+}
+
+// Body narrowing for the two prefs writes. The library coerces instead of
+// checking: a string `toolNames` spreads into one entry per character, an
+// absent one reads as "clear the list" and `Boolean("false")` is true
+// (Bugs 84402, 84403, 84404, 84405). Each answers 400 with the field named,
+// before anything is read or written.
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function toolNamesError(value: unknown): string | undefined {
+  if (!Array.isArray(value)) {
+    return "toolNames is required and must be an array of tool names";
+  }
+  if (!value.every(isNonEmptyString)) {
+    return "toolNames must contain non-empty strings only";
+  }
+  return undefined;
 }
 
 export const toolsController = {
@@ -270,10 +310,27 @@ export const toolsController = {
   }),
 
   setDisabled: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    const args = unpackPositional(req.body, [
+      "serverType",
+      "toolNames",
+      "entityId",
+      "scope",
+    ] as const);
     // Same accessibility gate as the server writes above (Bug 82975): a
     // bogus entityId must not silently write prefs into the global scope.
     await assertEntityAccessible(args.entityId as string | undefined);
+    const scope = parseToolPrefsScope(args.scope);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(args.scope) });
+      return;
+    }
+    // An explicit empty list stays legal: it is the documented "switch
+    // everything back on" and what the settings page sends for it.
+    const toolNamesProblem = toolNamesError(args.toolNames);
+    if (toolNamesProblem !== undefined) {
+      res.status(400).json({ error: toolNamesProblem });
+      return;
+    }
     // The serverType must be a group key the round's tool filter actually
     // matches — an arbitrary string used to be stored verbatim and read back
     // "successfully" while never disabling anything (Bug 83013). Valid keys:
@@ -289,7 +346,7 @@ export const toolsController = {
       WEB_SEARCH_TYPE,
       IMAGE_GENERATION_TYPE,
       DOCUMENT_AGENT_TYPE,
-      ...Object.keys(await resolveCustomServers(entityId)),
+      ...Object.keys(await resolveCustomServers(entityId, { strict: true })),
     ]);
     if (typeof serverType !== "string" || !validTypes.has(serverType)) {
       res.status(400).json({
@@ -299,17 +356,18 @@ export const toolsController = {
       });
       return;
     }
-    await engine.setDisabled(
-      args.serverType as string,
-      (args.toolNames as string[]) ?? [],
-      args.entityId as string | undefined,
-    );
+    await engine.setDisabled(serverType, args.toolNames as string[], entityId, scope);
     res.json({ success: true });
   }),
 
   getDisabled: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const map = await engine.getDisabled(entityId);
+    const scope = parseToolPrefsScope(req.query["scope"]);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(req.query["scope"]) });
+      return;
+    }
+    const map = await engine.getDisabled(entityId, scope);
     res.json(map);
   }),
 
@@ -332,10 +390,22 @@ export const toolsController = {
     );
     // Same accessibility gate as the server writes above (Bug 82975).
     await assertEntityAccessible(args.entityId as string | undefined);
+    if (!isNonEmptyString(args.serverType)) {
+      res.status(400).json({ error: "serverType is required and must be a non-empty string" });
+      return;
+    }
+    if (!isNonEmptyString(args.toolName)) {
+      res.status(400).json({ error: "toolName is required and must be a non-empty string" });
+      return;
+    }
+    if (typeof args.value !== "boolean") {
+      res.status(400).json({ error: "value is required and must be a boolean" });
+      return;
+    }
     await engine.setAllowAlways(
-      args.serverType as string,
-      args.toolName as string,
-      Boolean(args.value),
+      args.serverType,
+      args.toolName,
+      args.value,
       args.entityId as string | undefined,
     );
     res.json({ success: true });

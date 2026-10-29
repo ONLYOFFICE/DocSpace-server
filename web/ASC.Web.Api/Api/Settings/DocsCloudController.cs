@@ -46,6 +46,8 @@ public class DocsCloudController(
     ITariffService tariffService,
     IQuotaService quotaService,
     SecurityContext securityContext,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
     PaymentHelper paymentHelper,
     CspSettingsHelper cspSettingsHelper,
     WebItemManager webItemManager,
@@ -114,7 +116,17 @@ public class DocsCloudController(
             throw new ArgumentException("Quota is already set");
         }
 
-        var result = await paymentHelper.GetDocsCloudTrialAsync(tenant.Id, docsCloudTrialQuota.Name);
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var customer = new DocsCloudTrialCustomer(
+            user.Email,
+            commonLinkUtility.ServerRootPath,
+            user.DisplayUserName(false, displayUserSettingsHelper),
+            user.MobilePhone,
+            CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+            tenant.AffiliateId);
+
+        var result = await paymentHelper.GetDocsCloudTrialAsync(tenant.Id, docsCloudTrialQuota.Name, customer);
 
         if (result)
         {

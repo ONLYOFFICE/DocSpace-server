@@ -96,7 +96,7 @@ public class RoomGroupDto
 }
 
 [Scope]
-public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory)
+public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory, FileSecurity fileSecurity)
 {
     /// <summary>
     /// Builds the response for one group. The section comes from the group itself, and the rooms are
@@ -172,22 +172,18 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
-            await foreach (var folder in folderDao.GetFoldersAsync(roomIds))
-            {
+            var rooms = folderDao.GetFoldersAsync(roomIds)
                 // an archived room leaves its groups; the reference is kept so that unarchiving restores the membership
-                if (folder.RootFolderType == FolderType.Archive)
-                {
-                    continue;
-                }
-
+                .Where(folder => folder.RootFolderType != FolderType.Archive)
                 // a room of the other section is invisible in this group's listing, so it must not be
                 // counted either - otherwise the group shows a room count it never lists
-                if (!roomArea.MatchesRoomType(folder.FolderType))
-                {
-                    continue;
-                }
+                .Where(folder => roomArea.MatchesRoomType(folder.FolderType));
 
-                yield return await folderWrapperHelper.GetAsync(folder);
+            // a room the owner of the group can no longer read leaves the group the same way: the reference
+            // is kept, so that access granted again restores the membership, but nothing of the room is shown
+            await foreach (var room in fileSecurity.FilterReadAsync(rooms))
+            {
+                yield return await folderWrapperHelper.GetAsync((Folder<T>)room);
             }
         }
     }

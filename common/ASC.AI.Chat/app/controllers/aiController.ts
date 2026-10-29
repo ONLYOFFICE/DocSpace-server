@@ -61,7 +61,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
-import { getString, isObject, parseInt10 } from "../narrow.js";
+import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -762,6 +762,31 @@ async function aiToolsUnpaidError(
 
 export const aiController = {
   send: asyncHandler<SendInput>(async (req, res) => {
+    // The body used to reach the engine unchecked: an unknown or missing
+    // actionType died in the assignment resolver and a missing userMessage
+    // in the attachment resolver, both as 500 (Bug 84294). Checked before
+    // anything is primed so a refused call has no side effects.
+    if (!isObject(req.body)) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (!asActionType(req.body.actionType)) {
+      res.status(400).json({ error: "actionType is required and must be a known action type" });
+      return;
+    }
+    if (!hasPromptContent(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content or an attachment",
+      });
+      return;
+    }
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
+    }
     // Without this the provider request runs without the forwarded auth /
     // request headers, so a correct call comes back with an empty message
     // plus an auth error, or fails outright with a 500 (Bugs 82833, 82835).
@@ -790,6 +815,37 @@ export const aiController = {
   }),
 
   sendCustom: asyncHandler<SendCustomInput>(async (req, res) => {
+    // A missing systemPrompt went to the provider as an undefined system
+    // message and came back as a 500 (Bug 84299); a string `isStream` such
+    // as "false" counted as true and switched the answer to a stream
+    // (Bug 84300). Both are the caller's mistake, so 400, before anything
+    // is primed.
+    if (!isObject(req.body)) {
+      res.status(400).json({ error: "the request body must be an object" });
+      return;
+    }
+    if (typeof req.body.systemPrompt !== "string" || req.body.systemPrompt.trim().length === 0) {
+      res.status(400).json({ error: "systemPrompt is required and must be a non-empty string" });
+      return;
+    }
+    if (!hasPromptContent(req.body.userMessage)) {
+      res.status(400).json({
+        error: "userMessage must contain non-empty text content or an attachment",
+      });
+      return;
+    }
+    {
+      const limitError = attachmentLimitError(req.body.userMessage);
+      if (limitError) {
+        res.status(400).json({ error: limitError });
+        return;
+      }
+    }
+    const isStream: unknown = req.body.isStream;
+    if (isStream !== undefined && isStream !== null && typeof isStream !== "boolean") {
+      res.status(400).json({ error: "isStream must be a boolean" });
+      return;
+    }
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();

@@ -86,6 +86,259 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task GetCustomerOperationPages_AdvancesOffsetByItemsUntilTotalQuantity()
+    {
+        var queries = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            queries.Add(request.RequestUri!.Query);
+            var offset = int.Parse(ParseQuery(request.RequestUri)["offset"]);
+
+            return Json(HttpStatusCode.OK, OperationsPage(count: Math.Min(2, 5 - offset), totalQuantity: 5));
+        });
+
+        var pages = new List<Report>();
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+        {
+            pages.Add(page);
+        }
+
+        pages.Select(p => p.Collection.Count).Should().Equal(2, 2, 1);
+        queries.Select(q => ParseQuery(new Uri(BaseUrl + q))["offset"]).Should().Equal("0", "2", "4");
+        queries.Should().AllSatisfy(q =>
+        {
+            // The filter's own Offset stays unset, so the page token is the only offset parameter.
+            q.TrimStart('?').Split('&').Count(p => p.StartsWith("offset=", StringComparison.Ordinal)).Should().Be(1);
+            ParseQuery(new Uri(BaseUrl + q))["limit"].Should().Be("2");
+        });
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_StopsOnEmptyPage_EvenBelowTotalQuantity()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, OperationsPage(count: ++calls == 1 ? 3 : 0, totalQuantity: 100)));
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 3 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(3);
+        calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_ErrorOnLaterPage_IsMappedByExceptionFactory()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ => ++calls == 1
+            ? Json(HttpStatusCode.OK, OperationsPage(count: 2, totalQuantity: 10))
+            : Json(HttpStatusCode.BadRequest, "Customer not found"));
+
+        var act = async () =>
+        {
+            await foreach (var _ in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+            {
+            }
+        };
+
+        await act.Should().ThrowExactlyAsync<AccountingCustomerNotFoundException>();
+        calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetCustomerServiceUsagePages_PagesTheUsagePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath + "?offset=" + ParseQuery(request.RequestUri)["offset"]);
+            var offset = int.Parse(ParseQuery(request.RequestUri)["offset"]);
+
+            return Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("{}", Math.Min(2, 3 - offset)))}}],"totalQuantity":3}""");
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerServiceUsagePages("portal-1", new UsageFilter { Limit = 2 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(3);
+        paths.Should().Equal("/api/customer/portal-1/usage?offset=0", "/api/customer/portal-1/usage?offset=2");
+    }
+
+    [Fact]
+    public async Task GetCustomerOperationPages_ServerCapsPageSize_AdvancesByItemsReceived()
+    {
+        var offsets = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            var offset = ParseQuery(request.RequestUri!)["offset"];
+            offsets.Add(offset);
+
+            // Asked for 1000, the service returns at most 100 per page.
+            return Json(HttpStatusCode.OK, OperationsPage(count: Math.Min(100, 250 - int.Parse(offset)), totalQuantity: 250));
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 1000 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(250);
+        offsets.Should().Equal("0", "100", "200");
+    }
+
+    // The paging relies on totalQuantity: without it a full first page is all a report gets. This pins that
+    // dependency, so a change of the accounting contract shows up here rather than as a truncated report.
+    [Theory]
+    [InlineData("""{"collection":[{},{}],"totalQuantity":0}""")]
+    [InlineData("""{"collection":[{},{}]}""")]
+    public async Task GetCustomerOperationPages_StopsAfterFirstPage_WhenTotalQuantityIsZeroOrMissing(string firstPage)
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ =>
+        {
+            calls++;
+            return Json(HttpStatusCode.OK, firstPage);
+        });
+
+        var items = 0;
+        await foreach (var page in client.GetCustomerOperationPages("portal-1", new OperationFilter { Limit = 2 }).AsPages())
+        {
+            items += page.Collection.Count;
+        }
+
+        items.Should().Be(2);
+        calls.Should().Be(1);
+    }
+
+    [Fact]
+    public void GetCustomerOperationPages_FilterOffsetSet_ThrowsBeforeAnyRequest()
+    {
+        var calls = 0;
+        var (client, _) = CreateClient(_ =>
+        {
+            calls++;
+            return Json(HttpStatusCode.OK, OperationsPage(count: 0, totalQuantity: 0));
+        });
+
+        var operations = () => client.GetCustomerOperationPages("portal-1", new OperationFilter { Offset = 10 });
+        var usage = () => client.GetCustomerServiceUsagePages("portal-1", new UsageFilter { Offset = 10 });
+
+        operations.Should().ThrowExactly<ArgumentException>().WithParameterName("filter");
+        usage.Should().ThrowExactly<ArgumentException>().WithParameterName("filter");
+        calls.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetServicePrices_ResolvesTheServiceThenBuildsByServicePath()
+    {
+        var paths = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            paths.Add(request.RequestUri!.AbsolutePath);
+            return request.RequestUri.AbsolutePath.Contains("/servicePrice/")
+                ? Json(HttpStatusCode.OK, """[{"id":12,"serviceId":7,"timeUnit":"Minute","servicePrice":0.5}]""")
+                : Json(HttpStatusCode.OK, """{"id":7,"name":"ai-tools"}""");
+        });
+
+        var prices = await client.GetServicePricesAsync("ai-tools", active: true);
+
+        paths.Should().Equal("/api/service/by-name/ai-tools", "/api/servicePrice/by-service/7");
+        prices.Should().ContainSingle().Which.TimeUnit.Should().Be(PriceTimeUnit.Minute);
+    }
+
+    [Fact]
+    public async Task CompleteCustomerSession_PostsToSessionCompletePath()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
+
+        await client.CompleteCustomerSessionAsync("portal-1", "backup", 42, 3, "3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+
+        handler.LastMethod.Should().Be(HttpMethod.Post);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/session/complete");
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        body.RootElement.GetProperty("sessionId").GetInt32().Should().Be(42);
+        body.RootElement.GetProperty("customerName").GetString().Should().Be("portal-1");
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_SendsNamesInOneRequest_AndLeavesUnknownServicesOut()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 2,
+            ("backup", 10m, "USD"), ("disk-storage", 0.14m, "EUR"))));
+
+        var prices = await client.GetProductPriceInfoAsync(["backup", "disk-storage", "unknown"]);
+
+        handler.CallCount.Should().Be(1);
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/service");
+
+        var query = ParseQuery(handler.LastUri);
+        query["status"].Should().Be("Approved");
+        query["limit"].Should().Be("100");
+        query["offset"].Should().Be("0");
+        QueryValues(handler.LastUri, "names").Should().BeEquivalentTo("backup", "disk-storage", "unknown");
+
+        prices.Keys.Should().BeEquivalentTo("backup", "disk-storage");
+        prices["backup"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 10m });
+        prices["disk-storage"].Should().Equal(new Dictionary<string, decimal> { ["EUR"] = 0.14m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_ServiceIgnoringNamesFilter_ReturnsOnlyRequestedServices()
+    {
+        // An accounting service without the names filter answers with every approved service.
+        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 3,
+            ("backup", 10m, "USD"), ("ai-tools", 0m, "USD"), ("disk-storage", 0.14m, "USD"))));
+
+        var prices = await client.GetProductPriceInfoAsync(["ai-tools"]);
+
+        prices.Keys.Should().Equal("ai-tools");
+        prices["ai-tools"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 0m });
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_NoNames_SendsNoRequest()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, ServicesPage(totalQuantity: 0)));
+
+        var prices = await client.GetProductPriceInfoAsync([]);
+
+        prices.Should().BeEmpty();
+        handler.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetProductPriceInfo_AnswerLargerThanPage_ReadsEveryPage()
+    {
+        var offsets = new List<string>();
+        var (client, _) = CreateClient(request =>
+        {
+            var offset = ParseQuery(request.RequestUri!)["offset"];
+            offsets.Add(offset);
+
+            // 150 services: the first page holds 100 of them, the second the remaining 50.
+            var services = Enumerable.Range(int.Parse(offset), offset == "0" ? 100 : 50)
+                .Select(i => ($"service-{i}", (decimal)i, "USD"))
+                .ToArray();
+
+            return Json(HttpStatusCode.OK, ServicesPage(150, services));
+        });
+
+        var prices = await client.GetProductPriceInfoAsync(["service-0", "service-149"]);
+
+        offsets.Should().Equal("0", "100");
+        prices["service-149"].Should().Equal(new Dictionary<string, decimal> { ["USD"] = 149m });
+    }
+
+    [Fact]
     public async Task GetCustomerBalance_BuildsBalancePathAndDeserializesResponse()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
@@ -121,7 +374,7 @@ public class AccountingClientTests
         // Refit.ApiRequestException to the callers.
         var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
 
-        var act = async () => await client.GetServiceInfoAsync("backup");
+        var act = async () => await client.GetAllCurrenciesAsync();
 
         (await act.Should().ThrowExactlyAsync<AccountingException>())
             .WithInnerException<HttpRequestException>();
@@ -129,9 +382,9 @@ public class AccountingClientTests
     [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "[]"));
 
-        await client.GetServiceInfoAsync("backup");
+        await client.GetAllCurrenciesAsync();
 
         handler.LastAuthorization.Should().NotBeNull();
 
@@ -247,7 +500,7 @@ public class AccountingClientTests
         await act.Should().ThrowAsync<AccountingNotConfiguredException>();
     }
 
-    private static (AccountingClient client, CapturingHandler handler) CreateClient(
+    internal static (AccountingClient client, CapturingHandler handler) CreateClient(
         Func<HttpRequestMessage, HttpResponseMessage> responder, string baseUrl = BaseUrl)
     {
         var configuration = new ConfigurationBuilder()
@@ -280,7 +533,20 @@ public class AccountingClientTests
         return (provider.GetRequiredService<AccountingClient>(), handler);
     }
 
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
+    private static string OperationsPage(int count, int totalQuantity)
+    {
+        return $$"""{"collection":[{{string.Join(",", Enumerable.Repeat("""{"service":"backup"}""", count))}}],"totalQuantity":{{totalQuantity}}}""";
+    }
+
+    private static string ServicesPage(int totalQuantity, params (string Name, decimal Price, string Currency)[] services)
+    {
+        var items = services.Select(s =>
+            $$$"""{"name":"{{{s.Name}}}","priceValue":{{{s.Price.ToString(CultureInfo.InvariantCulture)}}},"currency":{"code":"{{{s.Currency}}}"}}""");
+
+        return $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""";
+    }
+
+    internal static HttpResponseMessage Json(HttpStatusCode status, string json)
     {
         return new HttpResponseMessage(status)
         {
@@ -296,7 +562,17 @@ public class AccountingClientTests
         return $"ASC {key}:{timestamp}:{hash}";
     }
 
-    private static Dictionary<string, string> ParseQuery(Uri uri)
+    private static List<string> QueryValues(Uri uri, string name)
+    {
+        return uri.Query.TrimStart('?')
+            .Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Select(pair => pair.Split('=', 2))
+            .Where(pair => Uri.UnescapeDataString(pair[0]) == name)
+            .Select(pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1]) : "")
+            .ToList();
+    }
+
+    internal static Dictionary<string, string> ParseQuery(Uri uri)
     {
         var result = new Dictionary<string, string>();
         var query = uri.Query.TrimStart('?');
@@ -317,7 +593,7 @@ public class AccountingClientTests
         return result;
     }
 
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
+    internal sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
         public int CallCount { get; private set; }
         public Uri? LastUri { get; private set; }

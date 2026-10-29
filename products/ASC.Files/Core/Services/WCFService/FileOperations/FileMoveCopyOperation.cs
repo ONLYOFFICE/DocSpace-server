@@ -448,7 +448,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                     {
                                         await fileMarker.RemoveMarkAsNewForAllAsync(folder);
 
-                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, null, CancellationToken);
                                         newFolder = await folderDao.GetFolderAsync(newFolderId);
                                         var parentFolder = await parentFolderTask;
 
@@ -527,7 +527,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                                 await socketManager.DeleteFolder(folder, action: async () =>
                                                 {
-                                                    newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                                    newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, null, CancellationToken);
                                                 });
 
                                                 var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
@@ -544,7 +544,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                                 await socketManager.DeleteFolder(folder, action: async () =>
                                                 {
-                                                    newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                                    newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, null, CancellationToken);
                                                 });
 
                                                 await notifyClient.SendRoomMovedArchiveAsync(folder, userIDs, securityContext.CurrentAccount.ID);
@@ -554,9 +554,13 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                         }
                                         else
                                         {
+                                            // Duplicate keeps both folders, so - as a copy does - the moved one arrives under
+                                            // the first free title of the destination
+                                            var newTitle = await GetDuplicateTitleAsync(folder.Title, folder.ParentId, toFolderId, folderDao.GetAvailableTitleAsync);
+
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
-                                                newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                                newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, newTitle, CancellationToken);
                                             });
 
                                             if (folder.RootFolderType is FolderType.USER or FolderType.Privacy && toFolder.IsRoom)
@@ -695,9 +699,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var fileIdsToProcess = fileIds;
 
         // fast path: plain move inside the internal dao without conflicts, quota owner or
-        // room changes; anything more complex falls back to the per-file loop below.
-        // Duplicate resolve type skips conflict detection for files entirely, so it is
-        // batched as well
+        // room changes; anything more complex falls back to the per-file loop below
         if (!copy && typeof(T) == typeof(int) && toFolder.Id is int &&
             !toFolder.ProviderEntry &&
             toFolder.RootFolderType is not (FolderType.TRASH or FolderType.Archive or FolderType.Privacy) &&
@@ -802,10 +804,14 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                     await socketManager.RemoveFromSharedAsync(file, forRemove);
                                 }
 
+                                // Duplicate keeps both files, so - as a copy does - the moved one arrives under the
+                                // first free title of the destination
+                                var newTitle = await GetDuplicateTitleAsync(file.Title, file.ParentId, toFolderId, fileDao.GetAvailableTitleAsync);
+
                                 TTo newFileId = default;
                                 await socketManager.DeleteFileAsync(file, action: async () =>
                                 {
-                                    newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks);
+                                    newFileId = await FileDao.MoveFileAsync(file.Id, toFolderId, deleteLinks, newTitle);
                                 });
 
                                 newFile = await fileDao.GetFileAsync(newFileId);
@@ -1047,6 +1053,23 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         return needToMark;
     }
 
+    /// <summary>
+    /// The title an entry moved with <c>Duplicate</c> has to arrive under: the first free title of the
+    /// destination when its own is taken there, otherwise null - the entry keeps its title. A move inside the
+    /// same folder keeps the title as well.
+    /// </summary>
+    private async Task<string> GetDuplicateTitleAsync<TTo>(string title, T parentId, TTo toFolderId, Func<string, TTo, Task<string>> getAvailableTitle)
+    {
+        if (_resolveType != FileConflictResolveType.Duplicate || Equals(parentId?.ToString(), toFolderId.ToString()))
+        {
+            return null;
+        }
+
+        var freeTitle = await getAvailableTitle(title, toFolderId);
+
+        return string.Equals(freeTitle, title, StringComparison.Ordinal) ? null : freeTitle;
+    }
+
     private const int MoveBatchSize = 100;
 
     // Moves the plain files in chunks through FileDao.MoveFilesAsync and reports their
@@ -1176,32 +1199,27 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             return fallback;
         }
 
-        var toMove = candidates;
-
-        // Duplicate mode moves files regardless of name collisions (same as the per-file
-        // path, which skips conflict detection for it); otherwise — one conflict lookup
-        // per destination instead of one per file, matching the case-insensitive db comparison.
+        // A file whose title is already taken goes through the per-file path, whatever the resolve type:
+        // that path overwrites, skips or - for Duplicate - gives the moved file a free title. One conflict
+        // lookup per destination instead of one per file, matching the case-insensitive db comparison.
         // Same-titled files within the selection itself would collide right after the first
         // of them is moved, so only one of them may go through the batch
-        if (_resolveType != FileConflictResolveType.Duplicate)
+        var existingTitles = new HashSet<string>(
+            await fileDao.GetExistingTitlesAsync(toFolder.Id, candidates.Select(c => c.File.Title)),
+            StringComparer.OrdinalIgnoreCase);
+
+        var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        List<(File<T> File, Folder<T> Parent)> toMove = [];
+
+        foreach (var candidate in candidates)
         {
-            var existingTitles = new HashSet<string>(
-                await fileDao.GetExistingTitlesAsync(toFolder.Id, candidates.Select(c => c.File.Title)),
-                StringComparer.OrdinalIgnoreCase);
-
-            var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            toMove = [];
-
-            foreach (var candidate in candidates)
+            if (existingTitles.Contains(candidate.File.Title) || !seenTitles.Add(candidate.File.Title))
             {
-                if (existingTitles.Contains(candidate.File.Title) || !seenTitles.Add(candidate.File.Title))
-                {
-                    fallback.Add(candidate.File.Id);
-                }
-                else
-                {
-                    toMove.Add(candidate);
-                }
+                fallback.Add(candidate.File.Id);
+            }
+            else
+            {
+                toMove.Add(candidate);
             }
         }
 

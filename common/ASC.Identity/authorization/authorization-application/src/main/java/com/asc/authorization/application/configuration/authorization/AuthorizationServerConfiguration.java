@@ -38,8 +38,10 @@ import com.asc.authorization.application.security.filter.BasicSignatureAuthentic
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.converter.PublicClientRefreshTokenAuthenticationConverter;
 import com.asc.authorization.application.security.oauth.generator.PrefixedAuthorizationCodeGenerator;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
+import com.asc.authorization.application.security.oauth.provider.PublicClientRefreshTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
 import com.asc.authorization.application.security.service.SignatureService;
@@ -59,6 +61,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -66,6 +69,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -98,6 +102,7 @@ public class AuthorizationServerConfiguration {
 
   private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
   private static final String CLIENT_SECRET_POST = "client_secret_post";
+  private static final String NONE = "none";
 
   private static final String AUTHORIZATION_CODE = "authorization_code";
   private static final String PERSONAL_ACCESS_TOKEN = "personal_access_token";
@@ -149,6 +154,7 @@ public class AuthorizationServerConfiguration {
       HttpSecurity http,
       SecurityConfigurationProperties securityConfigurationProperties,
       RegisteredClientRepository registeredClientRepository,
+      OAuth2AuthorizationService authorizationService,
       SignatureService signatureService) {
     var fallbackScopeAuthorizationCodeRequestConverter =
         new FallbackScopeAuthorizationCodeRequestConverter(registeredClientRepository);
@@ -191,6 +197,7 @@ public class AuthorizationServerConfiguration {
                                 methods -> {
                                   methods.clear();
                                   methods.add(CLIENT_SECRET_POST);
+                                  methods.add(NONE);
                                 })
                             .tokenIntrospectionEndpointAuthenticationMethods(
                                 methods -> {
@@ -201,6 +208,7 @@ public class AuthorizationServerConfiguration {
                                 methods -> {
                                   methods.clear();
                                   methods.add(CLIENT_SECRET_POST);
+                                  methods.add(NONE);
                                 })))
         .oidc(
             oidcConfigurer ->
@@ -221,6 +229,7 @@ public class AuthorizationServerConfiguration {
                                             methods -> {
                                               methods.clear();
                                               methods.add(CLIENT_SECRET_POST);
+                                              methods.add(NONE);
                                             })
                                         .tokenIntrospectionEndpointAuthenticationMethods(
                                             methods -> {
@@ -231,6 +240,7 @@ public class AuthorizationServerConfiguration {
                                             methods -> {
                                               methods.clear();
                                               methods.add(CLIENT_SECRET_POST);
+                                              methods.add(NONE);
                                             })
                                         .build()))
                     .userInfoEndpoint(
@@ -243,6 +253,17 @@ public class AuthorizationServerConfiguration {
                                     return new OidcUserInfo(jwtPrincipal.getToken().getClaims());
                                   return new OidcUserInfo(Map.of("sub", authentication.getName()));
                                 })))
+        .clientAuthentication(
+            c ->
+                c.authenticationConverter(
+                        new PublicClientRefreshTokenAuthenticationConverter(
+                            PathPatternRequestMatcher.withDefaults()
+                                .matcher(
+                                    HttpMethod.POST,
+                                    authorizationServerSettings().getTokenRevocationEndpoint())))
+                    .authenticationProvider(
+                        new PublicClientRefreshTokenAuthenticationProvider(
+                            registeredClientRepository, authorizationService)))
         .tokenEndpoint(
             t ->
                 t.accessTokenRequestConverters(

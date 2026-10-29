@@ -121,7 +121,7 @@ public class DeleteVersionTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: 999999999, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: 999999999, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -161,7 +161,7 @@ public class DeleteVersionTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -175,14 +175,14 @@ public class DeleteVersionTests(
         var file = await CreateFileWithSecondVersion("Autotest DelVer Trash File");
 
         var deleteResults = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
         await WaitLongOperation(deleteResults.FirstOrDefault()?.Id);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.DeleteFileVersionsAsync(
-                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]),
+                new DeleteVersionBatchRequestDto(fileId: file.Id, versions: [1]) { ReturnSingleOperation = true },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);

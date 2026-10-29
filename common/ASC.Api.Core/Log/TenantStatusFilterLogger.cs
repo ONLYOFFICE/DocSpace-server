@@ -40,6 +40,9 @@ internal static partial class TenantStatusFilterLogger
     [LoggerMessage(LogLevel.Warning, "Tenant {tenantId} is not removed or suspended")]
     public static partial void WarningTenantIsNotRemoved(this ILogger<TenantStatusFilter> logger, int tenantId);
 
+    [LoggerMessage(LogLevel.Warning, "Tenant {tenantId} is blocked by the retention policy")]
+    public static partial void WarningTenantIsBlocked(this ILogger<TenantStatusFilter> logger, int tenantId);
+
     [LoggerMessage(LogLevel.Warning, "Tenant {tenantId} is {tenantStatus}")]
     public static partial void WarningTenantStatus(this ILogger<TenantStatusFilter> logger, int tenantId, TenantStatus tenantStatus);
 }

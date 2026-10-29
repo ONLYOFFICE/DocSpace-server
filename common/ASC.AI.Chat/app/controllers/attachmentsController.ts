@@ -89,8 +89,11 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
   if (!isObject(raw)) {
     return { ok: false, error: "input is required and must be an object" };
   }
-  if (typeof raw.path !== "string") {
-    return { ok: false, error: "input.path is required and must be a string" };
+  // Empty is as bad as missing: the storage reads an empty path as a
+  // raw-payload draft and throws a plain Error, which answered 500
+  // (Bug 84389).
+  if (typeof raw.path !== "string" || raw.path.trim().length === 0) {
+    return { ok: false, error: "input.path is required and must be a non-empty string" };
   }
   if (typeof raw.content !== "string") {
     return { ok: false, error: "input.content is required and must be a string" };

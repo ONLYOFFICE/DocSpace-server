@@ -160,7 +160,9 @@ public class ProjectConfigurator(
             .WithEnvironment("ai:mcp:0:endpoint", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort, "mcp").Uri.ToString())
             .WithEnvironment("ai:mcpInternalHost", Constants.OpenRestyContainer)
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
-            .WithEntrypoint("dotnet");
+            .WithEntrypoint("dotnet")
+            .WithWorkstationGc()
+            .WithMemoryLimit(ContainerMemoryExtensions.DotNetServiceLimit);
 
         switch (builder.Configuration["APP_EDITION"])
         {

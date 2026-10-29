@@ -48,6 +48,7 @@ const openApiSchemas = createRequire(import.meta.url)(
 ) as OpenApiSchemaBundle;
 import { agentsController } from "./controllers/agentsController.js";
 import { textToDocxController } from "./controllers/textToDocxController.js";
+import { metaController } from "./controllers/metaController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -196,6 +197,14 @@ export default function registerRoutes(app: Application): void {
   // textToDocxController); completion is signalled by the files socket
   // create event, not by this response.
   router.post("/text-to-docx", textToDocxController.start);
+
+  // Metadata-field generation: reads the selected files as text and asks the
+  // `GenerateMeta` model which custom fields describe them (see
+  // metaController). One synchronous round, no thread.
+  router.post("/meta/generate", metaController.generate);
+  // Metadata filling: reads one entry's fields and the content behind it and
+  // writes the values the text supports through the Files metadata API.
+  router.post("/meta/fill", metaController.fill);
 
   router.get("/agents", agentsController.getAgents);
   router.get("/agents/news", agentsController.getAgentsNews);

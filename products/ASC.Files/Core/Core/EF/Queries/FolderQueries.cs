@@ -294,9 +294,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy)
+    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy, string title)
     {
-        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, folderType, modifiedBy);
+        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, folderType, modifiedBy, title);
     }
 
     [PreCompileQuery]
@@ -692,13 +692,15 @@ static file class FolderQueries
                     .Where(r => r.EntryType == (byte)FileEntryType.Folder)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, int, FolderType, Guid, Task<int>> UpdateFoldersAsync =
-        (FilesDbContext ctx, int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy) =>
+    // a null title keeps the one the folder has
+    public static readonly Func<FilesDbContext, int, int, int, FolderType, Guid, string, Task<int>> UpdateFoldersAsync =
+        (FilesDbContext ctx, int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy, string title) =>
             ctx.Folders
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => r.Id == folderId)
                 .ExecuteUpdateAsync(toUpdate => toUpdate
                     .SetProperty(p => p.ParentId, parentId)
+                    .SetProperty(p => p.Title, p => title ?? p.Title)
                     .SetProperty(p => p.FolderType, folderType)
                     .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
                     .SetProperty(p => p.ModifiedBy, modifiedBy)

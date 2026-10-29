@@ -68,33 +68,57 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public bool HasOtelCollector => OtelCollectorResource != null;
 
+    /// <summary>
+    /// DbGate, RedisInsight, the OpenSearch dashboard and the RabbitMQ management UI together cost
+    /// ~450 MiB of the Docker VM and nothing in the graph depends on them. They are on by default;
+    /// DEV_TOOLS=false leaves them out when the memory matters more than the UIs.
+    /// </summary>
+    private bool DevTools => string.Compare(builder.Configuration["DEV_TOOLS"], "false", StringComparison.OrdinalIgnoreCase) != 0;
+
 
     public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
     {
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
         var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
-            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306)
+            // performance_schema alone holds ~220 MiB of a fresh mysql:9 (433 -> 211 MiB measured); the
+            // buffer pool is pinned at the server default so the figure does not drift with the image.
+            .WithArgs("--performance-schema=OFF", "--innodb-buffer-pool-size=128M");
+
+        // The datadir lives in exactly one place: a data volume when asked for, otherwise tmpfs when asked
+        // for, otherwise the container's writable layer. The same flag drives the cap below, so a caller
+        // passing both withDataVolume and withTmpfs gets the volume and keeps the cap.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
 
         if (withDataVolume)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
         }
-        else if (withTmpfs)
+        else if (datadirOnTmpfs)
         {
             // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
             // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
             // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
             mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
-
         }
 
-        if (withDbGate)
+        // The cap stays off the tmpfs variant: tmpfs pages are charged to the container's cgroup, so a cap
+        // would count the datadir of every test portal and kill the server mid-run.
+        if (!datadirOnTmpfs)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.MySqlLimit);
+        }
+
+        if (withDbGate && DevTools)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDbGate();
         }
 
         MySqlDatabaseResource = mysqlResourceBuilder.AddDatabase("docspace");
+
+        // The editors keep their own schema in this server instead of a bundled PostgreSQL (AddEditors).
+        EditorResource?.WaitFor(mysqlResourceBuilder);
 
         builder.Eventing.Subscribe(MySqlDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -123,12 +147,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         RabbitMqResource = builder
             .AddRabbitMQ("messaging");
 
-        if (withManagementPlugin)
+        if (withManagementPlugin && DevTools)
         {
-            // Enabling the plugin at boot costs a few seconds, and nothing opens the UI during an
-            // integration-test run — so that profile asks for the plain image instead.
+            // Enabling the plugin at boot costs a few seconds and memory, and nothing opens the UI
+            // during an integration-test run — so that profile asks for the plain image instead.
             RabbitMqResource = RabbitMqResource.WithManagementPlugin();
         }
+
+        EditorResource?.WaitFor(RabbitMqResource);
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -152,10 +178,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
 
-        if (withRedisInsight)
+        if (withRedisInsight && DevTools)
         {
             RedisResource = RedisResource.WithRedisInsight();
         }
+
+        EditorResource?.WaitFor(RedisResource);
 
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -252,6 +280,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             new GenerateParameterDefault { MinLength = 16, MinLower = 1, MinUpper = 1, MinNumeric = 1, MinSpecial = 1 },
             secret: true, persist: true);
 
+        // No font-generation shortcut here on purpose: the image regenerates AllFonts.js and the font
+        // thumbnails on every start (~30-100 s depending on the version). Caching them needs knowledge of the
+        // image's internals (output paths, start-script behaviour per version), which is not worth carrying.
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, tag)
             //TODO:get from config or set for the rest projects
@@ -273,7 +304,40 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 "if grep -q passwordHash /var/www/onlyoffice/Data/runtime.json 2>/dev/null; then cmd=reset-admin-password; else cmd=create-admin; fi; " +
                 "documentserver-admin $cmd --password-file \"$f\" </dev/null; rm -f \"$f\" ) & " +
                 "exec /app/ds/run-document-server.sh")
-            .WithResetAdminPasswordCommand(adminPanelPassword, builder.Configuration["ASPIRE_CONTAINER_RUNTIME"] ?? "docker");
+            .WithResetAdminPasswordCommand(adminPanelPassword, builder.Configuration["ASPIRE_CONTAINER_RUNTIME"] ?? "docker")
+            // Editing state has two halves that must survive a restart together: the task_result/doc_changes
+            // rows (in the AppHost MySQL since the external-DB change above, so they persist) and the cached
+            // document files under /var/lib/onlyoffice (an anonymous volume on the image, so a new container
+            // starts without them). Rows without files made every document that was open at shutdown fail
+            // to reopen and get re-saved damaged (2026-10-09). Production mounts the same path as ds_state
+            // (buildtools/install/docker/ds.yml); the name carries no tag because the data is not version-bound.
+            .WithVolume("docspace-editors-state", "/var/lib/onlyoffice")
+            // Give the document service time to finish the saves in flight before the container is killed -
+            // the production compose uses the same 60 s stop_grace_period.
+            .WithContainerRuntimeArgs("--stop-timeout", "60")
+            .WithMemoryLimit(ContainerMemoryExtensions.EditorsLimit);
+
+        // The image bundles its own PostgreSQL, RabbitMQ and Redis and starts each one only when the matching
+        // host still says "localhost" after the environment is read. Pointing them at the AppHost's own
+        // containers drops the bundled broker (~120 MiB) and database (~80 MiB) from the editors container.
+        // The values resolve at start time: AddEditors runs before AddMySql/AddRabbitMq/AddRedis (see
+        // Program.cs), so the resources do not exist yet here, and a profile without one of them (preview has
+        // no RabbitMQ or Redis) sends an empty value, which the script treats as unset and falls back to the
+        // bundled service. The editors container reaches the others the way Identity does: through the
+        // published host port, with localhost swapped for host.docker.internal.
+        // The schema is the image's own business: with DB_TYPE=mysql it runs CREATE DATABASE IF NOT EXISTS
+        // and its createdb.sql as DB_USER, hence root. Those resources add a WaitFor on the editors in turn.
+        EditorResource
+            .WithEnvironment("DB_TYPE", () => MySqlConnectionStringBuilder != null ? "mysql" : string.Empty)
+            .WithEnvironment("DB_HOST", () => MySqlConnectionStringBuilder != null ? SubstituteLocalhost(MySqlConnectionStringBuilder.Server) ?? string.Empty : string.Empty)
+            .WithEnvironment("DB_PORT", () => MySqlConnectionStringBuilder?.Port.ToString() ?? string.Empty)
+            .WithEnvironment("DB_NAME", () => MySqlConnectionStringBuilder != null ? "onlyoffice" : string.Empty)
+            .WithEnvironment("DB_USER", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
+            .WithEnvironment("DB_PWD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty)
+            .WithEnvironment("AMQP_URI", () => RabbitMqUri != null ? SubstituteLocalhost(RabbitMqUri.ToString()) ?? string.Empty : string.Empty)
+            .WithEnvironment("REDIS_SERVER_HOST", () => SubstituteLocalhost(Redis?.Host) ?? string.Empty)
+            .WithEnvironment("REDIS_SERVER_PORT", () => Redis?.Port ?? string.Empty)
+            .WithEnvironment("REDIS_SERVER_PASS", () => Redis?.Password ?? string.Empty);
 
         return this;
     }
@@ -290,7 +354,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
-            .WithEnvironment("discovery.type", "single-node");
+            .WithEnvironment("discovery.type", "single-node")
+            .WithEnvironment("OPENSEARCH_JAVA_OPTS", ContainerMemoryExtensions.OpensearchJavaOptions)
+            .WithMemoryLimit(ContainerMemoryExtensions.OpensearchLimit);
 
         if (withDataVolume)
         {
@@ -298,7 +364,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
         }
 
-        if (withDashboard)
+        if (withDashboard && DevTools)
         {
             builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
                 .WithHttpEndpoint(targetPort: 5601)
@@ -628,7 +694,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Scheme", () => "http")
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
-                .WithEnvironment("elastic:Threads", () => "1");
+                .WithEnvironment("elastic:Threads", () => "1")
+                // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.
+                .WithEnvironment("elastic:MaxContentLength", ContainerMemoryExtensions.IndexerMaxContentLength.ToString());
         }
 
         if (_parameters != null)
@@ -642,6 +710,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
     {
+        resourceBuilder
+            .WithEnvironment("JAVA_TOOL_OPTIONS", ContainerMemoryExtensions.IdentityJavaOptions)
+            .WithMemoryLimit(ContainerMemoryExtensions.IdentityLimit);
+
         resourceBuilder
             .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
             .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)

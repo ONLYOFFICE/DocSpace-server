@@ -73,6 +73,20 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         return link;
     }
 
+    public async Task<string> GetInvoiceLinkAsync(string portalId, string paymentRef)
+    {
+        EnsureConfigured();
+
+        var result = await billingApi.GetInvoiceLinkAsync(new GetInvoiceLinkRequestDto
+        {
+            PortalId = [portalId],
+            PaymentRef = [paymentRef]
+        });
+
+        var link = JsonSerializer.Deserialize<string>(result);
+        return link;
+    }
+
     public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
     {
         EnsureConfigured();
@@ -274,12 +288,22 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(string portalId)
+    public async Task<bool> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
     {
         EnsureConfigured();
 
-        var result =
-            await billingApi.GetDocsCloudTrialAsync(new BillingPortalRequestDto { PortalId = [portalId] });
+        var requestDto = new GetDocsCloudTrialRequestDto
+        {
+            PortalId = [portalId],
+            Email = Optional(customer?.Email),
+            PortalLink = Optional(customer?.PortalLink),
+            Name = Optional(customer?.Name),
+            Phone = Optional(customer?.Phone),
+            LanguageCode = Optional(customer?.LanguageCode),
+            AffiliateId = Optional(customer?.AffiliateId)
+        };
+
+        var result = await billingApi.GetDocsCloudTrialAsync(requestDto);
 
         return result == "\"ok\"";
     }
@@ -326,6 +350,35 @@ public class BillingPortalRequestDto
     public List<string> PortalId { get; set; }
 }
 
+/// <summary>
+/// The customer details sent to the billing service along with a Docs Connect trial request.
+/// Empty values are omitted from the request.
+/// </summary>
+/// <param name="Email">The e-mail of the user who starts the trial.</param>
+/// <param name="PortalLink">The absolute address of the portal.</param>
+/// <param name="Name">The display name of the user who starts the trial.</param>
+/// <param name="Phone">The mobile phone of the user who starts the trial.</param>
+/// <param name="LanguageCode">The two-letter ISO 639-1 code of the request language.</param>
+/// <param name="AffiliateId">The affiliate identifier the portal was registered with.</param>
+public record DocsCloudTrialCustomer(
+    string Email,
+    string PortalLink,
+    string Name,
+    string Phone,
+    string LanguageCode,
+    string AffiliateId);
+
+/// <summary>A Docs Connect trial request carrying the customer details.</summary>
+public class GetDocsCloudTrialRequestDto : BillingPortalRequestDto
+{
+    public List<string> Email { get; set; }
+    public List<string> PortalLink { get; set; }
+    public List<string> Name { get; set; }
+    public List<string> Phone { get; set; }
+    public List<string> LanguageCode { get; set; }
+    public List<string> AffiliateId { get; set; }
+}
+
 /// <summary>A portal-scoped request that targets a single product.</summary>
 public class BillingProductRequestDto : BillingPortalRequestDto
 {
@@ -336,6 +389,13 @@ public class BillingProductRequestDto : BillingPortalRequestDto
 public class GetAccountLinkRequestDto : BillingPortalRequestDto
 {
     public List<string> BackRef { get; set; }
+}
+
+/// <summary>Request for the hosted page of the invoice behind a payment.</summary>
+public class GetInvoiceLinkRequestDto : BillingPortalRequestDto
+{
+    /// <summary>The payment reference of the top-up: a Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>).</summary>
+    public List<string> PaymentRef { get; set; }
 }
 
 /// <summary>Request for a single Stripe payment (checkout) URL.</summary>

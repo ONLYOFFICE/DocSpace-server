@@ -76,13 +76,21 @@ public class KeyController(
                 return null;
             }
 
-            var decryptedEmail = await validationKeyProvider.DecodeAndDecrypt(inDto.EmailKey);
-
             var cacheKey = $"{inDto.Page}{inDto.LinkKey}";
 
-            var isValid = validationKeyProvider.ValidateKey(cacheKey, inDto.EmailKey, inDto.LinkKey);
+            var result = validationKeyProvider.ValidateKey(cacheKey, inDto.EmailKey, inDto.LinkKey);
 
-            return new ValideteKeysResponseDto(decryptedEmail, isValid);
+            if (result == KeyValidationResult.Invalid)
+            {
+                // the email key does not match the link key and may not be ours, so it is not decrypted
+                return new ValideteKeysResponseDto(null, false, result);
+            }
+
+            var decryptedEmail = await validationKeyProvider.DecodeAndDecrypt(inDto.EmailKey);
+
+            return result == KeyValidationResult.Ok
+                ? new ValideteKeysResponseDto(decryptedEmail, true, null)
+                : new ValideteKeysResponseDto(decryptedEmail, false, result);
         }
         catch (Exception ex)
         {
