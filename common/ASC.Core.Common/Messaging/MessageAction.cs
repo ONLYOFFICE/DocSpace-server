@@ -1080,6 +1080,12 @@ public enum MessageAction
     [Description("Service spending limit deleted")]
     CustomerServiceLimitDeleted = 6116,
 
+    [Description("App enabled")]
+    AppEnabled = 6119,
+
+    [Description("App disabled")]
+    AppDisabled = 6120,
+
     /// <summary>
     /// A member queued a past webhook delivery to be sent again; the target is the subscription.
     /// </summary>

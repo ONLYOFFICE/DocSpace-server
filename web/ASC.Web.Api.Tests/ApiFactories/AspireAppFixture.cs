@@ -40,8 +40,10 @@ namespace ASC.Web.Api.Tests.ApiFactories;
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
+    // Web.Studio hosts the only subscriber that persists audit events published to the event bus,
+    // which the Apps audit trail suite reads back.
     protected override IEnumerable<string> Resources =>
-        [ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
+        [ResourceNames.People, ResourceNames.WebStudio, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
 
     // the webhook tests (NeedsLazyResources) wait for these themselves. The receiver is the subscriber: creating a
     // subscription probes it. It is published on a loopback alias that macOS lacks until it is added by hand, so

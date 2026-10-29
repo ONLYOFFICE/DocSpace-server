@@ -1320,4 +1320,10 @@
   <data name="FolderMarkedAsRead" xml:space="preserve">
     <value>Folders [{0}]. Marked As Read</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>App enabled: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>App disabled: {0}</value>
+  </data>
 </root>
