@@ -144,6 +144,13 @@ LINE_CHECKS = [
      re.compile(r"\.Log(Trace|Debug|Information|Warning|Error|Critical)\s*\(|\b_?logger\.Log\s*\("), is_cs),
     ("logging.md", "string interpolation in a log call",
      re.compile(r"\.Log\w*\(\s*\$\""), is_cs),
+    ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
+     re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
+    ("correctness", "* configuration value read - bounds checked (0, negative, above a framework limit)?",
+     re.compile(r"\.GetValue<\s*(int|long|double|TimeSpan|int\[\])|configuration\[\s*\""),
+     lambda p: is_cs(p) and not is_test(p)),
+    ("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?",
+     re.compile(r"catch\s*(\([^)]*\))?\s*\{\s*\}"), lambda p: is_cs(p) and not is_test(p)),
     ("http-clients.md", "`new HttpClient(` (IHttpClientFactory required)",
      re.compile(r"new\s+HttpClient\s*\("), is_cs),
     ("http-clients.md", "new named HttpClient registered",
@@ -326,6 +333,83 @@ def print_resx_section(files: list[tuple[str, str]], base: str, head: str | None
                 print(f"      !! placeholder mismatch: {', '.join(broken)}")
         if len(keys) > 20:
             print(f"    ... and {len(keys) - 20} more keys")
+    print()
+
+
+# --- changed endpoints, stateful code, size ------------------------------------------------------
+# These sections feed the cross-cutting matrix (SKILL.md §3 A0), reviewer G and the chunking of
+# reviewers (SKILL.md §3 "Coverage"): a reviewer handed a large area samples it, and these lists make
+# the work enumerable.
+
+HTTP_ATTR = re.compile(r'^\s*\[Http(Get|Post|Put|Delete|Patch)(?:\(\s*"([^"]*)")?')
+ACTION = re.compile(r"^\s*public\s+(?:async\s+)?[\w<>\[\],.? ]+?\s+(\w+)\s*\(")
+CLASS_ROUTE = re.compile(r'^\s*\[Route\(\s*"([^"]*)"')
+
+
+def print_endpoints_section(files, added, read_head) -> None:
+    print("## Changed endpoints (one row each in the cross-cutting matrix, SKILL.md §3 A0)")
+    rows = []
+    for st, p in files:
+        if not p.endswith("Controller.cs") or not is_cs(p) or is_test(p) or st.startswith("D"):
+            continue
+        changed = {n for n, _ in added.get(p, [])}
+        blob = read_head(p) if changed else None
+        if not blob:
+            continue
+        lines = blob.decode("utf-8", "replace").splitlines()
+        prefix, actions, pending = "", [], None
+        for i, line in enumerate(lines, 1):
+            if not prefix and (m := CLASS_ROUTE.match(line)):
+                prefix = m.group(1)
+            if m := HTTP_ATTR.match(line):
+                pending = (i, m.group(1).upper(), m.group(2) or "")
+            elif pending and (m := ACTION.match(line)):
+                lo = pending[0]
+                while lo > 1 and lines[lo - 2].strip().startswith(("///", "[")):
+                    lo -= 1
+                actions.append([lo, pending[0], pending[1], pending[2], m.group(1)])
+                pending = None
+        for k, (lo, attr, verb, route, name) in enumerate(actions):
+            hi = actions[k + 1][0] - 1 if k + 1 < len(actions) else len(lines)
+            n = sum(1 for x in changed if lo <= x <= hi)
+            if n:
+                mark = "new" if attr in changed else f"{n} changed line(s)"
+                rows.append(f"  {verb:6} {prefix}/{route}".rstrip("/") + f"  {name}  [{p}:{attr}]  ({mark})")
+    print("\n".join(rows) if rows else "  none")
+    print()
+
+
+STATEFUL = re.compile(
+    r"\b(BackgroundService|IHostedService|PeriodicTimer|Channel<|SemaphoreSlim|IDistributedLockProvider|"
+    r"DistributedLock|StopAsync|IIntegrationEventHandler|Lease\w*|NextAttempt\w*|Retry\w*|Interlocked)\b")
+
+
+def print_stateful_section(added) -> None:
+    print("## Stateful / background processing (reviewer G, SKILL.md §3 G)")
+    rows = []
+    for path, lines in sorted(added.items()):
+        if not is_cs(path) or is_test(path):
+            continue
+        kinds = sorted({m.group(1) for _, t in lines for m in STATEFUL.finditer(t)})
+        if len(kinds) >= 2:
+            rows.append(f"  {path}: {', '.join(kinds[:8])}")
+    print("\n".join(rows) if rows else "  none")
+    print()
+
+
+CHUNK_LINES = 1500
+
+
+def print_size_section(added) -> None:
+    prod = {p: len(ls) for p, ls in added.items() if is_cs(p) and not is_test(p)
+            and not p.endswith((".Designer.cs", "ModelSnapshot.cs"))}
+    total = sum(prod.values())
+    chunks = max(1, -(-total // CHUNK_LINES))
+    print("## Size (SKILL.md §3 Coverage)")
+    print(f"  added lines in product .cs: {total} in {len(prod)} file(s) -> "
+          f"{chunks} chunk(s) of ~{CHUNK_LINES} lines for reviewers B, D, E, G")
+    for p, n in sorted(prod.items(), key=lambda x: -x[1])[:10]:
+        print(f"    {n:5}  {p}")
     print()
 
 
@@ -523,6 +607,12 @@ def main() -> None:
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
     print()
+
+    read_head = (lambda p: Path(p).read_bytes() if Path(p).exists() else None) if a.worktree \
+        else (lambda p: git_bytes("show", f"{a.head}:{p}"))
+    print_endpoints_section(files, added, read_head)
+    print_stateful_section(added)
+    print_size_section(added)
 
     # --- localized resources -------------------------------------------------------------------
     print_resx_section(files, merge_base, None if a.worktree else a.head)
