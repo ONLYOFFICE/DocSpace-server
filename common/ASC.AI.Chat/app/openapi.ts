@@ -157,6 +157,7 @@ function tag(name: string): string {
 // engine apply its own default. A name means the same thing wherever it
 // appears, as with `PARAM_DOCS` - none of the six is guarded in any operation.
 const OPTIONAL_QUERY_PARAMS = new Set([
+  "expand",
   "limit",
   "startIndex",
   "count",
@@ -190,6 +191,8 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
     'The order the message page is read in. Only "desc" turns the read around and pages back from the newest message; omit for the forward read.',
   entityId:
     "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+  expand:
+    'Set to "profile" to answer the assigned profiles themselves instead of their IDs: `{ assignments, profilesTotal, chatProfilesTotal }`. Omit for the plain ID map.',
   folderId: "The prompt folder identifier. Omit to list the prompts that sit outside any folder.",
   limit: "The maximum number of items to return.",
   messageId: "The globally unique chat message identifier.",
@@ -229,6 +232,7 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
   cursor: `{"id":"${EXAMPLE_IDS.thread}","lastEditDate":${EXAMPLE_AT_MS}}`,
   direction: "desc",
   entityId: EXAMPLE_IDS.room,
+  expand: "profile",
   folderId: EXAMPLE_IDS.promptFolder,
   limit: 20,
   messageId: EXAMPLE_IDS.message,
@@ -351,7 +355,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiAssignmentsGetAssignment:
     "Returns the profile bound to one AI action, without applying the `Default` fallback - an empty answer means this action has no profile of its own, not that nothing is configured. `actionType` is required and is read from the query. Use `GET api/2.0/ai/assignments/resolve-for-action` to learn which profile would actually serve the action. This reads the portal-wide binding and accepts no `entityId`.",
   aiAssignmentsGetAllAssignments:
-    "Returns every action-to-profile binding of a scope as one map, which is what a settings screen loads. `entityId` narrows it to a room and has to name one the caller can open; a room that is not an agent room degrades to the portal-wide set rather than answering empty, and omitting the parameter reads the portal-wide set directly. Actions with no binding are simply absent from the map. The `Default` slot is reported as an entry of its own rather than being folded into the others.",
+    "Returns every action-to-profile binding of a scope as one map, which is what a settings screen loads. `entityId` narrows it to a room and has to name one the caller can open; a room that is not an agent room degrades to the portal-wide set rather than answering empty, and omitting the parameter reads the portal-wide set directly. Actions with no binding are simply absent from the map. The `Default` slot is reported as an entry of its own rather than being folded into the others. With `expand=profile` the answer is `{ assignments, profilesTotal, chatProfilesTotal }`: the assigned profiles themselves (as `GET api/2.0/ai/profiles/list` describes them) keyed by action, a binding whose profile no longer exists left out, plus how many profiles the portal has and how many of them can chat; this is the one read a chat needs to start.",
   aiAssignmentsCascadeProfileDelete:
     "Detaches a profile from every assignment that points at it, which is the cleanup step before the profile itself is removed. The `Default` slot is promoted to the first remaining profile, or dropped when none is left, and every other slot holding the profile is cleared. `profileId` is required and may be sent in the body or as a query parameter. `DELETE api/2.0/ai/profiles/delete` already does this, so call it directly only when the profile is being removed by some other means.",
 
@@ -1375,7 +1379,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiAssignmentsGetAssignment:
     "The profile bound to the action, or an empty result when it has none of its own.",
   aiAssignmentsGetAllAssignments:
-    "The scope's bindings as a map of action type to profile ID. An action with no binding is absent.",
+    "The scope's bindings as a map of action type to profile ID, or with `expand=profile` the envelope of the assigned profiles and the catalogue's counts. An action with no binding is absent.",
   aiAssignmentsCascadeProfileDelete: "Confirms no assignment points at the profile any more.",
 
   aiAttachmentsSaveFile: "The stored draft, whose ID links it to a message later.",

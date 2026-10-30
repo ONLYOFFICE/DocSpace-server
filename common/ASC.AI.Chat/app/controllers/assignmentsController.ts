@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { AssignmentsEngine, ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asActionType, asString, isObject } from "../narrow.js";
@@ -190,6 +190,32 @@ export const assignmentsController = {
     // absent/empty entityId stays the global scope.
     await assertEntityAccessible(entityId);
     const result = await engine.getAllAssignments(entityId);
+    // `expand=profile` answers the assigned profiles themselves instead of
+    // their ids, with the catalogue's counts, so a chat can start on one
+    // read: the client learns its current model (name, provider,
+    // capabilities) and whether the portal has any profile at all without
+    // `profiles/list`, which it reads only when the model picker opens. An
+    // assignment whose profile is gone is left out, as the id-only answer
+    // would point at nothing.
+    if (asString(req.query["expand"]) === "profile") {
+      const profiles = await storage.profiles.readAllForClient();
+      const byId = new Map(profiles.map((profile) => [profile.id, profile]));
+      const assignments: Record<string, (typeof profiles)[number]> = {};
+      for (const [actionType, profileId] of Object.entries(result)) {
+        const profile = profileId ? byId.get(profileId) : undefined;
+        if (profile) assignments[actionType] = profile;
+      }
+      // A profile without known capabilities may chat, as the widget's
+      // model picker assumes (`CapabilitiesUI.Chat`).
+      const canChat = (p: { capabilities?: number | null }) =>
+        !p.capabilities || (p.capabilities & CapabilitiesUI.Chat) !== 0;
+      res.json({
+        assignments,
+        profilesTotal: profiles.length,
+        chatProfilesTotal: profiles.filter(canChat).length,
+      });
+      return;
+    }
     res.json(result);
   }),
 
