@@ -43,10 +43,14 @@ import { isObject, getNumber, getObject, getString, getEntityId } from "../narro
 import logger from "../log.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
+import { mockProjectTitle } from "./aiProjectsMock/registry.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
 // `GET /api/2.0/files/folder/{folderId}` (FoldersController.GetFolderInfo).
+/** `FolderType.AiProjectRoom` on the C# side — an AI project. */
+const AI_PROJECT_FOLDER_TYPE = 40;
+
 export interface DocspaceFolderInfo {
   /** Whether the folder is an AI agent room (`FolderType.AiRoom` on the C# side). */
   isAgent: boolean;
@@ -207,6 +211,17 @@ export async function getFolderInfo(
  * dropped so a later reader can retry.
  */
 function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  // A project of the AI projects mock exists only in this process.
+  const mockTitle = mockProjectTitle(folderId);
+  if (mockTitle !== undefined) {
+    return Promise.resolve({
+      isAgent: false,
+      title: mockTitle,
+      folderType: AI_PROJECT_FOLDER_TYPE,
+      roomType: 12,
+      canCreate: false,
+    });
+  }
   // A primed chat round already carries the folders it is scoped to (from
   // `GET internal/ai/chat-context`) — no Files API round-trip for those.
   const fromSnapshot = lookupChatContextFolder(folderId);
@@ -505,9 +520,6 @@ export async function resolveAgentEntityId(
   const folderInfo = await getFolderInfoOnce(entityId);
   return folderInfo?.isAgent ? entityId : undefined;
 }
-
-/** `FolderType.AiProjectRoom` on the C# side — an AI project. */
-const AI_PROJECT_FOLDER_TYPE = 40;
 
 /**
  * The project id when `entityId` is an AI project (`FolderType.AiProjectRoom`),

@@ -74,8 +74,38 @@ manager (9) and member (11). As for agents, every route is delegated to the .NET
 (`internal/ai/projects…`, `AiProjectsController`) and answers its DocSpace envelope unchanged; the
 only check made here is that a chosen model exists and can chat.
 
-The .NET controller does not exist yet: the method-by-method specification is
-`client/packages/client/src/pages/AiProjects/spec/02-new-server-methods.md`.
+The .NET contract, method by method, is
+`client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md`.
+
+#### Mock
+
+Until the .NET side lands, `AI_PROJECTS_MOCK=1` (or `"aiProjects": { "mock": true }` in the
+config; never in production) answers every project route in process
+(`app/controllers/aiProjectsMockController.ts`, `app/storage/aiProjectsMock/`). Each signed-in
+user gets a world of their own, built from a scenario on the first call, with themselves as the
+owner, a Project manager, a Member or an admin outside the project, as each project says. The
+rights of the C# contract are enforced, and so are its 400s (an unknown body field, a blank or too
+long title, more than 20 rooms of a kind, a room linked twice).
+
+| Scenario | What it holds |
+|---|---|
+| `default` | ~36 projects that stress the UI: 170-character titles with and without spaces, emoji, right-to-left, CJK and markup-like titles; 20 + 20 linked rooms; rooms with 150 skills, 1000 files of 2400 (truncated) or none; gone and archived rooms; a deleted model; 260 members with groups, guests and pending invitations; 120 history entries with grouped events and project events the client does not draw yet; expired and used-up invitation links; 9 pinned projects (the 10th pin works, the 11th is refused); a muted project; membership through a group only; a grant warning; a project whose every read answers 500 and one whose sources take 4 s |
+| `many` | `default` plus 300 plain projects, for paging and infinite scroll |
+| `empty` | no projects at all |
+| `one` | one ordinary project |
+
+- `GET /api/2.0/ai/projects/mock` tells the scenario; `POST /api/2.0/ai/projects/mock`
+  `{ "scenario": "many" }` drops every world and rebuilds from that scenario. The start scenario
+  is `AI_PROJECTS_MOCK_SCENARIO` (default `default`).
+- `AI_PROJECTS_MOCK_DELAY_MS` delays every answer, to see the loaders.
+- Renaming a project to a title with `#400`, `#403` or `#500` makes its next save fail with that
+  status.
+- Real Instructions and Knowledge rooms picked in the dialog are linked as they are: their skills
+  and files are read live. A chat round inside a mock project runs on its model (the portal default
+  when none is set; a deleted one answers 409) with only those real rooms; the generated rooms have
+  no files to read.
+- Deleting and duplicating answer a file operation that is already finished.
+- Nothing survives a restart.
 
 ### License
 

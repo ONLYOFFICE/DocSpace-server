@@ -58,6 +58,8 @@ import { openaiPassthroughController } from "./controllers/openaiPassthroughCont
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { aiProjectsController } from "./controllers/aiProjectsController.js";
+import { aiProjectsMockController } from "./controllers/aiProjectsMockController.js";
+import { isAiProjectsMockEnabled } from "./storage/aiProjectsMock/registry.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
@@ -216,27 +218,34 @@ export default function registerRoutes(app: Application): void {
   router.delete("/agents/:id", agentsController.deleteAgent);
 
   // AI projects: rooms of type 12 with a settings block, delegated to the
-  // .NET AI service like the agents above (see aiProjectsController).
-  router.get("/projects", aiProjectsController.getProjects);
-  router.post("/projects", aiProjectsController.createProject);
-  router.get("/projects/:id", aiProjectsController.getProject);
-  router.put("/projects/:id", aiProjectsController.updateProject);
-  router.delete("/projects/:id", aiProjectsController.deleteProject);
-  router.put("/projects/:id/pin", aiProjectsController.pinProject);
-  router.put("/projects/:id/unpin", aiProjectsController.unpinProject);
-  router.get("/projects/:id/share", aiProjectsController.getMembers);
-  router.put("/projects/:id/share", aiProjectsController.setMembers);
-  router.put("/projects/:id/leave", aiProjectsController.leaveProject);
-  router.put("/projects/:id/owner", aiProjectsController.changeOwner);
-  router.get("/projects/:id/links", aiProjectsController.getInviteLinks);
-  router.put("/projects/:id/links", aiProjectsController.setInviteLink);
-  router.post("/projects/:id/resend", aiProjectsController.resendInvitations);
-  router.put("/projects/:id/mute", aiProjectsController.muteProject);
-  router.put("/projects/:id/duplicate", aiProjectsController.duplicateProject);
-  router.delete("/projects/:id/logo", aiProjectsController.deleteLogo);
-  router.get("/projects/:id/history", aiProjectsController.getHistory);
-  router.get("/projects/:id/skills", aiProjectsController.getSkills);
-  router.get("/projects/:id/knowledge", aiProjectsController.getKnowledgeFiles);
+  // .NET AI service like the agents above (see aiProjectsController), or
+  // answered in process by the mock when AI_PROJECTS_MOCK=1 (see
+  // aiProjectsMockController); `/projects/mock` then switches its scenario.
+  const projects = isAiProjectsMockEnabled() ? aiProjectsMockController : aiProjectsController;
+  if (isAiProjectsMockEnabled()) {
+    router.get("/projects/mock", aiProjectsMockController.getMock);
+    router.post("/projects/mock", aiProjectsMockController.resetMock);
+  }
+  router.get("/projects", projects.getProjects);
+  router.post("/projects", projects.createProject);
+  router.get("/projects/:id", projects.getProject);
+  router.put("/projects/:id", projects.updateProject);
+  router.delete("/projects/:id", projects.deleteProject);
+  router.put("/projects/:id/pin", projects.pinProject);
+  router.put("/projects/:id/unpin", projects.unpinProject);
+  router.get("/projects/:id/share", projects.getMembers);
+  router.put("/projects/:id/share", projects.setMembers);
+  router.put("/projects/:id/leave", projects.leaveProject);
+  router.put("/projects/:id/owner", projects.changeOwner);
+  router.get("/projects/:id/links", projects.getInviteLinks);
+  router.put("/projects/:id/links", projects.setInviteLink);
+  router.post("/projects/:id/resend", projects.resendInvitations);
+  router.put("/projects/:id/mute", projects.muteProject);
+  router.put("/projects/:id/duplicate", projects.duplicateProject);
+  router.delete("/projects/:id/logo", projects.deleteLogo);
+  router.get("/projects/:id/history", projects.getHistory);
+  router.get("/projects/:id/skills", projects.getSkills);
+  router.get("/projects/:id/knowledge", projects.getKnowledgeFiles);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

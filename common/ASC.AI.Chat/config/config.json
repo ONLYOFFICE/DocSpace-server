@@ -12,6 +12,9 @@
       "url": "http://localhost:5157"
     }
   },
+  "aiProjects": {
+    "mock": true
+  },
   "logger": {
     "file": {
       "level": "debug",
