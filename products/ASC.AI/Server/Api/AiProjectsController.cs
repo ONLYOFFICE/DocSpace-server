@@ -40,7 +40,10 @@ public class AiProjectsController(
     FileStorageService fileStorageService,
     GlobalFolderHelper globalFolderHelper,
     FolderContentDtoHelper folderContentDtoHelper,
-    FolderDtoHelper folderDtoHelper)
+    FolderDtoHelper folderDtoHelper,
+    FileDeleteOperationsManager fileDeleteOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FileSecurity fileSecurity)
     : ControllerBase
 {
     /// <remarks>
@@ -162,5 +165,33 @@ public class AiProjectsController(
         var updated = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateProject.Map());
 
         return await folderDtoHelper.GetAsync(updated);
+    }
+
+    /// <remarks>
+    /// Removes an AI project.
+    /// </remarks>
+    /// <summary>Remove an AI project</summary>
+    /// <path>api/2.0/ai/projects/{id}</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "The caller may not read or delete the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpDelete("projects/{id}")]
+    public async Task<FileOperationDto> DeleteProject(DeleteRoomRequestDto<int> inDto)
+    {
+        var project = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (project is not { FolderType: FolderType.AiProjectRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanDeleteAsync(project))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
+
+        return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 }
