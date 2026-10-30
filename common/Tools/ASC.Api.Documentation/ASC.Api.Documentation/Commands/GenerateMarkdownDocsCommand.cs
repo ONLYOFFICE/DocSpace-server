@@ -392,11 +392,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             section["siteUrl"],
             section["indexTitle"] ?? "ONLYOFFICE Apps API",
             titles,
+            ReadExampleSettings(section.GetSection("examples")),
             contract is { Length: > 0 } ? Path.GetFullPath(Path.Combine(contract)) : null,
             webhooks["directory"] ?? "webhooks",
             webhooks["title"] ?? "ONLYOFFICE DocSpace Webhooks");
-            titles,
-            ReadExampleSettings(section.GetSection("examples")));
     }
 
     /// <summary>
@@ -858,11 +857,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         string? SiteUrl,
         string IndexTitle,
         IReadOnlyDictionary<string, string> Titles,
+        ExampleSettings Examples,
         string? WebhooksContract,
         string WebhooksDirectory,
         string WebhooksTitle)
-        IReadOnlyDictionary<string, string> Titles,
-        ExampleSettings Examples)
     {
         /// <summary>
         /// Titles are keyed by the published document name, so a section added to the API without
