@@ -795,6 +795,18 @@
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Incorrect email address</value>
   </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>The webhook target is not an existing user or group</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>The webhook is disabled. Enable it before retrying its deliveries</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>The event is being sent right now. Retry it once the attempt has finished</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>The delivery was recorded in an earlier webhook format and cannot be sent again</value>
+  </data>
   <data name="ErrorAccessDenied" xml:space="preserve">
     <value>No permissions to perform this action</value>
   </data>

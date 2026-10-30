@@ -44,6 +44,11 @@ public class DataRowInfo(string tableName)
     private readonly List<string> _columnNames = [];
     private readonly List<object> _values = [];
 
+    public bool HasColumn(string columnName)
+    {
+        return GetIndex(columnName) != -1;
+    }
+
     public void SetValue(string columnName, object item)
     {
         var index = GetIndex(columnName);

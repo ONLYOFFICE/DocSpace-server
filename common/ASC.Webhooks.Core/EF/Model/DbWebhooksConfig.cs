@@ -115,11 +115,13 @@ public static class WebhooksConfigExtension
                 entity.Property(e => e.Enabled)
                     .HasColumnName("enabled")
                     .HasDefaultValueSql("'1'")
+                    .ValueGeneratedNever()
                     .HasColumnType("tinyint(1)");
 
                 entity.Property(e => e.SSL)
                     .HasColumnName("ssl")
                     .HasDefaultValueSql("'1'")
+                    .ValueGeneratedNever()
                     .HasColumnType("tinyint(1)");
 
                 entity.Property(e => e.Triggers)
@@ -216,11 +218,13 @@ public static class WebhooksConfigExtension
                 entity.Property(e => e.Enabled)
                     .HasColumnName("enabled")
                     .HasDefaultValueSql("true")
+                    .ValueGeneratedNever()
                     .HasColumnType("boolean");
 
                 entity.Property(e => e.SSL)
                     .HasColumnName("ssl")
                     .HasDefaultValueSql("true")
+                    .ValueGeneratedNever()
                     .HasColumnType("boolean");
 
                 entity.Property(e => e.Triggers)

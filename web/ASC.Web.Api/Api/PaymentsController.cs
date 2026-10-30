@@ -78,7 +78,8 @@ public class PaymentController(
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
     PaymentHelper paymentHelper,
-    QuotaSocketManager quotaSocketManager)
+    QuotaSocketManager quotaSocketManager,
+    DepositDtoMapper depositDtoMapper)
     : ControllerBase
 {
     /// <remarks>
@@ -1004,7 +1005,7 @@ public class PaymentController(
 
         inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcStartDate = GetUtcStartDate(inDto.StartDate, tenant);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new OperationFilter
@@ -1032,6 +1033,145 @@ public class PaymentController(
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, true);
 
         return new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
+    }
+
+    /// <remarks>
+    /// Lists the top-ups of the portal's wallet - the payments into it - one page at a time, which is what a list of
+    /// payments with their invoices is built from. A portal that is not a billing customer yet has no top-ups and
+    /// gets an empty result rather than an error. Only the payer or the portal owner may read it, as with the
+    /// invoices, and the call is read-only. Every filter is optional: `startDate` and `endDate` default to the
+    /// portal creation date and the present moment, a value without `Z` or an offset is read in the portal time
+    /// zone, and `status` narrows to how a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next
+    /// to `totalQuantity`, `totalPage` and `currentPage`; a negative `offset` or a `limit` outside 1 to 100 fails
+    /// with 400. An empty result means the portal is not a billing customer, has no wallet at the accounting service
+    /// yet, or that service could not be read; a period without top-ups gives an empty `collection`. A top-up with
+    /// `hasInvoice` true has an invoice, opened with `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`.
+    /// For the full wallet history, charges and refunds included, use
+    /// `GET api/2.0/portal/payment/customer/operations`.
+    /// </remarks>
+    /// <summary>
+    /// Get the wallet top-ups
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/deposits</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal is not a billing customer, has no wallet at the accounting service yet, or that service could not be read", typeof(DepositReportDto))]
+    [SwaggerResponse(400, "`offset` is negative, `limit` is outside 1 to 100, or a parameter cannot be read, such as a `status` that is not one of its values or a date that is not ISO 8601")]
+    [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
+    [HttpGet("customer/deposits")]
+    public async Task<DepositReportDto> GetCustomerDeposits(GetCustomerDepositsRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
+
+        var offset = inDto.Offset ?? 0;
+        var limit = inDto.Limit ?? 25;
+
+        var filter = new DepositFilter
+        {
+            UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
+            UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
+            Status = inDto.Status,
+            Offset = offset,
+            Limit = limit
+        };
+
+        var report = await tariffService.GetCustomerDepositsAsync(tenant.Id, filter);
+        if (report == null)
+        {
+            return null;
+        }
+
+        return depositDtoMapper.Map(report, offset, limit);
+    }
+
+    /// <remarks>
+    /// Hands back the address of the page on which the billing provider shows the invoice for one top-up of the
+    /// portal's wallet, so a client can open or download it. The top-up is named by the `id` that
+    /// `GET api/2.0/portal/payment/customer/deposits` returns, and only one listed there with `hasInvoice` true has an
+    /// invoice to show. Only the payer or the portal owner may read it, as with the billing account page, and the
+    /// call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
+    /// it is asked for anew on every call, so request it when the user is about to open the invoice instead of
+    /// storing it. A top-up this portal does not have, one without an invoice, or a portal that is not a billing
+    /// customer answers 404, and an `id` that is not a number fails with 400. An installation without a billing
+    /// service answers 403, and 402 means the billing or the accounting service rejected the request or did not
+    /// answer, which a later retry may get past.
+    /// </remarks>
+    /// <summary>
+    /// Get the top-up invoice
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/deposits/{id}/invoice</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The absolute address of the hosted invoice page for the top-up", typeof(string))]
+    [SwaggerResponse(400, "`id` is not a number")]
+    [SwaggerResponse(402, "The billing or the accounting service rejected the request for the top-up or its invoice link, or did not answer")]
+    [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, no top-up with this ID, or the top-up has no invoice")]
+    [HttpGet("customer/deposits/{id}/invoice")]
+    public async Task<string> GetDepositInvoice(GetDepositInvoiceRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+
+        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
+
+        // The default window of the top-up list, so every top-up the list can show is found here as well.
+        var utcStartDate = GetUtcStartDate(null, tenant);
+        var utcEndDate = DateTime.UtcNow;
+
+        Deposit deposit;
+
+        try
+        {
+            deposit = await tariffService.FindCustomerDepositAsync(tenant.Id, inDto.Id, utcStartDate, utcEndDate, HttpContext.RequestAborted);
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            throw new ItemNotFoundException("Customer could not be found");
+        }
+        catch (AccountingException exception)
+        {
+            // A failed accounting read is answered like a failed billing request, with the retryable 402, rather
+            // than taken for a missing top-up.
+            throw new BillingException("The top-up could not be read from the accounting service", exception);
+        }
+
+        if (deposit is not { HasInvoice: true })
+        {
+            throw new ItemNotFoundException("Invoice could not be found");
+        }
+
+        try
+        {
+            return await tariffService.GetInvoiceLinkAsync(tenant.Id, deposit.PaymentRef);
+        }
+        catch (BillingNotFoundException)
+        {
+            throw new ItemNotFoundException("Invoice could not be found");
+        }
+    }
+
+    // A requested start is read in the portal time zone; without one the period starts at the portal creation date.
+    private DateTime GetUtcStartDate(DateTime? startDate, Tenant tenant)
+    {
+        return startDate.HasValue
+            ? tenantUtil.DateTimeToUtc(startDate.Value)
+            : TenantUtil.GetUtcCreationDate(tenant);
     }
 
     /// <remarks>
@@ -1069,7 +1209,7 @@ public class PaymentController(
 
         var filter = new MonthlyUsageFilter
         {
-            UtcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime),
+            UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
             TimeZome = tenant.TimeZone ?? "UTC"
         };
@@ -1116,7 +1256,7 @@ public class PaymentController(
 
         inDto.ServiceName = await paymentHelper.GetCorrectServiceNamesAsync(inDto.ServiceName);
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcStartDate = GetUtcStartDate(inDto.StartDate, tenant);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
 
         var filter = new UsageFilter

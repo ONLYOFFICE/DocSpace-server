@@ -122,7 +122,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.UserUpdatedAiSettings,
                     MessageAction.DocsCloudConfigUpdated,
                     MessageAction.AiProfileUpdated,
-                    MessageAction.AiProfileAssigned
+                    MessageAction.AiProfileAssigned,
+                    MessageAction.AppEnabled, MessageAction.AppDisabled
                 ]
             },
             {
@@ -164,7 +165,8 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Send, [
-                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
+                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions,
+                    MessageAction.WebhookRetried
                 ]
             },
             {

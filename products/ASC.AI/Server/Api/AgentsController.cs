@@ -113,6 +113,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Create an ai agent</summary>
     /// <path>api/2.0/ai/agents</path>
+    [RaisesWebhook(WebhookTrigger.AgentCreated)]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
@@ -168,6 +169,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Update an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "on every successful call, even one that changes nothing")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, or a tag name is empty")]
@@ -194,6 +196,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Remove an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "once the queued operation deletes the agent")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [SwaggerResponse(403, "The caller may not read or delete the agent")]
@@ -226,6 +229,9 @@ public class AgentsController(
     /// </summary>
     /// <path>api/2.0/ai/agents/agentquota</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "for every listed agent, even when its quota does not change")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead for a listed ID that is an ordinary room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/agentquota")]
@@ -270,6 +276,9 @@ public class AgentsController(
     /// </summary>
     /// <path>api/2.0/ai/agents/resetquota</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "for every listed agent")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead for a listed ID that is an ordinary room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/resetquota")]

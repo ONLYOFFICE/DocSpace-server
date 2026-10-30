@@ -113,6 +113,7 @@ global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
+global using ASC.Webhooks.Core;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;

@@ -39,7 +39,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 [Trait("Category", "Settings")]
 public class RetryWebhooksTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : WebhookDeliveryTestBase(fixture)
 {
     [Fact]
     public async Task RetryWebhooks_EmptyIdList_ReturnsEmptyResult()
@@ -54,5 +54,132 @@ public class RetryWebhooksTests(
         // Assert
         result.StatusCode.Should().Be(200);
         result.Response.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_SeveralDeliveries_QueuesANewRecordForEach()
+    {
+        // Arrange
+        var configId = await CreateSubscriptionAsync();
+        await FireEventAsync();
+        await FireEventAsync();
+        var deliveries = (await WaitForAttemptedDeliveriesAsync(configId, 2)).Where(l => l.Status != 0).ToList();
+        deliveries.Should().HaveCount(2, "both events should have been attempted by now");
+        var ids = deliveries.Select(d => d.Id).ToList();
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(new WebhookRetryRequestDto(ids), TestContext.Current.CancellationToken);
+
+        // Assert: new records, one per retried event
+        result.Response.Should().HaveCount(2);
+        result.Response.Select(r => r.Id).Should().NotIntersectWith(ids);
+        result.Response.Should().AllSatisfy(r =>
+        {
+            r.Status.Should().Be(0);
+            r.Delivery.Should().BeNull();
+        });
+
+        var newIds = result.Response.Select(r => r.Id).ToList();
+        var records = await GetDeliveryRecordsAsync(configId);
+        records.Where(r => newIds.Contains(r.Id)).Select(r => r.EventId).Should().BeEquivalentTo(ids);
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_TwoRecordsOfTheSameEvent_QueuesOneRetry()
+    {
+        // Arrange: an event's first record and a manual retry of it, attempted, so nothing of the event is in flight
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
+        var firstRetry = (await _webhooksApi.RetryWebhookAsync(original.Id, TestContext.Current.CancellationToken)).Response;
+        (await WaitForAttemptAsync(original.Id, firstRetry.Id)).Status.Should().NotBe(0, "the first retry should have been attempted by now");
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([original.Id, firstRetry.Id]), TestContext.Current.CancellationToken);
+
+        // Assert: one new record for the event; a second one would stop the first as soon as it was queued
+        var retry = result.Response.Should().ContainSingle().Subject;
+        retry.Id.Should().NotBe(original.Id).And.NotBe(firstRetry.Id);
+
+        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        records.Should().HaveCount(3, "the event's first record, the earlier retry and the one queued now");
+        records.Single(r => r.Id == retry.Id).EventId.Should().Be(original.Id);
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_UnknownId_IsSkippedInSilence()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([delivery.Id, int.MaxValue]), TestContext.Current.CancellationToken);
+
+        // Assert: a shorter response is the only sign that something was left out
+        result.Response.Should().ContainSingle().Which.Id.Should().NotBe(delivery.Id);
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_DeliveryBeingSent_IsSkippedInSilence()
+    {
+        // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+        await PlantInFlightAsync(record.Id);
+
+        // Act
+        await _webApiClient.Authenticate(Owner);
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([record.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_DisabledSubscription_IsSkippedInSilence()
+    {
+        // Arrange: a delivered event, then the subscription is switched off
+        var receiver = await CreateReceiverAsync();
+        var subscription = await CreateSubscriptionAsync(receiver);
+        await FireEventAsync();
+        var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
+
+        await _webApiClient.Authenticate(Owner);
+        await _webhooksApi.EnableWebhookAsync(new UpdateWebhooksConfigRequestDto(subscription.Id)
+        {
+            Name = subscription.Name,
+            Uri = subscription.Uri,
+            SecretKey = subscription.SecretKey,
+            Enabled = false
+        }, TestContext.Current.CancellationToken);
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([record.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_AnotherMembersSubscription_IsSkippedInSilence()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _webApiClient.Authenticate(roomAdmin);
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([delivery.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
     }
 }

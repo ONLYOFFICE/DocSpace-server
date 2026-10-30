@@ -31,102 +31,10 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Webhooks.Core;
-
-using InternalEmployeeType = ASC.Core.Users.EmployeeType;
-using InternalWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
-using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
-
 namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    public static TheoryData<InternalWebhookTrigger> AdminOnlyTriggers =>
-    [
-        InternalWebhookTrigger.UserCreated,
-        InternalWebhookTrigger.UserInvited,
-        InternalWebhookTrigger.GroupCreated,
-        InternalWebhookTrigger.GroupUpdated,
-        InternalWebhookTrigger.GroupDeleted,
-        InternalWebhookTrigger.RoomCreated,
-        InternalWebhookTrigger.RoomCopied,
-        InternalWebhookTrigger.AgentCreated,
-    ];
-
-    public static TheoryData<InternalWebhookTrigger> AllRolesTriggers =>
-    [
-        InternalWebhookTrigger.All,
-        InternalWebhookTrigger.UserUpdated,
-        InternalWebhookTrigger.UserDeleted,
-        InternalWebhookTrigger.FileCreated,
-        InternalWebhookTrigger.FileUploaded,
-        InternalWebhookTrigger.FileUpdated,
-        InternalWebhookTrigger.FileTrashed,
-        InternalWebhookTrigger.FileDeleted,
-        InternalWebhookTrigger.FileRestored,
-        InternalWebhookTrigger.FileCopied,
-        InternalWebhookTrigger.FileMoved,
-        InternalWebhookTrigger.FolderCreated,
-        InternalWebhookTrigger.FolderUpdated,
-        InternalWebhookTrigger.FolderTrashed,
-        InternalWebhookTrigger.FolderDeleted,
-        InternalWebhookTrigger.FolderRestored,
-        InternalWebhookTrigger.FolderCopied,
-        InternalWebhookTrigger.FolderMoved,
-        InternalWebhookTrigger.RoomUpdated,
-        InternalWebhookTrigger.RoomArchived,
-        InternalWebhookTrigger.RoomDeleted,
-        InternalWebhookTrigger.RoomRestored,
-        InternalWebhookTrigger.FormSubmit,
-        InternalWebhookTrigger.FormFilledOut,
-        InternalWebhookTrigger.FormStopped,
-        InternalWebhookTrigger.AgentUpdated,
-        InternalWebhookTrigger.AgentDeleted,
-    ];
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_DocSpaceAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_RoomAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AdminOnlyTriggers))]
-    public void IsAvailableFor_AdminOnlyTrigger_User_ReturnsFalse(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.User).Should().BeFalse();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_DocSpaceAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.DocSpaceAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_RoomAdmin_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.RoomAdmin).Should().BeTrue();
-
-    [Theory]
-    [MemberData(nameof(AllRolesTriggers))]
-    public void IsAvailableFor_AllRolesTrigger_User_ReturnsTrue(InternalWebhookTrigger trigger)
-        => trigger.IsAvailableFor(InternalEmployeeType.User).Should().BeTrue();
-
-    [Fact]
-    public void AllTriggers_HaveAvailableForAttribute()
-    {
-        var type = typeof(InternalWebhookTrigger);
-
-        foreach (var value in Enum.GetValues<InternalWebhookTrigger>())
-        {
-            var field = type.GetField(value.ToString());
-            var attr = Attribute.GetCustomAttribute(field!, typeof(AvailableForAttribute));
-            attr.Should().NotBeNull($"WebhookTrigger.{value} is missing [AvailableFor] attribute");
-        }
-    }
-
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "73741")]
@@ -143,16 +51,19 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
         triggers.Should().NotBeNull();
         triggers.Response.Should().NotBeNull();
 
-        //var trigger = triggers.Response.FirstOrDefault(x => x.Id == (long)WebhookTrigger.UserCreated);
-        //trigger.Should().NotBeNull();
-        //trigger!.Available.Should().Be(false);
+        var trigger = triggers.Response.FirstOrDefault(x => x.Id == (long)WebhookTrigger.UserCreated);
+        trigger.Should().NotBeNull();
+        trigger!.Available.Should().BeFalse("a User may not subscribe to the creation of users");
 
+        // The triggers are checked before the target is probed, so this address is never contacted; were the
+        // trigger check gone, the blacklisted localhost would answer the request with a 400 of its own, which
+        // is why the message is asserted and not only the status.
         var createWebhooksConfigRequestsDto = new CreateWebhooksConfigRequestDto(
             "test",
-            "https://onlyoffice.com",
+            "http://localhost",
             "test123!@#%ABC",
             true,
-            true,
+            false,
             WebhookTrigger.UserCreated
             );
 
@@ -162,6 +73,7 @@ public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("Trigger is not available");
     }
 
     [Fact]

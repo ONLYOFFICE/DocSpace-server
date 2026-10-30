@@ -53,6 +53,12 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     /// </summary>
     private const string ModelsDirectory = "models";
 
+    /// <summary>
+    /// The name the webhook models are rendered under before they are cut into pages. Only the generator and the
+    /// staging directory ever see it.
+    /// </summary>
+    private const string WebhookModelsDocument = "webhook-models";
+
     private static readonly JsonSerializerOptions _writeOptions = new()
     {
         WriteIndented = true,
@@ -216,6 +222,31 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 : $"  cut into [green]{sliced.Count}[/] endpoint pages, [green]{exampled}[/] with examples");
         }
 
+        // After the sections: a trigger page links the API operations that raise it, so their pages have to be
+        // known by then.
+        var webhooksDirectory = Path.Combine(outputDirectory, markdown.WebhooksDirectory);
+        IReadOnlyList<WebhookMarkdown.WebhookPage> webhookPages = [];
+
+        if (markdown.WebhooksContract != null)
+        {
+            var rendered = await RenderWebhooksAsync(
+                markdown,
+                splitDirectory,
+                outputDirectory,
+                webhooksDirectory,
+                operationDocuments,
+                cancellationToken);
+
+            if (rendered == null)
+            {
+                return 1;
+            }
+
+            webhookPages = rendered;
+
+            AnsiConsole.MarkupLine($"Rendered [green]{webhookPages.Count}[/] webhook pages");
+        }
+
         CheckPlaced(examples, placed);
 
         if (!string.IsNullOrWhiteSpace(markdown.BundleDirectory))
@@ -228,6 +259,11 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 sectionDocuments,
                 operationDocuments,
                 [.. models.Select(model => new MarkdownBundle.ModelDocument(model.Title, model.FileName))],
+                new MarkdownBundle.WebhooksDocument(
+                    markdown.WebhooksContract == null ? null : webhooksDirectory,
+                    markdown.WebhooksDirectory,
+                    markdown.WebhooksTitle,
+                    webhookPages),
                 cancellationToken);
 
             AnsiConsole.MarkupLine(
@@ -236,7 +272,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             // Only once the bundle holds a complete copy: until then these directories are the
             // only place the work exists, and a failed run is far easier to diagnose with them
             // still on disk.
-            RemoveStaging(outputDirectory, operationsDirectory, splitDirectory);
+            RemoveStaging(outputDirectory, operationsDirectory, splitDirectory, webhooksDirectory);
         }
 
         return 0;
@@ -252,7 +288,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     /// published document in the working tree, where it goes stale and gets read as though it
     /// were current.
     /// </remarks>
-    private static void RemoveStaging(string outputDirectory, string operationsDirectory, string splitDirectory)
+    private static void RemoveStaging(string outputDirectory, string operationsDirectory, string splitDirectory, string webhooksDirectory)
     {
         foreach (var path in Directory.EnumerateFiles(outputDirectory, "*.md"))
         {
@@ -265,6 +301,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                  {
                      operationsDirectory,
                      splitDirectory,
+                     webhooksDirectory,
                      Path.Combine(outputDirectory, ".openapi-generator")
                  })
         {
@@ -344,6 +381,9 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             .Where(title => !string.IsNullOrWhiteSpace(title.Value))
             .ToDictionary(title => title.Key, title => title.Value!, StringComparer.OrdinalIgnoreCase);
 
+        var webhooks = section.GetSection("webhooks");
+        var contract = webhooks.GetSection("contract").Get<string[]>();
+
         return new MarkdownSettings(
             configuration["serverUrl"],
             section["docsUrl"],
@@ -351,6 +391,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             ReadBundleDirectory(section),
             section["siteUrl"],
             section["indexTitle"] ?? "ONLYOFFICE Apps API",
+            titles,
+            contract is { Length: > 0 } ? Path.GetFullPath(Path.Combine(contract)) : null,
+            webhooks["directory"] ?? "webhooks",
+            webhooks["title"] ?? "ONLYOFFICE DocSpace Webhooks");
             titles,
             ReadExampleSettings(section.GetSection("examples")));
     }
@@ -619,6 +663,74 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     }
 
     /// <summary>
+    /// Renders the webhooks reference into <paramref name="webhooksDirectory"/>: the model pages through the
+    /// generator, as the API models are, and the trigger pages from the contract. Null when the generator refused
+    /// the models document, which the caller reports as the failure it is.
+    /// </summary>
+    private async Task<IReadOnlyList<WebhookMarkdown.WebhookPage>?> RenderWebhooksAsync(
+        MarkdownSettings markdown,
+        string splitDirectory,
+        string outputDirectory,
+        string webhooksDirectory,
+        IReadOnlyList<MarkdownBundle.OperationDocument> operations,
+        CancellationToken cancellationToken)
+    {
+        AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(markdown.WebhooksTitle)}[/]");
+
+        var contract = WebhookMarkdown.LoadContract(markdown.WebhooksContract!);
+
+        if (Directory.Exists(webhooksDirectory))
+        {
+            Directory.Delete(webhooksDirectory, recursive: true);
+        }
+
+        var modelsDocument = await WebhookMarkdown.WriteModelsDocumentAsync(
+            contract,
+            splitDirectory,
+            WebhookModelsDocument,
+            markdown.WebhooksTitle,
+            cancellationToken);
+
+        var arguments = new List<string> { "-i", modelsDocument };
+
+        AddProperty(arguments, "documentName", WebhookModelsDocument);
+        AddProperty(arguments, "modelsOnly", "true");
+
+        if (await RunGeneratorAsync(arguments, cancellationToken) != 0)
+        {
+            return null;
+        }
+
+        var rendered = Path.Combine(outputDirectory, $"{WebhookModelsDocument}.md");
+
+        await MdxSafe.ApplyAsync(rendered, cancellationToken);
+
+        // the category of the model pages is written with the others, where its place in the sidebar is known
+        var models = await MarkdownSlicer.SliceModelsAsync(
+            rendered,
+            Path.Combine(webhooksDirectory, WebhookMarkdown.ModelsDirectory),
+            cancellationToken);
+
+        File.Delete(rendered);
+
+        var modelFiles = models.ToDictionary(model => model.Title, model => model.FileName, StringComparer.Ordinal);
+
+        // an endpoint the API publishes on two pages, as a third-party variant, links to the first of them
+        var apiPages = operations
+            .Where(operation => !string.IsNullOrEmpty(operation.Endpoint))
+            .GroupBy(operation => operation.Endpoint, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => MarkdownBundle.PagePath(group.First()), StringComparer.Ordinal);
+
+        return await WebhookMarkdown.RenderAsync(
+            contract,
+            webhooksDirectory,
+            markdown.WebhooksTitle,
+            modelFiles.GetValueOrDefault,
+            apiPages.GetValueOrDefault,
+            cancellationToken);
+    }
+
+    /// <summary>
     /// Moves the rendered document to where it is published, under the name it is published as.
     /// </summary>
     /// <remarks>
@@ -745,6 +857,10 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         string? BundleDirectory,
         string? SiteUrl,
         string IndexTitle,
+        IReadOnlyDictionary<string, string> Titles,
+        string? WebhooksContract,
+        string WebhooksDirectory,
+        string WebhooksTitle)
         IReadOnlyDictionary<string, string> Titles,
         ExampleSettings Examples)
     {

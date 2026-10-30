@@ -705,6 +705,7 @@ public class PortalController(
     /// Generate the Document Server license quota report
     /// </summary>
     /// <path>apisystem/portal/licensequota/report</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "for the report file it saves into the caller's personal section, unless there is no license quota data to report")]
     [Tags("Portal")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(IActionResult))]
     [SwaggerResponse(403, "The method is available on a server installation only")]

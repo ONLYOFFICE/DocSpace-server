@@ -39,6 +39,12 @@ public class ColumnMapper
     private readonly Dictionary<string, object> _newMappings = new();
     private readonly DateTime _now = DateTime.UtcNow;
 
+    /// <summary>
+    /// True when the portal is being moved to another region (TransferPortalTask), so its state carries on there;
+    /// false for a restore from an archive, which brings back a past state of the portal.
+    /// </summary>
+    public bool PortalTransfer { get; init; }
+
     public int GetTenantMapping()
     {
         var mapping = GetMapping("tenants_tenants", "id");
@@ -55,6 +61,12 @@ public class ColumnMapper
 
     public void SetDateMapping(string tableName, KeyValuePair<string, bool> column, object oldValue)
     {
+        // an empty date stays empty: mapping it would give a nullable date column a value
+        if (oldValue is null or DBNull)
+        {
+            return;
+        }
+
         if (!column.Value)
         {
             SetMapping(tableName, column.Key, oldValue, _now);

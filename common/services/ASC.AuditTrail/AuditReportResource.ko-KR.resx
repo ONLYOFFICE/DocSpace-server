@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Document Builder 스크립트에 의해 파일이 열렸습니다: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>앱이 활성화되었습니다: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>앱이 비활성화되었습니다: {0}</value>
+  </data>
 </root>

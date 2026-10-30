@@ -1,0 +1,1 @@
+{"event":{"id":3,"createOn":"2026-10-26T12:41:26Z","createBy":"8263c8ae-ba2f-4d00-b797-f52a56f5ac48","trigger":"user.updated","triggerId":4},"webhook":{"id":3,"name":"webhook-glvwqhmo8d","url":"http://127.0.0.2:18089/hooks/d716716617694d9bba76a9688d9e6f2c","triggers":["user.updated"],"target":{"id":"8263c8ae-ba2f-4d00-b797-f52a56f5ac48","type":"user"}}}
