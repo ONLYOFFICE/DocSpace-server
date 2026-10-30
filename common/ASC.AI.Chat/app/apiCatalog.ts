@@ -146,7 +146,7 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
 // Routes registered explicitly in `routes.ts` that are not backed by an
 // engine. Kept in sync by hand with those `router.<verb>(...)` calls.
 // `operationId`s are lowerCamelCase and `ai`-scoped so they never clash
-// with the .NET AI service's ids (e.g. its own `getAgents`) once merged.
+// with the .NET AI service's ids (e.g. its own `getProjects`) once merged.
 export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   {
     method: "POST",
@@ -170,70 +170,6 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     tag: "Metadata",
     operationId: "aiMetaFill",
     summary: "Fill metadata values",
-    hasBody: true,
-  },
-  {
-    method: "GET",
-    path: "/agents",
-    tag: "Agents",
-    operationId: "aiAgentsList",
-    summary: "List agents",
-  },
-  {
-    method: "POST",
-    path: "/agents",
-    tag: "Agents",
-    operationId: "aiAgentsCreate",
-    summary: "Create an agent",
-    hasBody: true,
-  },
-  {
-    method: "GET",
-    path: "/agents/news",
-    tag: "Agents",
-    operationId: "aiAgentsNews",
-    summary: "List agent news items",
-  },
-  {
-    method: "GET",
-    path: "/agents/{id}",
-    tag: "Agents",
-    operationId: "aiAgentsGet",
-    summary: "Get an agent",
-    pathParams: ["id"],
-  },
-  {
-    method: "PUT",
-    path: "/agents/{id}",
-    tag: "Agents",
-    operationId: "aiAgentsUpdate",
-    summary: "Update an agent",
-    pathParams: ["id"],
-    hasBody: true,
-  },
-  {
-    method: "DELETE",
-    path: "/agents/{id}",
-    tag: "Agents",
-    operationId: "aiAgentsDelete",
-    summary: "Delete an agent",
-    pathParams: ["id"],
-    hasBody: true,
-  },
-  {
-    method: "PUT",
-    path: "/agents/agentquota",
-    tag: "Agents",
-    operationId: "aiAgentsUpdateQuota",
-    summary: "Update agents' quota",
-    hasBody: true,
-  },
-  {
-    method: "PUT",
-    path: "/agents/resetquota",
-    tag: "Agents",
-    operationId: "aiAgentsResetQuota",
-    summary: "Reset agents' quota",
     hasBody: true,
   },
   {
@@ -411,7 +347,6 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 // operation uses but the document does not declare is an OpenAPI lint error
 // (`operation-tag-defined`), so a new custom tag belongs here as well.
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
-  Agents: "AI agent rooms (delegated to the .NET AI service).",
   Projects:
     "AI projects: a model, Instructions rooms and Knowledge rooms shared with a team (rooms of type 12, delegated to the .NET AI service).",
   Export: "Markdown → docx export.",

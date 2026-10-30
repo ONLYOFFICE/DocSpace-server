@@ -553,7 +553,7 @@ export type Req_aiWebSearchSetActiveConfig = {
 };
 export type Req_aiWebSearchClear = string;
 
-/* --------------------- Custom routes (agents / export) ----------------- */
+/* --------------------- Custom routes (export) ------------------------- */
 
 export type Req_aiExportTextToDocx = {
   /** Document title (also the file name). */
@@ -655,83 +655,6 @@ export type Res_aiMetaFill = {
     title?: string;
     reason: "unsupported" | "limit" | "forbidden" | "not_found" | "empty" | "failed";
   }[];
-};
-/**
- * A DocSpace room id: an integer for native rooms, a string for
- * third-party-backed ones.
- */
-type RoomId = number | string;
-
-/**
- * Room fields shared by agent creation and update, mirroring the .NET
- * `CreateAgentRequestDto` / `UpdateRoomRequest` (see
- * `products/ASC.AI/Server/Api/AgentsController.cs`). The nested objects
- * (`lifetime`, `watermark`, `logo`) are DocSpace room DTOs forwarded
- * verbatim; they are documented as open objects rather than duplicating the
- * full .NET shape here.
- */
-type AgentRoomFields = {
-  /** Agent (room) title. */
-  title?: string;
-  /** Room quota in bytes. */
-  quota?: number;
-  /** Whether room content is indexed for search. */
-  indexing?: boolean;
-  /** Whether downloading room content is denied. */
-  denyDownload?: boolean;
-  /** Room data lifetime policy (`RoomDataLifetimeDto`). */
-  lifetime?: Record<string, unknown>;
-  /** Watermark settings (`WatermarkRequestDto`). */
-  watermark?: Record<string, unknown>;
-  /** Room logo (`LogoRequest`). */
-  logo?: Record<string, unknown>;
-  /** Room tags. */
-  tags?: string[];
-  /** Room accent color. */
-  color?: string;
-  /** Room cover image id. */
-  cover?: string;
-};
-
-export type Req_aiAgentsCreate = AgentRoomFields & {
-  /** Profile id bound to the agent. */
-  profileId: string;
-  /** Agent system prompt; stored as the room's `chatSettings.prompt`. */
-  prompt: string;
-  /** Whether the agent room is private. */
-  private?: boolean;
-  /** Initial share entries (`FileShareParams`). */
-  share?: Record<string, unknown>[];
-  /** Whether to attach the default DocSpace MCP tool server. */
-  attachDefaultTools?: boolean;
-};
-
-export type Req_aiAgentsUpdate = AgentRoomFields & {
-  /** Profile id to rebind (optional). */
-  profileId?: string;
-  /** Chat settings (`ChatSettings`); requires a valid provider/model. */
-  chatSettings?: Record<string, unknown>;
-  /** Whether form results are sent to an external DB. */
-  sendFormToExternalDB?: boolean;
-  /** Whether forms are saved as XLSX. */
-  saveFormAsXLSX?: boolean;
-};
-
-export type Req_aiAgentsDelete = {
-  /** Delete the room after the editing session finishes. */
-  deleteAfter?: boolean;
-};
-
-export type Req_aiAgentsUpdateQuota = {
-  /** Agent (room) ids to update. */
-  roomIds: RoomId[];
-  /** New quota in bytes; a negative value disables the custom quota. */
-  quota: number;
-};
-
-export type Req_aiAgentsResetQuota = {
-  /** Agent (room) ids to reset to the tenant default quota. */
-  roomIds: RoomId[];
 };
 
 /* ----------------------------- Projects --------------------------------- */

@@ -84,10 +84,10 @@ export const assignmentsController = {
       return;
     }
     const entityId = asString(req.query["entityId"]);
-    // A nonexistent room used to fold to the portal-wide lookup and answer
-    // its profile with 200; get-all-assignments already 404s it (Bug 82832),
-    // and so do both resolve operations now (Bug 84279). An accessible
-    // non-agent room still degrades to the portal scope by design.
+    // A nonexistent room used to answer the portal-wide profile with 200;
+    // get-all-assignments already 404s it (Bug 82832), and so do both
+    // resolve operations now (Bug 84279). An accessible room is accepted;
+    // the bindings themselves are portal-wide.
     await assertEntityAccessible(entityId);
     // The engine's throwing variant reports "nothing configured" with a
     // plain Error, which read as a 500 (Bugs 84278, 84450); the lenient
@@ -183,11 +183,10 @@ export const assignmentsController = {
   getAllAssignments: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     // Read-side gating (Bug 82832): a supplied entityId must reference a folder
-    // the caller can access — a nonexistent/no-access id 404s. But a valid
-    // *non-agent* folder is fine: it falls through and assignmentsStorage
-    // degrades the read to the global scope (review #2), so the model
-    // assignment still loads in ordinary rooms and My Documents. An
-    // absent/empty entityId stays the global scope.
+    // the caller can access — a nonexistent/no-access id 404s. A valid folder
+    // is fine: the bindings are portal-wide (review #2), so the model
+    // assignment loads the same in ordinary rooms and My Documents. An
+    // absent/empty entityId is the ordinary case.
     await assertEntityAccessible(entityId);
     const result = await engine.getAllAssignments(entityId);
     // `expand=profile` answers the assigned profiles themselves instead of

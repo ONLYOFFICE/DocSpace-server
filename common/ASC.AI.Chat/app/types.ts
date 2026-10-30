@@ -87,7 +87,7 @@ export interface RequestContext {
   filesApiReads?: number;
   chatContextMisses?: string[];
   // The profile the current chat round runs on, as the send handlers
-  // finalized it (thread prefill and agent substitution applied). Read by
+  // finalized it (thread prefill and AI-project binding applied). Read by
   // the document agent tool, whose `callTool` carries no profile.
   roundProfileId?: string;
   // Attachment ref ids of the current user message, captured before the

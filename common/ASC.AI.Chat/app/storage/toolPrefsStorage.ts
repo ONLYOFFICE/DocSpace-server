@@ -37,11 +37,9 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../../config/index.js";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
-import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsScope, ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 import {
-  chatContextScope,
   invalidateChatContext,
   readChatContext,
   reportChatContextMiss,
@@ -51,73 +49,48 @@ const BASE_PATH = "/tool-prefs";
 const DISABLED_PATH = `${BASE_PATH}/disabled`;
 const ALLOW_ALWAYS_PATH = `${BASE_PATH}/allow-always`;
 
-function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
-  return entityId ? { entityId } : undefined;
-}
+// Tool preferences are one list per user (plus the tenant list). The
+// `entityId` the library passes with every call (the folder the chat is
+// opened from) is accepted for the interface's sake and ignored; the C#
+// storage keeps the user's list under `entityId: null`.
 
 // The `scope` the AI service is asked for. Only the tenant list is named on
 // the wire: a request without a scope is the user's effective list, which
 // is what every reader expected before scopes existed, so an AI service that
 // predates them keeps answering exactly as it did.
 function scopeQuery(
-  entityId: string | undefined,
   scope: ToolPrefsScope | undefined,
 ): Record<string, QueryValue> | undefined {
-  const query = { ...(entityIdQuery(entityId) ?? {}) };
-  if (scope === TENANT_SCOPE) {
-    query["scope"] = scope;
-  }
-  return Object.keys(query).length > 0 ? query : undefined;
+  return scope === TENANT_SCOPE ? { scope } : undefined;
 }
 
 const TENANT_SCOPE: ToolPrefsScope = "tenant";
 
-// The round snapshot's raw `serverType -> { disabled, allowAlways }` map for
-// the scope `entityId` folds to, or `undefined` when the read must go to the
-// AI service (no snapshot, stale after a write, or an id the snapshot does
-// not describe).
-function snapshotToolPrefs(entityId: string | undefined): unknown {
-  const snapshot = readChatContext("toolPrefs");
-  const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-  return scope?.toolPrefs;
+// The round snapshot's raw `serverType -> { disabled, allowAlways }` map, or
+// `undefined` when the read must go to the AI service (no snapshot, or stale
+// after a write).
+function snapshotToolPrefs(): unknown {
+  return readChatContext("toolPrefs")?.global.toolPrefs;
 }
 
-// `scopedEntityId` must already be gated via `resolveAgentEntityId`. The
-// round snapshot carries the effective (user) list only, so a tenant-scoped
-// read always goes to the AI service.
-async function fetchToolPrefs(
-  scopedEntityId: string | undefined,
-  scope?: ToolPrefsScope,
-): Promise<unknown> {
-  const fromSnapshot = scope === TENANT_SCOPE ? undefined : snapshotToolPrefs(scopedEntityId);
+// The round snapshot carries the effective (user) list only, so a
+// tenant-scoped read always goes to the AI service.
+async function fetchToolPrefs(scope?: ToolPrefsScope): Promise<unknown> {
+  const fromSnapshot = scope === TENANT_SCOPE ? undefined : snapshotToolPrefs();
   if (fromSnapshot !== undefined) {
     return fromSnapshot;
   }
   if (scope !== TENANT_SCOPE) {
-    reportChatContextMiss(`toolPrefs.read(${scopedEntityId ?? "-"})`);
+    reportChatContextMiss("toolPrefs.read");
   }
-  const query = scopeQuery(scopedEntityId, scope);
+  const query = scopeQuery(scope);
   return aiService.get(BASE_PATH, query ? { query } : undefined);
 }
 
-async function readToolPrefsRaw(
-  entityId: string | undefined,
-  scope?: ToolPrefsScope,
-): Promise<unknown> {
-  const fromSnapshot = scope === TENANT_SCOPE ? undefined : snapshotToolPrefs(entityId);
-  if (fromSnapshot !== undefined) {
-    return fromSnapshot;
-  }
-  return fetchToolPrefs(await resolveAgentEntityId(entityId), scope);
-}
-
 // Same fetch, but a missing prefs row (404) reads as "nothing stored".
-async function fetchToolPrefsSafe(
-  scopedEntityId: string | undefined,
-  scope?: ToolPrefsScope,
-): Promise<unknown> {
+async function fetchToolPrefsSafe(scope?: ToolPrefsScope): Promise<unknown> {
   try {
-    return await fetchToolPrefs(scopedEntityId, scope);
+    return await fetchToolPrefs(scope);
   } catch (err) {
     if (err instanceof AiServiceHttpError && err.status === 404) {
       return {};
@@ -219,7 +192,7 @@ function withClearedKeys(
 }
 
 // The portal MCP server's tools are always enabled and cannot be disabled
-// anywhere (global chat, agents, the editor plugin). Its "disabled"
+// anywhere (the chat, the editor plugin). Its "disabled"
 // entries are dropped on read — so a legacy stored entry has no effect —
 // and never persisted on write. Enforced here, at the single storage
 // chokepoint every consumer (engine tool context, UI permission cards)
@@ -266,28 +239,22 @@ function aliasIntegrationGroups(
 // caller's personal server types to the tenant list.
 async function putDisabled(
   disabled: Record<string, string[]>,
-  entityId: string | undefined,
   scope?: ToolPrefsScope,
 ): Promise<void> {
-  const scopedEntityId = await resolveAgentEntityId(entityId);
-  const stored = parseDisabled(await fetchToolPrefsSafe(scopedEntityId, scope));
+  const stored = parseDisabled(await fetchToolPrefsSafe(scope));
   await aiService.put(DISABLED_PATH, {
     disabled: withoutPortalServer(withClearedKeys(disabled, stored)),
-    entityId: scopedEntityId,
+    entityId: null,
     ...(scope === TENANT_SCOPE ? { scope } : {}),
   });
   invalidateChatContext("toolPrefs");
 }
 
-async function putAllowAlways(
-  allowAlways: Record<string, string[]>,
-  entityId: string | undefined,
-): Promise<void> {
-  const scopedEntityId = await resolveAgentEntityId(entityId);
-  const stored = parseAllowAlwaysGrouped(await fetchToolPrefsSafe(scopedEntityId));
+async function putAllowAlways(allowAlways: Record<string, string[]>): Promise<void> {
+  const stored = parseAllowAlwaysGrouped(await fetchToolPrefsSafe());
   await aiService.put(ALLOW_ALWAYS_PATH, {
     allowAlways: withClearedKeys(allowAlways, stored),
-    entityId: scopedEntityId,
+    entityId: null,
   });
   invalidateChatContext("toolPrefs");
 }
@@ -295,18 +262,18 @@ async function putAllowAlways(
 export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async createDisabled(
     disabled: Record<string, string[]>,
-    entityId?: string,
+    _entityId?: string,
     scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId, scope);
+    await putDisabled(disabled, scope);
   }
 
   async readDisabled(
-    entityId?: string,
+    _entityId?: string,
     scope?: ToolPrefsScope,
   ): Promise<Record<string, string[]>> {
     try {
-      const raw = await readToolPrefsRaw(entityId, scope);
+      const raw = await fetchToolPrefs(scope);
       return aliasIntegrationGroups(withoutPortalServer(parseDisabled(raw)));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -318,33 +285,33 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
 
   async updateDisabled(
     disabled: Record<string, string[]>,
-    entityId?: string,
+    _entityId?: string,
     scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId, scope);
+    await putDisabled(disabled, scope);
   }
 
   async upsertDisabled(
     disabled: Record<string, string[]>,
-    entityId?: string,
+    _entityId?: string,
     scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId, scope);
+    await putDisabled(disabled, scope);
   }
 
-  async deleteDisabled(entityId?: string, scope?: ToolPrefsScope): Promise<void> {
+  async deleteDisabled(_entityId?: string, scope?: ToolPrefsScope): Promise<void> {
     // No DELETE endpoint on the C# side; clear by upserting an empty map
     // (`putDisabled` re-adds every stored key with an empty list).
-    await putDisabled({}, entityId, scope);
+    await putDisabled({}, scope);
   }
 
-  async createAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
+  async createAllowAlways(tokens: string[], _entityId?: string): Promise<void> {
+    await putAllowAlways(groupAllowAlwaysTokens(tokens));
   }
 
-  async readAllowAlways(entityId?: string): Promise<string[]> {
+  async readAllowAlways(_entityId?: string): Promise<string[]> {
     try {
-      const raw = await readToolPrefsRaw(entityId);
+      const raw = await fetchToolPrefs();
       return parseAllowAlwaysTokens(raw);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -354,15 +321,15 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
     }
   }
 
-  async updateAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
+  async updateAllowAlways(tokens: string[], _entityId?: string): Promise<void> {
+    await putAllowAlways(groupAllowAlwaysTokens(tokens));
   }
 
-  async upsertAllowAlways(tokens: string[], entityId?: string): Promise<void> {
-    await putAllowAlways(groupAllowAlwaysTokens(tokens), entityId);
+  async upsertAllowAlways(tokens: string[], _entityId?: string): Promise<void> {
+    await putAllowAlways(groupAllowAlwaysTokens(tokens));
   }
 
-  async deleteAllowAlways(entityId?: string): Promise<void> {
-    await putAllowAlways({}, entityId);
+  async deleteAllowAlways(_entityId?: string): Promise<void> {
+    await putAllowAlways({});
   }
 }

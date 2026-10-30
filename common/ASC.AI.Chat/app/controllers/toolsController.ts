@@ -90,12 +90,11 @@ function assertRoutableServerName(rawName: unknown): string {
 }
 
 // Resolve the config to store for an entry. Entries named after a
-// configured system server are whitelist markers (see agentServerWhitelist
-// in tools/systemTools.ts): they are pinned to the canonical system config
-// so a marker never shadows the system group with a broken connection.
-// When a caller attaches an existing portal-level server to an entity
-// without sending a config (the agent dialog flow), the portal-scope
-// config is copied.
+// configured system server are pinned to the canonical system config (see
+// getSystemServerConfig in tools/systemTools.ts) so such an entry never
+// shadows the system group with a broken connection. A write without a
+// config re-saves the entry already registered under that name; anything
+// else without a config is refused.
 async function resolveConfig(
   name: string,
   provided: McpServerConfig | undefined,
@@ -117,14 +116,13 @@ async function resolveConfig(
   );
 }
 
-// System-server entries are whitelist markers pinned to the canonical
-// internal endpoint (see resolveConfig above). Redact — never drop — the
-// config on the way out: system servers run server-side only (see
-// tools/systemTools.ts), so the browser must not receive a config it
-// would try to start itself, and the internal endpoint must not leak.
-// The name still round-trips: the agent dialog pre-selects by key, and
-// saving the whole map from the chat config editor re-pins the entry
-// through resolveConfig.
+// System-server entries are pinned to the canonical internal endpoint
+// (see resolveConfig above). Redact — never drop — the config on the way
+// out: system servers run server-side only (see tools/systemTools.ts), so
+// the browser must not receive a config it would try to start itself, and
+// the internal endpoint must not leak. The name still round-trips: saving
+// the whole map from the chat config editor re-pins the entry through
+// resolveConfig.
 function redactSystemServer(
   name: string,
   config: McpServerConfig,
@@ -177,11 +175,11 @@ export const toolsController = {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
     // A supplied entityId must at least be REACHABLE: a nonexistent or
-    // deleted id otherwise folds silently into the portal-wide scope and
-    // mutates it (Bug 82975). An accessible NON-agent folder still folds to
-    // global BY DESIGN (Bug 82863: the widget sends the current location
-    // here) — the gate is on accessibility, not agent-ness, mirroring the
-    // threads/create decision (Bug 82719).
+    // deleted id otherwise silently mutates the portal-wide registry
+    // (Bug 82975). An accessible folder is accepted and ignored — the
+    // registry is one map per portal (Bug 82863: the widget sends the
+    // current location here) — mirroring the threads/create decision
+    // (Bug 82719).
     await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.addCustomServer(
       name,
@@ -234,9 +232,9 @@ export const toolsController = {
     const servers = await engine.listCustomServers(entityId);
     const redacted: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(servers)) {
-      // The portal MCP server is not user-manageable: legacy per-agent
-      // whitelist markers named after it must not surface as selectable
-      // entries (it is always enabled server-side, see systemTools).
+      // The portal MCP server is not user-manageable: a legacy registry
+      // entry named after it must not surface as a selectable entry (it is
+      // always enabled server-side, see systemTools).
       if (name === PORTAL_MCP_SERVER_NAME) continue;
       redacted[name] = redactSystemServer(name, config);
     }
@@ -265,7 +263,7 @@ export const toolsController = {
         : tools
     ) as Record<string, unknown>;
     // Hide the portal MCP server from every management surface (the MCP
-    // settings page's permission cards, the agent dialog's server picker):
+    // settings page's permission cards):
     // it is always enabled with all tools and cannot be configured. The
     // chat engine's tool context does not go through this listing, so the
     // tools themselves stay available everywhere.
@@ -276,9 +274,9 @@ export const toolsController = {
       groups: { ...systemGroups, ...custom.groups },
       errors: custom.errors,
       // `groups` mixes system and registered custom servers, so name the
-      // system ones explicitly — the agent dialog pre-selects and labels
-      // servers by this list; without it every registered custom server got
-      // the portal branding and a default pre-selection (Bug 83705).
+      // system ones explicitly — the settings page labels servers by this
+      // list; without it every registered custom server got the portal
+      // branding (Bug 83705).
       system: Object.keys(systemGroups),
     });
   }),

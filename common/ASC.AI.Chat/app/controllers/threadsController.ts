@@ -50,7 +50,6 @@ import {
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
-import { agentAssignedProfileId } from "./agentProfile.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
@@ -115,12 +114,11 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
-//     (see `assertEntityAccessible`). An accessible NON-agent folder is
-//     allowed BY DESIGN (Bug 82719 reopen decision): threads are either
-//     global or agent-scoped, so `HttpThreadsStorage` folds a non-agent
-//     entityId (e.g. the Trash root, an ordinary room — the main client
-//     sends the current location here) to the global scope instead of
-//     rejecting it. An absent entityId is the legitimate global scope.
+//     (see `assertEntityAccessible`). The client sends one only inside an AI
+//     project (the project id); any other accessible folder is allowed BY
+//     DESIGN (Bug 82719 reopen decision): threads are one list per user,
+//     so `HttpThreadsStorage` ignores the id instead of rejecting it. An
+//     absent entityId is the ordinary case.
 //  2. A live profile must be resolvable — an explicit `profileId` that exists,
 //     or the `Chat` assignment for the scope — otherwise there is no model to
 //     run the thread against, so reject with 404.
@@ -197,15 +195,6 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
-    // The agent's assigned profile is authoritative for threads created in
-    // its room: substitute it over any caller-supplied profileId so a new
-    // thread cannot start on a different model (Bug 82915).
-    if (req.body && typeof req.body === "object") {
-      const agentProfileId = await agentAssignedProfileId(req.body.entityId);
-      if (agentProfileId) {
-        req.body.profileId = agentProfileId;
-      }
-    }
     await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
@@ -217,7 +206,7 @@ export const threadsController = {
     // object directly, so a missing/non-object profile means there is no model
     // to run the thread against → 404 (this also avoids the engine TypeError
     // that previously collapsed to a 500). A supplied entityId must be
-    // reachable; a non-agent one folds to the global scope downstream (see
+    // reachable; the thread itself is global whatever it names (see
     // `assertThreadCreatable` for the Bug 82719 design decision).
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {

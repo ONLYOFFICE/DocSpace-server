@@ -42,9 +42,8 @@ import type { JsonObject } from "../narrow.js";
 // AI projects. A project is a DocSpace room of type 12 whose settings block
 // (`aiProject`: the chat profile, the linked Instructions rooms and the
 // linked Knowledge rooms) lives with the room. Every operation is delegated
-// to the .NET AI service (`internal/ai/projects…`, AiProjectsController), as
-// agentsController delegates agents; the answer is the upstream DocSpace
-// envelope unchanged. The contract, method by method, is
+// to the .NET AI service (`internal/ai/projects…`, AiProjectsController);
+// the answer is the upstream DocSpace envelope unchanged. The contract, method by method, is
 // client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md.
 
 // `profileId` is a profile UUID (`Profile.id: string` in
@@ -56,8 +55,8 @@ function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
 }
 
-// Mirrors agentsController: a profile that does not exist or cannot chat
-// would be stored fine and then fail every round with model_not_found.
+// A profile that does not exist or cannot chat would be stored fine and
+// then fail every round with model_not_found, so it is checked up front.
 async function assertUsableChatProfile(profileId: string): Promise<void> {
   const profile = await storage.profiles.readById(profileId);
   if (!profile) {
@@ -109,7 +108,7 @@ export function bodyOf(raw: unknown): JsonObject {
 }
 
 // The create / update body is forwarded as is; only the model is checked
-// here, before the room is touched, as agentsController does (Bug 82922):
+// here, before the room is touched (Bug 82922):
 // `aiProject.profileId` is a UUID of a chat profile, or null for the portal
 // default.
 export async function assertProjectProfile(body: JsonObject): Promise<void> {

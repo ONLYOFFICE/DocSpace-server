@@ -41,7 +41,6 @@ import {
 } from "../requestContext.js";
 import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
-import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
@@ -51,15 +50,8 @@ import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 const AI_PROJECT_FOLDER_TYPE = 40;
 
 export interface DocspaceFolderInfo {
-  /** Whether the folder is an AI agent room (`FolderType.AiRoom` on the C# side). */
-  isAgent: boolean;
-  /** The folder's display name (`FolderDto.Title`) — the agent name for an agent room. */
+  /** The folder's display name (`FolderDto.Title`). */
   title?: string;
-  /**
-   * The agent room's stored instruction (`chatSettings.prompt`), when set.
-   * Only agent rooms carry one — `undefined` for a regular folder.
-   */
-  prompt?: string;
   /** `FolderDto.Type` — the raw `FolderType` value. */
   folderType?: number;
   /** `FolderDto.RoomType` — the raw `RoomType` value; only rooms carry one. */
@@ -71,12 +63,6 @@ export interface DocspaceFolderInfo {
    */
   canCreate?: boolean;
 }
-
-// Mirrors `FolderType.IsAgent()` in
-// products/ASC.Files/Core/Helpers/DocSpaceHelper.cs: an agent is a folder of
-// type `FolderType.AiRoom`. The DTO also carries it as `RoomType.AiRoom`.
-const FOLDER_TYPE_AI_ROOM = 31;
-const ROOM_TYPE_AI_ROOM = 9;
 
 // The form-filling room — the one room kind the "Forms" section shows. That
 // section is virtual (anchored on an empty `FolderType.Forms` folder); its
@@ -141,12 +127,8 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   }
   const folderType = getNumber(envelope, "type");
   const roomType = getNumber(envelope, "roomType");
-  const chatSettings = getObject(envelope, "chatSettings");
-  const prompt = chatSettings ? getString(chatSettings, "prompt") : undefined;
   const result: DocspaceFolderInfo = {
-    isAgent: folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM,
     title: getString(envelope, "title"),
-    prompt,
   };
   if (folderType !== undefined) {
     result.folderType = folderType;
@@ -203,8 +185,8 @@ export async function getFolderInfo(
 
 /**
  * Request-scoped memoization of {@link getFolderInfo}. A single chat round
- * reads the same folder more than once — the agent instruction, the source
- * metadata — and the DTO cannot change mid-request, so the second reader
+ * reads the same folder more than once — the AI-project detection, the
+ * source metadata — and the DTO cannot change mid-request, so the second reader
  * joins the first fetch instead of issuing its own. Falls through to a plain
  * fetch outside a request context. Rejections are not cached: the entry is
  * dropped so a later reader can retry.
@@ -235,14 +217,13 @@ export type SourceKind = "folder" | "file";
 
 /**
  * The DocSpace entry a model request is attributed to, as the billing
- * backend classifies it. Rooms split by the section they belong to: an
- * `Agent` is a room of the "AI Agents" section, a `Form` a room of the
- * "Forms" section, a `Room` one of the "Rooms" section. Every other folder
- * — a plain folder in any room or in "My documents", the system subfolders
- * of an agent (Knowledge, Result Storage) or of a form room, the section
- * roots — is a `Folder`; every file is a `File`.
+ * backend classifies it. Rooms split by the section they belong to: a
+ * `Form` is a room of the "Forms" section, a `Room` one of the "Rooms"
+ * section. Every other folder — a plain folder in any room or in "My
+ * documents", the system subfolders of a form room, the section roots, an
+ * AI project — is a `Folder`; every file is a `File`.
  */
-export type SourceType = "Agent" | "File" | "Folder" | "Room" | "Form";
+export type SourceType = "File" | "Folder" | "Room" | "Form";
 
 /**
  * The resolved source of a round, sent by the ONLYOFFICE provider (and the
@@ -263,9 +244,6 @@ export interface SourceMeta {
  */
 export function folderSourceType(info: DocspaceFolderInfo): SourceType {
   const { folderType, roomType } = info;
-  if (info.isAgent || folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM) {
-    return "Agent";
-  }
   if (folderType === FOLDER_TYPE_FORM_ROOM || roomType === ROOM_TYPE_FORM_ROOM) {
     return "Form";
   }
@@ -347,7 +325,7 @@ function getFileInfoOnce(fileId: string): Promise<DocspaceFileInfo | undefined> 
  * a client cannot describe an entry it cannot see. An absent id, a 404/403,
  * or an unparseable response all yield `undefined`, which the provider
  * renders as no `metadata` at all. Never throws (mirrors
- * {@link safeGetAgentInstruction}): metadata is telemetry for the backend,
+ * {@link safeGetToolsPrompt}): metadata is telemetry for the backend,
  * never a reason to fail a chat.
  */
 export async function safeResolveSource(
@@ -393,76 +371,10 @@ export async function primeSourceMeta(
 }
 
 /**
- * Best-effort fetch of an agent room's stored instruction
- * (`chatSettings.prompt`). Never throws — a failed fetch, an absent scope,
- * or a non-agent folder simply yields an empty string, leaving the system
- * prompt unchanged (mirrors {@link safeGetToolsPrompt}).
- */
-export async function safeGetAgentInstruction(
-  entityId: string | undefined,
-): Promise<string> {
-  if (!entityId) {
-    return "";
-  }
-  try {
-    const info = await getFolderInfoOnce(entityId);
-    // Untrusted: strip markup before the instruction reaches the model prompt
-    // so stored HTML can't round-trip into another user's reply (Bug 82726).
-    return sanitizeInstruction(info?.prompt ?? "");
-  } catch (err) {
-    logger.warn(
-      `agent instruction fetch failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
-    return "";
-  }
-}
-
-/**
- * Resolve the Result Storage folder of an agent room. Agent rooms
- * (`FolderType.AiRoom`) own a system subfolder (`FolderType.ResultStorage`)
- * for generated artifacts; `GET /api/2.0/files/{agentId}?searchArea=ResultStorage`
- * swaps the returned `current` folder to that subfolder (see
- * `FileStorageService.GetFolderItemsAsync`). Resolves to the subfolder id,
- * or `undefined` when the agent is inaccessible (404) or has no Result
- * Storage; other HTTP failures propagate as {@link DocspaceApiHttpError}.
- */
-export async function getAgentResultStorageId(
-  agentId: string,
-): Promise<string | undefined> {
-  // `count` is [Range(1, …)]-validated on the C# side — 0 is a 400. We only
-  // need `current.id`, so ask for the smallest allowed page.
-  const url =
-    `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(agentId)}`
-    + "?searchArea=ResultStorage&count=1";
-  const { signal, cancel } = withTimeout(undefined);
-  try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
-    if (res.status === 404) {
-      return undefined;
-    }
-    if (!res.ok) {
-      throw new DocspaceApiHttpError(res.status, res.statusText, url);
-    }
-    const raw: unknown = await res.json();
-    const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
-    const current = envelope ? getObject(envelope, "current") : undefined;
-    const id = current ? getNumber(current, "id") : undefined;
-    if (id === undefined) {
-      logger.warn(`getAgentResultStorageId(${agentId}) -> no current.id in response from ${url}`);
-      return undefined;
-    }
-    return String(id);
-  } finally {
-    cancel();
-  }
-}
-
-/**
  * Resolve the current user's "My documents" folder id
- * (`GET api/2.0/files/@my` -> `current.id`). Used as the fallback target for
- * a generated image when the chat's own scope cannot take an upload. The
+ * (`GET api/2.0/files/@my` -> `current.id`). The target for a generated
+ * file when the round names no folder or the folder it names cannot take an
+ * upload, and the folder context of a round inside an AI project. The
  * numeric id is resolved rather than posting to the `@my/insert` alias so the
  * upload goes through the same code path (and logs the real folder) as any
  * other target. Resolves to `undefined` when the section is unavailable.
@@ -493,23 +405,6 @@ export async function getMyDocumentsFolderId(): Promise<string | undefined> {
 }
 
 /**
- * Gate a client-supplied `entityId` on the Files API: entity-scoped AI data
- * (assignments, preferences, threads, MCP servers, tool prefs) only exists
- * for agent rooms, so anything else — a non-agent folder, a folder the
- * current user cannot see (404), an unparseable response — resolves to
- * `undefined`, falling back to the global scope.
- */
-export async function resolveAgentEntityId(
-  entityId: string | undefined,
-): Promise<string | undefined> {
-  if (!entityId) {
-    return undefined;
-  }
-  const folderInfo = await getFolderInfoOnce(entityId);
-  return folderInfo?.isAgent ? entityId : undefined;
-}
-
-/**
  * The project id when `entityId` is an AI project (`FolderType.AiProjectRoom`),
  * `undefined` for any other folder, an unknown one, or no id at all. Served
  * from the primed chat-context snapshot when it describes the folder.
@@ -525,17 +420,16 @@ export async function resolveAiProjectEntityId(
 }
 
 /**
- * Gate a client-supplied `entityId` on *accessibility* (not agent-ness). When
- * an entityId is present it must reference a folder the caller can actually
- * reach: a missing folder surfaces as 404, a folder the caller cannot open as
- * 403 — the status the Files API itself answers, and the one the read routes
- * already relay for the same folder through {@link resolveAgentEntityId}.
- * Masking the 403 as 404 here hid nothing and made a write to a room answer
- * differently from a read of it (Bug 83998). An absent entityId is the
- * legitimate global scope and passes. Unlike {@link resolveAgentEntityId}
- * this does NOT require an agent room — an accessible non-agent folder is a
- * valid scope that degrades to global downstream. Used to gate thread
- * creation and entity-scoped writes.
+ * Gate a client-supplied `entityId` on *accessibility*. When an entityId is
+ * present it must reference a folder the caller can actually reach: a
+ * missing folder surfaces as 404, a folder the caller cannot open as 403 —
+ * the status the Files API itself answers. Masking the 403 as 404 here hid
+ * nothing and made a write to a room answer differently from a read of it
+ * (Bug 83998). An absent entityId is the legitimate global scope and passes.
+ * Any accessible folder is a valid id: the per-user AI data is global, so
+ * the id only matters where it is read for what it is (an AI project, a
+ * location, an upload target). Used to gate thread creation and the
+ * settings writes that still take an `entityId`.
  */
 export async function assertEntityAccessible(
   entityId: string | undefined,

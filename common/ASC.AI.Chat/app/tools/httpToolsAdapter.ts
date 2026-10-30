@@ -76,8 +76,8 @@ type ToolsList = {
 // Relative editor link for a DocSpace file — the same shape the knowledge
 // search citations use. Relative on purpose: the chat renders links as plain
 // anchors, so a page-relative or invented href (`?fileId=1`, `Report.docx`)
-// resolves against the current `/ai-agents/<id>` page and opens a new empty
-// chat instead of the file (Bug 84152).
+// resolves against the current page and opens something else than the file
+// (Bug 84152).
 export function fileEditorUrl(fileId: string | number): string {
     return `/doceditor?fileId=${encodeURIComponent(String(fileId))}`;
 }

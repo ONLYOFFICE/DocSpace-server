@@ -59,10 +59,8 @@ import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
   canTakeUpload,
-  getAgentResultStorageId,
   getFolderInfo,
   getMyDocumentsFolderId,
-  resolveAgentEntityId,
   getFileInfo,
 } from "../storage/docspaceFilesApi.js";
 import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
@@ -73,12 +71,7 @@ import {
   getSourceMeta,
 } from "../requestContext.js";
 import { resolveCustomServers } from "./customTools.js";
-import {
-  agentServerWhitelist,
-  getSystemServerConfig,
-  sessionCookie,
-  systemServerHeaders,
-} from "./systemTools.js";
+import { getSystemServerConfig, sessionCookie, systemServerHeaders } from "./systemTools.js";
 import { getMcpServers, PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import {
   DOCUMENT_AGENT_FILES_PATH,
@@ -90,7 +83,6 @@ import {
   MAX_FILE_BYTES,
 } from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
-import { agentAssignedProfileId } from "../controllers/agentProfile.js";
 import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
 import type { DocumentAgentSettings } from "./documentAgentClient.js";
 import { getArray, getString, isObject } from "../narrow.js";
@@ -229,7 +221,7 @@ async function run(
   entityId: string | undefined,
   onprogress: ProgressCallback | undefined,
 ): Promise<unknown> {
-  const profile = await resolveProfile(entityId);
+  const profile = await resolveProfile();
   if (!profile) {
     return { error: "No model is configured for this chat, the document agent cannot run." };
   }
@@ -321,11 +313,11 @@ function savedFileId(url: string): string | undefined {
 }
 
 // The chat's own model: the round's profile when the handler recorded one,
-// else the agent room's assignment, else the portal's chat default. Read raw,
+// else the portal's chat default. Read raw,
 // as the C# storage serves it: the in-process override would point an
 // `onlyoffice` profile at this service's own address, which the agent, on
 // another host, cannot reach (see modelSettings).
-async function resolveProfile(entityId: string | undefined): Promise<Profile | undefined> {
+async function resolveProfile(): Promise<Profile | undefined> {
   const roundProfileId = getRoundProfileId();
   if (roundProfileId) {
     const profile = await storage.profiles.readByIdRaw(roundProfileId);
@@ -333,9 +325,7 @@ async function resolveProfile(entityId: string | undefined): Promise<Profile | u
       return profile;
     }
   }
-  const profileId =
-    (await agentAssignedProfileId(entityId)) ??
-    (await storage.assignments.readByType(ActionType.Chat ?? ActionType.Default));
+  const profileId = await storage.assignments.readByType(ActionType.Chat ?? ActionType.Default);
   return profileId ? storage.profiles.readByIdRaw(profileId) : undefined;
 }
 
@@ -473,9 +463,8 @@ function withInputIds(task: string, fileIds: string[], folderIds: string[]): str
 
 // The MCP servers the agent gets: the portal's own server always, as that is
 // how the agent reads the workspace ids it is handed; the other
-// host-configured system servers when the host shares them, under the same
-// whitelist the chat applies to an agent room; and the custom servers of the
-// round's scope, as the chat itself sees them. The system servers carry the
+// host-configured system servers when the host shares them; and the portal's
+// custom servers, as the chat itself sees them. The system servers carry the
 // caller's session as their headers. The agent connects to every server it
 // is given before it starts, so a server it cannot reach fails the task.
 async function collectServers(
@@ -504,14 +493,10 @@ async function collectServers(
     };
   };
 
-  const whitelist = config.shareSystemServers ? await agentServerWhitelist(entityId) : undefined;
   const headers = systemServerHeaders();
   for (const server of getMcpServers()) {
     const portal = server.name === PORTAL_MCP_SERVER_NAME;
     if (!portal && !config.shareSystemServers) {
-      continue;
-    }
-    if (whitelist && !whitelist.has(server.name)) {
       continue;
     }
     const url = getSystemServerConfig(server.name)?.url ?? server.endpoint;
@@ -566,19 +551,11 @@ function stringHeaders(headers: Record<string, unknown>): Record<string, string>
   return out;
 }
 
-// Where the files go: an agent room's Result Storage, else the current
-// folder when the user may create there, else My documents.
+// Where the files go: the current folder when the user may create there,
+// else My documents.
 async function resolveUploadTarget(entityId: string | undefined): Promise<string | undefined> {
-  if (entityId) {
-    const agentId = await resolveAgentEntityId(entityId);
-    if (agentId) {
-      const resultStorageId = await getAgentResultStorageId(agentId);
-      if (resultStorageId) {
-        return resultStorageId;
-      }
-    } else if (canTakeUpload(await getFolderInfo(entityId))) {
-      return entityId;
-    }
+  if (entityId && canTakeUpload(await getFolderInfo(entityId))) {
+    return entityId;
   }
   return getMyDocumentsFolderId();
 }

@@ -46,7 +46,6 @@ import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS, CUSTOM_TAG_DOCS } from "./a
 const openApiSchemas = createRequire(import.meta.url)(
   "./generated/openapi-schemas.json",
 ) as OpenApiSchemaBundle;
-import { agentsController } from "./controllers/agentsController.js";
 import { textToDocxController } from "./controllers/textToDocxController.js";
 import { metaController } from "./controllers/metaController.js";
 import { aiController } from "./controllers/aiController.js";
@@ -188,11 +187,7 @@ export default function registerRoutes(app: Application): void {
     next();
   });
 
-  // Custom routes not backed by an @onlyoffice/ai-chat engine. Agent
-  // operations are delegated to the .NET AI service (see agentsController).
-  // Literal sub-paths (`news`, `agentquota`, `resetquota`) are registered
-  // before the parameterized `/agents/:id` so Express does not capture them
-  // as an id.
+  // Custom routes not backed by an @onlyoffice/ai-chat engine.
   // Async markdown → docx export via the .NET AI Worker (see
   // textToDocxController); completion is signalled by the files socket
   // create event, not by this response.
@@ -206,17 +201,8 @@ export default function registerRoutes(app: Application): void {
   // writes the values the text supports through the Files metadata API.
   router.post("/meta/fill", metaController.fill);
 
-  router.get("/agents", agentsController.getAgents);
-  router.get("/agents/news", agentsController.getAgentsNews);
-  router.get("/agents/:id", agentsController.getAgentInfo);
-  router.post("/agents", agentsController.createAgent);
-  router.put("/agents/agentquota", agentsController.updateAgentsQuota);
-  router.put("/agents/resetquota", agentsController.resetAgentsQuota);
-  router.put("/agents/:id", agentsController.updateAgent);
-  router.delete("/agents/:id", agentsController.deleteAgent);
-
   // AI projects: rooms of type 12 with a settings block, delegated to the
-  // .NET AI service like the agents above (see aiProjectsController).
+  // .NET AI service (see aiProjectsController).
   // Only the project-specific operations live here; everything a project
   // shares with an ordinary room (pin, mute, share, invitation links, leave,
   // owner change, logo, history) goes through the Files API
