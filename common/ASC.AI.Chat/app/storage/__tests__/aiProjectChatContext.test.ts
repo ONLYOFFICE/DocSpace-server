@@ -47,20 +47,24 @@ vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId, getMyDocume
 const getRoomSkills = vi.fn();
 vi.mock("../roomSkills.js", () => ({ CONTEXT_CLOUD: "docspace", getRoomSkills }));
 
+const readProjectRooms = vi.fn();
+vi.mock("../aiProjectRooms.js", () => ({ readProjectRooms }));
+
+const readByType = vi.fn();
+const readById = vi.fn();
+vi.mock("../index.js", () => ({
+  storage: { assignments: { readByType }, profiles: { readById } },
+}));
+
 
 const { applyAiProjectChatContext } = await import("../aiProjectChatContext.js");
 
-const projectContext = (overrides: Record<string, unknown> = {}) => ({
-  projectId: 42,
+// The project as `GET internal/ai/projects/{id}` answers it (the FolderDto fields the context reads).
+const projectRoom = (overrides: Record<string, unknown> = {}) => ({
+  id: 42,
   title: "Sales",
-  myRole: 11,
-  canChat: true,
-  profileId: "p1",
-  effectiveProfileId: "p1",
-  profileAvailable: true,
-  instructionsRoomIds: [7],
-  knowledgeRoomIds: [9],
-  unavailableRoomIds: [],
+  access: 2,
+  inRoom: true,
   ...overrides,
 });
 
@@ -118,12 +122,18 @@ describe("applyAiProjectChatContext inside a project", () => {
   beforeEach(() => {
     resolveAiProjectEntityId.mockResolvedValue("42");
     aiServiceGet.mockImplementation(async (url: string) => {
-      if (url === "/projects/42/chat-context") return projectContext();
-      if (url === "/projects/42/skills") {
-        return { rooms: [{ id: 7, available: true, skills: [{ id: "f1", name: "tone", description: "" }] }] };
-      }
+      if (url === "/projects/42") return projectRoom();
       throw new Error(`unexpected ${url}`);
     });
+    readProjectRooms.mockResolvedValue({
+      instructionsRooms: [{ id: 7, title: "Brand voice", logo: null }],
+      knowledgeRooms: [{ id: 9, title: "Docs", logo: null }],
+    });
+    readByType.mockResolvedValue("p1");
+    readById.mockResolvedValue({ id: "p1", capabilities: 1 });
+    getRoomSkills.mockImplementation(async (id: string) =>
+      id === "7" ? [{ id: "f1", name: "tone", description: "" }] : [],
+    );
     getMyDocumentsFolderId.mockResolvedValue("1001");
   });
 
@@ -142,7 +152,18 @@ describe("applyAiProjectChatContext inside a project", () => {
       knowledgeRooms: [{ cloud: "docspace", id: "9" }],
       folderContext: { id: "1001" },
     });
-    expect(getRoomSkills).not.toHaveBeenCalled();
+    // The project's rooms come from the server, the skills from each room's files.
+    expect(getRoomSkills).toHaveBeenCalledWith("7");
+    expect(readProjectRooms).toHaveBeenCalledWith("42");
+  });
+
+  it("runs the round without a room's skills when its files cannot be read", async () => {
+    getRoomSkills.mockRejectedValue(new Error("403"));
+    const body: Record<string, unknown> = { entityId: "42", actionArgs: {} };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect((body["actionArgs"] as Record<string, unknown>)["contextRooms"]).toEqual([
+      { cloud: "docspace", id: "7", skills: [] },
+    ]);
   });
 
   it("keeps the folder the caller picked as the scope", async () => {
@@ -164,13 +185,20 @@ describe("applyAiProjectChatContext inside a project", () => {
     expect((body["actionArgs"] as Record<string, unknown>)["folderContext"]).toBeUndefined();
   });
 
-  it("refuses a caller who may not chat, and a project whose model is gone", async () => {
-    aiServiceGet.mockResolvedValueOnce(projectContext({ canChat: false }));
+  it("refuses an admin outside the project, and a portal whose Chat model is gone", async () => {
+    aiServiceGet.mockResolvedValueOnce(projectRoom({ access: 0, inRoom: false }));
     expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({ status: 403 });
-    aiServiceGet.mockResolvedValueOnce(projectContext({ profileAvailable: false }));
+    readById.mockResolvedValueOnce(undefined);
     expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({
       status: 409,
       body: { code: "projectModelUnavailable" },
     });
+  });
+
+  it("refuses the round when the portal's Chat model cannot chat or none is assigned", async () => {
+    readById.mockResolvedValueOnce({ id: "p1", capabilities: 2 });
+    expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({ status: 409 });
+    readByType.mockResolvedValueOnce(null);
+    expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({ status: 409 });
   });
 });

@@ -68,23 +68,38 @@ engine streams (`toolProgress`) until the result replaces it; nothing of it is p
 ### AI projects
 
 `/api/2.0/ai/projects/*` (`app/controllers/aiProjectsController.ts`) serves the AI Projects page:
-a project is a room of type 12 that binds a model, Instructions rooms (type 10) and Knowledge rooms
+a project is a room of type 12 that links Instructions rooms (type 10) and Knowledge rooms
 (type 11) and shares them with a team under three roles — project owner (`access` 1), project
-manager (9) and member (2, the room's Read). As for agents, only the project-specific routes live here — list,
-create, get, update, delete, `skills` and `knowledge` — and every one of them is delegated to the
-.NET AI service (`internal/ai/projects…`, `AiProjectsController`) and answers its DocSpace envelope
-unchanged; the only check made here is that a chosen model exists and can chat. Everything a
-project shares with an ordinary room — pin and unpin, mute, members (`share`), invitation links,
-resending invitations, leaving, changing the owner, removing the logo and the history
-— is done by the client through the Files API (`files/rooms/{id}/...`), not through this service.
+manager (9) and member (2, the room's Read). As for agents, only the project-specific routes live
+here — list, create, get, update, delete, `skills` and `knowledge`. The room itself is delegated to
+the .NET AI service (`internal/ai/projects…`, `AiProjectsController`), which stores the linked rooms
+as one flat set per project behind `GET/POST/DELETE internal/ai/projects/{id}/rooms` (type told
+apart by the room, at most 100 of each kind, sorted by title) and stores no model yet. The client
+contract keeps the rooms inside the project's `aiProject` block and in the create / update body as
+`aiProject.instructionsRoomIds` / `knowledgeRoomIds`, so `app/storage/aiProjectRooms.ts` composes
+one over the other: a `GET projects/{id}` is the room plus its rooms; a create links the rooms
+right after the room is made; an update brings the links to the lists sent (a list absent keeps its
+rooms, `[]` unlinks them all); a refused link or unlink comes back as a `roomUnavailable` warning
+in `aiProject.warnings`, a chosen `profileId` as a `modelNotStored` warning (the project runs on
+the portal's Chat model). `skills` reads each linked Instructions room's Markdown frontmatter
+(`roomSkills.ts`) and `knowledge` each linked Knowledge room's files from the Files API, both with
+the caller's credentials. The list answers the rooms without the block: a project is read again
+when it is opened or picked. Everything a project shares with an ordinary room — pin and unpin,
+mute, members (`share`), invitation links, resending invitations, leaving, changing the owner,
+removing the logo and the history — is done by the client through the Files API
+(`files/rooms/{id}/...`), not through this service.
+
+A chat round whose `entityId` is a project (`storage/aiProjectChatContext.ts`) runs on the
+project, not on what the composer sent: members only (the room's `inRoom`), the portal's Chat
+model, the linked Instructions rooms as context (skills) rooms and the linked Knowledge rooms as
+knowledge bases.
 
 The project DTO is a room card: besides its `aiProject` block it carries the room fields the list
 reads — `tags` (tag names, as a room's `tags`), `createdBy` and `updatedBy` (the same user shape),
 `pinned`, `mute`, `inRoom`, `access`, `security`. The create and update bodies take `tags` the way
 a room does (names; create sets the list, update replaces it when the field is present, `[]`
 clears it) next to `title`, `color`, `cover`, `logo` and `aiProject`; every other room-only field
-(quota, lifetime, watermark, ...) is refused. The tag names to pick from are the portal's own
-(`GET files/tags`).
+(quota, lifetime, watermark, ...) is refused by the .NET side.
 
 `GET projects` takes the rooms list's query, forwarded to .NET as is:
 
@@ -97,12 +112,8 @@ clears it) next to `title`, `color`, `cover`, `logo` and `aiProject`; every othe
 | `subjectOwnerId` | projects this user owns; combines with `subjectId` |
 | `tags` | one value holding a JSON array of names (`tags=%5B%22sales%22%2C%22legal%22%5D`), as `files/rooms` takes it: projects carrying **any** of them. |
 | `withoutTags` | `true`: projects with no tags (`tags` is then ignored) |
-| `role` | the caller's role: `1` owner, `9` project manager, `2` member (the room's Read); `0` or omitted: every role |
-| `hasInstructions`, `hasKnowledge` | `true`: at least one linked room of that kind |
-| `linkedRoomId`, `instructionsRoomId`, `knowledgeRoomId` | projects linking that room |
 
-The .NET contract, method by method, is
-`client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md`.
+The client-facing contract is `client/openspec/changes/ai-projects/specs/ai-projects-api/spec.md`.
 
 ### License
 

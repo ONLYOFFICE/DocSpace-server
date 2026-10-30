@@ -33,18 +33,36 @@
 import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
+import {
+  listProjectKnowledge,
+  listProjectSkills,
+  projectIdOf,
+  readProjectRooms,
+  roomIdsOf,
+  syncProjectRooms,
+  withAiProjectBlock,
+  type AiProjectWarning,
+} from "../storage/aiProjectRooms.js";
 import { asyncHandler } from "./_helpers.js";
 import type { TypedRequest } from "./_helpers.js";
 import type { Response } from "express";
 import { isObject, getObject, getString } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
+import logger from "../log.js";
 
-// AI projects. A project is a DocSpace room of type 12 whose settings block
-// (`aiProject`: the chat profile, the linked Instructions rooms and the
-// linked Knowledge rooms) lives with the room. Every operation is delegated
-// to the .NET AI service (`internal/ai/projects…`, AiProjectsController);
-// the answer is the upstream DocSpace envelope unchanged. The contract, method by method, is
-// client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md.
+// AI projects. A project is a DocSpace room of type 12 that links
+// Instructions rooms and Knowledge rooms. The room itself (list, create,
+// get, update, delete) is delegated to the .NET AI service
+// (`internal/ai/projects…`, AiProjectsController), which stores the linked
+// rooms as one flat set per project behind `GET/POST/DELETE
+// internal/ai/projects/{id}/rooms`. The client keeps the contract of
+// `ai-projects-api`: a project answers with an `aiProject` block (profile,
+// `instructionsRooms`, `knowledgeRooms`, `canEditSettings`, `warnings`) and
+// the create / update body carries the rooms as `aiProject.instructionsRoomIds`
+// / `knowledgeRoomIds`; this controller composes the one over the other
+// (see storage/aiProjectRooms.ts). The list answers the rooms without the
+// block: nothing in the list shows the linked rooms, and a project is read
+// again when it is opened or picked.
 
 // `profileId` is a profile UUID (`Profile.id: string` in
 // @onlyoffice/ai-chat; a `Guid` on the .NET side).
@@ -107,10 +125,9 @@ export function bodyOf(raw: unknown): JsonObject {
   return isObject(raw) ? raw : {};
 }
 
-// The create / update body is forwarded as is; only the model is checked
-// here, before the room is touched (Bug 82922):
-// `aiProject.profileId` is a UUID of a chat profile, or null for the portal
-// default.
+// The model of the create / update body is checked before the room is
+// touched (Bug 82922): `aiProject.profileId` is a UUID of a chat profile, or
+// null for the portal default.
 export async function assertProjectProfile(body: JsonObject): Promise<void> {
   const settings = getObject(body, "aiProject");
   if (!settings || !("profileId" in settings) || settings["profileId"] === null) {
@@ -139,6 +156,37 @@ export async function assertKnowledgeRoomsLinkable(body: JsonObject): Promise<vo
   if (isObject(config) && config["vectorizationEnabled"] === false) {
     badRequest("Knowledge rooms cannot be linked while vectorization is disabled on this portal");
   }
+}
+
+// The .NET side stores no model with a project yet: a chosen model cannot
+// be kept, so the save goes on with the portal default and says so in the
+// answer's `aiProject.warnings` instead of failing or dropping it silently.
+export function modelNotStoredWarning(body: JsonObject): AiProjectWarning[] {
+  const settings = getObject(body, "aiProject");
+  if (!settings || typeof settings["profileId"] !== "string") {
+    return [];
+  }
+  return [
+    {
+      code: "modelNotStored",
+      roomId: null,
+      subjectId: null,
+      message:
+        "The model is not stored with the project yet; the project runs on the portal default model",
+    },
+  ];
+}
+
+// The create / update body without its `aiProject` block: the .NET room
+// routes take `title`, `color`, `cover`, `tags` and `logo` and refuse any
+// other property, so the block is taken apart here (rooms -> the rooms
+// routes, model -> a warning) and never forwarded.
+export function splitProjectBody(body: JsonObject): {
+  room: JsonObject;
+  settings: JsonObject | undefined;
+} {
+  const { aiProject, ...room } = body;
+  return { room, settings: isObject(aiProject) ? aiProject : undefined };
 }
 
 // The C# side words its 4xx answers for the user (AiProjectResource), so a
@@ -182,11 +230,11 @@ function projectHandler(handler: (req: TypedRequest, res: Response) => Promise<v
 
 export const aiProjectsController = {
   // GET projects — lists the AI projects the caller may see, as the
-  // FolderContentDto of the projects root. The query (filterValue, sortBy,
-  // sortOrder, startIndex, count, subjectId, excludeSubject, subjectOwnerId,
-  // tags (one value holding a JSON array of names, as `files/rooms` takes it),
-  // withoutTags, role, hasInstructions, hasKnowledge, linkedRoomId) is
-  // forwarded as is to `GET internal/ai/projects`.
+  // FolderContentDto of the projects root, without the `aiProject` block.
+  // The query (filterValue, sortBy, sortOrder, startIndex, count, subjectId,
+  // excludeSubject, subjectOwnerId, tags (one value holding a JSON array of
+  // names, as `files/rooms` takes it), withoutTags) is forwarded as is to
+  // `GET internal/ai/projects`.
   getProjects: projectHandler(async (req, res) => {
     const content = await aiService.get("/projects", {
       query: forwardQuery(req.query),
@@ -195,33 +243,69 @@ export const aiProjectsController = {
     res.json(content);
   }),
 
-  // POST projects — creates a project (`POST internal/ai/projects`). Body:
-  // title, color, cover, logo, tags (names, as a room takes them) and the
-  // `aiProject` block (profileId, instructionsRoomIds, knowledgeRoomIds).
-  // The caller becomes its owner.
+  // POST projects — creates a project (`POST internal/ai/projects`: title,
+  // color, cover, logo, tags) and links the rooms of its `aiProject` block
+  // (`POST internal/ai/projects/{id}/rooms`). The caller becomes its owner.
+  // The answer is the project with its block; a room the server refused to
+  // link, or a model it cannot store yet, is reported in `aiProject.warnings`.
   createProject: projectHandler(async (req, res) => {
     const body = bodyOf(req.body);
     await assertProjectProfile(body);
     await assertKnowledgeRoomsLinkable(body);
-    res.json(await aiService.post("/projects", body, { raw: true }));
+    const { room, settings } = splitProjectBody(body);
+    const envelope = await aiService.post("/projects", room, { raw: true });
+    const id = projectIdOf(envelope);
+    if (id === undefined) {
+      logger.warn("ai/projects create: the answer carries no project id, the rooms are not linked");
+      res.json(envelope);
+      return;
+    }
+    const warnings = modelNotStoredWarning(body);
+    const wanted = roomIdsOf(settings);
+    warnings.push(
+      ...(await syncProjectRooms(id, wanted, { instructionsRooms: [], knowledgeRooms: [] })),
+    );
+    const rooms = await readProjectRooms(id);
+    res.json(withAiProjectBlock(envelope, rooms, warnings));
   }),
 
-  // GET projects/{id} — one project with its `aiProject` block
-  // (`GET internal/ai/projects/{id}`).
+  // GET projects/{id} — one project with its `aiProject` block, composed from
+  // `GET internal/ai/projects/{id}` and `GET internal/ai/projects/{id}/rooms`.
   getProject: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
-    res.json(await aiService.get(`/projects/${id}`, { raw: true }));
+    const [envelope, rooms] = await Promise.all([
+      aiService.get(`/projects/${id}`, { raw: true }),
+      readProjectRooms(id),
+    ]);
+    res.json(withAiProjectBlock(envelope, rooms));
   }),
 
-  // PUT projects/{id} — changes the title, logo, tags or `aiProject` block
-  // (`PUT internal/ai/projects/{id}`). An absent field keeps its value; a
-  // present `tags` replaces the set.
+  // PUT projects/{id} — changes the title, logo, tags (`PUT internal/ai/projects/{id}`;
+  // an absent field keeps its value, a present `tags` replaces the set) and
+  // brings the linked rooms to the lists of the `aiProject` block
+  // (`POST` / `DELETE internal/ai/projects/{id}/rooms`): a list sent links
+  // and unlinks to match it, a list not sent keeps its rooms. A body with
+  // only the block reads the room instead of writing it.
   updateProject: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
     const body = bodyOf(req.body);
     await assertProjectProfile(body);
     await assertKnowledgeRoomsLinkable(body);
-    res.json(await aiService.put(`/projects/${id}`, body, { raw: true }));
+    const { room, settings } = splitProjectBody(body);
+    const [envelope, current] = await Promise.all([
+      Object.keys(room).length > 0
+        ? aiService.put(`/projects/${id}`, room, { raw: true })
+        : aiService.get(`/projects/${id}`, { raw: true }),
+      readProjectRooms(id),
+    ]);
+    const warnings = modelNotStoredWarning(body);
+    const wanted = roomIdsOf(settings);
+    let rooms = current;
+    if (wanted.instructionsRoomIds !== undefined || wanted.knowledgeRoomIds !== undefined) {
+      warnings.push(...(await syncProjectRooms(id, wanted, current)));
+      rooms = await readProjectRooms(id);
+    }
+    res.json(withAiProjectBlock(envelope, rooms, warnings));
   }),
 
   // DELETE projects/{id} — deletes the project (`DELETE internal/ai/projects/{id}`,
@@ -236,21 +320,18 @@ export const aiProjectsController = {
   }),
 
   // GET projects/{id}/skills — the skills of the linked Instructions rooms,
-  // grouped by room (`GET internal/ai/projects/{id}/skills`).
+  // grouped by room: the rooms from `GET internal/ai/projects/{id}/rooms`,
+  // the skills from each room's Markdown files (storage/roomSkills.ts).
   getSkills: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
-    res.json(await aiService.get(`/projects/${id}/skills`, { raw: true }));
+    res.json(await listProjectSkills(id));
   }),
 
   // GET projects/{id}/knowledge — the files of the linked Knowledge rooms
-  // with their indexing state (`GET internal/ai/projects/{id}/knowledge`).
+  // with their indexing state: the rooms from `GET internal/ai/projects/{id}/rooms`,
+  // the files from the Files API.
   getKnowledgeFiles: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
-    res.json(
-      await aiService.get(`/projects/${id}/knowledge`, {
-        query: forwardQuery(req.query),
-        raw: true,
-      }),
-    );
+    res.json(await listProjectKnowledge(id));
   }),
 };

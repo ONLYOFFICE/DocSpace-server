@@ -31,28 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The chat context of an AI project (`GET internal/ai/projects/{id}/chat-context`,
-// AiProjectChatContextController). A round whose `entityId` is a project
-// runs on what the project says, not on what the composer sent: the model
-// is the project's (or the portal default), and only the linked rooms the
-// caller can still read are connected — the Instructions rooms as context
-// (skills) rooms, the Knowledge rooms as knowledge bases.
+// The chat context of an AI project: what a round whose `entityId` is a
+// project runs on, instead of what the composer sent. The .NET side stores
+// the project as a room (`GET internal/ai/projects/{id}`: the caller's
+// `access` and `inRoom`) and its linked rooms (`GET internal/ai/projects/{id}/rooms`),
+// and no model yet, so the context is composed here: the model is the
+// portal's Chat assignment, the Instructions rooms are connected as context
+// (skills) rooms, the Knowledge rooms as knowledge bases. Every room the
+// server lists is active and readable by the caller.
 
+import { storage } from "./index.js";
 import { aiService } from "./httpClient.js";
 import { getMyDocumentsFolderId, resolveAiProjectEntityId } from "./docspaceFilesApi.js";
 import { refreshContextRoomSkills } from "./contextRoomSkills.js";
-import { getArray, getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
+import { readProjectRooms } from "./aiProjectRooms.js";
+import { CONTEXT_CLOUD, getRoomSkills } from "./roomSkills.js";
+import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
 
-/** `AiProjectChatContextDto` on the C# side. */
 export interface AiProjectChatContext {
   projectId: number;
   title: string;
-  /** 1 project owner, 9 Project manager, 11 Member, 0 none (an admin outside the project). */
+  /** The caller's `access` on the room: 1 project owner, 9 Project manager, 2 Member, 0 none (an admin outside the project). */
   myRole: number;
+  /** Members only: owner, Project manager, Member (the room's `inRoom`). */
   canChat: boolean;
-  /** The stored project model; `null` = the portal default. */
+  /** The stored project model; always `null` (the portal default) until the server stores one. */
   profileId: string | null;
   /** The model the round runs on; `null` when none is configured. */
   effectiveProfileId: string | null;
@@ -68,38 +74,25 @@ export interface AiProjectRoundRefusal {
   body: { error: string; code?: string };
 }
 
-function idList(obj: JsonObject, key: string): number[] {
-  return (getArray(obj, key) ?? []).filter(
-    (v): v is number => typeof v === "number" && Number.isInteger(v) && v > 0,
-  );
-}
-
-function parseChatContext(raw: unknown): AiProjectChatContext | undefined {
-  if (!isObject(raw)) {
-    return undefined;
+// The portal's Chat assignment and whether it names a profile that exists
+// and can chat; a project runs on it until the server stores a model.
+async function effectiveProfile(): Promise<{ id: string | null; available: boolean }> {
+  const id = await storage.assignments.readByType(ActionType.Chat).catch(() => null);
+  if (!id) {
+    return { id: null, available: false };
   }
-  const projectId = getNumber(raw, "projectId");
-  if (projectId === undefined) {
-    return undefined;
-  }
-  return {
-    projectId,
-    title: getString(raw, "title") ?? "",
-    myRole: getNumber(raw, "myRole") ?? 0,
-    canChat: getBoolean(raw, "canChat") === true,
-    profileId: getString(raw, "profileId") ?? null,
-    effectiveProfileId: getString(raw, "effectiveProfileId") ?? null,
-    profileAvailable: getBoolean(raw, "profileAvailable") === true,
-    instructionsRoomIds: idList(raw, "instructionsRoomIds"),
-    knowledgeRoomIds: idList(raw, "knowledgeRoomIds"),
-    unavailableRoomIds: idList(raw, "unavailableRoomIds"),
-  };
+  const profile = await storage.profiles.readById(id).catch(() => undefined);
+  const canChat =
+    !!profile &&
+    (typeof profile.capabilities !== "number" ||
+      (profile.capabilities & CapabilitiesUI.Chat) !== 0);
+  return { id, available: canChat };
 }
 
 /**
  * The project's chat context when `entityId` is an AI project, `undefined`
- * otherwise. A project the caller cannot see answers 404 upstream, which
- * propagates as such.
+ * otherwise. A project the caller cannot see answers 403 or 404 upstream,
+ * which propagates as such.
  */
 export async function readAiProjectChatContext(
   entityId: string | undefined,
@@ -108,56 +101,52 @@ export async function readAiProjectChatContext(
   if (!projectId) {
     return undefined;
   }
-  const context = parseChatContext(await aiService.get(`/projects/${projectId}/chat-context`));
-  if (!context) {
-    throw new Error(`chat-context of AI project ${projectId}: unparseable response`);
+  const [project, rooms, profile] = await Promise.all([
+    aiService.get(`/projects/${projectId}`),
+    readProjectRooms(projectId),
+    effectiveProfile(),
+  ]);
+  if (!isObject(project)) {
+    throw new Error(`AI project ${projectId}: unparseable answer`);
   }
-  return context;
+  return {
+    projectId: getNumber(project, "id") ?? Number(projectId),
+    title: getString(project, "title") ?? "",
+    myRole: getNumber(project, "access") ?? 0,
+    canChat: getBoolean(project, "inRoom") === true,
+    profileId: null,
+    effectiveProfileId: profile.id,
+    profileAvailable: profile.available,
+    instructionsRoomIds: rooms.instructionsRooms.map((room) => room.id),
+    knowledgeRoomIds: rooms.knowledgeRooms.map((room) => room.id),
+    unavailableRoomIds: [],
+  };
 }
 
-// The linked Instructions rooms with their skills, as the project stores them
-// (`GET internal/ai/projects/{id}/skills`), in the `actionArgs.contextRooms`
-// shape: only the ids of `roomIds` (the readable ones, in linked order).
-// Best-effort: a failed read runs the round without skills.
+// The linked Instructions rooms with their current skills, in the
+// `actionArgs.contextRooms` shape: the frontmatter of each room's Markdown
+// files, read for this round (storage/roomSkills.ts). Best-effort per room:
+// a room whose files cannot be read runs without its skills.
 async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<JsonObject[]> {
-  if (roomIds.length === 0) {
-    return [];
-  }
-  try {
-    const raw = await aiService.get(`/projects/${projectId}/skills`);
-    const rooms = isObject(raw) ? (getObjectArray(raw, "rooms") ?? []) : [];
-    const byId = new Map<number, JsonObject>();
-    for (const room of rooms) {
-      const id = getNumber(room, "id");
-      if (id !== undefined && getBoolean(room, "available") === true) {
-        byId.set(id, room);
+  return Promise.all(
+    roomIds.map(async (id): Promise<JsonObject> => {
+      let skills: { id: string; name: string; description: string }[] = [];
+      try {
+        skills = (await getRoomSkills(String(id))).map(({ id: skillId, name, description }) => ({
+          id: skillId,
+          name,
+          description,
+        }));
+      } catch (err) {
+        logger.warn(
+          `AI project ${projectId}: skills of room ${id} not read, the round runs without them: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
-    }
-    return roomIds.flatMap((id) => {
-      const room = byId.get(id);
-      if (!room) {
-        return [];
-      }
-      return [
-        {
-          cloud: "docspace",
-          id: String(id),
-          skills: (getObjectArray(room, "skills") ?? []).map((skill) => ({
-            id: getString(skill, "id") ?? "",
-            name: getString(skill, "name") ?? "",
-            description: getString(skill, "description") ?? "",
-          })),
-        },
-      ];
-    });
-  } catch (err) {
-    logger.warn(
-      `AI project ${projectId}: skills not read, the round runs without them: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
-    return [];
-  }
+      return { cloud: CONTEXT_CLOUD, id: String(id), skills };
+    }),
+  );
 }
 
 /**
@@ -239,7 +228,9 @@ export async function applyAiProjectChatContext(
       body["contextEntityId"] = myDocumentsId;
       nextArgs["folderContext"] = { id: myDocumentsId };
     } else {
-      logger.warn(`AI project ${context.projectId}: My documents not resolved, the round has no folder context`);
+      logger.warn(
+        `AI project ${context.projectId}: My documents not resolved, the round has no folder context`,
+      );
       delete body["contextEntityId"];
       delete nextArgs["folderContext"];
     }

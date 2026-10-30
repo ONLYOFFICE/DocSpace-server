@@ -301,21 +301,22 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiDenyToolCall:
     'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
 
-  // Projects - rooms of type 12, delegated to the .NET AI service (AiProjectsController).
+  // Projects - rooms of type 12, delegated to the .NET AI service (AiProjectsController);
+  // the `aiProject` block is composed here over its `projects/{id}/rooms` routes.
   aiProjectsList:
-    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with its `aiProject` block and the caller's `security`. Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning; `role`, `hasInstructions`, `hasKnowledge`, `instructionsRoomId`, `knowledgeRoomId` and `linkedRoomId` narrow by the caller's role and the linked rooms.",
+    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with the caller's `security` and without the `aiProject` block (read a project to get its rooms). Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning.",
   aiProjectsCreate:
-    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block sets the model (`profileId`, a UUID of a chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each readable by the caller, not third-party, at most 20 of each. The caller is granted Viewer on every linked room they are not yet in. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
+    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block names the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each an active room readable by the caller, at most 100 of each; they are linked right after the room is created, and a refused link comes back as a `roomUnavailable` warning in the answer's `aiProject.warnings` rather than a failure. `aiProject.profileId` must be a UUID of a chat profile or `null`, but no model is stored with a project yet: a chosen one is answered with a `modelNotStored` warning and the project runs on the portal default. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
   aiProjectsGet:
-    "Returns one AI project as a room card: its `aiProject` block, the caller's `access` and `security`. A room that is not an AI project answers 404.",
+    "Returns one AI project as a room card: the caller's `access` and `security`, and its `aiProject` block - `profile` (always `null`, the portal default, until the service stores a model), the linked `instructionsRooms` and `knowledgeRooms` (each active and readable by the caller, sorted by title) and `canEditSettings`. A room that is not an AI project answers 404; a project the caller cannot read answers 403.",
   aiProjectsUpdate:
-    "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). In `aiProject` an absent field keeps its value, `profileId: null` returns to the portal default model and a room list replaces the current one, validated as on create. Every member not yet in a newly linked room is granted Viewer on it; unlinking a room revokes nothing.",
+    "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the rooms of the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). A room list sent in `aiProject` is brought about exactly: the rooms not linked yet are linked, the linked rooms left out are unlinked, `[]` unlinks every room of that kind; a list absent or `null` keeps its rooms. A refused link or unlink comes back as a `roomUnavailable` warning, a `profileId` as a `modelNotStored` warning (see create). Unlinking a room revokes nothing.",
   aiProjectsDelete:
     "Deletes an AI project as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner only. The linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched.",
   aiProjectsSkills:
-    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description. A room that is gone or that the caller can no longer read is listed with `available: false`. Which skills a chat round uses is the user's per-session choice and is not stored.",
+    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description, read from the Files API with the caller's credentials. A room whose files cannot be read is listed with `available: false` and no skills. Which skills a chat round uses is the user's per-session choice and is not stored.",
   aiProjectsKnowledge:
-    "Lists the files of every Knowledge room linked to the project, subfolders included, grouped by room, with each file's indexing state and the room's indexed and total counts. A room that is gone or unreadable is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
+    "Lists the files of every Knowledge room linked to the project, grouped by room, with each file's indexing state (`indexed`, `vectorizationStatus`, `security.Vectorization`) and the room's total, indexed and failed counts, read from the Files API with the caller's credentials. A room that cannot be read is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
@@ -637,25 +638,26 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiProjectsCreate: {
     "400":
       "`title` is missing or too long, a field is not a project field, `color` or `cover` is " +
-      "malformed, `tags` is not an array of names, `aiProject.profileId` is not a UUID of a chat " +
-      "profile, or a room id is not an accessible room of the required type.",
+      "malformed, `tags` is not an array of names, or `aiProject.profileId` is not a UUID of a chat " +
+      "profile. A room that cannot be linked does not fail the create: see `aiProject.warnings`.",
     "403": "The caller is a user or a guest, who cannot create projects.",
   },
   aiProjectsGet: {
     "400": "The project id is not a positive integer.",
-    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+    "403": "The caller cannot read the project.",
+    "404": "The project does not exist or is not an AI project.",
   },
   aiProjectsUpdate: {
     "400":
       "The project id is not a positive integer, nothing to update is given, or a field fails " +
       "the checks of create.",
-    "403": "The caller is neither the owner nor a project manager.",
-    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+    "403": "The caller is neither the owner nor a project manager, or cannot read the project.",
+    "404": "The project does not exist or is not an AI project.",
   },
   aiProjectsDelete: {
     "400": "The project id is not a positive integer.",
-    "403": "The caller is not the owner.",
-    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
+    "403": "The caller may not read or delete the project.",
+    "404": "The project does not exist or is not an AI project.",
   },
   aiProjectsSkills: {
     "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
@@ -2055,35 +2057,6 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       description: "`true` keeps only the projects with no tags; `tags` is then ignored.",
       required: false,
       schema: { type: "boolean", examples: [true] },
-    },
-    {
-      name: "role",
-      in: "query",
-      description:
-        "Keep only the projects the caller holds this role in: `1` owner, `9` project manager, `2` member (the room's Read). Omitted or `0`: every role.",
-      required: false,
-      schema: { type: "integer", examples: [1] },
-    },
-    {
-      name: "hasInstructions",
-      in: "query",
-      description: "`true` keeps only the projects with at least one Instructions room.",
-      required: false,
-      schema: { type: "boolean", examples: [true] },
-    },
-    {
-      name: "hasKnowledge",
-      in: "query",
-      description: "`true` keeps only the projects with at least one Knowledge room.",
-      required: false,
-      schema: { type: "boolean", examples: [true] },
-    },
-    {
-      name: "linkedRoomId",
-      in: "query",
-      description: "Keep only the projects that link this Instructions or Knowledge room.",
-      required: false,
-      schema: { type: "integer", examples: [42] },
     },
     {
       name: "startIndex",

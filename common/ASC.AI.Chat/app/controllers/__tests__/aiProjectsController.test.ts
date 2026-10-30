@@ -52,8 +52,42 @@ vi.mock("../../storage/httpClient.js", () => ({
   AiServiceHttpError: FakeAiServiceHttpError,
 }));
 vi.mock("../../storage/index.js", () => ({ storage: { profiles: { readById: vi.fn() } } }));
+vi.mock("../../storage/aiProjectRooms.js", () => ({
+  listProjectKnowledge: vi.fn(),
+  listProjectSkills: vi.fn(),
+  projectIdOf: vi.fn(),
+  readProjectRooms: vi.fn(),
+  roomIdsOf: vi.fn(),
+  syncProjectRooms: vi.fn(),
+  withAiProjectBlock: vi.fn(),
+}));
 
-const { assertKnowledgeRoomsLinkable, forwardQuery } = await import("../aiProjectsController.js");
+const { assertKnowledgeRoomsLinkable, forwardQuery, modelNotStoredWarning, splitProjectBody } =
+  await import("../aiProjectsController.js");
+
+describe("splitProjectBody", () => {
+  it("takes the aiProject block out of the room fields", () => {
+    const body = { title: "Sales", tags: ["q3"], aiProject: { profileId: null, instructionsRoomIds: [7] } };
+    expect(splitProjectBody(body)).toEqual({
+      room: { title: "Sales", tags: ["q3"] },
+      settings: { profileId: null, instructionsRoomIds: [7] },
+    });
+    expect(splitProjectBody({ title: "Sales" })).toEqual({ room: { title: "Sales" }, settings: undefined });
+  });
+});
+
+describe("modelNotStoredWarning", () => {
+  it("warns about a chosen model, which the server cannot store yet", () => {
+    expect(modelNotStoredWarning({ aiProject: { profileId: "p1" } })).toMatchObject([
+      { code: "modelNotStored", roomId: null },
+    ]);
+  });
+
+  it("says nothing for the portal default or no block", () => {
+    expect(modelNotStoredWarning({ aiProject: { profileId: null } })).toEqual([]);
+    expect(modelNotStoredWarning({ title: "Sales" })).toEqual([]);
+  });
+});
 
 describe("forwardQuery", () => {
   it("passes strings and repeated parameters through, dropping the rest", () => {
