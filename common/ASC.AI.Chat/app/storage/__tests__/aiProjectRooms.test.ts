@@ -223,7 +223,7 @@ describe("listProjectKnowledge", () => {
       });
       expect((listed[0] as { files: unknown[] }).files).toEqual([
         {
-          id: "1",
+          id: 1,
           title: "a.docx",
           fileExst: ".docx",
           indexed: true,
@@ -231,7 +231,7 @@ describe("listProjectKnowledge", () => {
           security: { Vectorization: false },
         },
         {
-          id: "2",
+          id: 2,
           title: "b.pdf",
           fileExst: ".pdf",
           indexed: false,
@@ -240,8 +240,42 @@ describe("listProjectKnowledge", () => {
         },
       ]);
       expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toBe(
-        "http://portal/api/2.0/files/9?filterType=1&count=1000&startIndex=0",
+        "http://portal/api/2.0/files/9?filterType=1&count=100&startIndex=0",
       );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("reads a large room page by page, up to the limit", async () => {
+    aiServiceGet.mockResolvedValue({
+      instructionsRooms: [],
+      knowledgeRooms: [{ id: 9, title: "Docs" }],
+    });
+    const file = (id: number) => ({
+      id,
+      title: `${id}.docx`,
+      fileExst: ".docx",
+      vectorizationStatus: 1,
+    });
+    const fetchMock = vi.fn(async (url: string) => {
+      const startIndex = Number(new URL(url).searchParams.get("startIndex"));
+      return {
+        ok: true,
+        json: async () => ({
+          response: {
+            total: 1250,
+            files: Array.from({ length: 100 }, (_, i) => file(startIndex + i + 1)),
+          },
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const { rooms: listed } = await listProjectKnowledge(42);
+      expect(fetchMock).toHaveBeenCalledTimes(10);
+      expect(listed[0]).toMatchObject({ totalFiles: 1250, indexedFiles: 1000, truncated: true });
+      expect((listed[0] as { files: unknown[] }).files).toHaveLength(1000);
     } finally {
       vi.unstubAllGlobals();
     }

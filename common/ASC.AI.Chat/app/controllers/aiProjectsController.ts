@@ -207,6 +207,13 @@ function upstreamMessage(body: string): string | undefined {
   }
 }
 
+// The DocSpace envelope the client's request layer unwraps
+// (`response.data.response`); the answers composed here, unlike the ones
+// relayed from .NET, have to be wrapped in it themselves.
+function docspaceEnvelope(response: unknown): JsonObject {
+  return { response, count: 1, status: 0, statusCode: 200 };
+}
+
 function projectHandler(handler: (req: TypedRequest, res: Response) => Promise<void>) {
   return asyncHandler(async (req, res) => {
     try {
@@ -324,7 +331,7 @@ export const aiProjectsController = {
   // the skills from each room's Markdown files (storage/roomSkills.ts).
   getSkills: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
-    res.json(await listProjectSkills(id));
+    res.json(docspaceEnvelope(await listProjectSkills(id)));
   }),
 
   // GET projects/{id}/knowledge — the files of the linked Knowledge rooms
@@ -332,6 +339,6 @@ export const aiProjectsController = {
   // the files from the Files API.
   getKnowledgeFiles: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
-    res.json(await listProjectKnowledge(id));
+    res.json(docspaceEnvelope(await listProjectKnowledge(id)));
   }),
 };

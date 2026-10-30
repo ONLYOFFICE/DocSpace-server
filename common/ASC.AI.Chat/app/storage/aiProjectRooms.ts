@@ -65,7 +65,9 @@ const KNOWLEDGE_ROOM_TYPE = 11;
 
 /** `FilterType.FilesOnly` on the C# side. */
 const FILTER_FILES_ONLY = 1;
-/** Files of a Knowledge room read at most; the listing reports `truncated` past it. */
+/** Page size of the Files API (`ApiContext.MaxCount`); a larger `count` answers 400. */
+const FILES_PAGE_SIZE = 100;
+/** Files of a Knowledge room read at most (10 pages); the listing reports `truncated` past it. */
 const KNOWLEDGE_FILES_LIMIT = 1000;
 /** `VectorizationStatus` on the C# side. */
 const VECTORIZATION_COMPLETED = 1;
@@ -372,7 +374,8 @@ export async function listProjectSkills(
 }
 
 interface KnowledgeFile {
-  id: string;
+  /** The DocSpace file id, a number as the Files API answers it (the client retries vectorization by it). */
+  id: number;
   title: string;
   fileExst: string;
   indexed: boolean;
@@ -380,15 +383,33 @@ interface KnowledgeFile {
   security: { Vectorization: boolean };
 }
 
-// One page of a Knowledge room's files (`GET api/2.0/files/{roomId}`, files
-// only): the files with their vectorization state and the room's total.
+// The files of a Knowledge room (`GET api/2.0/files/{roomId}`, files only),
+// read page by page up to the limit, with their vectorization state and the
+// room's total.
 async function listKnowledgeFiles(
   roomId: number,
 ): Promise<{ files: KnowledgeFile[]; total: number }> {
+  const files: KnowledgeFile[] = [];
+  let total = 0;
+  for (let startIndex = 0; startIndex < KNOWLEDGE_FILES_LIMIT; startIndex += FILES_PAGE_SIZE) {
+    const page = await readKnowledgeFilesPage(roomId, startIndex);
+    files.push(...page.files);
+    total = page.total;
+    if (startIndex + FILES_PAGE_SIZE >= total || page.files.length === 0) {
+      break;
+    }
+  }
+  return { files, total };
+}
+
+async function readKnowledgeFilesPage(
+  roomId: number,
+  startIndex: number,
+): Promise<{ files: KnowledgeFile[]; total: number }> {
   const params = new URLSearchParams({
     filterType: String(FILTER_FILES_ONLY),
-    count: String(KNOWLEDGE_FILES_LIMIT),
-    startIndex: "0",
+    count: String(FILES_PAGE_SIZE),
+    startIndex: String(startIndex),
   });
   const url = `${proxyBaseUrl}/api/2.0/files/${encodeURIComponent(String(roomId))}?${params}`;
   const { signal, cancel } = withTimeout(undefined);
@@ -405,7 +426,7 @@ async function listKnowledgeFiles(
     }
     const files: KnowledgeFile[] = [];
     for (const entry of getObjectArray(envelope, "files") ?? []) {
-      const id = getEntityId(entry, "id");
+      const id = getNumber(entry, "id");
       const title = getString(entry, "title");
       if (id === undefined || !title) {
         continue;
@@ -423,7 +444,7 @@ async function listKnowledgeFiles(
         },
       });
     }
-    return { files, total: getNumber(envelope, "total") ?? files.length };
+    return { files, total: getNumber(envelope, "total") ?? startIndex + files.length };
   } finally {
     cancel();
   }
@@ -431,8 +452,8 @@ async function listKnowledgeFiles(
 
 /**
  * The files of every linked Knowledge room, for `GET ai/projects/{id}/knowledge`:
- * the rooms as the server lists them, each with its files (at most 1000,
- * `truncated` when the room holds more), their vectorization state and the
+ * the rooms as the server lists them, each with its files (at most 1000, read
+ * in pages of 100, `truncated` when the room holds more), their vectorization state and the
  * room's counters. A room that cannot be read comes back with
  * `available: false` and no files, never as a failure.
  */
