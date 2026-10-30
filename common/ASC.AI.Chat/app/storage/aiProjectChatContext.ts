@@ -44,21 +44,6 @@ import { refreshContextRoomSkills } from "./contextRoomSkills.js";
 import { getArray, getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
-import { mockProjectTitle } from "./aiProjectsMock/registry.js";
-import * as aiProjectsMock from "./aiProjectsMock/store.js";
-import type { MockReply } from "./aiProjectsMock/store.js";
-
-// The payload of a mock answer, or its failure as the upstream one would be.
-function fromMock(reply: MockReply): unknown {
-  const body = isObject(reply.body) ? reply.body : {};
-  if (reply.status !== 200) {
-    throw Object.assign(new Error(getString(body, "error") ?? "AI projects mock failure"), {
-      status: reply.status,
-      expose: reply.status < 500,
-    });
-  }
-  return body["response"];
-}
 
 /** `AiProjectChatContextDto` on the C# side. */
 export interface AiProjectChatContext {
@@ -123,11 +108,7 @@ export async function readAiProjectChatContext(
   if (!projectId) {
     return undefined;
   }
-  const context = parseChatContext(
-    mockProjectTitle(projectId) !== undefined
-      ? fromMock(await aiProjectsMock.chatContext(projectId))
-      : await aiService.get(`/projects/${projectId}/chat-context`),
-  );
+  const context = parseChatContext(await aiService.get(`/projects/${projectId}/chat-context`));
   if (!context) {
     throw new Error(`chat-context of AI project ${projectId}: unparseable response`);
   }
@@ -143,10 +124,7 @@ async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<J
     return [];
   }
   try {
-    const raw =
-      mockProjectTitle(projectId) !== undefined
-        ? fromMock(await aiProjectsMock.chatSkills(String(projectId)))
-        : await aiService.get(`/projects/${projectId}/skills`);
+    const raw = await aiService.get(`/projects/${projectId}/skills`);
     const rooms = isObject(raw) ? (getObjectArray(raw, "rooms") ?? []) : [];
     const byId = new Map<number, JsonObject>();
     for (const room of rooms) {

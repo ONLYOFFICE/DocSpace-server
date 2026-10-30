@@ -70,53 +70,39 @@ engine streams (`toolProgress`) until the result replaces it; nothing of it is p
 `/api/2.0/ai/projects/*` (`app/controllers/aiProjectsController.ts`) serves the AI Projects page:
 a project is a room of type 12 that binds a model, Instructions rooms (type 10) and Knowledge rooms
 (type 11) and shares them with a team under three roles — project owner (`access` 1), project
-manager (9) and member (11). As for agents, only the project-specific routes live here — list,
+manager (9) and member (2, the room's Read). As for agents, only the project-specific routes live here — list,
 create, get, update, delete, `skills` and `knowledge` — and every one of them is delegated to the
 .NET AI service (`internal/ai/projects…`, `AiProjectsController`) and answers its DocSpace envelope
 unchanged; the only check made here is that a chosen model exists and can chat. Everything a
 project shares with an ordinary room — pin and unpin, mute, members (`share`), invitation links,
-resending invitations, leaving, changing the owner, duplicating, removing the logo and the history
+resending invitations, leaving, changing the owner, removing the logo and the history
 — is done by the client through the Files API (`files/rooms/{id}/...`), not through this service.
+
+The project DTO is a room card: besides its `aiProject` block it carries the room fields the list
+reads — `tags` (tag names, as a room's `tags`), `createdBy` and `updatedBy` (the same user shape),
+`pinned`, `mute`, `inRoom`, `access`, `security`. The create and update bodies take `tags` the way
+a room does (names; create sets the list, update replaces it when the field is present, `[]`
+clears it) next to `title`, `color`, `cover`, `logo` and `aiProject`; every other room-only field
+(quota, lifetime, watermark, ...) is refused. The tag names to pick from are the portal's own
+(`GET files/tags`).
+
+`GET projects` takes the rooms list's query, forwarded to .NET as is:
+
+| Parameter | Meaning |
+|---|---|
+| `filterValue` | title contains the text |
+| `sortBy`, `sortOrder` | `DateAndTime` (default), `AZ`, `DateAndTimeCreation`, `Tags` (joined tag names, untagged last) or `Author` (owner display name); `ascending` / `descending` (default). Any other `sortBy` answers 400 |
+| `startIndex`, `count` | paging |
+| `subjectId`, `excludeSubject` | projects shared with this user or group, in any role, the owner included; `excludeSubject=true` inverts it |
+| `subjectOwnerId` | projects this user owns; combines with `subjectId` |
+| `tags` | one value holding a JSON array of names (`tags=%5B%22sales%22%2C%22legal%22%5D`), as `files/rooms` takes it: projects carrying **any** of them. |
+| `withoutTags` | `true`: projects with no tags (`tags` is then ignored) |
+| `role` | the caller's role: `1` owner, `9` project manager, `2` member (the room's Read); `0` or omitted: every role |
+| `hasInstructions`, `hasKnowledge` | `true`: at least one linked room of that kind |
+| `linkedRoomId`, `instructionsRoomId`, `knowledgeRoomId` | projects linking that room |
 
 The .NET contract, method by method, is
 `client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md`.
-
-#### Mock
-
-Until the .NET side lands, `AI_PROJECTS_MOCK=1` (or `"aiProjects": { "mock": true }` in the
-config; never in production) answers every project route in process
-(`app/controllers/aiProjectsMockController.ts`, `app/storage/aiProjectsMock/`). Each signed-in
-user gets a world of their own, built from a scenario on the first call, with themselves as the
-owner, a Project manager, a Member or an admin outside the project, as each project says. The
-rights of the C# contract are enforced, and so are its 400s (an unknown body field, a blank or too
-long title, more than 20 rooms of a kind, a room linked twice).
-
-The mock covers only the routes of this service. Mock project ids live in Node memory alone, so the
-room operations the client sends to the Files API (`files/rooms/{id}/...`) — pin and unpin, mute,
-members and invitation links (`share`, `links`, `resend`), leave, owner change, duplicate, logo
-removal and history — do **not** work on mock projects: the portal has no such room and answers
-404. The project DTO still carries the room fields the page reads (`pinned`, `mute`, `inRoom`,
-`access`, `security`), so the list and the cards render; only those actions fail.
-
-| Scenario | What it holds |
-|---|---|
-| `default` | ~32 projects that stress the UI: 170-character titles with and without spaces, emoji, right-to-left, CJK and markup-like titles; 20 + 20 linked rooms; rooms with 150 skills, 1000 files of 2400 (truncated) or none; gone and archived rooms; a deleted model; 9 pinned projects; a muted project; a grant warning; a project whose every read answers 500 and one whose sources take 4 s |
-| `many` | `default` plus 300 plain projects, for paging and infinite scroll |
-| `empty` | no projects at all |
-| `one` | one ordinary project |
-
-- `GET /api/2.0/ai/projects/mock` tells the scenario; `POST /api/2.0/ai/projects/mock`
-  `{ "scenario": "many" }` drops every world and rebuilds from that scenario. The start scenario
-  is `AI_PROJECTS_MOCK_SCENARIO` (default `default`).
-- `AI_PROJECTS_MOCK_DELAY_MS` delays every answer, to see the loaders.
-- Renaming a project to a title with `#400`, `#403` or `#500` makes its next save fail with that
-  status.
-- Real Instructions and Knowledge rooms picked in the dialog are linked as they are: their skills
-  and files are read live. A chat round inside a mock project runs on its model (the portal default
-  when none is set; a deleted one answers 409) with only those real rooms; the generated rooms have
-  no files to read.
-- Deleting answers a file operation that is already finished.
-- Nothing survives a restart.
 
 ### License
 

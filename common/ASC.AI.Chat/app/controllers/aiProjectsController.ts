@@ -33,7 +33,6 @@
 import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
-import type { QueryValue } from "../storage/httpClient.js";
 import { asyncHandler } from "./_helpers.js";
 import type { TypedRequest } from "./_helpers.js";
 import type { Response } from "express";
@@ -82,13 +81,24 @@ export function projectIdParam(value: string | undefined): string {
   return value;
 }
 
-// Forward the caller's flat string query params to the .NET endpoint
-// unchanged. Array/object query values are dropped rather than guessed at.
-export function forwardQuery(query: Record<string, unknown>): Record<string, QueryValue> {
-  const out: Record<string, QueryValue> = {};
+/** The query a project route forwards: a string per name, or the strings of a repeated name. */
+export type ForwardedQuery = Record<string, string | string[]>;
+
+// Forward the caller's string query params to the .NET endpoint unchanged. A
+// repeated parameter (`tags=a&tags=b`, which Express parses into an array)
+// goes through as the same repeated parameter, so the rooms-style list
+// filters bind on the .NET side as they do for `files/rooms`. Object query
+// values are dropped rather than guessed at.
+export function forwardQuery(query: Record<string, unknown>): ForwardedQuery {
+  const out: ForwardedQuery = {};
   for (const [key, value] of Object.entries(query)) {
     if (typeof value === "string") {
       out[key] = value;
+    } else if (Array.isArray(value)) {
+      const strings = value.filter((v): v is string => typeof v === "string");
+      if (strings.length > 0) {
+        out[key] = strings;
+      }
     }
   }
   return out;
@@ -174,8 +184,10 @@ function projectHandler(handler: (req: TypedRequest, res: Response) => Promise<v
 export const aiProjectsController = {
   // GET projects — lists the AI projects the caller may see, as the
   // FolderContentDto of the projects root. The query (filterValue, sortBy,
-  // sortOrder, startIndex, count, subjectId, role, hasInstructions,
-  // hasKnowledge, linkedRoomId) is forwarded as is to `GET internal/ai/projects`.
+  // sortOrder, startIndex, count, subjectId, excludeSubject, subjectOwnerId,
+  // tags (one value holding a JSON array of names, as `files/rooms` takes it),
+  // withoutTags, role, hasInstructions, hasKnowledge, linkedRoomId) is
+  // forwarded as is to `GET internal/ai/projects`.
   getProjects: projectHandler(async (req, res) => {
     const content = await aiService.get("/projects", {
       query: forwardQuery(req.query),
@@ -185,8 +197,9 @@ export const aiProjectsController = {
   }),
 
   // POST projects — creates a project (`POST internal/ai/projects`). Body:
-  // title, color, cover, logo and the `aiProject` block (profileId,
-  // instructionsRoomIds, knowledgeRoomIds). The caller becomes its owner.
+  // title, color, cover, logo, tags (names, as a room takes them) and the
+  // `aiProject` block (profileId, instructionsRoomIds, knowledgeRoomIds).
+  // The caller becomes its owner.
   createProject: projectHandler(async (req, res) => {
     const body = bodyOf(req.body);
     await assertProjectProfile(body);
@@ -201,8 +214,9 @@ export const aiProjectsController = {
     res.json(await aiService.get(`/projects/${id}`, { raw: true }));
   }),
 
-  // PUT projects/{id} — changes the title, logo or `aiProject` block
-  // (`PUT internal/ai/projects/{id}`). An absent field keeps its value.
+  // PUT projects/{id} — changes the title, logo, tags or `aiProject` block
+  // (`PUT internal/ai/projects/{id}`). An absent field keeps its value; a
+  // present `tags` replaces the set.
   updateProject: projectHandler(async (req, res) => {
     const id = projectIdParam(req.params["id"]);
     const body = bodyOf(req.body);

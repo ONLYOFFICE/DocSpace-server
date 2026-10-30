@@ -47,8 +47,6 @@ vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId, getMyDocume
 const getRoomSkills = vi.fn();
 vi.mock("../roomSkills.js", () => ({ CONTEXT_CLOUD: "docspace", getRoomSkills }));
 
-vi.mock("../aiProjectsMock/registry.js", () => ({ mockProjectTitle: () => undefined }));
-vi.mock("../aiProjectsMock/store.js", () => ({}));
 
 const { applyAiProjectChatContext } = await import("../aiProjectChatContext.js");
 

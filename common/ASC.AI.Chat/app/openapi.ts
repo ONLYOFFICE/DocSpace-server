@@ -305,13 +305,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Projects - rooms of type 12, delegated to the .NET AI service (AiProjectsController).
   aiProjectsList:
-    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with its `aiProject` block and the caller's `security`. Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `startIndex` and `count` are the rooms listing's; `role`, `hasInstructions`, `hasKnowledge`, `instructionsRoomId`, `knowledgeRoomId` and `linkedRoomId` narrow by the caller's role and the linked rooms.",
+    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with its `aiProject` block and the caller's `security`. Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning; `role`, `hasInstructions`, `hasKnowledge`, `instructionsRoomId`, `knowledgeRoomId` and `linkedRoomId` narrow by the caller's role and the linked rooms.",
   aiProjectsCreate:
-    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it. The optional `aiProject` block sets the model (`profileId`, a UUID of a chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each readable by the caller, not third-party, at most 20 of each. The caller is granted Viewer on every linked room they are not yet in. Room-only fields (tags, quota, lifetime, watermark, ...) are refused.",
+    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block sets the model (`profileId`, a UUID of a chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each readable by the caller, not third-party, at most 20 of each. The caller is granted Viewer on every linked room they are not yet in. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
   aiProjectsGet:
     "Returns one AI project as a room card: its `aiProject` block, the caller's `access` and `security`. A room that is not an AI project answers 404.",
   aiProjectsUpdate:
-    "Changes an AI project: `title`, `color`, `cover`, `logo` and the `aiProject` block. Owner and project managers only. In `aiProject` an absent field keeps its value, `profileId: null` returns to the portal default model and a room list replaces the current one, validated as on create. Every member not yet in a newly linked room is granted Viewer on it; unlinking a room revokes nothing.",
+    "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). In `aiProject` an absent field keeps its value, `profileId: null` returns to the portal default model and a room list replaces the current one, validated as on create. Every member not yet in a newly linked room is granted Viewer on it; unlinking a room revokes nothing.",
   aiProjectsDelete:
     "Deletes an AI project as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner only. The linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched.",
   aiProjectsSkills:
@@ -657,8 +657,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiProjectsCreate: {
     "400":
       "`title` is missing or too long, a field is not a project field, `color` or `cover` is " +
-      "malformed, `aiProject.profileId` is not a UUID of a chat profile, or a room id is not an " +
-      "accessible room of the required type.",
+      "malformed, `tags` is not an array of names, `aiProject.profileId` is not a UUID of a chat " +
+      "profile, or a room id is not an accessible room of the required type.",
     "403": "The caller is a user or a guest, who cannot create projects.",
   },
   aiProjectsGet: {
@@ -2078,7 +2078,7 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
       name: "sortBy",
       in: "query",
       description:
-        "The sort field, as for rooms: `DateAndTime` (last change, the default), `AZ` or `DateAndTimeCreation`.",
+        "The sort field, as for rooms: `DateAndTime` (last change, the default), `AZ`, `DateAndTimeCreation`, `Tags` (by the joined tag names, untagged projects last) or `Author` (by the owner's display name). Any other value answers 400.",
       required: false,
       schema: { type: "string", examples: ["DateAndTime"] },
     },
@@ -2092,15 +2092,47 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
     {
       name: "subjectId",
       in: "query",
-      description: "Keep only the projects this user owns.",
+      description:
+        "Keep only the projects shared with this user or group, in any role, the owner included (as for rooms).",
       required: false,
       schema: { type: "string", examples: ["00000000-0000-0000-0000-000000000000"] },
+    },
+    {
+      name: "excludeSubject",
+      in: "query",
+      description:
+        "`true` inverts `subjectId`: keep only the projects NOT shared with that subject.",
+      required: false,
+      schema: { type: "boolean", examples: [false] },
+    },
+    {
+      name: "subjectOwnerId",
+      in: "query",
+      description:
+        "Keep only the projects this user owns. Combines with `subjectId`: the projects this user owns that the other subject is a member of.",
+      required: false,
+      schema: { type: "string", examples: ["00000000-0000-0000-0000-000000000000"] },
+    },
+    {
+      name: "tags",
+      in: "query",
+      description:
+        "Keep only the projects carrying any of these tag names: one value holding a JSON array of strings, URL-encoded (`tags=%5B%22sales%22%2C%22legal%22%5D`), as `files/rooms` takes it.",
+      required: false,
+      schema: { type: "string", examples: ['["sales","legal"]'] },
+    },
+    {
+      name: "withoutTags",
+      in: "query",
+      description: "`true` keeps only the projects with no tags; `tags` is then ignored.",
+      required: false,
+      schema: { type: "boolean", examples: [true] },
     },
     {
       name: "role",
       in: "query",
       description:
-        "Keep only the projects the caller holds this role in: `1` owner, `9` project manager, `11` member. Omitted or `0`: every role.",
+        "Keep only the projects the caller holds this role in: `1` owner, `9` project manager, `2` member (the room's Read). Omitted or `0`: every role.",
       required: false,
       schema: { type: "integer", examples: [1] },
     },

@@ -58,8 +58,6 @@ import { openaiPassthroughController } from "./controllers/openaiPassthroughCont
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { aiProjectsController } from "./controllers/aiProjectsController.js";
-import { aiProjectsMockController } from "./controllers/aiProjectsMockController.js";
-import { isAiProjectsMockEnabled } from "./storage/aiProjectsMock/registry.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
@@ -218,18 +216,12 @@ export default function registerRoutes(app: Application): void {
   router.delete("/agents/:id", agentsController.deleteAgent);
 
   // AI projects: rooms of type 12 with a settings block, delegated to the
-  // .NET AI service like the agents above (see aiProjectsController), or
-  // answered in process by the mock when AI_PROJECTS_MOCK=1 (see
-  // aiProjectsMockController); `/projects/mock` then switches its scenario.
+  // .NET AI service like the agents above (see aiProjectsController).
   // Only the project-specific operations live here; everything a project
   // shares with an ordinary room (pin, mute, share, invitation links, leave,
-  // owner change, duplicate, logo, history) goes through the Files API
+  // owner change, logo, history) goes through the Files API
   // (`files/rooms/{id}/...`) directly.
-  const projects = isAiProjectsMockEnabled() ? aiProjectsMockController : aiProjectsController;
-  if (isAiProjectsMockEnabled()) {
-    router.get("/projects/mock", aiProjectsMockController.getMock);
-    router.post("/projects/mock", aiProjectsMockController.resetMock);
-  }
+  const projects = aiProjectsController;
   router.get("/projects", projects.getProjects);
   router.post("/projects", projects.createProject);
   router.get("/projects/:id", projects.getProject);

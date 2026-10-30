@@ -53,7 +53,31 @@ vi.mock("../../storage/httpClient.js", () => ({
 }));
 vi.mock("../../storage/index.js", () => ({ storage: { profiles: { readById: vi.fn() } } }));
 
-const { assertKnowledgeRoomsLinkable } = await import("../aiProjectsController.js");
+const { assertKnowledgeRoomsLinkable, forwardQuery } = await import("../aiProjectsController.js");
+
+describe("forwardQuery", () => {
+  it("passes strings and repeated parameters through, dropping the rest", () => {
+    expect(
+      forwardQuery({
+        filterValue: "sales",
+        tags: '["sales","legal"]',
+        repeated: ["a", "b"],
+        excludeSubject: "true",
+        withoutTags: "true",
+        nested: { a: 1 },
+        mixed: ["ok", 2, { b: 1 }],
+        empty: [],
+      }),
+    ).toEqual({
+      filterValue: "sales",
+      tags: '["sales","legal"]',
+      repeated: ["a", "b"],
+      excludeSubject: "true",
+      withoutTags: "true",
+      mixed: ["ok"],
+    });
+  });
+});
 
 describe("assertKnowledgeRoomsLinkable", () => {
   beforeEach(() => {
