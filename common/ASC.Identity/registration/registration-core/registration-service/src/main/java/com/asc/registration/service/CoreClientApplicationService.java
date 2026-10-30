@@ -137,6 +137,16 @@ public class CoreClientApplicationService implements ClientApplicationService {
   }
 
   /**
+   * Retrieves detailed information for a client straight from the store, bypassing the cache.
+   *
+   * @param clientId the unique identifier of the client.
+   * @return a {@link ClientResponse} containing the detailed information of the specified client.
+   */
+  public ClientResponse getStoredClient(String clientId) {
+    return clientQueryHandler.getStoredClient(clientId);
+  }
+
+  /**
    * Retrieves basic client information for a specific tenant and client.
    *
    * @param query The query containing the client ID and optional tenant ID.
@@ -275,14 +285,21 @@ public class CoreClientApplicationService implements ClientApplicationService {
   public int deleteUserClients(DeleteUserClientsCommand command) {
     validate(command);
 
+    var deleted = clientUpdateCommandHandler.deleteUserClients(command);
+
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
-    userClientsMessagePublisher.publish(
+
+    AfterCommitPublisher.publish(
+        clientCacheTenantRemoveMessagePublisher,
+        ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
+    AfterCommitPublisher.publish(
+        userClientsMessagePublisher,
         UserClientsRemovedEvent.builder()
             .userId(command.getUserId())
             .tenantId(command.getTenantId())
             .build());
 
-    return clientUpdateCommandHandler.deleteUserClients(command);
+    return deleted;
   }
 
   /**
@@ -294,13 +311,17 @@ public class CoreClientApplicationService implements ClientApplicationService {
   public int deleteTenantClients(DeleteTenantClientsCommand command) {
     validate(command);
 
+    var deleted = clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
+
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
 
-    clientCacheTenantRemoveMessagePublisher.publish(
+    AfterCommitPublisher.publish(
+        clientCacheTenantRemoveMessagePublisher,
         ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
-    tenantClientsMessagePublisher.publish(
+    AfterCommitPublisher.publish(
+        tenantClientsMessagePublisher,
         TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
 
-    return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
+    return deleted;
   }
 }

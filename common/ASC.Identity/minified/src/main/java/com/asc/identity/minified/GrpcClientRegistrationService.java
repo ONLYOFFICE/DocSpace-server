@@ -36,10 +36,12 @@ package com.asc.identity.minified;
 import com.asc.common.application.proto.ClientRegistrationServiceGrpc;
 import com.asc.common.application.proto.ClientResponse;
 import com.asc.common.application.proto.GetClientRequest;
+import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
@@ -67,7 +69,9 @@ public class GrpcClientRegistrationService
    */
   public void getClient(GetClientRequest request, StreamObserver<ClientResponse> responseObserver) {
     try {
-      var client = clientApplicationService.getClient(request.getClientId());
+      // read from the store, not the cache: authorization caches the answer itself, and a cached
+      // answer here could still hold a change that authorization has already evicted
+      var client = clientApplicationService.getStoredClient(request.getClientId());
       responseObserver.onNext(
           ClientResponse.newBuilder()
               .setClientId(client.getClientId())
@@ -98,10 +102,20 @@ public class GrpcClientRegistrationService
               .setIsPublic(client.isPublic())
               .build());
       responseObserver.onCompleted();
-    } catch (Exception e) {
+    } catch (ClientNotFoundException e) {
       responseObserver.onError(
           Status.NOT_FOUND
-              .withDescription("Could not find client with id " + request.getClientId())
+              .withDescription("Could not find client with id %s".formatted(request.getClientId()))
+              .asRuntimeException());
+    } catch (IllegalArgumentException | ConstraintViolationException e) {
+      responseObserver.onError(
+          Status.INVALID_ARGUMENT
+              .withDescription("Invalid client id %s".formatted(request.getClientId()))
+              .asRuntimeException());
+    } catch (Exception e) {
+      responseObserver.onError(
+          Status.UNAVAILABLE
+              .withDescription("Could not retrieve client with id %s".formatted(request.getClientId()))
               .asRuntimeException());
     }
   }
