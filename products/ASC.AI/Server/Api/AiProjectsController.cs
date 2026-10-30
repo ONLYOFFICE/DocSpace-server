@@ -116,4 +116,25 @@ public class AiProjectsController(
 
         return await folderDtoHelper.GetAsync(project);
     }
+
+    /// <remarks>
+    /// Returns an AI project.
+    /// </remarks>
+    /// <summary>Get an AI project</summary>
+    /// <path>api/2.0/ai/projects/{id}</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "Project information", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "The caller may not read the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpGet("projects/{id}")]
+    public async Task<FolderDto<int>> GetProject(RoomIdRequestDto<int> inDto)
+    {
+        var project = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (project is not { FolderType: FolderType.AiProjectRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        return await folderDtoHelper.GetAsync(project);
+    }
 }
