@@ -1,6 +1,6 @@
 ---
 name: generate-sdk
-description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates."
+description: "Generating the DocSpace API SDKs: running the generator for the chosen languages, and on request re-emitting the OpenAPI documents first (rebuild of ASC.Api.Documentation.slnx). USE FOR: generate SDK, regenerate SDK, update SDK, regenerate openapi json, api-docs.json, openapi-generator, postman collection, markdown api reference. DO NOT USE FOR: hand-editing generated code in the generated SDK directories, changing controllers/DTOs to fix the spec, writing custom generator templates, the webhook SDKs in the webhooks/ folders of the SDK submodules (generate-webhook-sdk)."
 ---
 
 # Generating SDKs
@@ -71,11 +71,23 @@ on them.
    the API reference into `sdk/docspace-api-spec`. It is a normal stage-B command like the others —
    the build no longer runs it, so it has to be asked for explicitly whenever the reference needs
    refreshing. Pass through any extra parameters the user gives.
+   The same command renders the **webhooks reference** from the webhooks contract named in
+   `markdown.webhooks.contract` of `appsettings.json` (`common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml`):
+   a page per trigger, per trigger family and per delivery model, published in
+   `static/docspace/api-backend/webhooks/` beside `usage-api/` and listed in the `## Webhooks` section of
+   `llms.txt`. A trigger page links the API operations that raise it to their pages in the API reference, so
+   both references come from one run. The pages show the contract as committed: when a `[RaisesWebhook]`
+   attribute or a payload DTO changed, regenerate the contract first (step 1 of the `generate-webhook-sdk` skill,
+   after stage A here). The model pages are cut by the same generator and slicer as the API models; the trigger,
+   family and index pages are written by `WebhookMarkdown`, because openapi-generator renders `paths` only, not
+   the `webhooks` section of a document.
 2. **Always ask whether to regenerate the OpenAPI documents** (`AskUserQuestion`, yes/no) — never
    assume. Yes when controllers/DTOs/Swagger annotations changed since the last regeneration; no
    when only generator configs or templates changed.
 3. If yes → stage A, and stop on failure. Then stage B.
-4. Report the resolved paths, which documents changed, which languages ran, and the diffs — including
+4. Run the case check over every SDK directory that ran (see *Case-only renames* below) and fix what
+   it finds before reporting.
+5. Report the resolved paths, which documents changed, which languages ran, and the diffs — including
    the indexes outside the SDK submodules that the run dirtied (see *Reporting the result*).
 
 ## Resolving the paths (do this before touching anything)
@@ -214,10 +226,43 @@ invent any.
 `mvn clean package` by calling `openapi-generator-cli` (or `mvn`, or `npm`) directly, however
 tempting it looks with several languages queued up. Some commands do more than generate: `CSharp`
 then runs `dotnet build` and copies a
-`.nupkg`, `TypeScript` then runs `npm install` + `npm pack` and copies a `.tgz`. Which commands have
+`.nupkg`, `TypeScript` then runs `npm install` + `npm pack`, which writes a `.tgz`. Which commands have
 such steps, and where they write, is the tool's business and changes without notice — calling the
 generator yourself silently skips them and produces a half-updated SDK with exit code 0. The
 duplicated Maven build is the price of not encoding that knowledge here.
+
+## Case-only renames
+
+When a schema is renamed by case alone — `IPRestrictionArrayWrapper` → `IpRestrictionArrayWrapper`,
+`STRINGArrayWrapper` → `StringArrayWrapper` — and stage B runs on a case-insensitive file system
+(Windows, default macOS, where git has `core.ignorecase=true`), the generator overwrites the old file
+in place. The content carries the new name, the file keeps the old one, and git records only a content
+change. Nothing fails locally. It surfaces later, on Linux:
+
+- Java CI: `class IpRestrictionArrayWrapper is public, should be declared in a file named
+  IpRestrictionArrayWrapper.java` — the build is red;
+- PHP: the PSR-4 autoloader looks for `IpRestrictionArrayWrapper.php` and finds nothing at runtime;
+- C#, Kotlin, Swift build, but file and type names disagree;
+- every SDK: `docs/*.md` links in the README point at a file name that does not exist on GitHub.
+
+So after stage B, run the check over the resolved output directory of **every** language that ran:
+
+```bash
+python .claude/skills/generate-sdk/scripts/fix_case_renames.py <sdk dir> [<sdk dir> ...]
+```
+
+It compares each source file's primary type (`.java`, `.kt`, `.cs`, `.swift`, `.php`) with its file
+name, and each relative Markdown link with the file it points to, and lists case-only mismatches.
+Exit code 0 means clean. On mismatches rerun with `--apply`: it does `git mv` to the expected case,
+leaving the renames staged in the submodule. A `CONFLICT` line (exit 2) means the two signals disagree
+about one file — do not guess, report it.
+
+A directory that is not a repository root (`Go`/`Ruby` before they get a submodule) is skipped: an
+untracked directory has no stale tracked name to fix.
+
+The check does not cover modules whose file names are derived and lower-cased (`Python`, `Go`,
+`Ruby`, `TypeScript` sources) — a case-only rename cannot leave them stale, only their `docs/*.md`,
+which the link check does cover.
 
 ## Prerequisites
 
@@ -268,20 +313,19 @@ Report both. The second one is easy to miss precisely because nothing asked for 
 shows only a moved submodule pointer, and the actual change is one level down. The `Markdown`
 command adds to the same submodule through the Markdown bundle (`markdown.bundle`).
 
-**Post-generation steps write packages outside the SDK directory, into places `git status` in this
-repo will not show you.** Verified destinations, both of which are *tracked* files that a run leaves
-modified:
+**Post-generation steps write packages that `git status` of the SDK directory alone will not
+explain.** Verified destinations, both of which are *tracked* files that a run leaves modified:
 
 | Language | Package | Lands in | Whose index |
 | --- | --- | --- | --- |
 | `CSharp` | `DocSpace.API.SDK.<ver>.nupkg` | `.nuget/packages/` at this repo's root | **this** repo — a generation run dirties a tracked binary here |
-| `TypeScript` | `onlyoffice-docspace-api-sdk-<ver>.tgz` | `client/libs/ui-kit/`, a sibling of `server/` | the **client** repo, inside its own `ui-kit` submodule |
+| `TypeScript` | `onlyoffice-docspace-api-sdk-<ver>.tgz` | the root of `sdk/docspace-api-sdk-typescript`, where `npm pack` writes it | the TypeScript SDK submodule — nothing copies it anywhere else (ui-kit lives in a repository of its own now) |
 
-So a `CSharp`/`TypeScript` run touches up to **four** indexes: the language's own SDK submodule,
-`sdk/docspace-api-spec` (the joiner's published contract — unavoidable, every run), this repo (the
-`.nupkg`, plus the submodule pointers), and a neighbouring repository (the `.tgz`). Say so when
-reporting. These destinations are the tool's business and can change: re-read them out of the matching `Commands/Generate<Lang>SdkCommand.cs` (`CopyPackages`)
-instead of trusting this table if anything looks off.
+So a `CSharp`/`TypeScript` run touches up to **three** indexes: the language's own SDK submodule
+(for TypeScript including the `.tgz`), `sdk/docspace-api-spec` (the joiner's published contract —
+unavoidable, every run) and this repo (the `.nupkg`, plus the submodule pointers). Say so when
+reporting. These destinations are the tool's business and can change: re-read them out of the
+matching `Commands/Generate<Lang>SdkCommand.cs` instead of trusting this table if anything looks off.
 
 ## Consumers keep building against the old SDK until the NuGet cache is dropped
 
@@ -334,6 +378,10 @@ None of this applies when the version number was bumped: a new version is a new 
   the language through the tool.
 - Everything regenerated and green, but a consumer in this repo still behaves as before the change —
   the stale NuGet cache entry, see the section above. Nothing in the logs hints at it.
+- Linux CI fails with `class X is public, should be declared in a file named X.java` (or PHP cannot
+  autoload a model) while the local build was green — a case-only rename on a case-insensitive file
+  system, see *Case-only renames*. Run the check with `--apply` and commit the renames in the
+  submodule.
 
 Known-harmless noise, do not chase it and do not report it as a failure:
 

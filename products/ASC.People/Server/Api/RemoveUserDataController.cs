@@ -123,6 +123,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </remarks>
     /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]
@@ -202,6 +203,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </remarks>
     /// <summary>Delete the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/start</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued job creates the folder that takes over the files and folders the caller shared from the personal folder, in the personal section of the member who last changed that folder or of the portal owner; not when the caller shared none")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued personal folder deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "The caller is not a guest, or is a guest whose personal folder has not been created")]

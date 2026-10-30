@@ -47,13 +47,18 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         new("webstudio_settings", "TenantID") {UserIDColumns = ["UserID"] },
         new("webstudio_uservisit", "tenantid") {InsertMethod = InsertMethod.None},
         new("app_settings", "tenant_id") {DateColumns = new Dictionary<string, bool> {{"last_modified", false}}},
-        new("webhooks_config", "tenant_id", "id"),
-        new("webhooks_logs", "tenant_id", "id")
+        // No DateColumns, deliberately, for both webhook tables. Their dates are UTC moments of what has already happened
+        // (an event queued, an attempt made, the last success or failure of a subscription) and are restored as they
+        // were: a restore that replaces dates would otherwise rewrite the history of the journal. The schedule
+        // (next_attempt_on, lease_id) is not shifted either: TryPrepareRow drops it on a restore and keeps it on a transfer.
+        new("webhooks_config", "tenant_id", "id") { UserIDColumns = ["created_by", "modified_by"] },
+        new("webhooks_logs", "tenant_id", "id") { UserIDColumns = ["retried_by", "uid"] }
     ];
 
     private readonly RelationInfo[] _relations =
     [
-        new("webhooks_config", "id", "webhooks_logs", "config_id")
+        new("webhooks_config", "id", "webhooks_logs", "config_id"),
+        new("webhooks_logs", "id", "webhooks_logs", "retry_of")
     ];
 
     public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
@@ -74,6 +79,43 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper, TableInfo table, DataRowInfo row)
     {
         var (prepared, preparedRow) = await base.TryPrepareRow(dump, connection, columnMapper, table, row);
+
+        if (prepared && table.Name == "webhooks_logs")
+        {
+            // The lease names an instance of the source's sender and means nothing on the target.
+            var leased = !IsNull(preparedRow, "lease_id");
+            SetNull(preparedRow, "lease_id");
+
+            // A portal transfer keeps the schedule, so a delivery waiting for its next attempt resumes on the target:
+            // the source portal stops sending once it is no longer active, and every pending retry would be lost.
+            // A restore from an archive brings back a past state instead: the portal may have delivered those events
+            // after the backup was taken, and sending them again, under new ids (event.id, and webhook.id, which the
+            // sender rewrites from the restored subscription), would reach the receiver a second time with nothing
+            // to tell it so. The same holds for a row that was in flight when a transfer began (its next_attempt_on
+            // is then the lease expiry): the source may still have finished that request. The schedule is dropped,
+            // and a row that was never attempted says why it never was.
+            if ((!columnMapper.PortalTransfer || leased) && !IsNull(preparedRow, "next_attempt_on"))
+            {
+                SetNull(preparedRow, "next_attempt_on");
+
+                // a row that was attempted keeps the target's last answer; the note says why there is no next attempt
+                // in the words of what happened: a transfer, or a restore
+                if (IsNull(preparedRow, "response_payload") && !WasAttempted(preparedRow))
+                {
+                    SetValue(preparedRow, "response_payload", columnMapper.PortalTransfer ? DbWorker.MovedInFlightNote : DbWorker.RestoredFromBackupNote);
+                }
+            }
+
+            // An archive of the previous version has no attempts column, and its unsent rows are in the old payload
+            // format, which must never be sent: they get the note Upgrade103 gives such rows in place.
+            if (!HasColumn(preparedRow, "attempts") && IsNull(preparedRow, "request_headers") && IsNull(preparedRow, "response_payload"))
+            {
+                SetValue(preparedRow, "response_payload", DbWorker.PreviousVersionNote);
+            }
+
+            return (true, preparedRow);
+        }
+
         if (!prepared || table.Name != "webstudio_settings" || !IsWebSearchSettings(row["ID"]))
         {
             return (prepared, preparedRow);
@@ -86,6 +128,45 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         }
 
         return (true, preparedRow);
+    }
+
+    private static void SetNull(Dictionary<string, object> preparedRow, string column)
+    {
+        SetValue(preparedRow, column, null);
+    }
+
+    private static void SetValue(Dictionary<string, object> preparedRow, string column, object value)
+    {
+        var key = FindColumn(preparedRow, column);
+        if (key != null)
+        {
+            preparedRow[key] = value;
+        }
+    }
+
+    private static bool HasColumn(Dictionary<string, object> preparedRow, string column)
+    {
+        return FindColumn(preparedRow, column) != null;
+    }
+
+    // An archive of the previous version has no attempts column: its rows count as never attempted.
+    private static bool WasAttempted(Dictionary<string, object> preparedRow)
+    {
+        var key = FindColumn(preparedRow, "attempts");
+
+        return key != null && preparedRow[key] is not (null or DBNull) && Convert.ToInt32(preparedRow[key], CultureInfo.InvariantCulture) > 0;
+    }
+
+    private static bool IsNull(Dictionary<string, object> preparedRow, string column)
+    {
+        var key = FindColumn(preparedRow, column);
+
+        return key == null || preparedRow[key] is null or DBNull;
+    }
+
+    private static string FindColumn(Dictionary<string, object> preparedRow, string column)
+    {
+        return preparedRow.Keys.FirstOrDefault(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsWebSearchSettings(object settingsId)
@@ -126,6 +207,39 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         }
     }
 
+    // Columns that only record who did something. A user who cannot be mapped (removed before the backup) would drop
+    // the whole row under the generic rule, losing a subscription for the admin who last edited it, or a delivery
+    // record for the member who caused it; the column is blanked instead. created_by is not among them: a subscription
+    // without its owner would skip the access checks made for the owner, so it is dropped with its owner.
+    private static readonly HashSet<(string Table, string Column)> _auditUserColumns =
+    [
+        ("webhooks_config", "modified_by"),
+        ("webhooks_logs", "uid"),
+        ("webhooks_logs", "retried_by")
+    ];
+
+    protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, TableInfo table, string columnName, ref object value)
+    {
+        if (!_auditUserColumns.Contains((table.Name, columnName.ToLowerInvariant())))
+        {
+            return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
+        }
+
+        var userId = Convert.ToString(value);
+
+        if (Helpers.IsEmptyOrSystemUser(userId))
+        {
+            return true;
+        }
+
+        // uid is not nullable: the empty user is what an event no member caused carries
+        value = columnMapper.GetUserMapping(userId) ?? (table.Name == "webhooks_logs" && columnName.Equals("uid", StringComparison.OrdinalIgnoreCase)
+            ? Guid.Empty.ToString()
+            : null);
+
+        return true;
+    }
+
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
         if (relation.ParentTable == "crm_organisation_logo")
@@ -151,6 +265,31 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
 
             return success;
         }
+
+        if (relation.ChildTable == "webhooks_logs" && relation.ChildColumn is "retry_of" or "config_id")
+        {
+            // A row whose parent has no mapping is dropped: the generic rule would keep the old id, which in the new
+            // tenant points to no row (a foreign key error on insert) or to an unrelated one. For config_id, that is a
+            // subscription dropped with its creator who could not be mapped, and its delivery records go with it. For
+            // retry_of, the receiver would get that id as event.id; the original row of an event is always restored
+            // before its retries, since RestoreDbModuleTask passes the rows of a self relation parents first, whatever
+            // order the archive holds them in
+            if (value == null || value == DBNull.Value)
+            {
+                return true;
+            }
+
+            var mapped = columnMapper.GetMapping(relation.ParentTable, relation.ParentColumn, value);
+            if (mapped == null)
+            {
+                return false;
+            }
+
+            value = mapped;
+
+            return true;
+        }
+
         return base.TryPrepareValue(connection, columnMapper, relation, ref value);
     }
 }

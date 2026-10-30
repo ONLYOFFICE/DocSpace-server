@@ -48,7 +48,6 @@ global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
-global using DisableResponseWrapperAttribute = ASC.Api.Core.Middleware.DisableResponseWrapperAttribute;
 global using ASC.ApiSystem;
 global using ASC.ApiSystem.Classes;
 global using ASC.ApiSystem.Extensions;
@@ -85,6 +84,7 @@ global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Utility;
 global using ASC.Web.Core.Utility.Settings;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 global using ASC.Webhooks.Core.EF.Context;
 
 global using CsvHelper.Configuration;
@@ -103,3 +103,5 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 
 global using Swashbuckle.AspNetCore.Annotations;
+
+global using DisableResponseWrapperAttribute = ASC.Api.Core.Middleware.DisableResponseWrapperAttribute;

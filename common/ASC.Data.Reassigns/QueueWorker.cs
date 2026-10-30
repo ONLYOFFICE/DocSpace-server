@@ -122,14 +122,15 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
 public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        BaseCommonLinkUtility baseCommonLinkUtility)
     : QueueWorker<UpdateUserTypeProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
 {
     public async Task<UpdateUserTypeProgressItem> StartAsync(int tenantId, Guid userId, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
     {
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
 
-        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders);
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders, GetBaseUri(baseCommonLinkUtility));
 
         return await StartAsync(tenantId, userId, result);
     }

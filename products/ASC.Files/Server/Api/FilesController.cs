@@ -303,6 +303,8 @@ public abstract class FilesController<T>(
     /// Copy a file
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
+    [RaisesWebhook(WebhookTrigger.FileUploaded, When = "as well when the copy is converted to another format")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
@@ -339,6 +341,7 @@ public abstract class FilesController<T>(
     /// Create a file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/file</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
@@ -368,6 +371,7 @@ public abstract class FilesController<T>(
     /// Create an HTML file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -396,6 +400,7 @@ public abstract class FilesController<T>(
     /// Create a text file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -426,6 +431,8 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FileTrashed, When = "once the queued operation moves the file to the trash")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead when the file is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the file, or the file is locked by somebody else or open in an editing session")]
@@ -677,6 +684,7 @@ public abstract class FilesController<T>(
     /// Lock a file
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "on every successful call, even one that changes nothing; with `lockFile=false` on a file of the portal storage it is raised twice, once for the unlocking note appended to the version comment and once for the unlock itself")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with its lock state as it now stands", typeof(FileDto<int>))]
     [SwaggerResponse(403, "The caller may not lock or unlock the file")]
@@ -734,6 +742,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [SwaggerResponse(400, "The version is missing or is already the current one")]
@@ -792,6 +801,7 @@ public abstract class FilesController<T>(
     /// Update a comment
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The comment as it was stored", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`, the version is below 1 or does not exist, or the comment is longer than 255 characters")]
@@ -820,6 +830,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for a rename that takes effect, and again for a switch to `lastVersion`")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file after the rename, the restore, or both", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
@@ -840,6 +851,7 @@ public abstract class FilesController<T>(
     /// </remarks>
     /// <summary>Update file contents</summary>
     /// <path>api/2.0/files/{fileId}/update</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
@@ -1016,6 +1028,7 @@ public abstract class FilesController<T>(
     /// Set file order
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "when the order changes")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with the position it now holds", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -1046,6 +1059,8 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/order</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every folder in the list whose order changes")]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file in the list whose order changes")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The files and folders that were moved, with the positions they now hold", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, or an `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -1077,6 +1092,7 @@ public abstract class FilesController<T>(
     /// Save a file as PDF
     /// </summary>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The PDF file that was created", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`")]
@@ -1164,6 +1180,7 @@ public abstract class FilesController<T>(
     /// Perform form filling action
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
@@ -1304,6 +1321,7 @@ public class FilesControllerCommon(
     /// Create a file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/file</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
@@ -1322,6 +1340,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create an HTML file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1349,6 +1368,7 @@ public class FilesControllerCommon(
     /// Create an HTML file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -1366,6 +1386,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create a text file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1391,6 +1412,7 @@ public class FilesControllerCommon(
     /// Create a text file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]

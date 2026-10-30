@@ -628,6 +628,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid connection URL.
+        /// </summary>
+        public static string ErrorMessage_InvalidThirdPartyUrl {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect title.
         /// </summary>
         public static string ErrorMessage_InvalidTitle {

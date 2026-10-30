@@ -94,4 +94,37 @@ public static class Constants
     public const string NextcloudVersion = "33-apache";
     public const string NextcloudUser = "docspace";
     public const string NextcloudPassword = "docspace-tests";
+
+    // The WireMock the webhook tests subscribe to: it answers deliveries the way a test stubs it and
+    // keeps a journal of what it received. The port is fixed and not proxied, and Docker publishes it
+    // on WebhookReceiverHost - a loopback alias the integration-test blacklist leaves open
+    // (ConnectionStringManager.AddBaseConfig) while 127.0.0.1 stays blocked.
+    public const string WebhookReceiverContainer = "webhook-receiver";
+    public const string WireMockVersion = "3.9.2";
+    public const int WebhookReceiverPort = 18089;
+    public const string WebhookReceiverHost = "127.0.0.2";
+
+    // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
+    // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
+    // four attempts in all, instead of the production schedule of minutes to hours, and an attempt that gives up on a
+    // silent target after WebhookTestRequestTimeout instead of 30 seconds. The delivery tests in ASC.Web.Api.Tests
+    // (WebhookDeliveryTestBase) read the same values.
+    public const int WebhookTestRetryCount = 3;
+    public static TimeSpan WebhookTestRetryInterval { get; } = TimeSpan.FromMilliseconds(500);
+    public static TimeSpan WebhookTestRequestTimeout { get; } = TimeSpan.FromSeconds(12);
+
+    // UrlValidator.DefaultBlacklist with 127.0.0.0/8 narrowed to 127.0.0.1/32: the receiver is reached as
+    // WebhookReceiverHost, while localhost stays refused (bug 80980). A non-empty list replaces the default as a
+    // whole, so a test in ASC.Web.Api.Tests (WebhookTestProfileTests) keeps the two in step.
+    public static IReadOnlyList<string> WebhookTestBlacklist { get; } =
+    [
+        "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
+        "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
+    ];
+
+    // The services that get WebhookTestBlacklist: Web.Api checks the target of a subscription when it is saved, and
+    // Web.Studio sends the deliveries. Every other UrlValidator caller of the profile keeps the default list, so the
+    // SSRF tests of the other suites run against what production refuses.
+    public static IReadOnlyList<string> WebhookTestBlacklistServices { get; } =
+        [ProjectConfigurator.GetProjectName<ASC_Web_Api>(), ProjectConfigurator.GetProjectName<ASC_Web_Studio>()];
 }

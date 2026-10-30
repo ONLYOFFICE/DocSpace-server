@@ -59,6 +59,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+    private IResourceBuilder<ContainerResource>? WebhookReceiverResource { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
@@ -409,6 +410,25 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    /// <summary>
+    /// The receiver the webhook delivery tests subscribe to (WireMock). A test stubs the answer for a
+    /// path of its own through the admin API and reads back from the request journal what the portal
+    /// sent. Adding it also switches the services to the test webhook settings in
+    /// <see cref="AddBaseConfig{T}"/>: a blacklist the receiver passes and short retry intervals.
+    /// </summary>
+    public ConnectionStringManager AddWebhookReceiver()
+    {
+        WebhookReceiverResource = builder.AddContainer(Constants.WebhookReceiverContainer, "wiremock/wiremock", Constants.WireMockVersion)
+            .WithHttpEndpoint(port: Constants.WebhookReceiverPort, targetPort: 8080, name: "http", isProxied: false)
+            // published on that loopback alias rather than the default localhost (127.0.0.1), which the
+            // test blacklist keeps refusing
+            .WithEndpoint("http", e => e.TargetHost = Constants.WebhookReceiverHost)
+            .WithArgs("--disable-banner", "--max-request-journal-entries", "10000")
+            .WithHttpHealthCheck("/__admin/mappings");
+
+        return this;
+    }
+
     public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
@@ -651,6 +671,36 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
+        }
+
+        if (WebhookReceiverResource != null)
+        {
+            // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
+            // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
+            if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))
+            {
+                var blacklist = Constants.WebhookTestBlacklist;
+
+                for (var i = 0; i < blacklist.Count; i++)
+                {
+                    resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
+                }
+            }
+
+            // Retries due at once rather than after minutes to hours, so the tests can watch a delivery being
+            // retried and given up on: four attempts in all. The sender still notices a due retry only on its
+            // next poll (every 5 seconds), so a shorter interval would gain nothing.
+            for (var i = 0; i < Constants.WebhookTestRetryCount; i++)
+            {
+                resourceBuilder.WithEnvironment(
+                    $"webhooks:retryIntervals:{i}", Constants.WebhookTestRetryInterval.ToString());
+            }
+
+            // An attempt gives up on a silent target after 12 seconds rather than 30, so the test of a body that
+            // arrives after the limit waits that much less. It stays above the 9-second answer the slowest stubbed
+            // receiver gives (WebhookDeliveryStateTests), which has to arrive within the limit
+            resourceBuilder.WithEnvironment(
+                "webhooks:requestTimeout", Constants.WebhookTestRequestTimeout.ToString());
         }
 
         if (isDocker)

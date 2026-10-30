@@ -1653,7 +1653,7 @@
           "Portal"
         ],
         "summary": "Generate the Document Server license quota report",
-        "description": "Generates the Document Server license quota report.",
+        "description": "Generates the Document Server license quota report.\n\nRaises the `file.created` webhook for the report file it saves into the caller's personal section, unless there is no license quota data to report.",
         "operationId": "createDocumentServerLicenseQuotaReport",
         "parameters": [
           {
@@ -1737,6 +1737,12 @@
           },
           {
             "OpenId": [ ]
+          }
+        ],
+        "x-docspace-webhooks": [
+          {
+            "trigger": "file.created",
+            "when": "for the report file it saves into the caller's personal section, unless there is no license quota data to report"
           }
         ]
       }

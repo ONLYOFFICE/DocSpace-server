@@ -41,7 +41,9 @@ public class ThirdPartyRequestDto
     /// <summary>
     /// The address of the storage server to connect to. It is needed by the WebDAV presets whose server is not known
     /// in advance (`WebDav`, `Nextcloud`, `ownCloud`), where it points at the WebDAV endpoint of that server, and by
-    /// `SharePoint`; the presets with a fixed address and the OAuth services ignore it.
+    /// `SharePoint`. For `kDrive` it is the WebDAV address of the drive, `https://{kDrive ID}.connect.kdrive.infomaniak.com`,
+    /// optionally followed by a folder path; the kDrive ID is the number after `/drive/` in the URL of the kDrive web app.
+    /// The OAuth services ignore it.
     /// </summary>
     /// <example>https://cloud.example.com/remote.php/dav/files/admin/</example>
     public string Url { get; set; }
@@ -85,8 +87,7 @@ public class ThirdPartyRequestDto
 
     /// <summary>
     /// The account to re-authenticate instead of connecting a new one, as `providerId` of
-    /// `GET api/2.0/files/thirdparty`; both a number and its decimal string form are accepted. For an account
-    /// attached to the Rooms section only the credentials are applied, and its title and server address are kept.
+    /// `GET api/2.0/files/thirdparty`; both a number and its decimal string form are accepted.
     /// </summary>
     /// <example>12</example>
     [JsonConverter(typeof(ProviderIdConverter))]

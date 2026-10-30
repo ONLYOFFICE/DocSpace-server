@@ -2708,8 +2708,9 @@ public class FileStorageService //: IFileStorageService
         var newOrder = await fileDao.SetCustomOrder(fileId, file.ParentId, order);
         if (newOrder != 0 && newOrder != file.Order)
         {
+            var oldOrder = file.Order;
             file.Order = order;
-            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
+            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, oldOrder.ToString(), order.ToString());
             await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
         }
 
@@ -2746,11 +2747,14 @@ public class FileStorageService //: IFileStorageService
             {
                 case File<T> file:
                     {
+                        // SetCustomOrder returns the current order when it does not change, so an unchanged entry is
+                        // told apart by comparing, as SetFileOrder does; the old value is taken before it is replaced
+                        var oldOrder = file.Order;
                         var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
-                        if (newOrder != 0)
+                        if (newOrder != 0 && newOrder != oldOrder)
                         {
                             entry.Order = item.Order;
-                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
+                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, oldOrder.ToString(), item.Order.ToString(), contextId);
                             await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
                         }
 
@@ -2758,11 +2762,12 @@ public class FileStorageService //: IFileStorageService
                     }
                 case Folder<T> folder:
                     {
+                        var oldOrder = folder.Order;
                         var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
-                        if (newOrder != 0)
+                        if (newOrder != 0 && newOrder != oldOrder)
                         {
                             entry.Order = item.Order;
-                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
+                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, oldOrder.ToString(), item.Order.ToString(), contextId);
                             await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
                         }
 
@@ -2788,8 +2793,9 @@ public class FileStorageService //: IFileStorageService
 
         if (newOrder != 0 && newOrder != folder.Order)
         {
+            var oldOrder = folder.Order;
             folder.Order = order;
-            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
+            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, oldOrder.ToString(), order.ToString());
 
             await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
         }
@@ -5350,7 +5356,8 @@ public class FileStorageService //: IFileStorageService
                 var createByInfo = await userManager.GetUsersAsync(createBy);
                 await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id.ToString(), userInfo.DisplayUserName(false, displayUserSettingsHelper), createByInfo.Id.ToString(), createByInfo.DisplayUserName(false, displayUserSettingsHelper));
 
-                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
+                // only a room reaches this point: CanChangeOwnerAsync refuses a folder that is not one
+                await webhookManager.PublishAsync(newFolder.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated, newFolder);
             }
 
             yield return newFolder;
@@ -6181,7 +6188,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
@@ -6258,7 +6265,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);

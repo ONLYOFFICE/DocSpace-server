@@ -1,0 +1,1 @@
+{"event":{"id":21,"createOn":"2026-10-08T10:02:44Z","createBy":"66faa6e4-f133-11ea-b126-00ffeec8b4ef","trigger":"space.created","triggerId":1099511627776},"payload":{"id":17,"title":"Research","spaceKind":4},"webhook":{"id":3,"name":"space","url":"http://localhost:35555/webhook/","triggers":["space.created"],"target":{"id":"17","type":"space"}}}

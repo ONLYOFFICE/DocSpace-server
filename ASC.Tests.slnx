@@ -35,6 +35,7 @@
   <Project Path="common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj" />
   <Project Path="common/Tests/ASC.Tests.Common/ASC.Tests.Common.csproj" />
   <Project Path="common/Tools/ASC.Data.Stress/ASC.Data.Stress.csproj" />
+  <Project Path="common/Tools/ASC.Webhooks.Contract/ASC.Webhooks.Contract.csproj" />
   <Project Path="products/ASC.AI/ASC.AI.Tests/ASC.AI.Tests.csproj" />
   <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
   <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />

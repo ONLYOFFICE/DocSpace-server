@@ -39,16 +39,126 @@ namespace ASC.Api.Core.Webhook;
 public class UserWebhookManager(
     IWebhookPublisher webhookPublisher,
     WebhookGroupAccessChecker webhookGroupAccessChecker,
-    WebhookUserAccessChecker webhookUserAccessChecker)
+    WebhookUserAccessChecker webhookUserAccessChecker,
+    UserWebhookDtoHelper userWebhookDtoHelper,
+    GroupWebhookDtoHelper groupWebhookDtoHelper,
+    ILogger<UserWebhookManager> logger)
 {
+    /// <summary>
+    /// Whether any active subscription listens to <paramref name="trigger"/>, from the cached list: a caller that has
+    /// work of its own to do before an event (a snapshot to compare with) asks it first.
+    /// </summary>
+    public Task<bool> HasSubscribersAsync(WebhookTrigger trigger)
+    {
+        return webhookPublisher.HasWebhookConfigsAsync(trigger);
+    }
+
+    // Called once the action has taken effect: a failure to build the payload must not fail a request whose change is
+    // already made, so the webhook is dropped (and logged) instead, as before an action (TryPrepareAsync).
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo, userInfo.Id);
+        var publish = await TryPrepareAsync(trigger, userInfo.Id, () => PrepareAsync(trigger, userInfo));
+
+        await publish();
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo, groupInfo.ID);
+        var publish = await TryPrepareAsync(trigger, groupInfo.ID, () => PrepareAsync(trigger, groupInfo));
+
+        await publish();
+    }
+
+    public async Task PublishAfterAsync(WebhookTrigger trigger, UserInfo userInfo, Func<Task> action)
+    {
+        var publish = await TryPrepareAsync(trigger, userInfo.Id, () => PrepareAsync(trigger, userInfo));
+
+        await action();
+
+        await publish();
+    }
+
+    public async Task PublishAfterAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo, Func<Task> action)
+    {
+        var publish = await TryPrepareAsync(trigger, groupInfo.ID, () => PrepareAsync(trigger, groupInfo));
+
+        await action();
+
+        await publish();
+    }
+
+    // The payload is built before the action, which removes what it describes, or after one that has taken effect; a
+    // failure to build it must stop neither, so the webhook is dropped instead.
+    private async Task<Func<Task>> TryPrepareAsync(WebhookTrigger trigger, Guid entityId, Func<Task<Func<Task>>> prepare)
+    {
+        try
+        {
+            return await prepare();
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorPrepareWebhook(trigger, entityId, e);
+
+            return () => Task.CompletedTask;
+        }
+    }
+
+    private async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, UserInfo userInfo)
+    {
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookUserAccessChecker, userInfo);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return () => Task.CompletedTask;
+        }
+
+        var payload = await userWebhookDtoHelper.GetAsync(userInfo);
+
+        var publications = new List<Func<Task>>();
+
+        foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
+        {
+            var subscriberPayload = await userWebhookDtoHelper.RestrictForSubscriberAsync(payload, userInfo, subscriberConfigs.Key);
+
+            publications.Add(() => webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, userInfo.Id));
+        }
+
+        return async () =>
+        {
+            foreach (var publish in publications)
+            {
+                await publish();
+            }
+        };
+    }
+
+    private async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
+    {
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookGroupAccessChecker, groupInfo);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return () => Task.CompletedTask;
+        }
+
+        var payload = await groupWebhookDtoHelper.GetAsync(groupInfo);
+
+        var publications = new List<Func<Task>>();
+
+        foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
+        {
+            var subscriberPayload = await groupWebhookDtoHelper.RestrictForSubscriberAsync(payload, subscriberConfigs.Key);
+
+            publications.Add(() => webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, groupInfo.ID));
+        }
+
+        return async () =>
+        {
+            foreach (var publish in publications)
+            {
+                await publish();
+            }
+        };
     }
 }
 
@@ -60,7 +170,7 @@ public class WebhookGroupAccessChecker(
 {
     public bool CheckIsTarget(ASC.Core.Users.GroupInfo data, string targetId)
     {
-        return data.ID.ToString() == targetId;
+        return Guid.TryParse(targetId, out var id) && id == data.ID;
     }
 
     public async Task<bool> CheckAccessAsync(ASC.Core.Users.GroupInfo data, Guid userId)
@@ -82,7 +192,7 @@ public class WebhookUserAccessChecker(UserManager userManager) : IWebhookAccessC
 {
     public bool CheckIsTarget(UserInfo data, string targetId)
     {
-        return data.Id.ToString() == targetId;
+        return Guid.TryParse(targetId, out var id) && id == data.Id;
     }
 
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)

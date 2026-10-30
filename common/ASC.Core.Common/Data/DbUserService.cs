@@ -295,6 +295,13 @@ public class EFUserService(
         return (await userDbContext.UserByTenantAsync(tenant).ToListAsync()).Map();
     }
 
+    public async Task<int> GetGroupMembersCountAsync(int tenant, Guid groupId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await userDbContext.GroupMembersCountAsync(tenant, groupId);
+    }
+
     public async Task<int> GetUsersCountAsync(UserQueryFilter filter)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();

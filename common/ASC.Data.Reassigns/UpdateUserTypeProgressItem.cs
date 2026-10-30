@@ -50,6 +50,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
     private Guid _currentUserId;
     private EmployeeType _employeeType;
     private IDictionary<string, StringValues> _httpHeaders;
+    private string _baseUri;
     private UserInfo _userInfo;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
@@ -63,9 +64,10 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType, IDictionary<string, StringValues> httpHeaders)
+    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType, IDictionary<string, StringValues> httpHeaders, string baseUri)
     {
         _tenantId = tenantId;
+        _baseUri = baseUri;
         User = user;
         ToUser = toUserId;
         _currentUserId = currentUserId;
@@ -86,6 +88,14 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
         var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
+
+        // the user.updated webhook carries absolute avatar and profile links; without the request's address a
+        // background task builds them from the no-request fallback (http://localhost on a portal without a base domain)
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>().ServerUri = _baseUri;
+        }
+
         _userInfo = await userManager.GetUsersAsync(User);
 
         try
