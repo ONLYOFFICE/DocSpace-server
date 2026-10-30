@@ -129,7 +129,7 @@ public class MetadataLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture
         var trashed = (await _metadataApi.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Templates;
         trashed.Should().ContainSingle(t => t.Id == template.Id, "a folder in the trash keeps its metadata until the trash is emptied");
 
-        var results = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
         await WaitAsync(results);
 
         var folderResponse = await Assert.ThrowsAsync<ApiException>(

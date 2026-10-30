@@ -134,7 +134,9 @@ public abstract class BatchContentTestBase(
 
     protected async Task<FileOperationDto?> EmptyTrash()
     {
-        var started = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // `single` is this endpoint's ReturnSingleOperation: without it the answer lists every delete operation of the
+        // caller, an earlier unread one included, and Complete could wait on that one instead of the emptying.
+        var started = (await _filesOperationsApi.EmptyTrashAsync(single: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         return await Complete(started, FileOperationType.Delete);
     }

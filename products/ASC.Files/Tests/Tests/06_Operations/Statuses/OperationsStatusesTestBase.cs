@@ -102,7 +102,8 @@ public abstract class OperationsStatusesTestBase(
     /// <summary>Starts emptying the trash and returns the operation id.</summary>
     protected async Task<string> StartEmptyTrash()
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // single: only the operation this call queued, not an earlier delete the caller has not read yet
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
     }

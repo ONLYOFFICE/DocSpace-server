@@ -152,6 +152,8 @@ public static class OpenApiExtension
             // Must stay after every filter that produces content: it rewrites what the filters above have
             // produced into openapi 3.1 form.
             c.DocumentFilter<OpenApi31SchemaDocumentFilter>();
+            // Reads the examples the filter above has just moved into `examples`.
+            c.DocumentFilter<IntegerOrStringParameterFilter>();
             // Last of all: it only moves the finished third-party operations into the real ones, and has to
             // see them in their final 3.1 form.
             c.DocumentFilter<ThirdPartyVariantDocumentFilter>();
@@ -549,6 +551,83 @@ public static class OpenApiExtension
                     concrete.Name = JsonNamingPolicy.CamelCase.ConvertName(char.ToUpperInvariant(name[0]) + name[1..]);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Describes an id that is "an integer or a string" (a <see cref="JsonElement"/>) as a plain string when it travels
+    /// in a query, path or header.
+    /// </summary>
+    /// <remarks>
+    /// There the value is text either way, and the binder (<c>ParseQueryParam</c>) reads a numeric text as a number
+    /// and anything else as a string, so <c>type: string</c> describes the wire exactly. The <c>oneOf</c> that suits a
+    /// JSON body made every generator build a wrapper class for the parameter and put that wrapper's
+    /// <c>toString()</c> on the query (<c>destFolderId=class ... { ActualInstance: 5 }</c>), so the generated methods
+    /// of <c>GET files/fileops/move</c> and <c>GET files/fileops/checkdestfolder</c> could not send a valid request.
+    /// It runs on the finished 3.1 document, where every example already sits in <c>examples</c>. The flattened query
+    /// parameters share their schema objects with the body component, so the schemas are replaced, never changed in
+    /// place.
+    /// </remarks>
+    private class IntegerOrStringParameterFilter : IDocumentFilter
+    {
+        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+        {
+            var operations = (swaggerDoc.Paths ?? []).Values.SelectMany(path => path.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>());
+
+            foreach (var parameter in operations.SelectMany(operation => operation.Parameters ?? []))
+            {
+                if (parameter is not OpenApiParameter { In: not ParameterLocation.Cookie, Schema: OpenApiSchema schema } concrete)
+                {
+                    continue;
+                }
+
+                if (IsIntegerOrString(schema.OneOf) || IsIntegerOrString(schema.AnyOf))
+                {
+                    concrete.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Description = schema.Description,
+                        Examples = ToStringExamples(schema.Examples)
+                    };
+                }
+                else if (schema.Items is OpenApiSchema items && (IsIntegerOrString(items.OneOf) || IsIntegerOrString(items.AnyOf)))
+                {
+                    concrete.Schema = new OpenApiSchema
+                    {
+                        Type = schema.Type,
+                        Description = schema.Description,
+                        Examples = ToStringExamples(schema.Examples),
+                        Items = new OpenApiSchema { Type = JsonSchemaType.String }
+                    };
+                }
+            }
+        }
+
+        /// <summary>
+        /// The two variants a <see cref="JsonElement"/> id is described with. An enum is described by a string and an
+        /// integer variant too, but each of those lists its members, and a query enum keeps its schema.
+        /// </summary>
+        private static bool IsIntegerOrString(IList<IOpenApiSchema> variants)
+        {
+            return variants is { Count: 2 } &&
+                   variants.All(v => v.Enum is not { Count: > 0 }) &&
+                   variants.Any(v => v.Type == JsonSchemaType.Integer) &&
+                   variants.Any(v => v.Type == JsonSchemaType.String);
+        }
+
+        private static List<JsonNode> ToStringExamples(IList<JsonNode> examples)
+        {
+            return examples?.Select(ToStringExample).ToList();
+        }
+
+        private static JsonNode ToStringExample(JsonNode example)
+        {
+            return example switch
+            {
+                JsonArray array => new JsonArray([.. array.Select(ToStringExample)]),
+                JsonValue value => JsonValue.Create(value.ToJsonString().Trim('"')),
+                _ => example?.DeepClone()
+            };
         }
     }
 

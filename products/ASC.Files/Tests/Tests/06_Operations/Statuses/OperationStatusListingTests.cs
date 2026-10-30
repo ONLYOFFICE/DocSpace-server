@@ -104,9 +104,16 @@ public class OperationStatusListingTests(
 
         var ranks = all.Select(o => Rank(o.Operation)).ToList();
         ranks.Should().BeInAscendingOrder();
-        all.Find(o => o.Id == download.Id)!.Finished.Should().BeTrue();
-        all.Find(o => o.Id == download.Id)!.Url.Should().NotBeNullOrEmpty();
         all.Find(o => o.Id == copy.Id)!.Finished.Should().BeFalse();
+
+        // the one-file download is usually done by now, but under a full run the shared worker may still be on it
+        var downloadRecord = all.Find(o => o.Id == download.Id)!;
+        if (!downloadRecord.Finished)
+        {
+            downloadRecord = await FinishedRecord(download.Id);
+        }
+
+        downloadRecord.Url.Should().NotBeNullOrEmpty();
 
         // filtering by id: only that operation is returned
         (await GetStatuses(copy.Id)).Select(o => o.Id).Should().Equal(copy.Id);

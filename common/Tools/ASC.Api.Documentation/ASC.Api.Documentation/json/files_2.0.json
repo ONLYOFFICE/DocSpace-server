@@ -18267,9 +18267,9 @@
             "schema": {
               "examples": [
                 [
-                  1,
-                  2,
-                  3
+                  "1",
+                  "2",
+                  "3"
                 ]
               ],
               "type": [
@@ -18277,20 +18277,7 @@
                 "array"
               ],
               "items": {
-                "anyOf": [
-                  {
-                    "examples": [
-                      1234
-                    ],
-                    "type": "integer"
-                  },
-                  {
-                    "examples": [
-                      "some text"
-                    ],
-                    "type": "string"
-                  }
-                ]
+                "type": "string"
               },
               "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list."
             }
@@ -18302,9 +18289,9 @@
             "schema": {
               "examples": [
                 [
-                  1,
-                  2,
-                  3
+                  "1",
+                  "2",
+                  "3"
                 ]
               ],
               "type": [
@@ -18312,20 +18299,7 @@
                 "array"
               ],
               "items": {
-                "anyOf": [
-                  {
-                    "examples": [
-                      1234
-                    ],
-                    "type": "integer"
-                  },
-                  {
-                    "examples": [
-                      "some text"
-                    ],
-                    "type": "string"
-                  }
-                ]
+                "type": "string"
               },
               "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list."
             }
@@ -18336,22 +18310,9 @@
             "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room.",
             "schema": {
               "examples": [
-                1
+                "1"
               ],
-              "oneOf": [
-                {
-                  "examples": [
-                    1234
-                  ],
-                  "type": "integer"
-                },
-                {
-                  "examples": [
-                    "some text"
-                  ],
-                  "type": "string"
-                }
-              ],
+              "type": "string",
               "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room."
             }
           },
@@ -18660,9 +18621,9 @@
             "schema": {
               "examples": [
                 [
-                  1,
-                  2,
-                  3
+                  "1",
+                  "2",
+                  "3"
                 ]
               ],
               "type": [
@@ -18670,20 +18631,7 @@
                 "array"
               ],
               "items": {
-                "anyOf": [
-                  {
-                    "examples": [
-                      1234
-                    ],
-                    "type": "integer"
-                  },
-                  {
-                    "examples": [
-                      "some text"
-                    ],
-                    "type": "string"
-                  }
-                ]
+                "type": "string"
               },
               "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list."
             }
@@ -18695,9 +18643,9 @@
             "schema": {
               "examples": [
                 [
-                  1,
-                  2,
-                  3
+                  "1",
+                  "2",
+                  "3"
                 ]
               ],
               "type": [
@@ -18705,20 +18653,7 @@
                 "array"
               ],
               "items": {
-                "anyOf": [
-                  {
-                    "examples": [
-                      1234
-                    ],
-                    "type": "integer"
-                  },
-                  {
-                    "examples": [
-                      "some text"
-                    ],
-                    "type": "string"
-                  }
-                ]
+                "type": "string"
               },
               "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list."
             }
@@ -18729,22 +18664,9 @@
             "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room.",
             "schema": {
               "examples": [
-                1
+                "1"
               ],
-              "oneOf": [
-                {
-                  "examples": [
-                    1234
-                  ],
-                  "type": "integer"
-                },
-                {
-                  "examples": [
-                    "some text"
-                  ],
-                  "type": "string"
-                }
-              ],
+              "type": "string",
               "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room."
             }
           },

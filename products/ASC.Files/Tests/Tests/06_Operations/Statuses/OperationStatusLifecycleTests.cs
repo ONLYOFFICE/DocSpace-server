@@ -34,8 +34,8 @@
 namespace ASC.Files.Tests.Tests._06_Operations.Statuses;
 
 /// <summary>
-/// <c>GET /api/2.0/files/fileops</c> while operations run: the record of a started operation is Created at
-/// progress 0, moves through Running with progress that only grows and ends Completed at 100; a finished record
+/// <c>GET /api/2.0/files/fileops</c> while operations run: the record of a started operation is Created (or already
+/// Running, once the worker has accepted it) at progress 0, moves through Running with progress that only grows and ends Completed at 100; a finished record
 /// is handed out once (by any read, or by the answer to the next start of the same group) and then dropped;
 /// <c>deleteAfter=true</c> never hands it out. Kinds listed together and account isolation are in
 /// <see cref="OperationStatusListingTests"/>.
@@ -46,8 +46,13 @@ public class OperationStatusLifecycleTests(
     AspireAppFixture fixture)
     : OperationFlowTestBase(fixture)
 {
+    /// <remarks>
+    /// The start answer is read after the task is published as Created, while the worker that takes it over through the
+    /// event bus marks it Running as soon as it accepts it. Which of the two the answer shows depends on how fast that
+    /// hand-over is, so both are accepted; what has to hold either way is that nothing is done yet.
+    /// </remarks>
     [Fact]
-    public async Task GetOperationStatuses_StartedOperation_IsCreatedAtZeroThenCompletedAtHundredWithSameIdAndNoError()
+    public async Task GetOperationStatuses_StartedOperation_IsAtZeroThenCompletedAtHundredWithSameIdAndNoError()
     {
         // Arrange
         var myDocs = await GetUserFolderIdAsync(Owner);
@@ -59,7 +64,7 @@ public class OperationStatusLifecycleTests(
 
         // Assert
         started.Id.Should().MatchRegex("^[0-9a-f-]{36}$");
-        started.Status.Should().Be(DistributedTaskStatus.Created);
+        started.Status.Should().BeOneOf(DistributedTaskStatus.Created, DistributedTaskStatus.Running);
         started.Progress.Should().Be(0);
         started.Processed.Should().Be("0");
         started.Error.Should().BeNullOrEmpty();

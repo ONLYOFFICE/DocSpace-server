@@ -34,42 +34,21 @@
 namespace ASC.Files.Tests.Tests._06_Operations.CheckMoveCopy;
 
 /// <remarks>
-/// <c>GET /api/2.0/files/fileops/move</c> is bound by <c>BatchModelBinder</c>
-/// (<c>products/ASC.Files/Core/ApiModels/Binders.cs:215</c>), which reads flat query parameters —
-/// <c>fileIds</c>, <c>folderIds</c>, <c>destFolderId</c>, <c>conflictResolveType</c>,
-/// <c>deleteAfter</c>, <c>content</c>. The generated
-/// <c>OperationsApi.CheckMoveOrCopyBatchItemsAsync</c> instead sends the whole
-/// <c>BatchRequestDto</c> under a single <c>inDto</c> query key
-/// (<c>ClientUtils.ParameterToMultiMap("", "inDto", inDto)</c>), so the binder never populates
-/// <c>DestFolderId</c> — its <c>ValueKind</c> stays <c>Undefined</c> — and
-/// <c>OperationController.CheckMoveOrCopyBatchItems</c> throws server-side. That is an
-/// SDK/OpenAPI-generation defect, not a product bug, and it is exactly the "route the typed
-/// signature cannot produce" carve-out in <c>tests.md</c>. Every test in this folder therefore goes
-/// through <see cref="CheckMoveOrCopy"/> below, which issues the request over raw HTTP with a
-/// hand-built query string.
+/// Every test in this folder goes through <see cref="CheckMoveOrCopy"/>, which calls
+/// <c>GET /api/2.0/files/fileops/move</c> through the typed client and hands back the status and the body whether
+/// the call succeeded or not. The ids travel as text: the query carries no type, and the server reads a numeric
+/// text as a portal id (BUG 84727 was the generated client sending its id wrapper instead).
 /// </remarks>
 public abstract class CheckMoveCopyTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
-
     /// <summary>
     /// The parsed result of a <c>GET /api/2.0/files/fileops/move</c> call. <c>FileEntryBaseDto</c>
     /// (what the endpoint's response array actually deserializes to) carries a <c>Title</c> but no
     /// <c>Id</c>, so conflicting items are identified by title here as well.
     /// </summary>
     protected sealed record CheckMoveOrCopyResult(HttpStatusCode StatusCode, List<string> Titles, string RawBody);
-
-    private sealed class ResponseEntry
-    {
-        public string? Title { get; set; }
-    }
-
-    private sealed class ResponseBody
-    {
-        public List<ResponseEntry>? Response { get; set; }
-    }
 
     protected async Task<CheckMoveOrCopyResult> CheckMoveOrCopy(
         int? destFolderId = null,
@@ -79,52 +58,25 @@ public abstract class CheckMoveCopyTestBase(
         bool? deleteAfter = null,
         bool? content = null)
     {
-        var query = new List<string>();
-
-        if (destFolderId.HasValue)
+        try
         {
-            query.Add($"destFolderId={destFolderId.Value}");
-        }
+            var response = await _filesOperationsApi.CheckMoveOrCopyBatchItemsWithHttpInfoAsync(
+                fileIds: fileIds?.Select(id => id.ToString(CultureInfo.InvariantCulture)).ToList(),
+                folderIds: folderIds?.Select(id => id.ToString(CultureInfo.InvariantCulture)).ToList(),
+                destFolderId: destFolderId?.ToString(CultureInfo.InvariantCulture),
+                conflictResolveType: conflictResolveType,
+                deleteAfter: deleteAfter,
+                content: content,
+                cancellationToken: TestContext.Current.CancellationToken);
 
-        if (fileIds != null)
+            var titles = response.Data.Response?.Select(entry => entry.Title ?? string.Empty).ToList() ?? [];
+
+            return new CheckMoveOrCopyResult(response.StatusCode, titles, response.RawContent);
+        }
+        catch (ApiException exception)
         {
-            query.AddRange(fileIds.Select(id => $"fileIds={id}"));
+            return new CheckMoveOrCopyResult((HttpStatusCode)exception.ErrorCode, [], exception.ErrorContent?.ToString() ?? string.Empty);
         }
-
-        if (folderIds != null)
-        {
-            query.AddRange(folderIds.Select(id => $"folderIds={id}"));
-        }
-
-        if (conflictResolveType.HasValue)
-        {
-            query.Add($"conflictResolveType={conflictResolveType.Value}");
-        }
-
-        if (deleteAfter.HasValue)
-        {
-            query.Add($"deleteAfter={(deleteAfter.Value ? "true" : "false")}");
-        }
-
-        if (content.HasValue)
-        {
-            query.Add($"content={(content.Value ? "true" : "false")}");
-        }
-
-        var path = "api/2.0/files/fileops/move" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
-
-        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        var titles = new List<string>();
-
-        if (response.IsSuccessStatusCode && !string.IsNullOrWhiteSpace(body))
-        {
-            var parsed = JsonSerializer.Deserialize<ResponseBody>(body, _jsonOptions);
-            titles = parsed?.Response?.Select(entry => entry.Title ?? string.Empty).ToList() ?? [];
-        }
-
-        return new CheckMoveOrCopyResult(response.StatusCode, titles, body);
     }
 
     /// <summary>
@@ -137,10 +89,9 @@ public abstract class CheckMoveCopyTestBase(
     protected sealed record CheckBatchResult(List<CheckedEntry> Response);
 
     /// <summary>
-    /// SDK-shaped adapter over <see cref="CheckMoveOrCopy"/>: takes the same <see cref="BatchRequestDto"/>
-    /// the generated client takes, sends it as the flat query string the server actually binds, throws
-    /// <see cref="ApiException"/> on a non-2xx exactly like the generated client would, and hands back
-    /// the response list under <c>.Response</c>.
+    /// Adapter over <see cref="CheckMoveOrCopy"/> for the tests written against the body model: takes a
+    /// <see cref="BatchRequestDto"/>, sends its fields as the query parameters of the preflight, throws
+    /// <see cref="ApiException"/> on a non-2xx and hands back the response list under <c>.Response</c>.
     /// </summary>
     protected async Task<CheckBatchResult> CheckMoveOrCopyBatch(BatchRequestDto request, CancellationToken cancellationToken = default)
     {

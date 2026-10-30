@@ -34,16 +34,15 @@
 namespace ASC.Files.Tests.Tests._06_Operations.CheckPreflight;
 
 /// <summary>
-/// BUG 84727: the generated SDK cannot send the ids of the two preflight endpoints. The ids are
-/// <c>oneOf</c> wrappers (a number for a portal folder, a string for a third-party one) and
-/// <c>ClientUtils.ParameterToString</c> writes such a wrapper with <c>Convert.ToString</c>, so the
-/// query carries "class CheckMoveOrCopyBatchItemsDestFolderIdParameter { ActualInstance: 5 }" instead of
-/// <c>5</c>; the server finds no destination and answers 400. The TypeScript SDK fails the same way
-/// (it spreads the id with <c>Object.entries</c>). Every other preflight test works around it with a
-/// raw request (see <see cref="CheckPreflightTestBase"/>); these go through the typed client, as a
-/// real caller does, with a numeric and with a string destination id, and are red until it is fixed.
+/// BUG 84727: the generated SDKs could not send the ids of the two preflight endpoints. The ids were
+/// described as <c>oneOf</c> integer/string, so every generator built a wrapper class for them, and the
+/// C# client put the wrapper's <c>ToString()</c> on the query ("class ... { ActualInstance: 5 }" instead of
+/// <c>5</c>); the TypeScript one spread it with <c>Object.entries</c>. The server found no destination and
+/// answered 400. Fixed in the OpenAPI document: an integer-or-string id in a query is now published as a
+/// plain string, which is what the query carries anyway, and the server still reads a numeric text as a
+/// portal id. These cases call the typed client directly, as a real caller does.
 /// </summary>
-[Trait("Category", "Bug")]
+[Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class CheckSdkSerializationBugTests(
     AspireAppFixture fixture)
@@ -51,26 +50,18 @@ public class CheckSdkSerializationBugTests(
 {
     [Theory]
     [Trait("Bug", "84727")]
-    [InlineData(PreflightKind.Move, false)]
-    [InlineData(PreflightKind.Move, true)]
-    [InlineData(PreflightKind.CheckDestFolder, false)]
-    [InlineData(PreflightKind.CheckDestFolder, true)]
-    public async Task TypedCall_SendsTheDestinationId_AndTheServerAcceptsIt(PreflightKind kind, bool destinationAsString)
+    [InlineData(PreflightKind.Move)]
+    [InlineData(PreflightKind.CheckDestFolder)]
+    public async Task TypedCall_SendsTheDestinationId_AndTheServerAcceptsIt(PreflightKind kind)
     {
         // Arrange
         var myDocsFolderId = await GetUserFolderIdAsync(Owner);
         var file = await CreateFile("Autotest Check Sdk.docx", myDocsFolderId);
-        var room = await CreateCustomRoom($"Autotest Check Sdk Room {kind} {destinationAsString}");
+        var room = await CreateCustomRoom($"Autotest Check Sdk Room {kind}");
         await CreateFile("Autotest Check Sdk.docx", room.Id);
 
-        // Premise: the server accepts exactly this request when it is built by hand.
-        var control = await Preflight(kind, fileIds: [file.Id], destFolderId: room.Id);
-        control.Status.Should().Be(HttpStatusCode.OK);
-
-        CheckMoveOrCopyBatchItemsDestFolderIdParameter destination = destinationAsString
-            ? new(room.Id.ToString(CultureInfo.InvariantCulture))
-            : new(room.Id);
-        List<CheckMoveOrCopyBatchItemsFolderIdsParameterInner> fileIds = [new(file.Id)];
+        var destination = room.Id.ToString(CultureInfo.InvariantCulture);
+        List<string> fileIds = [file.Id.ToString(CultureInfo.InvariantCulture)];
 
         // Act
         if (kind == PreflightKind.Move)

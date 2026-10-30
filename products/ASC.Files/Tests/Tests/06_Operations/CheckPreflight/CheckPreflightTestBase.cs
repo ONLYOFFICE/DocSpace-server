@@ -39,21 +39,10 @@ namespace ASC.Files.Tests.Tests._06_Operations.CheckPreflight;
 /// (<c>checkMoveOrCopyDestFolder</c>).
 /// </summary>
 /// <remarks>
-/// <para>
-/// Every call goes over raw HTTP with a hand-built flat query. The generated
-/// <c>CheckMoveOrCopyBatchItemsAsync</c> / <c>CheckMoveOrCopyDestFolderAsync</c> take the
-/// <c>oneOf</c> id wrappers (<c>CheckMoveOrCopyBatchItemsDestFolderIdParameter</c>,
-/// <c>CheckMoveOrCopyBatchItemsFolderIdsParameterInner</c>) and put them on the query through
-/// <c>ClientUtils.ParameterToString</c>, which falls back to <c>Convert.ToString</c> and so sends the
-/// wrapper's <c>ToString()</c> ("class ... { ActualInstance: 5 }") instead of <c>5</c>. The server then
-/// finds no destination and answers 400 (BUG 84727; the TypeScript SDK fails the same way). The typed
-/// path is pinned separately in <see cref="CheckSdkSerializationBugTests"/>.
-/// </para>
-/// <para>
-/// The raw JSON is also needed for the response: <c>FileEntryBaseDto</c>, the element type of both
-/// responses, has a <c>Title</c> but no <c>Id</c> and no <c>FolderId</c>, and the tests identify the
-/// reported entries by id.
-/// </para>
+/// The request goes through the typed client; the response is read from its raw JSON, because
+/// <c>FileEntryBaseDto</c>, the element type of both responses, has a <c>Title</c> but no <c>Id</c> and no
+/// <c>FolderId</c>, and the tests identify the reported entries by id. A failure comes back as a status and a
+/// body, not as an exception, so a test can assert on either.
 /// </remarks>
 public abstract class CheckPreflightTestBase(
     AspireAppFixture fixture)
@@ -108,47 +97,43 @@ public abstract class CheckPreflightTestBase(
         FileConflictResolveType? conflictResolveType = null,
         bool? content = null)
     {
-        var query = new List<string>();
+        var queryFileIds = AsQueryIds(fileIds);
+        var queryFolderIds = AsQueryIds(folderIds);
+        var queryDestFolderId = destFolderId?.ToString(CultureInfo.InvariantCulture);
 
-        if (destFolderId.HasValue)
+        try
         {
-            query.Add($"destFolderId={destFolderId.Value}");
+            if (kind == PreflightKind.Move)
+            {
+                var moveResponse = await _filesOperationsApi.CheckMoveOrCopyBatchItemsWithHttpInfoAsync(
+                    fileIds: queryFileIds,
+                    folderIds: queryFolderIds,
+                    destFolderId: queryDestFolderId,
+                    conflictResolveType: conflictResolveType,
+                    content: content,
+                    cancellationToken: TestContext.Current.CancellationToken);
+
+                var parsed = JsonSerializer.Deserialize<MoveBody>(moveResponse.RawContent, _preflightJsonOptions);
+
+                return new PreflightResponse(moveResponse.StatusCode, moveResponse.RawContent, parsed?.Response ?? [], null);
+            }
+
+            var destResponse = await _filesOperationsApi.CheckMoveOrCopyDestFolderWithHttpInfoAsync(
+                fileIds: queryFileIds,
+                folderIds: queryFolderIds,
+                destFolderId: queryDestFolderId,
+                conflictResolveType: conflictResolveType,
+                content: content,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            var payload = JsonSerializer.Deserialize<DestBody>(destResponse.RawContent, _preflightJsonOptions)?.Response;
+
+            return new PreflightResponse(destResponse.StatusCode, destResponse.RawContent, payload?.Files ?? [], payload?.Result);
         }
-
-        query.AddRange((fileIds ?? []).Select(id => $"fileIds={id}"));
-        query.AddRange((folderIds ?? []).Select(id => $"folderIds={id}"));
-
-        if (conflictResolveType.HasValue)
+        catch (ApiException exception)
         {
-            query.Add($"conflictResolveType={conflictResolveType.Value}");
+            return new PreflightResponse((HttpStatusCode)exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty, [], null);
         }
-
-        if (content.HasValue)
-        {
-            query.Add($"content={(content.Value ? "true" : "false")}");
-        }
-
-        var route = kind == PreflightKind.Move ? "move" : "checkdestfolder";
-        var path = $"api/2.0/files/fileops/{route}" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
-
-        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return new PreflightResponse(response.StatusCode, body, [], null);
-        }
-
-        if (kind == PreflightKind.Move)
-        {
-            var parsed = JsonSerializer.Deserialize<MoveBody>(body, _preflightJsonOptions);
-
-            return new PreflightResponse(response.StatusCode, body, parsed?.Response ?? [], null);
-        }
-
-        var payload = JsonSerializer.Deserialize<DestBody>(body, _preflightJsonOptions)?.Response;
-
-        return new PreflightResponse(response.StatusCode, body, payload?.Files ?? [], payload?.Result);
     }
 
     /// <summary>
