@@ -34,10 +34,15 @@
 package com.asc.common.utilities.cache;
 
 import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
  * Two-tier cache: an {@link MemoryCache} in every application instance in front of Redis, which the
@@ -46,8 +51,10 @@ import org.springframework.data.redis.core.RedisTemplate;
  * <p>Entries are keyed by id alone and stamped with the {@link CacheNamespaceRegistry} namespace of
  * their tenant, so a lookup needs no tenant up front, and evicting a tenant or the whole cache is a
  * single counter increment rather than a search for the keys involved. No operation scans the
- * keyspace. Evicting one entry removes it from Redis and broadcasts the eviction so that every
- * instance drops its own copy.
+ * keyspace. Evicting one entry removes it from Redis, moves its version on, and broadcasts the
+ * eviction so that every instance drops its own copy. The version, kept next to the entry, lets a
+ * value read from the source after a cache miss be stored only if no eviction or write came first
+ * (see {@link #writeUnlessInvalidated}).
  *
  * <p>Reads try the instance tier first and fall back to Redis, promoting what they find there.
  * Writes go to both tiers. The instance tier expires far sooner than Redis, which bounds how long
@@ -64,6 +71,38 @@ public abstract class CompositeCache<V> {
   private static final int MEMORY_MAX_SIZE = 10_000;
   private static final Duration REDIS_EXPIRE_AFTER_WRITE = Duration.ofMinutes(3);
   private static final Duration MEMORY_EXPIRE_AFTER_WRITE = Duration.ofSeconds(10);
+  private static final String VERSION_SUFFIX = ":version";
+  private static final RedisSerializer<Long> VERSION_SERIALIZER =
+      new GenericToStringSerializer<>(Long.class);
+
+  static final RedisScript<Long> READ_VERSION =
+      RedisScript.of("return tonumber(redis.call('GET', KEYS[2]) or '0')", Long.class);
+
+  static final RedisScript<Long> EVICT =
+      RedisScript.of(
+          """
+          local version = redis.call('INCR', KEYS[2])
+          redis.call('PEXPIRE', KEYS[2], ARGV[1])
+          redis.call('UNLINK', KEYS[1])
+          return version""",
+          Long.class);
+
+  static final RedisScript<Long> WRITE =
+      RedisScript.of(
+          """
+          local version = redis.call('INCR', KEYS[2])
+          redis.call('PEXPIRE', KEYS[2], ARGV[2])
+          redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
+          return version""",
+          Long.class);
+
+  static final RedisScript<Long> WRITE_IF_VERSION =
+      RedisScript.of(
+          """
+          if (redis.call('GET', KEYS[2]) or '0') ~= ARGV[3] then return 0 end
+          redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
+          return 1""",
+          Long.class);
 
   /**
    * A value read back from Redis together with the namespace it was written under.
@@ -126,6 +165,28 @@ public abstract class CompositeCache<V> {
     return keyPrefix + KEY_SEPARATOR + id;
   }
 
+  private static String ttlMillis() {
+    return String.valueOf(REDIS_EXPIRE_AFTER_WRITE.toMillis());
+  }
+
+  private static byte[] raw(Object arg) {
+    return arg instanceof byte[] bytes
+        ? bytes
+        : String.valueOf(arg).getBytes(StandardCharsets.UTF_8);
+  }
+
+  private Long runScript(RedisScript<Long> script, String id, Object... args) {
+    var rawArgs = new Object[args.length];
+    for (var i = 0; i < args.length; i++) rawArgs[i] = raw(args[i]);
+
+    return redisTemplate.execute(
+        script,
+        RedisSerializer.byteArray(),
+        VERSION_SERIALIZER,
+        List.of(buildCacheKey(id), buildCacheKey(id) + VERSION_SUFFIX),
+        rawArgs);
+  }
+
   /**
    * Reads a value from the instance tier, then from Redis, accepting it only while the namespace it
    * was stamped with is still current. A value found in Redis is promoted to the instance tier.
@@ -173,7 +234,21 @@ public abstract class CompositeCache<V> {
    * @param value the value to cache.
    */
   protected void write(String id, V value) {
+    store(id, value, null);
+  }
+
+  protected void writeUnlessInvalidated(String id, V value, CacheTicket ticket) {
+    store(id, value, ticket);
+  }
+
+  private void store(String id, V value, CacheTicket ticket) {
     var key = buildCacheKey(id);
+    if (ticket != null
+        && (ticket.version() == null || memoryCache.generation() != ticket.generation())) {
+      log.info("Skipped caching key: {} because it was invalidated while being read", key);
+      return;
+    }
+
     var tenantId = tenantOf(value);
     if (tenantId == null) {
       log.warn("Skipped caching key: {} because it has no tenant", key);
@@ -187,8 +262,21 @@ public abstract class CompositeCache<V> {
     }
 
     try {
-      redisTemplate.opsForValue().set(key, toStored(namespace, value), REDIS_EXPIRE_AFTER_WRITE);
-      memoryCache.put(key, tenantId, namespace, value);
+      @SuppressWarnings("unchecked")
+      var serializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
+      var stored = serializer.serialize(toStored(namespace, value));
+      if (ticket == null) {
+        runScript(WRITE, id, stored, ttlMillis());
+        memoryCache.put(key, tenantId, namespace, value);
+      } else {
+        if (runScript(WRITE_IF_VERSION, id, stored, ttlMillis(), ticket.version()) == 0) {
+          log.info("Skipped caching key: {} because it was invalidated while being read", key);
+          return;
+        }
+
+        memoryCache.promote(key, tenantId, namespace, value, ticket.generation());
+      }
+
       log.info("Cached key: {}", key);
     } catch (Exception e) {
       log.error("Failed to cache key: {}", key, e);
@@ -196,14 +284,15 @@ public abstract class CompositeCache<V> {
   }
 
   /**
-   * Removes a value from Redis and from the instance tier of every instance.
+   * Removes a value from Redis, moves its version on, and drops it from the instance tier of every
+   * instance.
    *
    * @param id the id of the value.
    */
   protected void remove(String id) {
     var key = buildCacheKey(id);
     try {
-      redisTemplate.unlink(key);
+      runScript(EVICT, id, ttlMillis());
       log.info("Evicted key: {}", key);
     } catch (Exception e) {
       log.error("Failed to evict key: {}", key, e);
@@ -227,5 +316,24 @@ public abstract class CompositeCache<V> {
   protected void removeAll() {
     memoryCache.invalidateAll();
     log.info("Evicted all cached entries under prefix: {}", keyPrefix);
+  }
+
+  /**
+   * Takes the ticket a cache-miss fill hands to {@link #writeUnlessInvalidated}: the invalidation
+   * generation of this instance and the entry's version in Redis. Take it before reading the value
+   * from its source.
+   *
+   * @param id the id of the value about to be read.
+   * @return the ticket; its version is {@code null} if Redis could not be read, and such a ticket
+   *     caches nothing.
+   */
+  public CacheTicket ticket(String id) {
+    var generation = memoryCache.generation();
+    try {
+      return new CacheTicket(generation, runScript(READ_VERSION, id));
+    } catch (Exception e) {
+      log.warn("Failed to read the cache version of key: {}", buildCacheKey(id), e);
+      return new CacheTicket(generation, null);
+    }
   }
 }

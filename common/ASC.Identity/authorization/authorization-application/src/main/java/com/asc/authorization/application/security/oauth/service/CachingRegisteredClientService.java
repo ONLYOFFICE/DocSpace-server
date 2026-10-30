@@ -36,6 +36,7 @@ package com.asc.authorization.application.security.oauth.service;
 import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
 import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.common.utilities.cache.CompositeCache;
 import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
 import java.util.Optional;
@@ -96,6 +97,13 @@ public class CachingRegisteredClientService extends CompositeCache<CachedRegiste
     }
 
     write(client.getClientId(), client);
+  }
+
+  @Override
+  public void putUnlessInvalidated(CachedRegisteredClient client, CacheTicket ticket) {
+    if (client == null || client.getClientId() == null) return;
+
+    writeUnlessInvalidated(client.getClientId(), client, ticket);
   }
 
   @Override

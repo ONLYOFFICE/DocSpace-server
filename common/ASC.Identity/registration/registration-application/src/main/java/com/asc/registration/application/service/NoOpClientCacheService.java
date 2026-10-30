@@ -35,6 +35,7 @@ package com.asc.registration.application.service;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import java.util.Optional;
@@ -61,6 +62,14 @@ import org.springframework.stereotype.Service;
 public class NoOpClientCacheService implements ClientCacheService {
   @Override
   public void put(Client client) {}
+
+  @Override
+  public CacheTicket ticket(ClientId clientId) {
+    return new CacheTicket(0, null);
+  }
+
+  @Override
+  public void putUnlessInvalidated(Client client, CacheTicket ticket) {}
 
   @Override
   public Optional<Client> get(ClientId clientId, TenantId tenantId) {

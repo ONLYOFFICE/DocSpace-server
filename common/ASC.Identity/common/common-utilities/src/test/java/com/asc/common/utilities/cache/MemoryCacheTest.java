@@ -36,14 +36,8 @@ package com.asc.common.utilities.cache;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,47 +46,6 @@ class MemoryCacheTest {
   private static final long OTHER_TENANT = 2L;
   private static final Duration TTL = Duration.ofMinutes(1);
 
-  private static class InMemoryCounterStore implements CacheNamespaceCounterStore {
-    private final Map<String, String> counters = new ConcurrentHashMap<>();
-
-    @Override
-    public List<String> multiGet(List<String> keys) {
-      return keys.stream().map(counters::get).toList();
-    }
-
-    @Override
-    public String get(String key) {
-      return counters.get(key);
-    }
-
-    @Override
-    public boolean setIfAbsent(String key, String value, Duration ttl) {
-      return counters.putIfAbsent(key, value) == null;
-    }
-
-    @Override
-    public void increment(String key, Duration ttl) {
-      counters.merge(key, "1", (a, b) -> String.valueOf(Long.parseLong(a) + 1));
-    }
-
-    @Override
-    public void refreshTtl(String key, Duration ttl) {}
-  }
-
-  private static class InMemoryBus implements CacheInvalidationBus {
-    private final List<Consumer<String>> listeners = new ArrayList<>();
-
-    @Override
-    public void publish(String message) {
-      listeners.forEach(listener -> listener.accept(message));
-    }
-
-    @Override
-    public void subscribe(Consumer<String> listener) {
-      listeners.add(listener);
-    }
-  }
-
   private CacheNamespaceRegistry registryA;
   private CacheNamespaceRegistry registryB;
   private MemoryCache<String> cacheA;
@@ -100,8 +53,8 @@ class MemoryCacheTest {
 
   @BeforeEach
   void setUp() {
-    var store = new InMemoryCounterStore();
-    var bus = new InMemoryBus();
+    var store = new InMemoryCacheSupport.CounterStore();
+    var bus = new InMemoryCacheSupport.Bus();
     registryA = new CacheNamespaceRegistry(store, "test:ver");
     registryB = new CacheNamespaceRegistry(store, "test:ver");
     cacheA = new MemoryCache<>(registryA, bus, 100, TTL);

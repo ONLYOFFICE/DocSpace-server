@@ -18,6 +18,10 @@
             <groupId>com.asc</groupId>
             <artifactId>common-data</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-utilities</artifactId>
+        </dependency>
 
         <!-- Spring Boot JPA Starter -->
         <dependency>
