@@ -30,6 +30,7 @@ import org.openapitools.codegen.utils.ModelUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,10 +82,22 @@ final class CallSnippets {
     /**
      * Hands every operation of an API to the language's builder. The third-party twin of an operation
      * (see ThirdPartyVariants) is left out: it is an overload of the same method, on the same page.
+     * <p>
+     * An operation that states more than one tag stays only in the API of its first tag. The generator
+     * puts it into the API of every tag it states, each time through another API class, and the
+     * snippet file takes one example per operation. The first tag is the one the page is filed under
+     * (see OpenapiSplitter), and the SDK has the method in that tag's API class as well.
      */
-    static void attach(OperationsMap objs, Consumer<CodegenOperation> builder) {
-        for (CodegenOperation op : objs.getOperations().getOperation()) {
-            if (!op.vendorExtensions.containsKey(ThirdPartyVariants.IS_VARIANT)) {
+    static void attach(CodegenConfig config, OperationsMap objs, Consumer<CodegenOperation> builder) {
+        Iterator<CodegenOperation> operations = objs.getOperations().getOperation().iterator();
+
+        while (operations.hasNext()) {
+            CodegenOperation op = operations.next();
+
+            if (op.tags != null && op.tags.size() > 1
+                    && !config.sanitizeTag(op.tags.get(0).getName()).equals(op.baseName)) {
+                operations.remove();
+            } else if (!op.vendorExtensions.containsKey(ThirdPartyVariants.IS_VARIANT)) {
                 builder.accept(op);
             }
         }

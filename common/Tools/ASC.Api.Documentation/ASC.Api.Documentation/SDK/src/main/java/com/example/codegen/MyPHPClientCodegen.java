@@ -136,7 +136,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
         OperationMap operations = objs.getOperations();
         String apiImport = apiPackage + "\\" + operations.get("x-folder") + "\\" + operations.get("x-classname");
 
-        CallSnippets.attach(objs, operation -> snippets.attach(operation, apiImport));
+        CallSnippets.attach(this, objs, operation -> snippets.attach(operation, apiImport));
     }
 
     @Override

@@ -126,7 +126,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             return 1;
         }
 
-        var placed = new HashSet<(string Tab, string OperationId)>();
+        var placed = new HashSet<(string Tab, string OriginalOperationId)>();
 
         foreach (var document in sections)
         {
@@ -157,7 +157,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 documentPath,
                 sectionDirectory,
                 modelPages.GetValueOrDefault,
-                operationId => MarkdownSettings.NameFor(groups.GetValueOrDefault(operationId, string.Empty)),
+                originalOperationId => MarkdownSettings.NameFor(groups.GetValueOrDefault(originalOperationId, string.Empty)),
                 cancellationToken);
 
             // Onto the cut pages, past the escaping and the heading promotion, both of which would
@@ -470,9 +470,9 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     private static List<ExampleTabs.TabSnippets> ForSection(
         IReadOnlyList<ExampleTabs.TabSnippets> examples,
         IReadOnlyList<MarkdownSlicer.SlicedOperation> operations,
-        HashSet<(string Tab, string OperationId)> placed)
+        HashSet<(string Tab, string OriginalOperationId)> placed)
     {
-        var pages = operations.Select(operation => operation.OperationId).ToHashSet(StringComparer.Ordinal);
+        var pages = operations.Select(operation => operation.OriginalOperationId).ToHashSet(StringComparer.Ordinal);
         var section = new List<ExampleTabs.TabSnippets>();
 
         foreach (var tab in examples)
@@ -481,9 +481,9 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 .Where(snippet => pages.Contains(snippet.Key))
                 .ToDictionary(snippet => snippet.Key, snippet => snippet.Value, StringComparer.Ordinal);
 
-            foreach (var operationId in snippets.Keys)
+            foreach (var originalOperationId in snippets.Keys)
             {
-                placed.Add((tab.Tab.Value, operationId));
+                placed.Add((tab.Tab.Value, originalOperationId));
             }
 
             section.Add(tab with { Snippets = snippets });
@@ -493,21 +493,22 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     }
 
     /// <summary>
-    /// Fails on an example no section had a page for: the generator of the language and the
-    /// Markdown generator then disagree about the operation ids, and the example would be lost
-    /// unseen.
+    /// Fails on an example no section had a page for, which would otherwise be lost unseen. The
+    /// examples and the pages are matched by the id the document gives the operation, which no
+    /// generator recases, so this means the language's generator wrote an example for an operation
+    /// no section document holds.
     /// </summary>
     private static void CheckPlaced(
         IReadOnlyList<ExampleTabs.TabSnippets> examples,
-        HashSet<(string Tab, string OperationId)> placed)
+        HashSet<(string Tab, string OriginalOperationId)> placed)
     {
         foreach (var tab in examples)
         {
-            foreach (var operationId in tab.Snippets.Keys)
+            foreach (var originalOperationId in tab.Snippets.Keys)
             {
-                if (!placed.Contains((tab.Tab.Value, operationId)))
+                if (!placed.Contains((tab.Tab.Value, originalOperationId)))
                 {
-                    throw new Exception($"The {tab.Tab.Label} example of '{operationId}' has no page to go on");
+                    throw new Exception($"The {tab.Tab.Label} example of '{originalOperationId}' has no page to go on");
                 }
             }
         }

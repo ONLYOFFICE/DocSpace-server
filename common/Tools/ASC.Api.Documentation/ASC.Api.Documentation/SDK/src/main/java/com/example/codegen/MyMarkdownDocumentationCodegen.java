@@ -422,7 +422,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                         String.valueOf(additionalProperties.get("snippetsServerUrl")), isFetch());
             }
 
-            CallSnippets.attach(results, snippets::attach);
+            CallSnippets.attach(this, results, snippets::attach);
             return results;
         }
 
@@ -1581,7 +1581,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             boolean isMap;
             boolean isFreeFormObject;
             boolean isAnyType;
-            boolean isModel;
             boolean isString;
             boolean isInteger;
             boolean isNumber;
@@ -1605,7 +1604,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 shape.isMap = parameter.isMap;
                 shape.isFreeFormObject = parameter.isFreeFormObject;
                 shape.isAnyType = parameter.isAnyType;
-                shape.isModel = parameter.isModel;
                 shape.isString = parameter.isString;
                 shape.isInteger = parameter.isInteger || parameter.isLong || parameter.isShort;
                 shape.isNumber = parameter.isNumber || parameter.isFloat || parameter.isDouble || parameter.isDecimal;
@@ -1635,7 +1633,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 shape.isMap = property.isMap;
                 shape.isFreeFormObject = property.isFreeFormObject;
                 shape.isAnyType = property.isAnyType;
-                shape.isModel = property.isModel;
                 shape.isString = property.isString;
                 shape.isInteger = property.isInteger || property.isLong || property.isShort;
                 shape.isNumber = property.isNumber || property.isFloat || property.isDouble || property.isDecimal;

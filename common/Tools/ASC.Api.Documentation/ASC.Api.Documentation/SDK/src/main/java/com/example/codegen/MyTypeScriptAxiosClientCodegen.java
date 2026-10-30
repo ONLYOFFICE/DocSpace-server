@@ -309,7 +309,7 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         }
 
         String apiClass = String.valueOf(objs.getOperations().get("x-classname"));
-        CallSnippets.attach(objs, operation -> snippets.attach(operation, apiClass));
+        CallSnippets.attach(this, objs, operation -> snippets.attach(operation, apiClass));
     }
 
     @Override

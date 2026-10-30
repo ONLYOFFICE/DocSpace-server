@@ -45,9 +45,11 @@ namespace ASC.Api.Documentation;
 /// example would turn into a heading. Nothing reads a page after this.
 /// <para>
 /// Each tab reads its examples from a snippet file of its own, which holds the snippets of the
-/// whole API between `&lt;!--snippet:operationId--&gt;` markers and ends with `&lt;!--/snippets--&gt;`.
-/// They are matched to the pages by operation id, the one name every language shares: the
-/// methods the examples call are named differently in each of them.
+/// whole API between `&lt;!--snippet:original id--&gt;` markers and ends with `&lt;!--/snippets--&gt;`.
+/// They are matched to the pages by the operation id the document states, the one name every
+/// language shares: the methods the examples call are named differently in each of them, and so
+/// is the id itself once a generator has recased it - the page is named by the Markdown
+/// generator's id.
 /// </para>
 /// </remarks>
 internal static class ExampleTabs
@@ -63,7 +65,7 @@ internal static class ExampleTabs
     private const string MarkerSuffix = "-->";
 
     /// <summary>
-    /// Reads the snippets of one tab, keyed by operation id.
+    /// Reads the snippets of one tab, keyed by the operation id the document states.
     /// </summary>
     /// <remarks>
     /// A marker with nothing under it is an operation the language has no example for, and the
@@ -77,7 +79,7 @@ internal static class ExampleTabs
         var lines = await File.ReadAllLinesAsync(path, cancellationToken);
         var snippets = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
 
-        string? operationId = null;
+        string? originalOperationId = null;
         var body = new List<string>();
         var ended = false;
 
@@ -86,22 +88,22 @@ internal static class ExampleTabs
             if (line.StartsWith(SnippetMarkerPrefix, StringComparison.Ordinal)
                 && line.EndsWith(MarkerSuffix, StringComparison.Ordinal))
             {
-                Add(snippets, operationId, body, path);
+                Add(snippets, originalOperationId, body, path);
 
-                operationId = line[SnippetMarkerPrefix.Length..^MarkerSuffix.Length];
+                originalOperationId = line[SnippetMarkerPrefix.Length..^MarkerSuffix.Length];
                 body = [];
                 continue;
             }
 
             if (line.StartsWith(SnippetsEndMarker, StringComparison.Ordinal))
             {
-                Add(snippets, operationId, body, path);
+                Add(snippets, originalOperationId, body, path);
 
                 ended = true;
                 break;
             }
 
-            if (operationId != null)
+            if (originalOperationId != null)
             {
                 body.Add(line);
             }
@@ -143,11 +145,11 @@ internal static class ExampleTabs
 
             lines.RemoveAt(marker);
 
-            var examples = tabs.Where(tab => tab.Snippets.ContainsKey(operation.OperationId)).ToList();
+            var examples = tabs.Where(tab => tab.Snippets.ContainsKey(operation.OriginalOperationId)).ToList();
 
             if (examples.Count > 0)
             {
-                lines.InsertRange(marker, Section(groupId, examples, operation.OperationId));
+                lines.InsertRange(marker, Section(groupId, examples, operation.OriginalOperationId));
                 exampled++;
             }
 
@@ -159,11 +161,11 @@ internal static class ExampleTabs
 
     private static void Add(
         Dictionary<string, IReadOnlyList<string>> snippets,
-        string? operationId,
+        string? originalOperationId,
         List<string> body,
         string path)
     {
-        if (operationId == null)
+        if (originalOperationId == null)
         {
             return;
         }
@@ -175,9 +177,9 @@ internal static class ExampleTabs
             return;
         }
 
-        if (!snippets.TryAdd(operationId, snippet))
+        if (!snippets.TryAdd(originalOperationId, snippet))
         {
-            throw new Exception($"'{operationId}' has two examples in {path}");
+            throw new Exception($"'{originalOperationId}' has two examples in {path}");
         }
     }
 
@@ -208,7 +210,7 @@ internal static class ExampleTabs
     /// with the endpoint's own heading. Each tag stands on a line of its own and the code is fenced
     /// off by blank lines, which is what makes MDX read the code inside a tab as Markdown.
     /// </remarks>
-    private static IEnumerable<string> Section(string groupId, List<TabSnippets> examples, string operationId)
+    private static IEnumerable<string> Section(string groupId, List<TabSnippets> examples, string originalOperationId)
     {
         yield return "## Example";
         yield return string.Empty;
@@ -222,7 +224,7 @@ internal static class ExampleTabs
             yield return $"<TabItem value=\"{example.Tab.Value}\" label=\"{example.Tab.Label}\">";
             yield return string.Empty;
 
-            foreach (var line in example.Snippets[operationId])
+            foreach (var line in example.Snippets[originalOperationId])
             {
                 yield return line;
             }
@@ -242,7 +244,7 @@ internal static class ExampleTabs
     internal sealed record Tab(string Value, string Label);
 
     /// <summary>
-    /// The snippets one tab holds for a section, keyed by operation id.
+    /// The snippets one tab holds for a section, keyed by the operation id the document states.
     /// </summary>
     internal sealed record TabSnippets(Tab Tab, IReadOnlyDictionary<string, IReadOnlyList<string>> Snippets);
 }

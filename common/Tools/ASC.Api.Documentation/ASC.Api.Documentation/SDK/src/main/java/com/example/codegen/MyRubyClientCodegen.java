@@ -357,7 +357,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
             snippets = new Snippets(openAPI, allModels, moduleName);
         }
 
-        CallSnippets.attach(objs, snippets::attach);
+        CallSnippets.attach(this, objs, snippets::attach);
     }
 
     private String toDashCase(String input) {

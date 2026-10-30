@@ -16,7 +16,7 @@ All URIs are relative to *{{{basePath}}}*, where the host is the address of your
 {{/operation}}
 {{#operation}}
 
-<!--op:{{operationId}}|{{vendorExtensions.x-anchor}}-->
+<!--op:{{operationId}}|{{vendorExtensions.x-anchor}}|{{{operationIdOriginal}}}-->
 ### {{operationId}}
 
 > {{#returnType}}{{.}} {{/returnType}}{{operationId}}({{#allParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/allParams}})

@@ -221,7 +221,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             snippets = new Snippets(openAPI, allModels, name -> template.execute(Map.of("lambda", lambda, "name", name)));
         }
 
-        CallSnippets.attach(objs, snippets::attach);
+        CallSnippets.attach(this, objs, snippets::attach);
     }
 
     @Override
@@ -815,17 +815,17 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
 
             switch (stripNullable(type)) {
                 case "string":
-                    return text == null ? placeholderString(where) : CallSnippets.quote(text);
+                    return text == null ? logPlaceholder(CallSnippets.quote("YOUR_VALUE"), where) : CallSnippets.quote(text);
                 case "int":
                 case "long":
                 case "double":
-                    return text == null ? "0" : text;
+                    return text == null ? logPlaceholder("0", where) : text;
                 case "float":
-                    return (text == null ? "0" : text) + "f";
+                    return (text == null ? logPlaceholder("0", where) : text) + "f";
                 case "decimal":
-                    return (text == null ? "0" : text) + "m";
+                    return (text == null ? logPlaceholder("0", where) : text) + "m";
                 case "bool":
-                    return text == null ? "false" : text.toLowerCase(Locale.ROOT);
+                    return text == null ? logPlaceholder("false", where) : text.toLowerCase(Locale.ROOT);
                 default:
                     CodegenModel model = models.get(stripNullable(type));
                     if (model == null) {
@@ -840,9 +840,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             }
         }
 
-        private String placeholderString(String where) {
+        /** The value standing in for one the document states no example for, noted in the log. */
+        private String logPlaceholder(String value, String where) {
             placeholders.add(where);
-            return CallSnippets.quote("YOUR_VALUE");
+            return value;
         }
 
         private String value(Shape shape, Object example, String name, String where, int depth) {

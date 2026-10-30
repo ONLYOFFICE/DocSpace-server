@@ -148,7 +148,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
         // The Retrofit interface writes its paths without the leading slash, so the generator has taken it
         // off; the document, where the examples are looked up by path, keeps it.
-        CallSnippets.attach(objs, operation -> {
+        CallSnippets.attach(this, objs, operation -> {
             String path = operation.path;
             if (path != null && !path.startsWith("/")) {
                 operation.path = "/" + path;
@@ -820,7 +820,10 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
             if (model.vars == null || model.vars.isEmpty()) {
                 if (CallSnippets.isComposed(model)) {
-                    // The SDK makes a oneOf or anyOf a class with no field to hold one of its variants.
+                    // The SDK makes a oneOf or anyOf a class with no field to hold one of its variants, so
+                    // the call sends {} in its place. This is a known defect of the SDK's templates, left to
+                    // be fixed there: the snippet shows the call the SDK allows and does not work around it.
+                    // Once the wrapper holds a variant, write the one CallSnippets.variant picks, as Swift does.
                     placeholders.add(where);
                 }
                 return fields;

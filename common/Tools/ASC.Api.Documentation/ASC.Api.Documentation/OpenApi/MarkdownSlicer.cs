@@ -40,10 +40,11 @@ namespace ASC.Api.Documentation;
 /// and the authorization schemes.
 /// </summary>
 /// <remarks>
-/// The operations are delimited by comments the template emits (`&lt;!--op:id|anchor--&gt;`) rather
-/// than found by matching heading levels: the slicer would otherwise silently mis-cut the moment
-/// the template's headings move, and a documentation page that is quietly wrong is worse than a
-/// build that fails. The markers never reach either output.
+/// The operations are delimited by comments the template emits
+/// (`&lt;!--op:id|anchor|original id--&gt;`) rather than found by matching heading levels: the
+/// slicer would otherwise silently mis-cut the moment the template's headings move, and a
+/// documentation page that is quietly wrong is worse than a build that fails. The markers never
+/// reach either output.
 /// </remarks>
 internal static class MarkdownSlicer
 {
@@ -289,7 +290,17 @@ internal static class MarkdownSlicer
             return;
         }
 
-        var group = groupOf(marker.Name);
+        // The sub-sections and the examples are both keyed by this id, so without it the page
+        // would quietly lose both. It is missing when the document gives the operation no id, or
+        // when the template has stopped writing it.
+        if (marker.Original.Length == 0)
+        {
+            throw new Exception(
+                $"The marker of '{marker.Name}' states no id from the document: either the operation has "
+                + $"none there or the template does not write it: {documentPath}");
+        }
+
+        var group = groupOf(marker.Original);
         var directory = group.Length > 0 ? Path.Combine(outputDirectory, group) : outputDirectory;
 
         Directory.CreateDirectory(directory);
@@ -306,6 +317,7 @@ internal static class MarkdownSlicer
 
         results.Add(new SlicedOperation(
             marker.Name,
+            marker.Original,
             marker.Anchor,
             group,
             fileName,
@@ -504,19 +516,20 @@ internal static class MarkdownSlicer
     }
 
     /// <summary>
-    /// What the template states about an operation where it cut: its id, and the fragment the
-    /// section's tables link to it by.
+    /// What the template states about an operation where it cut: its id, the fragment the
+    /// section's tables link to it by, and the id the document itself gives it. A model's marker
+    /// states the first two only.
     /// </summary>
-    private sealed record Marker(string Name, string Anchor)
+    private sealed record Marker(string Name, string Anchor, string Original)
     {
         public static Marker Parse(string line, string prefix)
         {
-            var content = line[prefix.Length..^MarkerSuffix.Length];
-            var separator = content.IndexOf('|', StringComparison.Ordinal);
+            var fields = line[prefix.Length..^MarkerSuffix.Length].Split('|', 3);
 
-            return separator < 0
-                ? new Marker(content, string.Empty)
-                : new Marker(content[..separator], content[(separator + 1)..]);
+            return new Marker(
+                fields[0],
+                fields.Length > 1 ? fields[1] : string.Empty,
+                fields.Length > 2 ? fields[2] : string.Empty);
         }
     }
 
@@ -530,8 +543,16 @@ internal static class MarkdownSlicer
     /// One published operation. <paramref name="Group"/> is the sub-section it was filed under,
     /// empty when its tag is the section itself.
     /// </summary>
+    /// <remarks>
+    /// <paramref name="OperationId"/> is the id as the Markdown generator writes it, which is what
+    /// the page is named and headed by. <paramref name="OriginalOperationId"/> is the id the
+    /// document gives the operation, before any generator recases it: each language's generator
+    /// recases it its own way, so that is the only id the examples of every language can be
+    /// matched by.
+    /// </remarks>
     internal sealed record SlicedOperation(
         string OperationId,
+        string OriginalOperationId,
         string Anchor,
         string Group,
         string FileName,

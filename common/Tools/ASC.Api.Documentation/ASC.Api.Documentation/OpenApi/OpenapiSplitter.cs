@@ -299,6 +299,7 @@ internal static class OpenapiSplitter
                 var operation = method.Value!.DeepClone();
                 kept[method.Key] = operation;
 
+                KeepFirstTag(operation);
                 CollectTags(operation, usedTags);
                 CollectSchemaRefs(operation, joinedSchemas, usedSchemas);
             }
@@ -449,6 +450,23 @@ internal static class OpenapiSplitter
         }
 
         return groups;
+    }
+
+    /// <summary>
+    /// Leaves an operation the first of its tags only: the one <see cref="SectionOf"/> files it
+    /// under.
+    /// </summary>
+    /// <remarks>
+    /// openapi-generator writes an operation once for every tag it states, so a second tag would
+    /// put the operation on the section's pages twice, and the call examples take the API class of
+    /// the first tag as well.
+    /// </remarks>
+    private static void KeepFirstTag(JsonNode operation)
+    {
+        if (operation["tags"] is JsonArray { Count: > 1 } tags)
+        {
+            operation["tags"] = new JsonArray(tags[0]?.DeepClone());
+        }
     }
 
     private static void CollectTags(JsonNode operation, HashSet<string> usedTags)

@@ -261,7 +261,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
             );
         }
 
-        CallSnippets.attach(objs, snippets::attach);
+        CallSnippets.attach(this, objs, snippets::attach);
     }
 
     @Override
@@ -846,6 +846,10 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 return qualify(type) + "{}";
             }
 
+            if (isAny(type)) {
+                return literal(example);
+            }
+
             String text = example == null ? null : SpecExamples.text(example);
 
             switch (type) {
@@ -860,13 +864,19 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 case "int64":
                 case "float32":
                 case "float64":
-                    return text == null ? "0" : text;
+                    if (text == null) {
+                        placeholders.add(where);
+                        return "0";
+                    }
+                    return text;
                 case "bool":
-                    return text == null ? "false" : text.toLowerCase(Locale.ROOT);
+                    if (text == null) {
+                        placeholders.add(where);
+                        return "false";
+                    }
+                    return text.toLowerCase(Locale.ROOT);
                 case "time.Time":
                     return time(text, where);
-                case "interface{}":
-                    return text == null ? "nil" : literal(example, text);
                 default:
                     CodegenModel model = models.get(type);
                     if (model == null) {
@@ -973,8 +983,8 @@ public class MyGoClientCodegen extends GoClientCodegen {
             if (shape.isNumeric) {
                 return text;
             }
-            if ("interface{}".equals(shape.dataType)) {
-                return literal(example, text);
+            if (isAny(shape.dataType)) {
+                return literal(example);
             }
 
             return CallSnippets.quote(text);
@@ -1015,7 +1025,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
             boolean byPointer = valueType.startsWith("*");
             String type = byPointer ? valueType.substring(1) : valueType;
 
-            if ("interface{}".equals(type) || "any".equals(type)) {
+            if (isAny(type)) {
                 String value = literal(example);
                 return byPointer ? "&" + variable(key, type, value) : value;
             }
@@ -1068,7 +1078,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 return "map[string]interface{}{" + String.join(", ", entries) + "}";
             }
 
-            return literal(example, SpecExamples.text(example));
+            String text = SpecExamples.text(example);
+            return example instanceof Number || example instanceof Boolean
+                    ? text.toLowerCase(Locale.ROOT)
+                    : CallSnippets.quote(text);
+        }
+
+        /** Whether a Go type holds a value of any type: `interface{}`, as the SDK spells it, or its alias `any`. */
+        private static boolean isAny(String type) {
+            return "interface{}".equals(type) || "any".equals(type);
         }
 
         /**
@@ -1184,10 +1202,6 @@ public class MyGoClientCodegen extends GoClientCodegen {
             return "time.Now()";
         }
 
-        private static String literal(Object example, String text) {
-            return example instanceof Number || example instanceof Boolean ? text.toLowerCase(Locale.ROOT) : CallSnippets.quote(text);
-        }
-
         private static String placeholder(Shape shape, String name) {
             if (shape.isBoolean) {
                 return "false";
@@ -1197,6 +1211,11 @@ public class MyGoClientCodegen extends GoClientCodegen {
             }
             if ("string".equals(shape.dataType)) {
                 return CallSnippets.quote(CallSnippets.placeholderName(name));
+            }
+            // The SDK leaves a nil out of the body, so a required value of any type would not reach the
+            // server at all: an empty map stands in, as for a free-form object.
+            if (isAny(shape.dataType)) {
+                return "map[string]interface{}{}";
             }
 
             return "nil";

@@ -308,7 +308,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
         String apiImport = "from " + apiPackage + "." + operations.get("x-folder") + "." + underscore(classname)
                 + " import " + classname;
 
-        CallSnippets.attach(objs, operation -> snippets.attach(operation, apiImport));
+        CallSnippets.attach(this, objs, operation -> snippets.attach(operation, apiImport));
     }
 
     @Override
@@ -796,8 +796,16 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
                     return CallSnippets.quote(text);
                 case "int":
                 case "float":
-                    return text == null ? "0" : text;
+                    if (text == null) {
+                        placeholders.add(where);
+                        return "0";
+                    }
+                    return text;
                 case "bool":
+                    if (text == null) {
+                        placeholders.add(where);
+                        return "False";
+                    }
                     return Boolean.parseBoolean(text) ? "True" : "False";
                 case "datetime":
                     return dateTime(text, where);
@@ -1140,6 +1148,11 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
             }
             if (shape.isString || "str".equals(shape.dataType)) {
                 return CallSnippets.quote(CallSnippets.placeholderName(name));
+            }
+            // A None in a required value of any type would reach the server: an empty dictionary stands
+            // in, as for a free-form object.
+            if (shape.isAnyType) {
+                return "{}";
             }
 
             return "None";

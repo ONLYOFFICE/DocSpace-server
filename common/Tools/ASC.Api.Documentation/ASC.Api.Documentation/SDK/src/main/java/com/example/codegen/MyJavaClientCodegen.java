@@ -137,7 +137,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         OperationMap operations = objs.getOperations();
         String apiImport = apiPackage + "." + operations.get("x-folder") + "." + operations.get("x-classname");
 
-        CallSnippets.attach(objs, operation -> snippets.attach(operation, apiImport));
+        CallSnippets.attach(this, objs, operation -> snippets.attach(operation, apiImport));
     }
 
     @Override
@@ -648,7 +648,10 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             List<CodegenProperty> properties = model.readWriteVars != null ? model.readWriteVars : model.vars;
 
             if (CallSnippets.isComposed(model) && (properties == null || properties.isEmpty())) {
-                // The SDK makes a oneOf or anyOf of plain values a class with no field to hold one of them.
+                // The SDK makes a oneOf or anyOf of plain values a class with no field to hold one of them,
+                // so the call sends {} in its place. This is a known defect of the SDK's templates, left
+                // to be fixed there: the snippet shows the call the SDK allows and does not work around it.
+                // Once the wrapper holds a variant, write the one CallSnippets.variant picks, as Swift does.
                 placeholders.add(where);
                 return setters;
             }
@@ -981,6 +984,10 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                     return "false";
                 case "URI":
                     return "URI.create(" + CallSnippets.quote(CallSnippets.placeholderName(name)) + ")";
+                // A value of any type is an Object in the SDK, and a null in a required one would reach the
+                // server: an empty map stands in, as for a free-form object.
+                case "Object":
+                    return "new HashMap<>()";
                 default:
                     return "null";
             }
