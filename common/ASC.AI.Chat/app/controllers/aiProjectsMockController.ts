@@ -85,33 +85,6 @@ export const aiProjectsMockController = {
     return mock.updateProject(projectIdParam(req.params["id"]), body);
   }),
   deleteProject: handler(async (req) => mock.deleteProject(projectIdParam(req.params["id"]))),
-  pinProject: handler(async (req) => mock.setPinned(projectIdParam(req.params["id"]), true)),
-  unpinProject: handler(async (req) => mock.setPinned(projectIdParam(req.params["id"]), false)),
-  muteProject: handler(async (req) =>
-    mock.setMute(projectIdParam(req.params["id"]), bodyOf(req.body)),
-  ),
-  duplicateProject: handler(async (req) => mock.duplicateProject(projectIdParam(req.params["id"]))),
-  deleteLogo: handler(async (req) => mock.deleteLogo(projectIdParam(req.params["id"]))),
-  getHistory: handler(async (req) =>
-    mock.getHistory(projectIdParam(req.params["id"]), stringQuery(req)),
-  ),
-  getMembers: handler(async (req) =>
-    mock.getMembers(projectIdParam(req.params["id"]), stringQuery(req)),
-  ),
-  setMembers: handler(async (req) =>
-    mock.setMembers(projectIdParam(req.params["id"]), bodyOf(req.body)),
-  ),
-  resendInvitations: handler(async (req) =>
-    mock.resend(projectIdParam(req.params["id"]), bodyOf(req.body)),
-  ),
-  leaveProject: handler(async (req) => mock.leave(projectIdParam(req.params["id"]))),
-  changeOwner: handler(async (req) =>
-    mock.changeOwner(projectIdParam(req.params["id"]), bodyOf(req.body)),
-  ),
-  getInviteLinks: handler(async (req) => mock.getLinks(projectIdParam(req.params["id"]))),
-  setInviteLink: handler(async (req) =>
-    mock.setLink(projectIdParam(req.params["id"]), bodyOf(req.body)),
-  ),
   getSkills: handler(async (req) => mock.getSkills(projectIdParam(req.params["id"]))),
   getKnowledgeFiles: handler(async (req) =>
     mock.getKnowledge(projectIdParam(req.params["id"]), stringQuery(req)),

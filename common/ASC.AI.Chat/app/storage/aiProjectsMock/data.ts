@@ -37,8 +37,9 @@
 // scenario gives "me". The default scenario is a catalogue of what can break
 // the UI — long, unbroken, right-to-left and markup-like titles, the most
 // rooms a project may link, rooms with hundreds of skills or thousands of
-// files, gone and archived rooms, a deleted model, hundreds of members, an
-// expired invitation link, a long history — rather than a realistic portal.
+// files, gone and archived rooms, a deleted model — rather than a realistic
+// portal. Only what the project routes answer is modelled: members, invitation
+// links and history belong to the Files API, which the mock does not serve.
 
 import { MOCK_PROJECT_ID_BASE, MOCK_ROOM_ID_BASE } from "./registry.js";
 
@@ -60,12 +61,6 @@ export interface MockUser {
   isVisitor: boolean;
   /** 1 activated, 2 pending (invited by e-mail, never signed in). */
   activationStatus: 1 | 2;
-}
-
-export interface MockGroup {
-  id: string;
-  name: string;
-  membersCount: number;
 }
 
 export interface MockSkill {
@@ -103,40 +98,9 @@ export interface MockRoom {
   totalFiles?: number;
 }
 
-export interface MockMember {
-  subject: { kind: "user"; user: MockUser } | { kind: "group"; group: MockGroup };
-  access: 9 | 11;
-}
-
-export interface MockLink {
-  id: string;
-  title: string;
-  expirationDate: string | null;
-  maxUseCount: number | null;
-  currentUseCount: number;
-  requestToken: string;
-}
-
-export interface MockHistoryEvent {
-  id: number;
-  key: string;
-  actionId: number;
-  date: string;
-  initiator: MockUser;
-  data: Record<string, unknown>;
-  related: {
-    id: number;
-    key: string;
-    actionId: number;
-    date: string;
-    initiator: MockUser;
-    data: Record<string, unknown>;
-  }[];
-}
-
 /** What the caller is in a project: the owner, a member with a role, or an admin outside it. */
 export type MyStanding =
-  { kind: "owner" } | { kind: "member"; access: 9 | 11; viaGroup?: boolean } | { kind: "outside" };
+  { kind: "owner" } | { kind: "member"; access: 9 | 11 } | { kind: "outside" };
 
 export interface MockProject {
   id: number;
@@ -155,10 +119,6 @@ export interface MockProject {
   profileId: string | null;
   instructionsRoomIds: number[];
   knowledgeRoomIds: number[];
-  /** Everyone but the owner and the caller. */
-  members: MockMember[];
-  link: MockLink | null;
-  history: MockHistoryEvent[];
   /** Answer every read of this project with this status (error paths). */
   failWith?: 400 | 403 | 500;
   /** Delay every read of this project's sources by this many ms (loaders). */
@@ -179,7 +139,6 @@ export type Scenario = (typeof SCENARIOS)[number];
 export interface MockWorld {
   me: MockUser;
   users: MockUser[];
-  groups: MockGroup[];
   rooms: Map<number, MockRoom>;
   projects: Map<number, MockProject>;
 }
@@ -189,12 +148,10 @@ export interface MockWorld {
 let nextProjectId = MOCK_PROJECT_ID_BASE + 1;
 let nextRoomId = MOCK_ROOM_ID_BASE + 1;
 let nextFileId = 970_000_001;
-let nextEventId = 1;
 
 export const newProjectId = (): number => nextProjectId++;
 const newRoomId = (): number => nextRoomId++;
 const newFileId = (): number => nextFileId++;
-export const newEventId = (): number => nextEventId++;
 
 /** A deterministic generator, so every world built from a scenario is the same. */
 function prng(seed: number): () => number {
@@ -279,7 +236,7 @@ function user(n: number, over: Partial<MockUser> = {}): MockUser {
   };
 }
 
-/** The pool of people the members, owners and history draw from. */
+/** The pool of people the project owners are drawn from. */
 function buildUsers(): MockUser[] {
   const users: MockUser[] = [];
   users.push(user(1, { displayName: "Portal Owner", isOwner: true, isAdmin: true }));
@@ -318,19 +275,6 @@ function buildUsers(): MockUser[] {
     );
   }
   return users;
-}
-
-function buildGroups(): MockGroup[] {
-  return [
-    { id: guid(1, 2), name: "Sales", membersCount: 12 },
-    {
-      id: guid(2, 2),
-      name: "Marketing & Communications (EMEA, APAC and the Americas) — extended team",
-      membersCount: 148,
-    },
-    { id: guid(3, 2), name: "Δ Research", membersCount: 3 },
-    { id: guid(4, 2), name: "Empty group", membersCount: 0 },
-  ];
 }
 
 const LONG_WORD = "Supercalifragilisticexpialidocious".repeat(5).slice(0, 170);
@@ -444,119 +388,6 @@ function iso(daysAgo: number, minutes = 0): string {
   return d.toISOString().replace("Z", "+00:00");
 }
 
-function members(
-  world: MockWorld,
-  from: number,
-  count: number,
-  opts: { groups?: boolean } = {},
-): MockMember[] {
-  const list: MockMember[] = [];
-  const pool = world.users.slice(1);
-  for (let i = 0; i < count && from + i < pool.length; i += 1) {
-    const u = pool[from + i] as MockUser;
-    const canManage = u.isAdmin || u.isRoomAdmin || u.isOwner;
-    list.push({ subject: { kind: "user", user: u }, access: canManage && i % 3 === 0 ? 9 : 11 });
-  }
-  if (opts.groups) {
-    for (const group of world.groups) {
-      list.push({ subject: { kind: "group", group }, access: 11 });
-    }
-  }
-  return list;
-}
-
-const HISTORY_KEYS: [string, number][] = [
-  ["RoomCreated", 5001],
-  ["RoomRenamed", 5003],
-  ["RoomCreateUser", 5070],
-  ["RoomUpdateAccessForUser", 5071],
-  ["RoomRemoveUser", 5072],
-  ["RoomGroupAdded", 5073],
-  ["RoomColorChanged", 5100],
-  ["RoomCoverChanged", 5101],
-  ["RoomLogoCreated", 5102],
-  ["RoomInviteResend", 5074],
-  ["RoomChangeOwner", 5075],
-  // Project events the client does not draw yet: they must be skipped, not crash.
-  ["AiProjectModelChanged", 5167],
-  ["AiProjectRoomLinked", 5168],
-  ["AiProjectRoomUnlinked", 5169],
-];
-
-export function historyEvent(
-  key: string,
-  actionId: number,
-  initiator: MockUser,
-  date: string,
-  data: Record<string, unknown>,
-): MockHistoryEvent {
-  return { id: newEventId(), key, actionId, date, initiator, data, related: [] };
-}
-
-function history(world: MockWorld, project: MockProject, count: number): MockHistoryEvent[] {
-  const rnd = prng(project.id);
-  const events: MockHistoryEvent[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const [key, actionId] = HISTORY_KEYS[i % HISTORY_KEYS.length] as [string, number];
-    const initiator = pick(rnd, world.users.slice(0, 12));
-    const target = pick(rnd, world.users.slice(10));
-    const data: Record<string, unknown> =
-      key === "RoomRenamed"
-        ? {
-            oldTitle: `Old title ${i}`,
-            newTitle: i % 4 === 0 ? LONG_TITLE : project.title,
-            id: project.id,
-          }
-        : key === "RoomCreateUser" || key === "RoomRemoveUser" || key === "RoomInviteResend"
-          ? { user: target, access: 11, id: project.id, title: project.title }
-          : key === "RoomUpdateAccessForUser"
-            ? { user: target, access: 9, oldAccess: 11, id: project.id, title: project.title }
-            : key === "RoomGroupAdded"
-              ? {
-                  group: { id: world.groups[1]?.id, name: world.groups[1]?.name },
-                  access: 11,
-                  id: project.id,
-                  title: project.title,
-                }
-              : key === "RoomChangeOwner"
-                ? {
-                    owner: project.owner,
-                    oldOwner: initiator,
-                    id: project.id,
-                    title: project.title,
-                  }
-                : { id: project.id, title: project.title };
-    const event = historyEvent(key, actionId, initiator, iso(Math.floor(i / 3), i * 7), data);
-    // A burst of invitations collapses into one entry with related ones.
-    if (key === "RoomCreateUser" && i % 28 === 2) {
-      for (let r = 0; r < 12; r += 1) {
-        event.related.push({
-          id: newEventId(),
-          key,
-          actionId,
-          date: event.date,
-          initiator,
-          data: { user: world.users[20 + r], access: 11, id: project.id, title: project.title },
-        });
-      }
-    }
-    events.push(event);
-  }
-  return events;
-}
-
-function link(over: Partial<MockLink> = {}): MockLink {
-  return {
-    id: guid(newEventId(), 3),
-    title: "Invite",
-    expirationDate: iso(-7),
-    maxUseCount: null,
-    currentUseCount: 0,
-    requestToken: `mock-token-${newEventId()}`,
-    ...over,
-  };
-}
-
 interface ProjectSpec {
   title: string;
   me: MyStanding;
@@ -568,9 +399,6 @@ interface ProjectSpec {
   mute?: boolean;
   cover?: string | null;
   hasLogo?: boolean;
-  members?: MockMember[];
-  link?: MockLink | null;
-  historyCount?: number;
   createdDaysAgo?: number;
   failWith?: 400 | 403 | 500;
   slowMs?: number;
@@ -601,13 +429,9 @@ function project(world: MockWorld, profiles: ProfileChoice, spec: ProjectSpec): 
           : null,
     instructionsRoomIds: spec.instructions ?? [],
     knowledgeRoomIds: spec.knowledge ?? [],
-    members: spec.members ?? members(world, Math.floor(rnd() * 40) + 10, 3),
-    link: spec.link === undefined ? link() : spec.link,
-    history: [],
     failWith: spec.failWith,
     slowMs: spec.slowMs,
   };
-  p.history = history(world, p, spec.historyCount ?? 6);
   world.projects.set(id, p);
   return p;
 }
@@ -635,8 +459,6 @@ function edgeCases(world: MockWorld, profiles: ProfileChoice): void {
     knowledge: [catalogue, emptyKnowledge],
     profile: "real",
     pinned: true,
-    historyCount: 40,
-    members: members(world, 10, 8, { groups: true }),
   });
   project(world, profiles, {
     title: LONG_TITLE,
@@ -673,7 +495,7 @@ function edgeCases(world: MockWorld, profiles: ProfileChoice): void {
     me: { kind: "owner" },
     instructions: [ins({ title: "<i>markup</i> & ampersand <room>", skills: 1 })],
   });
-  project(world, profiles, { title: "A", me: { kind: "owner" }, cover: null, link: null });
+  project(world, profiles, { title: "A", me: { kind: "owner" }, cover: null });
   project(world, profiles, {
     title: "人工智能项目 — 季度报告与客户研究",
     me: { kind: "member", access: 9 },
@@ -760,8 +582,6 @@ function edgeCases(world: MockWorld, profiles: ProfileChoice): void {
   project(world, profiles, {
     title: "No rooms linked at all",
     me: { kind: "owner" },
-    link: null,
-    members: [],
   });
   project(world, profiles, {
     title: "Only instructions",
@@ -790,39 +610,12 @@ function edgeCases(world: MockWorld, profiles: ProfileChoice): void {
     knowledge: [catalogue],
   });
   project(world, profiles, {
-    title: "260 members, groups, guests and pending invites",
-    me: { kind: "owner" },
-    members: members(world, 0, 260, { groups: true }),
-    historyCount: 120,
-    instructions: [brand],
-  });
-  project(world, profiles, {
-    title: "Expired invitation link",
-    me: { kind: "member", access: 9 },
-    owner: admin,
-    link: link({ expirationDate: iso(3), title: "Old link" }),
-  });
-  project(world, profiles, {
-    title: "Invitation link used up (25 of 25)",
-    me: { kind: "owner" },
-    link: link({
-      maxUseCount: 25,
-      currentUseCount: 25,
-      title: "A link with a very long name that should be truncated somewhere in the panel",
-    }),
-  });
-  project(world, profiles, {
     title: "Uploaded logo",
     me: { kind: "owner" },
     hasLogo: true,
     instructions: [brand],
   });
   project(world, profiles, { title: "Cover and colour", me: { kind: "owner" }, cover: "bookmark" });
-  project(world, profiles, {
-    title: "Member through a group only (cannot leave)",
-    me: { kind: "member", access: 11, viaGroup: true },
-    owner: admin,
-  });
   project(world, profiles, {
     title: "Grant fails on a linked room",
     me: { kind: "owner" },
@@ -862,7 +655,7 @@ function edgeCases(world: MockWorld, profiles: ProfileChoice): void {
   project(world, profiles, { title: "Pinned 7", me: { kind: "owner" }, pinned: true });
   project(world, profiles, { title: "Pinned 8", me: { kind: "owner" }, pinned: true });
   project(world, profiles, {
-    title: "Pinned 9 (one more pin is allowed, the 11th is refused)",
+    title: "Pinned 9",
     me: { kind: "owner" },
     pinned: true,
   });
@@ -885,7 +678,6 @@ function filler(world: MockWorld, profiles: ProfileChoice, count: number): void 
       owner: world.users[1 + (i % 3)] as MockUser,
       instructions: i % 2 === 0 ? [shared] : [],
       profile: i % 5 === 0 ? "real" : "default",
-      historyCount: 2,
     });
   }
 }
@@ -895,7 +687,6 @@ export function buildWorld(me: MockUser, scenario: Scenario, profiles: ProfileCh
   const world: MockWorld = {
     me,
     users: [],
-    groups: buildGroups(),
     rooms: new Map(),
     projects: new Map(),
   };

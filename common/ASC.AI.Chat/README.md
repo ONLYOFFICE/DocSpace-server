@@ -70,9 +70,13 @@ engine streams (`toolProgress`) until the result replaces it; nothing of it is p
 `/api/2.0/ai/projects/*` (`app/controllers/aiProjectsController.ts`) serves the AI Projects page:
 a project is a room of type 12 that binds a model, Instructions rooms (type 10) and Knowledge rooms
 (type 11) and shares them with a team under three roles — project owner (`access` 1), project
-manager (9) and member (11). As for agents, every route is delegated to the .NET AI service
-(`internal/ai/projects…`, `AiProjectsController`) and answers its DocSpace envelope unchanged; the
-only check made here is that a chosen model exists and can chat.
+manager (9) and member (11). As for agents, only the project-specific routes live here — list,
+create, get, update, delete, `skills` and `knowledge` — and every one of them is delegated to the
+.NET AI service (`internal/ai/projects…`, `AiProjectsController`) and answers its DocSpace envelope
+unchanged; the only check made here is that a chosen model exists and can chat. Everything a
+project shares with an ordinary room — pin and unpin, mute, members (`share`), invitation links,
+resending invitations, leaving, changing the owner, duplicating, removing the logo and the history
+— is done by the client through the Files API (`files/rooms/{id}/...`), not through this service.
 
 The .NET contract, method by method, is
 `client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md`.
@@ -87,9 +91,16 @@ owner, a Project manager, a Member or an admin outside the project, as each proj
 rights of the C# contract are enforced, and so are its 400s (an unknown body field, a blank or too
 long title, more than 20 rooms of a kind, a room linked twice).
 
+The mock covers only the routes of this service. Mock project ids live in Node memory alone, so the
+room operations the client sends to the Files API (`files/rooms/{id}/...`) — pin and unpin, mute,
+members and invitation links (`share`, `links`, `resend`), leave, owner change, duplicate, logo
+removal and history — do **not** work on mock projects: the portal has no such room and answers
+404. The project DTO still carries the room fields the page reads (`pinned`, `mute`, `inRoom`,
+`access`, `security`), so the list and the cards render; only those actions fail.
+
 | Scenario | What it holds |
 |---|---|
-| `default` | ~36 projects that stress the UI: 170-character titles with and without spaces, emoji, right-to-left, CJK and markup-like titles; 20 + 20 linked rooms; rooms with 150 skills, 1000 files of 2400 (truncated) or none; gone and archived rooms; a deleted model; 260 members with groups, guests and pending invitations; 120 history entries with grouped events and project events the client does not draw yet; expired and used-up invitation links; 9 pinned projects (the 10th pin works, the 11th is refused); a muted project; membership through a group only; a grant warning; a project whose every read answers 500 and one whose sources take 4 s |
+| `default` | ~32 projects that stress the UI: 170-character titles with and without spaces, emoji, right-to-left, CJK and markup-like titles; 20 + 20 linked rooms; rooms with 150 skills, 1000 files of 2400 (truncated) or none; gone and archived rooms; a deleted model; 9 pinned projects; a muted project; a grant warning; a project whose every read answers 500 and one whose sources take 4 s |
 | `many` | `default` plus 300 plain projects, for paging and infinite scroll |
 | `empty` | no projects at all |
 | `one` | one ordinary project |
@@ -104,7 +115,7 @@ long title, more than 20 rooms of a kind, a room linked twice).
   and files are read live. A chat round inside a mock project runs on its model (the portal default
   when none is set; a deleted one answers 409) with only those real rooms; the generated rooms have
   no files to read.
-- Deleting and duplicating answer a file operation that is already finished.
+- Deleting answers a file operation that is already finished.
 - Nothing survives a restart.
 
 ### License

@@ -221,6 +221,10 @@ export default function registerRoutes(app: Application): void {
   // .NET AI service like the agents above (see aiProjectsController), or
   // answered in process by the mock when AI_PROJECTS_MOCK=1 (see
   // aiProjectsMockController); `/projects/mock` then switches its scenario.
+  // Only the project-specific operations live here; everything a project
+  // shares with an ordinary room (pin, mute, share, invitation links, leave,
+  // owner change, duplicate, logo, history) goes through the Files API
+  // (`files/rooms/{id}/...`) directly.
   const projects = isAiProjectsMockEnabled() ? aiProjectsMockController : aiProjectsController;
   if (isAiProjectsMockEnabled()) {
     router.get("/projects/mock", aiProjectsMockController.getMock);
@@ -231,19 +235,6 @@ export default function registerRoutes(app: Application): void {
   router.get("/projects/:id", projects.getProject);
   router.put("/projects/:id", projects.updateProject);
   router.delete("/projects/:id", projects.deleteProject);
-  router.put("/projects/:id/pin", projects.pinProject);
-  router.put("/projects/:id/unpin", projects.unpinProject);
-  router.get("/projects/:id/share", projects.getMembers);
-  router.put("/projects/:id/share", projects.setMembers);
-  router.put("/projects/:id/leave", projects.leaveProject);
-  router.put("/projects/:id/owner", projects.changeOwner);
-  router.get("/projects/:id/links", projects.getInviteLinks);
-  router.put("/projects/:id/links", projects.setInviteLink);
-  router.post("/projects/:id/resend", projects.resendInvitations);
-  router.put("/projects/:id/mute", projects.muteProject);
-  router.put("/projects/:id/duplicate", projects.duplicateProject);
-  router.delete("/projects/:id/logo", projects.deleteLogo);
-  router.get("/projects/:id/history", projects.getHistory);
   router.get("/projects/:id/skills", projects.getSkills);
   router.get("/projects/:id/knowledge", projects.getKnowledgeFiles);
 

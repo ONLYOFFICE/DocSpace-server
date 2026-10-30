@@ -37,8 +37,11 @@
 // each other's edits and "me" is always the real signed-in user. Every
 // answer is shaped as the C# AiProjectsController answers (see
 // client/packages/client/src/pages/AiProjects/spec/AiProjects-API-for-CSharp.md),
-// including the rights table: a Member cannot edit, an admin outside the
-// project cannot mute, the owner cannot leave, and so on.
+// including the rights table: a Member cannot edit, only the owner or a
+// DocSpace admin can delete, and so on. Only the project-specific routes are
+// mocked: pin, mute, share, invitation links, leave, owner change, duplicate,
+// logo removal and history go through the Files API (`files/rooms/{id}/...`),
+// which does not know the mock's ids, so they do not work on mock projects.
 
 import { ActionType, AssignmentsEngine, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
@@ -54,7 +57,6 @@ import {
   buildWorld,
   DELETED_PROFILE_ID,
   guid,
-  historyEvent,
   INSTRUCTIONS,
   KNOWLEDGE,
   newProjectId,
@@ -62,14 +64,10 @@ import {
 } from "./data.js";
 import type {
   MockFile,
-  MockHistoryEvent,
-  MockLink,
-  MockMember,
   MockProject,
   MockRoom,
   MockUser,
   MockWorld,
-  MyStanding,
   Role,
   Scenario,
 } from "./data.js";
@@ -83,7 +81,6 @@ export interface MockReply {
 
 const MAX_TITLE = 170;
 const MAX_ROOMS_PER_KIND = 20;
-const MAX_PINNED = 10;
 const DEFAULT_COUNT = 100;
 
 const LOGO_SVG =
@@ -384,123 +381,12 @@ function folderDto(world: MockWorld, profiles: Profile[], p: MockProject, warnin
   };
 }
 
-function memberDto(m: MockMember, project: MockProject) {
-  if (m.subject.kind === "group") {
-    return {
-      access: m.access,
-      isOwner: false,
-      isLocked: false,
-      canEditAccess: security(project).EditAccess,
-      subjectType: 2,
-      sharedTo: {
-        id: m.subject.group.id,
-        name: m.subject.group.name,
-        manager: null,
-        isSystem: false,
-        membersCount: m.subject.group.membersCount,
-      },
-    };
-  }
-  return {
-    access: m.access,
-    isOwner: false,
-    isLocked: false,
-    canEditAccess: security(project).EditAccess,
-    subjectType: 0,
-    sharedTo: userRef(m.subject.user),
-  };
-}
-
-/** Owner first, then the caller (when a member), then the rest. */
-function shareList(world: MockWorld, p: MockProject) {
-  const list: JsonObject[] = [
-    {
-      access: 1,
-      isOwner: true,
-      isLocked: true,
-      canEditAccess: false,
-      subjectType: 0,
-      sharedTo: userRef(p.owner),
-    },
-  ];
-  if (p.me.kind === "member" && !p.me.viaGroup) {
-    list.push(memberDto({ subject: { kind: "user", user: world.me }, access: p.me.access }, p));
-  }
-  const order = (m: MockMember) =>
-    m.subject.kind === "group"
-      ? 1
-      : m.subject.user.activationStatus === 2
-        ? 3
-        : m.access === 9
-          ? 0
-          : 2;
-  const rest = [...p.members].sort((a, b) => order(a) - order(b));
-  for (const m of rest) {
-    list.push(memberDto(m, p));
-  }
-  return list;
-}
-
-function linkDto(l: MockLink) {
-  const expired = l.expirationDate !== null && Date.parse(l.expirationDate) < Date.now();
-  return {
-    access: 11,
-    isOwner: false,
-    isLocked: false,
-    canEditAccess: true,
-    subjectType: 4,
-    sharedTo: {
-      id: l.id,
-      title: l.title,
-      shareLink: `${proxyBaseUrl}/s/${l.requestToken}`,
-      expirationDate: l.expirationDate,
-      linkType: 0,
-      isExpired: expired,
-      primary: false,
-      requestToken: l.requestToken,
-      maxUseCount: l.maxUseCount,
-      currentUseCount: l.currentUseCount,
-      internal: false,
-      denyDownload: false,
-    },
-  };
-}
-
-function eventDto(e: MockHistoryEvent | MockHistoryEvent["related"][number]) {
-  const data = Object.fromEntries(
-    Object.entries(e.data).map(([k, v]) =>
-      isObject(v) && typeof v["displayName"] === "string"
-        ? [k, userRef(v as unknown as MockUser)]
-        : [k, v],
-    ),
-  );
-  return {
-    id: e.id,
-    action: { id: e.actionId, key: e.key },
-    initiator: userRef(e.initiator),
-    date: e.date,
-    data,
-  };
-}
-
 /* ------------------------------ Validation ------------------------------- */
 
 const nowIso = () => new Date().toISOString().replace("Z", "+00:00");
 
 function touch(p: MockProject) {
   p.updated = nowIso();
-}
-
-function logEvent(
-  world: MockWorld,
-  p: MockProject,
-  key: string,
-  actionId: number,
-  data: Record<string, unknown>,
-) {
-  p.history.unshift(
-    historyEvent(key, actionId, world.me, nowIso(), { id: p.id, title: p.title, ...data }),
-  );
 }
 
 function titleOf(raw: unknown, required: boolean): string | MockReply | undefined {
@@ -720,13 +606,9 @@ export async function createProject(body: JsonObject): Promise<MockReply> {
     profileId: patch.profileId,
     instructionsRoomIds: patch.instructions ?? [],
     knowledgeRoomIds: patch.knowledge ?? [],
-    members: [],
-    link: null,
-    history: [],
   };
   world.projects.set(p.id, p);
   registerMockProject(p.id, p.title);
-  logEvent(world, p, "RoomCreated", 5001, {});
   return ok(
     folderDto(
       world,
@@ -762,27 +644,22 @@ export async function updateProject(id: string, body: JsonObject): Promise<MockR
   if (patch && "status" in patch) return patch;
 
   if (title !== undefined && title !== p.title) {
-    logEvent(world, p, "RoomRenamed", 5003, { oldTitle: p.title, newTitle: title });
     p.title = title;
     registerMockProject(p.id, p.title);
   }
   if (typeof body["color"] === "string" && body["color"]) {
     p.color = body["color"];
-    logEvent(world, p, "RoomColorChanged", 5100, {});
   }
   if (typeof body["cover"] === "string") {
     p.cover = body["cover"] || null;
-    logEvent(world, p, "RoomCoverChanged", 5101, {});
   }
   if (isObject(body["logo"])) {
     p.hasLogo = true;
-    logEvent(world, p, "RoomLogoCreated", 5102, {});
   }
   let added: number[] = [];
   if (patch) {
     if (patch.profileIdSet && patch.profileId !== p.profileId) {
       p.profileId = patch.profileId;
-      logEvent(world, p, "AiProjectModelChanged", 5167, {});
     }
     if (patch.instructions) {
       added = added.concat(patch.instructions.filter((x) => !p.instructionsRoomIds.includes(x)));
@@ -797,11 +674,11 @@ export async function updateProject(id: string, body: JsonObject): Promise<MockR
   return ok(folderDto(world, profiles, p, grantWarnings(world, added)));
 }
 
-/** A file operation the client stops polling at once: it is already finished. */
-function finishedOperation(type: 2 | 7) {
+/** A delete file operation the client stops polling at once: it is already finished. */
+function finishedOperation() {
   return {
     id: guid(Math.floor(Math.random() * 1e9), 4),
-    Operation: type,
+    Operation: 2,
     progress: 100,
     error: "",
     processed: "1",
@@ -817,350 +694,7 @@ export async function deleteProject(id: string): Promise<MockReply> {
     return fail(403, "Only the project owner or a DocSpace admin can delete the AI project");
   world.projects.delete(p.id);
   unregisterMockProject(p.id);
-  return ok(finishedOperation(2));
-}
-
-export async function duplicateProject(id: string): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (!security(p).Duplicate || !canCreate(world.me))
-    return fail(403, "You cannot duplicate this AI project");
-  const copy: MockProject = {
-    ...p,
-    id: newProjectId(),
-    title: `${p.title} (1)`.slice(0, MAX_TITLE),
-    owner: world.me,
-    me: { kind: "owner" },
-    created: nowIso(),
-    updated: nowIso(),
-    pinned: false,
-    mute: false,
-    members: [],
-    link: null,
-    history: [],
-    instructionsRoomIds: p.instructionsRoomIds.filter((x) => world.rooms.get(x)?.available),
-    knowledgeRoomIds: p.knowledgeRoomIds.filter((x) => world.rooms.get(x)?.available),
-    failWith: undefined,
-  };
-  world.projects.set(copy.id, copy);
-  registerMockProject(copy.id, copy.title);
-  logEvent(world, copy, "RoomCreated", 5001, {});
-  return ok(finishedOperation(7));
-}
-
-export async function deleteLogo(id: string): Promise<MockReply> {
-  const { world, profiles } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (p.hasLogo && !security(p).EditRoom)
-    return fail(403, "You do not have rights to edit this AI project");
-  p.hasLogo = false;
-  touch(p);
-  return ok(folderDto(world, profiles, p));
-}
-
-export async function setPinned(id: string, pinned: boolean): Promise<MockReply> {
-  const { world, profiles } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (pinned && !p.pinned) {
-    const count = [...world.projects.values()].filter((x) => x.pinned && visible(world, x)).length;
-    if (count >= MAX_PINNED) return fail(403, `You can pin at most ${MAX_PINNED} AI projects`);
-  }
-  p.pinned = pinned;
-  return ok(folderDto(world, profiles, p));
-}
-
-export async function setMute(id: string, body: JsonObject): Promise<MockReply> {
-  const { world, profiles } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (typeof body["mute"] !== "boolean") return fail(400, "mute must be true or false");
-  if (!security(p).Mute) return fail(403, "You are not a member of this AI project");
-  p.mute = body["mute"];
-  return ok(folderDto(world, profiles, p));
-}
-
-export async function getHistory(id: string, query: Record<string, string>): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  const from = query["fromDate"] ? Date.parse(query["fromDate"]) : -Infinity;
-  const to = query["toDate"] ? Date.parse(query["toDate"]) : Infinity;
-  const all = p.history.filter((e) => {
-    const t = Date.parse(e.date);
-    return t >= from && t <= to;
-  });
-  const startIndex = Math.max(0, Number(query["startIndex"] ?? 0) || 0);
-  const count = Math.max(1, Number(query["count"] ?? DEFAULT_COUNT) || DEFAULT_COUNT);
-  const page = all.slice(startIndex, startIndex + count).map((e) => ({
-    ...eventDto(e),
-    related: e.related.map(eventDto),
-  }));
-  return ok(page, { count: page.length, total: all.length });
-}
-
-export async function getMembers(id: string, query: Record<string, string>): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  const filterType = Number(query["filterType"] ?? 0);
-  if (filterType !== 0 && filterType !== 1) return fail(400, "filterType must be 0 or 1");
-  if (filterType === 1) {
-    const links = p.link && security(p).EditAccess ? [linkDto(p.link)] : [];
-    return ok(links, { count: links.length, total: links.length });
-  }
-  const text = (query["filterValue"] ?? "").trim().toLowerCase();
-  let list = shareList(world, p);
-  if (text) {
-    list = list.filter((m) => {
-      const to = getObject(m, "sharedTo");
-      const name = (to && (getString(to, "displayName") ?? getString(to, "name"))) ?? "";
-      const email = (to && getString(to, "email")) ?? "";
-      return name.toLowerCase().includes(text) || email.toLowerCase().includes(text);
-    });
-  }
-  const startIndex = Math.max(0, Number(query["startIndex"] ?? 0) || 0);
-  const count = Math.max(1, Number(query["count"] ?? DEFAULT_COUNT) || DEFAULT_COUNT);
-  const page = list.slice(startIndex, startIndex + count);
-  return ok(page, { count: page.length, total: list.length });
-}
-
-export async function setMembers(id: string, body: JsonObject): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (!security(p).EditAccess)
-    return fail(403, "You do not have rights to manage the members of this AI project");
-  const allowed = new Set(["invitations", "notify", "message", "culture", "force"]);
-  const extra = Object.keys(body).find((k) => !allowed.has(k));
-  if (extra)
-    return fail(400, `The JSON property "${extra}" could not be mapped to any .NET member`);
-  const invitations = getArray(body, "invitations") ?? [];
-  if (invitations.length === 0) return fail(400, "At least one invitation is required");
-  for (const inv of invitations) {
-    if (!isObject(inv)) return fail(400, "An invitation must be an object");
-    const hasId = typeof inv["id"] === "string";
-    const hasEmail = typeof inv["email"] === "string";
-    if (hasId === hasEmail) return fail(400, "An invitation needs either an id or an e-mail");
-    const access = getNumber(inv, "access");
-    if (access !== 0 && access !== 9 && access !== 11)
-      return fail(400, "The role must be Project manager or Member");
-    if (hasEmail && access === 9) return fail(400, "An e-mail invitation can only make a Member");
-    if (inv["id"] === p.owner.id)
-      return fail(400, "The project owner is not in the member list; use Change owner");
-  }
-  const changed: MockMember[] = [];
-  for (const inv of invitations as JsonObject[]) {
-    const access = getNumber(inv, "access") as 0 | 9 | 11;
-    const email = getString(inv, "email");
-    const subjectId = getString(inv, "id");
-    if (subjectId === world.me.id) {
-      if (access === 0) p.me = { kind: "outside" };
-      else p.me = { kind: "member", access };
-      continue;
-    }
-    const index = p.members.findIndex((m) =>
-      m.subject.kind === "user"
-        ? m.subject.user.id === subjectId || (!!email && m.subject.user.email === email)
-        : m.subject.group.id === subjectId,
-    );
-    if (access === 0) {
-      if (index >= 0) {
-        const [removed] = p.members.splice(index, 1);
-        if (removed?.subject.kind === "user")
-          logEvent(world, p, "RoomRemoveUser", 5072, { user: removed.subject.user, access: 11 });
-      }
-      continue;
-    }
-    if (index >= 0) {
-      const m = p.members[index] as MockMember;
-      if (
-        m.subject.kind === "user" &&
-        access === 9 &&
-        (m.subject.user.isVisitor || m.subject.user.isCollaborator)
-      ) {
-        return fail(403, "This role is not available for this user");
-      }
-      m.access = access;
-      changed.push(m);
-      if (m.subject.kind === "user")
-        logEvent(world, p, "RoomUpdateAccessForUser", 5071, {
-          user: m.subject.user,
-          access,
-          oldAccess: 11,
-        });
-      continue;
-    }
-    const group = world.groups.find((g) => g.id === subjectId);
-    const known = world.users.find((u) => u.id === subjectId);
-    const member: MockMember = group
-      ? { subject: { kind: "group", group }, access: 11 }
-      : {
-          subject: {
-            kind: "user",
-            user:
-              known ??
-              ({
-                id: subjectId ?? guid(Math.floor(Math.random() * 1e9), 5),
-                displayName: email ?? `User ${subjectId?.slice(0, 8)}`,
-                email: email ?? "",
-                isOwner: false,
-                isAdmin: false,
-                isRoomAdmin: access === 9,
-                isCollaborator: false,
-                isVisitor: !!email,
-                activationStatus: email ? 2 : 1,
-              } satisfies MockUser),
-          },
-          access,
-        };
-    if (
-      member.subject.kind === "user" &&
-      access === 9 &&
-      (member.subject.user.isVisitor || member.subject.user.isCollaborator)
-    ) {
-      return fail(403, "This role is not available for this user");
-    }
-    p.members.push(member);
-    changed.push(member);
-    if (member.subject.kind === "user")
-      logEvent(world, p, "RoomCreateUser", 5070, { user: member.subject.user, access });
-    else
-      logEvent(world, p, "RoomGroupAdded", 5073, {
-        group: { id: member.subject.group.id, name: member.subject.group.name },
-        access,
-      });
-  }
-  touch(p);
-  const warnings = grantWarnings(world, [...p.instructionsRoomIds, ...p.knowledgeRoomIds]).map(
-    (w) => ({ ...w, code: "grantSkipped" }),
-  );
-  return ok({
-    members: changed.map((m) => memberDto(m, p)),
-    warning: null,
-    error: 0,
-    ...(changed.length && warnings.length ? { aiProjectWarnings: warnings } : {}),
-  });
-}
-
-export async function resend(id: string, body: JsonObject): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (!security(p).EditRoom)
-    return fail(403, "You do not have rights to manage the members of this AI project");
-  const ids = getArray(body, "usersIds");
-  if (ids && ids.length > 1000) return fail(400, "At most 1000 users at a time");
-  logEvent(world, p, "RoomInviteResend", 5074, {});
-  return ok(null);
-}
-
-export async function leave(id: string): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (p.me.kind === "owner")
-    return fail(400, "The project owner cannot leave the project. Change the owner first.");
-  if (p.me.kind === "outside") return fail(400, "You are not a member of this project");
-  if (p.me.viaGroup)
-    return fail(400, "You are a member through a group; ask a Project manager to remove the group");
-  p.me = { kind: "outside" };
-  logEvent(world, p, "RoomRemoveUser", 5072, { user: world.me, access: 11 });
-  return ok(null);
-}
-
-export async function changeOwner(id: string, body: JsonObject): Promise<MockReply> {
-  const { world, profiles } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (!security(p).ChangeOwner)
-    return fail(403, "Only the project owner or a DocSpace admin can change the owner");
-  const userId = getString(body, "userId");
-  if (!userId || userId === "00000000-0000-0000-0000-000000000000")
-    return fail(400, "userId is required");
-  if (userId === p.owner.id) return fail(400, "This user already owns the project");
-  const keep = body["keepAsManager"] !== false;
-  const target =
-    world.users.find((u) => u.id === userId) ??
-    ({
-      id: userId,
-      displayName: `User ${userId.slice(0, 8)}`,
-      email: "",
-      isOwner: false,
-      isAdmin: false,
-      isRoomAdmin: true,
-      isCollaborator: false,
-      isVisitor: false,
-      activationStatus: 1,
-    } satisfies MockUser);
-  if (target.isVisitor || target.isCollaborator) {
-    return fail(403, "The new owner must be a DocSpace admin or a room admin");
-  }
-  const oldOwner = p.owner;
-  const wasMe: MyStanding = p.me;
-  p.members = p.members.filter(
-    (m) => !(m.subject.kind === "user" && m.subject.user.id === target.id),
-  );
-  p.owner = target;
-  if (target.id === world.me.id) {
-    p.me = { kind: "owner" };
-  } else if (wasMe.kind === "owner") {
-    p.me = keep ? { kind: "member", access: 9 } : { kind: "outside" };
-  } else if (keep) {
-    p.members.unshift({ subject: { kind: "user", user: oldOwner }, access: 9 });
-  }
-  logEvent(world, p, "RoomChangeOwner", 5075, { owner: target, oldOwner });
-  touch(p);
-  return ok(folderDto(world, profiles, p));
-}
-
-export async function getLinks(id: string): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  const links = p.link && security(p).EditAccess ? [linkDto(p.link)] : [];
-  return ok(links, { count: links.length });
-}
-
-export async function setLink(id: string, body: JsonObject): Promise<MockReply> {
-  const { world } = await context();
-  const p = find(world, id);
-  if (isReply(p)) return p;
-  if (!security(p).EditAccess)
-    return fail(403, "You do not have rights to manage the invitation link of this AI project");
-  const access = getNumber(body, "access");
-  if (access !== 0 && access !== 11) return fail(400, "The invitation link can only make Members");
-  const linkId = getString(body, "linkId");
-  if (access === 0) {
-    if (!linkId) return fail(400, "linkId is required to remove the link");
-    p.link = null;
-    return ok(null);
-  }
-  if (!linkId && p.link) return fail(403, "The project already has an invitation link");
-  const maxUseCount = body["maxUseCount"];
-  if (
-    maxUseCount !== undefined &&
-    maxUseCount !== null &&
-    (typeof maxUseCount !== "number" || maxUseCount < 1 || maxUseCount > 1000)
-  ) {
-    return fail(400, "maxUseCount must be between 1 and 1000");
-  }
-  const expirationDate = typeof body["expirationDate"] === "string" ? body["expirationDate"] : null;
-  if (expirationDate && Date.parse(expirationDate) < Date.now() - 60_000) {
-    return fail(400, "The expiration date is in the past");
-  }
-  const current = p.link;
-  p.link = {
-    id: current?.id ?? guid(Math.floor(Math.random() * 1e9), 3),
-    title: getString(body, "title") || current?.title || "Invite",
-    expirationDate,
-    maxUseCount: typeof maxUseCount === "number" ? maxUseCount : null,
-    currentUseCount: current?.currentUseCount ?? 0,
-    requestToken: current?.requestToken ?? `mock-token-${p.id}-${Date.now()}`,
-  };
-  return ok(linkDto(p.link));
+  return ok(finishedOperation());
 }
 
 /** The skills of one linked room: generated for a mock room, read live for a real one. */
