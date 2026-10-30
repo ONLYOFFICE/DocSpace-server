@@ -94,6 +94,7 @@ global using ASC.Files.Core;
 global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Text;
+global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;

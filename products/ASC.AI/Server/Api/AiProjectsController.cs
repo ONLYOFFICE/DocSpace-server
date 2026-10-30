@@ -39,11 +39,12 @@ namespace ASC.AI.Api;
 public class AiProjectsController(
     FileStorageService fileStorageService,
     GlobalFolderHelper globalFolderHelper,
-    FolderContentDtoHelper folderContentDtoHelper)
+    FolderContentDtoHelper folderContentDtoHelper,
+    FolderDtoHelper folderDtoHelper)
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the AI projects the caller can see.
+    /// Returns the list of AI projects.
     /// </remarks>
     /// <summary>Get AI projects</summary>
     /// <path>api/2.0/ai/projects</path>
@@ -94,5 +95,25 @@ public class AiProjectsController(
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, inDto.StartIndex, inDto.Text);
 
         return dto.NotFoundIfNull();
+    }
+
+    /// <remarks>
+    /// Creates an AI project.
+    /// </remarks>
+    /// <summary>Create an AI project</summary>
+    /// <path>api/2.0/ai/projects</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "Created project", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(402, "The logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller is a user or a guest, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
+    [HttpPost("projects")]
+    public async Task<FolderDto<int>> CreateProject(CreateAiProjectRequestDto inDto)
+    {
+        var project = await fileStorageService.CreateAiProjectAsync(inDto.Title, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
+
+        return await folderDtoHelper.GetAsync(project);
     }
 }
