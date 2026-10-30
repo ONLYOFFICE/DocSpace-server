@@ -137,4 +137,30 @@ public class AiProjectsController(
 
         return await folderDtoHelper.GetAsync(project);
     }
+
+    /// <remarks>
+    /// Updates an AI project.
+    /// </remarks>
+    /// <summary>Update an AI project</summary>
+    /// <path>api/2.0/ai/projects/{id}</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "Updated project information", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the project update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(402, "The new logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller may not edit the project, or `logo.tmpFile` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "The AI project is not found, or the uploaded image named by `logo.tmpFile` no longer exists")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
+    [HttpPut("projects/{id}")]
+    public async Task<FolderDto<int>> UpdateProject(UpdateAiProjectRequestDto inDto)
+    {
+        var project = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (project is not { FolderType: FolderType.AiProjectRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var updated = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateProject.Map());
+
+        return await folderDtoHelper.GetAsync(updated);
+    }
 }
