@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Plik otwarty przez skrypt Document Builder: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Pokoje powiązane z projektem AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Pokoje odłączone od projektu AI {0}: [{1}]</value>
+  </data>
 </root>

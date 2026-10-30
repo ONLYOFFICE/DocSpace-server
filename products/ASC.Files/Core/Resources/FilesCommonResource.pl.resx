@@ -622,4 +622,13 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Szukaj w metadanych folderu</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt AI może być powiązany z maksymalnie {0} pokojami instrukcji</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt AI może być powiązany z maksymalnie {0} pokojami wiedzy</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Tych pokojów nie można powiązać z projektem AI: {0}</value>
+  </data>
 </root>

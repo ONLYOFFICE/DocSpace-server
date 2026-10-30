@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>البحث في بيانات المجلد الوصفية</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>يمكن ربط {0} من غرف التعليمات كحد أقصى بمشروع الذكاء الاصطناعي</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>يمكن ربط {0} من غرف المعرفة كحد أقصى بمشروع الذكاء الاصطناعي</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>لا يمكن ربط هذه الغرف بمشروع الذكاء الاصطناعي: {0}</value>
+  </data>
 </root>

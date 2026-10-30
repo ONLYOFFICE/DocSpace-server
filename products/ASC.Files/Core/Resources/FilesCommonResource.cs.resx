@@ -622,4 +622,13 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hledat v metadatech složky</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt AI může propojit nejvýše {0} místností s pokyny</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt AI může propojit nejvýše {0} znalostních místností</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Tyto místnosti nelze propojit s projektem AI: {0}</value>
+  </data>
 </root>

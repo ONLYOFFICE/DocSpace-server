@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Ֆայլը բացվել է Document Builder սցենարի կողմից՝ {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>{0} ԱԲ նախագծին կապված սենյակներ՝ [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>{0} ԱԲ նախագծից անջատված սենյակներ՝ [{1}]</value>
+  </data>
 </root>

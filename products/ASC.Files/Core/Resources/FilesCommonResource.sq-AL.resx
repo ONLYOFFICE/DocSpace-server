@@ -622,4 +622,13 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Kërko në meta të dhënat e dosjes</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Një projekt IA mund të lidhë jo më shumë se {0} dhoma udhëzimesh</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Një projekt IA mund të lidhë jo më shumë se {0} dhoma njohurish</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Këto dhoma nuk mund të lidhen me projektin e IA-së: {0}</value>
+  </data>
 </root>

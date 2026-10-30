@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Skedari u hap nga skripti i Document Builder: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Dhoma të lidhura me projektin e IA-së {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Dhoma të shkëputura nga projekti i IA-së {0}: [{1}]</value>
+  </data>
 </root>

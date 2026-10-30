@@ -52,6 +52,7 @@ global using FluentAssertions;
 
 global using Xunit;
 
+global using ArchiveRoomRequest = DocSpace.API.SDK.Model.ArchiveRoomRequest;
 global using ChatContextDto = ASCAi::ASC.AI.Models.ResponseDto.ChatContextDto;
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
@@ -59,6 +60,7 @@ global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
+global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;

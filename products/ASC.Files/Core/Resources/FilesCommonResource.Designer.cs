@@ -430,6 +430,33 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An AI project can link no more than {0} Instructions rooms.
+        /// </summary>
+        public static string ErrorMessage_AiProjectInstructionsRoomsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectInstructionsRoomsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An AI project can link no more than {0} Knowledge rooms.
+        /// </summary>
+        public static string ErrorMessage_AiProjectKnowledgeRoomsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectKnowledgeRoomsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to These rooms cannot be linked to the AI project: {0}.
+        /// </summary>
+        public static string ErrorMessage_AiProjectRoomsNotLinkable {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectRoomsNotLinkable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI services are disabled for the current portal.
         /// </summary>
         public static string ErrorMessage_AiServicesDisabled {

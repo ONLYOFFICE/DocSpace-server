@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Претражи у метаподацима фасцикле</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI пројекат може да повеже највише {0} соба са упутствима</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI пројекат може да повеже највише {0} соба знања</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Ове собе не могу да се повежу са AI пројектом: {0}</value>
+  </data>
 </root>

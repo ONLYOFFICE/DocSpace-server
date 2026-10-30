@@ -622,4 +622,13 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Iskanje v metapodatkih mape</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt UI lahko poveže največ {0} sob z navodili</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt UI lahko poveže največ {0} sob z znanjem</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Teh sob ni mogoče povezati s projektom UI: {0}</value>
+  </data>
 </root>

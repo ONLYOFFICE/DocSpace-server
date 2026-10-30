@@ -622,4 +622,13 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Zoeken in mapmetagegevens</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Een AI-project kan maximaal {0} instructieruimtes koppelen</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Een AI-project kan maximaal {0} kennisruimtes koppelen</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Deze ruimtes kunnen niet aan het AI-project worden gekoppeld: {0}</value>
+  </data>
 </root>

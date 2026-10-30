@@ -622,4 +622,13 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Căutare în metadatele folderului</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un proiect AI poate asocia cel mult {0} camere de instrucțiuni</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un proiect AI poate asocia cel mult {0} camere de cunoștințe</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Aceste camere nu pot fi asociate proiectului AI: {0}</value>
+  </data>
 </root>

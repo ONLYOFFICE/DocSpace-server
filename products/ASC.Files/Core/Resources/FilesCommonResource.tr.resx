@@ -622,4 +622,13 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Klasör meta verilerinde ara</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Bir yapay zeka projesine en fazla {0} talimat odası bağlanabilir</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Bir yapay zeka projesine en fazla {0} bilgi odası bağlanabilir</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Bu odalar yapay zeka projesine bağlanamaz: {0}</value>
+  </data>
 </root>

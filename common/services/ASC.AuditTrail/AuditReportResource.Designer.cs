@@ -2743,6 +2743,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms linked to AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsLinkedToAiProject {
+            get {
+                return ResourceManager.GetString("RoomsLinkedToAiProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Logo created.
         /// </summary>
         public static string RoomLogoCreated {
@@ -2793,6 +2802,15 @@ namespace ASC.AuditTrail {
         public static string RoomUnarchived {
             get {
                 return ResourceManager.GetString("RoomUnarchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms unlinked from AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsUnlinkedFromAiProject {
+            get {
+                return ResourceManager.GetString("RoomsUnlinkedFromAiProject", resourceCulture);
             }
         }
         

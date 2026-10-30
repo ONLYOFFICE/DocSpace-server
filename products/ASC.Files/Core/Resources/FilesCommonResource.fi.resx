@@ -622,4 +622,13 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hae kansion metatiedoista</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Tekoälyprojektiin voi linkittää enintään {0} ohjehuonetta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Tekoälyprojektiin voi linkittää enintään {0} tietohuonetta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Näitä huoneita ei voi linkittää tekoälyprojektiin: {0}</value>
+  </data>
 </root>

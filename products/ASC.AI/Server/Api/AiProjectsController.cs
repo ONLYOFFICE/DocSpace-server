@@ -43,7 +43,9 @@ public class AiProjectsController(
     FolderDtoHelper folderDtoHelper,
     FileDeleteOperationsManager fileDeleteOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    AiProjectRoomService aiProjectRoomService,
+    AiProjectRoomsDtoMapper aiProjectRoomsDtoMapper)
     : ControllerBase
 {
     /// <remarks>
@@ -193,5 +195,58 @@ public class AiProjectsController(
         await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
 
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
+    }
+
+    /// <remarks>
+    /// Returns the active Instructions and Knowledge rooms linked to an AI project.
+    /// </remarks>
+    /// <summary>Get AI project rooms</summary>
+    /// <path>api/2.0/ai/projects/{id}/rooms</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "Rooms linked to the project", typeof(AiProjectRoomsDto))]
+    [SwaggerResponse(403, "The caller may not read the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpGet("projects/{id}/rooms")]
+    public async Task<AiProjectRoomsDto> GetProjectRooms(RoomIdRequestDto<int> inDto)
+    {
+        var rooms = await aiProjectRoomService.GetRoomsAsync(inDto.Id);
+
+        return await aiProjectRoomsDtoMapper.MapAsync(rooms);
+    }
+
+    /// <remarks>
+    /// Links Instructions and Knowledge rooms to an AI project; rooms already linked are skipped.
+    /// </remarks>
+    /// <summary>Link rooms to an AI project</summary>
+    /// <path>api/2.0/ai/projects/{id}/rooms</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(204, "The rooms are linked")]
+    [SwaggerResponse(400, "`roomIds` is empty or longer than 200 items, a room is not an active Instructions or Knowledge room the caller can read, or the project would link more than 100 rooms of one type")]
+    [SwaggerResponse(403, "The caller may not edit the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpPost("projects/{id}/rooms")]
+    public async Task<IActionResult> LinkProjectRooms(LinkAiProjectRoomsRequestDto inDto)
+    {
+        await aiProjectRoomService.LinkRoomsAsync(inDto.Id, inDto.Rooms.RoomIds);
+
+        return NoContent();
+    }
+
+    /// <remarks>
+    /// Unlinks rooms from an AI project; IDs that are not linked are ignored.
+    /// </remarks>
+    /// <summary>Unlink rooms from an AI project</summary>
+    /// <path>api/2.0/ai/projects/{id}/rooms</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(204, "The rooms are unlinked")]
+    [SwaggerResponse(400, "`roomIds` is empty or longer than 200 items")]
+    [SwaggerResponse(403, "The caller may not edit the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpDelete("projects/{id}/rooms")]
+    public async Task<IActionResult> UnlinkProjectRooms(UnlinkAiProjectRoomsRequestDto inDto)
+    {
+        await aiProjectRoomService.UnlinkRoomsAsync(inDto.Id, inDto.Rooms.RoomIds);
+
+        return NoContent();
     }
 }

@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Document Builder 스크립트에 의해 파일이 열렸습니다: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에 연결된 방: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에서 연결 해제된 방: [{1}]</value>
+  </data>
 </root>

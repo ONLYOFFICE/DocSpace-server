@@ -622,4 +622,13 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>ファイルメタデータで検索</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI プロジェクトにリンクできる指示ルームは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI プロジェクトにリンクできるナレッジルームは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>これらのルームは AI プロジェクトにリンクできません: {0}</value>
+  </data>
 </root>

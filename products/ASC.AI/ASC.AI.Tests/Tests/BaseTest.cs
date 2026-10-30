@@ -290,6 +290,54 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     }
 
     /// <summary>
+    /// Creates an Instructions room as the owner. The pinned SDK has no Instructions room type
+    /// (10) yet, so the room is created over raw HTTP.
+    /// </summary>
+    protected async Task<int> CreateInstructionsRoomAsync(string? title = null)
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+
+        var files = new RawApiClient(_clients.FilesHttpClient);
+        using var response = await files.PostAsync("/api/2.0/files/rooms", new { title = title ?? $"instructions-{Guid.NewGuid():N}", roomType = 10 }, TestContext.Current.CancellationToken);
+        var room = await files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+
+        return room.GetProperty("id").GetInt32();
+    }
+
+    /// <summary>Moves a room to the archive as the owner and waits until it is there.</summary>
+    protected async Task ArchiveRoomAsync(int roomId)
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+        await _clients.RoomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
+        await WaitRoomSectionAsync(roomId, FolderType.Archive);
+    }
+
+    /// <summary>Restores an archived room as the owner and waits until it is back among the rooms.</summary>
+    protected async Task UnarchiveRoomAsync(int roomId)
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+        await _clients.RoomsApi.UnarchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
+        await WaitRoomSectionAsync(roomId, FolderType.VirtualRooms);
+    }
+
+    private async Task WaitRoomSectionAsync(int roomId, FolderType section)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var room = (await _clients.RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response;
+
+            if (room.RootFolderType == section || DateTime.UtcNow >= deadline)
+            {
+                return;
+            }
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Returns the id of the owner's "My documents" root folder in the current test's portal.
     /// </summary>
     protected async Task<int> GetMyDocumentsFolderIdAsync()

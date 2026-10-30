@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Файлът е отворен от скрипт на Document Builder: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Стаи, свързани с ИИ проект {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Стаи, отделени от ИИ проект {0}: [{1}]</value>
+  </data>
 </root>

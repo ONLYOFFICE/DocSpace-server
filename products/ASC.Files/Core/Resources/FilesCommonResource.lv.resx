@@ -622,4 +622,13 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Meklēt mapes metadatos</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>MI projektam var piesaistīt ne vairāk kā {0} instrukciju telpas</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>MI projektam var piesaistīt ne vairāk kā {0} zināšanu telpas</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Šīs telpas nevar piesaistīt MI projektam: {0}</value>
+  </data>
 </root>

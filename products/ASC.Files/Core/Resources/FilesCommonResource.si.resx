@@ -126,4 +126,13 @@
   <data name="User" xml:space="preserve">
     <value>පරිශ්‍රීලකයා</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI ව්‍යාපෘතියකට උපදෙස් කාමර {0} කට වඩා සම්බන්ධ කළ නොහැක</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI ව්‍යාපෘතියකට දැනුම් කාමර {0} කට වඩා සම්බන්ධ කළ නොහැක</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>මෙම කාමර AI ව්‍යාපෘතියට සම්බන්ධ කළ නොහැක: {0}</value>
+  </data>
 </root>

@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Пошук у метаданих папки</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>До ШІ-проєкту можна прив'язати не більше {0} кімнат з інструкціями</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>До ШІ-проєкту можна прив'язати не більше {0} кімнат знань</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Ці кімнати не можна прив'язати до ШІ-проєкту: {0}</value>
+  </data>
 </root>

@@ -1317,4 +1317,10 @@
   <data name="FolderMarkedAsRead" xml:space="preserve">
     <value>Folders [{0}]. Marked As Read</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Rooms linked to AI project {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Rooms unlinked from AI project {0}: [{1}]</value>
+  </data>
 </root>

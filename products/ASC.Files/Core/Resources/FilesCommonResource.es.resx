@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Buscar en metadatos de la carpeta</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un proyecto de IA puede vincular como máximo {0} salas de instrucciones</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un proyecto de IA puede vincular como máximo {0} salas de conocimiento</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Estas salas no se pueden vincular al proyecto de IA: {0}</value>
+  </data>
 </root>

@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Αναζήτηση σε μεταδεδομένα φακέλου</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Ένα έργο ΤΝ μπορεί να συνδέσει έως {0} δωμάτια οδηγιών</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Ένα έργο ΤΝ μπορεί να συνδέσει έως {0} δωμάτια γνώσης</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Αυτά τα δωμάτια δεν μπορούν να συνδεθούν με το έργο ΤΝ: {0}</value>
+  </data>
 </root>

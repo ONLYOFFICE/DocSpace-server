@@ -1129,6 +1129,16 @@ internal class FolderDao(
             await filesDbContext.DeleteMetadataLinksByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
             await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
 
+            switch (folderToDelete.Find(f => f.Id == folderId)?.FolderType)
+            {
+                case FolderType.AiProjectRoom:
+                    await filesDbContext.DeleteAiProjectRoomsByProjectAsync(tenantId, folderId);
+                    break;
+                case FolderType.InstructionsRoom or FolderType.KnowledgeRoom:
+                    await filesDbContext.DeleteAiProjectRoomsByRoomAsync(tenantId, folderId);
+                    break;
+            }
+
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
@@ -1218,6 +1228,12 @@ internal class FolderDao(
             var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folderId, toFolderId, title ?? folder.Title, folder.FolderType);
 
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount, title);
+
+            if (folder.FolderType is FolderType.InstructionsRoom or FolderType.KnowledgeRoom)
+            {
+                await context.DeleteAiProjectRoomsByRoomAsync(tenantId, folderId);
+            }
+
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));

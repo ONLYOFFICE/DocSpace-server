@@ -98,6 +98,7 @@ global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Core.Vectorization;
