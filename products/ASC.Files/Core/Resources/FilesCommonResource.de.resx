@@ -622,4 +622,13 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>In Ordner-Metadaten suchen</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Ein KI-Projekt kann mit höchstens {0} Anweisungsräumen verknüpft werden</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Ein KI-Projekt kann mit höchstens {0} Wissensräumen verknüpft werden</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Diese Räume können nicht mit dem KI-Projekt verknüpft werden: {0}</value>
+  </data>
 </root>

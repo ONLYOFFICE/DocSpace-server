@@ -622,4 +622,13 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Pretraži u metapodacima fascikle</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI projekat može da poveže najviše {0} soba sa uputstvima</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI projekat može da poveže najviše {0} soba znanja</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Ove sobe ne mogu da se povežu sa AI projektom: {0}</value>
+  </data>
 </root>

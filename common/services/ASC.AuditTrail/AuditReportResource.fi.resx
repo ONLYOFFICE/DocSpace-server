@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Document Builder -skripti avasi tiedoston: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Huoneet linkitetty tekoälyprojektiin {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Huoneiden linkitys tekoälyprojektiin {0} poistettu: [{1}]</value>
+  </data>
 </root>

@@ -622,4 +622,13 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Qovluq metadatasında axtarış</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Sİ layihəsinə ən çox {0} təlimat otağı bağlana bilər</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Sİ layihəsinə ən çox {0} bilik otağı bağlana bilər</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Bu otaqlar Sİ layihəsinə bağlana bilməz: {0}</value>
+  </data>
 </root>

@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Търсене в метаданни на папка</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>ИИ проект може да свърже най-много {0} стаи с инструкции</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>ИИ проект може да свърже най-много {0} стаи със знания</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Тези стаи не могат да бъдат свързани с ИИ проекта: {0}</value>
+  </data>
 </root>

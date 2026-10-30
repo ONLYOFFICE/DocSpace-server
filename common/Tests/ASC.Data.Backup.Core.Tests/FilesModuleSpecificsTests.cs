@@ -275,6 +275,34 @@ public class FilesModuleSpecificsTests
         Convert.ToInt32(preparedRow["order"]).Should().Be(3);
     }
 
+    [Fact]
+    public async Task TryPrepareRow_FilesAiProjectRoom_RemapsProjectAndRoom()
+    {
+        // Arrange — an Instructions or Knowledge room linked to an AI project
+        const int oldRoomId = 100;
+        const int newRoomId = 500;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping("files_folder", "id", OldFolderId, NewFolderId);
+        columnMapper.SetMapping("files_folder", "id", oldRoomId, newRoomId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_ai_project_room");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("project_id", OldFolderId);
+        row.SetValue("room_id", oldRoomId);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_ai_project_room"), row);
+
+        // Assert — both the project and the linked room are folders and have to follow their new ids
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["project_id"]).Should().Be(NewFolderId);
+        Convert.ToInt32(preparedRow["room_id"]).Should().Be(newRoomId);
+    }
+
     [Theory]
     [InlineData(1, true)]
     [InlineData(2, true)]

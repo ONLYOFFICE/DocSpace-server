@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>文件由 Document Builder 脚本打开：{0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>已关联到 AI 项目 {0} 的房间：[{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>已与 AI 项目 {0} 取消关联的房间：[{1}]</value>
+  </data>
 </root>

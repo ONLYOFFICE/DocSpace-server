@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Որոնել թղթապանակի մետատվյալներում</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>ԱԲ նախագծին կարելի է կապել առավելագույնը {0} հրահանգների սենյակ</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>ԱԲ նախագծին կարելի է կապել առավելագույնը {0} գիտելիքների սենյակ</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Այս սենյակները հնարավոր չէ կապել ԱԲ նախագծին՝ {0}</value>
+  </data>
 </root>

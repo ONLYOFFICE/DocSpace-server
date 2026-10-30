@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Dosya Document Builder Komut Dosyası Tarafından Açıldı: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>{0} yapay zeka projesine bağlanan odalar: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>{0} yapay zeka projesiyle bağlantısı kaldırılan odalar: [{1}]</value>
+  </data>
 </root>

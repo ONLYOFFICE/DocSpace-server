@@ -623,4 +623,13 @@ Highest compatibility with docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>An AI agent's instruction cannot be longer than {0} characters</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>An AI project can link no more than {0} Instructions rooms</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>An AI project can link no more than {0} Knowledge rooms</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>These rooms cannot be linked to the AI project: {0}</value>
+  </data>
 </root>

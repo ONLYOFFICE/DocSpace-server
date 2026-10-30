@@ -622,4 +622,13 @@
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hľadať v metadátach priečinka</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt AI môže prepojiť najviac {0} miestností s pokynmi</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt AI môže prepojiť najviac {0} znalostných miestností</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Tieto miestnosti nie je možné prepojiť s projektom AI: {0}</value>
+  </data>
 </root>

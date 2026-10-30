@@ -1080,6 +1080,12 @@ public enum MessageAction
     [Description("Service spending limit deleted")]
     CustomerServiceLimitDeleted = 6116,
 
+    [Description("Rooms linked to AI project")]
+    RoomsLinkedToAiProject = 6117,
+
+    [Description("Rooms unlinked from AI project")]
+    RoomsUnlinkedFromAiProject = 6118,
+
     #endregion
 
     #region others

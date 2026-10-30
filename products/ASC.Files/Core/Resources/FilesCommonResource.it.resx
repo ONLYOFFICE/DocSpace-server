@@ -622,4 +622,13 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>Cerca nei metadati del file</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un progetto IA può collegare al massimo {0} stanze di istruzioni</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un progetto IA può collegare al massimo {0} stanze di conoscenza</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Queste stanze non possono essere collegate al progetto IA: {0}</value>
+  </data>
 </root>

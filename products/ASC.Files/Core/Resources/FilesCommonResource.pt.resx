@@ -622,4 +622,13 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Pesquisar nos metadados da pasta</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Um projeto de IA pode associar no máximo {0} salas de instruções</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Um projeto de IA pode associar no máximo {0} salas de conhecimento</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Estas salas não podem ser associadas ao projeto de IA: {0}</value>
+  </data>
 </root>
