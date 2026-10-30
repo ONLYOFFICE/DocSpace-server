@@ -129,6 +129,15 @@ function refName(ref: unknown): string | null {
   return match ? match[1]! : null;
 }
 
+// A lifted polymorphic base keeps its subtypes only by name: the copy of its
+// `discriminator` would map to the .NET components, and namespacing the mapping
+// would pull a whole `Ai` copy of every subtype into the SDKs, whose generators
+// also take the first copy's names for the inline schemas they share. The proxy
+// routes return the base as the .NET service does, so the copy goes without it.
+function isDiscriminator(key: string, value: unknown): boolean {
+  return key === "discriminator" && isObject(value) && typeof value["propertyName"] === "string";
+}
+
 // Every local component name referenced anywhere within `node`.
 function collectRefs(node: unknown, acc: Set<string>): void {
   if (Array.isArray(node)) {
@@ -142,7 +151,7 @@ function collectRefs(node: unknown, acc: Set<string>): void {
       const name = key === "$ref" ? refName(value) : null;
       if (name !== null) {
         acc.add(name);
-      } else {
+      } else if (!isDiscriminator(key, value)) {
         collectRefs(value, acc);
       }
     }
@@ -166,9 +175,11 @@ function namespaceRefs(node: unknown): unknown {
     const out: JsonObject = {};
     for (const [key, value] of Object.entries(node)) {
       const name = key === "$ref" ? refName(value) : null;
-      out[key] = name !== null
-        ? `#/components/schemas/${namespacedName(name)}`
-        : namespaceRefs(value);
+      if (name !== null) {
+        out[key] = `#/components/schemas/${namespacedName(name)}`;
+      } else if (!isDiscriminator(key, value)) {
+        out[key] = namespaceRefs(value);
+      }
     }
     return out;
   }

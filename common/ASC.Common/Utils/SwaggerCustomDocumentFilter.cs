@@ -157,7 +157,58 @@ public class DerivedSchemaFilter : ISchemaFilter
             }
 
             DescribeUnion(openApiSchema, derivedTypes, context);
+            DescribeDiscriminator(openApiSchema, baseType, derivedTypes);
         }
+    }
+
+    /// <summary>
+    /// Publishes the type discriminator of a <see cref="JsonPolymorphicAttribute"/> base as its <c>discriminator</c>, with
+    /// the value of every <see cref="JsonDerivedTypeAttribute"/> mapped to that type's schema.
+    /// </summary>
+    /// <remarks>
+    /// A generator that sees the discriminator builds the derived model for each object of a list declared with the base
+    /// type, instead of the base model, which drops every field only the derived types carry. <c>TypeDiscriminatorModifier</c>
+    /// writes the property on every derived object; it is published as an optional string of the base all the same,
+    /// because a response limited by the <c>fields</c> query parameter carries only the fields asked for. A mapped
+    /// type the document does not contain yet is added by
+    /// <see cref="DiscriminatorTargetsDocumentFilter"/>: generating it here, while the base itself is still being
+    /// generated, would register the base twice.
+    /// </remarks>
+    private static void DescribeDiscriminator(OpenApiSchema schema, Type baseType, List<Type> derivedTypes)
+    {
+        var name = baseType.GetCustomAttribute<JsonPolymorphicAttribute>()?.TypeDiscriminatorPropertyName;
+
+        if (string.IsNullOrEmpty(name) || schema.Properties is not { Count: > 0 })
+        {
+            return;
+        }
+
+        var mapping = new Dictionary<string, OpenApiSchemaReference>();
+
+        foreach (var attribute in baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true))
+        {
+            if (attribute.TypeDiscriminator is string value && derivedTypes.Contains(attribute.DerivedType))
+            {
+                var schemaId = OpenApiSchemaId.Of(attribute.DerivedType);
+                mapping[value] = new OpenApiSchemaReference(schemaId);
+                DiscriminatorTargetsDocumentFilter.MappedTypes[schemaId] = attribute.DerivedType;
+            }
+        }
+
+        if (mapping.Count == 0)
+        {
+            return;
+        }
+
+        schema.Discriminator = new OpenApiDiscriminator { PropertyName = name, Mapping = mapping };
+        schema.Properties[name] = new OpenApiSchema
+        {
+            Type = JsonSchemaType.String,
+            Description = $"Which concrete type the object is: {string.Join(", ", mapping.Keys.Select(k => $"`{k}`"))}. It is "
+                + "what tells the types apart in a list that mixes several of them; a response limited by `fields` may leave "
+                + "it out.",
+            Examples = [JsonValue.Create(mapping.Keys.First())]
+        };
     }
 
     /// <summary>
@@ -187,6 +238,52 @@ public class DerivedSchemaFilter : ISchemaFilter
         schema.Type = null;
     }
 
+}
+
+/// <summary>
+/// Adds to the document every type a <c>discriminator</c> maps to but no operation of this service returns directly,
+/// so that the mapping never points at a schema the document lacks.
+/// </summary>
+/// <remarks>
+/// The AI service, for one, returns lists of <c>FileEntryBaseDto</c> but no <c>FileDto</c> of its own. The schemas are
+/// generated here, after every operation, because the base is complete by now; <see cref="DerivedSchemaFilter"/> only
+/// records which type stands behind each mapped schema id.
+/// </remarks>
+public class DiscriminatorTargetsDocumentFilter : IDocumentFilter
+{
+    internal static readonly ConcurrentDictionary<string, Type> MappedTypes = new();
+
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var schemas = swaggerDoc.Components?.Schemas;
+
+        if (schemas == null)
+        {
+            return;
+        }
+
+        var targets = schemas.Values
+            .Select(s => s.Discriminator?.Mapping)
+            .Where(m => m != null)
+            .SelectMany(m => m.Values)
+            .Select(r => r.Reference.Id)
+            .Where(id => !schemas.ContainsKey(id))
+            .Distinct()
+            .ToList();
+
+        foreach (var id in targets)
+        {
+            if (MappedTypes.TryGetValue(id, out var type))
+            {
+                context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository);
+            }
+        }
+
+        foreach (var (id, schema) in context.SchemaRepository.Schemas)
+        {
+            schemas.TryAdd(id, schema);
+        }
+    }
 }
 
 public class LowercaseDocumentFilter : IDocumentFilter

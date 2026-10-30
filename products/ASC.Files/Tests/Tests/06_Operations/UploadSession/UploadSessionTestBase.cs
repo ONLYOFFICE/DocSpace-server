@@ -180,10 +180,9 @@ public abstract class UploadSessionTestBase(
     }
 
     /// <summary>Files directly inside a folder whose title starts with <paramref name="titlePrefix"/>.</summary>
-    protected async Task<List<ListedEntry>> FilesIn(int folderId, string titlePrefix = "")
+    protected async Task<List<FileDto>> FilesIn(int folderId, string titlePrefix = "")
     {
-        var (files, _) = await RawFolderListing.ReadAsync(
-            _filesClient, folderId.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (files, _) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
         return files.FindAll(f => f.Title.StartsWith(titlePrefix, StringComparison.Ordinal));
     }
@@ -191,9 +190,9 @@ public abstract class UploadSessionTestBase(
     /// <summary>Ids and titles of everything directly inside a folder, for exact before/after comparisons.</summary>
     protected async Task<List<string>> Listing(string folder)
     {
-        var (files, folders) = await RawFolderListing.ReadAsync(_filesClient, folder, TestContext.Current.CancellationToken);
+        var (files, folders) = await FolderListing.ReadAsync(_foldersApi, folder, TestContext.Current.CancellationToken);
 
-        return [.. files.Concat(folders).Select(e => $"{e.Id}:{e.Title}").Order(StringComparer.Ordinal)];
+        return [.. files.Select(e => $"{e.Id}:{e.Title}").Concat(folders.Select(e => $"{e.Id}:{e.Title}")).Order(StringComparer.Ordinal)];
     }
 
     protected Task<List<string>> Listing(int folderId) => Listing(folderId.ToString(CultureInfo.InvariantCulture));
@@ -201,8 +200,7 @@ public abstract class UploadSessionTestBase(
     /// <summary>Relative path and SHA-256 of every file below a folder.</summary>
     protected async Task<List<string>> ReadTree(int folderId, string prefix = "")
     {
-        var (files, folders) = await RawFolderListing.ReadAsync(
-            _filesClient, folderId.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (files, folders) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
         var result = new List<string>();
 

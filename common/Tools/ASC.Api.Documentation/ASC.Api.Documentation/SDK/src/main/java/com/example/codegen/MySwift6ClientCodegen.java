@@ -39,6 +39,12 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     }
 
     @Override
+    public void preprocessOpenAPI(io.swagger.v3.oas.models.OpenAPI openAPI) {
+        Discriminators.strip(openAPI);
+        super.preprocessOpenAPI(openAPI);
+    }
+
+    @Override
     public void processOpts() {
         super.processOpts();
         this.outputFolder = "../../../../../sdk/docspace-api-sdk-swift";

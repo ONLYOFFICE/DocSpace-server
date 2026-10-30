@@ -149,14 +149,14 @@ public abstract class BatchContentTestBase(
 
     protected async Task<List<int>> TrashFileIds()
     {
-        var (files, _) = await RawFolderListing.ReadAsync(_filesClient, "@trash", TestContext.Current.CancellationToken);
+        var (files, _) = await FolderListing.ReadAsync(_foldersApi, "@trash", TestContext.Current.CancellationToken);
 
         return [.. files.Select(f => f.Id)];
     }
 
     protected async Task<List<int>> TrashFolderIds()
     {
-        var (_, folders) = await RawFolderListing.ReadAsync(_filesClient, "@trash", TestContext.Current.CancellationToken);
+        var (_, folders) = await FolderListing.ReadAsync(_foldersApi, "@trash", TestContext.Current.CancellationToken);
 
         return [.. folders.Select(f => f.Id)];
     }

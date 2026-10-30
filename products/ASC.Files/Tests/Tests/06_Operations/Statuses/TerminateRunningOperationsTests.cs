@@ -136,8 +136,7 @@ public class TerminateRunningOperationsTests(
         // Assert
         (await CountFiles(folderId)).Should().Be(LongFiles);
 
-        var (_, folders) = await RawFolderListing.ReadAsync(
-            _filesClient, myDocs.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (_, folders) = await FolderListing.ReadAsync(_foldersApi, myDocs, TestContext.Current.CancellationToken);
         var copies = folders.FindAll(f => f.Id != folderId && f.Title.StartsWith("Autotest Terminate Duplicate", StringComparison.Ordinal));
         copies.Should().ContainSingle();
 
@@ -234,7 +233,7 @@ public class TerminateRunningOperationsTests(
 
         // Assert
         var inPlace = await Settled(() => CountFiles(folderId));
-        var (trashFiles, _) = await RawFolderListing.ReadAsync(_filesClient, "@trash", TestContext.Current.CancellationToken);
+        var (trashFiles, _) = await FolderListing.ReadAsync(_foldersApi, "@trash", TestContext.Current.CancellationToken);
         var trashed = trashFiles.Count(f => fileIds.Contains(f.Id));
         (inPlace + trashed).Should().Be(100);
 
@@ -370,8 +369,7 @@ public class TerminateRunningOperationsTests(
         dupRecord.Status.Should().Be(DistributedTaskStatus.Completed);
         (await Settled(() => CountFiles(room.Id))).Should().BeLessThan(LongFiles);
 
-        var (_, folders) = await RawFolderListing.ReadAsync(
-            _filesClient, myDocs.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (_, folders) = await FolderListing.ReadAsync(_foldersApi, myDocs, TestContext.Current.CancellationToken);
         var duplicate = folders.Find(f => f.Id != folderB && f.Title.StartsWith("Autotest Terminate Pair B", StringComparison.Ordinal));
         duplicate.Should().NotBeNull();
         (await CountFiles(duplicate!.Id)).Should().Be(LongFiles);

@@ -4,12 +4,15 @@
 {{/description}}
 
 {{^isEnum}}
-## Properties
+{{#parent}}
+Inherits from [{{{parent}}}]({{{parent}}}.md).
+
+{{/parent}}## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-{{#vars}}**{{name}}** | {{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}[**{{dataType}}**]({{complexType}}.md){{/isPrimitiveType}} | {{description}} | {{^required}}[optional] {{/required}}{{#isReadOnly}}[readonly] {{/isReadOnly}}{{#defaultValue}}[default to {{{.}}}]{{/defaultValue}}
-{{/vars}}
+{{#allVars}}**{{name}}** | {{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}[**{{dataType}}**]({{complexType}}.md){{/isPrimitiveType}} | {{description}} | {{^required}}[optional] {{/required}}{{#isReadOnly}}[readonly] {{/isReadOnly}}{{#defaultValue}}[default to {{{.}}}]{{/defaultValue}}
+{{/allVars}}
 
 ## Example
 
@@ -17,9 +20,9 @@ Name | Type | Description | Notes
 import { {{classname}} } from '{{#packageName}}{{.}}{{/packageName}}{{^packageName}}./api{{/packageName}}';
 
 const instance: {{classname}} = {
-{{#vars}}
+{{#allVars}}
     {{name}},
-{{/vars}}
+{{/allVars}}
 };
 ```
 

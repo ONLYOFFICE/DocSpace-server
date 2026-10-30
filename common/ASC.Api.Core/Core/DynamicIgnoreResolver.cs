@@ -253,5 +253,7 @@ public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor) : IC
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         options.JsonSerializerOptions.Converters.Add(new DynamicIgnoreConverter<SuccessApiResponse>(httpContextAccessor));
         options.JsonSerializerOptions.Converters.Add(new ApiDateTimeConverter());
+        options.JsonSerializerOptions.TypeInfoResolver = (options.JsonSerializerOptions.TypeInfoResolver ?? new DefaultJsonTypeInfoResolver())
+            .WithAddedModifier(TypeDiscriminatorModifier.Modify);
     }
 }

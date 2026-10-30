@@ -46,10 +46,16 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 /// What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the
 /// entry type.
 /// </summary>
-[JsonDerivedType(typeof(FileDto<int>))]
-[JsonDerivedType(typeof(FileDto<string>))]
-[JsonDerivedType(typeof(FolderDto<int>))]
-[JsonDerivedType(typeof(FolderDto<string>))]
+/// <remarks>
+/// Where an answer declares the entry by this base - the items of a folder listing, which mix files and folders, portal
+/// and third-party ones - the serializer adds <c>entryKind</c> with the value below, so that a client can build the
+/// concrete type, the one carrying the id. An answer that declares the concrete type does not need it.
+/// </remarks>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "entryKind")]
+[JsonDerivedType(typeof(FileDto<int>), "file")]
+[JsonDerivedType(typeof(FileDto<string>), "thirdPartyFile")]
+[JsonDerivedType(typeof(FolderDto<int>), "folder")]
+[JsonDerivedType(typeof(FolderDto<string>), "thirdPartyFolder")]
 public abstract class FileEntryBaseDto
 {
     /// <summary>

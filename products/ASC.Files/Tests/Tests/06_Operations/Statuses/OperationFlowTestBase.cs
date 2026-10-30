@@ -67,8 +67,7 @@ public abstract class OperationFlowTestBase(
     {
         try
         {
-            var (files, folders) = await RawFolderListing.ReadAsync(
-                _filesClient, folderId.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+            var (files, folders) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
             var total = files.Count;
 

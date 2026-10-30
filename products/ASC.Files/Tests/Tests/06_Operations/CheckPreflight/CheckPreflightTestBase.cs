@@ -39,21 +39,15 @@ namespace ASC.Files.Tests.Tests._06_Operations.CheckPreflight;
 /// (<c>checkMoveOrCopyDestFolder</c>).
 /// </summary>
 /// <remarks>
-/// The request goes through the typed client; the response is read from its raw JSON, because
-/// <c>FileEntryBaseDto</c>, the element type of both responses, has a <c>Title</c> but no <c>Id</c> and no
-/// <c>FolderId</c>, and the tests identify the reported entries by id. A failure comes back as a status and a
-/// body, not as an exception, so a test can assert on either.
+/// Both calls go through the typed client. The entries of both answers are declared as the base
+/// <c>FileEntryBaseDto</c> and arrive as the file or folder they are, told apart by <c>entryKind</c>, which is
+/// where the id the tests identify them by lives. A failure comes back as a status and a body, not as an
+/// exception, so a test can assert on either.
 /// </remarks>
 public abstract class CheckPreflightTestBase(
     AspireAppFixture fixture)
     : CheckDestFolder.CheckDestFolderTestBase(fixture)
 {
-    private static readonly JsonSerializerOptions _preflightJsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     public enum PreflightKind
     {
         Move,
@@ -62,23 +56,6 @@ public abstract class CheckPreflightTestBase(
 
     /// <summary>An entry of a preflight answer, as far as the tests need it.</summary>
     protected sealed record PreflightEntry(int Id, string? Title, int? FolderId);
-
-    private sealed class MoveBody
-    {
-        public List<PreflightEntry>? Response { get; set; }
-    }
-
-    private sealed class DestBody
-    {
-        public DestPayload? Response { get; set; }
-    }
-
-    private sealed class DestPayload
-    {
-        public CheckDestFolderResult? Result { get; set; }
-
-        public List<PreflightEntry>? Files { get; set; }
-    }
 
     /// <summary>The status, the body and the parsed answer of a preflight call.</summary>
     /// <param name="Status">The HTTP status.</param>
@@ -113,9 +90,7 @@ public abstract class CheckPreflightTestBase(
                     content: content,
                     cancellationToken: TestContext.Current.CancellationToken);
 
-                var parsed = JsonSerializer.Deserialize<MoveBody>(moveResponse.RawContent, _preflightJsonOptions);
-
-                return new PreflightResponse(moveResponse.StatusCode, moveResponse.RawContent, parsed?.Response ?? [], null);
+                return new PreflightResponse(moveResponse.StatusCode, moveResponse.RawContent, EntriesOf(moveResponse.Data.Response), null);
             }
 
             var destResponse = await _filesOperationsApi.CheckMoveOrCopyDestFolderWithHttpInfoAsync(
@@ -126,9 +101,9 @@ public abstract class CheckPreflightTestBase(
                 content: content,
                 cancellationToken: TestContext.Current.CancellationToken);
 
-            var payload = JsonSerializer.Deserialize<DestBody>(destResponse.RawContent, _preflightJsonOptions)?.Response;
+            var payload = destResponse.Data.Response;
 
-            return new PreflightResponse(destResponse.StatusCode, destResponse.RawContent, payload?.Files ?? [], payload?.Result);
+            return new PreflightResponse(destResponse.StatusCode, destResponse.RawContent, EntriesOf(payload?.Files), payload?.Result);
         }
         catch (ApiException exception)
         {
@@ -146,28 +121,26 @@ public abstract class CheckPreflightTestBase(
 
         foreach (var folderId in folderIds)
         {
-            var raw = await _foldersApi.GetFolderByFolderIdWithHttpInfoAsync(folderId, cancellationToken: TestContext.Current.CancellationToken);
-            var listing = JsonSerializer.Deserialize<ListingBody>(raw.RawContent, _preflightJsonOptions)?.Response;
+            var (files, folders) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
             result[folderId] =
             [
-                .. (listing?.Files ?? []).Concat(listing?.Folders ?? []).Select(e => $"{e.Id}:{e.Title}").Order()
+                .. files.Select(e => $"{e.Id}:{e.Title}").Concat(folders.Select(e => $"{e.Id}:{e.Title}")).Order()
             ];
         }
 
         return result;
     }
 
-    private sealed class ListingBody
+    /// <summary>A file reports the folder it is in; a folder has no <c>folderId</c> of its own.</summary>
+    private static List<PreflightEntry> EntriesOf(List<FileEntryBaseDto>? entries)
     {
-        public ListingPayload? Response { get; set; }
-    }
-
-    private sealed class ListingPayload
-    {
-        public List<PreflightEntry>? Files { get; set; }
-
-        public List<PreflightEntry>? Folders { get; set; }
+        return [.. (entries ?? []).Select(e => e switch
+        {
+            FileDto file => new PreflightEntry(file.Id, file.Title, file.FolderId),
+            FolderDto folder => new PreflightEntry(folder.Id, folder.Title, null),
+            _ => throw new InvalidOperationException($"a preflight answer named an entry of kind '{e.EntryKind}'")
+        })];
     }
 
     /// <summary>A preflight must not start work: the caller has no operation on record afterwards.</summary>
