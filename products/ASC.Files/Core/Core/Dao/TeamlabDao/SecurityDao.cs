@@ -1138,7 +1138,7 @@ internal abstract class SecurityBaseDao<T>(
                                     filesDbContext.Folders.Any(f =>
                                         f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
                                         f.Id == r.ParentId &&
-                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.AiProjects && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
                                     filesDbContext.Security.Any(b => b.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
                                 .OrderBy(r => r.Level)
                                 .Select(r => r.ParentId)

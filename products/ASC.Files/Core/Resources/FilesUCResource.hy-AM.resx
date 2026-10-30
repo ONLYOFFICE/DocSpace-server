@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>ԱԲ գործակալներ</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>ԱԲ նախագծեր</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Պահոց</value>
   </data>

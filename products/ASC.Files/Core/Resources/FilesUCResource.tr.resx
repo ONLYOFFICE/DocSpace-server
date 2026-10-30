@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>Yapay zekâ ajanları</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>Yapay zekâ projeleri</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Arşiv</value>
   </data>

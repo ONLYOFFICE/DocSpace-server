@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>MI aģenti</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>MI projekti</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Arhīvs</value>
   </data>

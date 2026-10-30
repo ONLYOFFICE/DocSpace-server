@@ -71,6 +71,7 @@ public class FileSecurity(
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
     public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
     public readonly FileShare DefaultAiAgentsShare = FileShare.Restrict;
+    public readonly FileShare DefaultAiProjectsShare = FileShare.Restrict;
     public readonly FileShare DefaultFormsShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
@@ -250,6 +251,15 @@ public class FileSecurity(
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.Group, [FileShare.ContentCreator, FileShare.Read, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Read, FileShare.None] }
+                }.ToFrozenDictionary()
+            },
+            {
+                FolderType.AiProjectRoom,
+                new Dictionary<SubjectType, HashSet<FileShare>>
+                {
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.Read, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -907,6 +917,39 @@ public class FileSecurity(
                 }
 
                 break;
+            case FolderType.AiProjects:
+                defaultRecords = null;
+
+                if (entry is not Folder<T> || entry is Folder<T> f4 && f4.FolderType != FolderType.AiProjects)
+                {
+                    break;
+                }
+
+                defaultRecords =
+                [
+                    new FileShareRecord<T>
+                    {
+                        Level = int.MaxValue,
+                        EntryId = entry.Id,
+                        EntryType = entry.FileEntryType,
+                        Share = FileShare.Read,
+                        Subject = Constants.GroupEveryone.ID,
+                        TenantId = tenantId,
+                        Owner = entry.RootCreateBy
+                    }
+                ];
+
+                if (shares.Count == 0)
+                {
+                    foreach (var defaultRecord in defaultRecords)
+                    {
+                        directAccess.AddRange((await userManager.GetUsersByGroupAsync(defaultRecord.Subject)).Where(x => x.Status == EmployeeStatus.Active).Select(y => y.Id).Distinct());
+                    }
+
+                    return (directAccess, sharedAccess);
+                }
+
+                break;
             case FolderType.Forms:
                 defaultRecords = null;
 
@@ -1116,6 +1159,7 @@ public class FileSecurity(
             FolderType.AiRoom => FileShare.ContentCreator,
             FolderType.InstructionsRoom => FileShare.ContentCreator,
             FolderType.KnowledgeRoom => FileShare.ContentCreator,
+            FolderType.AiProjectRoom => FileShare.Read,
             _ => FileShare.None
         };
     }
@@ -1268,6 +1312,18 @@ public class FileSecurity(
         }
 
         if (folder is { FolderType: FolderType.AiRoom } &&
+            action is FilesSecurityActions.Create or
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.CopyTo or
+                FilesSecurityActions.Move or
+                FilesSecurityActions.MoveTo or
+                FilesSecurityActions.Duplicate
+            )
+        {
+            return false;
+        }
+
+        if (folder is { FolderType: FolderType.AiProjectRoom } &&
             action is FilesSecurityActions.Create or
                 FilesSecurityActions.Copy or
                 FilesSecurityActions.CopyTo or
@@ -1568,6 +1624,11 @@ public class FileSecurity(
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
 
+                    if (folder.FolderType == FolderType.AiProjects && !isUser)
+                    {
+                        return action is FilesSecurityActions.Create;
+                    }
+
                     if (folder.FolderType == FolderType.Forms && !isUser)
                     {
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
@@ -1593,6 +1654,11 @@ public class FileSecurity(
                 }
 
                 if (folder.FolderType == FolderType.AiAgents)
+                {
+                    return true;
+                }
+
+                if (folder.FolderType == FolderType.AiProjects)
                 {
                     return true;
                 }
@@ -1691,6 +1757,7 @@ public class FileSecurity(
                 break;
             case FolderType.VirtualRooms:
             case FolderType.AiAgents:
+            case FolderType.AiProjects:
             case FolderType.Forms:
                 // The administrator bypass below does not extend to end-to-end encrypted rooms.
                 // Membership there means holding a key, so an administrator who was never invited
@@ -2091,6 +2158,7 @@ public class FileSecurity(
                 FolderType.Archive => DefaultArchiveShare,
                 FolderType.RoomTemplates => DefaultRoomTemplatesShare,
                 FolderType.AiAgents => DefaultAiAgentsShare,
+                FolderType.AiProjects => DefaultAiProjectsShare,
                 FolderType.Forms => DefaultFormsShare,
                 _ => DefaultCommonShare
             };
@@ -2942,6 +3010,7 @@ public class FileSecurity(
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
+            SearchArea.AiProjects => [await globalFolder.GetFolderAiProjectsAsync(daoFactory)],
             SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
@@ -3060,6 +3129,7 @@ public class FileSecurity(
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
+            SearchArea.AiProjects => [await globalFolder.GetFolderAiProjectsAsync(daoFactory)],
             SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
@@ -3124,8 +3194,9 @@ public class FileSecurity(
                         return true;
                     }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
-                case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.AiAgents:
+                case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.AiAgents or FolderType.AiProjects:
                 case SearchArea.AiAgents when entry.RootFolderType == FolderType.AiAgents:
+                case SearchArea.AiProjects when entry.RootFolderType == FolderType.AiProjects:
                 case SearchArea.Forms when entry.RootFolderType == FolderType.VirtualRooms:
                     {
                         entry.ShareRecord = record;

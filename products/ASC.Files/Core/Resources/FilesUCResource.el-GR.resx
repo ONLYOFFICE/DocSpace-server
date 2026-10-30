@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>Εκπρόσωποι AI</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>Έργα AI</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Αρχείο</value>
   </data>

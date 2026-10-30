@@ -55,6 +55,7 @@ global using ASC.AI.Models.RequestDto.McpServers;
 global using ASC.AI.Models.RequestDto.Messages;
 global using ASC.AI.Models.RequestDto.Preferences;
 global using ASC.AI.Models.RequestDto.Profiles;
+global using ASC.AI.Models.RequestDto.Projects;
 global using ASC.AI.Models.RequestDto.PromptFolders;
 global using ASC.AI.Models.RequestDto.Prompts;
 global using ASC.AI.Models.RequestDto.Settings;

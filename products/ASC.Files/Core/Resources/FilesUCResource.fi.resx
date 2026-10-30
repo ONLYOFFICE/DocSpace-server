@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>Tekoälyagentit</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>Tekoälyprojektit</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Arkisto</value>
   </data>

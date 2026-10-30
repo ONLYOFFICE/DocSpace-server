@@ -44,7 +44,8 @@ public static class DocSpaceHelper
         FolderType.VirtualDataRoom,
         FolderType.AiRoom,
         FolderType.InstructionsRoom,
-        FolderType.KnowledgeRoom
+        FolderType.KnowledgeRoom,
+        FolderType.AiProjectRoom
     ];
 
     extension(FolderType folderType)
@@ -75,7 +76,7 @@ public static class DocSpaceHelper
         /// </summary>
         public bool IsPublicSystemFolder()
         {
-            return folderType is FolderType.AiAgents or FolderType.Forms
+            return folderType is FolderType.AiAgents or FolderType.AiProjects or FolderType.Forms
                 or FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates
                 or FolderType.SHARE or FolderType.Recent or FolderType.Favorites
                 or FolderType.COMMON or FolderType.Templates or FolderType.DefaultTemplates;
@@ -94,7 +95,7 @@ public static class DocSpaceHelper
 
     // the roots of the sections that hold rooms: a file is never placed in them directly
     public static bool IsRoomsSectionRoot(FolderType folderType) =>
-        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
@@ -118,6 +119,7 @@ public static class DocSpaceHelper
             FolderType.AiRoom => RoomType.AiRoom,
             FolderType.InstructionsRoom => RoomType.InstructionsRoom,
             FolderType.KnowledgeRoom => RoomType.KnowledgeRoom,
+            FolderType.AiProjectRoom => RoomType.AiProjectRoom,
             _ => null
         };
     }
@@ -134,6 +136,7 @@ public static class DocSpaceHelper
             RoomType.AiRoom => FolderType.AiRoom,
             RoomType.InstructionsRoom => FolderType.InstructionsRoom,
             RoomType.KnowledgeRoom => FolderType.KnowledgeRoom,
+            RoomType.AiProjectRoom => FolderType.AiProjectRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
@@ -171,6 +174,7 @@ public static class DocSpaceHelper
             FilterType.AiRooms => FolderType.AiRoom,
             FilterType.InstructionsRooms => FolderType.InstructionsRoom,
             FilterType.KnowledgeRooms => FolderType.KnowledgeRoom,
+            FilterType.AiProjectRooms => FolderType.AiProjectRoom,
             _ => null
         };
     }

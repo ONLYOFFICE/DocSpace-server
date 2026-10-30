@@ -105,5 +105,8 @@ public enum FilterType
     [EnumMember] InstructionsRooms = 27,
 
     [Description("Knowledge rooms")]
-    [EnumMember] KnowledgeRooms = 28
+    [EnumMember] KnowledgeRooms = 28,
+
+    [Description("AI project rooms")]
+    [EnumMember] AiProjectRooms = 29
 }

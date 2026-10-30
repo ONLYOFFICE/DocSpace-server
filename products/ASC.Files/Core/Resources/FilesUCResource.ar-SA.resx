@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>وكلاء الذكاء الاصطناعي</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>مشاريع الذكاء الاصطناعي</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>أرشفة</value>
   </data>

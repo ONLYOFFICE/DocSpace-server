@@ -124,7 +124,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
                 await fileSecurity.UpdateShareByFolderTypesAsync(
                     User,
-                    [FolderType.AiRoom],
+                    [FolderType.AiRoom, FolderType.AiProjectRoom],
                     Files.Core.Security.FileShare.Read);
 
                 await SetPercentageAndCheckCancellationAsync(60, true);

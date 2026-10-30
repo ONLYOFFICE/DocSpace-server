@@ -137,7 +137,13 @@ public enum FolderType
     InstructionsRoom = 38,
 
     [Description("Knowledge room")]
-    KnowledgeRoom = 39
+    KnowledgeRoom = 39,
+
+    [Description("AI project room")]
+    AiProjectRoom = 40,
+
+    [Description("AI Projects")]
+    AiProjects = 41
 }
 
 /// <summary>
