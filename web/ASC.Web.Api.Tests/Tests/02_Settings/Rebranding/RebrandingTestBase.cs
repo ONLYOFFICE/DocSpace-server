@@ -54,4 +54,24 @@ public abstract class RebrandingTestBase(AspireAppFixture fixture) : BaseTest(fi
     protected RebrandingApi Rebranding => _rebrandingApi ??= new RebrandingApi(
         _webApiClient,
         new Configuration { BasePath = _webApiClient.BaseAddress!.ToString().TrimEnd('/') });
+
+    /// <summary>
+    /// No email, so even an open gate ends in a validation failure, never a write.
+    /// </summary>
+    protected static CompanyWhiteLabelSettingsRequestDto CompanyRequest => new(new SaveCompanyInfoRequest(
+        companyName: "Autotest Co",
+        site: "https://example.com",
+        address: "Autotest address",
+        phone: "+10000000000"));
+
+    /// <summary>
+    /// The built-in values, so an open gate would store what is already in effect.
+    /// </summary>
+    protected static AdditionalWhiteLabelSettingsRequestDto AdditionalRequest => new(new SaveAdditionalResourcesRequest(
+        startDocsEnabled: true,
+        helpCenterEnabled: true,
+        feedbackAndSupportEnabled: true,
+        userForumEnabled: true,
+        videoGuidesEnabled: true,
+        licenseAgreementsEnabled: true));
 }

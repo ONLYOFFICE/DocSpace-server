@@ -122,6 +122,46 @@ public class MoveBatchBugTests(
         destFiles.Select(f => f.Title).Distinct().Should().HaveCount(2, "titles in the destination after the move");
     }
 
+    /// <summary>
+    /// A folder holding a file that is open in the editor cannot be moved, which looks deliberate. What
+    /// this pins is the batch: one such folder and nothing moves, not even the folders that have nothing
+    /// to do with it - and the file that blocks it is not in the selection at all.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84725")]
+    public async Task MoveBatch_FolderHoldingFileOpenInEditor_DoesNotCancelTheMoveOfTheWholeSelection()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCollaborationRoom("Autotest MoveBatch Editing Session Room");
+        var dest = await CreateFolder("Autotest MoveBatch Editing Session Dest", room.Id);
+        var withOpenFile = await CreateFolder("Autotest MoveBatch Folder With Open File", room.Id);
+        var untouched = await CreateFolder("Autotest MoveBatch Folder Untouched", room.Id);
+        var openFile = await CreateFile("Autotest MoveBatch Open In Editor.docx", withOpenFile.Id);
+        await CreateFile("Autotest MoveBatch Untouched.docx", untouched.Id);
+
+        // Setup check: the call succeeds, i.e. the file is opened in the editor.
+        await _filesApi.StartEditFileAsync(openFile.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken);
+
+        // Act - whether the batch is refused outright or fails inside the operation is not the point,
+        // only what became of the folder that has nothing to do with the open file.
+        try
+        {
+            var moved = (await _filesOperationsApi.MoveBatchItemsAsync(
+                BuildRequest(dest.Id, folderIds: [withOpenFile.Id, untouched.Id]),
+                TestContext.Current.CancellationToken)).Response;
+            await WaitLongOperation(moved.FirstOrDefault()?.Id);
+        }
+        catch (ApiException)
+        {
+            // Refused as a whole: the assertion below reports the consequence.
+        }
+
+        // Assert
+        var untouchedAfter = (await _foldersApi.GetFolderInfoAsync(untouched.Id, TestContext.Current.CancellationToken)).Response;
+        untouchedAfter.ParentId.Should().Be(dest.Id, "the folders that do not hold the open file are moved regardless");
+    }
+
     private static BatchRequestDto BuildRequest(int destFolderId, int[]? fileIds = null, int[]? folderIds = null, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
     {
         return new BatchRequestDto

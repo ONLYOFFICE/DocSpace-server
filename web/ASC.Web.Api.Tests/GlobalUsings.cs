@@ -84,4 +84,5 @@ global using SecurityBannersVisibilityApi = DocSpace.API.SDK.Api.Security.Banner
 global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
 global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
+global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;
