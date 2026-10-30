@@ -120,6 +120,9 @@
   <data name="AiAgents" xml:space="preserve">
     <value>AI agent</value>
   </data>
+  <data name="AiProjects" xml:space="preserve">
+    <value>Dự án AI</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Sao lưu</value>
   </data>

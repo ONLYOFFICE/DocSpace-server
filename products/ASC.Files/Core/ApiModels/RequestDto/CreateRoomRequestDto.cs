@@ -60,7 +60,10 @@ public enum RoomType
     InstructionsRoom = 10,
 
     [Description("Knowledge room")]
-    KnowledgeRoom = 11
+    KnowledgeRoom = 11,
+
+    [Description("AI project room")]
+    AiProjectRoom = 12
 }
 
 public static class RoomTypeExtensions
@@ -82,6 +85,7 @@ public static class RoomTypeExtensions
             RoomType.AiRoom => FilterType.AiRooms,
             RoomType.InstructionsRoom => FilterType.InstructionsRooms,
             RoomType.KnowledgeRoom => FilterType.KnowledgeRooms,
+            RoomType.AiProjectRoom => FilterType.AiProjectRooms,
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }

@@ -406,6 +406,7 @@ public class FileStorageService //: IFileStorageService
             // so the requested FormTemplates area must be preserved to keep the split.
             FolderType.RoomTemplates => searchArea == SearchArea.FormTemplates ? SearchArea.FormTemplates : SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
+            FolderType.AiProjects => SearchArea.AiProjects,
             FolderType.Forms => SearchArea.Forms,
             _ => searchArea
         };
@@ -702,6 +703,13 @@ public class FileStorageService //: IFileStorageService
         });
     }
 
+    public async Task<Folder<int>> CreateAiProjectAsync(string title, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
+    {
+        var parentId = await globalFolderHelper.GetFolderAiProjectsAsync();
+
+        return await CreateRoomAsync(() => InternalCreateFolderAsync(parentId, title, FolderType.AiProjectRoom, false, null, null, null, null, null, color, cover, tags, logo));
+    }
+
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -751,7 +759,7 @@ public class FileStorageService //: IFileStorageService
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
-        if (folderType == FolderType.KnowledgeRoom)
+        if (folderType is FolderType.KnowledgeRoom or FolderType.AiProjectRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1164,7 +1172,12 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        if (isRoom && (parent.FolderType == FolderType.AiProjects) != (folderType == FolderType.AiProjectRoom))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1879,6 +1892,8 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.AiAgents &&
+                            folder.FolderType != FolderType.AiProjects &&
+                            folder.FolderType != FolderType.AiProjectRoom &&
                             folder.FolderType != FolderType.RoomTemplates &&
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
@@ -3651,12 +3666,15 @@ public class FileStorageService //: IFileStorageService
     {
         var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
+        var projects = await GetEntriesAsync(await globalFolderHelper.GetFolderAiProjectsAsync());
 
         var ids = entries.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
         var thirdIds = entries.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+        var projectIds = projects.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
 
         await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(projectIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.Read).ToListAsync();
 
         return;
 
@@ -3686,19 +3704,31 @@ public class FileStorageService //: IFileStorageService
             .Where(r => r.EntryType == FileEntryType.Folder && r.Share == FileShare.RoomManager)
             .ToListAsync();
 
+        var intEntryIds = shareRercords
+            .Select(r => int.TryParse(r.EntryId, out var id) ? id : (int?)null)
+            .OfType<int>()
+            .ToList();
+
+        var projectIds = intEntryIds.Count == 0
+            ? []
+            : await daoFactory.GetFolderDao<int>()
+                .GetRoomsAsync(intEntryIds, [FilterType.AiProjectRooms], null, Guid.Empty, null, false, false, false, ProviderFilter.None, Guid.Empty, null, parentsIds: null)
+                .Select(f => f.Id)
+                .ToHashSetAsync();
+
         foreach (var shareRercord in shareRercords)
         {
             if (int.TryParse(shareRercord.EntryId, out var intEntryId))
             {
-                await SetAccessAsync(intEntryId);
+                await SetAccessAsync(intEntryId, projectIds.Contains(intEntryId) ? FileShare.Read : FileShare.ContentCreator);
             }
             else
             {
-                await SetAccessAsync(shareRercord.EntryId);
+                await SetAccessAsync(shareRercord.EntryId, FileShare.ContentCreator);
             }
         }
 
-        async Task SetAccessAsync<T>(T entryId)
+        async Task SetAccessAsync<T>(T entryId, FileShare access)
         {
             await SetAceObjectAsync(new AceCollection<T>
             {
@@ -3706,7 +3736,7 @@ public class FileStorageService //: IFileStorageService
                 Folders = [entryId],
                 Aces =
                 [
-                    new AceWrapper { Access = FileShare.ContentCreator, Id = user }
+                    new AceWrapper { Access = access, Id = user }
                 ]
             }, false, socket: false, beforeOwnerChange: true);
         }
@@ -5305,7 +5335,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents and not FolderType.AiProjects)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
