@@ -732,7 +732,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 }
 
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
-                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive or FolderType.TRASH;
 
                 var parentFolder = await GetParentFolderAsync(file.ParentId);
                 try

@@ -38,23 +38,19 @@ namespace ASC.AI.Tests.Tests.AiProjectsTests;
 public class AiProjectRoomsLifecycleTests(AspireAppFixture fixture) : AiProjectRoomsTestBase(fixture)
 {
     [Fact]
-    public async Task ArchivedRoom_LosesLink_AndRestoringDoesNotBringItBack()
+    public async Task DeletedRoom_LosesLink()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
-        var archived = await CreateInstructionsRoomAsync();
+        var deleted = await CreateInstructionsRoomAsync();
         var kept = await CreateInstructionsRoomAsync();
-        using var linked = await LinkRoomsAsync(projectId, archived, kept);
+        using var linked = await LinkRoomsAsync(projectId, deleted, kept);
 
         // Act
-        await ArchiveRoomAsync(archived);
-        var afterArchive = await GetInstructionsRoomIdsAsync(projectId);
-        await UnarchiveRoomAsync(archived);
-        var afterRestore = await GetInstructionsRoomIdsAsync(projectId);
+        await DeleteRoomAsync(deleted);
 
         // Assert
-        afterArchive.Should().Equal(kept);
-        afterRestore.Should().Equal(kept);
+        (await GetInstructionsRoomIdsAsync(projectId)).Should().Equal(kept);
     }
 
     [Fact]

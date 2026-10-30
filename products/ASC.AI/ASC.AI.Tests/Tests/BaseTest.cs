@@ -304,31 +304,26 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return room.GetProperty("id").GetInt32();
     }
 
-    /// <summary>Moves a room to the archive as the owner and waits until it is there.</summary>
-    protected async Task ArchiveRoomAsync(int roomId)
+    /// <summary>Deletes a room outright as the owner and waits until it is gone.</summary>
+    protected async Task DeleteRoomAsync(int roomId)
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
-        await _clients.RoomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
-        await WaitRoomSectionAsync(roomId, FolderType.Archive);
-    }
+        await _clients.RoomsApi.DeleteRoomAsync(roomId, new DeleteRoomRequest(false), TestContext.Current.CancellationToken);
 
-    /// <summary>Restores an archived room as the owner and waits until it is back among the rooms.</summary>
-    protected async Task UnarchiveRoomAsync(int roomId)
-    {
-        await _clients.FilesHttpClient.Authenticate(Owner);
-        await _clients.RoomsApi.UnarchiveRoomAsync(roomId, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
-        await WaitRoomSectionAsync(roomId, FolderType.VirtualRooms);
-    }
-
-    private async Task WaitRoomSectionAsync(int roomId, FolderType section)
-    {
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var room = (await _clients.RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response;
+            try
+            {
+                await _clients.RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken);
+            }
+            catch (ApiException e) when (e.ErrorCode == 404)
+            {
+                return;
+            }
 
-            if (room.RootFolderType == section || DateTime.UtcNow >= deadline)
+            if (DateTime.UtcNow >= deadline)
             {
                 return;
             }

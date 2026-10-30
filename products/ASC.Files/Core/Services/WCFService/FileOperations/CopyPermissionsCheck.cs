@@ -314,7 +314,7 @@ public class PermissionCheckStarter<T, TTo>(
             }
         }
 
-        if (copy && !(isRoom && toFolder.FolderType == FolderType.VirtualRooms) && !await security.CanCopyToAsync(toFolder))
+        if (copy && !(isRoom && toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiHub) && !await security.CanCopyToAsync(toFolder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
             if (check)
@@ -454,13 +454,23 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom || toFolder.RootFolderType == FolderType.Archive))
+        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             return check ? throw new SecurityException(errorMsg) : errorMsg;
         }
 
-        if (isRoom && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
+        // a room of the AI rooms root is never archived and never leaves its root: the only
+        // operation that lands it anywhere is a duplicate into the same root
+        if (isRoom && folder.RootFolderType == FolderType.AiHub && (!copy || toFolder.FolderType != FolderType.AiHub))
+        {
+            errorMsg = toFolder.FolderType == FolderType.Archive
+                ? FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom
+                : FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+            return check ? throw new SecurityException(errorMsg) : errorMsg;
+        }
+
+        if (isRoom && folder.RootFolderType != FolderType.AiHub && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             if (check)
@@ -609,7 +619,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)

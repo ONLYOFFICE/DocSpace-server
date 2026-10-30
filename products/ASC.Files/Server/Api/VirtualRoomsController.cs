@@ -614,7 +614,8 @@ public abstract class VirtualRoomsController<T>(
     /// cannot be created, renamed or edited in it, and its settings, tags, logo and links can no longer be changed,
     /// which is why many other room operations answer an archived room with a refusal. The caller must be a manager
     /// of the room; administrators of the portal cannot archive a room they were not invited to, and a room template
-    /// cannot be archived at all and is answered as missing. The room is not archived when the response arrives: poll
+    /// cannot be archived at all and is answered as missing. Instructions and Knowledge rooms are never archived and
+    /// are refused with 403: delete them with `DELETE api/2.0/files/rooms/{id}` instead. The room is not archived when the response arrives: poll
     /// `GET api/2.0/files/fileops` until `finished` is true. Archiving an already archived room is harmless.
     /// `deleteAfter` decides only how long the finished record survives, not what happens to the room. Use
     /// `PUT api/2.0/files/rooms/{id}/unarchive` to bring the room back.
@@ -624,7 +625,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued archive operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not read or archive this room, the id names a folder that is not a room, or a file in the room is locked or being edited")]
+    [SwaggerResponse(403, "The caller may not read or archive this room, the id names a folder that is not a room, the room is an Instructions or Knowledge room, which is never archived, or a file in the room is locked or being edited")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/archive")]
@@ -634,6 +635,11 @@ public abstract class VirtualRoomsController<T>(
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
+        }
+
+        if (room.RootFolderType == FolderType.AiHub)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom);
         }
 
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
@@ -1399,6 +1405,7 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
     }

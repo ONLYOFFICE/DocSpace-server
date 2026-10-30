@@ -1147,6 +1147,8 @@ public class FoldersControllerCommon(
         if (aiAccessSettings.Enabled)
         {
             yield return await globalFolderHelper.FolderAiAgentsAsync;
+            yield return await globalFolderHelper.FolderAiHubAsync;
+            yield return await globalFolderHelper.FolderAiProjectsAsync;
         }
     }
 }

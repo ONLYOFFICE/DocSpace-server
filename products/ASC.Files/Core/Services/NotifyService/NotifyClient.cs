@@ -222,7 +222,7 @@ public class NotifyClient(
                 continue;
             }
 
-            if (file.RootFolderType is FolderType.VirtualRooms && await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
+            if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
             {
                 continue;
             }

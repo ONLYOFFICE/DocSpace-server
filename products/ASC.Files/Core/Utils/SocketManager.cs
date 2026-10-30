@@ -412,7 +412,7 @@ public class SocketManager(
     {
         var (direct, shared) = await fileSecurity.WhoCanReadSeparatelyAsync(entry);
 
-        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive)
         {
             var admins = await Admins();
             direct = direct.Concat(admins);

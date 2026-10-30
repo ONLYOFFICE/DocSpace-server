@@ -649,7 +649,7 @@ internal class FileDao(
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
 
-                        if ((isNew && currentFolder is { FolderType: FolderType.Knowledge }) || (inKnowledgeRoom && currentFolder.RootFolderType == FolderType.VirtualRooms))
+                        if ((isNew && currentFolder is { FolderType: FolderType.Knowledge }) || (inKnowledgeRoom && currentFolder.RootFolderType == FolderType.AiHub))
                         {
                             needVectorization = true;
                             file.VectorizationStatus = VectorizationStatus.InProgress;
@@ -1318,7 +1318,7 @@ internal class FileDao(
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
         var fromKnowledgeBase = fromFolder.FolderType is FolderType.Knowledge || fromRoomType == FolderType.KnowledgeRoom;
-        var toKnowledgeBase = toFolder.FolderType is FolderType.Knowledge || (toRoomType == FolderType.KnowledgeRoom && toFolder.RootFolderType == FolderType.VirtualRooms);
+        var toKnowledgeBase = toFolder.FolderType is FolderType.Knowledge || (toRoomType == FolderType.KnowledgeRoom && toFolder.RootFolderType == FolderType.AiHub);
         var sameKnowledgeBase = fromKnowledgeBase && toKnowledgeBase && fromRoomId == toRoomId;
 
         var needVectorization = toKnowledgeBase && !sameKnowledgeBase;

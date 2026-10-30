@@ -30,6 +30,8 @@ helpers.
 | Rooms | active / archive / templates | `VirtualRooms` (14) + `SearchArea.Active`; `Archive` (20) / `SearchArea.Archive`; `RoomTemplates` (30) / `SearchArea.Templates` |
 | Forms | form rooms / form templates | `Forms` (36) / `SearchArea.Forms`, `SearchArea.FormTemplates` — `FillingFormsRoom` (15) rooms that live under the `VirtualRooms` root |
 | AI Agents | agents, inside them Knowledge / ChatOutputs | `AiAgents` (34) / `SearchArea.AiAgents`, rooms of type `AiRoom` (31) |
+| AI Projects | projects | `AiProjects` (41) / `SearchArea.AiProjects`, rooms of type `AiProjectRoom` (40); no files, deleted outright |
+| AI rooms | Instructions / Knowledge rooms | `AiHub` (42) / `SearchArea.AiHub`, rooms of type `InstructionsRoom` (38) and `KnowledgeRoom` (39); created there only, never archived, no templates, deleted outright |
 
 The Rooms/Forms split is one function, `SearchArea.MatchesRoomType`: a `FillingFormsRoom` belongs to
 Forms and nowhere else; every other room type belongs to Rooms. Use it — do not re-derive the split.

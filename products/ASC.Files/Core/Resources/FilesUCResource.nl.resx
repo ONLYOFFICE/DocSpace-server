@@ -123,6 +123,9 @@
   <data name="AiProjects" xml:space="preserve">
     <value>AI-projecten</value>
   </data>
+  <data name="AiHub" xml:space="preserve">
+    <value>AI rooms</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>Archief</value>
   </data>
