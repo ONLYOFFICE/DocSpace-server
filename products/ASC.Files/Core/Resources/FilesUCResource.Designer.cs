@@ -79,6 +79,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI rooms.
+        /// </summary>
+        public static string AiHub {
+            get {
+                return ResourceManager.GetString("AiHub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Archive.
         /// </summary>
         public static string Archive {

@@ -122,12 +122,12 @@ public class AiProjectRoomsLinkTests(AspireAppFixture fixture) : AiProjectRoomsT
     }
 
     [Fact]
-    public async Task LinkRooms_ArchivedRoom_Returns400()
+    public async Task LinkRooms_DeletedRoom_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var room = await CreateInstructionsRoomAsync();
-        await ArchiveRoomAsync(room);
+        await DeleteRoomAsync(room);
 
         // Act
         using var response = await LinkRoomsAsync(projectId, room);

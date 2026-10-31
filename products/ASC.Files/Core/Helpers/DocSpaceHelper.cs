@@ -61,6 +61,15 @@ public static class DocSpaceHelper
         }
 
         /// <summary>
+        /// A room kept under the AI rooms root (<see cref="FolderType.AiHub"/>): an Instructions room or a
+        /// Knowledge room. Such a room is created there only, is never archived and has no templates.
+        /// </summary>
+        public bool IsAiHubRoom()
+        {
+            return folderType is FolderType.InstructionsRoom or FolderType.KnowledgeRoom;
+        }
+
+        /// <summary>
         /// A folder whose files are vectorized for knowledge search: the agent's knowledge folder
         /// or a knowledge room (the whole room is the knowledge base, subfolders included).
         /// </summary>
@@ -76,7 +85,7 @@ public static class DocSpaceHelper
         /// </summary>
         public bool IsPublicSystemFolder()
         {
-            return folderType is FolderType.AiAgents or FolderType.AiProjects or FolderType.Forms
+            return folderType is FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub or FolderType.Forms
                 or FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates
                 or FolderType.SHARE or FolderType.Recent or FolderType.Favorites
                 or FolderType.COMMON or FolderType.Templates or FolderType.DefaultTemplates;
@@ -95,7 +104,7 @@ public static class DocSpaceHelper
 
     // the roots of the sections that hold rooms: a file is never placed in them directly
     public static bool IsRoomsSectionRoot(FolderType folderType) =>
-        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {

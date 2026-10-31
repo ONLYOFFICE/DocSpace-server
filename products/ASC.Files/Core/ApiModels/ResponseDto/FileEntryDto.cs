@@ -498,7 +498,7 @@ public class FileEntryDtoHelper(
             entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
         }
 
-        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
         {
             var room = await _daoFactory.GetCacheFolderDao<TId>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
             if (room != null)

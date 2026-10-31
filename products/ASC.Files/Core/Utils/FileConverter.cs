@@ -332,7 +332,7 @@ public class FileConverter(
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false, ThumbnailData thumbnail = null, SpreadsheetLayout spreadsheetLayout = null)
     {
         Options options = null;
-        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);

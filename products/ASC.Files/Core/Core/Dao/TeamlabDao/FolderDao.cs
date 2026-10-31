@@ -83,6 +83,7 @@ internal class FolderDao(
     private const string Archive = "archive";
     private const string AiAgents = "aiagents";
     private const string AiProjects = "aiprojects";
+    private const string AiHub = "aihub";
     private const string Forms = "forms";
     private const string DefaultTemplates = "defaulttemplates";
 
@@ -1953,6 +1954,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.AiProjects;
                         folder.Title = AiProjects;
                         break;
+                    case AiHub:
+                        folder.FolderType = FolderType.AiHub;
+                        folder.Title = AiHub;
+                        break;
                     case Forms:
                         folder.FolderType = FolderType.Forms;
                         folder.Title = Forms;
@@ -2099,6 +2104,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.AiProjects;
                     folder.Title = AiProjects;
                     break;
+                case AiHub:
+                    folder.FolderType = FolderType.AiHub;
+                    folder.Title = AiHub;
+                    break;
                 case Forms:
                     folder.FolderType = FolderType.Forms;
                     folder.Title = Forms;
@@ -2227,6 +2236,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDAiProjectsAsync(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiProjects, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDAiHubAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiHub, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDFormsAsync(bool createIfNotExists)
@@ -2404,7 +2418,7 @@ internal class FolderDao(
         var rootFolderType = entry.RootFolderType;
 
         if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates
-            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents && rootFolderType != FolderType.AiProjects)
+            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents && rootFolderType != FolderType.AiProjects && rootFolderType != FolderType.AiHub)
         {
             return Task.FromResult((-1, "", rootFolderType));
         }

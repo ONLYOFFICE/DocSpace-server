@@ -1004,7 +1004,7 @@ public class FileSharing(
     public async Task<List<AceShortDto>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
-        var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
+        var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive;
         var inAgent = file.RootFolderType == FolderType.AiRoom;
 
         return

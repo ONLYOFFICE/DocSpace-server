@@ -145,7 +145,7 @@ public class FileMarker(
         else
         {
             var additionalSubjects = Array.Empty<Guid>();
-            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.Forms)
+            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub or FolderType.Forms)
             {
                 var room = parentFolders.Find(f => f.IsRoom);
                 if (room.CreateBy != obj.CurrentAccountId)
@@ -194,7 +194,7 @@ public class FileMarker(
                     .Where(async (u, _) => !await userManager.IsGuestAsync(u))
                     .ToListAsync();
 
-                if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents)
+                if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub)
                 {
                     var parents = new List<Folder<T>>();
 
@@ -368,6 +368,25 @@ public class FileMarker(
                     {
                         var aiAgentFolderId = await globalFolder.GetFolderAiAgentsAsync(daoFactory);
                         var rootId = aiAgentFolderId.ToString();
+
+                        foreach (var id in userIDs)
+                        {
+                            if (userEntriesData.TryGetValue(id, out var data))
+                            {
+                                data.RootId = rootId;
+                            }
+                            else
+                            {
+                                userEntriesData.Add(id, new Data { RootId = rootId });
+                            }
+                        }
+
+                        break;
+                    }
+                case FolderType.AiHub:
+                    {
+                        var aiHubFolderId = await globalFolder.GetFolderAiHubAsync(daoFactory);
+                        var rootId = aiHubFolderId.ToString();
 
                         foreach (var id in userIDs)
                         {
@@ -659,6 +678,9 @@ public class FileMarker(
                     break;
                 case FolderType.AiProjects:
                     cacheFolderId = rootFolderId = await globalFolder.GetFolderAiProjectsAsync(daoFactory);
+                    break;
+                case FolderType.AiHub:
+                    cacheFolderId = rootFolderId = await globalFolder.GetFolderAiHubAsync(daoFactory);
                     break;
                 case FolderType.BUNCH:
                     cacheFolderId = rootFolderId = await globalFolder.GetFolderProjectsAsync(daoFactory);
@@ -1138,7 +1160,7 @@ public class FileMarker(
             }
         }
 
-        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.Forms)
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub or FolderType.Forms)
         {
             var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
             totalTags = totalTags.Where(e => !disabledRooms.Contains(e.EntryId.ToString())).ToList();
@@ -1205,7 +1227,7 @@ public class FileMarker(
 
         if (parent.FolderType != FolderType.Forms && parentFolderTag.Count != countSubNew)
         {
-            if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects)
+            if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub)
             {
                 parentFolderTag.Count = countSubNew;
                 if (parentFolderTag.Id == -1)
@@ -1262,6 +1284,10 @@ public class FileMarker(
                     else if (rootFolder.RootFolderType == FolderType.AiProjects)
                     {
                         rootFolderId = IdConverter.Convert<T>(await globalFolder.GetFolderAiProjectsAsync(daoFactory));
+                    }
+                    else if (rootFolder.RootFolderType == FolderType.AiHub)
+                    {
+                        rootFolderId = IdConverter.Convert<T>(await globalFolder.GetFolderAiHubAsync(daoFactory));
                     }
 
                     if (!Equals(rootFolderId, default(T)))

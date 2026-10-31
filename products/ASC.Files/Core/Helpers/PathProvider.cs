@@ -87,6 +87,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             FolderType.VirtualRooms or FolderType.RoomTemplates => string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}"),
             FolderType.AiAgents => string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}"),
             FolderType.AiProjects => string.Format($"ai-projects/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            FolderType.AiHub => string.Format($"ai-rooms/{urlPathEncode}/filter?folder={urlPathEncode}"),
             FolderType.Forms => string.Format($"forms/{urlPathEncode}/filter?folder={urlPathEncode}"),
             _ => result
         };

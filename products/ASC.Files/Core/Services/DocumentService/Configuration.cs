@@ -882,7 +882,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
-            if (file.RootFolderType == FolderType.VirtualRooms &&
+            if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub &&
                 !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());

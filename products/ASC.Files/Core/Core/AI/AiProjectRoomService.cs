@@ -52,7 +52,7 @@ public class AiProjectRoomService(
         var tenantId = tenantManager.GetCurrentTenantId();
         await GetProjectAsync(projectId);
 
-        var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, projectId, await globalFolderHelper.GetFolderVirtualRooms());
+        var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, projectId, await globalFolderHelper.GetFolderAiHubAsync());
         if (linked.Count == 0)
         {
             return [];
@@ -65,7 +65,7 @@ public class AiProjectRoomService(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var project = await GetProjectForEditAsync(projectId);
-        var roomsFolderId = await globalFolderHelper.GetFolderVirtualRooms();
+        var roomsFolderId = await globalFolderHelper.GetFolderAiHubAsync();
 
         var linkable = await aiProjectRoomDao.GetLinkableRoomsAsync(tenantId, roomsFolderId, roomIds);
         ThrowIfNotLinkable([.. roomIds.Where(id => !linkable.ContainsKey(id))]);

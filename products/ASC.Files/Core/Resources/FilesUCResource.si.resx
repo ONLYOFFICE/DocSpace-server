@@ -120,6 +120,9 @@
   <data name="AiProjects" xml:space="preserve">
     <value>AI ව්‍යාපෘති</value>
   </data>
+  <data name="AiHub" xml:space="preserve">
+    <value>AI rooms</value>
+  </data>
   <data name="Archive" xml:space="preserve">
     <value>සංරක්‍ෂණය</value>
   </data>
