@@ -88,6 +88,28 @@ public class AiProjectSourcesUnlinkTests(AspireAppFixture fixture) : AiHubTestBa
     }
 
     [Fact]
+    public async Task UnlinkSources_RoomManagerWhoIsOnlyProjectViewer_Returns403AndKeepsLink()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var room = await CreateInstructionsRoomAsync();
+        using var linked = await LinkSourcesAsync(projectId, room);
+
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.Read);
+        await ShareRoomAsync(room, roomAdmin.Id, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(roomAdmin);
+
+        // Act
+        using var response = await UnlinkSourcesAsync(projectId, room);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().Equal(room);
+    }
+
+    [Fact]
     public async Task DeletedRoom_LosesLink()
     {
         // Arrange

@@ -126,6 +126,35 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return sources.GetProperty("instructionsRooms").EnumerateArray().Select(r => r.GetProperty("id").GetInt32()).ToList();
     }
 
+    protected async Task ShareRoomAsync(int roomId, Guid subjectId, FileShare access)
+    {
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest
+            {
+                Invitations = [new RoomInvitation { Id = subjectId, Access = access }],
+                Notify = false
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<Guid> CreateGroupAsync(params User[] members)
+    {
+        var request = new GroupRequestDto(members: [.. members.Select(m => m.Id)], groupManager: Owner.Id, groupName: Guid.NewGuid().ToString("N")[..10]);
+
+        return (await _groupApi.AddGroupAsync(request, TestContext.Current.CancellationToken)).Response.Id;
+    }
+
+    protected Task<HttpResponseMessage> GetFolderContentResponseAsync(int folderId)
+    {
+        return Files.GetAsync($"api/2.0/files/{folderId}", TestContext.Current.CancellationToken);
+    }
+
+    protected Task<HttpResponseMessage> GetFileResponseAsync(int fileId)
+    {
+        return Files.GetAsync($"api/2.0/files/file/{fileId}", TestContext.Current.CancellationToken);
+    }
+
     protected async Task<int> UploadSkillAsync(int folderId, string name, string description = "Reviews documents", string? fileName = null)
     {
         var content = Encoding.UTF8.GetBytes($"---\nname: {name}\ndescription: {description}\n---\n# {name}\n");

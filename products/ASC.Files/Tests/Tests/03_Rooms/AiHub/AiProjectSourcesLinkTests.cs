@@ -194,6 +194,26 @@ public class AiProjectSourcesLinkTests(AspireAppFixture fixture) : AiHubTestBase
     }
 
     [Fact]
+    public async Task LinkSources_RoomWhereProjectManagerIsOnlyViewer_Returns400()
+    {
+        // Arrange
+        var room = await CreateInstructionsRoomAsync();
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await ShareRoomAsync(room, roomAdmin.Id, FileShare.Read);
+
+        await _filesClient.Authenticate(roomAdmin);
+        var projectId = await CreateProjectAsync();
+
+        // Act
+        using var response = await LinkSourcesAsync(projectId, room);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Contain(room.ToString());
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task LinkSources_InstructionsRoomInsteadOfProject_Returns404()
     {
         // Arrange

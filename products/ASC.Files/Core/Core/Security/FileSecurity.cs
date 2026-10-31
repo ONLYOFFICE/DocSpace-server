@@ -2139,7 +2139,7 @@ public class FileSecurity(
                     ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
 
                     if (e.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.Archive &&
-                        ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                        ace is { SubjectType: SubjectType.User or SubjectType.AiProject or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
                     {
                         var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
@@ -2759,12 +2759,13 @@ public class FileSecurity(
         {
             return null;
         }
-        shares ??= await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
+        shares ??= await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet(), entry.RootFolderType == FolderType.AiHub);
 
         if (entry.FileEntryType == FileEntryType.File)
         {
             ace = shares
-                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .OrderBy(r => r.SubjectType == SubjectType.AiProject)
+                .ThenBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
@@ -2772,7 +2773,8 @@ public class FileSecurity(
         else
         {
             ace = shares
-                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .OrderBy(r => r.SubjectType == SubjectType.AiProject)
+                .ThenBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
@@ -2782,7 +2784,8 @@ public class FileSecurity(
         {
             // share on parent folders
             var parentAce = shares.Where(r => (Equals(r.ParentId, entry.Id) || Equals(r.ParentId, entry.ParentId) || Equals(r.EntryId, entry.ParentId)) && r.EntryType == FileEntryType.Folder)
-                .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .OrderBy(r => r.SubjectType == SubjectType.AiProject)
+                .ThenBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
@@ -2814,9 +2817,9 @@ public class FileSecurity(
         await securityDao.SetShareAsync(r);
     }
 
-    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, HashSet<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync<T>(FileEntry<T> entry, HashSet<Guid> subjects = null, bool includeAiProjectAccess = false)
     {
-        return await daoFactory.GetSecurityDao<T>().GetSharesAsync(entry, subjects);
+        return await daoFactory.GetSecurityDao<T>().GetSharesAsync(entry, subjects, includeAiProjectAccess);
     }
 
     public IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects)
@@ -3581,7 +3584,7 @@ public class FileSecurity(
         {
             return null;
         }
-        return await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet());
+        return await GetSharesAsync(entry, orderedSubjects.Select(s => s.Subject).ToHashSet(), entry.RootFolderType == FolderType.AiHub);
     }
 
     public async IAsyncEnumerable<FileShareRecord<string>> GetUserRecordsAsync()

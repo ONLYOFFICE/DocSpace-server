@@ -140,7 +140,7 @@ public class KnowledgeSearchToolFactory(
         var searchable = new List<Folder<int>>();
         foreach (var owner in owners)
         {
-            if (!await fileSecurity.CanUseAiAsync(owner))
+            if (!(owner.IsAgent ? await fileSecurity.CanUseAiAsync(owner) : await fileSecurity.CanReadAsync(owner)))
             {
                 continue;
             }

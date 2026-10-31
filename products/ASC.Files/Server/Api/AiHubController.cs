@@ -62,13 +62,13 @@ public class AiHubController(
     }
 
     /// <remarks>
-    /// Links Instructions and Knowledge rooms to an AI project as its sources. Rooms that are already linked are skipped.
+    /// Links Instructions and Knowledge rooms to an AI project as its sources, which gives every project member read access to them. The caller must manage the project and each listed room; rooms that are already linked are skipped.
     /// </remarks>
     /// <summary>Link sources to an AI project</summary>
     /// <path>api/2.0/files/rooms/{id}/sources</path>
     [Tags("Rooms / AI")]
     [SwaggerResponse(204, "The rooms are linked")]
-    [SwaggerResponse(400, "`roomIds` is empty or longer than 40 items, a room is not an active Instructions or Knowledge room the caller can read, or the project would hold more than 20 rooms of one kind")]
+    [SwaggerResponse(400, "`roomIds` is empty or longer than 40 items, a room is not an active Instructions or Knowledge room the caller manages, or the project would hold more than 20 rooms of one kind")]
     [SwaggerResponse(403, "The caller may not edit the project, or the AI features are turned off on the portal")]
     [SwaggerResponse(404, "No AI project has this id")]
     [HttpPost("{id}/sources")]
@@ -80,7 +80,7 @@ public class AiHubController(
     }
 
     /// <remarks>
-    /// Unlinks Instructions and Knowledge rooms from an AI project. The rooms themselves are not changed.
+    /// Unlinks Instructions and Knowledge rooms from an AI project; project members lose the access the link gave them. The caller must manage the project, rights on the rooms are not checked; the rooms themselves are not changed.
     /// </remarks>
     /// <summary>Unlink sources from an AI project</summary>
     /// <path>api/2.0/files/rooms/{id}/sources</path>

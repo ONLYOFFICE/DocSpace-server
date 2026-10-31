@@ -119,8 +119,17 @@ public class AiHubService(
         ThrowIfNotLinkable([.. roomIds.Where(id => !linkable.ContainsKey(id))]);
 
         var rooms = await daoFactory.GetFolderDao<int>().GetFoldersAsync(linkable.Keys).ToListAsync();
-        var readableIds = await fileSecurity.FilterReadAsync(rooms.ToAsyncEnumerable()).Select(r => r.Id).ToHashSetAsync();
-        ThrowIfNotLinkable([.. roomIds.Where(id => !readableIds.Contains(id))]);
+        var editableIds = new HashSet<int>();
+
+        foreach (var room in rooms)
+        {
+            if (await fileSecurity.CanEditRoomAsync(room))
+            {
+                editableIds.Add(room.Id);
+            }
+        }
+
+        ThrowIfNotLinkable([.. roomIds.Where(id => !editableIds.Contains(id))]);
 
         List<Folder<int>> added;
 
