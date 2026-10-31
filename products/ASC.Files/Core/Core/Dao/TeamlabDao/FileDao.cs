@@ -1145,6 +1145,12 @@ internal class FileDao(
             }
 
             await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
+
+            if (toDeleteFiles.Any(f => SkillFrontmatter.IsSkillFile(f.Title)))
+            {
+                await context.DeleteSkillsAsync(tenantId, fileIds);
+            }
+
             await context.DeleteTagsAsync(tenantId);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
             await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
@@ -1333,6 +1339,15 @@ internal class FileDao(
         var needVectorization = toKnowledgeBase && !sameKnowledgeBase;
         var needDeleteVectors = fromKnowledgeBase && !toKnowledgeBase;
 
+        var toInstructions = toRoomType == FolderType.InstructionsRoom && toFolder.RootFolderType == FolderType.AiHub;
+        var needDeleteSkill = fromRoomType == FolderType.InstructionsRoom && !toInstructions;
+
+        SkillFrontmatter skill = null;
+        if (toInstructions)
+        {
+            skill = await ReadSkillAsync(file, title ?? file.Title);
+        }
+
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var toRoom = toFolder.IsRoom ? toFolder : await folderDao.GetFolderAsync(toRoomId);
@@ -1441,6 +1456,16 @@ internal class FileDao(
 
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
                     await context.SaveChangesAsync();
+                }
+
+                if (skill != null)
+                {
+                    await SaveSkillAsync(context, tenantId, fileId, skill);
+                    await context.SaveChangesAsync();
+                }
+                else if (needDeleteSkill)
+                {
+                    await context.DeleteSkillAsync(tenantId, fileId);
                 }
 
                 // reuse the values already resolved before the transaction: toFolder has not
@@ -3429,11 +3454,6 @@ internal class FileDao(
 
     private async Task<(SkillFrontmatter Skill, Stream Stream)> ReadSkillAsync(File<int> file, Stream fileStream, ChunkedUploadSession<int> uploadSession)
     {
-        if (!SkillFrontmatter.IsSkillFile(file.Title))
-        {
-            throw new ArgumentException(FilesCommonResource.ErrorMessage_InstructionsRoomMarkdownOnly);
-        }
-
         ReadOnlyMemory<byte> head = default;
         if (fileStream != null)
         {
@@ -3447,11 +3467,29 @@ internal class FileDao(
             (head, _) = await PrefixedStream.ReadHeadAsync(tStream, SkillFrontmatter.MaxHeadLength);
         }
 
-        var error = SkillFrontmatter.TryParse(head.Span, out var skill);
+        return (ParseSkill(file.Title, head.Span), fileStream);
+    }
+
+    private async Task<SkillFrontmatter> ReadSkillAsync(File<int> file, string title)
+    {
+        await using var stream = await GetFileStreamAsync(file, 0, SkillFrontmatter.MaxHeadLength);
+        var (head, _) = await PrefixedStream.ReadHeadAsync(stream, SkillFrontmatter.MaxHeadLength);
+
+        return ParseSkill(title, head.Span);
+    }
+
+    private static SkillFrontmatter ParseSkill(string title, ReadOnlySpan<byte> head)
+    {
+        if (!SkillFrontmatter.IsSkillFile(title))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InstructionsRoomMarkdownOnly);
+        }
+
+        var error = SkillFrontmatter.TryParse(head, out var skill);
 
         return error switch
         {
-            SkillFrontmatterError.None => (skill, fileStream),
+            SkillFrontmatterError.None => skill,
             SkillFrontmatterError.InvalidName => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillNameInvalid),
             SkillFrontmatterError.InvalidDescription => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillDescriptionInvalid),
             _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillFrontmatterMissing)
