@@ -150,13 +150,13 @@ public class AiProjectRoomsLinkTests(AspireAppFixture fixture) : AiProjectRoomsT
     }
 
     [Fact]
-    public async Task LinkRooms_MoreThanTwoHundredIds_Returns400()
+    public async Task LinkRooms_MoreThanFortyIds_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, [.. Enumerable.Range(1, 201)]);
+        using var response = await LinkRoomsAsync(projectId, [.. Enumerable.Range(1, 41)]);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
