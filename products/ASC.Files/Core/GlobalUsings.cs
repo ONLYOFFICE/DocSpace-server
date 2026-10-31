@@ -305,3 +305,6 @@ global using Tag = ASC.Files.Core.Tag;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;
+global using YamlDeserializerBuilder = YamlDotNet.Serialization.DeserializerBuilder;
+global using YamlException = YamlDotNet.Core.YamlException;
+global using YamlIDeserializer = YamlDotNet.Serialization.IDeserializer;
