@@ -34384,8 +34384,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -34606,8 +34611,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -34734,8 +34744,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35006,8 +35021,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35333,8 +35353,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35595,8 +35620,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35637,8 +35667,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35858,8 +35893,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -35929,8 +35969,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -36511,8 +36556,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -37175,8 +37225,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -37627,8 +37682,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -38014,8 +38074,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -38137,8 +38202,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -38547,8 +38617,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -38718,8 +38793,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -39665,8 +39745,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -39906,8 +39991,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -40167,8 +40257,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -40381,8 +40476,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -40505,8 +40605,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -40574,8 +40679,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -41053,8 +41163,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -41098,8 +41213,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -41143,8 +41263,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -41358,8 +41483,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -41963,8 +42093,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42008,8 +42143,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42232,8 +42372,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42398,8 +42543,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42505,8 +42655,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42790,8 +42945,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42832,8 +42992,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -42986,8 +43151,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -43852,8 +44022,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -43948,8 +44123,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -44035,8 +44215,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -44169,8 +44354,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -44214,8 +44404,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -44352,8 +44547,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -44918,8 +45118,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45127,8 +45332,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45350,8 +45560,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45395,8 +45610,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45654,8 +45874,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45826,8 +46051,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -45963,8 +46193,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -46124,8 +46359,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -46451,8 +46691,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -47964,8 +48209,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48191,8 +48441,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48236,8 +48491,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48347,8 +48607,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48624,8 +48889,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48759,8 +49029,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48804,8 +49079,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -48849,8 +49129,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -49383,8 +49668,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -49827,8 +50117,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -49872,8 +50167,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -50041,8 +50341,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -50380,8 +50685,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -50594,8 +50904,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -51655,8 +51970,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -51697,8 +52017,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -51867,8 +52192,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -52175,8 +52505,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -52217,8 +52552,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -52382,8 +52722,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -52473,8 +52818,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -53242,8 +53592,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -53287,8 +53642,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -53425,8 +53785,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -53697,8 +54062,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -53915,8 +54285,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -54494,8 +54869,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -54597,8 +54977,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -55209,8 +55594,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",

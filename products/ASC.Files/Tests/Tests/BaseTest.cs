@@ -184,16 +184,6 @@ public class BaseTest(
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
-    /// <summary>
-    /// Reads the <c>total</c> of a share list (<c>api/2.0/files/file/{id}/share</c>,
-    /// <c>api/2.0/files/rooms/{id}/share?...</c>) from the raw envelope: <c>FileShareArrayWrapper</c>
-    /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
-    /// </summary>
-    protected Task<long?> ReadShareTotal(string path)
-    {
-        return new RawApiClient(_filesClient).GetTotalAsync(path, TestContext.Current.CancellationToken);
-    }
-
     protected async Task<int> GetShareFolderIdAsync(User user)
     {
         return await GetFolderIdAsync(FolderType.SHARE, user);

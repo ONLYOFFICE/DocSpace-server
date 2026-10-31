@@ -247,22 +247,14 @@ public class WebhookLogFilterTests(
         return logs.Response.Select(l => l.ConfigName).Distinct().ToList();
     }
 
-    /// <summary>
-    /// One page of a subscription's records, read through the SDK, with the <c>total</c> the response reports
-    /// beside them. The generated <see cref="WebhooksLogArrayWrapper"/> does not carry <c>total</c>, so that one
-    /// number is read from the raw envelope of the same request.
-    /// </summary>
+    /// <summary>One page of a subscription's records with the <c>total</c> the response reports beside them.</summary>
     private async Task<(long? Total, List<WebhooksLogDto> Records)> ReadPageAsync(int configId, int startIndex, int count)
     {
         await _webApiClient.Authenticate(Owner);
 
-        var records = (await _webhooksApi.GetWebhooksLogsAsync(
-            configId: configId, count: count, startIndex: startIndex, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var page = await _webhooksApi.GetWebhooksLogsAsync(
+            configId: configId, count: count, startIndex: startIndex, cancellationToken: TestContext.Current.CancellationToken);
 
-        var total = await _webApi.GetTotalAsync(
-            $"api/2.0/settings/webhooks/log?configId={configId}&startIndex={startIndex}&count={count}",
-            TestContext.Current.CancellationToken);
-
-        return (total, records);
+        return (page.Total, page.Response);
     }
 }

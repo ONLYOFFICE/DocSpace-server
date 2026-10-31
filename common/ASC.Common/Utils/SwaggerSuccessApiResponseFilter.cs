@@ -396,7 +396,10 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             Properties = new Dictionary<string, IOpenApiSchema>
             {
                 { "response", responseProperty },
-                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The total number of items in the response"  } },
+                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "How many items this response carries: the length of the page for a list, 1 for a single object"  } },
+                // Written by SuccessApiResponse.Total from ApiContext.SetTotalCount; absent from the schema before, so no
+                // generated wrapper could read the size of a paginated list.
+                { "total", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int64", Description = "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response"  } },
                 { "links", new OpenApiSchema
                     {
                         Type = JsonSchemaType.Array,

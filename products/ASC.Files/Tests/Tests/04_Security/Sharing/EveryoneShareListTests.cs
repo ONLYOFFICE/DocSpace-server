@@ -98,7 +98,7 @@ public class EveryoneShareListTests(
         var file = await CreateFileInMy("Autotest Everyone Total.docx", Owner);
         await ShareFile(file.Id, _everyoneId, FileShare.Read);
 
-        var total = await ReadShareTotal($"api/2.0/files/file/{file.Id}/share");
+        var total = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Total;
 
         total.Should().Be(2, "the owner and Everyone are the two entries of the list");
     }
