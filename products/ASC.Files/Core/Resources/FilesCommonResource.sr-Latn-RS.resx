@@ -631,4 +631,19 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Ove sobe ne mogu da se povežu sa AI projektom: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>U sobu sa uputstvima mogu da se dodaju samo Markdown (.md) datoteke</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Soba sa uputstvima može da sadrži najviše {0} veština</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Opis veštine mora da ima od 1 do 1024 znaka i ne sme da sadrži XML oznake</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Datoteka veštine mora da počinje YAML frontmatter blokom između dva reda --- sa poljima name i description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Naziv veštine mora da ima od 1 do 64 znaka, da sadrži samo mala slova, cifre i pojedinačne crtice i ne sme da počinje ili da se završava crticom</value>
+  </data>
 </root>

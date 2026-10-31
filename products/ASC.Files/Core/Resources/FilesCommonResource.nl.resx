@@ -631,4 +631,19 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Deze ruimtes kunnen niet aan het AI-project worden gekoppeld: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Aan een instructieruimte kunnen alleen Markdown-bestanden (.md) worden toegevoegd</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Een instructieruimte kan maximaal {0} skills bevatten</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>De beschrijving van de skill moet 1 tot 1024 tekens lang zijn en mag geen XML-tags bevatten</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Het skillbestand moet beginnen met een YAML-frontmatterblok tussen twee regels met ---, met de velden name en description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>De naam van de skill moet 1 tot 64 tekens lang zijn, mag alleen kleine letters, cijfers en enkele koppeltekens bevatten en mag niet met een koppelteken beginnen of eindigen</value>
+  </data>
 </root>

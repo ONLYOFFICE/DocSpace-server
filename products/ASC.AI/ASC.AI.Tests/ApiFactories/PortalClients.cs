@@ -50,6 +50,7 @@ public sealed class PortalClients : PortalClientsBase
     // Files service
     public FoldersApi FoldersApi { get; }
     public RoomsApi RoomsApi { get; }
+    public OperationsApi OperationsApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
@@ -65,6 +66,7 @@ public sealed class PortalClients : PortalClientsBase
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
 
         ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
     }

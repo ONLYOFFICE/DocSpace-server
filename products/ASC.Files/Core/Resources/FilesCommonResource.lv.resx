@@ -631,4 +631,19 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Šīs telpas nevar piesaistīt MI projektam: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Instrukciju telpai var pievienot tikai Markdown (.md) failus</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Instrukciju telpā var būt ne vairāk kā {0} prasmes</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Prasmes aprakstam jābūt no 1 līdz 1024 rakstzīmēm, un tajā nedrīkst būt XML tagu</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Prasmes failam jāsākas ar YAML frontmatter bloku starp divām --- rindām, ar laukiem name un description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Prasmes nosaukumam jābūt no 1 līdz 64 rakstzīmēm, tajā drīkst būt tikai mazie burti, cipari un atsevišķas defises, un tas nedrīkst sākties vai beigties ar defisi</value>
+  </data>
 </root>

@@ -631,4 +631,19 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Không thể liên kết các phòng này với dự án AI: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Chỉ có thể thêm tệp Markdown (.md) vào phòng hướng dẫn</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Một phòng hướng dẫn có thể chứa tối đa {0} kỹ năng</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Mô tả kỹ năng phải dài từ 1 đến 1024 ký tự và không được chứa thẻ XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Tệp kỹ năng phải bắt đầu bằng một khối YAML frontmatter nằm giữa hai dòng ---, với các trường name và description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Tên kỹ năng phải dài từ 1 đến 64 ký tự, chỉ chứa chữ thường, chữ số và dấu gạch nối đơn, và không được bắt đầu hoặc kết thúc bằng dấu gạch nối</value>
+  </data>
 </root>

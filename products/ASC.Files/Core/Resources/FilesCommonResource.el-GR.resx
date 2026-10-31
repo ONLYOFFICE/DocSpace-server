@@ -631,4 +631,19 @@
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Αυτά τα δωμάτια δεν μπορούν να συνδεθούν με το έργο ΤΝ: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Σε ένα δωμάτιο οδηγιών μπορούν να προστεθούν μόνο αρχεία Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ένα δωμάτιο οδηγιών μπορεί να περιέχει έως {0} δεξιότητες</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Η περιγραφή της δεξιότητας πρέπει να έχει από 1 έως 1024 χαρακτήρες και να μην περιέχει ετικέτες XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Το αρχείο της δεξιότητας πρέπει να ξεκινά με ένα μπλοκ YAML frontmatter ανάμεσα σε δύο γραμμές ---, με τα πεδία name και description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Το όνομα της δεξιότητας πρέπει να έχει από 1 έως 64 χαρακτήρες, να περιέχει μόνο πεζά γράμματα, ψηφία και μεμονωμένες παύλες και να μην ξεκινά ή τελειώνει με παύλα</value>
+  </data>
 </root>

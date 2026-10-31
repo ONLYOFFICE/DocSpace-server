@@ -631,4 +631,19 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>これらのルームは AI プロジェクトにリンクできません: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>指示ルームに追加できるのは Markdown (.md) ファイルのみです</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>指示ルームに含められるスキルは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>スキルの説明は 1～1024 文字で、XML タグを含めることはできません</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>スキルファイルは、name と description フィールドを含む 2 つの --- 行で囲まれた YAML フロントマターブロックで始まる必要があります</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>スキル名は 1～64 文字で、小文字、数字、単一のハイフンのみを使用でき、ハイフンで始めたり終えたりすることはできません</value>
+  </data>
 </root>

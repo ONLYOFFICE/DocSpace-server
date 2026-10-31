@@ -631,4 +631,19 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Diese Räume können nicht mit dem KI-Projekt verknüpft werden: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Zu einem Anweisungsraum können nur Markdown-Dateien (.md) hinzugefügt werden</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ein Anweisungsraum kann höchstens {0} Skills enthalten</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Die Beschreibung des Skills muss 1 bis 1024 Zeichen lang sein und darf keine XML-Tags enthalten</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Die Skill-Datei muss mit einem YAML-Frontmatter-Block zwischen zwei Zeilen mit --- beginnen, der die Felder name und description enthält</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Der Name des Skills muss 1 bis 64 Zeichen lang sein, darf nur Kleinbuchstaben, Ziffern und einzelne Bindestriche enthalten und darf nicht mit einem Bindestrich beginnen oder enden</value>
+  </data>
 </root>

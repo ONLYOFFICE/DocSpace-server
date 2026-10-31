@@ -631,4 +631,19 @@
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>لا يمكن ربط هذه الغرف بمشروع الذكاء الاصطناعي: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>يمكن إضافة ملفات Markdown (.md) فقط إلى غرفة التعليمات</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>يمكن أن تحتوي غرفة التعليمات على {0} من المهارات كحد أقصى</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>يجب أن يتراوح طول وصف المهارة بين 1 و1024 حرفًا وألا يحتوي على وسوم XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>يجب أن يبدأ ملف المهارة بكتلة YAML frontmatter بين سطرين ---، تتضمن الحقلين name وdescription</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>يجب أن يتراوح طول اسم المهارة بين 1 و64 حرفًا، وأن يحتوي فقط على أحرف صغيرة وأرقام وشرطات مفردة، وألا يبدأ أو ينتهي بشرطة</value>
+  </data>
 </root>

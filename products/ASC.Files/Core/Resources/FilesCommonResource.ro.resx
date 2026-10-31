@@ -631,4 +631,19 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Aceste camere nu pot fi asociate proiectului AI: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Într-o cameră de instrucțiuni pot fi adăugate doar fișiere Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>O cameră de instrucțiuni poate conține cel mult {0} abilități</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Descrierea abilității trebuie să aibă între 1 și 1024 de caractere și nu poate conține etichete XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Fișierul abilității trebuie să înceapă cu un bloc YAML frontmatter între două linii ---, cu câmpurile name și description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Numele abilității trebuie să aibă între 1 și 64 de caractere, să conțină doar litere mici, cifre și cratime simple și nu poate începe sau se termina cu o cratimă</value>
+  </data>
 </root>

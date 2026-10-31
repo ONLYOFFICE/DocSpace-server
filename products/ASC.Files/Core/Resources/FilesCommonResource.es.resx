@@ -631,4 +631,19 @@
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Estas salas no se pueden vincular al proyecto de IA: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Solo se pueden añadir archivos Markdown (.md) a una sala de instrucciones</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Una sala de instrucciones puede contener como máximo {0} habilidades</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>La descripción de la habilidad debe tener entre 1 y 1024 caracteres y no puede contener etiquetas XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>El archivo de la habilidad debe empezar con un bloque YAML frontmatter entre dos líneas ---, con los campos name y description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>El nombre de la habilidad debe tener entre 1 y 64 caracteres, contener solo letras minúsculas, dígitos y guiones simples, y no puede empezar ni terminar con un guion</value>
+  </data>
 </root>

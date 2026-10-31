@@ -59,19 +59,19 @@ public class AiProjectRoomsLifecycleTests(AspireAppFixture fixture) : AiProjectR
         // Arrange
         var projectId = await CreateProjectAsync();
         var rooms = new List<int>();
-        for (var i = 0; i <= 100; i++)
+        for (var i = 0; i <= 20; i++)
         {
             rooms.Add(await CreateInstructionsRoomAsync($"Autotest Instructions {i:D3}"));
         }
 
-        using var filled = await LinkRoomsAsync(projectId, [.. rooms.Take(100)]);
+        using var filled = await LinkRoomsAsync(projectId, [.. rooms.Take(20)]);
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, rooms[100]);
+        using var response = await LinkRoomsAsync(projectId, rooms[20]);
 
         // Assert
         filled.StatusCode.Should().Be(HttpStatusCode.NoContent);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await GetInstructionsRoomIdsAsync(projectId)).Should().HaveCount(100).And.NotContain(rooms[100]);
+        (await GetInstructionsRoomIdsAsync(projectId)).Should().HaveCount(20).And.NotContain(rooms[20]);
     }
 }

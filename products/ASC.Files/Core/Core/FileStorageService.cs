@@ -1190,7 +1190,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }

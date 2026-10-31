@@ -46,6 +46,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string PreferencesPath = "/internal/ai/preferences";
     protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
     protected const string ChatContextPath = "/internal/ai/chat-context";
+    protected const string RoomsSkillsPath = "/internal/ai/rooms/skills";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
@@ -342,6 +343,82 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         var content = (await _clients.FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         return content.Current.Id;
+    }
+
+    protected async Task<int> UploadSkillAsync(int folderId, string name, string description = "Reviews documents", string? fileName = null)
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+
+        var content = Encoding.UTF8.GetBytes($"---\nname: {name}\ndescription: {description}\n---\n# {name}\n");
+        var file = new FileParameter(fileName ?? $"{name}.md", "text/markdown", new MemoryStream(content));
+        var uploaded = await _clients.FoldersApi.UploadFileAsync(folderId, file: file, cancellationToken: TestContext.Current.CancellationToken);
+
+        return uploaded.Response.Single().Id;
+    }
+
+    protected Task MoveFileAsync(int destFolderId, int fileId)
+    {
+        return RunFileOperationAsync(api => api.MoveBatchItemsAsync(BatchRequest(destFolderId, fileId), TestContext.Current.CancellationToken));
+    }
+
+    protected Task CopyFileAsync(int destFolderId, int fileId)
+    {
+        return RunFileOperationAsync(api => api.CopyBatchItemsAsync(BatchRequest(destFolderId, fileId), TestContext.Current.CancellationToken));
+    }
+
+    protected Task DeleteFileAsync(int fileId, bool immediately = false)
+    {
+        var request = new DeleteBatchRequestDto
+        {
+            FolderIds = [],
+            FileIds = [new(fileId)],
+            Immediately = immediately,
+            ReturnSingleOperation = true
+        };
+
+        return RunFileOperationAsync(api => api.DeleteBatchItemsAsync(request, TestContext.Current.CancellationToken));
+    }
+
+    protected Task<HttpResponseMessage> GetRoomsSkillsResponseAsync(params int[] roomIds)
+    {
+        var query = string.Join("&", roomIds.Select(id => $"roomIds={id}"));
+
+        return _ai.GetAsync($"{RoomsSkillsPath}?{query}", TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<AiSkillsDto> GetRoomsSkillsAsync(params int[] roomIds)
+    {
+        using var response = await GetRoomsSkillsResponseAsync(roomIds);
+
+        return await _ai.ReadAsync<AiSkillsDto>(response, TestContext.Current.CancellationToken);
+    }
+
+    private static BatchRequestDto BatchRequest(int destFolderId, int fileId)
+    {
+        return new BatchRequestDto
+        {
+            DestFolderId = new(destFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(fileId)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+    }
+
+    private async Task RunFileOperationAsync(Func<OperationsApi, Task<FileOperationArrayWrapper>> start)
+    {
+        await _clients.FilesHttpClient.Authenticate(Owner);
+
+        var results = (await start(_clients.OperationsApi)).Response;
+        var operationId = results.FirstOrDefault()?.Id;
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (!results.TrueForAll(r => r.Finished) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(100, TestContext.Current.CancellationToken);
+
+            results = (await _clients.OperationsApi.GetOperationStatusesAsync(id: operationId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        }
     }
 
     protected async Task<PreferencesDto?> ReadPreferencesAsync(string? entityId = null)

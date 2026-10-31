@@ -45,7 +45,8 @@ public class AiProjectsController(
     FileOperationDtoHelper fileOperationDtoHelper,
     FileSecurity fileSecurity,
     AiProjectRoomService aiProjectRoomService,
-    AiProjectRoomsDtoMapper aiProjectRoomsDtoMapper)
+    AiProjectRoomsDtoMapper aiProjectRoomsDtoMapper,
+    AiSkillsDtoMapper aiSkillsDtoMapper)
     : ControllerBase
 {
     /// <remarks>
@@ -215,13 +216,32 @@ public class AiProjectsController(
     }
 
     /// <remarks>
+    /// Returns the skills of the Instructions rooms linked to an AI project, rooms sorted by title: one entry per
+    /// Markdown file in the room root, with the name and the description from its YAML frontmatter, sorted by file
+    /// title. Reading the project is enough to read the skills of every linked room.
+    /// </remarks>
+    /// <summary>Get AI project skills</summary>
+    /// <path>api/2.0/ai/projects/{id}/skills</path>
+    [Tags("AI / Projects")]
+    [SwaggerResponse(200, "Linked Instructions rooms with their skills", typeof(AiSkillsDto))]
+    [SwaggerResponse(403, "The caller may not read the project")]
+    [SwaggerResponse(404, "The AI project is not found")]
+    [HttpGet("projects/{id}/skills")]
+    public async Task<AiSkillsDto> GetProjectSkills(RoomIdRequestDto<int> inDto)
+    {
+        var rooms = await aiProjectRoomService.GetProjectSkillsAsync(inDto.Id);
+
+        return await aiSkillsDtoMapper.MapAsync(rooms);
+    }
+
+    /// <remarks>
     /// Links Instructions and Knowledge rooms to an AI project; rooms already linked are skipped.
     /// </remarks>
     /// <summary>Link rooms to an AI project</summary>
     /// <path>api/2.0/ai/projects/{id}/rooms</path>
     [Tags("AI / Projects")]
     [SwaggerResponse(204, "The rooms are linked")]
-    [SwaggerResponse(400, "`roomIds` is empty or longer than 200 items, a room is not an active Instructions or Knowledge room the caller can read, or the project would link more than 100 rooms of one type")]
+    [SwaggerResponse(400, "`roomIds` is empty or longer than 40 items, a room is not an active Instructions or Knowledge room the caller can read, or the project would link more than 20 rooms of one type")]
     [SwaggerResponse(403, "The caller may not edit the project")]
     [SwaggerResponse(404, "The AI project is not found")]
     [HttpPost("projects/{id}/rooms")]
@@ -239,7 +259,7 @@ public class AiProjectsController(
     /// <path>api/2.0/ai/projects/{id}/rooms</path>
     [Tags("AI / Projects")]
     [SwaggerResponse(204, "The rooms are unlinked")]
-    [SwaggerResponse(400, "`roomIds` is empty or longer than 200 items")]
+    [SwaggerResponse(400, "`roomIds` is empty or longer than 40 items")]
     [SwaggerResponse(403, "The caller may not edit the project")]
     [SwaggerResponse(404, "The AI project is not found")]
     [HttpDelete("projects/{id}/rooms")]

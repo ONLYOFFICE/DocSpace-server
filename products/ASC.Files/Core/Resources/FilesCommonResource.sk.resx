@@ -631,4 +631,19 @@
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Tieto miestnosti nie je možné prepojiť s projektom AI: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Do miestnosti s pokynmi je možné pridávať iba súbory Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Miestnosť s pokynmi môže obsahovať najviac {0} zručností</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Popis zručnosti musí mať 1 až 1024 znakov a nesmie obsahovať značky XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Súbor zručnosti musí začínať blokom YAML frontmatter medzi dvoma riadkami --- s poľami name a description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Názov zručnosti musí mať 1 až 64 znakov, môže obsahovať iba malé písmená, číslice a jednotlivé pomlčky a nesmie začínať ani končiť pomlčkou</value>
+  </data>
 </root>

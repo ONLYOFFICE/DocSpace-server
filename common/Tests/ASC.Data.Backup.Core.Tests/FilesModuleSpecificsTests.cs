@@ -303,6 +303,34 @@ public class FilesModuleSpecificsTests
         Convert.ToInt32(preparedRow["room_id"]).Should().Be(newRoomId);
     }
 
+    [Fact]
+    public async Task TryPrepareRow_FilesSkill_RemapsFile()
+    {
+        // Arrange — the frontmatter of a skill file in an Instructions room
+        const int oldFileId = 100;
+        const int newFileId = 500;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping("files_file", "id", oldFileId, newFileId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_skill");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("file_id", oldFileId);
+        row.SetValue("name", "pdf-review");
+        row.SetValue("description", "Reviews PDF documents");
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_skill"), row);
+
+        // Assert — the row follows its file; the texts are copied as they are
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["file_id"]).Should().Be(newFileId);
+        preparedRow["name"].Should().Be("pdf-review");
+    }
+
     [Theory]
     [InlineData(1, true)]
     [InlineData(2, true)]

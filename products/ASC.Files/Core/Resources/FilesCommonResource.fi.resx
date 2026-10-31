@@ -631,4 +631,19 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Näitä huoneita ei voi linkittää tekoälyprojektiin: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Ohjehuoneeseen voi lisätä vain Markdown-tiedostoja (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ohjehuoneessa voi olla enintään {0} taitoa</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Taidon kuvauksen on oltava 1–1024 merkkiä pitkä, eikä se saa sisältää XML-tageja</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Taitotiedoston on alettava YAML frontmatter -lohkolla, joka on kahden rivin --- välissä ja sisältää kentät name ja description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Taidon nimen on oltava 1–64 merkkiä pitkä, se saa sisältää vain pieniä kirjaimia, numeroita ja yksittäisiä yhdysmerkkejä, eikä se saa alkaa tai päättyä yhdysmerkkiin</value>
+  </data>
 </root>

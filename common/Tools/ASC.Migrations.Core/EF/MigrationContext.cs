@@ -121,6 +121,7 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
     public DbSet<DbFilesMetadataValue> MetadataValues { get; set; }
     public DbSet<DbFilesAiProjectRoom> AiProjectRooms { get; set; }
+    public DbSet<DbFilesSkill> Skills { get; set; }
 
 
     public DbSet<IdentityAuthorization> IdentityAuthorizations { get; set; }
@@ -219,6 +220,7 @@ public class MigrationContext : DbContext
                 .AddDbFilesMetadataLink()
                 .AddDbFilesMetadataValue()
                 .AddDbFilesAiProjectRoom()
+                .AddDbFilesSkill()
                 .AddInstanceRegistration()
                 .AddAuditEvent()
                 .AddLoginEvents()
