@@ -39,9 +39,9 @@ namespace ASC.AI.Models.ResponseDto;
 public class AiSkillsDto
 {
     /// <summary>
-    /// The rooms, one entry per requested or linked room.
+    /// The rooms, sorted by title.
     /// </summary>
-    /// <example>[{"id": 17001, "title": "Brand voice", "available": true, "skills": []}]</example>
+    /// <example>[{"id": 17001, "title": "Brand voice", "skills": []}]</example>
     public required List<AiSkillsRoomDto> Rooms { get; set; }
 }
 
@@ -57,24 +57,18 @@ public class AiSkillsRoomDto
     public required int Id { get; set; }
 
     /// <summary>
-    /// Room title; null when the room is not available.
+    /// Room title.
     /// </summary>
     /// <example>Brand voice</example>
-    public string? Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
-    /// Room logo; null when the room is not available.
+    /// Room logo.
     /// </summary>
-    public LogoDto? Logo { get; set; }
+    public required LogoDto Logo { get; set; }
 
     /// <summary>
-    /// Whether the room exists, is an Instructions room and can be read by the caller.
-    /// </summary>
-    /// <example>true</example>
-    public required bool Available { get; set; }
-
-    /// <summary>
-    /// Skills of the room, sorted by file title; empty when the room is not available.
+    /// Skills of the room, sorted by file title.
     /// </summary>
     /// <example>[{"id": "9911", "name": "brand-voice", "description": "Writes marketing texts in the brand voice."}]</example>
     public required List<AiSkillDto> Skills { get; set; }
@@ -116,10 +110,9 @@ public partial class AiSkillsDtoMapper(RoomLogoManager roomLogoManager)
         {
             result.Rooms.Add(new AiSkillsRoomDto
             {
-                Id = room.RoomId,
-                Title = room.Room?.Title,
-                Logo = room.Room == null ? null : await roomLogoManager.GetLogoAsync(room.Room),
-                Available = room.Room != null,
+                Id = room.Room.Id,
+                Title = room.Room.Title,
+                Logo = await roomLogoManager.GetLogoAsync(room.Room),
                 Skills = Map(room.Skills)
             });
         }

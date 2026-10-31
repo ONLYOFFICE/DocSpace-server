@@ -71,13 +71,10 @@ public class AiProjectRoomService(
             .ToListAsync();
 
         var readable = await fileSecurity.FilterReadAsync(rooms.ToAsyncEnumerable())
-            .ToDictionaryAsync(r => r.Id, r => (Folder<int>)r);
+            .Select(r => (Folder<int>)r)
+            .ToListAsync();
 
-        var skills = readable.Count == 0
-            ? []
-            : await skillDao.GetSkillsAsync(tenantId, [.. readable.Keys]);
-
-        return [.. roomIds.Select(id => new RoomSkills(id, readable.GetValueOrDefault(id), skills.GetValueOrDefault(id) ?? []))];
+        return await GetRoomSkillsAsync(tenantId, readable);
     }
 
     public async Task<List<RoomSkills>> GetProjectSkillsAsync(int projectId)
@@ -86,9 +83,15 @@ public class AiProjectRoomService(
         await GetProjectAsync(projectId);
 
         var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, projectId, await globalFolderHelper.GetFolderAiHubAsync());
-        var rooms = await GetSkillsAsync(linked.Where(r => r.Value == FolderType.InstructionsRoom).Select(r => r.Key).ToHashSet());
+        var roomIds = linked.Where(r => r.Value == FolderType.InstructionsRoom).Select(r => r.Key).ToList();
+        if (roomIds.Count == 0)
+        {
+            return [];
+        }
 
-        return [.. rooms.OrderBy(r => r.Room.Title, StringComparer.CurrentCultureIgnoreCase).ThenBy(r => r.RoomId)];
+        var rooms = await daoFactory.GetFolderDao<int>().GetFoldersAsync(roomIds).ToListAsync();
+
+        return await GetRoomSkillsAsync(tenantId, rooms);
     }
 
     public async Task LinkRoomsAsync(int projectId, IReadOnlySet<int> roomIds)
@@ -158,6 +161,24 @@ public class AiProjectRoomService(
         await filesMessageService.SendAsync(MessageAction.RoomsUnlinkedFromAiProject, project, project.Title, string.Join(", ", titles));
 
         await socketManager.UpdateFolderAsync(project);
+    }
+
+    private async Task<List<RoomSkills>> GetRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)
+    {
+        if (rooms.Count == 0)
+        {
+            return [];
+        }
+
+        var skills = await skillDao.GetSkillsAsync(tenantId, rooms.Select(r => r.Id));
+
+        return
+        [
+            .. rooms
+                .OrderBy(r => r.Title, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(r => r.Id)
+                .Select(r => new RoomSkills(r, skills.GetValueOrDefault(r.Id) ?? []))
+        ];
     }
 
     private async Task<Folder<int>> GetProjectAsync(int projectId)

@@ -38,4 +38,4 @@ public record Skill(int RoomId, int FileId, string Title, string Name, string De
     public const int MaxPerRoom = 100;
 }
 
-public record RoomSkills(int RoomId, Folder<int> Room, List<Skill> Skills);
+public record RoomSkills(Folder<int> Room, List<Skill> Skills);

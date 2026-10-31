@@ -53,7 +53,6 @@ public class AiProjectSkillsTests(AspireAppFixture fixture) : AiProjectRoomsTest
 
         // Assert
         result.Rooms.Select(r => r.Id).Should().Equal(first, second);
-        result.Rooms.Should().AllSatisfy(r => r.Available.Should().BeTrue());
         result.Rooms[0].Skills.Select(s => s.Name).Should().Equal("brand-voice");
         result.Rooms[1].Skills.Select(s => s.Name).Should().Equal("pdf-review");
     }

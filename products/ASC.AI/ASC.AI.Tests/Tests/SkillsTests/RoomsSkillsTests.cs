@@ -51,7 +51,6 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         var room = result.Rooms.Should().ContainSingle().Subject;
         room.Id.Should().Be(roomId);
-        room.Available.Should().BeTrue();
         room.Title.Should().Be("Autotest Skills Catalog");
         room.Skills.Select(s => (s.Id, s.Name, s.Description)).Should().Equal(
             (first.ToString(), "brand-voice", "Writes in the brand voice"),
@@ -59,7 +58,7 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task GetSkills_EmptyRoom_ReturnsAvailableRoomWithoutSkills()
+    public async Task GetSkills_EmptyRoom_ReturnsRoomWithoutSkills()
     {
         // Arrange
         var roomId = await CreateInstructionsRoomAsync();
@@ -69,7 +68,7 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         var room = result.Rooms.Should().ContainSingle().Subject;
-        room.Available.Should().BeTrue();
+        room.Id.Should().Be(roomId);
         room.Skills.Should().BeEmpty();
     }
 
@@ -92,21 +91,20 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task GetSkills_UnknownRoom_ReturnsUnavailableRoom()
+    public async Task GetSkills_UnknownRoom_LeavesItOut()
     {
+        // Arrange
+        var roomId = await CreateInstructionsRoomAsync();
+
         // Act
-        var result = await GetRoomsSkillsAsync(int.MaxValue);
+        var result = await GetRoomsSkillsAsync(roomId, int.MaxValue);
 
         // Assert
-        var room = result.Rooms.Should().ContainSingle().Subject;
-        room.Id.Should().Be(int.MaxValue);
-        room.Available.Should().BeFalse();
-        room.Title.Should().BeNull();
-        room.Skills.Should().BeEmpty();
+        result.Rooms.Select(r => r.Id).Should().Equal(roomId);
     }
 
     [Fact]
-    public async Task GetSkills_RoomOfAnotherType_ReturnsUnavailableRoom()
+    public async Task GetSkills_RoomOfAnotherType_LeavesItOut()
     {
         // Arrange
         var agentRoomId = await CreateRoomAsync();
@@ -115,11 +113,11 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
         var result = await GetRoomsSkillsAsync(agentRoomId);
 
         // Assert
-        result.Rooms.Should().ContainSingle().Which.Available.Should().BeFalse();
+        result.Rooms.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetSkills_RoomTheCallerCannotRead_ReturnsUnavailableRoom()
+    public async Task GetSkills_RoomTheCallerCannotRead_LeavesItOut()
     {
         // Arrange
         var roomId = await CreateInstructionsRoomAsync();
@@ -132,10 +130,7 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
         var result = await GetRoomsSkillsAsync(roomId);
 
         // Assert
-        var room = result.Rooms.Should().ContainSingle().Subject;
-        room.Available.Should().BeFalse();
-        room.Title.Should().BeNull();
-        room.Skills.Should().BeEmpty();
+        result.Rooms.Should().BeEmpty();
     }
 
     [Fact]

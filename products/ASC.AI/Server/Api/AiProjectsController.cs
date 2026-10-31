@@ -218,7 +218,7 @@ public class AiProjectsController(
     /// <remarks>
     /// Returns the skills of the Instructions rooms linked to an AI project, rooms sorted by title: one entry per
     /// Markdown file in the room root, with the name and the description from its YAML frontmatter, sorted by file
-    /// title. A linked room the caller cannot read is listed with `available: false` and no skills.
+    /// title. Reading the project is enough to read the skills of every linked room.
     /// </remarks>
     /// <summary>Get AI project skills</summary>
     /// <path>api/2.0/ai/projects/{id}/skills</path>

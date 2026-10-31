@@ -42,10 +42,9 @@ public class AiRoomsController(
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the skills of the given Instructions rooms in one call, one entry per distinct room id: a skill is a
-    /// Markdown file in the room root, with the name and the description from its YAML frontmatter, sorted by file
-    /// title. A room that does not exist, is not an Instructions room or cannot be read by the caller is listed with
-    /// `available: false` and no skills.
+    /// Returns the skills of the given Instructions rooms in one call, rooms sorted by title: a skill is a Markdown
+    /// file in the room root, with the name and the description from its YAML frontmatter, sorted by file title. A
+    /// room that does not exist, is not an Instructions room or cannot be read by the caller is left out.
     /// </remarks>
     /// <summary>Get the skills of Instructions rooms</summary>
     /// <path>api/2.0/ai/rooms/skills</path>
