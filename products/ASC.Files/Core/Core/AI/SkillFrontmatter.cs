@@ -47,6 +47,8 @@ public sealed partial class SkillFrontmatter
     public const int MaxNameLength = 64;
     public const int MaxDescriptionLength = 1024;
 
+    public const string Extension = ".md";
+
     private const string NameKey = "name";
     private const string DescriptionKey = "description";
 
@@ -59,6 +61,11 @@ public sealed partial class SkillFrontmatter
 
     public required string Name { get; init; }
     public required string Description { get; init; }
+
+    public static bool IsSkillFile(string title)
+    {
+        return FileUtility.GetFileExtension(title) == Extension;
+    }
 
     public static SkillFrontmatterError TryParse(ReadOnlySpan<byte> head, out SkillFrontmatter frontmatter)
     {

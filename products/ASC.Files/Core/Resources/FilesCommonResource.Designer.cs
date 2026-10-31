@@ -619,6 +619,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only Markdown files (.md) can be added to an instructions room.
+        /// </summary>
+        public static string ErrorMessage_InstructionsRoomMarkdownOnly {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InstructionsRoomMarkdownOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid folder ID.
         /// </summary>
         public static string ErrorMessage_InvalidFolderId {
@@ -1038,6 +1047,33 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_SharpBoxException {
             get {
                 return ResourceManager.GetString("ErrorMessage_SharpBoxException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill description must be 1 to 1024 characters long and must not contain XML tags.
+        /// </summary>
+        public static string ErrorMessage_SkillDescriptionInvalid {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillDescriptionInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill file must start with a YAML frontmatter block between two --- lines, with the name and description fields.
+        /// </summary>
+        public static string ErrorMessage_SkillFrontmatterMissing {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillFrontmatterMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill name must be 1 to 64 characters long, contain only lowercase letters, digits and single hyphens, and must not start or end with a hyphen.
+        /// </summary>
+        public static string ErrorMessage_SkillNameInvalid {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillNameInvalid", resourceCulture);
             }
         }
         
