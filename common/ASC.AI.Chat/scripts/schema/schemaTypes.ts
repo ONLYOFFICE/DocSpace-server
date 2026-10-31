@@ -789,13 +789,21 @@ type AiProjectLinkedRoom = {
 export type AiProjectSkill = {
   /** The file id. */
   id: string;
-  /** The frontmatter name, what the model sees; the file name without `.md` when it has none. */
+  /** The frontmatter name, what the model sees. */
   name: string;
   /** The frontmatter description. */
   description: string;
 };
-/** An Instructions room with its skills. */
-export type AiProjectSkillsRoom = AiProjectLinkedRoom & { skills: AiProjectSkill[] };
+/** An Instructions room with its skills, as the .NET skills catalog lists it. */
+export type AiProjectSkillsRoom = {
+  /** The room id. */
+  id: number;
+  /** The room title. */
+  title: string;
+  /** The room logo, as the room DTO carries it. */
+  logo: Record<string, unknown> | null;
+  skills: AiProjectSkill[];
+};
 export type Res_aiProjectsSkills = AiProjectEnvelopeBase & {
   response: { rooms: AiProjectSkillsRoom[] };
 };

@@ -2110,7 +2110,7 @@
         },
         "name": {
           "type": "string",
-          "description": "The frontmatter name, what the model sees; the file name without `.md` when it has none."
+          "description": "The frontmatter name, what the model sees."
         },
         "description": {
           "type": "string",
@@ -2127,45 +2127,37 @@
     },
     "AiProjectSkillsRoom": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
-        "skills": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectSkill"
-          }
-        },
         "id": {
           "type": "number",
           "description": "The room id."
         },
         "title": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The room title; `null` when the room is not available."
+          "type": "string",
+          "description": "The room title."
         },
         "logo": {
-          "description": "The room logo, as the room DTO carries it; `null` when the room is not available.",
+          "description": "The room logo, as the room DTO carries it.",
           "type": [
             "object",
             "null"
           ]
         },
-        "available": {
-          "type": "boolean",
-          "description": "`false` when the room is gone or the caller can no longer read it."
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiProjectSkill"
+          }
         }
       },
       "required": [
-        "available",
         "id",
+        "title",
         "logo",
-        "skills",
-        "title"
+        "skills"
       ],
-      "description": "An Instructions room with its skills."
+      "additionalProperties": false,
+      "description": "An Instructions room with its skills, as the.NET skills catalog lists it."
     },
     "AiProjectKnowledgeFile": {
       "type": "object",
