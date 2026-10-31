@@ -41,9 +41,10 @@ namespace ASC.Files.Tests.Tests._01_Files.CopySave;
 /// that fast path (<c>FileStorageService.CreateNewFileAsync</c>, a template-based copy) only when
 /// the source and destination extensions match; any mismatch — <c>toForm</c>, or a non-standard
 /// extension such as <c>.md</c> — falls through to <c>FileConverter.ExecAsync</c>, which asks the
-/// ONLYOFFICE document server for a real conversion. The integration-test AppHost provisions no
-/// document-server resource, so those cases cannot pass here; see the porting report for the two
-/// TS cases dropped for this reason (and one already <c>test.skip</c>'d in the source suite).
+/// ONLYOFFICE document server for a real conversion. The integration-test host runs one that reaches
+/// the portals, so those cases (the format pairs of <c>conversion.spec.ts</c>, <c>toForm</c>, bug 80745)
+/// can be ported; they are not yet. A <c>.docxf</c> → <c>.pdf</c> form is made this way by
+/// <c>FormsTestBase.ConvertToOoFormAsync</c>.
 /// </remarks>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]

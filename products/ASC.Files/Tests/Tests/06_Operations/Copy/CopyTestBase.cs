@@ -113,8 +113,9 @@ public abstract class CopyTestBase(
     /// involved: a new .pdf goes through <c>FileStorageService.CreateNewFileAsync</c>, which copies
     /// the built-in blank-PDF template, and that template itself carries the <c>ONLYOFFICEFORM</c>
     /// signature (the same fact the <c>01_Files/Forms</c> and <c>01_Files/FormFilling</c> suites rely
-    /// on). The original TypeScript helper converted .docx → .docxf → .pdf through <c>copyas</c>,
-    /// which needs a live document server the integration-test AppHost does not run.
+    /// on). The original TypeScript helper converted .docx → .docxf → .pdf through <c>copyas</c>; the
+    /// template is kept on purpose, since these suites copy a form rather than make one, and it needs no
+    /// document server. The converted form is checked in <c>01_Files/Forms/IsFormPdfTests</c>.
     /// </summary>
     protected async Task<int> CreateOoForm(int folderId)
     {

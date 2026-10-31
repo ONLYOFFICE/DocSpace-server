@@ -43,7 +43,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// Every test has the owner subscribe to the same event as a control: one publication serves both, so once the
 /// owner's record is there the other one would be too. The subscription under test is created first, which puts
 /// it before the control in the order the publication walks them. form.submit is not covered: it is published from
-/// the Document Server save callback, and the integration-test profile runs no Document Server.
+/// the Document Server save callback for a filled form, and nothing here drives an editor session to send one.
 /// </remarks>
 [Trait("Category", "Settings")]
 public class WebhookPublishAccessTests(
