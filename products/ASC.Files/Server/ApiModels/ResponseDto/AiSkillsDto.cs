@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
 /// Instructions rooms with their skills.

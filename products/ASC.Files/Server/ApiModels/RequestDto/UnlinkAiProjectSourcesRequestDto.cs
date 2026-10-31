@@ -31,26 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.Projects;
+namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
 /// Rooms to unlink from the AI project.
 /// </summary>
-public class UnlinkAiProjectRoomsRequest
+public class UnlinkAiProjectSourcesRequest
 {
     /// <summary>
     /// IDs of the rooms to unlink. IDs that are not linked to the project are ignored.
     /// </summary>
     /// <example>[17001, 17020]</example>
     [MinLength(1)]
-    [MaxLength(2 * AiProjectRoomService.MaxRoomsPerType)]
+    [MaxLength(2 * AiHubService.MaxRoomsPerType)]
     public required HashSet<int> RoomIds { get; set; }
 }
 
 /// <summary>
 /// Request to unlink rooms from an AI project.
 /// </summary>
-public class UnlinkAiProjectRoomsRequestDto
+public class UnlinkAiProjectSourcesRequestDto
 {
     /// <summary>
     /// ID of the project.
@@ -63,5 +63,5 @@ public class UnlinkAiProjectRoomsRequestDto
     /// The rooms to unlink.
     /// </summary>
     [FromBody]
-    public required UnlinkAiProjectRoomsRequest Rooms { get; set; }
+    public required UnlinkAiProjectSourcesRequest Rooms { get; set; }
 }

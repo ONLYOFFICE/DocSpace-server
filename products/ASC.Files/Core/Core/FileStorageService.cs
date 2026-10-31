@@ -406,7 +406,6 @@ public class FileStorageService //: IFileStorageService
             // so the requested FormTemplates area must be preserved to keep the split.
             FolderType.RoomTemplates => searchArea == SearchArea.FormTemplates ? SearchArea.FormTemplates : SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
-            FolderType.AiProjects => SearchArea.AiProjects,
             FolderType.AiHub => SearchArea.AiHub,
             FolderType.Forms => SearchArea.Forms,
             _ => searchArea
@@ -671,6 +670,12 @@ public class FileStorageService //: IFileStorageService
         var tenantId = tenantManager.GetCurrentTenantId();
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
+        if (folderType.IsAiHubRoom() && (privacy || indexing.HasValue || lifetime != null || denyDownload.HasValue || watermark != null || chatSettings != null ||
+                                          sendFormToExternalDB.HasValue || saveFormAsXLSX.HasValue || (quota.HasValue && folderType == FolderType.AiProjectRoom)))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(roomType));
+        }
+
         await CheckPublicRoomCreationAsync(folderType);
         await CheckKnowledgeRoomCreationAsync(folderType);
 
@@ -710,13 +715,6 @@ public class FileStorageService //: IFileStorageService
                 return await InternalCreateFolderAsync(parentId, title, FolderType.AiRoom, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX);
             }
         });
-    }
-
-    public async Task<Folder<int>> CreateAiProjectAsync(string title, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
-    {
-        var parentId = await globalFolderHelper.GetFolderAiProjectsAsync();
-
-        return await CreateRoomAsync(() => InternalCreateFolderAsync(parentId, title, FolderType.AiProjectRoom, false, null, null, null, null, null, color, cover, tags, logo));
     }
 
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
@@ -768,7 +766,7 @@ public class FileStorageService //: IFileStorageService
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
-        if (folderType.IsAiHubRoom() || folderType == FolderType.AiProjectRoom)
+        if (folderType.IsAiHubRoom())
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1190,12 +1188,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
-        }
-
-        if (isRoom && (parent.FolderType == FolderType.AiProjects) != (folderType == FolderType.AiProjectRoom))
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1514,6 +1507,13 @@ public class FileStorageService //: IFileStorageService
         // ArgumentException is what the middleware maps to 400; BadHttpRequestException is not in
         // that table and would surface as 500.
         if (updateData.ChatSettings != null && folder.FolderType != FolderType.AiRoom)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
+        }
+
+        if (folder.FolderType.IsAiHubRoom() && (updateData.Indexing.HasValue || updateData.DenyDownload.HasValue || updateData.Lifetime != null || updateData.Watermark != null ||
+                                                 updateData.SendFormToExternalDB.HasValue || updateData.SaveFormAsXLSX.HasValue ||
+                                                 (updateData.Quota.HasValue && folder.FolderType == FolderType.AiProjectRoom)))
         {
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
         }
@@ -1915,7 +1915,6 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.AiAgents &&
-                            folder.FolderType != FolderType.AiProjects &&
                             folder.FolderType != FolderType.AiProjectRoom &&
                             folder.FolderType != FolderType.AiHub &&
                             folder.FolderType != FolderType.RoomTemplates &&
@@ -3691,11 +3690,10 @@ public class FileStorageService //: IFileStorageService
         var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiHubAsync()));
-        var projects = await GetEntriesAsync(await globalFolderHelper.GetFolderAiProjectsAsync());
 
-        var ids = entries.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
-        var thirdIds = entries.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
-        var projectIds = projects.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
+        var ids = entries.OfType<Folder<int>>().Where(f => f.FolderType != FolderType.AiProjectRoom).Select(f => f.Id);
+        var thirdIds = entries.OfType<Folder<string>>().Select(f => f.Id);
+        var projectIds = entries.OfType<Folder<int>>().Where(f => f.FolderType == FolderType.AiProjectRoom).Select(f => f.Id);
 
         await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
@@ -5020,9 +5018,12 @@ public class FileStorageService //: IFileStorageService
                 var internalFolders = await daoFactory.GetFolderDao<int>().GetFoldersAsync(internalIds).ToListAsync();
 
                 var agentTagsCount = internalFolders.Count(x => x.IsAgent);
-                var roomTagsCount = tags.Count - agentTagsCount;
+                var aiHubTagsCount = internalFolders.Count(x => x.RootFolderType == FolderType.AiHub);
+                var roomTagsCount = tags.Count - agentTagsCount - aiHubTagsCount;
 
-                var tagsCount = room.IsAgent ? agentTagsCount : roomTagsCount;
+                var tagsCount = room.IsAgent
+                    ? agentTagsCount
+                    : room.RootFolderType == FolderType.AiHub ? aiHubTagsCount : roomTagsCount;
 
                 if (tagsCount >= fileUtilityConfiguration.MaxPinnedRooms)
                 {
@@ -5360,7 +5361,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents and not FolderType.AiProjects and not FolderType.AiHub)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents and not FolderType.AiHub)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }

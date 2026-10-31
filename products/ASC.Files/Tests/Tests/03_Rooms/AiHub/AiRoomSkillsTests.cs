@@ -31,14 +31,35 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.AiProjectsTests;
 
-[Trait("Category", "Read")]
-[Trait("Feature", "AI/Projects")]
-public class AiProjectSkillsTests(AspireAppFixture fixture) : AiProjectRoomsTestBase(fixture)
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
+
+/// <summary>
+/// The skills of one room of the AI rooms section: an Instructions room answers its own skills, an AI project the
+/// skills of the Instructions rooms linked to it.
+/// </summary>
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class AiRoomSkillsTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
-    public async Task GetSkills_LinkedRooms_ReturnsThemSortedByTitleWithTheirSkills()
+    public async Task GetSkills_InstructionsRoom_ReturnsItsSkills()
+    {
+        // Arrange
+        var roomId = await CreateInstructionsRoomAsync("Autotest Own Skills");
+        var fileId = await UploadSkillAsync(roomId, "brand-voice", "Writes in the brand voice");
+
+        // Act
+        var result = await GetRoomSkillsAsync(roomId);
+
+        // Assert
+        var room = result.Rooms.Should().ContainSingle().Subject;
+        room.Id.Should().Be(roomId);
+        room.Skills.Select(s => (s.Id, s.Name, s.Description)).Should().Equal((fileId.ToString(), "brand-voice", "Writes in the brand voice"));
+    }
+
+    [Fact]
+    public async Task GetSkills_ProjectWithLinkedRooms_ReturnsThemSortedByTitleWithTheirSkills()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
@@ -46,10 +67,10 @@ public class AiProjectSkillsTests(AspireAppFixture fixture) : AiProjectRoomsTest
         var first = await CreateInstructionsRoomAsync("Autotest A Instructions");
         await UploadSkillAsync(first, "brand-voice");
         await UploadSkillAsync(second, "pdf-review");
-        using var linked = await LinkRoomsAsync(projectId, second, first);
+        using var linked = await LinkSourcesAsync(projectId, second, first);
 
         // Act
-        var result = await GetProjectSkillsAsync(projectId);
+        var result = await GetRoomSkillsAsync(projectId);
 
         // Assert
         result.Rooms.Select(r => r.Id).Should().Equal(first, second);
@@ -58,48 +79,70 @@ public class AiProjectSkillsTests(AspireAppFixture fixture) : AiProjectRoomsTest
     }
 
     [Fact]
-    public async Task GetSkills_NoLinkedRooms_ReturnsEmptyList()
+    public async Task GetSkills_ProjectWithoutLinkedRooms_ReturnsEmptyList()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        var result = await GetProjectSkillsAsync(projectId);
+        var result = await GetRoomSkillsAsync(projectId);
 
         // Assert
         result.Rooms.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetSkills_UnknownProject_Returns404()
+    public async Task GetSkills_AgentRoom_Returns404()
     {
+        // Arrange
+        var agentId = (await CreateAiRoom("Autotest Agent")).Id;
+
         // Act
-        using var response = await _ai.GetAsync($"{AiProjectsPath}/{int.MaxValue}/skills", TestContext.Current.CancellationToken);
+        using var response = await GetRoomSkillsResponseAsync(agentId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task GetSkills_UserWithoutAccess_Returns403()
+    public async Task GetSkills_UnknownRoom_Returns404()
+    {
+        // Act
+        using var response = await GetRoomSkillsResponseAsync(int.MaxValue);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetSkills_ProjectUserWithoutAccess_Returns403()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
-        var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(user);
+        var user = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
 
         // Act
-        using var response = await _ai.GetAsync($"{AiProjectsPath}/{projectId}/skills", TestContext.Current.CancellationToken);
+        using var response = await GetRoomSkillsResponseAsync(projectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    private async Task<AiSkillsDto> GetProjectSkillsAsync(int projectId)
+    [Fact]
+    public async Task GetSkills_InstructionsRoomUserWithoutAccess_Returns403()
     {
-        using var response = await _ai.GetAsync($"{AiProjectsPath}/{projectId}/skills", TestContext.Current.CancellationToken);
+        // Arrange
+        var roomId = await CreateInstructionsRoomAsync();
 
-        return await _ai.ReadAsync<AiSkillsDto>(response, TestContext.Current.CancellationToken);
+        var user = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+
+        // Act
+        using var response = await GetRoomSkillsResponseAsync(roomId);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

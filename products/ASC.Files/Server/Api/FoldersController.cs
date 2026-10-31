@@ -1148,7 +1148,6 @@ public class FoldersControllerCommon(
         {
             yield return await globalFolderHelper.FolderAiAgentsAsync;
             yield return await globalFolderHelper.FolderAiHubAsync;
-            yield return await globalFolderHelper.FolderAiProjectsAsync;
         }
     }
 }

@@ -31,30 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The rooms linked to an AI project.
+/// The sources of an AI project: the Instructions and Knowledge rooms linked to it.
 /// </summary>
-public class AiProjectRoomsDto
+public class AiProjectSourcesDto
 {
     /// <summary>
     /// Linked Instructions rooms, sorted by title.
     /// </summary>
     /// <example>[{"id": 17001, "title": "Brand voice"}]</example>
-    public required List<AiProjectRoomDto> InstructionsRooms { get; set; }
+    public required List<AiProjectSourceDto> InstructionsRooms { get; set; }
 
     /// <summary>
     /// Linked Knowledge rooms, sorted by title.
     /// </summary>
     /// <example>[{"id": 17020, "title": "Product catalogue"}]</example>
-    public required List<AiProjectRoomDto> KnowledgeRooms { get; set; }
+    public required List<AiProjectSourceDto> KnowledgeRooms { get; set; }
 }
 
 /// <summary>
-/// A room linked to an AI project.
+/// A room linked to an AI project as its source.
 /// </summary>
-public class AiProjectRoomDto
+public class AiProjectSourceDto
 {
     /// <summary>
     /// ID of the room.
@@ -71,16 +71,16 @@ public class AiProjectRoomDto
     /// <summary>
     /// Room logo.
     /// </summary>
-    public LogoDto? Logo { get; set; }
+    public LogoDto Logo { get; set; }
 }
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public partial class AiProjectRoomsDtoMapper(RoomLogoManager roomLogoManager)
+public partial class AiProjectSourcesDtoMapper(RoomLogoManager roomLogoManager)
 {
-    public async Task<AiProjectRoomsDto> MapAsync(IEnumerable<Folder<int>> rooms)
+    public async Task<AiProjectSourcesDto> MapAsync(IEnumerable<Folder<int>> rooms)
     {
-        var result = new AiProjectRoomsDto { InstructionsRooms = [], KnowledgeRooms = [] };
+        var result = new AiProjectSourcesDto { InstructionsRooms = [], KnowledgeRooms = [] };
 
         foreach (var room in rooms.OrderBy(r => r.Title, StringComparer.CurrentCultureIgnoreCase).ThenBy(r => r.Id))
         {
@@ -93,6 +93,6 @@ public partial class AiProjectRoomsDtoMapper(RoomLogoManager roomLogoManager)
         return result;
     }
 
-    [MapperIgnoreTarget(nameof(AiProjectRoomDto.Logo))]
-    private partial AiProjectRoomDto Map(Folder<int> room);
+    [MapperIgnoreTarget(nameof(AiProjectSourceDto.Logo))]
+    private partial AiProjectSourceDto Map(Folder<int> room);
 }

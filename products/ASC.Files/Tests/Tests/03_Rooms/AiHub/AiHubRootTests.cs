@@ -42,11 +42,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
-public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AiHubRootTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
-    private const int InstructionsRoomType = 10;
-    private const int AiHubFolderType = 42;
-
     [Fact]
     public async Task CreateRoom_Instructions_LandsUnderAiHubRoot()
     {
@@ -54,7 +51,7 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
         await _filesClient.Authenticate(Owner);
 
         // Act
-        var room = await CreateInstructionsRoomAsync("Autotest Instructions Root");
+        var room = await CreateHubRoomAsync(InstructionsRoomType, "Autotest Instructions Root");
         var section = await GetAiHubSectionAsync();
 
         // Assert
@@ -67,7 +64,7 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var roomId = await CreateInstructionsRoomIdAsync("Autotest Instructions Listing");
+        var roomId = await CreateInstructionsRoomAsync("Autotest Instructions Listing");
 
         // Act
         var aiHub = IdsOf(await GetAiHubSectionAsync());
@@ -83,7 +80,7 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var roomId = await CreateInstructionsRoomIdAsync("Autotest Instructions Archive");
+        var roomId = await CreateInstructionsRoomAsync("Autotest Instructions Archive");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -98,7 +95,7 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var roomId = await CreateInstructionsRoomIdAsync("Autotest Instructions Template");
+        var roomId = await CreateInstructionsRoomAsync("Autotest Instructions Template");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -128,7 +125,7 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
-        var roomId = await CreateInstructionsRoomIdAsync("Autotest Instructions Delete");
+        var roomId = await CreateInstructionsRoomAsync("Autotest Instructions Delete");
 
         // Act
         await _roomsApi.DeleteRoomAsync(roomId, new DeleteRoomRequest(false), TestContext.Current.CancellationToken);
@@ -140,31 +137,5 @@ public class AiHubRootTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         exception.ErrorCode.Should().Be(404);
         IdsOf(await GetAiHubSectionAsync()).Should().NotContain(roomId);
-    }
-
-    private async Task<int> CreateInstructionsRoomIdAsync(string title)
-    {
-        return (await CreateInstructionsRoomAsync(title)).GetProperty("id").GetInt32();
-    }
-
-    private async Task<JsonElement> CreateInstructionsRoomAsync(string title)
-    {
-        var files = new RawApiClient(_filesClient);
-        using var response = await files.PostAsync("api/2.0/files/rooms", new { title, roomType = InstructionsRoomType }, TestContext.Current.CancellationToken);
-
-        return await files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
-    }
-
-    private async Task<JsonElement> GetAiHubSectionAsync()
-    {
-        var files = new RawApiClient(_filesClient);
-        using var response = await files.GetAsync("api/2.0/files/rooms?searchArea=AiHub", TestContext.Current.CancellationToken);
-
-        return await files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
-    }
-
-    private static List<int> IdsOf(JsonElement section)
-    {
-        return section.GetProperty("folders").EnumerateArray().Select(f => f.GetProperty("id").GetInt32()).ToList();
     }
 }

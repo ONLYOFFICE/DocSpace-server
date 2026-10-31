@@ -82,9 +82,6 @@ public class FilesMappingAction(TenantUtil tenantUtil)
             case FolderType.AiAgents:
                 destination.Title = FilesUCResource.AiAgents;
                 break;
-            case FolderType.AiProjects:
-                destination.Title = FilesUCResource.AiProjects;
-                break;
             case FolderType.AiHub:
                 destination.Title = FilesUCResource.AiHub;
                 break;

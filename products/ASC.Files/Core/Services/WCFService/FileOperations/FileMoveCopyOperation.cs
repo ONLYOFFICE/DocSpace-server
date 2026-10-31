@@ -297,7 +297,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                 try
                                 {
-                                    if (isRoomCopying)
+                                    if (isRoomCopying && toFolder.FolderType == FolderType.VirtualRooms)
                                     {
                                         roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
                                         await countRoomChecker.CheckAppend();

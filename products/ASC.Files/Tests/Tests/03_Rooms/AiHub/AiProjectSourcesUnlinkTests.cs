@@ -31,58 +31,97 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.AiProjectsTests;
 
-[Trait("Category", "Update")]
-[Trait("Feature", "AI/Projects")]
-public class AiProjectRoomsUnlinkTests(AspireAppFixture fixture) : AiProjectRoomsTestBase(fixture)
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
+
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class AiProjectSourcesUnlinkTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
-    public async Task UnlinkRooms_AsOwner_RemovesOnlyListedRooms()
+    public async Task UnlinkSources_AsOwner_RemovesOnlyListedRooms()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var removed = await CreateInstructionsRoomAsync();
         var kept = await CreateInstructionsRoomAsync();
         var notLinked = await CreateInstructionsRoomAsync();
-        using var linked = await LinkRoomsAsync(projectId, removed, kept);
+        using var linked = await LinkSourcesAsync(projectId, removed, kept);
 
         // Act
-        using var response = await UnlinkRoomsAsync(projectId, removed, notLinked, int.MaxValue);
+        using var response = await UnlinkSourcesAsync(projectId, removed, notLinked, int.MaxValue);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await GetInstructionsRoomIdsAsync(projectId)).Should().Equal(kept);
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().Equal(kept);
     }
 
     [Fact]
-    public async Task UnlinkRooms_EmptyRoomIds_Returns400()
+    public async Task UnlinkSources_EmptyRoomIds_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        using var response = await UnlinkRoomsAsync(projectId);
+        using var response = await UnlinkSourcesAsync(projectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task UnlinkRooms_UserWithoutAccess_Returns403()
+    public async Task UnlinkSources_UserWithoutAccess_Returns403()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var room = await CreateInstructionsRoomAsync();
-        using var linked = await LinkRoomsAsync(projectId, room);
+        using var linked = await LinkSourcesAsync(projectId, room);
 
-        var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(user);
+        var user = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
 
         // Act
-        using var response = await UnlinkRoomsAsync(projectId, room);
+        using var response = await UnlinkSourcesAsync(projectId, room);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeletedRoom_LosesLink()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var deleted = await CreateInstructionsRoomAsync();
+        var kept = await CreateInstructionsRoomAsync();
+        using var linked = await LinkSourcesAsync(projectId, deleted, kept);
+
+        // Act
+        await DeleteRoomAndWaitAsync(deleted);
+
+        // Assert
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().Equal(kept);
+    }
+
+    [Fact]
+    public async Task LinkSources_OverLimit_Returns400AndKeepsExistingLinks()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+        var rooms = new List<int>();
+        for (var i = 0; i <= 20; i++)
+        {
+            rooms.Add(await CreateInstructionsRoomAsync($"Autotest Instructions {i:D3}"));
+        }
+
+        using var filled = await LinkSourcesAsync(projectId, [.. rooms.Take(20)]);
+
+        // Act
+        using var response = await LinkSourcesAsync(projectId, rooms[20]);
+
+        // Assert
+        filled.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().HaveCount(20).And.NotContain(rooms[20]);
     }
 }

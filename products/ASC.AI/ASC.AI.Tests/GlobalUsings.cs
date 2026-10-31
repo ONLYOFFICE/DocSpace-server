@@ -36,7 +36,6 @@ extern alias ASCAi;
 global using System.Diagnostics;
 global using System.Net;
 global using System.Net.Http.Json;
-global using System.Text;
 global using System.Text.Json;
 
 global using ASC.AI.Integration.Profiles;
@@ -53,19 +52,12 @@ global using FluentAssertions;
 
 global using Xunit;
 
-global using AiSkillsDto = ASCAi::ASC.AI.Models.ResponseDto.AiSkillsDto;
-global using ApiException = DocSpace.API.SDK.Client.ApiException;
-global using BatchRequestDto = DocSpace.API.SDK.Model.BatchRequestDto;
 global using ChatContextDto = ASCAi::ASC.AI.Models.ResponseDto.ChatContextDto;
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
-global using DeleteBatchRequestDto = DocSpace.API.SDK.Model.DeleteBatchRequestDto;
-global using DeleteRoomRequest = DocSpace.API.SDK.Model.DeleteRoomRequest;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
-global using FileConflictResolveType = DocSpace.API.SDK.Model.FileConflictResolveType;
-global using FileOperationArrayWrapper = DocSpace.API.SDK.Model.FileOperationArrayWrapper;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;

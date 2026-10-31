@@ -31,11 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.SkillsTests;
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
-[Trait("Category", "Read")]
-[Trait("Feature", "AI/Skills")]
-public class RoomsSkillsLifecycleTests(AspireAppFixture fixture) : BaseTest(fixture)
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class RoomsSkillsLifecycleTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
     public async Task NewVersion_ReplacesTheSkill()
@@ -59,7 +59,7 @@ public class RoomsSkillsLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
     {
         // Arrange
         var roomId = await CreateInstructionsRoomAsync();
-        var fileId = await UploadSkillAsync(await GetMyDocumentsFolderIdAsync(), "pdf-review");
+        var fileId = await UploadSkillAsync(await GetUserFolderIdAsync(Owner), "pdf-review");
 
         // Act
         await MoveFileAsync(roomId, fileId);
@@ -77,7 +77,7 @@ public class RoomsSkillsLifecycleTests(AspireAppFixture fixture) : BaseTest(fixt
         var fileId = await UploadSkillAsync(roomId, "pdf-review");
 
         // Act
-        await MoveFileAsync(await GetMyDocumentsFolderIdAsync(), fileId);
+        await MoveFileAsync(await GetUserFolderIdAsync(Owner), fileId);
         var result = await GetRoomsSkillsAsync(roomId);
 
         // Assert

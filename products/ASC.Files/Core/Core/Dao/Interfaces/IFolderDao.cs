@@ -448,14 +448,6 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
 
     /// <summary>
-    /// Returns id folder "AiProjects"
-    /// Only in TMFolderDao
-    /// </summary>
-    /// <param name="createIfNotExists"></param>
-    /// <returns></returns>
-    Task<T> GetFolderIDAiProjectsAsync(bool createIfNotExists);
-
-    /// <summary>
     /// Returns id folder "AiHub"
     /// Only in TMFolderDao
     /// </summary>

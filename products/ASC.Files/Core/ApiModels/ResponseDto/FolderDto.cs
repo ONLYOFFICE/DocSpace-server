@@ -575,7 +575,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents or FolderType.AiProjects or FolderType.AiHub))
+        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents or FolderType.AiHub))
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

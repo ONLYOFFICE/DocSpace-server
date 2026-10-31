@@ -35,7 +35,7 @@
 namespace ASC.Files.Core.Core.AI;
 
 [Scope]
-public class AiProjectRoomService(
+public class AiHubService(
     IDaoFactory daoFactory,
     AiProjectRoomDao aiProjectRoomDao,
     SkillDao skillDao,
@@ -48,7 +48,7 @@ public class AiProjectRoomService(
 {
     public const int MaxRoomsPerType = 20;
 
-    public async Task<List<Folder<int>>> GetRoomsAsync(int projectId)
+    public async Task<List<Folder<int>>> GetSourcesAsync(int projectId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         await GetProjectAsync(projectId);
@@ -74,15 +74,30 @@ public class AiProjectRoomService(
             .Select(r => (Folder<int>)r)
             .ToListAsync();
 
-        return await GetRoomSkillsAsync(tenantId, readable);
+        return await BuildRoomSkillsAsync(tenantId, readable);
     }
 
-    public async Task<List<RoomSkills>> GetProjectSkillsAsync(int projectId)
+    public async Task<List<RoomSkills>> GetSkillsAsync(int roomId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        await GetProjectAsync(projectId);
 
-        var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, projectId, await globalFolderHelper.GetFolderAiHubAsync());
+        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId);
+        if (room is not { FolderType: FolderType.InstructionsRoom or FolderType.AiProjectRoom, RootFolderType: FolderType.AiHub })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        if (room.FolderType == FolderType.InstructionsRoom)
+        {
+            return await BuildRoomSkillsAsync(tenantId, [room]);
+        }
+
+        var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, roomId, await globalFolderHelper.GetFolderAiHubAsync());
         var roomIds = linked.Where(r => r.Value == FolderType.InstructionsRoom).Select(r => r.Key).ToList();
         if (roomIds.Count == 0)
         {
@@ -91,10 +106,10 @@ public class AiProjectRoomService(
 
         var rooms = await daoFactory.GetFolderDao<int>().GetFoldersAsync(roomIds).ToListAsync();
 
-        return await GetRoomSkillsAsync(tenantId, rooms);
+        return await BuildRoomSkillsAsync(tenantId, rooms);
     }
 
-    public async Task LinkRoomsAsync(int projectId, IReadOnlySet<int> roomIds)
+    public async Task LinkSourcesAsync(int projectId, IReadOnlySet<int> roomIds)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var project = await GetProjectForEditAsync(projectId);
@@ -134,7 +149,7 @@ public class AiProjectRoomService(
         await socketManager.UpdateFolderAsync(project);
     }
 
-    public async Task UnlinkRoomsAsync(int projectId, IReadOnlySet<int> roomIds)
+    public async Task UnlinkSourcesAsync(int projectId, IReadOnlySet<int> roomIds)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var project = await GetProjectForEditAsync(projectId);
@@ -163,7 +178,7 @@ public class AiProjectRoomService(
         await socketManager.UpdateFolderAsync(project);
     }
 
-    private async Task<List<RoomSkills>> GetRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)
+    private async Task<List<RoomSkills>> BuildRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)
     {
         if (rooms.Count == 0)
         {

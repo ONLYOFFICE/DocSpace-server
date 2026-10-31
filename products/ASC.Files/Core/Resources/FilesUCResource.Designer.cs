@@ -70,15 +70,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI projects.
-        /// </summary>
-        public static string AiProjects {
-            get {
-                return ResourceManager.GetString("AiProjects", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to AI rooms.
         /// </summary>
         public static string AiHub {

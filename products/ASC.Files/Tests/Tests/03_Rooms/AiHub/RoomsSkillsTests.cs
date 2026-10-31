@@ -31,11 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.SkillsTests;
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
-[Trait("Category", "Read")]
-[Trait("Feature", "AI/Skills")]
-public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class RoomsSkillsTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
     [Fact]
     public async Task GetSkills_RoomWithSkills_ReturnsThemSortedByFileTitle()
@@ -107,7 +107,7 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task GetSkills_RoomOfAnotherType_LeavesItOut()
     {
         // Arrange
-        var agentRoomId = await CreateRoomAsync();
+        var agentRoomId = (await CreateAiRoom("Autotest Agent")).Id;
 
         // Act
         var result = await GetRoomsSkillsAsync(agentRoomId);
@@ -123,8 +123,8 @@ public class RoomsSkillsTests(AspireAppFixture fixture) : BaseTest(fixture)
         var roomId = await CreateInstructionsRoomAsync();
         await UploadSkillAsync(roomId, "pdf-review");
 
-        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(roomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
 
         // Act
         var result = await GetRoomsSkillsAsync(roomId);

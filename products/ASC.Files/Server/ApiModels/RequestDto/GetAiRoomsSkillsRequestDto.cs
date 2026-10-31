@@ -31,31 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Api;
+namespace ASC.Files.ApiModels.RequestDto;
 
-[Scope]
-[ApiEndpoint("ai", Internal = true)]
-[AiFeature]
-public class AiRoomsController(
-    AiProjectRoomService aiProjectRoomService,
-    AiSkillsDtoMapper aiSkillsDtoMapper)
-    : ControllerBase
+/// <summary>
+/// Request for the skills of several Instructions rooms.
+/// </summary>
+public class GetAiRoomsSkillsRequestDto
 {
-    /// <remarks>
-    /// Returns the skills of the given Instructions rooms in one call, rooms sorted by title: a skill is a Markdown
-    /// file in the room root, with the name and the description from its YAML frontmatter, sorted by file title. A
-    /// room that does not exist, is not an Instructions room or cannot be read by the caller is left out.
-    /// </remarks>
-    /// <summary>Get the skills of Instructions rooms</summary>
-    /// <path>api/2.0/ai/rooms/skills</path>
-    [Tags("AI / Rooms")]
-    [SwaggerResponse(200, "Rooms with their skills", typeof(AiSkillsDto))]
-    [SwaggerResponse(400, "`roomIds` is empty or longer than 20 items")]
-    [HttpGet("rooms/skills")]
-    public async Task<AiSkillsDto> GetRoomsSkills(GetAiRoomsSkillsRequestDto inDto)
-    {
-        var rooms = await aiProjectRoomService.GetSkillsAsync(inDto.RoomIds);
-
-        return await aiSkillsDtoMapper.MapAsync(rooms);
-    }
+    /// <summary>
+    /// IDs of the Instructions rooms, one `roomIds` query item per room; 1 to 20 items.
+    /// </summary>
+    /// <example>[17001, 17002]</example>
+    [FromQuery(Name = "roomIds")]
+    [MinLength(1)]
+    [MaxLength(AiHubService.MaxRoomsPerType)]
+    public HashSet<int> RoomIds { get; set; } = [];
 }

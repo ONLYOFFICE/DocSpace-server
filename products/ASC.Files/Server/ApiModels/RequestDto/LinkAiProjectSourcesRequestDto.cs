@@ -31,51 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.Projects;
+namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The fields of an AI project to change.
+/// Rooms to link to the AI project.
 /// </summary>
-[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
-public class UpdateAiProjectRequest
+public class LinkAiProjectSourcesRequest
 {
     /// <summary>
-    /// New project name.
+    /// IDs of the Instructions and Knowledge rooms to link. Each must be an active room the caller can read; rooms already linked are skipped.
     /// </summary>
-    /// <example>Marketing research</example>
-    [StringLength(170)]
-    public string? Title { get; set; }
-
-    /// <summary>
-    /// Background color of the project icon as six hexadecimal digits without `#`.
-    /// </summary>
-    /// <example>FF6600</example>
-    [RegularExpression("^[0-9a-fA-F]{6}$")]
-    public string? Color { get; set; }
-
-    /// <summary>
-    /// Identifier of the picture drawn on the project while it has no logo.
-    /// </summary>
-    /// <example>bookmark</example>
-    [StringLength(50)]
-    public string? Cover { get; set; }
-
-    /// <summary>
-    /// Tag names the project carries from now on.
-    /// </summary>
-    /// <example>["marketing","q3"]</example>
-    public IEnumerable<string>? Tags { get; set; }
-
-    /// <summary>
-    /// Logo cropped from a picture the caller uploaded beforehand.
-    /// </summary>
-    public LogoRequest? Logo { get; set; }
+    /// <example>[17001, 17020]</example>
+    [MinLength(1)]
+    [MaxLength(2 * AiHubService.MaxRoomsPerType)]
+    public required HashSet<int> RoomIds { get; set; }
 }
 
 /// <summary>
-/// Request to update an AI project.
+/// Request to link rooms to an AI project.
 /// </summary>
-public class UpdateAiProjectRequestDto
+public class LinkAiProjectSourcesRequestDto
 {
     /// <summary>
     /// ID of the project.
@@ -85,14 +60,8 @@ public class UpdateAiProjectRequestDto
     public required int Id { get; set; }
 
     /// <summary>
-    /// The fields to change.
+    /// The rooms to link.
     /// </summary>
     [FromBody]
-    public required UpdateAiProjectRequest UpdateProject { get; set; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
-public static partial class UpdateAiProjectRequestMapper
-{
-    public static partial UpdateRoomRequest Map(this UpdateAiProjectRequest source);
+    public required LinkAiProjectSourcesRequest Rooms { get; set; }
 }

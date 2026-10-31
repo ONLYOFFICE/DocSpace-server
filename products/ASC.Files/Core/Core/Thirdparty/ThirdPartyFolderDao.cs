@@ -628,11 +628,6 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
-    public Task<string> GetFolderIDAiProjectsAsync(bool createIfNotExists)
-    {
-        return Task.FromResult<string>(null);
-    }
-
     public Task<string> GetFolderIDAiHubAsync(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);

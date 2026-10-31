@@ -31,30 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tests.Tests.AiProjectsTests;
 
-[Trait("Category", "Update")]
-[Trait("Feature", "AI/Projects")]
-public class AiProjectRoomsLinkTests(AspireAppFixture fixture) : AiProjectRoomsTestBase(fixture)
+namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
+
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AiHub")]
+public class AiProjectSourcesLinkTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
-    private const string AgentsPath = "/internal/ai/agents";
-
     [Fact]
-    public async Task GetRooms_NewProject_ReturnsEmptyLists()
+    public async Task GetSources_NewProject_ReturnsEmptyLists()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        var rooms = await GetRoomsAsync(projectId);
+        var sources = await GetSourcesAsync(projectId);
 
         // Assert
-        rooms.GetProperty("instructionsRooms").GetArrayLength().Should().Be(0);
-        rooms.GetProperty("knowledgeRooms").GetArrayLength().Should().Be(0);
+        sources.GetProperty("instructionsRooms").GetArrayLength().Should().Be(0);
+        sources.GetProperty("knowledgeRooms").GetArrayLength().Should().Be(0);
     }
 
     [Fact]
-    public async Task LinkRooms_AsOwner_ReturnsRoomsSortedByTitle()
+    public async Task LinkSources_AsOwner_ReturnsRoomsSortedByTitle()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
@@ -62,167 +61,180 @@ public class AiProjectRoomsLinkTests(AspireAppFixture fixture) : AiProjectRoomsT
         var first = await CreateInstructionsRoomAsync("Autotest A Instructions");
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, second, first);
-        var rooms = await GetRoomsAsync(projectId);
+        using var response = await LinkSourcesAsync(projectId, second, first);
+        var sources = await GetSourcesAsync(projectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var instructions = rooms.GetProperty("instructionsRooms").EnumerateArray().ToList();
+        var instructions = sources.GetProperty("instructionsRooms").EnumerateArray().ToList();
         instructions.Select(r => r.GetProperty("id").GetInt32()).Should().Equal(first, second);
         instructions.Select(r => r.GetProperty("title").GetString()).Should().Equal("Autotest A Instructions", "Autotest B Instructions");
         instructions.Should().AllSatisfy(r => r.TryGetProperty("logo", out _).Should().BeTrue());
-        rooms.GetProperty("knowledgeRooms").GetArrayLength().Should().Be(0);
+        sources.GetProperty("knowledgeRooms").GetArrayLength().Should().Be(0);
     }
 
     [Fact]
-    public async Task LinkRooms_AlreadyLinkedAndDuplicateIds_LinksEachRoomOnce()
+    public async Task LinkSources_AlreadyLinkedAndDuplicateIds_LinksEachRoomOnce()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var linked = await CreateInstructionsRoomAsync();
         var added = await CreateInstructionsRoomAsync();
-        using var first = await LinkRoomsAsync(projectId, linked);
+        using var first = await LinkSourcesAsync(projectId, linked);
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, linked, added, added);
+        using var response = await LinkSourcesAsync(projectId, linked, added, added);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await GetInstructionsRoomIdsAsync(projectId)).Should().BeEquivalentTo([linked, added]);
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().BeEquivalentTo([linked, added]);
     }
 
     [Fact]
-    public async Task LinkRooms_RoomOfAnotherType_Returns400AndLinksNothing()
+    public async Task LinkSources_RoomOfAnotherType_Returns400AndLinksNothing()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var instructions = await CreateInstructionsRoomAsync();
-        var agent = await CreateRoomAsync();
+        var agent = (await CreateAiRoom("Autotest Agent")).Id;
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, instructions, agent);
+        using var response = await LinkSourcesAsync(projectId, instructions, agent);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Contain(agent.ToString());
-        (await GetInstructionsRoomIdsAsync(projectId)).Should().BeEmpty();
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().BeEmpty();
     }
 
     [Fact]
-    public async Task LinkRooms_UnknownRoom_Returns400()
+    public async Task LinkSources_AnotherProject_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
+        var otherProjectId = await CreateProjectAsync();
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, int.MaxValue);
+        using var response = await LinkSourcesAsync(projectId, otherProjectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task LinkRooms_DeletedRoom_Returns400()
+    public async Task LinkSources_UnknownRoom_Returns400()
+    {
+        // Arrange
+        var projectId = await CreateProjectAsync();
+
+        // Act
+        using var response = await LinkSourcesAsync(projectId, int.MaxValue);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task LinkSources_DeletedRoom_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var room = await CreateInstructionsRoomAsync();
-        await DeleteRoomAsync(room);
+        await DeleteRoomAndWaitAsync(room);
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, room);
+        using var response = await LinkSourcesAsync(projectId, room);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task LinkRooms_EmptyRoomIds_Returns400()
+    public async Task LinkSources_EmptyRoomIds_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        using var response = await LinkRoomsAsync(projectId);
+        using var response = await LinkSourcesAsync(projectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task LinkRooms_MoreThanFortyIds_Returns400()
+    public async Task LinkSources_MoreThanFortyIds_Returns400()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, [.. Enumerable.Range(1, 41)]);
+        using var response = await LinkSourcesAsync(projectId, [.. Enumerable.Range(1, 41)]);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task LinkRooms_RoomTheCallerCannotRead_Returns400()
+    public async Task LinkSources_RoomTheCallerCannotRead_Returns400()
     {
         // Arrange
         var room = await CreateInstructionsRoomAsync();
 
-        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(roomAdmin);
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
         var projectId = await CreateProjectAsync();
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, room);
+        using var response = await LinkSourcesAsync(projectId, room);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await GetInstructionsRoomIdsAsync(projectId)).Should().BeEmpty();
+        (await GetInstructionsSourceIdsAsync(projectId)).Should().BeEmpty();
     }
 
     [Fact]
-    public async Task LinkRooms_AgentInsteadOfProject_Returns404()
+    public async Task LinkSources_InstructionsRoomInsteadOfProject_Returns404()
     {
         // Arrange
+        var notAProject = await CreateInstructionsRoomAsync();
         var room = await CreateInstructionsRoomAsync();
-        using var created = await _ai.PostAsync(AgentsPath, new { title = "Autotest Agent" }, TestContext.Current.CancellationToken);
-        var agent = await _ai.ReadAsync<JsonElement>(created, TestContext.Current.CancellationToken);
 
         // Act
-        using var response = await LinkRoomsAsync(agent.GetProperty("id").GetInt32(), room);
+        using var response = await LinkSourcesAsync(notAProject, room);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task LinkRooms_UserWithoutAccess_Returns403()
+    public async Task LinkSources_UserWithoutAccess_Returns403()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
         var room = await CreateInstructionsRoomAsync();
 
-        var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(user);
+        var user = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
 
         // Act
-        using var response = await LinkRoomsAsync(projectId, room);
+        using var response = await LinkSourcesAsync(projectId, room);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
-    public async Task GetRooms_UserWithoutAccess_Returns403()
+    public async Task GetSources_UserWithoutAccess_Returns403()
     {
         // Arrange
         var projectId = await CreateProjectAsync();
 
-        var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(user);
+        var user = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(user);
 
         // Act
-        using var response = await _ai.GetAsync($"{AiProjectsPath}/{projectId}/rooms", TestContext.Current.CancellationToken);
+        using var response = await GetSourcesResponseAsync(projectId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

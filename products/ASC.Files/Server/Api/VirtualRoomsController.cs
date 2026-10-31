@@ -1150,7 +1150,7 @@ public abstract class VirtualRoomsController<T>(
     /// and does not survive a trip through the Archive section, so an unarchived room has to be pinned again. Pinned
     /// rooms stay above the unpinned ones whatever sorting or filter the listing uses, and their own order between
     /// each other is stable. An account may keep only a limited number of pinned rooms at a time, ten on a portal
-    /// with the default configuration, and AI rooms are counted separately against their own allowance; a request
+    /// with the default configuration, and AI agents and AI rooms are counted separately; a request
     /// over the limit is refused until something is unpinned with `PUT api/2.0/files/rooms/{id}/unpin`. Pinning a
     /// room that is already pinned changes nothing and is safe to repeat. Anybody who can read the room may pin it,
     /// including guests and portal administrators who were never invited, while somebody who is not in the room is
@@ -1161,7 +1161,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its pinned flag set for the caller", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents are counted separately)")]
+    [SwaggerResponse(403, "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents and AI rooms are counted separately)")]
     [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/pin")]

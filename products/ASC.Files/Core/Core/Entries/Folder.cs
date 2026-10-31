@@ -142,11 +142,8 @@ public enum FolderType
     [Description("AI project room")]
     AiProjectRoom = 40,
 
-    [Description("AI Projects")]
-    AiProjects = 41,
-
     [Description("AI rooms")]
-    AiHub = 42
+    AiHub = 41
 }
 
 /// <summary>
