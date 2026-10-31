@@ -171,7 +171,7 @@ public class FileUploader(
 
             if (!string.IsNullOrEmpty(subFolderTitle))
             {
-                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom)
+                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
