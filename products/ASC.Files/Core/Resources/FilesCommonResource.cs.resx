@@ -631,4 +631,19 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Tyto místnosti nelze propojit s projektem AI: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Do místnosti s pokyny lze přidávat pouze soubory Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Místnost s pokyny může obsahovat nejvýše {0} dovedností</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Popis dovednosti musí mít 1 až 1024 znaků a nesmí obsahovat značky XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Soubor dovednosti musí začínat blokem YAML frontmatter mezi dvěma řádky --- s poli name a description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Název dovednosti musí mít 1 až 64 znaků, smí obsahovat pouze malá písmena, číslice a jednotlivé pomlčky a nesmí pomlčkou začínat ani končit</value>
+  </data>
 </root>

@@ -631,4 +631,19 @@
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Эти комнаты нельзя привязать к ИИ-проекту: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>В комнату с инструкциями можно добавлять только файлы Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>В комнате с инструкциями может быть не более {0} навыков</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Описание навыка должно содержать от 1 до 1024 символов и не должно содержать XML-тегов</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Файл навыка должен начинаться с блока YAML frontmatter между двумя строками --- с полями name и description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Имя навыка должно содержать от 1 до 64 символов, только строчные буквы, цифры и одиночные дефисы, и не должно начинаться или заканчиваться дефисом</value>
+  </data>
 </root>

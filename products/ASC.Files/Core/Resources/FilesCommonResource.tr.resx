@@ -631,4 +631,19 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Bu odalar yapay zeka projesine bağlanamaz: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Bir talimat odasına yalnızca Markdown (.md) dosyaları eklenebilir</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Bir talimat odası en fazla {0} beceri içerebilir</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Beceri açıklaması 1 ile 1024 karakter arasında olmalı ve XML etiketleri içermemelidir</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Beceri dosyası, name ve description alanlarını içeren, iki --- satırı arasındaki bir YAML frontmatter bloğuyla başlamalıdır</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Beceri adı 1 ile 64 karakter arasında olmalı, yalnızca küçük harfler, rakamlar ve tek kısa çizgiler içermeli ve kısa çizgiyle başlamamalı veya bitmemelidir</value>
+  </data>
 </root>

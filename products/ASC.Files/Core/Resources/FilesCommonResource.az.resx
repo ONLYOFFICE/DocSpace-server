@@ -631,4 +631,19 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Bu otaqlar Sİ layihəsinə bağlana bilməz: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Təlimat otağına yalnız Markdown (.md) faylları əlavə edilə bilər</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Təlimat otağında ən çox {0} bacarıq ola bilər</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Bacarığın təsviri 1 ilə 1024 simvol arasında olmalı və XML teqləri ehtiva etməməlidir</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Bacarıq faylı iki --- sətri arasında name və description sahələri olan YAML frontmatter bloku ilə başlamalıdır</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Bacarığın adı 1 ilə 64 simvol arasında olmalı, yalnız kiçik hərflərdən, rəqəmlərdən və tək defislərdən ibarət olmalı, defislə başlamamalı və bitməməlidir</value>
+  </data>
 </root>

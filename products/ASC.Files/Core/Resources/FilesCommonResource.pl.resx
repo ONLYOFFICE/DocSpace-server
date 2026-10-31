@@ -631,4 +631,19 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Tych pokojów nie można powiązać z projektem AI: {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Do pokoju instrukcji można dodawać tylko pliki Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Pokój instrukcji może zawierać maksymalnie {0} umiejętności</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Opis umiejętności musi mieć od 1 do 1024 znaków i nie może zawierać znaczników XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Plik umiejętności musi zaczynać się od bloku YAML frontmatter między dwoma wierszami --- z polami name i description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Nazwa umiejętności musi mieć od 1 do 64 znaków, zawierać tylko małe litery, cyfry i pojedyncze łączniki oraz nie może zaczynać się ani kończyć łącznikiem</value>
+  </data>
 </root>

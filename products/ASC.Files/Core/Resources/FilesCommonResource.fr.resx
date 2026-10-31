@@ -631,4 +631,19 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
     <value>Ces salles ne peuvent pas être liées au projet IA : {0}</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Seuls les fichiers Markdown (.md) peuvent être ajoutés à une salle d'instructions</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Une salle d'instructions peut contenir au maximum {0} compétences</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>La description de la compétence doit comporter de 1 à 1024 caractères et ne doit pas contenir de balises XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Le fichier de la compétence doit commencer par un bloc YAML frontmatter entre deux lignes ---, avec les champs name et description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Le nom de la compétence doit comporter de 1 à 64 caractères, ne contenir que des lettres minuscules, des chiffres et des tirets simples, et ne doit pas commencer ni se terminer par un tiret</value>
+  </data>
 </root>
