@@ -39,7 +39,8 @@
 // next round without reconnecting the room. Best-effort per room: a room
 // that cannot be read keeps the skills the widget sent.
 
-import { CONTEXT_CLOUD, getRoomSkills } from "./roomSkills.js";
+import { CONTEXT_CLOUD, getRoomsSkills } from "./roomSkills.js";
+import type { RoomSkill } from "@onlyoffice/ai-chat/core";
 import { getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
@@ -58,24 +59,32 @@ export async function refreshContextRoomSkills(body: unknown): Promise<void> {
   if (!rooms || rooms.length === 0) {
     return;
   }
-  const refreshed = await Promise.all(
-    rooms.map(async (room): Promise<JsonObject> => {
-      const id = getString(room, "id");
-      if (!id || (room["cloud"] ?? CONTEXT_CLOUD) !== CONTEXT_CLOUD) {
-        return room;
-      }
-      try {
-        const skills = await getRoomSkills(id);
-        return { ...room, skills: skills.map(({ id: skillId, name, description }) => ({ id: skillId, name, description })) };
-      } catch (err) {
-        logger.warn(
-          `context room ${id}: skills not refreshed, the round keeps the ones sent: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
-        );
-        return room;
-      }
-    }),
-  );
-  (body["actionArgs"] as JsonObject)["contextRooms"] = refreshed;
+  const ids = rooms
+    .filter((room) => (room["cloud"] ?? CONTEXT_CLOUD) === CONTEXT_CLOUD)
+    .map((room) => getString(room, "id"))
+    .filter((id): id is string => !!id);
+  if (ids.length === 0) {
+    return;
+  }
+  let catalog: Map<string, RoomSkill[]>;
+  try {
+    catalog = await getRoomsSkills(ids);
+  } catch (err) {
+    logger.warn(
+      `context rooms ${ids.join(",")}: skills not refreshed, the round keeps the ones sent: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return;
+  }
+  (body["actionArgs"] as JsonObject)["contextRooms"] = rooms.map((room): JsonObject => {
+    const id = getString(room, "id");
+    if (!id || (room["cloud"] ?? CONTEXT_CLOUD) !== CONTEXT_CLOUD) {
+      return room;
+    }
+    const skills = catalog.get(id);
+    return skills
+      ? { ...room, skills: skills.map(({ id: skillId, name, description }) => ({ id: skillId, name, description })) }
+      : room;
+  });
 }

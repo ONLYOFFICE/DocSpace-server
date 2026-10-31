@@ -45,7 +45,7 @@ import { aiService } from "./httpClient.js";
 import { getMyDocumentsFolderId, resolveAiProjectEntityId } from "./docspaceFilesApi.js";
 import { refreshContextRoomSkills } from "./contextRoomSkills.js";
 import { readProjectRooms } from "./aiProjectRooms.js";
-import { CONTEXT_CLOUD, getRoomSkills } from "./roomSkills.js";
+import { CONTEXT_CLOUD, parseSkillsCatalog } from "./roomSkills.js";
 import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
@@ -124,29 +124,33 @@ export async function readAiProjectChatContext(
 }
 
 // The linked Instructions rooms with their current skills, in the
-// `actionArgs.contextRooms` shape: the frontmatter of each room's Markdown
-// files, read for this round (storage/roomSkills.ts). Best-effort per room:
-// a room whose files cannot be read runs without its skills.
+// `actionArgs.contextRooms` shape: one read of the project's skills catalog
+// (`GET internal/ai/projects/{id}/skills`), kept in linked order. Best-effort:
+// when the catalog cannot be read the round runs without the skills.
 async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<JsonObject[]> {
-  return Promise.all(
-    roomIds.map(async (id): Promise<JsonObject> => {
-      let skills: { id: string; name: string; description: string }[] = [];
-      try {
-        skills = (await getRoomSkills(String(id))).map(({ id: skillId, name, description }) => ({
-          id: skillId,
-          name,
-          description,
-        }));
-      } catch (err) {
-        logger.warn(
-          `AI project ${projectId}: skills of room ${id} not read, the round runs without them: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
-        );
-      }
-      return { cloud: CONTEXT_CLOUD, id: String(id), skills };
-    }),
-  );
+  if (roomIds.length === 0) {
+    return [];
+  }
+  let catalog = new Map<string, { id: string; name: string; description: string }[]>();
+  try {
+    const rooms = parseSkillsCatalog(await aiService.get(`/projects/${projectId}/skills`));
+    catalog = new Map(rooms.map((room) => [room.id, room.skills]));
+  } catch (err) {
+    logger.warn(
+      `AI project ${projectId}: skills not read, the round runs without them: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+  return roomIds.map((id) => ({
+    cloud: CONTEXT_CLOUD,
+    id: String(id),
+    skills: (catalog.get(String(id)) ?? []).map(({ id: skillId, name, description }) => ({
+      id: skillId,
+      name,
+      description,
+    })),
+  }));
 }
 
 /**

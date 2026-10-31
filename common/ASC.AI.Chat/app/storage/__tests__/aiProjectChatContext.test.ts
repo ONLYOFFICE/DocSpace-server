@@ -44,8 +44,11 @@ const resolveAiProjectEntityId = vi.fn();
 const getMyDocumentsFolderId = vi.fn();
 vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId, getMyDocumentsFolderId }));
 
-const getRoomSkills = vi.fn();
-vi.mock("../roomSkills.js", () => ({ CONTEXT_CLOUD: "docspace", getRoomSkills }));
+const getRoomsSkills = vi.fn();
+vi.mock("../roomSkills.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../roomSkills.js")>()),
+  getRoomsSkills,
+}));
 
 const readProjectRooms = vi.fn();
 vi.mock("../aiProjectRooms.js", () => ({ readProjectRooms }));
@@ -74,10 +77,16 @@ describe("applyAiProjectChatContext outside a project", () => {
   });
 
   it("reads the skills of every picked DocSpace room again for the round", async () => {
-    getRoomSkills.mockImplementation(async (id: string) =>
-      id === "7"
-        ? [{ id: "f1", name: "tone", description: "Brand voice." }, { id: "f2", name: "new", description: "" }]
-        : [],
+    getRoomsSkills.mockResolvedValue(
+      new Map([
+        [
+          "7",
+          [
+            { id: "f1", name: "tone", description: "Brand voice." },
+            { id: "f2", name: "new", description: "Second." },
+          ],
+        ],
+      ]),
     );
     const body = {
       entityId: "3",
@@ -95,15 +104,25 @@ describe("applyAiProjectChatContext outside a project", () => {
         id: "7",
         skills: [
           { id: "f1", name: "tone", description: "Brand voice." },
-          { id: "f2", name: "new", description: "" },
+          { id: "f2", name: "new", description: "Second." },
         ],
       },
       { cloud: "other", id: "x", skills: [{ id: "s", name: "keep", description: "" }] },
     ]);
+    // One catalog read for every picked DocSpace room.
+    expect(getRoomsSkills).toHaveBeenCalledWith(["7"]);
   });
 
-  it("keeps the skills sent when a room cannot be read", async () => {
-    getRoomSkills.mockRejectedValue(new Error("403"));
+  it("keeps the skills sent for a room the catalog leaves out", async () => {
+    getRoomsSkills.mockResolvedValue(new Map());
+    const sent = [{ id: "f1", name: "old", description: "" }];
+    const body = { actionArgs: { contextRooms: [{ cloud: "docspace", id: "7", skills: sent }] } };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect(body.actionArgs.contextRooms[0]?.skills).toEqual(sent);
+  });
+
+  it("keeps the skills sent when the catalog cannot be read", async () => {
+    getRoomsSkills.mockRejectedValue(new Error("500"));
     const sent = [{ id: "f1", name: "old", description: "" }];
     const body = { actionArgs: { contextRooms: [{ cloud: "docspace", id: "7", skills: sent }] } };
     expect(await applyAiProjectChatContext(body)).toBeNull();
@@ -113,7 +132,7 @@ describe("applyAiProjectChatContext outside a project", () => {
   it("leaves a body without context rooms alone", async () => {
     const body = { entityId: "3", actionArgs: { knowledgeRooms: [{ cloud: "docspace", id: "9" }] } };
     expect(await applyAiProjectChatContext(body)).toBeNull();
-    expect(getRoomSkills).not.toHaveBeenCalled();
+    expect(getRoomsSkills).not.toHaveBeenCalled();
     expect(body.actionArgs).toEqual({ knowledgeRooms: [{ cloud: "docspace", id: "9" }] });
   });
 });
@@ -123,6 +142,13 @@ describe("applyAiProjectChatContext inside a project", () => {
     resolveAiProjectEntityId.mockResolvedValue("42");
     aiServiceGet.mockImplementation(async (url: string) => {
       if (url === "/projects/42") return projectRoom();
+      if (url === "/projects/42/skills") {
+        return {
+          rooms: [
+            { id: 7, title: "Brand voice", logo: null, skills: [{ id: "f1", name: "tone", description: "Tone." }] },
+          ],
+        };
+      }
       throw new Error(`unexpected ${url}`);
     });
     readProjectRooms.mockResolvedValue({
@@ -131,9 +157,6 @@ describe("applyAiProjectChatContext inside a project", () => {
     });
     readByType.mockResolvedValue("p1");
     readById.mockResolvedValue({ id: "p1", capabilities: 1 });
-    getRoomSkills.mockImplementation(async (id: string) =>
-      id === "7" ? [{ id: "f1", name: "tone", description: "" }] : [],
-    );
     getMyDocumentsFolderId.mockResolvedValue("1001");
   });
 
@@ -148,17 +171,20 @@ describe("applyAiProjectChatContext inside a project", () => {
     expect(body["profileId"]).toBe("p1");
     expect(body["contextEntityId"]).toBe("1001");
     expect(body["actionArgs"]).toEqual({
-      contextRooms: [{ cloud: "docspace", id: "7", skills: [{ id: "f1", name: "tone", description: "" }] }],
+      contextRooms: [{ cloud: "docspace", id: "7", skills: [{ id: "f1", name: "tone", description: "Tone." }] }],
       knowledgeRooms: [{ cloud: "docspace", id: "9" }],
       folderContext: { id: "1001" },
     });
-    // The project's rooms come from the server, the skills from each room's files.
-    expect(getRoomSkills).toHaveBeenCalledWith("7");
+    // The project's rooms and their skills both come from the .NET side.
+    expect(aiServiceGet).toHaveBeenCalledWith("/projects/42/skills");
     expect(readProjectRooms).toHaveBeenCalledWith("42");
   });
 
-  it("runs the round without a room's skills when its files cannot be read", async () => {
-    getRoomSkills.mockRejectedValue(new Error("403"));
+  it("runs the round without the skills when the catalog cannot be read", async () => {
+    aiServiceGet.mockImplementation(async (url: string) => {
+      if (url === "/projects/42") return projectRoom();
+      throw new Error("500");
+    });
     const body: Record<string, unknown> = { entityId: "42", actionArgs: {} };
     expect(await applyAiProjectChatContext(body)).toBeNull();
     expect((body["actionArgs"] as Record<string, unknown>)["contextRooms"]).toEqual([
