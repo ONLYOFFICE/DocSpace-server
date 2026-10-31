@@ -628,6 +628,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An instructions room can contain at most {0} skills.
+        /// </summary>
+        public static string ErrorMessage_InstructionsRoomSkillsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InstructionsRoomSkillsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid folder ID.
         /// </summary>
         public static string ErrorMessage_InvalidFolderId {

@@ -38,6 +38,7 @@ namespace ASC.Files.Core.Core.AI;
 public class AiProjectRoomService(
     IDaoFactory daoFactory,
     AiProjectRoomDao aiProjectRoomDao,
+    SkillDao skillDao,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
     GlobalFolderHelper globalFolderHelper,
@@ -45,7 +46,7 @@ public class AiProjectRoomService(
     FilesMessageService filesMessageService,
     SocketManager socketManager)
 {
-    public const int MaxRoomsPerType = 100;
+    public const int MaxRoomsPerType = 20;
 
     public async Task<List<Folder<int>>> GetRoomsAsync(int projectId)
     {
@@ -59,6 +60,35 @@ public class AiProjectRoomService(
         }
 
         return await daoFactory.GetFolderDao<int>().GetFoldersAsync(linked.Keys).ToListAsync();
+    }
+
+    public async Task<List<RoomSkills>> GetSkillsAsync(IReadOnlySet<int> roomIds)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var rooms = await daoFactory.GetFolderDao<int>().GetFoldersAsync(roomIds)
+            .Where(r => r is { IsRoom: true, FolderType: FolderType.InstructionsRoom, RootFolderType: FolderType.AiHub })
+            .ToListAsync();
+
+        var readable = await fileSecurity.FilterReadAsync(rooms.ToAsyncEnumerable())
+            .ToDictionaryAsync(r => r.Id, r => (Folder<int>)r);
+
+        var skills = readable.Count == 0
+            ? []
+            : await skillDao.GetSkillsAsync(tenantId, [.. readable.Keys]);
+
+        return [.. roomIds.Select(id => new RoomSkills(id, readable.GetValueOrDefault(id), skills.GetValueOrDefault(id) ?? []))];
+    }
+
+    public async Task<List<RoomSkills>> GetProjectSkillsAsync(int projectId)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        await GetProjectAsync(projectId);
+
+        var linked = await aiProjectRoomDao.GetLinkedRoomsAsync(tenantId, projectId, await globalFolderHelper.GetFolderAiHubAsync());
+        var rooms = await GetSkillsAsync(linked.Where(r => r.Value == FolderType.InstructionsRoom).Select(r => r.Key).ToHashSet());
+
+        return [.. rooms.OrderBy(r => r.Room.Title, StringComparer.CurrentCultureIgnoreCase).ThenBy(r => r.RoomId)];
     }
 
     public async Task LinkRoomsAsync(int projectId, IReadOnlySet<int> roomIds)

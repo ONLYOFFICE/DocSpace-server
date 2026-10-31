@@ -285,6 +285,9 @@
   <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
     <value>Only Markdown files (.md) can be added to an instructions room</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>An instructions room can contain at most {0} skills</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Invalid folder ID</value>
   </data>

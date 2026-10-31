@@ -725,6 +725,11 @@ internal class FileDao(
 
                         if (skill != null)
                         {
+                            if (isNew)
+                            {
+                                await EnsureSkillsLimitAsync(filesDbContext, tenantId, file.ParentId);
+                            }
+
                             previousSkill = await SaveSkillAsync(filesDbContext, tenantId, file.Id, skill);
                         }
 
@@ -1460,6 +1465,11 @@ internal class FileDao(
 
                 if (skill != null)
                 {
+                    if (fromRoomId != toRoomId)
+                    {
+                        await EnsureSkillsLimitAsync(context, tenantId, toFolderId);
+                    }
+
                     await SaveSkillAsync(context, tenantId, fileId, skill);
                     await context.SaveChangesAsync();
                 }
@@ -3494,6 +3504,14 @@ internal class FileDao(
             SkillFrontmatterError.InvalidDescription => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillDescriptionInvalid),
             _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillFrontmatterMissing)
         };
+    }
+
+    private static async Task EnsureSkillsLimitAsync(FilesDbContext filesDbContext, int tenantId, int roomId)
+    {
+        if (await filesDbContext.SkillsCountAsync(tenantId, roomId) >= Skill.MaxPerRoom)
+        {
+            throw new ArgumentException(string.Format(FilesCommonResource.ErrorMessage_InstructionsRoomSkillsLimit, Skill.MaxPerRoom));
+        }
     }
 
     private void ValidateKnowledgeRoomFile(File<int> file)

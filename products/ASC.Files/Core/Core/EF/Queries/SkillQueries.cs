@@ -54,19 +54,16 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbFilesSkillQuery> SkillsByRoomsAsync(int tenantId, IEnumerable<int> roomIds)
+    public IAsyncEnumerable<Skill> SkillsByRoomsAsync(int tenantId, IEnumerable<int> roomIds)
     {
         return SkillQueries.SkillsByRoomsAsync(this, tenantId, roomIds);
     }
-}
 
-public class DbFilesSkillQuery
-{
-    public int RoomId { get; init; }
-    public int FileId { get; init; }
-    public string Title { get; init; }
-    public string Name { get; init; }
-    public string Description { get; init; }
+    [PreCompileQuery]
+    public Task<int> SkillsCountAsync(int tenantId, int roomId)
+    {
+        return SkillQueries.SkillsCountAsync(this, tenantId, roomId);
+    }
 }
 
 static file class SkillQueries
@@ -90,18 +87,19 @@ static file class SkillQueries
                     .Where(s => s.TenantId == tenantId && fileIds.Contains(s.FileId))
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFilesSkillQuery>> SkillsByRoomsAsync =
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<Skill>> SkillsByRoomsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> roomIds) =>
                 ctx.Files
                     .Where(f => f.TenantId == tenantId && f.CurrentVersion && roomIds.Contains(f.ParentId))
                     .Join(ctx.Skills, f => new { f.TenantId, FileId = f.Id }, s => new { s.TenantId, s.FileId },
-                        (f, s) => new DbFilesSkillQuery
-                        {
-                            RoomId = f.ParentId,
-                            FileId = f.Id,
-                            Title = f.Title,
-                            Name = s.Name,
-                            Description = s.Description
-                        }));
+                        (f, s) => new Skill(f.ParentId, f.Id, f.Title, s.Name, s.Description)));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> SkillsCountAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                ctx.Files
+                    .Where(f => f.TenantId == tenantId && f.ParentId == roomId && f.CurrentVersion)
+                    .Join(ctx.Skills, f => new { f.TenantId, FileId = f.Id }, s => new { s.TenantId, s.FileId }, (_, s) => s)
+                    .Count());
 }
