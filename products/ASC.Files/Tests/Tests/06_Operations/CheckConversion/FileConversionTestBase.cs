@@ -45,10 +45,9 @@ namespace ASC.Files.Tests.Tests._06_Operations.CheckConversion;
 /// an <c>error</c>; a finished entry is handed out once.
 /// <para>
 /// Tests that need the finished result of a successful conversion (the converted text, the second
-/// version of a result, <c>outputType</c> pdf, <c>sync</c>) are not ported: the integration-test
-/// AppHost has no document server that can reach the portal (see <c>SaveFileAsPdfTests</c>), so such a
-/// conversion can never succeed here. Everything below decides on what the endpoints answer
-/// synchronously, or on a failure.
+/// version of a result, <c>outputType</c> pdf, <c>sync</c>) are not ported yet; the integration-test
+/// host runs a document server that reaches the portals, so they can be. Everything below decides on
+/// what the endpoints answer synchronously, or on a failure.
 /// </para>
 /// </remarks>
 public abstract class FileConversionTestBase(

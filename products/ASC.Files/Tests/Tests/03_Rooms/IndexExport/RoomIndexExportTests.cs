@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -51,12 +51,7 @@ public class RoomIndexExportTests(
     /// started on it never completed without an error. This pins the fix: the export must reach
     /// <c>isCompleted=true</c> with no error and a populated result file within the deadline.
     /// </remarks>
-    [Fact(Skip = "The index export cannot complete in the integration-test profile: the document " +
-                 "server fails at the download step (DocumentServiceException 'download'). Three " +
-                 "causes were found and are unfixed here - openresty's upstream map is built from " +
-                 "fixed ports while the services get ephemeral ones, the editors container publishes " +
-                 "no host port, and files:docservice:url:internal is only set under isDocker. " +
-                 "Skipped for the environment, not for the bug: 81110 itself is untested here.")]
+    [Fact]
     [Trait("Bug", "81110")]
     public async Task StartRoomIndexExport_IndexingEnabledAfterCreation_CompletesWithoutError()
     {
@@ -84,13 +79,14 @@ public class RoomIndexExportTests(
     }
 
     /// <summary>
-    /// Polls the caller's own index export until it is completed, deadline 30s (matching the
-    /// TypeScript suite's own retry window). Returns the last observed status so a timed-out
+    /// Polls the caller's own index export until it is completed, deadline 90s: the first document builder run
+    /// on a freshly started editors container takes longer than the TypeScript suite's 30s while the other
+    /// classes run in parallel. Returns the last observed status so a timed-out
     /// assertion still shows what the export was actually doing.
     /// </summary>
     private async Task<DocumentBuilderTaskDto> WaitForIndexExportCompleted()
     {
-        var deadline = DateTime.UtcNow.AddSeconds(30);
+        var deadline = DateTime.UtcNow.AddSeconds(90);
 
         while (true)
         {
@@ -98,8 +94,8 @@ public class RoomIndexExportTests(
 
             if (status is { IsCompleted: true } || DateTime.UtcNow >= deadline)
             {
-                status.Should().NotBeNull("the index export status must be reported within 30 seconds");
-                status.IsCompleted.Should().BeTrue("the index export must complete within 30 seconds (error '{0}')", status.Error);
+                status.Should().NotBeNull("the index export status must be reported within 90 seconds");
+                status.IsCompleted.Should().BeTrue("the index export must complete within 90 seconds (error '{0}')", status.Error);
                 return status;
             }
 

@@ -40,8 +40,8 @@ namespace ASC.Files.Tests.Tests._01_Files.CopySave;
 /// Only the cases that the TS suite (<c>files.spec.ts</c>, <c>conversion.spec.ts</c>) can decide
 /// without a converted document are ported in full. Every other positive case of
 /// <c>conversion.spec.ts</c> (the room-type matrix, the source-format matrix, the title rules, "every
-/// call adds another PDF", the PDF magic-number check) needs a document server that can reach the
-/// portal, and the integration-test AppHost does not provide one — see <see cref="SaveFileAsPdfTestBase"/>.
+/// call adds another PDF", the PDF magic-number check) needs the conversion itself. The integration-test
+/// host runs a document server that reaches the portals, so those cases can be ported; they are not yet.
 /// </remarks>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]

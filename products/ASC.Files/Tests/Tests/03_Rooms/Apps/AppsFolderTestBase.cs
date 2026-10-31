@@ -41,8 +41,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Apps;
 /// <c>Apps</c> is already there.
 /// </summary>
 /// <remarks>
-/// Skipping the upload conversion inside <c>.ai</c> is not covered: the integration-test AppHost
-/// runs no document server, so no conversion happens anywhere and there is nothing to contrast.
+/// Skipping the upload conversion inside <c>.ai</c> is not covered yet: it needs an upload that is
+/// converted elsewhere to contrast with, which the integration-test document server can now do.
 /// </remarks>
 public abstract class AppsFolderTestBase(
     AspireAppFixture fixture)
