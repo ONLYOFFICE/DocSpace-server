@@ -75,6 +75,7 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             new("files_roomgroup", "tenant_id", "id"),
             new("files_order", "tenant_id"),
             new("files_ai_project_room", "tenant_id"),
+            new("files_skill", "tenant_id"),
 
             // metadata templates: the template and field ids are autoincrement and get remapped, the link and
             // value rows carry composite keys only and follow the remapped template, field and entry ids
@@ -151,6 +152,8 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
 
             new("files_folder", "id", "files_ai_project_room", "project_id"),
             new("files_folder", "id", "files_ai_project_room", "room_id"),
+
+            new("files_file", "id", "files_skill", "file_id"),
 
             // metadata entry_id columns are int and are stored for the internal entries only, so like
             // files_order the entry type alone tells a file from a folder
