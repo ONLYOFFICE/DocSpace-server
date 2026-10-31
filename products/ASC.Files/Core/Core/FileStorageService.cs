@@ -665,8 +665,6 @@ public class FileStorageService //: IFileStorageService
         bool? sendFormToExternalDB = null,
         bool? saveFormAsXLSX = null)
     {
-        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
-
         var tenantId = tenantManager.GetCurrentTenantId();
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
@@ -676,6 +674,7 @@ public class FileStorageService //: IFileStorageService
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(roomType));
         }
 
+        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
         await CheckPublicRoomCreationAsync(folderType);
         await CheckKnowledgeRoomCreationAsync(folderType);
 
