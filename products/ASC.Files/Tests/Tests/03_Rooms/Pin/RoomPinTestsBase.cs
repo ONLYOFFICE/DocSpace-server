@@ -45,20 +45,14 @@ public abstract class RoomPinTestsBase(
     : RoomsPermissionsTestBase(fixture)
 {
     /// <summary>
-    /// A row of the rooms listing carrying the two fields <see cref="DocSpace.API.SDK.Model.FileEntryBaseDto"/>
-    /// drops: <c>Id</c> and <c>Pinned</c>. <see cref="GetRoomRows"/> reads them from the raw response
-    /// body instead — see the remarks there.
+    /// A row of the rooms listing: the room's <c>Id</c>, title and <c>Pinned</c> flag.
     /// </summary>
     protected readonly record struct RoomRow(int Id, string Title, bool Pinned);
 
     /// <summary>
-    /// Lists rooms exactly like <see cref="DocSpace.API.SDK.Api.Rooms.RoomsApi.GetRoomsFolderAsync"/>,
-    /// but returns each room's <c>id</c> and <c>pinned</c> flag alongside its title.
-    /// <c>FolderContentDto.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which only
-    /// carries the fields common to every entry type — neither <c>Id</c> nor <c>Pinned</c> is one of
-    /// them. That is an SDK defect worth reporting, not a preference: the request itself still goes
-    /// through the typed SDK call (so sorting/filtering/paging are exercised as intended), only the
-    /// response is re-read from <see cref="ApiResponse{T}.RawContent"/> to recover the missing fields.
+    /// Lists rooms through <see cref="DocSpace.API.SDK.Api.Rooms.RoomsApi.GetRoomsFolderAsync"/> and returns each
+    /// room's <c>id</c> and <c>pinned</c> flag alongside its title, read from the <c>FolderDto</c> the
+    /// <c>entryKind</c> discriminator makes of each entry of <c>FolderContentDto.Folders</c>.
     /// </summary>
     protected async Task<List<RoomRow>> GetRoomRows(
         SearchArea? searchArea = null,
@@ -68,7 +62,7 @@ public abstract class RoomPinTestsBase(
         int? count = null,
         int? startIndex = null)
     {
-        var response = await _roomsApi.GetRoomsFolderWithHttpInfoAsync(
+        var response = await _roomsApi.GetRoomsFolderAsync(
             searchArea: searchArea,
             sortBy: sortBy,
             sortOrder: sortOrder,
@@ -77,14 +71,7 @@ public abstract class RoomPinTestsBase(
             startIndex: startIndex,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        using var json = JsonDocument.Parse(response.RawContent);
-
-        return [.. json.RootElement.GetProperty("response").GetProperty("folders")
-            .EnumerateArray()
-            .Select(f => new RoomRow(
-                f.GetProperty("id").GetInt32(),
-                f.GetProperty("title").GetString()!,
-                f.TryGetProperty("pinned", out var pinned) && pinned.GetBoolean()))];
+        return [.. (response.Response.Folders ?? []).OfType<FolderDto>().Select(f => new RoomRow(f.Id, f.Title, f.Pinned))];
     }
 
     /// <summary>

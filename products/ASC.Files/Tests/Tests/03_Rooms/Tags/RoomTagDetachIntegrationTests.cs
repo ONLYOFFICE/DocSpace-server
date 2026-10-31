@@ -124,17 +124,15 @@ public class RoomTagDetachIntegrationTests(
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest Contents Preserved On Detach");
         const string innerFolderTitle = "Inner Folder";
-        await _foldersApi.CreateFolderAsync(room.Id, new CreateFolder(innerFolderTitle), TestContext.Current.CancellationToken);
+        var innerFolder = (await _foldersApi.CreateFolderAsync(room.Id, new CreateFolder(innerFolderTitle), TestContext.Current.CancellationToken)).Response;
         await _roomsApi.AddRoomTagsAsync(room.Id, new BatchTagsRequestDto(["ContentsTag"]), TestContext.Current.CancellationToken);
 
         // Act
         await _roomsApi.DeleteRoomTagsAsync(room.Id, new BatchTagsRequestDto(["ContentsTag"]), TestContext.Current.CancellationToken);
 
         // Assert
-        // FolderContentDto.Folders is typed List<FileEntryBaseDto>, which carries Title but
-        // neither Id nor Logo — so the inner folder is identified by title, not id.
         var content = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        content.Folders.Select(f => f.Title).Should().Contain(innerFolderTitle);
+        (content.Folders ?? []).OfType<FolderDto>().Should().ContainSingle(f => f.Id == innerFolder.Id).Which.Title.Should().Be(innerFolderTitle);
     }
 
     [Fact]
@@ -150,11 +148,9 @@ public class RoomTagDetachIntegrationTests(
         await _roomsApi.DeleteRoomTagsAsync(room.Id, new BatchTagsRequestDto(["ListTag"]), TestContext.Current.CancellationToken);
 
         // Assert
-        // FolderContentDto.Folders is typed List<FileEntryBaseDto>, which drops both "id"
-        // and "tags" — read the raw JSON to get at the room's tags in the list response.
         // filterValue is served from the search index, which is written asynchronously, so poll for
         // the room instead of racing that write with a bare read.
-        var tags = await PollForListedRoomTags(roomTitle);
+        var tags = await PollForListedRoomTags(room.Id, roomTitle);
 
         tags.Should().NotContain("ListTag");
     }
@@ -254,30 +250,23 @@ public class RoomTagDetachIntegrationTests(
     }
 
     /// <summary>
-    /// The tags of the room titled <paramref name="roomTitle"/> as GET /files/rooms lists it, polled
-    /// on a deadline because the <c>filterValue</c> search index is written asynchronously. Returns
-    /// the last observed state, so a timeout still fails on the assertion rather than on a throw.
+    /// The tags of room <paramref name="roomId"/> as GET /files/rooms?filterValue=<paramref name="roomTitle"/>
+    /// lists it, polled on a deadline because the <c>filterValue</c> search index is written asynchronously.
+    /// Returns the last observed state, so a timeout still fails on the assertion rather than on a throw.
     /// </summary>
-    private async Task<List<string>> PollForListedRoomTags(string roomTitle)
+    private async Task<List<string>> PollForListedRoomTags(int roomId, string roomTitle)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            using var response = await _filesClient.GetAsync(
-                $"api/2.0/files/rooms?filterValue={Uri.EscapeDataString(roomTitle)}",
-                TestContext.Current.CancellationToken);
-            var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-            using var document = JsonDocument.Parse(body);
+            var content = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-            var listedRoom = document.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray()
-                .FirstOrDefault(f => f.GetProperty("title").GetString() == roomTitle);
+            var listedRoom = (content.Folders ?? []).OfType<FolderDto>().FirstOrDefault(f => f.Id == roomId);
 
-            if (listedRoom.ValueKind != JsonValueKind.Undefined)
+            if (listedRoom is not null)
             {
-                return listedRoom.TryGetProperty("tags", out var tagsElement)
-                    ? tagsElement.EnumerateArray().Select(t => t.GetString()).ToList()
-                    : [];
+                return listedRoom.Tags ?? [];
             }
 
             if (DateTime.UtcNow >= deadline)

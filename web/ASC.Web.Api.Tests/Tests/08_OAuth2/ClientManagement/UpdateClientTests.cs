@@ -52,12 +52,9 @@ public class UpdateClientTests(
         var user = employeeType is null ? Owner : await InviteContact(employeeType.Value);
         var created = await CreateClientAsAsync(user);
 
-        var body = ValidUpdateClientBody(name: "Updated OAuth Client", description: "Updated description");
+        var request = ValidUpdateClientRequest(name: "Updated OAuth Client", description: "Updated description");
 
-        // Act
-        var result = await UpdateClientRawAsync(created.ClientId, body);
-
-        // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.OK, "{0}", result.Body);
+        // Act + Assert: the update answers 200 with an empty body, so a call that does not throw is the success.
+        await _clientManagementApi.UpdateClientAsync(created.ClientId, request, TestContext.Current.CancellationToken);
     }
 }

@@ -40,7 +40,7 @@ namespace ASC.Web.Api.Tests.Tests._09_Apps;
 [Trait("Category", "Apps")]
 public class SetAppEnabledTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : AppsTestBase(fixture)
 {
     /// <summary>
     /// Bug 84498: a body without the enabled field used to be accepted with 200 and switch the application off,
@@ -51,31 +51,14 @@ public class SetAppEnabledTests(
     public async Task SetAppEnabled_BodyWithoutEnabled_ReturnsBadRequestAndKeepsState()
     {
         // Arrange
-        var id = await GetFirstAppIdAsync();
-        using var enable = await _webApi.PutAsync($"api/2.0/apps/{id}/enabled", new { enabled = true }, TestContext.Current.CancellationToken);
-        enable.StatusCode.Should().Be(HttpStatusCode.OK);
+        var id = (await PickAppsAsync(1))[0];
+        await SaveEnabledAsync(id, true);
 
         // Act — raw, because the typed request cannot leave the enabled field out
         using var response = await _webApi.PutRawAsync($"api/2.0/apps/{id}/enabled", "{}", TestContext.Current.CancellationToken);
 
         // Assert
-        (await IsEnabledAsync(id)).Should().BeTrue();
+        (await AppsApi.GetAsync(id, Ct)).Response.Enabled.Should().BeTrue();
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    private async Task<string> GetFirstAppIdAsync()
-    {
-        using var response = await _webApi.GetAsync("api/2.0/apps", TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-
-        return json.RootElement.GetProperty("response").EnumerateArray().First().GetProperty("id").GetString()!;
-    }
-
-    private async Task<bool> IsEnabledAsync(string id)
-    {
-        using var response = await _webApi.GetAsync($"api/2.0/apps/{id}", TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-
-        return json.RootElement.GetProperty("response").GetProperty("enabled").GetBoolean();
     }
 }

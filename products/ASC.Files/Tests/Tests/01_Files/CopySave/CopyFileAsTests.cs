@@ -45,12 +45,6 @@ namespace ASC.Files.Tests.Tests._01_Files.CopySave;
 /// document-server resource, so those cases cannot pass here; see the porting report for the two
 /// TS cases dropped for this reason (and one already <c>test.skip</c>'d in the source suite).
 /// </remarks>
-/// <remarks>
-/// <see cref="FileEntryBaseDto"/> — the type <see cref="FileEntryBaseWrapper.Response"/> is typed
-/// as — carries <c>Title</c> but neither <c>Id</c> nor <c>FolderId</c>, so the copy's destination
-/// is verified by listing the destination folder's content instead of reading the copy response
-/// directly. This is an SDK model gap, not a preference.
-/// </remarks>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
 public class CopyFileAsTests(
@@ -72,10 +66,13 @@ public class CopyFileAsTests(
         // Act
         var copied = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyRequest, TestContext.Current.CancellationToken)).Response;
 
-        // Assert
-        copied.Title.Should().Be("Autotest Copied File.docx");
+        // Assert - the copy response is declared as FileEntryBaseDto and arrives as the FileDto it is
+        var copiedFile = copied.Should().BeOfType<FileDto>().Subject;
+        copiedFile.Title.Should().Be("Autotest Copied File.docx");
+        copiedFile.FolderId.Should().Be(destRoom.Id);
 
         var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        destContent.Files.Should().Contain(f => f.Title == "Autotest Copied File.docx");
+        (destContent.Files ?? []).OfType<FileDto>().Should().ContainSingle(f => f.Id == copiedFile.Id)
+            .Which.Title.Should().Be("Autotest Copied File.docx");
     }
 }

@@ -93,24 +93,14 @@ public abstract class DuplicateTestBase(
     }
 
     /// <summary>
-    /// <see cref="FolderContentDto.Folders"/> and <see cref="FolderContentDto.Files"/>
-    /// are typed <c>List&lt;FileEntryBaseDto&gt;</c>, which carries a <c>Title</c> but no <c>Id</c>
-    /// (the same SDK narrowness tests.md calls out for room reads through a folder listing). Locating
-    /// a duplicated entry's id therefore has to go through the raw JSON.
+    /// The id and title of every folder (or file) under <paramref name="parentFolderId"/>, read from the
+    /// <c>FileDto</c>/<c>FolderDto</c> the <c>entryKind</c> discriminator makes of each listed entry.
     /// </summary>
-    protected async Task<List<(int Id, string Title)>> GetRawEntries(int parentFolderId, bool inFolders)
+    protected async Task<List<(int Id, string Title)>> GetEntries(int parentFolderId, bool inFolders)
     {
-        var raw = await _foldersApi.GetFolderByFolderIdWithHttpInfoAsync(parentFolderId, cancellationToken: TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(raw.RawContent);
-        var array = json.RootElement.GetProperty("response").GetProperty(inFolders ? "folders" : "files");
+        var content = (await _foldersApi.GetFolderByFolderIdAsync(parentFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var entries = (inFolders ? content.Folders : content.Files) ?? [];
 
-        var result = new List<(int, string)>();
-
-        foreach (var entry in array.EnumerateArray())
-        {
-            result.Add((entry.GetProperty("id").GetInt32(), entry.GetProperty("title").GetString()!));
-        }
-
-        return result;
+        return [.. entries.OfType<FileEntryDto>().Select(e => (e.Id, e.Title))];
     }
 }

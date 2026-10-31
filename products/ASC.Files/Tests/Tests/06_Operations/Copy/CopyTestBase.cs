@@ -96,26 +96,16 @@ public abstract class CopyTestBase(
     }
 
     /// <summary>
-    /// <see cref="FolderContentDto.Folders"/> and <see cref="FolderContentDto.Files"/>
-    /// are typed <c>List&lt;FileEntryBaseDto&gt;</c>, which carries a <c>Title</c> but no <c>Id</c>
-    /// (the same SDK narrowness tests.md calls out for room reads through a folder listing). Locating
-    /// a copied entry's id therefore has to go through the raw JSON.
+    /// The id of the copied entry titled <paramref name="title"/> under <paramref name="parentFolderId"/>, read
+    /// from the <c>FileDto</c>/<c>FolderDto</c> the <c>entryKind</c> discriminator makes of each listed entry.
     /// </summary>
     protected async Task<int> FindEntryIdByTitle(int parentFolderId, string title, bool inFolders)
     {
-        var raw = await _foldersApi.GetFolderByFolderIdWithHttpInfoAsync(parentFolderId, cancellationToken: TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(raw.RawContent);
-        var array = json.RootElement.GetProperty("response").GetProperty(inFolders ? "folders" : "files");
+        var content = (await _foldersApi.GetFolderByFolderIdAsync(parentFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var entries = (inFolders ? content.Folders : content.Files) ?? [];
 
-        foreach (var entry in array.EnumerateArray())
-        {
-            if (entry.TryGetProperty("title", out var titleProp) && titleProp.GetString() == title)
-            {
-                return entry.GetProperty("id").GetInt32();
-            }
-        }
-
-        throw new InvalidOperationException($"No entry titled '{title}' found under folder {parentFolderId}.");
+        return entries.OfType<FileEntryDto>().FirstOrDefault(e => e.Title == title)?.Id
+            ?? throw new InvalidOperationException($"No entry titled '{title}' found under folder {parentFolderId}.");
     }
 
     /// <summary>

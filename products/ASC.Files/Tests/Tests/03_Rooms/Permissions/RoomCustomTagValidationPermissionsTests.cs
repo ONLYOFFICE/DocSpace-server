@@ -38,8 +38,9 @@ public class RoomCustomTagValidationPermissionsTests(
     AspireAppFixture fixture)
     : RoomsPermissionsTestBase(fixture)
 {
-    // These cases send deliberately malformed bodies, which the typed SDK cannot express,
-    // so they go through the raw HTTP client.
+    // The malformed bodies (a wrong property name, a missing or null array, a wrong-typed value or
+    // element) cannot be expressed by the typed BatchTagsRequestDto, so those cases go through the raw
+    // HTTP client; everything the DTO can carry goes through the SDK.
 
     [Fact]
     [Trait("Bug", "80046")]
@@ -69,10 +70,14 @@ public class RoomCustomTagValidationPermissionsTests(
         var before = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Act
-        using var response = await SendRawTagsDelete("""{"names":[]}""");
+        var exception = await Record.ExceptionAsync(
+            async () => await _roomsApi.DeleteCustomTagsAsync(new BatchTagsRequestDto([]), TestContext.Current.CancellationToken));
 
-        // Assert
-        ((int)response.StatusCode).Should().BeOneOf(200, 400);
+        // Assert - accepted (200) or refused as a bad request (400), never anything else
+        if (exception is not null)
+        {
+            exception.Should().BeOfType<ApiException>().Which.ErrorCode.Should().Be(400);
+        }
 
         var after = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         after.Should().BeEquivalentTo(before);
@@ -101,17 +106,35 @@ public class RoomCustomTagValidationPermissionsTests(
     /// <c>BatchTagsRequestDto.Names</c>, which DataAnnotations does not do on its own.
     /// </remarks>
     [Theory]
-    [InlineData("""{"names":[""]}""")]
-    [InlineData("""{"names":["   "]}""")]
-    [InlineData("""{"names":[null]}""")]
+    [InlineData("")]
+    [InlineData("   ")]
     [Trait("Bug", "81689")]
-    public async Task DeleteCustomTags_BlankNameEntry_BadRequest(string body)
+    public async Task DeleteCustomTags_BlankNameEntry_BadRequest(string name)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await SendRawTagsDelete(body);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.DeleteCustomTagsAsync(new BatchTagsRequestDto([name]), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    /// <remarks>
+    /// The null entry of bug 81689: a null element inside the names array is a body the typed
+    /// <c>List&lt;string&gt;</c> is not meant to carry, so it is sent raw.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "81689")]
+    public async Task DeleteCustomTags_NullNameEntry_BadRequest()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await SendRawTagsDelete("""{"names":[null]}""");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

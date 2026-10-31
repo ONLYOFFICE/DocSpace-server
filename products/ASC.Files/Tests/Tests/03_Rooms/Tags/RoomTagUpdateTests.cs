@@ -220,11 +220,26 @@ public class RoomTagUpdateTests(
         exception.ErrorCode.Should().Be(400);
     }
 
+    [Fact]
+    public async Task UpdateTag_EmptyOldName_ReturnsBadRequest()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.UpdateRoomTagAsync(
+                new UpdateTagRequestDto("", "Autotest Empty Old Name New"),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
     // The typed DTO's constructor requires non-null oldName/newName and throws client-side for
     // null, so these bodies — which the TS suite sends with null/missing fields — can only be
     // produced over raw HTTP.
     [Theory]
-    [InlineData("""{"oldName":"","newName":"Autotest Empty Old Name New"}""")]
     [InlineData("""{"newName":"Autotest Missing Old Name"}""")]
     [InlineData("{}")]
     [InlineData("""{"oldName":null,"newName":"Autotest Null Old Name New"}""")]

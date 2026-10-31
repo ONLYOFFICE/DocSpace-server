@@ -293,19 +293,13 @@ public class BaseTest(
     }
 
     /// <summary>
-    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
-    /// neither <c>id</c> nor <c>type</c>.
+    /// The id of the AI room's knowledge folder, found among its subfolders by <c>FolderType.Knowledge</c>.
     /// </summary>
     protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
     {
-        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+        var folders = (await _foldersApi.GetFoldersAsync(aiRoomId, TestContext.Current.CancellationToken)).Response;
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-
-        return payload.RootElement.GetProperty("response").EnumerateArray()
-            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
-            .Select(f => f.GetProperty("id").GetInt32())
-            .First();
+        return folders.OfType<FolderDto>().First(f => f.Type == FolderType.Knowledge).Id;
     }
 
     /// <summary>

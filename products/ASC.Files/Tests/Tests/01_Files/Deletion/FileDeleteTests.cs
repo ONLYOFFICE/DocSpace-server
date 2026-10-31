@@ -536,31 +536,20 @@ public class FileDeleteTests(
 
     /// <summary>
     /// Empties the trash, optionally only for the items originally located in the sections of the given types.
-    /// The generated SDK client has no folderType parameter yet, so the request is issued directly.
     /// </summary>
     private async Task EmptyTrashAndWait(List<FolderType>? folderType = null)
     {
-        var url = "api/2.0/files/fileops/emptytrash?single=true";
+        var operations = (await _filesOperationsApi.EmptyTrashAsync(
+            single: true,
+            folderType: folderType?.ConvertAll(type => (int)type),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        if (folderType != null)
-        {
-            url = folderType.Aggregate(url, (current, type) => current + $"&folderType={(int)type}");
-        }
-
-        using var response = await _filesClient.PutAsync(url, null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        response.IsSuccessStatusCode.Should().BeTrue(body);
-
-        using var json = JsonDocument.Parse(body);
-        var operations = json.RootElement.GetProperty("response");
-
-        if (operations.GetArrayLength() == 0)
+        if (operations.Count == 0)
         {
             return;
         }
 
-        await WaitOperation(operations[0].GetProperty("id").GetString(), "empty trash");
+        await WaitOperation(operations[0].Id, "empty trash");
     }
 
     /// <summary>

@@ -123,35 +123,4 @@ public abstract class FavoritesTestBase(
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
     }
-
-    /// <summary>A file as it comes back from a raw GET /files/@favorites read.</summary>
-    protected sealed record RawFavoriteFile(string Title, string? OriginRoomTitle, bool? IsFavorite);
-
-    /// <summary>
-    /// Reads GET /files/@favorites straight from JSON. <c>FolderContentDto.Files</c> is typed
-    /// <c>List&lt;FileEntryBaseDto&gt;</c>, which carries <c>Title</c> and <c>IsFavorite</c> but not
-    /// <c>OriginRoomTitle</c> - that field only exists on the concrete <c>FileEntryDto</c> the
-    /// endpoint actually returns. That is an SDK/OpenAPI defect, not a preference; every other test
-    /// that does not need <c>originRoomTitle</c> should keep calling <see cref="GetFavorites"/>.
-    /// </summary>
-    protected async Task<List<RawFavoriteFile>> GetFavoritesFilesRawAsync()
-    {
-        using var response = await _filesClient.GetAsync("api/2.0/files/@favorites", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to read api/2.0/files/@favorites ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var filesElement = json.RootElement.GetProperty("response").GetProperty("files");
-
-        return filesElement.EnumerateArray()
-            .Select(f => new RawFavoriteFile(
-                f.GetProperty("title").GetString() ?? string.Empty,
-                f.TryGetProperty("originRoomTitle", out var originRoomTitle) ? originRoomTitle.GetString() : null,
-                f.TryGetProperty("isFavorite", out var isFavorite) && isFavorite.ValueKind is JsonValueKind.True or JsonValueKind.False ? isFavorite.GetBoolean() : null))
-            .ToList();
-    }
 }

@@ -303,28 +303,13 @@ public class RoomLogoDeleteTests(
         // Act
         await _roomsApi.DeleteRoomLogoAsync(room.Id, TestContext.Current.CancellationToken);
 
-        // Assert: the typed SDK's FolderContentDto only exposes the fields common to every entry
-        // type (FileEntryBaseDto), which drops id/logo — read the raw JSON instead. That is an SDK
-        // defect worth reporting, not a preference.
-        //
-        // The list is deliberately unfiltered: a filterValue query is served from the search index
-        // (FolderDao -> factoryIndexer.TrySelectIdsAsync), so a room created moments ago may not be
-        // in it yet. The portal belongs to this test alone and holds exactly one room.
-        using var response = await _filesClient.GetAsync(
-            "api/2.0/files/rooms",
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
+        // Assert: the list is deliberately unfiltered: a filterValue query is served from the search
+        // index (FolderDao -> factoryIndexer.TrySelectIdsAsync), so a room created moments ago may not
+        // be in it yet. The portal belongs to this test alone and holds exactly one room.
+        var content = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        var found = json.RootElement.GetProperty("response").GetProperty("folders")
-            .EnumerateArray()
-            .FirstOrDefault(f => f.GetProperty("id").GetInt32() == room.Id);
-
-        found.ValueKind.Should().NotBe(JsonValueKind.Undefined);
-        var originalLogo = found.TryGetProperty("logo", out var logo) && logo.TryGetProperty("original", out var original)
-            ? original.GetString()
-            : null;
-        originalLogo.Should().BeNullOrEmpty();
+        var found = (content.Folders ?? []).OfType<FolderDto>().Should().ContainSingle(f => f.Id == room.Id).Which;
+        (found.Logo?.Original).Should().BeNullOrEmpty();
     }
 
     [Fact]

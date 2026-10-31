@@ -37,7 +37,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Links;
 /// <c>GET /api/2.0/files/{folderId}</c> on a public room: every listed file carries its primary
 /// external link in <c>shortWebUrl</c>, which the listing reads once per file through the
 /// primary-external-link share query. A custom room has no such link and leaves the field empty.
-/// The listing model (<c>FileEntryBaseDto</c>) has no <c>Id</c>, so files are matched by title.
+/// Listed files are matched to the created ones by id.
 /// </summary>
 [Trait("Category", "Rooms")]
 public class PublicRoomListingShortLinkTests(
@@ -60,7 +60,7 @@ public class PublicRoomListingShortLinkTests(
         {
             var link = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-            listed.Should().ContainSingle(f => f.Title == file.Title)
+            listed.Should().ContainSingle(f => f.Id == file.Id)
                 .Which.ShortWebUrl.Should().Be(link.SharedLink.ShareLink, "file {0}", file.Title);
         }
     }
@@ -108,10 +108,10 @@ public class PublicRoomListingShortLinkTests(
         return files;
     }
 
-    private async Task<List<FileEntryBaseDto>> ListFiles(int roomId)
+    private async Task<List<FileDto>> ListFiles(int roomId)
     {
         var content = (await _foldersApi.GetFolderByFolderIdAsync(roomId, count: 100, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        return content.Files;
+        return [.. (content.Files ?? []).OfType<FileDto>()];
     }
 }

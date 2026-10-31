@@ -216,18 +216,13 @@ public class FileMoveConflictTests(
     }
 
     /// <summary>
-    /// Reads the ids of the files directly in a folder from the raw response body.
-    /// <c>FolderContentDto.Files</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
-    /// carries <c>Title</c> but not <c>Id</c> - an SDK model gap - so identity checks (same entry
-    /// vs. a new one with the same title) have to go through the raw JSON.
+    /// The ids of the files directly in a folder, for identity checks (same entry vs. a new one with the
+    /// same title).
     /// </summary>
     private async Task<List<int>> GetFileIdsInFolder(int folderId)
     {
-        var response = await _foldersApi.GetFolderByFolderIdWithHttpInfoAsync(folderId, cancellationToken: TestContext.Current.CancellationToken);
+        var (files, _) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-        var files = payload.RootElement.GetProperty("response").GetProperty("files");
-
-        return [.. files.EnumerateArray().Select(f => f.GetProperty("id").GetInt32())];
+        return [.. files.Select(f => f.Id)];
     }
 }

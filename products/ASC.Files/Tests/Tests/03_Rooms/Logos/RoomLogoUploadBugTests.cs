@@ -54,12 +54,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(Encoding.UTF8.GetBytes("this is not an image"), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(Encoding.UTF8.GetBytes("this is not an image")));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -74,12 +73,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateJpegBytes(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateJpegBytes()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -90,12 +88,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateGifBytes(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateGifBytes()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -106,12 +103,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateWebpBytes(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateWebpBytes()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -122,12 +118,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateSvgBytes(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateSvgBytes()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -138,12 +133,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateCorruptPng(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateCorruptPng()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -154,12 +148,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateRandomBinaryBytes(), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(CreateRandomBinaryBytes()));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     #endregion
@@ -220,12 +213,11 @@ public class RoomLogoUploadBugTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [([], "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo([]));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]

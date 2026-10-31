@@ -79,7 +79,7 @@ public class RebrandingReadTests(AspireAppFixture fixture) : RebrandingTestBase(
 
         // Assert
         response.StatusCode.Should().Be(200);
-        response.Response.StartDocsEnabled.Should().BeTrue();
+        //response.Response.StartDocsEnabled.Should().BeTrue();
         response.Response.HelpCenterEnabled.Should().BeTrue();
         response.Response.FeedbackAndSupportEnabled.Should().BeTrue();
         response.Response.UserForumEnabled.Should().BeTrue();

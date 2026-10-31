@@ -102,53 +102,27 @@ public abstract class ClientManagementTestBase(
     }
 
     /// <summary>
-    /// A valid update-client wire body. <see cref="UpdateClientRequest"/> cannot carry this: the
-    /// generated model only exposes <c>name</c>/<c>description</c>/<c>logo</c>/<c>public</c>/
-    /// <c>allow_pkce</c>/<c>is_public</c>/<c>allowed_origins</c>, but the identity service's PUT
-    /// also requires non-empty <c>redirect_uris</c> and <c>scopes</c> on every update — an
-    /// SDK/OpenAPI defect worth reporting. A plain <see cref="Dictionary{TKey,TValue}"/> is sent as
-    /// raw JSON instead, since the DTO cannot express the fields the endpoint actually requires.
+    /// A valid update-client request: the identity service's PUT requires <c>name</c>, <c>logo</c>,
+    /// <c>allowed_origins</c>, <c>redirect_uris</c> and non-empty <c>scopes</c> on every update
+    /// (the generated constructor rejects a null for any of them client-side), so the cases that
+    /// test one field start from this and flip only that one.
     /// </summary>
-    protected static Dictionary<string, object?> ValidUpdateClientBody(
+    protected static UpdateClientRequest ValidUpdateClientRequest(
         string name = "Updated OAuth Client",
         string? description = null,
-        string? logo = OAuthLogo,
+        string logo = OAuthLogo,
         List<string>? allowedOrigins = null,
         List<string>? redirectUris = null,
         List<string>? scopes = null)
     {
-        // The full create-payload field set: the TS suite sends `...fullClientRequest` on update,
-        // and the identity PUT 500s ("Something went wrong") when the URL fields are absent.
-        return new Dictionary<string, object?>
-        {
-            ["name"] = name,
-            ["description"] = description,
-            ["logo"] = logo,
-            ["website_url"] = "https://example.com",
-            ["terms_url"] = "https://example.com/terms",
-            ["policy_url"] = "https://example.com/policy",
-            ["logout_redirect_uri"] = "https://example.com/logout",
-            ["is_public"] = false,
-            ["allow_pkce"] = false,
-            ["allowed_origins"] = allowedOrigins ?? ["https://example.com"],
-            ["redirect_uris"] = redirectUris ?? ["https://example.com/callback"],
-            ["scopes"] = scopes ?? ["accounts.self:read"]
-        };
-    }
-
-    /// <summary>
-    /// Sends the update as raw JSON over <c>_identityClient</c> — see <see cref="ValidUpdateClientBody"/>
-    /// for why the typed <see cref="UpdateClientRequest"/> cannot be used here.
-    /// </summary>
-    protected async Task<(HttpStatusCode StatusCode, string Body)> UpdateClientRawAsync(
-        string clientId, Dictionary<string, object?> body)
-    {
-        using var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-        using var response = await _identityClient.PutAsync(
-            $"api/2.0/clients/{clientId}", content, TestContext.Current.CancellationToken);
-
-        var responseBody = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        return (response.StatusCode, responseBody);
+        return new UpdateClientRequest(
+            name: name,
+            description: description!,
+            logo: logo,
+            scopes: scopes ?? ["accounts.self:read"],
+            allowPkce: false,
+            allowedOrigins: allowedOrigins ?? ["https://example.com"],
+            redirectUris: redirectUris ?? ["https://example.com/callback"],
+            isPublic: false);
     }
 }

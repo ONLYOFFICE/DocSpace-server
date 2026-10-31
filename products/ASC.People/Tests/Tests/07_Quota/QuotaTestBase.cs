@@ -62,22 +62,12 @@ public abstract class QuotaTestBase(AspireAppFixture fixture) : BaseTest(fixture
         response.EnsureSuccessStatusCode();
     }
 
-    /// <summary>
-    /// The current portal's tenant id, read back from <c>GET /api/2.0/portal</c>. No SDK client on
-    /// <see cref="BaseTest"/> surfaces the tenant id of the running test's portal, so it is read
-    /// over raw HTTP instead of adding one.
-    /// </summary>
+    /// <summary>The current portal's tenant id, read back from <c>GET /api/2.0/portal</c>.</summary>
     protected async Task<int> GetTenantIdAsync()
     {
         await _webApiClient.Authenticate(Owner);
 
-        using var response = await _webApiClient.GetAsync("api/2.0/portal", TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var document = JsonDocument.Parse(body);
-
-        return document.RootElement.GetProperty("response").GetProperty("tenantId").GetInt32();
+        return (await _portalSettingsApi.GetPortalInformationAsync(TestContext.Current.CancellationToken)).Response.TenantId;
     }
 
     /// <summary>

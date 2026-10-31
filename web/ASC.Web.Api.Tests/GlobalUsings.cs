@@ -37,9 +37,11 @@ extern alias ASCWebApi;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.Http.Json;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;

@@ -77,22 +77,19 @@ public class IpRestrictionsSavePermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
-    // Raw HTTP for the same reason as IpRestrictionsSaveTests: the typed constructor rejects a
-    // null ipRestrictions list client-side.
     [Fact]
     public async Task UpdateIpRestrictionsSettings_Anonymous_ThrowsUnauthorized()
     {
         // Arrange
         await _webApiClient.Authenticate(null);
+        var dto = new IpRestrictionsDto([], false);
 
         // Act
-        using var response = await _webApi.PutRawAsync(
-            "api/2.0/settings/iprestrictions/settings",
-            """{"ipRestrictions":null,"enable":false}""",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _ipRestrictionsApi.UpdateIpRestrictionsSettingsAsync(dto, TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Theory]
@@ -104,14 +101,13 @@ public class IpRestrictionsSavePermissionsTests(
         // Arrange
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
+        var dto = new IpRestrictionsDto([], false);
 
         // Act
-        using var response = await _webApi.PutRawAsync(
-            "api/2.0/settings/iprestrictions/settings",
-            """{"ipRestrictions":null,"enable":false}""",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _ipRestrictionsApi.UpdateIpRestrictionsSettingsAsync(dto, TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        exception.ErrorCode.Should().Be(403);
     }
 }

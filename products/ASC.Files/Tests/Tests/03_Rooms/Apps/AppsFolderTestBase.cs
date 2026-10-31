@@ -146,26 +146,17 @@ public abstract class AppsFolderTestBase(
     }
 
     /// <summary>
-    /// The room listing is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which carries a <c>Title</c> but
-    /// no <c>Id</c> (the SDK narrowness tests.md calls out), so a room created by an operation has to be
-    /// found through the raw JSON.
+    /// Finds a room created by an operation: the first room other than <paramref name="exceptRoomId"/> whose title
+    /// starts with <paramref name="titlePrefix"/>.
     /// </summary>
     protected async Task<int> FindRoomIdByTitlePrefix(string titlePrefix, int exceptRoomId)
     {
-        var raw = await _roomsApi.GetRoomsFolderWithHttpInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(raw.RawContent);
+        var content = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        foreach (var entry in json.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray())
-        {
-            var id = entry.GetProperty("id").GetInt32();
+        var room = (content.Folders ?? []).OfType<FolderDto>()
+            .FirstOrDefault(f => f.Id != exceptRoomId && f.Title.StartsWith(titlePrefix, StringComparison.Ordinal));
 
-            if (id != exceptRoomId && entry.GetProperty("title").GetString()!.StartsWith(titlePrefix, StringComparison.Ordinal))
-            {
-                return id;
-            }
-        }
-
-        throw new InvalidOperationException($"No room titled '{titlePrefix}…' other than {exceptRoomId} was found.");
+        return room?.Id ?? throw new InvalidOperationException($"No room titled '{titlePrefix}…' other than {exceptRoomId} was found.");
     }
 
     private static BatchRequestDto BuildBatchRequest(int folderId, int destFolderId, FileConflictResolveType conflictResolveType)

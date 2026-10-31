@@ -132,10 +132,15 @@ nullable property. The DTO accepts all of those and the server does the rejectin
 ordinary typed calls.
 
 One more carve-out, on the response side: a generated model can be too narrow to carry what the
-endpoint returns. `FolderContentDto.Folders` is typed `List<FileEntryBaseDto>`, which has
-`Title` but neither `Id` nor `Logo`, so a room read through a folder listing loses both. When the
-assertion needs a field the model drops, read the raw JSON — and say so in a comment, because
-that is an SDK defect worth reporting, not a preference.
+endpoint returns. When the assertion needs a field the model drops, read the raw JSON — and say
+so in a comment, because that is an SDK defect worth reporting, not a preference.
+
+A list typed with the base `FileEntryBaseDto` is not such a case. `FolderContentDto.Files` and
+`.Folders`, the preflight answers and the other entry lists arrive as their concrete models,
+picked by the `entryKind` discriminator, so take the fields from those:
+`content.Folders.OfType<FolderDto>()` carries `Id`, `RoomType`, `Logo`, `Pinned`;
+`OfType<ThirdPartyFolderDto>()` the third-party rooms with their string ids.
+`FolderListing` (`products/ASC.Files/Tests/Tests/06_Operations/`) reads a listing that way.
 
 Decide these by evidence, not by feel: read the `[DataMember(..., EmitDefaultValue = ...)]`
 attributes on the generated model and the constructor, which together determine what an

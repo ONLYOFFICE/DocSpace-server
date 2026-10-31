@@ -41,13 +41,6 @@ namespace ASC.Web.Api.Tests.Tests._05_Security.AuditTrail;
 /// <see cref="AuditTrailReportTests"/> for why that is not needed on this Aspire-hosted
 /// (<c>Standalone</c>) integration portal.
 /// </summary>
-/// <remarks>
-/// SDK gap: the response is a flat <c>TenantAuditSettings</c>, not the nested
-/// <c>{"settings": {...}}</c> shape the generated <see cref="TenantAuditSettingsWrapper"/> expects
-/// — see <see cref="AuditSettingsGetTests"/> for the full explanation. The request body genuinely
-/// is nested that way (that part of the generated model is correct), so the negative cases go
-/// through the typed SDK method and only the positive responses are read as raw JSON.
-/// </remarks>
 [Trait("Category", "Security")]
 public class AuditSettingsSetTests(
     AspireAppFixture fixture)
@@ -62,15 +55,11 @@ public class AuditSettingsSetTests(
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.PostAsync(
-            "api/2.0/security/audit/settings/lifetime",
-            new { settings = new { loginHistoryLifeTime = 180, auditTrailLifeTime = 180 } },
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var settings = (await _auditTrailDataApi.SetAuditSettingsAsync(_settingsUpdate, TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        AssertUpdatedSettings(body);
+        settings.LoginHistoryLifeTime.Should().Be(180);
+        settings.AuditTrailLifeTime.Should().Be(180);
     }
 
     [Fact]
@@ -81,15 +70,11 @@ public class AuditSettingsSetTests(
         await _webApiClient.Authenticate(admin);
 
         // Act
-        using var response = await _webApi.PostAsync(
-            "api/2.0/security/audit/settings/lifetime",
-            new { settings = new { loginHistoryLifeTime = 180, auditTrailLifeTime = 180 } },
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var settings = (await _auditTrailDataApi.SetAuditSettingsAsync(_settingsUpdate, TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        AssertUpdatedSettings(body);
+        settings.LoginHistoryLifeTime.Should().Be(180);
+        settings.AuditTrailLifeTime.Should().Be(180);
     }
 
     [Fact]
@@ -123,15 +108,5 @@ public class AuditSettingsSetTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
-    }
-
-    private static void AssertUpdatedSettings(string body)
-    {
-        using var json = JsonDocument.Parse(body);
-        var settings = json.RootElement.GetProperty("response");
-
-        settings.GetProperty("loginHistoryLifeTime").GetInt32().Should().Be(180);
-        settings.GetProperty("auditTrailLifeTime").GetInt32().Should().Be(180);
-        settings.TryGetProperty("lastModified", out _).Should().BeTrue();
     }
 }

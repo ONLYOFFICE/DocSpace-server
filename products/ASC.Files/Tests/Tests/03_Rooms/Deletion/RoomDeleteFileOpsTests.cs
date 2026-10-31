@@ -124,8 +124,6 @@ public class RoomDeleteFileOpsTests(
         // Assert
         results.Should().OnlyContain(r => r.Finished && r.Error == "");
 
-        // The room list is read raw: FolderContentDto.Folders is typed List<FileEntryBaseDto>,
-        // which carries Title but not Id, so the duplicate cannot be addressed through the SDK model.
         var duplicateId = await FindRoomId("Autotest Admin Room With File For Owner Duplicate", room.Id);
         duplicateId.Should().NotBeNull();
 
@@ -133,26 +131,14 @@ public class RoomDeleteFileOpsTests(
         info.FilesCount.Should().Be(1);
     }
 
-    /// <summary>Reads GET /files/rooms raw and returns the id of the first room whose title contains
-    /// <paramref name="titlePart"/> and whose id differs from <paramref name="excludeId"/>.</summary>
+    /// <summary>The id of the first room whose title contains <paramref name="titlePart"/> and whose id differs
+    /// from <paramref name="excludeId"/>.</summary>
     private async Task<int?> FindRoomId(string titlePart, int excludeId)
     {
-        using var response = await _filesClient.GetAsync("api/2.0/files/rooms", TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
+        var content = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-
-        foreach (var folder in json.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray())
-        {
-            var id = folder.GetProperty("id").GetInt32();
-
-            if (id != excludeId && folder.GetProperty("title").GetString()?.Contains(titlePart) == true)
-            {
-                return id;
-            }
-        }
-
-        return null;
+        return (content.Folders ?? []).OfType<FolderDto>()
+            .FirstOrDefault(f => f.Id != excludeId && f.Title?.Contains(titlePart) == true)?.Id;
     }
 
     /// <summary>

@@ -171,9 +171,8 @@ public class AddFileToRecentTests(
         // Act
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
-        // Assert - FolderContentDto.Files is typed FileEntryBaseDto, which carries Title but
-        // not Id, so the file is matched by its (unique) title.
-        var recent = await PollRecentUntil(r => r.Files.Any(f => f.Title == file.Title));
-        recent.Files.Should().Contain(f => f.Title == file.Title);
+        // Assert - the third-party file is listed as the ThirdPartyFileDto it is, with its string id
+        var recent = await PollRecentUntil(r => r.Files.OfType<ThirdPartyFileDto>().Any(f => f.Id == file.Id));
+        recent.Files.OfType<ThirdPartyFileDto>().Should().Contain(f => f.Id == file.Id);
     }
 }

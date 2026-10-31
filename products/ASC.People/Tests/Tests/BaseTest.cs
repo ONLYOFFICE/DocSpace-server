@@ -71,6 +71,7 @@ public class BaseTest(
     protected UsersApi _portalUsersApi = null!;
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
+    protected SettingsApi _portalSettingsApi = null!;
     protected WebhooksApi _webhooksApi = null!;
 
     public async ValueTask InitializeAsync()
@@ -108,6 +109,7 @@ public class BaseTest(
         _portalUsersApi = _clients.PortalUsersApi;
         _commonSettingsApi = _clients.CommonSettingsApi;
         _settingsQuotaApi = _clients.SettingsQuotaApi;
+        _portalSettingsApi = _clients.PortalSettingsApi;
         _webhooksApi = _clients.WebhooksApi;
 
         await _peopleClient.Authenticate(Owner);

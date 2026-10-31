@@ -184,10 +184,10 @@ public class WebhookLogFilterTests(
         // Assert
         first.Total.Should().Be(3, "total counts every matching record, not the page");
         second.Total.Should().Be(3);
-        first.Response.Should().HaveCount(2);
-        second.Response.Should().ContainSingle();
-        first.Response!.Select(r => r.Id).Should().NotIntersectWith(second.Response!.Select(r => r.Id));
-        first.Response!.Select(r => r.Id).Should().BeInDescendingOrder("records come newest first");
+        first.Records.Should().HaveCount(2);
+        second.Records.Should().ContainSingle();
+        first.Records.Select(r => r.Id).Should().NotIntersectWith(second.Records.Select(r => r.Id));
+        first.Records.Select(r => r.Id).Should().BeInDescendingOrder("records come newest first");
     }
 
     [Theory]
@@ -248,17 +248,21 @@ public class WebhookLogFilterTests(
     }
 
     /// <summary>
-    /// One page of a subscription's records with the <c>total</c> the response reports beside them, which the
-    /// generated SDK wrapper does not carry, so it is read from the raw envelope.
+    /// One page of a subscription's records, read through the SDK, with the <c>total</c> the response reports
+    /// beside them. The generated <see cref="WebhooksLogArrayWrapper"/> does not carry <c>total</c>, so that one
+    /// number is read from the raw envelope of the same request.
     /// </summary>
-    private async Task<RawApiResponse<List<DeliveryRecord>>> ReadPageAsync(int configId, int startIndex, int count)
+    private async Task<(long? Total, List<WebhooksLogDto> Records)> ReadPageAsync(int configId, int startIndex, int count)
     {
         await _webApiClient.Authenticate(Owner);
 
-        using var response = await _webApi.GetAsync(
+        var records = (await _webhooksApi.GetWebhooksLogsAsync(
+            configId: configId, count: count, startIndex: startIndex, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var total = await _webApi.GetTotalAsync(
             $"api/2.0/settings/webhooks/log?configId={configId}&startIndex={startIndex}&count={count}",
             TestContext.Current.CancellationToken);
 
-        return await _webApi.ReadEnvelopeAsync<List<DeliveryRecord>>(response, TestContext.Current.CancellationToken);
+        return (total, records);
     }
 }

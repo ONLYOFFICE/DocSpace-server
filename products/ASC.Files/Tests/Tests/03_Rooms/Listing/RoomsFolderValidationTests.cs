@@ -176,14 +176,14 @@ public class RoomsFolderValidationTests(
         await CreateCustomRoom("Autotest Other");
 
         // Act - filterValue is served from the search index, so poll instead of reading once.
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(type: [RoomType.PublicRoom], filterValue: "Combo"),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(type: [RoomType.PublicRoom], filterValue: "Combo"),
             r => r.Folders.Count > 0);
 
         // Assert
-        raw.Folders.Should().ContainSingle();
-        raw.Folders[0].Title.Should().Be("Autotest Combo Public");
-        raw.Folders[0].RoomType.Should().Be(RoomType.PublicRoom);
+        rooms.Folders.Should().ContainSingle();
+        rooms.Folders[0].Title.Should().Be("Autotest Combo Public");
+        rooms.Folders[0].RoomType.Should().Be(RoomType.PublicRoom);
     }
 
     [Fact]
@@ -222,10 +222,10 @@ public class RoomsFolderValidationTests(
         }
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(searchArea: SearchArea.Archive, type: [RoomType.VirtualDataRoom]);
+        var rooms = await ListRoomsAsync(searchArea: SearchArea.Archive, type: [RoomType.VirtualDataRoom]);
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(vdr.Id);
         ids.Should().NotContain(custom.Id);
     }
@@ -251,12 +251,12 @@ public class RoomsFolderValidationTests(
 
         // Act - both the tag and the title filter are served from the search index, which is written
         // asynchronously, so poll for the tagged room instead of racing that write.
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }), filterValue: "TagCombo"),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(tags: JsonSerializer.Serialize(new[] { tag }), filterValue: "TagCombo"),
             page => page.Folders.Exists(f => f.Id == match.Id));
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(match.Id);
         ids.Should().NotContain(titleOnly.Id);
         ids.Should().NotContain(tagOnly.Id);
@@ -275,10 +275,10 @@ public class RoomsFolderValidationTests(
         await WaitLongOperation();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync();
+        var rooms = await ListRoomsAsync();
 
         // Assert
-        raw.Folders.Select(f => f.Id).Should().NotContain(room.Id);
+        rooms.Folders.Select(f => f.Id).Should().NotContain(room.Id);
     }
 
     [Fact]
@@ -320,12 +320,12 @@ public class RoomsFolderValidationTests(
         var room = await CreateCustomRoom("Autotest Untagged Then Tagged");
 
         // Act / Assert - before tagging, the room must not match the tag filter
-        var before = await GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }));
+        var before = await ListRoomsAsync(tags: JsonSerializer.Serialize(new[] { tag }));
         before.Folders.Select(f => f.Id).Should().NotContain(room.Id);
 
         await _roomsApi.AddRoomTagsAsync(room.Id, new BatchTagsRequestDto([tag]), TestContext.Current.CancellationToken);
 
-        var after = await GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }));
+        var after = await ListRoomsAsync(tags: JsonSerializer.Serialize(new[] { tag }));
         after.Folders.Select(f => f.Id).Should().Contain(room.Id);
     }
 

@@ -69,17 +69,10 @@ public class PortalTariffPermissionsTests(
         await _webApiClient.Authenticate(member);
 
         // Act
-        // Raw JSON: the stripped-down member view omits dueDate, which the generated Tariff
-        // model marks required, so the typed call dies in deserialization — an SDK defect
-        // (model too narrow for what the endpoint returns), worth reporting.
-        using var response = await _webApi.GetAsync("api/2.0/portal/tariff", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var tariff = json.RootElement.GetProperty("response");
-        tariff.GetProperty("id").GetInt32().Should().Be(0);
-        tariff.GetProperty("state").GetInt32().Should().Be((int)TariffState.Paid);
+        tariff.Id.Should().Be(0);
+        tariff.State.Should().Be(TariffState.Paid);
     }
 }

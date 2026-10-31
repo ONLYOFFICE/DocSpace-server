@@ -71,7 +71,7 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [originalId]));
 
         // Assert
-        var entries = await GetRawEntries(dir.Id, inFolders: false);
+        var entries = await GetEntries(dir.Id, inFolders: false);
         entries.Should().HaveCount(3);
         var copies = entries.Where(e => e.Id != originalId).ToList();
         copies.Select(c => c.Title).Distinct().Should().HaveCount(2);
@@ -95,7 +95,7 @@ public class DuplicateContentTests(
         var content = OperationFileBytes.Make(300, 111);
         var originalId = await Put(dir.Id, "indep.bin", content);
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [originalId]));
-        var copyId = (await GetRawEntries(dir.Id, inFolders: false)).Single(e => e.Id != originalId).Id;
+        var copyId = (await GetEntries(dir.Id, inFolders: false)).Single(e => e.Id != originalId).Id;
 
         // Act - a new version of the original, then its deletion
         var newer = OperationFileBytes.Make(310, 112);
@@ -128,7 +128,7 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [id]));
 
         // Assert
-        var copyId = (await GetRawEntries(dir.Id, inFolders: false)).Single(e => e.Id != id).Id;
+        var copyId = (await GetEntries(dir.Id, inFolders: false)).Single(e => e.Id != id).Id;
         (await Download(copyId)).Should().Equal(v2);
         (await GetVersionsOf(id)).Should().Equal(1, 2);
         (await Download(id, 1)).Should().Equal(v1);
@@ -153,7 +153,7 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: ids));
 
         // Assert
-        var entries = await GetRawEntries(dir.Id, inFolders: false);
+        var entries = await GetEntries(dir.Id, inFolders: false);
         entries.Should().HaveCount(6);
 
         for (var i = 0; i < contents.Length; i++)
@@ -179,15 +179,15 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(folderIds: [root.Id]));
 
         // Assert
-        var copyRoot = (await GetRawEntries(myDocsFolderId, inFolders: true))
+        var copyRoot = (await GetEntries(myDocsFolderId, inFolders: true))
             .Single(e => e.Id != root.Id && e.Title.StartsWith("Autotest Duplicate Tree"));
-        var copyLevel = (await GetRawEntries(copyRoot.Id, inFolders: true)).Single();
+        var copyLevel = (await GetEntries(copyRoot.Id, inFolders: true)).Single();
         copyLevel.Title.Should().Be("Level");
 
         async Task AssertCopyIntact()
         {
-            var rootFile = (await GetRawEntries(copyRoot.Id, inFolders: false)).Single();
-            var levelFile = (await GetRawEntries(copyLevel.Id, inFolders: false)).Single();
+            var rootFile = (await GetEntries(copyRoot.Id, inFolders: false)).Single();
+            var levelFile = (await GetEntries(copyLevel.Id, inFolders: false)).Single();
             (await Download(rootFile.Id)).Should().Equal(rootBytes);
             (await Download(levelFile.Id)).Should().Equal(levelBytes);
         }
@@ -215,7 +215,7 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [id, id]));
 
         // Assert
-        var copies = (await GetRawEntries(dir.Id, inFolders: false)).Where(e => e.Id != id).ToList();
+        var copies = (await GetEntries(dir.Id, inFolders: false)).Where(e => e.Id != id).ToList();
         copies.Should().HaveCount(2);
         copies.Select(c => c.Title).Distinct().Should().HaveCount(2);
 
@@ -240,7 +240,7 @@ public class DuplicateContentTests(
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [id]));
 
         // Assert
-        var entries = await GetRawEntries(dir.Id, inFolders: false);
+        var entries = await GetEntries(dir.Id, inFolders: false);
         entries.Should().HaveCount(3);
         var copy = entries.Single(e => e.Id != id && e.Id != squatterId);
         copy.Title.Should().NotBe("taken (1).bin");
@@ -263,7 +263,7 @@ public class DuplicateContentTests(
 
         // Positive control: the same user may duplicate the room file alone.
         await DuplicateAndWait(BuildDuplicateRequest(fileIds: [own]));
-        var afterControl = await GetRawEntries(room.Id, inFolders: false);
+        var afterControl = await GetEntries(room.Id, inFolders: false);
         afterControl.Should().HaveCount(2);
 
         // Act
@@ -273,10 +273,10 @@ public class DuplicateContentTests(
 
         // Assert
         exception.ErrorCode.Should().Be(403);
-        (await GetRawEntries(room.Id, inFolders: false)).Should().BeEquivalentTo(afterControl);
+        (await GetEntries(room.Id, inFolders: false)).Should().BeEquivalentTo(afterControl);
 
         await _filesClient.Authenticate(Owner);
-        (await GetRawEntries(myDocsFolderId, inFolders: false)).Should().ContainSingle(e => e.Title.StartsWith("Autotest Duplicate Private"));
+        (await GetEntries(myDocsFolderId, inFolders: false)).Should().ContainSingle(e => e.Title.StartsWith("Autotest Duplicate Private"));
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public class DuplicateContentTests(
         // Arrange
         var myDocsFolderId = await GetUserFolderIdAsync(Owner);
         var ownerFile = await Put(myDocsFolderId, "Autotest Duplicate Isolation Owner.bin", OperationFileBytes.Make(30, 181));
-        var ownerBefore = await GetRawEntries(myDocsFolderId, inFolders: false);
+        var ownerBefore = await GetEntries(myDocsFolderId, inFolders: false);
 
         var user = await InviteMember(EmployeeType.User);
         await _filesClient.Authenticate(user);
@@ -301,11 +301,11 @@ public class DuplicateContentTests(
 
         // Assert
         stolen.ErrorCode.Should().Be(403);
-        var copy = (await GetRawEntries(userDocsFolderId, inFolders: false)).Single(e => e.Id != userFile);
+        var copy = (await GetEntries(userDocsFolderId, inFolders: false)).Single(e => e.Id != userFile);
         (await Download(copy.Id)).Should().Equal(content);
 
         await _filesClient.Authenticate(Owner);
-        (await GetRawEntries(myDocsFolderId, inFolders: false)).Should().BeEquivalentTo(ownerBefore);
+        (await GetEntries(myDocsFolderId, inFolders: false)).Should().BeEquivalentTo(ownerBefore);
     }
 
     private async Task<List<int>> GetVersionsOf(int fileId)

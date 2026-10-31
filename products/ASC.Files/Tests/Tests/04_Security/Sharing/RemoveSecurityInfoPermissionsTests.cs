@@ -175,9 +175,8 @@ public class RemoveSecurityInfoPermissionsTests(
 
         result.Should().BeTrue();
 
-        // FolderContentDto.Folders is typed FileEntryBaseDto, which carries Title but not Id.
         var sharedWithMe = await GetSharedWithMe(member);
-        sharedWithMe.Folders.Should().NotContain(f => f.Title == folder.Title);
+        (sharedWithMe.Folders ?? []).OfType<FolderDto>().Should().NotContain(f => f.Id == folder.Id);
     }
 
     [Fact]

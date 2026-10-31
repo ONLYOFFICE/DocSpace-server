@@ -233,7 +233,7 @@ public class DuplicateBatchItemsTests(
         await DuplicateAndWait(BuildDuplicateRequest(folderIds: [sourceFolder.Id]));
 
         // Assert
-        var matchingFolders = (await GetRawEntries(myDocsId, inFolders: true))
+        var matchingFolders = (await GetEntries(myDocsId, inFolders: true))
             .Where(e => e.Title.Contains(folderBase, StringComparison.Ordinal))
             .ToList();
         matchingFolders.Should().HaveCountGreaterThanOrEqualTo(2);

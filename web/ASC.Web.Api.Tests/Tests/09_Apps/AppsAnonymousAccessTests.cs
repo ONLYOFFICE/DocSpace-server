@@ -119,19 +119,4 @@ public class AppsAnonymousAccessTests(
         await _webApiClient.Authenticate(Owner);
         (await SnapshotAsync(id)).Should().Be(before);
     }
-
-    // Raw HTTP: the same refusal for a body the typed client could also send, kept as the transport-level control.
-    [Fact]
-    public async Task SetSettings_AnonymousRawRequest_ReturnsUnauthorized()
-    {
-        // Arrange
-        var id = (await PickAppsAsync(1))[0];
-        await _webApiClient.Authenticate(null);
-
-        // Act
-        var (status, _) = await SendAsync(HttpMethod.Put, $"{AppPath(id)}/settings", """{"settings":{"a":1}}""");
-
-        // Assert
-        status.Should().Be(HttpStatusCode.Unauthorized);
-    }
 }

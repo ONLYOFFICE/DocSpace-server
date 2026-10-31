@@ -93,9 +93,9 @@ public abstract class RoomGroupsTestBase(
         dto.Icon.Should().NotBeNull();
         // totalRooms must match the number of rooms actually returned.
         dto.TotalRooms.Should().Be(dto.Rooms.Count);
-        // no duplicate rooms by title (FileEntryBaseDto has no id).
-        var titles = dto.Rooms.ConvertAll(r => r.Title);
-        titles.Distinct().Count().Should().Be(titles.Count);
+        // no duplicate rooms.
+        var ids = dto.Rooms.OfType<FolderDto>().Select(r => r.Id).ToList();
+        ids.Should().HaveCount(dto.Rooms.Count).And.OnlyHaveUniqueItems();
     }
 
     /// <summary>

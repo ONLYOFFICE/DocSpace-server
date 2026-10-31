@@ -277,11 +277,11 @@ public class RoomGroupSearchAreaTests(
         var group = await CreateRoomGroup("Cross Area Group", [customRoomId]);
 
         // Act
-        var ownSection = await ListRoomTitles(SearchArea.Active, group.Id);
-        var otherSection = await ListRoomTitles(SearchArea.Forms, group.Id);
+        var ownSection = await ListRoomIds(SearchArea.Active, group.Id);
+        var otherSection = await ListRoomIds(SearchArea.Forms, group.Id);
 
         // Assert - the group filter must not be silently dropped in the other section
-        ownSection.Should().Contain("Cross Area Room");
+        ownSection.Should().Contain(customRoomId);
         otherSection.Should().BeEmpty();
     }
 
@@ -297,17 +297,17 @@ public class RoomGroupSearchAreaTests(
     }
 
     /// <summary>
-    /// The rooms a section lists when filtered by one group. Matched by title: the folder listing model
-    /// types its entries as <c>FileEntryBaseDto</c>, which carries no id.
+    /// The ids of the rooms a section lists when filtered by one group. Every listed entry must arrive as a
+    /// <c>FolderDto</c>; one that does not fails here rather than being silently skipped.
     /// </summary>
-    private async Task<List<string>> ListRoomTitles(SearchArea searchArea, int groupId)
+    private async Task<List<int>> ListRoomIds(SearchArea searchArea, int groupId)
     {
         var content = await _roomsApi.GetRoomsFolderAsync(
             searchArea: searchArea,
             groupId: groupId,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        return [.. content.Response.Folders.Select(f => f.Title)];
+        return [.. (content.Response.Folders ?? []).Select(f => f.Should().BeOfType<FolderDto>().Subject.Id)];
     }
 
     #endregion
