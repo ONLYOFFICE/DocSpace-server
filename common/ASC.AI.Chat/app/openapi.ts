@@ -314,7 +314,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiProjectsDelete:
     "Deletes an AI project as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner only. The linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched.",
   aiProjectsSkills:
-    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description, read from the Files API with the caller's credentials. A room whose files cannot be read is listed with `available: false` and no skills. Which skills a chat round uses is the user's per-session choice and is not stored.",
+    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description, from the .NET skills catalog. Reading the project is enough to read the skills of every linked room. Which skills a chat round uses is the user's per-session choice and is not stored.",
   aiProjectsKnowledge:
     "Lists the files of every Knowledge room linked to the project, grouped by room, with each file's indexing state (`indexed`, `vectorizationStatus`, `security.Vectorization`) and the room's total, indexed and failed counts, read from the Files API with the caller's credentials. A room that cannot be read is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
 

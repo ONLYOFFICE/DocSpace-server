@@ -32,8 +32,7 @@ class FakeDocspaceApiHttpError extends Error {
   }
 }
 vi.mock("../docspaceFilesApi.js", () => ({ DocspaceApiHttpError: FakeDocspaceApiHttpError }));
-const getRoomSkills = vi.fn();
-vi.mock("../roomSkills.js", () => ({ getRoomSkills }));
+vi.mock("../roomSkills.js", async (importOriginal) => importOriginal());
 vi.mock("../../requestContext.js", () => ({
   countFilesApiRead: vi.fn(),
   getForwardedHeaders: () => ({}),
@@ -153,30 +152,30 @@ describe("aiProjectBlock / withAiProjectBlock", () => {
 });
 
 describe("listProjectSkills", () => {
-  it("lists each Instructions room with its skills, an unreadable one as unavailable", async () => {
+  it("passes on the .NET skills catalog of the project's Instructions rooms", async () => {
     aiServiceGet.mockResolvedValue({
-      instructionsRooms: [
-        { id: 7, title: "A" },
-        { id: 8, title: "B" },
+      rooms: [
+        {
+          id: 7,
+          title: "A",
+          logo: { color: "FF6600" },
+          skills: [{ id: "f1", name: "tone", description: "Brand voice." }],
+        },
+        { id: 8, title: "B", logo: null, skills: [] },
       ],
-      knowledgeRooms: [],
-    });
-    getRoomSkills.mockImplementation(async (id: string) => {
-      if (id === "7") return [{ id: "f1", name: "tone", description: "Brand voice." }];
-      throw new FakeDocspaceApiHttpError(403, "Forbidden", "u");
     });
     expect(await listProjectSkills(42)).toEqual({
       rooms: [
         {
           id: 7,
           title: "A",
-          logo: null,
-          available: true,
+          logo: { color: "FF6600" },
           skills: [{ id: "f1", name: "tone", description: "Brand voice." }],
         },
-        { id: 8, title: "B", logo: null, available: false, skills: [] },
+        { id: 8, title: "B", logo: null, skills: [] },
       ],
     });
+    expect(aiServiceGet).toHaveBeenCalledWith("/projects/42/skills");
   });
 });
 

@@ -10538,7 +10538,7 @@
         ],
         "operationId": "aiProjectsList",
         "summary": "List projects",
-        "description": "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with its `aiProject` block and the caller's `security`. Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning; `role`, `hasInstructions`, `hasKnowledge`, `instructionsRoomId`, `knowledgeRoomId` and `linkedRoomId` narrow by the caller's role and the linked rooms.",
+        "description": "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with the caller's `security` and without the `aiProject` block (read a project to get its rooms). Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning.",
         "responses": {
           "200": {
             "description": "The projects the caller may see, in the folder-content envelope of the projects root.",
@@ -10679,54 +10679,6 @@
             }
           },
           {
-            "name": "role",
-            "in": "query",
-            "description": "Keep only the projects the caller holds this role in: `1` owner, `9` project manager, `2` member (the room's Read). Omitted or `0`: every role.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "examples": [
-                1
-              ]
-            }
-          },
-          {
-            "name": "hasInstructions",
-            "in": "query",
-            "description": "`true` keeps only the projects with at least one Instructions room.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "examples": [
-                true
-              ]
-            }
-          },
-          {
-            "name": "hasKnowledge",
-            "in": "query",
-            "description": "`true` keeps only the projects with at least one Knowledge room.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "examples": [
-                true
-              ]
-            }
-          },
-          {
-            "name": "linkedRoomId",
-            "in": "query",
-            "description": "Keep only the projects that link this Instructions or Knowledge room.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "examples": [
-                42
-              ]
-            }
-          },
-          {
             "name": "startIndex",
             "in": "query",
             "description": "The zero-based index of the first item to return.",
@@ -10758,7 +10710,7 @@
         ],
         "operationId": "aiProjectsCreate",
         "summary": "Create a project",
-        "description": "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block sets the model (`profileId`, a UUID of a chat profile, or `null` for the portal default) and the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each readable by the caller, not third-party, at most 20 of each. The caller is granted Viewer on every linked room they are not yet in. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
+        "description": "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block names the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each an active room readable by the caller, at most 100 of each; they are linked right after the room is created, and a refused link comes back as a `roomUnavailable` warning in the answer's `aiProject.warnings` rather than a failure. `aiProject.profileId` must be a UUID of a chat profile or `null`, but no model is stored with a project yet: a chosen one is answered with a `modelNotStored` warning and the project runs on the portal default. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
         "responses": {
           "200": {
             "description": "The created project, with the caller as its owner.",
@@ -10771,7 +10723,7 @@
             }
           },
           "400": {
-            "description": "`title` is missing or too long, a field is not a project field, `color` or `cover` is malformed, `tags` is not an array of names, `aiProject.profileId` is not a UUID of a chat profile, or a room id is not an accessible room of the required type.",
+            "description": "`title` is missing or too long, a field is not a project field, `color` or `cover` is malformed, `tags` is not an array of names, or `aiProject.profileId` is not a UUID of a chat profile. A room that cannot be linked does not fail the create: see `aiProject.warnings`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10840,7 +10792,7 @@
         ],
         "operationId": "aiProjectsGet",
         "summary": "Get a project",
-        "description": "Returns one AI project as a room card: its `aiProject` block, the caller's `access` and `security`. A room that is not an AI project answers 404.",
+        "description": "Returns one AI project as a room card: the caller's `access` and `security`, and its `aiProject` block - `profile` (always `null`, the portal default, until the service stores a model), the linked `instructionsRooms` and `knowledgeRooms` (each active and readable by the caller, sorted by title) and `canEditSettings`. A room that is not an AI project answers 404; a project the caller cannot read answers 403.",
         "responses": {
           "200": {
             "description": "The project, with its `aiProject` block and the caller's `security`.",
@@ -10873,7 +10825,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "description": "The caller cannot read the project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10883,7 +10835,7 @@
             }
           },
           "404": {
-            "description": "The project does not exist, is not an AI project, or the caller cannot see it.",
+            "description": "The project does not exist or is not an AI project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10924,7 +10876,7 @@
         ],
         "operationId": "aiProjectsUpdate",
         "summary": "Update a project",
-        "description": "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). In `aiProject` an absent field keeps its value, `profileId: null` returns to the portal default model and a room list replaces the current one, validated as on create. Every member not yet in a newly linked room is granted Viewer on it; unlinking a room revokes nothing.",
+        "description": "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the rooms of the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). A room list sent in `aiProject` is brought about exactly: the rooms not linked yet are linked, the linked rooms left out are unlinked, `[]` unlinks every room of that kind; a list absent or `null` keeps its rooms. A refused link or unlink comes back as a `roomUnavailable` warning, a `profileId` as a `modelNotStored` warning (see create). Unlinking a room revokes nothing.",
         "responses": {
           "200": {
             "description": "The updated project.",
@@ -10957,7 +10909,7 @@
             }
           },
           "403": {
-            "description": "The caller is neither the owner nor a project manager.",
+            "description": "The caller is neither the owner nor a project manager, or cannot read the project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10967,7 +10919,7 @@
             }
           },
           "404": {
-            "description": "The project does not exist, is not an AI project, or the caller cannot see it.",
+            "description": "The project does not exist or is not an AI project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11061,7 +11013,7 @@
             }
           },
           "403": {
-            "description": "The caller is not the owner.",
+            "description": "The caller may not read or delete the project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11071,7 +11023,7 @@
             }
           },
           "404": {
-            "description": "The project does not exist, is not an AI project, or the caller cannot see it.",
+            "description": "The project does not exist or is not an AI project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11134,7 +11086,7 @@
         ],
         "operationId": "aiProjectsSkills",
         "summary": "List the project's skills",
-        "description": "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description. A room that is gone or that the caller can no longer read is listed with `available: false`. Which skills a chat round uses is the user's per-session choice and is not stored.",
+        "description": "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description, from the .NET skills catalog. Reading the project is enough to read the skills of every linked room. Which skills a chat round uses is the user's per-session choice and is not stored.",
         "responses": {
           "200": {
             "description": "The skills of the linked Instructions rooms, grouped by room.",
@@ -11241,7 +11193,7 @@
         ],
         "operationId": "aiProjectsKnowledge",
         "summary": "List the project's knowledge files",
-        "description": "Lists the files of every Knowledge room linked to the project, subfolders included, grouped by room, with each file's indexing state and the room's indexed and total counts. A room that is gone or unreadable is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
+        "description": "Lists the files of every Knowledge room linked to the project, grouped by room, with each file's indexing state (`indexed`, `vectorizationStatus`, `security.Vectorization`) and the room's total, indexed and failed counts, read from the Files API with the caller's credentials. A room that cannot be read is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
         "responses": {
           "200": {
             "description": "The files of the linked Knowledge rooms, grouped by room.",
@@ -13467,7 +13419,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The frontmatter name, what the model sees; the file name without `.md` when it has none."
+            "description": "The frontmatter name, what the model sees."
           },
           "description": {
             "type": "string",
@@ -13484,45 +13436,37 @@
       },
       "AiProjectSkillsRoom": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
-          "skills": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AiProjectSkill"
-            }
-          },
           "id": {
             "type": "number",
             "description": "The room id."
           },
           "title": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The room title; `null` when the room is not available."
+            "type": "string",
+            "description": "The room title."
           },
           "logo": {
-            "description": "The room logo, as the room DTO carries it; `null` when the room is not available.",
+            "description": "The room logo, as the room DTO carries it.",
             "type": [
               "object",
               "null"
             ]
           },
-          "available": {
-            "type": "boolean",
-            "description": "`false` when the room is gone or the caller can no longer read it."
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProjectSkill"
+            }
           }
         },
         "required": [
-          "available",
           "id",
+          "title",
           "logo",
-          "skills",
-          "title"
+          "skills"
         ],
-        "description": "An Instructions room with its skills."
+        "additionalProperties": false,
+        "description": "An Instructions room with its skills, as the.NET skills catalog lists it."
       },
       "AiProjectKnowledgeFile": {
         "type": "object",

@@ -38,12 +38,13 @@
 // The client contract (`ai-projects-api`) keeps the rooms inside the
 // project's `aiProject` block and in the create / update body as
 // `instructionsRoomIds` / `knowledgeRoomIds`; this module composes that
-// shape over the .NET routes, and lists the skills and the knowledge files
-// of the linked rooms, which the .NET side does not serve yet.
+// shape over the .NET routes, passes on the skills of the linked rooms
+// (`GET internal/ai/projects/{id}/skills`) and lists their knowledge files,
+// which the .NET side does not serve yet.
 
 import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
-import { getRoomSkills } from "./roomSkills.js";
+import { parseSkillsCatalog } from "./roomSkills.js";
 import { countFilesApiRead, getForwardedHeaders } from "../requestContext.js";
 import {
   getArray,
@@ -345,32 +346,22 @@ function isAccessError(err: unknown): boolean {
 
 /**
  * The skills of every linked Instructions room, for `GET ai/projects/{id}/skills`:
- * the rooms as the server lists them, each with the frontmatter of its
- * Markdown files (`getRoomSkills`). A room whose files cannot be read comes
- * back with `available: false` and no skills, never as a failure.
+ * the .NET catalog read through the project (`GET internal/ai/projects/{id}/skills`),
+ * rooms sorted by title, each with the name and description of its skills.
+ * Reading the project is enough to read the skills of every linked room.
  */
 export async function listProjectSkills(
   projectId: string | number,
 ): Promise<{ rooms: JsonObject[] }> {
-  const { instructionsRooms } = await readProjectRooms(projectId);
-  const rooms = await mapLimit(
-    instructionsRooms,
-    READ_CONCURRENCY,
-    async (room): Promise<JsonObject> => {
-      try {
-        const skills = await getRoomSkills(String(room.id));
-        return { id: room.id, title: room.title, logo: room.logo, available: true, skills };
-      } catch (err) {
-        if (!isAccessError(err)) {
-          logger.warn(
-            `AI project ${projectId}: skills of room ${room.id} not read: ${String(err)}`,
-          );
-        }
-        return { id: room.id, title: room.title, logo: room.logo, available: false, skills: [] };
-      }
-    },
-  );
-  return { rooms };
+  const raw = await aiService.get(`/projects/${projectId}/skills`);
+  return {
+    rooms: parseSkillsCatalog(raw).map((room) => ({
+      id: parseInt10(room.id) ?? room.id,
+      title: room.title,
+      logo: room.logo as JsonObject | null,
+      skills: room.skills.map(({ id, name, description }) => ({ id, name, description })),
+    })),
+  };
 }
 
 interface KnowledgeFile {
