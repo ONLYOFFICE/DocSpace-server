@@ -159,12 +159,21 @@ function parseRoomsPage(
  * may not see. Empty when there is none, so the widget shows no picker at
  * all.
  */
-/** The rooms of one type the caller can read — `GET api/2.0/files/rooms?type=…`, paged. */
+/** The search area of the root that keeps the Instructions and Knowledge rooms. */
+const AI_HUB_SEARCH_AREA = "AiHub";
+
+/**
+ * The rooms of one type the caller can read — `GET api/2.0/files/rooms?type=…`,
+ * paged. Instructions and Knowledge rooms are kept under their own root (the
+ * "AI rooms" section, `searchArea=AiHub`), never in Rooms, so the listing
+ * asks for that search area.
+ */
 async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]> {
   const rooms: ContextFolder["rooms"] = [];
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const params = new URLSearchParams({
       type: String(roomType),
+      searchArea: AI_HUB_SEARCH_AREA,
       count: String(PAGE_SIZE),
       startIndex: String(page * PAGE_SIZE),
     });
