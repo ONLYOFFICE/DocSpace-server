@@ -70,5 +70,16 @@ public static class DefaultDistributedTaskQueueFactoryExtension
                 options.TimeUntilUnregisterInSeconds = timeUntilUnregisterInSeconds.Value;
             }
         });
+
+        // How many tasks of the queue run at once is fixed in code; an installation can raise it for one queue with
+        // core:queue:<task type name>:maxThreadsCount (e.g. core:queue:AuditReportTask:maxThreadsCount=4).
+        services.AddOptions<DistributedTaskQueueFactoryOptions>(typeof(T).FullName ?? typeof(T).Name)
+            .Configure<IConfiguration>((options, configuration) =>
+            {
+                if (int.TryParse(configuration[$"core:queue:{typeof(T).Name}:maxThreadsCount"], out var configured) && configured > 0)
+                {
+                    options.MaxThreadsCount = configured;
+                }
+            });
     }
 }
