@@ -1454,6 +1454,11 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                if (skill != null && fromRoomId != toRoomId)
+                {
+                    await EnsureSkillsLimitAsync(context, tenantId, toFolderId);
+                }
+
                 if (trashId.Equals(toFolderId))
                 {
                     await q.ExecuteUpdateAsync(f => f
@@ -1487,11 +1492,6 @@ internal class FileDao(
 
                 if (skill != null)
                 {
-                    if (fromRoomId != toRoomId)
-                    {
-                        await EnsureSkillsLimitAsync(context, tenantId, toFolderId);
-                    }
-
                     await SaveSkillAsync(context, tenantId, fileId, skill);
                     await context.SaveChangesAsync();
                 }
