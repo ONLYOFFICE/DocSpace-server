@@ -69,6 +69,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     //
     // The links a portal returns carry its own host, <alias>.docspace.localhost (see SetBaseDomainAsync).
     // Windows does not resolve *.localhost, so the handler connects every such host to the loopback itself.
+    // "localhost" goes there too: Windows tries ::1 first, and the ports Docker publishes (identity, OpenSearch)
+    // listen on 127.0.0.1 only, so every new connection waited ~2 s for the refusal before falling back.
     private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false, ConnectCallback = ConnectAsync };
 
     /// <summary>The base domain of the test portals: each one is <c>&lt;alias&gt;.docspace.localhost</c>.</summary>
@@ -77,7 +79,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     private static async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
     {
         var host = context.DnsEndPoint.Host;
-        EndPoint endPoint = host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase)
+        EndPoint endPoint = host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase)
             ? new IPEndPoint(IPAddress.Loopback, context.DnsEndPoint.Port)
             : context.DnsEndPoint;
 

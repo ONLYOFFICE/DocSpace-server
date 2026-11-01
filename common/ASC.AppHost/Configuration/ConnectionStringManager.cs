@@ -742,7 +742,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder
                 .WithEnvironment("elastic:Scheme", () => "http")
-                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
+                // 127.0.0.1, not localhost: Windows tries ::1 first, the port Docker publishes listens on IPv4
+                // only, and every new connection to the index waited ~2 s for that refusal.
+                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : IPAddress.Loopback.ToString()))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1")
                 // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.
