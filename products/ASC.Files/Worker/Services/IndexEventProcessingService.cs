@@ -44,7 +44,7 @@ public class IndexEventProcessingService(
     // answered, so nobody waits for a write here to become searchable. A forced refresh per write took about half
     // of the time of an event and let the channel fill up under load - a new entry then waited ~25 s for the ones
     // ahead of it. Without it the index shows the write at its next periodic refresh (index.refresh_interval, 1 s).
-    private const bool RefreshImmediately = true;
+    private const bool RefreshImmediately = false;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
