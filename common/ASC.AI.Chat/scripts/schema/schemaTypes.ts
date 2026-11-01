@@ -657,175 +657,35 @@ export type Res_aiMetaFill = {
   }[];
 };
 
-/* ----------------------------- Projects --------------------------------- */
-// A project is a room of type 12; every operation but skills and knowledge
-// answers the Files API envelope of the room method it delegates to.
+/* --------------------------- Project model ------------------------------ */
+// A project is a Files room of type 12; its model is the project-scoped Chat
+// assignment, served here until the Files API serves it.
 
-/**
- * The `aiProject` block of a create or update body
- * (`AiProjectSettingsRequestDto` on the C# side). An absent field keeps the
- * current value.
- */
-export type AiProjectSettingsRequest = {
-  /** The model: a UUID of a chat profile, or `null` for the portal default. */
-  profileId?: string | null;
-  /** The Instructions rooms (type 10) to link, at most 20; replaces the current list. */
-  instructionsRoomIds?: number[];
-  /** The Knowledge rooms (type 11) to link, at most 20; replaces the current list. */
-  knowledgeRoomIds?: number[];
+export type Req_aiProjectsSetModel = {
+  /** The UUID of a chat profile, or `null` for the portal default. */
+  profileId: string | null;
 };
 
-/** An uploaded picture (`POST api/2.0/files/logos`) and its crop. */
-export type AiProjectLogoRequest = {
-  /** The uploaded picture, as `POST files/logos` named it. */
-  tmpFile: string;
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
+/** The project's own model; `null` when the project runs on the portal default. */
+export type AiProjectModel = {
+  profile: {
+    /** The profile id. */
+    id: string;
+    /** The profile name; empty when the profile is gone. */
+    name: string;
+    /** The provider type of the profile; `null` when the profile is gone. */
+    provider: string | null;
+    /** `false` when the profile is gone or cannot chat: the project's rounds are refused. */
+    available: boolean;
+  } | null;
 };
 
-/** The fields a project has, as a room create or update carries them. */
-type AiProjectFields = {
-  /** The logo colour: six hexadecimal digits without `#`, or empty for the default. */
-  color?: string;
-  /** The id of a built-in cover (`GET files/rooms/covers`), or empty for the initials. */
-  cover?: string;
-  /** An uploaded logo. */
-  logo?: AiProjectLogoRequest;
-  aiProject?: AiProjectSettingsRequest;
-};
-
-export type Req_aiProjectsCreate = AiProjectFields & {
-  /** The project title, 1 to 170 characters. */
-  title: string;
-};
-
-export type Req_aiProjectsUpdate = AiProjectFields & {
-  /** The new title, 1 to 170 characters. */
-  title?: string;
-};
-
-export type Req_aiProjectsDelete = {
-  /** Delete the room after the editing session finishes. */
-  deleteAfter?: boolean;
-};
-
-/** One membership change: a user by `id` or someone without an account by `email`, and the role. */
-export type AiProjectInvitation = {
-  /** The user id; leave it out and give `email` to invite someone without an account. */
-  id?: string;
-  /** The email of someone without an account. */
-  email?: string;
-  /** 9 project manager (portal owner, DocSpace admins and room admins only), 11 member, 0 remove. */
-  access: number;
-};
-
-export type Req_aiProjectsSetMembers = {
-  invitations: AiProjectInvitation[];
-  /** Whether to notify the invited users. */
-  notify?: boolean;
-  /** The text of the notification. */
-  message?: string;
-  /** The culture of the notification. */
-  culture?: string;
-  /** Apply the change even when it affects a user's other shares. */
-  force?: boolean;
-};
-
-export type Req_aiProjectsChangeOwner = {
-  /** The new owner: the portal owner, a DocSpace admin or a room admin. */
-  userId: string;
-  /** Keep the previous owner as a project manager (default true); otherwise they leave. */
-  keepAsManager?: boolean;
-};
-
-export type Req_aiProjectsSetLink = {
-  /** The link to change or remove; absent creates a new link. */
-  linkId?: string;
-  /** 11 member (create or change), 0 remove the link. */
-  access: number;
-  /** The link title, 1 to 255 characters. */
-  title?: string;
-  /** When the link stops working; `null` never. */
-  expirationDate?: string | null;
-  /** How many times the link may be used, 1 to 1000; `null` without a limit. */
-  maxUseCount?: number | null;
-};
-
-export type Req_aiProjectsResend = {
-  /** The pending members to invite again. */
-  usersIds?: string[];
-  /** Invite every pending member again. */
-  resendAll?: boolean;
-};
-
-export type Req_aiProjectsMute = {
-  /** `true` turns the project's notifications off for the caller, `false` back on. */
-  mute: boolean;
-};
-
-/** The DocSpace envelope of the Node-built project answers. */
-type AiProjectEnvelopeBase = {
+export type Res_aiProjectsGetModel = {
+  response: AiProjectModel;
+  count: number;
   /** 0 on success. */
   status: number;
   /** The HTTP status, 200 on success. */
   statusCode: number;
 };
-
-/** A linked room as the skills and knowledge panels show it. */
-type AiProjectLinkedRoom = {
-  /** The room id. */
-  id: number;
-  /** The room title; `null` when the room is not available. */
-  title: string | null;
-  /** The room logo, as the room DTO carries it; `null` when the room is not available. */
-  logo: Record<string, unknown> | null;
-  /** `false` when the room is gone or the caller can no longer read it. */
-  available: boolean;
-};
-
-/** A skill: a Markdown file of an Instructions room. */
-export type AiProjectSkill = {
-  /** The file id. */
-  id: string;
-  /** The frontmatter name, what the model sees. */
-  name: string;
-  /** The frontmatter description. */
-  description: string;
-};
-/** An Instructions room with its skills, as the .NET skills catalog lists it. */
-export type AiProjectSkillsRoom = {
-  /** The room id. */
-  id: number;
-  /** The room title. */
-  title: string;
-  /** The room logo, as the room DTO carries it. */
-  logo: Record<string, unknown> | null;
-  skills: AiProjectSkill[];
-};
-export type Res_aiProjectsSkills = AiProjectEnvelopeBase & {
-  response: { rooms: AiProjectSkillsRoom[] };
-};
-
-/** A file of a Knowledge room with its indexing state. */
-export type AiProjectKnowledgeFile = {
-  id: number;
-  title: string;
-  fileExst: string;
-  /** Whether the file is indexed for search. */
-  indexed: boolean;
-};
-/** A Knowledge room with its files and indexing counts. */
-export type AiProjectKnowledgeRoom = AiProjectLinkedRoom & {
-  /** The number of files in the room, subfolders included. */
-  totalFiles: number;
-  /** The number of listed files already indexed. */
-  indexedFiles: number;
-  /** The room holds more files than one listing reads (1000). */
-  truncated: boolean;
-  files: AiProjectKnowledgeFile[];
-};
-export type Res_aiProjectsKnowledge = AiProjectEnvelopeBase & {
-  response: { rooms: AiProjectKnowledgeRoom[] };
-};
+export type Res_aiProjectsSetModel = Res_aiProjectsGetModel;

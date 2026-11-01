@@ -2025,222 +2025,49 @@
       ],
       "additionalProperties": false
     },
-    "AiProjectSettingsRequest": {
+    "AiProjectModel": {
       "type": "object",
       "properties": {
-        "profileId": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "The model: a UUID of a chat profile, or `null` for the portal default."
-        },
-        "instructionsRoomIds": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "description": "The Instructions rooms (type 10) to link, at most 20; replaces the current list."
-        },
-        "knowledgeRoomIds": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "description": "The Knowledge rooms (type 11) to link, at most 20; replaces the current list."
-        }
-      },
-      "additionalProperties": false,
-      "description": "The `aiProject` block of a create or update body (`AiProjectSettingsRequestDto` on the C# side). An absent field keeps the current value."
-    },
-    "AiProjectLogoRequest": {
-      "type": "object",
-      "properties": {
-        "tmpFile": {
-          "type": "string",
-          "description": "The uploaded picture, as `POST files/logos` named it."
-        },
-        "x": {
-          "type": "number"
-        },
-        "y": {
-          "type": "number"
-        },
-        "width": {
-          "type": "number"
-        },
-        "height": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "tmpFile"
-      ],
-      "additionalProperties": false,
-      "description": "An uploaded picture (`POST api/2.0/files/logos`) and its crop."
-    },
-    "AiProjectInvitation": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The user id; leave it out and give `email` to invite someone without an account."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email of someone without an account."
-        },
-        "access": {
-          "type": "number",
-          "description": "9 project manager (portal owner, DocSpace admins and room admins only), 11 member, 0 remove."
-        }
-      },
-      "required": [
-        "access"
-      ],
-      "additionalProperties": false,
-      "description": "One membership change: a user by `id` or someone without an account by `email`, and the role."
-    },
-    "AiProjectSkill": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The file id."
-        },
-        "name": {
-          "type": "string",
-          "description": "The frontmatter name, what the model sees."
-        },
-        "description": {
-          "type": "string",
-          "description": "The frontmatter description."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description"
-      ],
-      "additionalProperties": false,
-      "description": "A skill: a Markdown file of an Instructions room."
-    },
-    "AiProjectSkillsRoom": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number",
-          "description": "The room id."
-        },
-        "title": {
-          "type": "string",
-          "description": "The room title."
-        },
-        "logo": {
-          "description": "The room logo, as the room DTO carries it.",
+        "profile": {
           "type": [
             "object",
             "null"
-          ]
-        },
-        "skills": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectSkill"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "logo",
-        "skills"
-      ],
-      "additionalProperties": false,
-      "description": "An Instructions room with its skills, as the.NET skills catalog lists it."
-    },
-    "AiProjectKnowledgeFile": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "title": {
-          "type": "string"
-        },
-        "fileExst": {
-          "type": "string"
-        },
-        "indexed": {
-          "type": "boolean",
-          "description": "Whether the file is indexed for search."
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "fileExst",
-        "indexed"
-      ],
-      "additionalProperties": false,
-      "description": "A file of a Knowledge room with its indexing state."
-    },
-    "AiProjectKnowledgeRoom": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "totalFiles": {
-          "type": "number",
-          "description": "The number of files in the room, subfolders included."
-        },
-        "indexedFiles": {
-          "type": "number",
-          "description": "The number of listed files already indexed."
-        },
-        "truncated": {
-          "type": "boolean",
-          "description": "The room holds more files than one listing reads (1000)."
-        },
-        "files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiProjectKnowledgeFile"
-          }
-        },
-        "id": {
-          "type": "number",
-          "description": "The room id."
-        },
-        "title": {
-          "type": [
-            "string",
-            "null"
           ],
-          "description": "The room title; `null` when the room is not available."
-        },
-        "logo": {
-          "description": "The room logo, as the room DTO carries it; `null` when the room is not available.",
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "available": {
-          "type": "boolean",
-          "description": "`false` when the room is gone or the caller can no longer read it."
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The profile id."
+            },
+            "name": {
+              "type": "string",
+              "description": "The profile name; empty when the profile is gone."
+            },
+            "provider": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The provider type of the profile; `null` when the profile is gone."
+            },
+            "available": {
+              "type": "boolean",
+              "description": "`false` when the profile is gone or cannot chat: the project's rounds are refused."
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "provider",
+            "available"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
-        "available",
-        "files",
-        "id",
-        "indexedFiles",
-        "logo",
-        "title",
-        "totalFiles",
-        "truncated"
+        "profile"
       ],
-      "description": "A Knowledge room with its files and indexing counts."
+      "additionalProperties": false,
+      "description": "The project's own model; `null` when the project runs on the portal default."
     },
     "AiUserSettingsWrapper": {
       "type": "object",
@@ -4334,217 +4161,36 @@
         "additionalProperties": false
       }
     },
-    "aiProjectsCreate": {
-      "request": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "The project title, 1 to 170 characters."
-          },
-          "color": {
-            "type": "string",
-            "description": "The logo colour: six hexadecimal digits without `#`, or empty for the default."
-          },
-          "cover": {
-            "type": "string",
-            "description": "The id of a built-in cover (`GET files/rooms/covers`), or empty for the initials."
-          },
-          "logo": {
-            "$ref": "#/components/schemas/AiProjectLogoRequest",
-            "description": "An uploaded logo."
-          },
-          "aiProject": {
-            "$ref": "#/components/schemas/AiProjectSettingsRequest"
-          }
-        },
-        "required": [
-          "title"
-        ]
-      }
-    },
-    "aiProjectsUpdate": {
-      "request": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "The new title, 1 to 170 characters."
-          },
-          "color": {
-            "type": "string",
-            "description": "The logo colour: six hexadecimal digits without `#`, or empty for the default."
-          },
-          "cover": {
-            "type": "string",
-            "description": "The id of a built-in cover (`GET files/rooms/covers`), or empty for the initials."
-          },
-          "logo": {
-            "$ref": "#/components/schemas/AiProjectLogoRequest",
-            "description": "An uploaded logo."
-          },
-          "aiProject": {
-            "$ref": "#/components/schemas/AiProjectSettingsRequest"
-          }
-        }
-      }
-    },
-    "aiProjectsDelete": {
+    "aiProjectsSetModel": {
       "request": {
         "type": "object",
         "properties": {
-          "deleteAfter": {
-            "type": "boolean",
-            "description": "Delete the room after the editing session finishes."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsSetMembers": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "invitations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AiProjectInvitation"
-            }
-          },
-          "notify": {
-            "type": "boolean",
-            "description": "Whether to notify the invited users."
-          },
-          "message": {
-            "type": "string",
-            "description": "The text of the notification."
-          },
-          "culture": {
-            "type": "string",
-            "description": "The culture of the notification."
-          },
-          "force": {
-            "type": "boolean",
-            "description": "Apply the change even when it affects a user's other shares."
-          }
-        },
-        "required": [
-          "invitations"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsChangeOwner": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "description": "The new owner: the portal owner, a DocSpace admin or a room admin."
-          },
-          "keepAsManager": {
-            "type": "boolean",
-            "description": "Keep the previous owner as a project manager (default true); otherwise they leave."
-          }
-        },
-        "required": [
-          "userId"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsSetLink": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "linkId": {
-            "type": "string",
-            "description": "The link to change or remove; absent creates a new link."
-          },
-          "access": {
-            "type": "number",
-            "description": "11 member (create or change), 0 remove the link."
-          },
-          "title": {
-            "type": "string",
-            "description": "The link title, 1 to 255 characters."
-          },
-          "expirationDate": {
+          "profileId": {
             "type": [
               "string",
               "null"
             ],
-            "description": "When the link stops working; `null` never."
-          },
-          "maxUseCount": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "description": "How many times the link may be used, 1 to 1000; `null` without a limit."
+            "description": "The UUID of a chat profile, or `null` for the portal default."
           }
         },
         "required": [
-          "access"
+          "profileId"
         ],
         "additionalProperties": false
+      },
+      "response": {
+        "$ref": "#/components/schemas/Res_aiProjectsGetModel"
       }
     },
-    "aiProjectsResend": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "usersIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The pending members to invite again."
-          },
-          "resendAll": {
-            "type": "boolean",
-            "description": "Invite every pending member again."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsMute": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "mute": {
-            "type": "boolean",
-            "description": "`true` turns the project's notifications off for the caller, `false` back on."
-          }
-        },
-        "required": [
-          "mute"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "aiProjectsSkills": {
+    "aiProjectsGetModel": {
       "response": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "response": {
-            "type": "object",
-            "properties": {
-              "rooms": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AiProjectSkillsRoom"
-                }
-              }
-            },
-            "required": [
-              "rooms"
-            ],
-            "additionalProperties": false
+            "$ref": "#/components/schemas/AiProjectModel"
+          },
+          "count": {
+            "type": "number"
           },
           "status": {
             "type": "number",
@@ -4557,45 +4203,11 @@
         },
         "required": [
           "response",
+          "count",
           "status",
           "statusCode"
-        ]
-      }
-    },
-    "aiProjectsKnowledge": {
-      "response": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "response": {
-            "type": "object",
-            "properties": {
-              "rooms": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AiProjectKnowledgeRoom"
-                }
-              }
-            },
-            "required": [
-              "rooms"
-            ],
-            "additionalProperties": false
-          },
-          "status": {
-            "type": "number",
-            "description": "0 on success."
-          },
-          "statusCode": {
-            "type": "number",
-            "description": "The HTTP status, 200 on success."
-          }
-        },
-        "required": [
-          "response",
-          "status",
-          "statusCode"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "aiSettingsGet": {
