@@ -43,17 +43,11 @@ public class ProfileStorageService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway aiGateway,
-    BaseCommonLinkUtility linkUtility,
+    ProfileReader profileReader,
     MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
-    private readonly AiGateway _aiGateway = aiGateway;
-
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
-
-    private const string ImageModality = "image";
-    private const string ToolsCapability = "tools";
-    private const string ReasoningCapability = "reasoning";
 
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
@@ -86,13 +80,7 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (_aiGateway.Configured)
-        {
-            var profiles = await GetGatewayProfilesAsync();
-            return profiles.FirstOrDefault(p => p.Id == id) ?? throw new ItemNotFoundException();
-        }
-
-        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
+        var profile = await profileReader.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
         return profile ?? throw new ItemNotFoundException();
     }
@@ -138,99 +126,6 @@ public class ProfileStorageService(
 
     internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
     {
-        if (!_aiGateway.Configured)
-        {
-            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        }
-
-        var profiles = models is null ? await GetGatewayProfilesAsync() : MapGatewayProfiles(models);
-        return [.. profiles];
-    }
-
-    private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
-    {
-        var response = await _aiGateway.GetModelsAsync();
-
-        return MapGatewayProfiles(response.Data);
-    }
-
-    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
-    {
-        return models
-            .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))
-            .Select(m => new Profile
-            {
-                Id = m.RevisionId,
-                Name = m.Alias,
-                ProviderType = "onlyoffice",
-                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-                ModelId = m.Id,
-                Reasoning = MapReasoning(m),
-                CanUseTool = HasCapability(m, ToolsCapability),
-                Capabilities = MapCapabilities(m),
-                UseResponsesApi = false,
-                Key = "onlyoffice"
-            });
-    }
-
-    private static ReasoningConfig MapReasoning(Model model)
-    {
-        var reasoning = model.Reasoning;
-
-        return new ReasoningConfig
-        {
-            Thinks = reasoning is not null || HasCapability(model, ReasoningCapability),
-            CanDisable = reasoning is null || !reasoning.Mandatory,
-            Depths = reasoning?.SupportedEfforts?.Select(ParseDepth).OfType<ReasoningDepth>().ToArray() ?? [],
-            DefaultDepth = reasoning is null
-                ? null
-                : reasoning.DefaultEnabled ? ParseDepth(reasoning.DefaultEffort) : ReasoningDepth.None
-        };
-    }
-
-    private static ReasoningDepth? ParseDepth(string? value)
-    {
-        return ReasoningDepthExtensions.TryParse(value, true, out var depth) ? depth : null;
-    }
-
-    private static Capabilities MapCapabilities(Model model)
-    {
-        var capabilities = Capabilities.None;
-
-        if (string.Equals(model.Type, "chat", StringComparison.OrdinalIgnoreCase))
-        {
-            capabilities |= Capabilities.Chat;
-        }
-        else if (string.Equals(model.Type, "image", StringComparison.OrdinalIgnoreCase))
-        {
-            capabilities |= Capabilities.Image;
-        }
-
-        if (HasModality(model.InputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Vision;
-        }
-
-        if (HasModality(model.OutputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Image;
-        }
-
-        if (HasCapability(model, ToolsCapability))
-        {
-            capabilities |= Capabilities.Tools;
-        }
-
-        return capabilities;
-    }
-
-    private static bool HasCapability(Model model, string capability)
-    {
-        return model.Capabilities?.Contains(capability, StringComparer.OrdinalIgnoreCase) == true;
-    }
-
-    private static bool HasModality(IEnumerable<string> modalities, string modality)
-    {
-        return modalities.Contains(modality, StringComparer.OrdinalIgnoreCase);
+        return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
     }
 }

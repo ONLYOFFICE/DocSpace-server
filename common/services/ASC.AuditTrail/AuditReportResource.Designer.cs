@@ -268,6 +268,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI model of AI project {0} changed to {1}.
+        /// </summary>
+        public static string AiProjectProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProjectProfileAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI provider created: {0}.
         /// </summary>
         public static string AIProviderCreated {

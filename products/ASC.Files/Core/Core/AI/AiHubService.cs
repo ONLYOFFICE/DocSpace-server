@@ -39,6 +39,8 @@ public class AiHubService(
     IDaoFactory daoFactory,
     AiProjectRoomDao aiProjectRoomDao,
     SkillDao skillDao,
+    AssignmentsStorage assignmentsStorage,
+    ProfileReader profileReader,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
     GlobalFolderHelper globalFolderHelper,
@@ -185,6 +187,41 @@ public class AiHubService(
         await filesMessageService.SendAsync(MessageAction.RoomsUnlinkedFromAiProject, project, project.Title, string.Join(", ", titles));
 
         await socketManager.UpdateFolderAsync(project);
+    }
+
+    public async Task<Profile> GetModelAsync(int projectId)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        await GetProjectAsync(projectId);
+
+        var profileId = await assignmentsStorage.ReadByTypeAsync(tenantId, ActionType.Chat, projectId);
+        if (profileId is null)
+        {
+            return null;
+        }
+
+        return await profileReader.ReadByIdAsync(tenantId, profileId.Value);
+    }
+
+    public async Task<Profile> SetModelAsync(int projectId, Guid profileId)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var project = await GetProjectForEditAsync(projectId);
+
+        var profile = await profileReader.ReadByIdAsync(tenantId, profileId);
+
+        if (profile is null || profile.Capabilities is { } capabilities && capabilities != Capabilities.None && !capabilities.HasFlag(Capabilities.Chat))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(profileId));
+        }
+
+        await assignmentsStorage.UpsertManyAsync(tenantId, new Dictionary<ActionType, Guid> { [ActionType.Chat] = profile.Id }, projectId);
+
+        await filesMessageService.SendAsync(MessageAction.AiProjectProfileAssigned, project, project.Title, profile.Name);
+
+        await socketManager.UpdateFolderAsync(project);
+
+        return profile;
     }
 
     private async Task<List<RoomSkills>> BuildRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)

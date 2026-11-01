@@ -63,6 +63,7 @@ global using System.Text.Unicode;
 global using System.Web;
 global using System.Xml;
 
+global using ASC.AI.Integration.Assignments;
 global using ASC.AI.Integration.Database.Models;
 global using ASC.AI.Integration.Profiles;
 global using ASC.Api.Core;
@@ -277,6 +278,7 @@ global using static ASC.Files.Core.Helpers.DocumentService.CommandResponse;
 global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracker;
 global using static ASC.Web.Files.Utils.FileTracker;
 
+global using ActionType = ASC.AI.Integration.Assignments.ActionType;
 global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
@@ -298,6 +300,7 @@ global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using License = ASC.Core.Billing.License;
 global using Location = ASC.Files.Core.Core.Entries.Location;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using ReportType = ASC.Files.Core.Services.DocumentBuilderService.ReportType;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;

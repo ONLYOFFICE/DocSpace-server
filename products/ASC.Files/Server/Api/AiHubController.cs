@@ -130,4 +130,39 @@ public class AiHubController(
 
         return await aiSkillsDtoMapper.MapAsync(rooms);
     }
+
+    /// <remarks>
+    /// Returns the AI model selected for the chat of an AI project, as the ID of an AI model profile. Any project member with read access may call it. The call is read-only. The result holds only the project's own choice: `profileId` is null when nobody has selected a model for the project yet, or when the selected profile has been removed from the portal since. In both cases the portal-wide model is used instead, which this operation does not return. To change the model, use `PUT api/2.0/files/rooms/{id}/model`.
+    /// </remarks>
+    /// <summary>Get the AI project model</summary>
+    /// <path>api/2.0/files/rooms/{id}/model</path>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The AI model profile selected for the project, or null when none is selected", typeof(AiProjectModelDto))]
+    [SwaggerResponse(403, "The caller may not read the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id")]
+    [HttpGet("{id}/model")]
+    public async Task<AiProjectModelDto> GetProjectModel(RoomIdRequestDto<int> inDto)
+    {
+        var profile = await aiHubService.GetModelAsync(inDto.Id);
+
+        return profile.Map();
+    }
+
+    /// <remarks>
+    /// Selects the AI model that answers in the chat of an AI project, replacing the previous choice, and returns the model now selected. Take `profileId` from the profiles that `GET api/2.0/ai/profiles/list` returns. The caller must be able to edit the project; reading it is not enough. The change applies to every member of the project, is recorded in the audit trail and notifies the project's open clients. Repeating the call with the same profile changes nothing. A model can only be replaced by another one: there is no operation that clears the selection and returns the project to the portal-wide model. The profile must exist on the portal and be able to chat; a profile known to serve only other kinds of tasks, such as image generation, is refused with 400.
+    /// </remarks>
+    /// <summary>Set the AI project model</summary>
+    /// <path>api/2.0/files/rooms/{id}/model</path>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The AI model profile now selected for the project", typeof(AiProjectModelDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `profileId`, the portal has no AI model profile with this id, or the profile cannot be used for chat")]
+    [SwaggerResponse(403, "The caller may not edit the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id")]
+    [HttpPut("{id}/model")]
+    public async Task<AiProjectModelDto> SetProjectModel(UpdateAiProjectModelRequestDto inDto)
+    {
+        var profile = await aiHubService.SetModelAsync(inDto.Id, inDto.Model.ProfileId);
+
+        return profile.Map();
+    }
 }

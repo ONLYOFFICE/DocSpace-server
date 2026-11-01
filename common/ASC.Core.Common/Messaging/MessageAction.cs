@@ -1086,6 +1086,9 @@ public enum MessageAction
     [Description("Rooms unlinked from AI project")]
     RoomsUnlinkedFromAiProject = 6118,
 
+    [Description("AI project model changed")]
+    AiProjectProfileAssigned = 6119,
+
     #endregion
 
     #region others
