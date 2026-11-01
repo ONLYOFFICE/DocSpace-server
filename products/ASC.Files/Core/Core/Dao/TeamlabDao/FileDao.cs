@@ -956,6 +956,17 @@ internal class FileDao(
 
         var tenantId = _tenantManager.GetCurrentTenantId();
 
+        SkillFrontmatter skill = null;
+        DbFilesSkill previousSkill = null;
+        if (fileStream != null)
+        {
+            var (_, _, roomType) = await daoFactory.GetFolderDao<int>().GetParentRoomInfoFromFileEntryAsync(file);
+            if (roomType == FolderType.InstructionsRoom)
+            {
+                (skill, fileStream) = await ReadSkillAsync(file, fileStream, null);
+            }
+        }
+
         var (tenantQuotaLock, graceForThisSave) = await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId);
         await using var quotaLockScope = tenantQuotaLock;
 
@@ -1004,6 +1015,12 @@ internal class FileDao(
                 toUpdate.ThumbnailStatus = file.ThumbnailStatus;
 
                 context.Update(toUpdate);
+
+                if (skill != null)
+                {
+                    previousSkill = await SaveSkillAsync(context, tenantId, file.Id, skill);
+                }
+
                 await context.SaveChangesAsync();
 
                 await tx.CommitAsync();
@@ -1033,6 +1050,11 @@ internal class FileDao(
                 if (!await IsExistOnStorageAsync(file))
                 {
                     await DeleteFileVersionAsync(file);
+
+                    if (skill != null)
+                    {
+                        await RestoreSkillAsync(tenantId, file.Id, previousSkill);
+                    }
                 }
 
                 throw;
