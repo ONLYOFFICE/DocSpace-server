@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Комнаты отвязаны от ИИ-проекта {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>ИИ-модель ИИ-проекта {0} изменена на {1}</value>
+  </data>
 </root>

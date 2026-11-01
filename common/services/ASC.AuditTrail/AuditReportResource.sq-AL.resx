@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Dhoma të shkëputura nga projekti i IA-së {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modeli AI i projektit të IA-së {0} u ndryshua në {1}</value>
+  </data>
 </root>

@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Miestnosti odpojené od projektu AI {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Model AI projektu AI {0} bol zmenený na {1}</value>
+  </data>
 </root>

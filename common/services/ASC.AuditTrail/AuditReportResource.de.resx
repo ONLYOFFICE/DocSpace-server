@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Verknüpfung von Räumen mit KI-Projekt {0} aufgehoben: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>KI-Modell des KI-Projekts {0} geändert in {1}</value>
+  </data>
 </root>

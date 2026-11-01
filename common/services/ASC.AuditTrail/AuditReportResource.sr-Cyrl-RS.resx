@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Собе одвезане од AI пројекта {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI модел AI пројекта {0} је промењен у {1}</value>
+  </data>
 </root>

@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>AI プロジェクト {0} とのリンクを解除したルーム: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI プロジェクト {0} の AI モデルが {1} に変更されました</value>
+  </data>
 </root>

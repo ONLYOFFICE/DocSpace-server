@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>AI 프로젝트 {0}에서 연결 해제된 방: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI 프로젝트 {0}의 AI 모델이 {1}(으)로 변경되었습니다</value>
+  </data>
 </root>

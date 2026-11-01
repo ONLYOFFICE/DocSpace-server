@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>{0} yapay zeka projesiyle bağlantısı kaldırılan odalar: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>{0} yapay zeka projesinin AI modeli {1} olarak değiştirildi</value>
+  </data>
 </root>

@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Salas desassociadas do projeto de IA {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modelo de IA do projeto de IA {0} alterado para {1}</value>
+  </data>
 </root>

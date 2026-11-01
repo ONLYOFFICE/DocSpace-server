@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>الغرف التي تم إلغاء ربطها من مشروع الذكاء الاصطناعي {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>تم تغيير نموذج الذكاء الاصطناعي لمشروع الذكاء الاصطناعي {0} إلى {1}</value>
+  </data>
 </root>

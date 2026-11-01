@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Đã hủy liên kết phòng khỏi dự án AI {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Đã thay đổi mô hình AI của dự án AI {0} thành {1}</value>
+  </data>
 </root>

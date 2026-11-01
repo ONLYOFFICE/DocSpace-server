@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>{0} ԱԲ նախագծից անջատված սենյակներ՝ [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>{0} ԱԲ նախագծի ԱԲ մոդելը փոխվել է՝ {1}</value>
+  </data>
 </root>

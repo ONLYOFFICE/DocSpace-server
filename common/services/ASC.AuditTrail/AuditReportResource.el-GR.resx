@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Δωμάτια αποσυνδέθηκαν από το έργο ΤΝ {0}: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Το μοντέλο AI του έργου ΤΝ {0} άλλαξε σε {1}</value>
+  </data>
 </root>

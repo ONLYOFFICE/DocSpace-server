@@ -1323,4 +1323,7 @@
   <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
     <value>Huoneiden linkitys tekoälyprojektiin {0} poistettu: [{1}]</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Tekoälyprojektin {0} AI-malli vaihdettu: {1}</value>
+  </data>
 </root>
