@@ -1440,6 +1440,10 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
+        await using var skillsLock = skill != null && fromRoomId != toRoomId
+            ? await _distributedLockProvider.TryAcquireFairLockAsync(LockKey)
+            : null;
+
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
