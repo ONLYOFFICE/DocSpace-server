@@ -122,7 +122,7 @@ public class KnowledgeSearchToolFactory(
             return ToolBundle.Empty;
         }
 
-        var owners = context.KnowledgeRooms.Count > 0
+        var rooms = context.KnowledgeRooms.Count > 0
             ? await fileSecurity.FilterReadAsync(context.KnowledgeRooms.ToAsyncEnumerable()).Cast<Folder<int>>().ToListAsync()
             : context.Folder switch
             {
@@ -131,9 +131,14 @@ public class KnowledgeSearchToolFactory(
                 _ => []
             };
 
-        return owners.Count == 0
-            ? ToolBundle.Empty
-            : new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(owners))]);
+        if (rooms.Count == 0)
+        {
+            return ToolBundle.Empty;
+        }
+
+        var chatFolder = context.Folder as Folder<int> ?? rooms[0];
+
+        return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(chatFolder, rooms.Select(room => room.Id).ToList()))]);
     }
 
     private async Task<bool> HasKnowledgeAsync(Folder<int> agent)
@@ -145,7 +150,7 @@ public class KnowledgeSearchToolFactory(
         return knowledge is { FilesCount: > 0 };
     }
 
-    private AIFunction MakeFunction(IReadOnlyList<Folder<int>> owners)
+    private AIFunction MakeFunction(Folder<int> chatFolder, List<int> roomIds)
     {
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
@@ -154,6 +159,6 @@ public class KnowledgeSearchToolFactory(
         });
 
         Task<List<KnowledgeSearchResult>> Function([Description("Search query")] string query) =>
-            searchEngine.SearchAsync(owners, query);
+            searchEngine.SearchAsync(chatFolder, roomIds, query);
     }
 }
