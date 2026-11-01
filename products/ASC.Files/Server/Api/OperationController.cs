@@ -412,10 +412,12 @@ public class OperationController(
     /// only some of them or none, and `files` names the ones that are. The check is about what the destination allows
     /// to be stored in it rather than about name clashes — everywhere except a form-filling room every file is
     /// accepted, while a form-filling room accepts only PDF forms, so a text document offered to one comes back as
-    /// none accepted. The caller needs create access to the destination, so a room the caller cannot write to and an
-    /// archived room are refused with 403, a destination that does not exist is answered as missing, and a request
-    /// without `destFolderId` is rejected as an invalid request. Folder ids and the copying options of the request
-    /// play no part here. The call changes nothing; for same-named entries at the destination use
+    /// none accepted. A file listed twice is counted once, as the operation moves it once. The caller needs create
+    /// access to the destination, so a room the caller cannot write to and an archived room are refused with 403, as
+    /// are the Rooms, Forms and AI agents section roots, which hold rooms only; a destination that does not exist is
+    /// answered as missing, and a request without `destFolderId` is rejected as an invalid request. Folder ids and
+    /// the copying options of the request play no part here. The call changes nothing; for same-named entries at the
+    /// destination use
     /// `GET api/2.0/files/fileops/move`.
     /// </remarks>
     /// <summary>Check the destination folder</summary>
@@ -423,7 +425,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Whether the destination accepts all of the listed files, some of them or none, and which ones it accepts", typeof(CheckDestFolderDto))]
     [SwaggerResponse(400, "`destFolderId` is not given")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is the Rooms, Forms or AI agents section root, which holds rooms only")]
     [SwaggerResponse(404, "The destination folder does not exist")]
     [SwaggerResponse(500, "A listed file is on a third-party account and the destination accepts it, or a listed file does not exist while the destination is a form-filling room")]
     [HttpGet("checkdestfolder")]
@@ -450,7 +452,11 @@ public class OperationController(
 
         var filesTask = GetFilesDto(entries).ToListAsync();
 
-        var result = inDto.FileIds.Count - entries.Count != 0 ?
+        // a file listed twice is queued once by the operation, so the verdict counts the distinct ids
+        var (requestedIntIds, requestedStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+        var requestedCount = requestedIntIds.Distinct().Count() + requestedStringIds.Distinct().Count();
+
+        var result = requestedCount - entries.Count != 0 ?
                      entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed : CheckDestFolderResult.AllAllowed;
 
         return new CheckDestFolderDto
@@ -472,11 +478,15 @@ public class OperationController(
     /// Reports which of the requested files and folders already have a same-named entry in `destFolderId`, so that
     /// the clash can be settled before the move or the copy is started. Nothing is moved, copied or changed by the
     /// call, although the address is shared with `PUT api/2.0/files/fileops/move`: the answer is the part of the
-    /// request that clashes, and an empty array means the batch would go through without one. The
-    /// `conflictResolveType` of the request is not taken into account — clashing items are reported whatever it says
-    /// — and encrypted files are left out of the report. A source id that resolves to nothing is not an error and is
-    /// passed over. The caller needs create access to the destination: an archived room and a room the caller cannot
-    /// write to are refused with 403, a destination that does not exist is answered as missing, and a request without
+    /// request that clashes, and an empty array means the batch would go through without one. With `content` true the
+    /// listed folders are replaced by what they directly contain, as the operation does, so the clashes are looked for
+    /// among their files and sub-folders. The `conflictResolveType` of the request is not taken into account —
+    /// clashing items are reported whatever it says — and encrypted files are left out of the report. A source id
+    /// that resolves to nothing is not an error and is passed over. The caller needs create access to the
+    /// destination: an archived room and a room the caller cannot write to are refused with 403, and so is a file,
+    /// or a folder that is not a room, offered to the Rooms, Forms or AI agents section root (a knowledge folder and
+    /// the archive refuse such folders too), and a room offered anywhere but the Rooms root or the archive; only the
+    /// listed folders the caller can read are considered. A destination that does not exist is answered as missing, and a request without
     /// `destFolderId` is rejected as an invalid request. To learn whether the destination accepts the files at all
     /// use `GET api/2.0/files/fileops/checkdestfolder`.
     /// </remarks>
@@ -486,7 +496,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The listed items that already have a same-named entry in the destination folder", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(400, "`destFolderId` is not given")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is a listed folder or lies inside one")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder, the destination is a listed folder or lies inside one, a file or a folder that is not a room is offered to the Rooms, Forms or AI agents section root, or a room is offered anywhere but the Rooms root or the archive")]
     [SwaggerResponse(404, "The destination folder does not exist")]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryBaseDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
@@ -501,11 +511,11 @@ public class OperationController(
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32(), inDto.Content);
         }
         else
         {
-            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString(), inDto.Content);
         }
 
         var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFolders.OfType<int>().Select(Convert.ToInt32), FilterType.None, false);
@@ -523,8 +533,9 @@ public class OperationController(
     /// out stops every operation the caller has running, of every kind. Cancelling stops the job where it stands and
     /// does not undo it: what has already been copied, moved or deleted stays that way, so a cancelled batch can
     /// leave part of itself at the destination and part of it at the source, and the result has to be read back
-    /// rather than assumed. The cancelled record is dropped from `GET api/2.0/files/fileops` at once, which is why
-    /// the answer here is usually empty. An id that is not among the caller's operations cancels nothing and is not
+    /// rather than assumed. The cancelled record leaves the answer of this call, which is why it is usually empty, and
+    /// comes back once the job has actually stopped: the next `GET api/2.0/files/fileops` lists it a single time,
+    /// finished, with the status Canceled and the cancellation in `error`. An id that is not among the caller's operations cancels nothing and is not
     /// an error. Operations are private to the account that started them, an anonymous caller being scoped to the
     /// session of the external link, so the call can never reach an operation of anyone else.
     /// </remarks>

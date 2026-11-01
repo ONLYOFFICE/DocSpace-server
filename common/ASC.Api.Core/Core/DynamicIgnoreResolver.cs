@@ -47,7 +47,13 @@ namespace ASC.Api.Core.Core;
 /// </summary>
 public sealed class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor, int depth = 0, string fullPropertyName = "") : JsonConverter<T>
 {
-    private static readonly PropertyInfo[] _properties = typeof(T).GetProperties();
+    // what the serializer itself writes: instance properties without [JsonIgnore]. Static ones were walked too, and
+    // EmployeeDto.Default - a new instance with a Default of its own - recursed until the serializer's depth limit
+    private static readonly PropertyInfo[] _properties = typeof(T)
+        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        .Where(p => p.GetIndexParameters().Length == 0
+                    && p.GetCustomAttribute<JsonIgnoreAttribute>() is not { Condition: JsonIgnoreCondition.Always })
+        .ToArray();
     private static readonly string[] _rawNames = _properties.Select(p => p.Name).ToArray();
     private static readonly ConcurrentDictionary<JsonNamingPolicy, string[]> _namesByPolicy = new();
 
@@ -90,13 +96,20 @@ public sealed class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAc
 
             if (propertyValue != null && fields is { Length: > 0 })
             {
+                var wholeValue = false;
+
                 if (depth > 0)
                 {
-                    shouldSerialize = MatchFields(fields, propertyName, ref newFullPropertyName);
+                    shouldSerialize = MatchFields(fields, propertyName, ref newFullPropertyName, out wholeValue);
                 }
 
                 var responsePropertyName = propertyName.Equals(nameof(SuccessApiResponse.Response), StringComparison.InvariantCultureIgnoreCase);
-                if (shouldSerialize && (depth == 0 && responsePropertyName || depth > 0))
+                if (shouldSerialize && wholeValue)
+                {
+                    // selected as a whole: written exactly as the unfiltered response writes it
+                    newOptions = DynamicIgnoreOptionsCache.WithoutDynamicIgnore(options);
+                }
+                else if (shouldSerialize && (depth == 0 && responsePropertyName || depth > 0))
                 {
                     newOptions = DynamicIgnoreOptionsCache.ForValue(propertyValue, httpContextAccessor, depth + 1, newFullPropertyName, newOptions);
                 }
@@ -116,8 +129,9 @@ public sealed class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAc
     /// A field matches a property when it names it at this depth (<c>depth == 1</c>: the property itself, deeper: the
     /// accumulated path), names the current path, or is a dotted path starting at this property. The first matching
     /// field also decides the path handed to the nested converter — first match wins, as in the original <c>Any</c>.
+    /// <paramref name="wholeValue"/> tells a property selected as a whole from one only a dotted sub-path reaches into.
     /// </summary>
-    private bool MatchFields(string[] fields, string propertyName, ref string newFullPropertyName)
+    private bool MatchFields(string[] fields, string propertyName, ref string newFullPropertyName, out bool wholeValue)
     {
         foreach (var r in fields)
         {
@@ -127,6 +141,7 @@ public sealed class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAc
                 if (r == checkName || r == fullPropertyName || r.StartsWith(checkName + "."))
                 {
                     newFullPropertyName = checkName;
+                    wholeValue = r == checkName || r == fullPropertyName;
                     return true;
                 }
 
@@ -140,10 +155,12 @@ public sealed class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAc
                     newFullPropertyName = propertyName;
                 }
 
+                wholeValue = true;
                 return true;
             }
         }
 
+        wholeValue = false;
         return false;
     }
 }
