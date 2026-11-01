@@ -47,6 +47,7 @@ const openApiSchemas = createRequire(import.meta.url)(
   "./generated/openapi-schemas.json",
 ) as OpenApiSchemaBundle;
 import { textToDocxController } from "./controllers/textToDocxController.js";
+import { aiProjectModelController } from "./controllers/aiProjectModelController.js";
 import { metaController } from "./controllers/metaController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
@@ -56,7 +57,6 @@ import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
-import { aiProjectsController } from "./controllers/aiProjectsController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
 import { threadsController } from "./controllers/threadsController.js";
@@ -201,20 +201,11 @@ export default function registerRoutes(app: Application): void {
   // writes the values the text supports through the Files metadata API.
   router.post("/meta/fill", metaController.fill);
 
-  // AI projects: rooms of type 12 with a settings block, delegated to the
-  // .NET AI service (see aiProjectsController).
-  // Only the project-specific operations live here; everything a project
-  // shares with an ordinary room (pin, mute, share, invitation links, leave,
-  // owner change, logo, history) goes through the Files API
-  // (`files/rooms/{id}/...`) directly.
-  const projects = aiProjectsController;
-  router.get("/projects", projects.getProjects);
-  router.post("/projects", projects.createProject);
-  router.get("/projects/:id", projects.getProject);
-  router.put("/projects/:id", projects.updateProject);
-  router.delete("/projects/:id", projects.deleteProject);
-  router.get("/projects/:id/skills", projects.getSkills);
-  router.get("/projects/:id/knowledge", projects.getKnowledgeFiles);
+  // The model of an AI project (a Files room of type 12): its scoped Chat
+  // assignment, proxied to the .NET AI service until the Files API serves
+  // it. Everything else about a project goes through `files/rooms/{id}...`.
+  router.get("/projects/:id/model", aiProjectModelController.getModel);
+  router.put("/projects/:id/model", aiProjectModelController.setModel);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

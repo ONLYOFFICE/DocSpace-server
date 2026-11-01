@@ -43,7 +43,7 @@ import { isObject } from "./narrow.js";
 // of that surface as a static spec, this builder derives the OpenAPI 3.0
 // document from the very same maps at startup, so a route added to the
 // engine package appears in the spec automatically. Custom routes that are
-// not backed by an engine (projects, text-to-docx) are described alongside
+// not backed by an engine (text-to-docx, metadata, settings, ...) are described alongside
 // their registration via `CustomRouteDoc` entries.
 
 // A minimal structural subset of the OpenAPI object graph — just enough to
@@ -68,7 +68,7 @@ export interface EngineDoc {
 // the two stay in sync.
 export interface CustomRouteDoc {
   readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  /** Path relative to the API prefix, e.g. `/projects/{id}` (OpenAPI style). */
+  /** Path relative to the API prefix, e.g. `/prompts/{id}` (OpenAPI style). */
   readonly path: string;
   readonly tag: string;
   readonly summary: string;
@@ -208,11 +208,8 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
 // Per-operation overrides, keyed by `operationId` then parameter name. Needed
 // for `id`, which the engines reuse for four different entities.
 const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  aiProjectsGet: { id: "The project identifier." },
-  aiProjectsUpdate: { id: "The project identifier." },
-  aiProjectsDelete: { id: "The project identifier." },
-  aiProjectsSkills: { id: "The project identifier." },
-  aiProjectsKnowledge: { id: "The project identifier." },
+  aiProjectsGetModel: { id: "The AI project (room) identifier." },
+  aiProjectsSetModel: { id: "The AI project (room) identifier." },
   aiProfilesGetById: { id: "The AI provider profile identifier." },
   aiPromptsGetById: { id: "The saved prompt identifier." },
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
@@ -245,11 +242,8 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
 // Per-operation examples for `id`, which the engines reuse for four entities,
 // and for the project routes, whose `id` is an integer room ID rather than a UUID.
 const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
-  aiProjectsGet: { id: EXAMPLE_IDS.project },
-  aiProjectsUpdate: { id: EXAMPLE_IDS.project },
-  aiProjectsDelete: { id: EXAMPLE_IDS.project },
-  aiProjectsSkills: { id: EXAMPLE_IDS.project },
-  aiProjectsKnowledge: { id: EXAMPLE_IDS.project },
+  aiProjectsGetModel: { id: EXAMPLE_IDS.project },
+  aiProjectsSetModel: { id: EXAMPLE_IDS.project },
   aiProfilesGetById: { id: EXAMPLE_IDS.profile },
   aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
   aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
@@ -301,22 +295,12 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiDenyToolCall:
     'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
 
-  // Projects - rooms of type 12, delegated to the .NET AI service (AiProjectsController);
-  // the `aiProject` block is composed here over its `projects/{id}/rooms` routes.
-  aiProjectsList:
-    "Lists the AI projects the caller may see, as the folder-content payload of the projects root: every project for the portal owner and DocSpace admins, the projects they are a member of for everyone else. The query is forwarded unchanged to the DocSpace AI service, and the answer is its folder-content envelope, one folder per project with the caller's `security` and without the `aiProject` block (read a project to get its rooms). Pinned projects come first. `filterValue`, `sortBy`, `sortOrder`, `subjectId`, `excludeSubject`, `subjectOwnerId`, `tags`, `withoutTags`, `startIndex` and `count` are the rooms listing's, with the same meaning.",
-  aiProjectsCreate:
-    "Creates an AI project, a room of type 12, in the DocSpace AI service. The caller becomes its owner; only the portal owner, DocSpace admins and room admins may create. `title` is required; `color`, `cover` and an uploaded `logo` style it; `tags` (tag names, as a room takes them) sets its tags. The optional `aiProject` block names the linked rooms: `instructionsRoomIds` must be rooms of type 10 and `knowledgeRoomIds` rooms of type 11, each an active room readable by the caller, at most 100 of each; they are linked right after the room is created, and a refused link comes back as a `roomUnavailable` warning in the answer's `aiProject.warnings` rather than a failure. `aiProject.profileId` must be a UUID of a chat profile or `null`, but no model is stored with a project yet: a chosen one is answered with a `modelNotStored` warning and the project runs on the portal default. Other room-only fields (quota, lifetime, watermark, ...) are refused.",
-  aiProjectsGet:
-    "Returns one AI project as a room card: the caller's `access` and `security`, and its `aiProject` block - `profile` (always `null`, the portal default, until the service stores a model), the linked `instructionsRooms` and `knowledgeRooms` (each active and readable by the caller, sorted by title) and `canEditSettings`. A room that is not an AI project answers 404; a project the caller cannot read answers 403.",
-  aiProjectsUpdate:
-    "Changes an AI project: `title`, `color`, `cover`, `logo`, `tags` and the rooms of the `aiProject` block. Owner and project managers only. An absent field keeps its value; a present `tags` replaces the whole set (`[]` clears it). A room list sent in `aiProject` is brought about exactly: the rooms not linked yet are linked, the linked rooms left out are unlinked, `[]` unlinks every room of that kind; a list absent or `null` keeps its rooms. A refused link or unlink comes back as a `roomUnavailable` warning, a `profileId` as a `modelNotStored` warning (see create). Unlinking a room revokes nothing.",
-  aiProjectsDelete:
-    "Deletes an AI project as an asynchronous file operation to poll with `GET api/2.0/files/fileops`. Owner only. The linked Instructions and Knowledge rooms, and the Viewer shares the project granted on them, stay untouched.",
-  aiProjectsSkills:
-    "Lists the skills of every Instructions room linked to the project, grouped by room: each skill is a Markdown file of the room with its frontmatter name and description, from the .NET skills catalog. Reading the project is enough to read the skills of every linked room. Which skills a chat round uses is the user's per-session choice and is not stored.",
-  aiProjectsKnowledge:
-    "Lists the files of every Knowledge room linked to the project, grouped by room, with each file's indexing state (`indexed`, `vectorizationStatus`, `security.Vectorization`) and the room's total, indexed and failed counts, read from the Files API with the caller's credentials. A room that cannot be read is listed with `available: false`; a room holding more files than one listing reads (1000) is marked `truncated`.",
+  // Projects - the model of an AI project, a room of type 12 managed through
+  // the Files API; stored as the project-scoped Chat assignment.
+  aiProjectsGetModel:
+    "Returns the model of an AI project: `profile` is the chat profile stored for the project (`id`, `name`, `provider`, and `available`, false when the profile is gone or cannot chat), or `null` when the project runs on the portal's `Chat` assignment. The project is read with the caller's credentials first, so a room the caller cannot read answers 403 and a room that is not an AI project 404. A member who is not the owner, a project manager or a content creator cannot read the stored model yet and gets `null`.",
+  aiProjectsSetModel:
+    "Sets the model of an AI project. `profileId` is the UUID of an existing profile that can chat, or `null` for the portal default. Owner and project managers only (the room's `security.EditRoom`). There is no scoped delete on the server, so `null` on a project that has a model of its own pins the portal's current `Chat` profile to it; a later change of the portal default does not reach the project until its model is set again. Answers the model as `GET` does.",
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
@@ -633,37 +617,17 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "402": true,
   },
 
-  // Projects - the id is an integer and must name a room of type 12; the
-  // write operations validate the body before anything is forwarded.
-  aiProjectsCreate: {
-    "400":
-      "`title` is missing or too long, a field is not a project field, `color` or `cover` is " +
-      "malformed, `tags` is not an array of names, or `aiProject.profileId` is not a UUID of a chat " +
-      "profile. A room that cannot be linked does not fail the create: see `aiProject.warnings`.",
-    "403": "The caller is a user or a guest, who cannot create projects.",
-  },
-  aiProjectsGet: {
+  aiProjectsGetModel: {
     "400": "The project id is not a positive integer.",
     "403": "The caller cannot read the project.",
     "404": "The project does not exist or is not an AI project.",
   },
-  aiProjectsUpdate: {
+  aiProjectsSetModel: {
     "400":
-      "The project id is not a positive integer, nothing to update is given, or a field fails " +
-      "the checks of create.",
-    "403": "The caller is neither the owner nor a project manager, or cannot read the project.",
+      "The project id is not a positive integer, or `profileId` is missing, not a UUID, names no " +
+      "profile, or names a profile that cannot chat.",
+    "403": "The caller cannot read the project, or is neither its owner nor a project manager.",
     "404": "The project does not exist or is not an AI project.",
-  },
-  aiProjectsDelete: {
-    "400": "The project id is not a positive integer.",
-    "403": "The caller may not read or delete the project.",
-    "404": "The project does not exist or is not an AI project.",
-  },
-  aiProjectsSkills: {
-    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
-  },
-  aiProjectsKnowledge: {
-    "404": "The project does not exist, is not an AI project, or the caller cannot see it.",
   },
 
   // Assignments - every write validates its action type first; reading all
@@ -1265,8 +1229,8 @@ function jsonBody(schema: Json = JSON_OBJECT_SCHEMA, operationId?: string): Json
 }
 
 // Concrete request/response schemas (from `ts-json-schema-generator`) are
-// inlined per operation. Operations without a generated schema (`.NET`-
-// forwarded project listings, dual-mode `sendCustom`) fall back to the generic
+// inlined per operation. Operations without a generated schema (dual-mode
+// `sendCustom`) fall back to the generic
 // object.
 type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
 
@@ -1312,14 +1276,8 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
     "`isStream` was set. Nothing was persisted.",
 
-  aiProjectsList:
-    "The projects the caller may see, in the folder-content envelope of the projects root.",
-  aiProjectsCreate: "The created project, with the caller as its owner.",
-  aiProjectsGet: "The project, with its `aiProject` block and the caller's `security`.",
-  aiProjectsUpdate: "The updated project.",
-  aiProjectsDelete: "The file operation deleting the project.",
-  aiProjectsSkills: "The skills of the linked Instructions rooms, grouped by room.",
-  aiProjectsKnowledge: "The files of the linked Knowledge rooms, grouped by room.",
+  aiProjectsGetModel: "The project's model, or `null` for the portal default.",
+  aiProjectsSetModel: "The project's model after the change.",
 
   aiAssignmentsResolveForAction: "The profile that will serve the action.",
   aiAssignmentsTryResolveForAction:
@@ -1992,88 +1950,9 @@ function engineOperation(
 // Query parameters of a custom route. Engine routes get theirs from
 // `RouteSpec.params`, but a custom route has no such list, so a route that reads
 // the query says so here. These carry their own types and prose because they are
-// richer than the bare-name mechanism above: the projects listing forwards every
-// string query parameter it receives straight to the internal service, and these
-// are the ones that service reads.
-const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
-  aiProjectsList: [
-    {
-      name: "filterValue",
-      in: "query",
-      description: "Keep only the projects whose title contains this text.",
-      required: false,
-      schema: { type: "string", examples: ["marketing"] },
-    },
-    {
-      name: "sortBy",
-      in: "query",
-      description:
-        "The sort field, as for rooms: `DateAndTime` (last change, the default), `AZ`, `DateAndTimeCreation`, `Tags` (by the joined tag names, untagged projects last) or `Author` (by the owner's display name). Any other value answers 400.",
-      required: false,
-      schema: { type: "string", examples: ["DateAndTime"] },
-    },
-    {
-      name: "sortOrder",
-      in: "query",
-      description: "`ascending` or `descending` (the default).",
-      required: false,
-      schema: { type: "string", examples: ["descending"] },
-    },
-    {
-      name: "subjectId",
-      in: "query",
-      description:
-        "Keep only the projects shared with this user or group, in any role, the owner included (as for rooms).",
-      required: false,
-      schema: { type: "string", examples: ["00000000-0000-0000-0000-000000000000"] },
-    },
-    {
-      name: "excludeSubject",
-      in: "query",
-      description:
-        "`true` inverts `subjectId`: keep only the projects NOT shared with that subject.",
-      required: false,
-      schema: { type: "boolean", examples: [false] },
-    },
-    {
-      name: "subjectOwnerId",
-      in: "query",
-      description:
-        "Keep only the projects this user owns. Combines with `subjectId`: the projects this user owns that the other subject is a member of.",
-      required: false,
-      schema: { type: "string", examples: ["00000000-0000-0000-0000-000000000000"] },
-    },
-    {
-      name: "tags",
-      in: "query",
-      description:
-        "Keep only the projects carrying any of these tag names: one value holding a JSON array of strings, URL-encoded (`tags=%5B%22sales%22%2C%22legal%22%5D`), as `files/rooms` takes it.",
-      required: false,
-      schema: { type: "string", examples: ['["sales","legal"]'] },
-    },
-    {
-      name: "withoutTags",
-      in: "query",
-      description: "`true` keeps only the projects with no tags; `tags` is then ignored.",
-      required: false,
-      schema: { type: "boolean", examples: [true] },
-    },
-    {
-      name: "startIndex",
-      in: "query",
-      description: PARAM_DOCS["startIndex"] ?? "",
-      required: false,
-      schema: { type: "integer", examples: [0] },
-    },
-    {
-      name: "count",
-      in: "query",
-      description: PARAM_DOCS["count"] ?? "",
-      required: false,
-      schema: { type: "integer", examples: [25] },
-    },
-  ],
-};
+// richer than the bare-name mechanism above. No custom route reads its query
+// at the moment.
+const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {};
 
 function customOperation(
   route: CustomRouteDoc,

@@ -35,8 +35,9 @@
 // Instructions room (`RoomType.InstructionsRoom`). The .NET side checks each
 // file's YAML frontmatter (`name`, `description`) when it is saved, refuses a
 // file without a valid one, and keeps the pair in its skills catalog; this
-// module reads that catalog (`GET internal/ai/rooms/skills`) with the
-// caller's credentials, so a room the caller cannot read is left out.
+// module reads that catalog through the Files API
+// (`GET api/2.0/files/rooms/skills?roomIds=…`) with the caller's credentials,
+// so a room the caller cannot read is left out.
 //
 // The widget reads the catalog of every room once, when the room is
 // connected (`getRoomSkills`), and one body on demand through its built-in
@@ -44,7 +45,7 @@
 // so the body read is a plain file read with the caller's own credentials.
 
 import type { ContextFolder, RoomSkill } from "@onlyoffice/ai-chat/core";
-import { aiService, proxyBaseUrl, withTimeout } from "./httpClient.js";
+import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { countFilesApiRead, getForwardedHeaders } from "../requestContext.js";
 import {
   asString,
@@ -56,7 +57,7 @@ import {
   getString,
   isObject,
 } from "../narrow.js";
-import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
+import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
 import logger from "../log.js";
 
 /** `RoomType.InstructionsRoom` on the C# side — the rooms whose Markdown files are skills. */
@@ -71,7 +72,7 @@ const PAGE_SIZE = 100;
 /** Pages read at most — a runaway `total` must not turn into an endless loop. */
 const MAX_PAGES = 10;
 
-/** Rooms per catalog read: `roomIds` takes 1 to 20 ids (`AiProjectRoomService.MaxRoomsPerType`). */
+/** Rooms per catalog read: `roomIds` takes 1 to 20 ids (`AiHubService.MaxRoomsPerType`). */
 const SKILLS_BATCH_SIZE = 20;
 
 /**
@@ -147,7 +148,8 @@ export function parseSkillsCatalog(raw: unknown): CatalogRoom[] {
 
 /**
  * The skills of the given Instructions rooms, by room id —
- * `GET internal/ai/rooms/skills`, 20 rooms a call. A room that does not
+ * `GET api/2.0/files/rooms/skills?roomIds=…` (one `roomIds` item per room),
+ * 20 rooms a call. A room that does not
  * exist, is not an Instructions room under the AI rooms root, or that the
  * caller cannot read is absent from the map.
  */
@@ -158,7 +160,7 @@ export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, Roo
     batches.push(ids.slice(i, i + SKILLS_BATCH_SIZE));
   }
   const answers = await Promise.all(
-    batches.map((batch) => aiService.get("/rooms/skills", { query: { roomIds: batch } })),
+    batches.map((batch) => filesApiGet("rooms/skills", { roomIds: batch })),
   );
   const result = new Map<string, RoomSkill[]>();
   for (const answer of answers) {
@@ -424,12 +426,16 @@ async function readTextCapped(res: Response, limit: number): Promise<string> {
 /**
  * The skills of one Instructions room, from the catalog. Throws
  * `DocspaceApiHttpError` 404 when the room is not an Instructions room the
- * caller can read, as the Files API answered before the catalog existed.
+ * caller can read (the catalog leaves such a room out).
  */
 export async function getRoomSkills(roomId: string): Promise<RoomSkill[]> {
   const skills = (await getRoomsSkills([roomId])).get(roomId);
   if (!skills) {
-    throw new DocspaceApiHttpError(404, "Not Found", `internal/ai/rooms/skills?roomIds=${roomId}`);
+    throw new DocspaceApiHttpError(
+      404,
+      "Not Found",
+      `api/2.0/files/rooms/skills?roomIds=${encodeURIComponent(roomId)}`,
+    );
   }
   return skills;
 }

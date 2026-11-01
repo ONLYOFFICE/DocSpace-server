@@ -67,53 +67,30 @@ engine streams (`toolProgress`) until the result replaces it; nothing of it is p
 
 ### AI projects
 
-`/api/2.0/ai/projects/*` (`app/controllers/aiProjectsController.ts`) serves the AI Projects page:
-a project is a room of type 12 that links Instructions rooms (type 10) and Knowledge rooms
-(type 11) and shares them with a team under three roles — project owner (`access` 1), project
-manager (9) and member (2, the room's Read). As for agents, only the project-specific routes live
-here — list, create, get, update, delete, `skills` and `knowledge`. The room itself is delegated to
-the .NET AI service (`internal/ai/projects…`, `AiProjectsController`), which stores the linked rooms
-as one flat set per project behind `GET/POST/DELETE internal/ai/projects/{id}/rooms` (type told
-apart by the room, at most 100 of each kind, sorted by title) and stores no model yet. The client
-contract keeps the rooms inside the project's `aiProject` block and in the create / update body as
-`aiProject.instructionsRoomIds` / `knowledgeRoomIds`, so `app/storage/aiProjectRooms.ts` composes
-one over the other: a `GET projects/{id}` is the room plus its rooms; a create links the rooms
-right after the room is made; an update brings the links to the lists sent (a list absent keeps its
-rooms, `[]` unlinks them all); a refused link or unlink comes back as a `roomUnavailable` warning
-in `aiProject.warnings`, a chosen `profileId` as a `modelNotStored` warning (the project runs on
-the portal's Chat model). `skills` reads each linked Instructions room's Markdown frontmatter
-(`roomSkills.ts`) and `knowledge` each linked Knowledge room's files from the Files API, both with
-the caller's credentials. The list answers the rooms without the block: a project is read again
-when it is opened or picked. Everything a project shares with an ordinary room — pin and unpin,
-mute, members (`share`), invitation links, resending invitations, leaving, changing the owner,
-removing the logo and the history — is done by the client through the Files API
-(`files/rooms/{id}/...`), not through this service.
+An AI project is a room of type 12 (`FolderType.AiProjectRoom`, 40) under the AI rooms root
+(`FolderType.AiHub`) that links Instructions rooms (type 10) and Knowledge rooms (type 11) as its
+sources and shares them with a team. The client creates, lists, updates and deletes projects
+through the ordinary Files API (`files/rooms`, with `roomType=12` / `searchArea=AiHub&type=12`)
+and manages their sources and skills through `files/rooms/{id}/sources` and
+`files/rooms/{id}/skills` (`AiHubController` in ASC.Files).
+
+The one project route here is the model: `GET/PUT /api/2.0/ai/projects/{id}/model`
+(`app/controllers/aiProjectModelController.ts`, `app/storage/aiProjectModel.ts`). It answers
+`{ response: { profile: { id, name, provider, available } | null } }` (`null` = the portal's Chat
+model) and takes `{ profileId: string | null }`; writing needs the room's `security.EditRoom`. The
+model is stored as the `Chat` assignment of the .NET assignments storage scoped to the project
+(`entityId` = the project id). The server has no scoped delete, so `profileId: null` pins the
+portal's current Chat profile to a project that had a model of its own. A plain member cannot read
+the scoped assignment on the .NET side yet and gets `null` (the portal default). This route is
+meant to move to the Files API later.
 
 A chat round whose `entityId` is a project (`storage/aiProjectChatContext.ts`) runs on the
-project, not on what the composer sent: members only (the room's `inRoom`), the portal's Chat
-model, the linked Instructions rooms as context (skills) rooms and the linked Knowledge rooms as
-knowledge bases.
-
-The project DTO is a room card: besides its `aiProject` block it carries the room fields the list
-reads — `tags` (tag names, as a room's `tags`), `createdBy` and `updatedBy` (the same user shape),
-`pinned`, `mute`, `inRoom`, `access`, `security`. The create and update bodies take `tags` the way
-a room does (names; create sets the list, update replaces it when the field is present, `[]`
-clears it) next to `title`, `color`, `cover`, `logo` and `aiProject`; every other room-only field
-(quota, lifetime, watermark, ...) is refused by the .NET side.
-
-`GET projects` takes the rooms list's query, forwarded to .NET as is:
-
-| Parameter | Meaning |
-|---|---|
-| `filterValue` | title contains the text |
-| `sortBy`, `sortOrder` | `DateAndTime` (default), `AZ`, `DateAndTimeCreation`, `Tags` (joined tag names, untagged last) or `Author` (owner display name); `ascending` / `descending` (default). Any other `sortBy` answers 400 |
-| `startIndex`, `count` | paging |
-| `subjectId`, `excludeSubject` | projects shared with this user or group, in any role, the owner included; `excludeSubject=true` inverts it |
-| `subjectOwnerId` | projects this user owns; combines with `subjectId` |
-| `tags` | one value holding a JSON array of names (`tags=%5B%22sales%22%2C%22legal%22%5D`), as `files/rooms` takes it: projects carrying **any** of them. |
-| `withoutTags` | `true`: projects with no tags (`tags` is then ignored) |
-
-The client-facing contract is `client/openspec/changes/ai-projects/specs/ai-projects-api/spec.md`.
+project, not on what the composer sent: members only (the room's `inRoom`), the project's model
+(else the portal's Chat model), the linked Instructions rooms as context (skills) rooms and the
+linked Knowledge rooms as knowledge bases. It reads the project from the Files API with the caller's credentials —
+`GET files/rooms/{id}`, `GET files/rooms/{id}/sources` and `GET files/rooms/{id}/skills`. The
+skills of the Instructions rooms picked outside a project are read from
+`GET files/rooms/skills?roomIds=…` (`storage/roomSkills.ts`).
 
 ### License
 

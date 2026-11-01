@@ -116,6 +116,44 @@ export class DocspaceApiHttpError extends Error {
   }
 }
 
+/** A query value of {@link filesApiGet}: an array repeats the parameter once per item. */
+export type FilesApiQuery = Record<string, string | number | readonly (string | number)[]>;
+
+/**
+ * `GET api/2.0/files/{path}` on behalf of the current user (the caller's
+ * credentials relayed via {@link getForwardedHeaders}), answering the
+ * `response` of the DocSpace envelope. Any non-2xx answer throws
+ * {@link DocspaceApiHttpError} with its status; an answer without a
+ * `response` throws a plain error. `path` is relative to `api/2.0/files/`
+ * and must already be encoded.
+ */
+export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<unknown> {
+  const params = new URLSearchParams();
+  for (const [name, value] of Object.entries(query ?? {})) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      params.append(name, String(item));
+    }
+  }
+  const qs = params.toString();
+  const search = qs ? `?${qs}` : "";
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}${search}`;
+  const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
+  try {
+    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const raw: unknown = await res.json();
+    if (!isObject(raw) || !("response" in raw)) {
+      throw new Error(`DocSpace API: unparseable response from ${url}`);
+    }
+    return raw["response"];
+  } finally {
+    cancel();
+  }
+}
+
 function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   // DocSpace API responses are wrapped in a `{ response: ... }` envelope.
   const envelope = isObject(raw) ? getObject(raw, "response") : undefined;

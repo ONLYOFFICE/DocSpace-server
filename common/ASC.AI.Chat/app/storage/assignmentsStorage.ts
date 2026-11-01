@@ -43,10 +43,10 @@ import {
 
 // The action -> profile bindings are one map per portal. The `entityId` the
 // library passes with every call (the folder the chat is opened from) is
-// accepted for the interface's sake and ignored; an AI project's own model
-// is bound to the round by `applyAiProjectChatContext`, not through an
-// assignment. A request without an `entityId` is the portal-wide map on
-// the C# side.
+// accepted for the interface's sake and ignored. An AI project's own model
+// is a project-scoped assignment, read and written by `aiProjectModel.ts`
+// and bound to the round by `applyAiProjectChatContext`. A request without
+// an `entityId` is the portal-wide map on the C# side.
 const PATH = "/assignments";
 
 // Case-insensitive `ActionType` lookup: the aggregate serializes the C# enum

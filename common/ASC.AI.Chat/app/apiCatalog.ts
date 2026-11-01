@@ -283,61 +283,20 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   },
   {
     method: "GET",
-    path: "/projects",
+    path: "/projects/{id}/model",
     tag: "Projects",
-    operationId: "aiProjectsList",
-    summary: "List projects",
-  },
-  {
-    method: "POST",
-    path: "/projects",
-    tag: "Projects",
-    operationId: "aiProjectsCreate",
-    summary: "Create a project",
-    hasBody: true,
-  },
-
-  {
-    method: "GET",
-    path: "/projects/{id}",
-    tag: "Projects",
-    operationId: "aiProjectsGet",
-    summary: "Get a project",
+    operationId: "aiProjectsGetModel",
+    summary: "Get the project's model",
     pathParams: ["id"],
   },
   {
     method: "PUT",
-    path: "/projects/{id}",
+    path: "/projects/{id}/model",
     tag: "Projects",
-    operationId: "aiProjectsUpdate",
-    summary: "Update a project",
+    operationId: "aiProjectsSetModel",
+    summary: "Set the project's model",
     pathParams: ["id"],
     hasBody: true,
-  },
-  {
-    method: "DELETE",
-    path: "/projects/{id}",
-    tag: "Projects",
-    operationId: "aiProjectsDelete",
-    summary: "Delete a project",
-    pathParams: ["id"],
-    hasBody: true,
-  },
-  {
-    method: "GET",
-    path: "/projects/{id}/skills",
-    tag: "Projects",
-    operationId: "aiProjectsSkills",
-    summary: "List the project's skills",
-    pathParams: ["id"],
-  },
-  {
-    method: "GET",
-    path: "/projects/{id}/knowledge",
-    tag: "Projects",
-    operationId: "aiProjectsKnowledge",
-    summary: "List the project's knowledge files",
-    pathParams: ["id"],
   },
 ];
 
@@ -348,7 +307,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 // (`operation-tag-defined`), so a new custom tag belongs here as well.
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
   Projects:
-    "AI projects: a model, Instructions rooms and Knowledge rooms shared with a team (rooms of type 12, delegated to the .NET AI service).",
+    "The model of an AI project (a room of type 12, managed through the Files API `files/rooms`).",
   Export: "Markdown → docx export.",
   Metadata: "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
   Settings: "Portal-wide, vectorization and per-user AI settings.",

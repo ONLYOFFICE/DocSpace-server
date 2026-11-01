@@ -3,9 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../log.js", () => ({
   default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
-const aiServiceGet = vi.fn();
 vi.mock("../httpClient.js", () => ({
-  aiService: { get: aiServiceGet },
   proxyBaseUrl: "http://portal",
   withTimeout: () => ({ signal: undefined, cancel: () => {} }),
 }));
@@ -18,7 +16,11 @@ class FakeDocspaceApiHttpError extends Error {
     super(statusText);
   }
 }
-vi.mock("../docspaceFilesApi.js", () => ({ DocspaceApiHttpError: FakeDocspaceApiHttpError }));
+const filesApiGet = vi.fn();
+vi.mock("../docspaceFilesApi.js", () => ({
+  DocspaceApiHttpError: FakeDocspaceApiHttpError,
+  filesApiGet,
+}));
 vi.mock("../../requestContext.js", () => ({
   countFilesApiRead: vi.fn(),
   getForwardedHeaders: () => ({}),
@@ -57,13 +59,15 @@ describe("getKnowledgeFolders", () => {
   });
 });
 
-const catalog = (...rooms: { id: number; skills: { id: string; name: string; description: string }[] }[]) => ({
+const catalog = (
+  ...rooms: { id: number; skills: { id: string; name: string; description: string }[] }[]
+) => ({
   rooms: rooms.map((room) => ({ title: `Room ${room.id}`, logo: null, ...room })),
 });
 
 describe("skills catalog", () => {
   beforeEach(() => {
-    aiServiceGet.mockReset();
+    filesApiGet.mockReset();
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
   });
@@ -72,28 +76,35 @@ describe("skills catalog", () => {
     vi.unstubAllGlobals();
   });
 
-  it("reads the rooms' skills from the .NET catalog, 20 rooms a call", async () => {
-    aiServiceGet.mockImplementation(async (_path: string, opts: { query: { roomIds: string[] } }) =>
-      catalog(...opts.query.roomIds.map((id) => ({ id: Number(id), skills: [{ id: `f${id}`, name: "n", description: "d" }] }))),
+  it("reads the rooms' skills from the Files API catalog, 20 rooms a call", async () => {
+    filesApiGet.mockImplementation(async (_path: string, query: { roomIds: string[] }) =>
+      catalog(
+        ...query.roomIds.map((id) => ({
+          id: Number(id),
+          skills: [{ id: `f${id}`, name: "n", description: "d" }],
+        })),
+      ),
     );
     const ids = Array.from({ length: 25 }, (_, i) => String(i + 1));
 
     const skills = await getRoomsSkills(ids);
 
-    expect(aiServiceGet).toHaveBeenCalledTimes(2);
-    expect(aiServiceGet.mock.calls[0]?.[0]).toBe("/rooms/skills");
-    expect(aiServiceGet.mock.calls[0]?.[1].query.roomIds).toHaveLength(20);
-    expect(aiServiceGet.mock.calls[1]?.[1].query.roomIds).toEqual(["21", "22", "23", "24", "25"]);
+    expect(filesApiGet).toHaveBeenCalledTimes(2);
+    expect(filesApiGet.mock.calls[0]?.[0]).toBe("rooms/skills");
+    expect(filesApiGet.mock.calls[0]?.[1].roomIds).toHaveLength(20);
+    expect(filesApiGet.mock.calls[1]?.[1].roomIds).toEqual(["21", "22", "23", "24", "25"]);
     expect(skills.get("25")).toEqual([{ id: "f25", name: "n", description: "d" }]);
   });
 
   it("answers 404 for a room the catalog leaves out", async () => {
-    aiServiceGet.mockResolvedValue(catalog());
+    filesApiGet.mockResolvedValue(catalog());
     await expect(getRoomSkills("7")).rejects.toMatchObject({ status: 404 });
   });
 
   it("reads a skill body only for a skill of that room", async () => {
-    aiServiceGet.mockResolvedValue(catalog({ id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] }));
+    filesApiGet.mockResolvedValue(
+      catalog({ id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] }),
+    );
     await expect(getRoomSkill("7", "f2")).rejects.toMatchObject({ status: 404 });
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -111,13 +122,16 @@ describe("skills catalog", () => {
         },
       }),
     });
-    aiServiceGet.mockResolvedValue(
-      catalog({ id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] }, { id: 8, skills: [] }),
+    filesApiGet.mockResolvedValue(
+      catalog(
+        { id: 7, skills: [{ id: "f1", name: "tone", description: "Tone." }] },
+        { id: 8, skills: [] },
+      ),
     );
 
     const folders = await getContextFolders();
 
     expect(folders).toEqual([{ cloud: "docspace", rooms: [{ id: "7", name: "Brand voice" }] }]);
-    expect(aiServiceGet).toHaveBeenCalledTimes(1);
+    expect(filesApiGet).toHaveBeenCalledTimes(1);
   });
 });
