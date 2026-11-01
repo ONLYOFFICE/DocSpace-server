@@ -2738,7 +2738,7 @@ public class FileSecurity(
         if (e.Access != FileShare.Restrict &&
             e.CreateBy == userId &&
             (e.FileEntryType == FileEntryType.File || folder.FolderType != FolderType.COMMON) &&
-            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.RoomTemplates && e.RootFolderType != FolderType.VirtualRooms)
+            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.RoomTemplates && e.RootFolderType != FolderType.VirtualRooms && e.RootFolderType != FolderType.AiHub)
         {
             return true;
         }
