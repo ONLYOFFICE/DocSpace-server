@@ -1248,6 +1248,11 @@ public class FileSecurity(
         var folder = e as Folder<T>;
         var isRoom = folder is { IsRoom: true };
 
+        if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
+        {
+            return false;
+        }
+
         if (action == FilesSecurityActions.HistoryExport)
         {
             if (isGuest)
