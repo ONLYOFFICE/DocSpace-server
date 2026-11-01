@@ -106,8 +106,7 @@ public class FileSecurity(
                 { SubjectType.PrimaryExternalLink, [FileShare.FillForms, FileShare.None] }
             }.ToFrozenDictionary()
         },
-        { FolderType.AiRoom, _defaultFileShareDictionary },
-        { FolderType.InstructionsRoom, _defaultFileShareDictionary }
+        { FolderType.AiRoom, _defaultFileShareDictionary }
     }.ToFrozenDictionary();
 
     private static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> _linkCountRoomSettingsAccesses =
@@ -154,8 +153,7 @@ public class FileSecurity(
             }.ToFrozenDictionary()
         },
         { FolderType.FillingFormsRoom, new Dictionary<SubjectType, int> { { SubjectType.PrimaryExternalLink, 1 } }.ToFrozenDictionary() },
-        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() },
-        { FolderType.InstructionsRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() }
+        { FolderType.AiRoom, new Dictionary<SubjectType, int> { { SubjectType.ExternalLink, 6 } }.ToFrozenDictionary() }
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<FolderType, FrozenDictionary<SubjectType, HashSet<FileShare>>> AvailableRoomAccesses =
