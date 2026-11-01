@@ -48,6 +48,11 @@ public class TenantLogoManager(
     IHttpClientFactory clientFactory,
     ILogger<TenantLogoManager> logger)
 {
+    // A logo is a few kilobytes: a fetch that takes longer than this is not going to succeed, and the
+    // report waiting for it holds its queue.
+    private static readonly TimeSpan _defaultLogoFetchTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan _defaultLogoFailureDuration = TimeSpan.FromMinutes(5);
+
     public bool WhiteLabelEnabled
     {
         get
@@ -160,30 +165,44 @@ public class TenantLogoManager(
 
             var cacheKey = $"toplogodatauri_default_{logoPath}";
 
-            var cached = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
-            if (!string.IsNullOrEmpty(cached))
-            {
-                return cached;
-            }
-
             // The query carries the version of the file - the build number for the built-in logo,
             // the ETag for a partner one - and is what makes the caches in front of the storage
             // re-read a replaced file, so the request is made with it rather than without.
             var logoUrl = commonLinkUtility.GetFullAbsolutePath(logoPath);
 
-#pragma warning disable CA2000
-            var httpClient = clientFactory.CreateClient();
-#pragma warning restore CA2000
-            var data = await httpClient.GetByteArrayAsync(logoUrl);
-
-            var dataUri = ToDataUri(data, ext);
-
-            if (!string.IsNullOrEmpty(dataUri))
+            // The factory runs once for the reports that ask at the same time. The logo is fetched
+            // from the portal's own address, which a server behind NAT without hairpinning, in a
+            // closed network or with a name its own DNS does not know cannot reach. Such a fetch
+            // fails slowly - up to the timeout - and would fail the same way for the next report, so
+            // the failure is remembered too, as an empty entry, briefly enough for a fixed network
+            // to be noticed soon; the caller falls back to the logo URL meanwhile.
+            var dataUri = await hybridCache.GetOrSetAsync<string>(cacheKey, async (ctx, token) =>
             {
-                await hybridCache.SetAsync(cacheKey, dataUri, TimeSpan.FromDays(1));
-            }
+                try
+                {
+#pragma warning disable CA2000
+                    var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                    cts.CancelAfter(_defaultLogoFetchTimeout);
+                    var data = await httpClient.GetByteArrayAsync(logoUrl, cts.Token);
 
-            return dataUri;
+                    var result = ToDataUri(data, ext);
+                    if (result is not null)
+                    {
+                        return result;
+                    }
+                }
+                catch (Exception ex) when (!token.IsCancellationRequested)
+                {
+                    logger.ErrorWithException(ex);
+                }
+
+                ctx.Options.Duration = _defaultLogoFailureDuration;
+                return string.Empty;
+            }, TimeSpan.FromDays(1));
+
+            return string.IsNullOrEmpty(dataUri) ? null : dataUri;
         }
         catch (Exception ex)
         {
