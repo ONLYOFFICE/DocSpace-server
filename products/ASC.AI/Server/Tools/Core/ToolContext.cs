@@ -45,23 +45,14 @@ public class ToolContext
     /// only, and never for the main chat agent.</summary>
     public bool FormSubAgent { get; init; }
 
-    /// <summary>The knowledge room the composer connected for the round (0 = none): the knowledge search
-    /// tool searches it instead of the folder the chat is opened from. Older callers send one room here;
-    /// <see cref="KnowledgeRoomIds"/> carries the whole list.</summary>
-    public int KnowledgeRoomId { get; init; }
-
-    /// <summary>Every knowledge room the composer connected for the round; the knowledge search tool
-    /// searches all of them. Empty when none was sent.</summary>
-    public List<int>? KnowledgeRoomIds { get; init; }
+    [MaxLength(AiHubService.MaxRoomsPerType)]
+    public HashSet<int> KnowledgeRoomIds { get; init; } = [];
 }
 
 public class ResolvedToolContext
 {
     public IFolder? Folder { get; init; }
     public FileEntry? Form { get; init; }
-
-    /// <summary>The connected knowledge rooms, resolved with the caller's rights; a room that was sent but
-    /// does not exist, or is not a knowledge room, is left out. Empty when none was sent.</summary>
     public IReadOnlyList<Folder<int>> KnowledgeRooms { get; init; } = [];
 
     /// <summary>

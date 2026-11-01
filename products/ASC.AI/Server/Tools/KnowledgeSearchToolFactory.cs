@@ -117,54 +117,32 @@ public class KnowledgeSearchToolFactory(
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
         // The form-analysis sub-agent gets only the form-data tools.
-        if (context.FormSubAgent)
+        if (context.FormSubAgent || !await aiAccessibility.IsVectorizationEnabledAsync())
         {
             return ToolBundle.Empty;
         }
 
-        // The knowledge base is owned by an AI agent (its knowledge folder) or by knowledge
-        // rooms (every file in the room); both scope the chunks by their own id. Knowledge rooms
-        // connected in the composer win over the folder the chat is opened from; several rooms
-        // are searched side by side.
         var owners = context.KnowledgeRooms.Count > 0
-            ? context.KnowledgeRooms.ToList()
-            : context.Folder is Folder<int> { IsAgent: true } or Folder<int> { FolderType: FolderType.KnowledgeRoom }
-                ? [(Folder<int>)context.Folder]
-                : [];
-
-        if (owners.Count == 0 || !await aiAccessibility.IsVectorizationEnabledAsync())
-        {
-            return ToolBundle.Empty;
-        }
-
-        var searchable = new List<Folder<int>>();
-        foreach (var owner in owners)
-        {
-            if (!(owner.IsAgent ? await fileSecurity.CanUseAiAsync(owner) : await fileSecurity.CanReadAsync(owner)))
+            ? await fileSecurity.FilterReadAsync(context.KnowledgeRooms.ToAsyncEnumerable()).Cast<Folder<int>>().ToListAsync()
+            : context.Folder switch
             {
-                continue;
-            }
+                Folder<int> { IsAgent: true } agent => await fileSecurity.CanUseAiAsync(agent) && await HasKnowledgeAsync(agent) ? [agent] : [],
+                Folder<int> { FolderType: FolderType.KnowledgeRoom } room => await fileSecurity.CanReadAsync(room) ? [room] : [],
+                _ => []
+            };
 
-            if (owner.IsAgent)
-            {
-                var folderDao = daoFactory.GetFolderDao<int>();
+        return owners.Count == 0
+            ? ToolBundle.Empty
+            : new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(owners))]);
+    }
 
-                var knowledge = await folderDao.GetFoldersAsync(owner.Id, FolderType.Knowledge).FirstAsync();
-                if (knowledge is null || knowledge.FilesCount == 0)
-                {
-                    continue;
-                }
-            }
+    private async Task<bool> HasKnowledgeAsync(Folder<int> agent)
+    {
+        var knowledge = await daoFactory.GetFolderDao<int>()
+            .GetFoldersAsync(agent.Id, FolderType.Knowledge)
+            .FirstOrDefaultAsync();
 
-            searchable.Add(owner);
-        }
-
-        if (searchable.Count == 0)
-        {
-            return ToolBundle.Empty;
-        }
-
-        return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(searchable))]);
+        return knowledge is { FilesCount: > 0 };
     }
 
     private AIFunction MakeFunction(IReadOnlyList<Folder<int>> owners)
@@ -175,9 +153,6 @@ public class KnowledgeSearchToolFactory(
             Description = Description
         });
 
-        // Every connected room answers with its own best chunks (one embedding of the query for
-        // all of them); the lists are joined in the rooms' order, so the model sees each room
-        // represented rather than one room's tail.
         Task<List<KnowledgeSearchResult>> Function([Description("Search query")] string query) =>
             searchEngine.SearchAsync(owners, query);
     }

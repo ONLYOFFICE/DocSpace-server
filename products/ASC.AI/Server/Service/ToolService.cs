@@ -142,7 +142,7 @@ public class ToolService(
     {
         var folderTask = ResolveFolderAsync(context.FolderId);
         var formTask = ResolveFormAsync(context.FormId);
-        var knowledgeRoomsTask = ResolveKnowledgeRoomsAsync(context);
+        var knowledgeRoomsTask = ResolveKnowledgeRoomsAsync(context.KnowledgeRoomIds);
 
         await Task.WhenAll(folderTask, formTask, knowledgeRoomsTask);
 
@@ -181,32 +181,17 @@ public class ToolService(
         }
     }
 
-    // The list wins; the single id is what an older ASC.AI.Chat sends. Order and duplicates of the
-    // request are kept out of the result: each room once, in the order sent.
-    private async Task<IReadOnlyList<Folder<int>>> ResolveKnowledgeRoomsAsync(ToolContext context)
+    private async Task<IReadOnlyList<Folder<int>>> ResolveKnowledgeRoomsAsync(HashSet<int> roomIds)
     {
-        var ids = (context.KnowledgeRoomIds is { Count: > 0 } list ? list : [context.KnowledgeRoomId])
-            .Where(id => id > 0)
-            .Distinct()
-            .ToList();
-
-        if (ids.Count == 0)
+        if (roomIds.Count == 0)
         {
             return [];
         }
 
-        var rooms = await Task.WhenAll(ids.Select(ResolveKnowledgeRoomAsync));
-
-        return rooms.Where(room => room is not null).Select(room => room!).ToList();
-    }
-
-    private async Task<Folder<int>?> ResolveKnowledgeRoomAsync(int roomId)
-    {
-        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(roomId);
-
-        return room is { FolderType: FolderType.KnowledgeRoom }
-            ? await fileSecurity.SetSecurity(new[] { room }.ToAsyncEnumerable()).FirstAsync() as Folder<int>
-            : null;
+        return await daoFactory.GetFolderDao<int>()
+            .GetFoldersAsync(roomIds)
+            .Where(room => room.FolderType == FolderType.KnowledgeRoom)
+            .ToListAsync();
     }
 
     private async Task<File<int>?> ResolveFormAsync(int formId)
