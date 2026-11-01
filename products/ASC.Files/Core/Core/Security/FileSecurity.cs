@@ -2330,7 +2330,7 @@ public class FileSecurity(
                         if (e.Access == FileShare.RoomManager ||
                             (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
                         {
-                            if (file is { RootFolderType: FolderType.VirtualRooms })
+                            if (file is { RootFolderType: FolderType.VirtualRooms or FolderType.AiHub })
                             {
                                 return true;
                             }
