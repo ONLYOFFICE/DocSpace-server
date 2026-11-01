@@ -37,8 +37,8 @@
 // Knowledge rooms; both are read from the Files API with the caller's
 // credentials — the room (`GET api/2.0/files/rooms/{id}`: the caller's
 // `access` and `inRoom`) and its sources (`GET api/2.0/files/rooms/{id}/sources`).
-// The project's model is its own `Chat` assignment, scoped to the project
-// (storage/aiProjectModel.ts), else the portal's Chat assignment; the
+// The project's model is its own (`GET api/2.0/files/rooms/{id}/model`),
+// else the portal's Chat assignment; the
 // Instructions rooms are connected as context (skills) rooms, the Knowledge
 // rooms as knowledge bases. Every room the server lists is active and
 // readable by the caller.
@@ -51,8 +51,8 @@ import {
 } from "./docspaceFilesApi.js";
 import { refreshContextRoomSkills } from "./contextRoomSkills.js";
 import { CONTEXT_CLOUD, parseSkillsCatalog } from "./roomSkills.js";
-import { canChat, readProjectProfileId } from "./aiProjectModel.js";
-import { ActionType } from "@onlyoffice/ai-chat/core";
+import { ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import type { Profile } from "@onlyoffice/ai-chat/core";
 import { getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import logger from "../log.js";
@@ -102,10 +102,26 @@ export interface AiProjectRoundRefusal {
   body: { error: string; code?: string };
 }
 
-// The model a project round runs on: the project's own Chat assignment,
-// else the portal's, and whether it names a profile that exists and can
-// chat. The availability is that of the effective profile: a project model
-// that is gone is not replaced by the portal default.
+/** Whether a profile can serve a chat round (no capability mask = it can). */
+function canChat(profile: Pick<Profile, "capabilities"> | null | undefined): boolean {
+  return (
+    !!profile &&
+    (typeof profile.capabilities !== "number" || (profile.capabilities & CapabilitiesUI.Chat) !== 0)
+  );
+}
+
+// The project's own model (`GET files/rooms/{id}/model`, readable by every
+// member), or `null` when none is selected or its profile was removed.
+async function readProjectProfileId(projectId: string): Promise<string | null> {
+  const raw = await filesApiGet(`rooms/${encodeURIComponent(projectId)}/model`);
+  const profileId = isObject(raw) ? getString(raw, "profileId") : undefined;
+  return profileId || null;
+}
+
+// The model a project round runs on: the project's own, else the portal's
+// Chat model, and whether it names a profile that exists and can chat. The
+// availability is that of the effective profile: a project model that is
+// gone is not replaced by the portal default.
 async function effectiveProfile(
   projectId: string,
 ): Promise<{ own: string | null; id: string | null; available: boolean }> {

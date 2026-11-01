@@ -53,11 +53,8 @@ vi.mock("../roomSkills.js", async (importOriginal) => ({
   getRoomsSkills,
 }));
 
-const readProjectProfileId = vi.fn();
-vi.mock("../aiProjectModel.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../aiProjectModel.js")>()),
-  readProjectProfileId,
-}));
+// The project's own model as `GET files/rooms/42/model` answers it.
+let projectModel: string | null = null;
 
 const readByType = vi.fn();
 const readById = vi.fn();
@@ -159,6 +156,7 @@ describe("applyAiProjectChatContext inside a project", () => {
     filesApiGet.mockImplementation(async (path: string) => {
       if (path === "rooms/42") return projectRoom();
       if (path === "rooms/42/sources") return sources;
+      if (path === "rooms/42/model") return { profileId: projectModel };
       if (path === "rooms/42/skills") {
         return {
           rooms: [
@@ -173,8 +171,7 @@ describe("applyAiProjectChatContext inside a project", () => {
       }
       throw new Error(`unexpected ${path}`);
     });
-    readProjectProfileId.mockReset();
-    readProjectProfileId.mockResolvedValue(null);
+    projectModel = null;
     readByType.mockResolvedValue("p1");
     readById.mockResolvedValue({ id: "p1", capabilities: 1 });
     getMyDocumentsFolderId.mockResolvedValue("1001");
@@ -197,9 +194,10 @@ describe("applyAiProjectChatContext inside a project", () => {
       knowledgeRooms: [{ cloud: "docspace", id: "9" }],
       folderContext: { id: "1001" },
     });
-    // The project, its sources and their skills all come from the Files API.
+    // The project, its sources, its model and the skills all come from the Files API.
     expect(filesApiGet).toHaveBeenCalledWith("rooms/42");
     expect(filesApiGet).toHaveBeenCalledWith("rooms/42/sources");
+    expect(filesApiGet).toHaveBeenCalledWith("rooms/42/model");
     expect(filesApiGet).toHaveBeenCalledWith("rooms/42/skills");
   });
 
@@ -207,6 +205,7 @@ describe("applyAiProjectChatContext inside a project", () => {
     filesApiGet.mockImplementation(async (path: string) => {
       if (path === "rooms/42") return projectRoom();
       if (path === "rooms/42/sources") return sources;
+      if (path === "rooms/42/model") return { profileId: null };
       throw new Error("500");
     });
     const body: Record<string, unknown> = { entityId: "42", actionArgs: {} };
@@ -265,17 +264,16 @@ describe("applyAiProjectChatContext inside a project", () => {
   });
 
   it("runs on the project's own model ahead of the portal's", async () => {
-    readProjectProfileId.mockResolvedValue("own");
+    projectModel = "own";
     readById.mockImplementation(async (id: string) => ({ id, capabilities: 1 }));
     const body: Record<string, unknown> = { entityId: "42", profileId: "composer", actionArgs: {} };
     expect(await applyAiProjectChatContext(body)).toBeNull();
     expect(body["profileId"]).toBe("own");
-    expect(readProjectProfileId).toHaveBeenCalledWith("42");
     expect(readByType).not.toHaveBeenCalled();
   });
 
   it("refuses the round when the project's own model is gone, without falling back", async () => {
-    readProjectProfileId.mockResolvedValue("own");
+    projectModel = "own";
     readById.mockImplementation(async (id: string) =>
       id === "own" ? undefined : { id, capabilities: 1 },
     );

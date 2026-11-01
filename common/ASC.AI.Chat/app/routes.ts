@@ -47,7 +47,6 @@ const openApiSchemas = createRequire(import.meta.url)(
   "./generated/openapi-schemas.json",
 ) as OpenApiSchemaBundle;
 import { textToDocxController } from "./controllers/textToDocxController.js";
-import { aiProjectModelController } from "./controllers/aiProjectModelController.js";
 import { metaController } from "./controllers/metaController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
@@ -200,12 +199,6 @@ export default function registerRoutes(app: Application): void {
   // Metadata filling: reads one entry's fields and the content behind it and
   // writes the values the text supports through the Files metadata API.
   router.post("/meta/fill", metaController.fill);
-
-  // The model of an AI project (a Files room of type 12): its scoped Chat
-  // assignment, proxied to the .NET AI service until the Files API serves
-  // it. Everything else about a project goes through `files/rooms/{id}...`.
-  router.get("/projects/:id/model", aiProjectModelController.getModel);
-  router.put("/projects/:id/model", aiProjectModelController.setModel);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

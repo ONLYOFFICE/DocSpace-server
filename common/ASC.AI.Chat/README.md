@@ -74,21 +74,16 @@ through the ordinary Files API (`files/rooms`, with `roomType=12` / `searchArea=
 and manages their sources and skills through `files/rooms/{id}/sources` and
 `files/rooms/{id}/skills` (`AiHubController` in ASC.Files).
 
-The one project route here is the model: `GET/PUT /api/2.0/ai/projects/{id}/model`
-(`app/controllers/aiProjectModelController.ts`, `app/storage/aiProjectModel.ts`). It answers
-`{ response: { profile: { id, name, provider, available } | null } }` (`null` = the portal's Chat
-model) and takes `{ profileId: string | null }`; writing needs the room's `security.EditRoom`. The
-model is stored as the `Chat` assignment of the .NET assignments storage scoped to the project
-(`entityId` = the project id). The server has no scoped delete, so `profileId: null` pins the
-portal's current Chat profile to a project that had a model of its own. A plain member cannot read
-the scoped assignment on the .NET side yet and gets `null` (the portal default). This route is
-meant to move to the Files API later.
+The project's chat model is in the Files API as well: `GET/PUT files/rooms/{id}/model`
+(`{ profileId }`, readable by every member, set by the owner and Project managers, never
+cleared). This service has no project route of its own.
 
 A chat round whose `entityId` is a project (`storage/aiProjectChatContext.ts`) runs on the
 project, not on what the composer sent: members only (the room's `inRoom`), the project's model
 (else the portal's Chat model), the linked Instructions rooms as context (skills) rooms and the
 linked Knowledge rooms as knowledge bases. It reads the project from the Files API with the caller's credentials —
-`GET files/rooms/{id}`, `GET files/rooms/{id}/sources` and `GET files/rooms/{id}/skills`. The
+`GET files/rooms/{id}`, `GET files/rooms/{id}/sources`, `GET files/rooms/{id}/model` and
+`GET files/rooms/{id}/skills`. The
 skills of the Instructions rooms picked outside a project are read from
 `GET files/rooms/skills?roomIds=…` (`storage/roomSkills.ts`).
 

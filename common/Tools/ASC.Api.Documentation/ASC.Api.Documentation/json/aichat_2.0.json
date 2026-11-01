@@ -86,11 +86,6 @@
       "x-displayName": "Profiles"
     },
     {
-      "name": "AI / Projects",
-      "description": "The model of an AI project (a room of type 12, managed through the Files API `files/rooms`).",
-      "x-displayName": "Projects"
-    },
-    {
       "name": "AI / Prompts",
       "description": "Saved prompts and prompt folders.",
       "x-displayName": "Prompts"
@@ -135,7 +130,6 @@
         "AI / OpenAI passthrough",
         "AI / Preferences",
         "AI / Profiles",
-        "AI / Projects",
         "AI / Prompts",
         "AI / Settings",
         "AI / Threads",
@@ -10530,219 +10524,6 @@
           "x-codegen-request-body-name": "AiWebSearchPassthroughContentsRequest"
         }
       }
-    },
-    "/api/2.0/ai/projects/{id}/model": {
-      "get": {
-        "tags": [
-          "AI / Projects"
-        ],
-        "operationId": "aiProjectsGetModel",
-        "summary": "Get the project's model",
-        "description": "Returns the model of an AI project: `profile` is the chat profile stored for the project (`id`, `name`, `provider`, and `available`, false when the profile is gone or cannot chat), or `null` when the project runs on the portal's `Chat` assignment. The project is read with the caller's credentials first, so a room the caller cannot read answers 403 and a room that is not an AI project 404. A member who is not the owner, a project manager or a content creator cannot read the stored model yet and gets `null`.",
-        "responses": {
-          "200": {
-            "description": "The project's model, or `null` for the portal default.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "$ref": "#/components/schemas/AiProjectModel"
-                    },
-                    "count": {
-                      "type": "number"
-                    },
-                    "status": {
-                      "type": "number",
-                      "description": "0 on success."
-                    },
-                    "statusCode": {
-                      "type": "number",
-                      "description": "The HTTP status, 200 on success."
-                    }
-                  },
-                  "required": [
-                    "response",
-                    "count",
-                    "status",
-                    "statusCode"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The project id is not a positive integer.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The caller cannot read the project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The project does not exist or is not an AI project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The AI project (room) identifier.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "examples": [
-                "1240"
-              ]
-            }
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "AI / Projects"
-        ],
-        "operationId": "aiProjectsSetModel",
-        "summary": "Set the project's model",
-        "description": "Sets the model of an AI project. `profileId` is the UUID of an existing profile that can chat, or `null` for the portal default. Owner and project managers only (the room's `security.EditRoom`). There is no scoped delete on the server, so `null` on a project that has a model of its own pins the portal's current `Chat` profile to it; a later change of the portal default does not reach the project until its model is set again. Answers the model as `GET` does.",
-        "responses": {
-          "200": {
-            "description": "The project's model after the change.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Res_aiProjectsGetModel"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The project id is not a positive integer, or `profileId` is missing, not a UUID, names no profile, or names a profile that cannot chat.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The caller cannot read the project, or is neither its owner nor a project manager.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The project does not exist or is not an AI project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The AI project (room) identifier.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "examples": [
-                "1240"
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiProjectsSetModelRequest"
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -14029,22 +13810,6 @@
             "entityId": "1234"
           }
         ]
-      },
-      "AiProjectsSetModelRequest": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The UUID of a chat profile, or `null` for the portal default."
-          }
-        },
-        "required": [
-          "profileId"
-        ],
-        "additionalProperties": false
       }
     }
   }

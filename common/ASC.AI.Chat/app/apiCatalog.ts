@@ -281,23 +281,6 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     summary: "Web page contents passthrough",
     hasBody: true,
   },
-  {
-    method: "GET",
-    path: "/projects/{id}/model",
-    tag: "Projects",
-    operationId: "aiProjectsGetModel",
-    summary: "Get the project's model",
-    pathParams: ["id"],
-  },
-  {
-    method: "PUT",
-    path: "/projects/{id}/model",
-    tag: "Projects",
-    operationId: "aiProjectsSetModel",
-    summary: "Set the project's model",
-    pathParams: ["id"],
-    hasBody: true,
-  },
 ];
 
 // One-line description for every tag used by `CUSTOM_ROUTE_DOCS` that is not
@@ -306,8 +289,6 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 // operation uses but the document does not declare is an OpenAPI lint error
 // (`operation-tag-defined`), so a new custom tag belongs here as well.
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
-  Projects:
-    "The model of an AI project (a room of type 12, managed through the Files API `files/rooms`).",
   Export: "Markdown → docx export.",
   Metadata: "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
   Settings: "Portal-wide, vectorization and per-user AI settings.",
