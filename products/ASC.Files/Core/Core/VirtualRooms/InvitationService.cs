@@ -165,13 +165,15 @@ public class InvitationService(
 
                     var type = await userManager.GetUserTypeAsync(currentUserId);
 
-                    ProcessForAgent(folder, type, data);
+                    if (!ProcessForAgent(folder, type, data))
+                    {
+                        validation.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
+                        return false;
+                    }
 
                     if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
                     {
-                        data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
-
-                        if (data.Share == FileShare.None || !FileSecurity.IsAvailableAccess(data.Share, SubjectType.InvitationLink, folder.FolderType))
+                        if (!TrySetHighFreeRole(folder, data))
                         {
                             validation.Result = EmailValidationKeyProvider.ValidationResult.QuotaFailed;
                             return false;
@@ -331,12 +333,14 @@ public class InvitationService(
             var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
             var type = await userManager.GetUserTypeAsync(user);
 
-            ProcessForAgent(room, type, data);
+            if (!ProcessForAgent(room, type, data))
+            {
+                return;
+            }
 
             if (quotaLimit && FileSecurity.PaidShares.Contains(data.Share))
             {
-                data.Share = FileSecurity.GetHighFreeRole(room.FolderType);
-                if (data.Share == FileShare.None || !FileSecurity.IsAvailableAccess(data.Share, SubjectType.InvitationLink, room.FolderType))
+                if (!TrySetHighFreeRole(room, data))
                 {
                     return;
                 }
@@ -396,14 +400,34 @@ public class InvitationService(
         }
     }
 
-    private static void ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
+    private static bool ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
     {
-        if (folder.FolderType is FolderType.AiRoom && 
-            type == EmployeeType.Guest && 
+        if (type != EmployeeType.Guest)
+        {
+            return true;
+        }
+
+        if (folder.FolderType == FolderType.AiProjectRoom)
+        {
+            return false;
+        }
+
+        if (folder.FolderType == FolderType.AiRoom &&
             data.Share is FileShare.RoomManager or FileShare.ContentCreator)
         {
             data.Share = FileShare.Read;
         }
+
+        return true;
+    }
+
+    private static bool TrySetHighFreeRole<T>(Folder<T> folder, InvitationLinkData data)
+    {
+        data.Share = FileSecurity.GetHighFreeRole(folder.FolderType);
+
+        var subjectType = folder.FolderType == FolderType.AiProjectRoom ? SubjectType.User : SubjectType.InvitationLink;
+
+        return data.Share != FileShare.None && FileSecurity.IsAvailableAccess(data.Share, subjectType, folder.FolderType);
     }
 
     private async Task<(bool, EmailValidationKeyProvider.ValidationResult)> ProcessShare<T>(Folder<T> folder, Guid userId, InvitationLinkData data)
