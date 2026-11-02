@@ -273,8 +273,9 @@ public class FileSharingAceHelper(
                 }
 
                 if (room.FolderType == FolderType.AiProjectRoom &&
-                    currentUserType == EmployeeType.Guest &&
-                    w.Access != FileShare.None)
+                    w.SubjectType == SubjectType.User &&
+                    w.Access != FileShare.None &&
+                    (emailInvite ? await userManager.GetUserTypeAsync(await userManager.GetUserByEmailAsync(w.Email)) : currentUserType) == EmployeeType.Guest)
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
