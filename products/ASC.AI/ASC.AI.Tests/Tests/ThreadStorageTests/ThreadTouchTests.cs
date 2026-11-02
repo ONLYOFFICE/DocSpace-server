@@ -35,59 +35,77 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadTouchTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadTouchTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task Touch_NonExisting_Returns404()
     {
-        using var response = await _ai.PatchAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}/touch",
-            new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiThreads.AiThreadsTouchAsync(
+                new AiThreadsTouchRequest(Guid.NewGuid().ToString()),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    [Fact]
+    public async Task Touch_Existing_MovesLastEditDate()
+    {
+        var created = await CreateOwnThreadAsync();
+
+        await Task.Delay(1100, TestContext.Current.CancellationToken);
+
+        var result = await _aiThreads.AiThreadsTouchAsync(
+            new AiThreadsTouchRequest(created.ThreadId),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.Success.Should().BeTrue();
+        (await GetThreadAsync(created.ThreadId)).LastEditDate.Should().BeGreaterThan(created.LastEditDate);
     }
 
     [Fact]
     public async Task Touch_WithProfileId_AssignsProfile()
     {
-        var created = await CreateThreadAsync();
-        var profile = await CreateProfileAsync();
+        var created = await CreateOwnThreadAsync();
+        var other = await CreateProfileAsync();
 
-        using var response = await _ai.PatchAsync(
-            $"{ThreadsPath}/{created.Id}/touch",
-            new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), profileId = profile.Id },
+        var result = await _aiThreads.AiThreadsTouchAsync(
+            new AiThreadsTouchRequest(created.ThreadId, other.Id),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadThreadAsync(created.Id)).ProfileId.Should().Be(profile.Id);
+        result.Success.Should().BeTrue();
+        (await GetThreadAsync(created.ThreadId)).ProfileId.Should().Be(other.Id);
     }
 
     [Fact]
-    public async Task Touch_ClearProfile_RemovesProfile()
+    public async Task Touch_NullProfileId_RemovesProfile()
     {
-        var profile = await CreateProfileAsync();
-        var created = await CreateThreadAsync(profileId: profile.Id);
+        var created = await CreateOwnThreadAsync();
+        created.ProfileId.Should().NotBeNull();
 
-        using var response = await _ai.PatchAsync(
-            $"{ThreadsPath}/{created.Id}/touch",
-            new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), clearProfile = true },
+        // Raw on purpose: an explicit "profileId": null is what unbinds the profile (the chat service turns it into
+        // clearProfile), but AiThreadsTouchRequest declares profileId with EmitDefaultValue = false, so the SDK
+        // drops a null and only ever sends a plain touch.
+        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
+            $"{PublicThreadsPath}/touch",
+            $$"""{ "threadId": "{{created.ThreadId}}", "profileId": null }""",
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadThreadAsync(created.Id)).ProfileId.Should().BeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await GetThreadAsync(created.ThreadId)).ProfileId.Should().BeNull();
     }
 
     [Fact]
     public async Task Touch_NonExistentProfileId_Returns404()
     {
-        var created = await CreateThreadAsync();
+        var created = await CreateOwnThreadAsync();
 
-        using var response = await _ai.PatchAsync(
-            $"{ThreadsPath}/{created.Id}/touch",
-            new { lastEditDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), profileId = Guid.NewGuid() },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiThreads.AiThreadsTouchAsync(
+                new AiThreadsTouchRequest(created.ThreadId, Guid.NewGuid().ToString()),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+        (await GetThreadAsync(created.ThreadId)).ProfileId.Should().Be(created.ProfileId);
     }
 }

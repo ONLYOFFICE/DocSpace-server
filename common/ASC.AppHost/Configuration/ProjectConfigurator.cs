@@ -486,6 +486,13 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
+            if (isIntegrationTest)
+            {
+                // The AI tests stand in for the model provider with a WireMock in the test process, which a
+                // profile reaches through a loopback baseUrl — refused by default as an SSRF target.
+                resourceBuilder.WithEnvironment("AI__ALLOW_PRIVATE_BASE_URL", "true");
+            }
+
             resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
             resourceBuilder.WithOtlpExporter();
             ApplyServiceName(resourceBuilder);

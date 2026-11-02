@@ -35,80 +35,107 @@ namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
-public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class PreferencesReadTests(AspireAppFixture fixture) : PreferencesTestBase(fixture)
 {
     [Fact]
-    public async Task Read_Global_NoneStored_ReturnsNull()
+    public async Task Read_Global_NoneStored_ReadsAsOff()
     {
-        var preferences = await ReadPreferencesAsync();
-
-        preferences.Should().BeNull();
+        // Nothing stored: the level reads as the default "off", and is-deep-mode-set reports no row.
+        (await IsDepthStoredAsync()).Should().BeFalse();
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.Off);
     }
 
     [Fact]
     public async Task Read_Global_Existing_ReturnsValue()
     {
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await SetReasoningLevelAsync(AiReasoningLevel.High);
 
-        var preferences = await ReadPreferencesAsync();
-
-        preferences.Should().NotBeNull();
-        preferences!.Depth.Should().Be(ReasoningDepth.High);
+        (await IsDepthStoredAsync()).Should().BeTrue();
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.High);
     }
 
+    [Fact]
+    public async Task Read_WithRoomEntityId_ServesUserWideValue()
+    {
+        // Publicly the depth is one value per user: a write from a room is what a read from anywhere sees.
+        var roomId = await CreateRoomAsync();
+        await SetReasoningLevelAsync(AiReasoningLevel.High, roomId.ToString());
+
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.High);
+        (await GetReasoningLevelAsync(roomId.ToString())).Should().Be(AiReasoningLevel.High);
+    }
+
+    [Fact]
+    public async Task Read_NonNumericEntityId_Returns400()
+    {
+        // Raw on purpose — an SDK defect: the operation returns an enum, and on any non-2xx the generated
+        // ApiClient.ToApiResponse unboxes the null result into it, so the typed call throws NullReferenceException
+        // instead of ApiException. Same for every operation returning an enum or a bool.
+        using var response = await new RawApiClient(_aiChatClient).GetAsync(
+            "/api/2.0/ai/preferences/get-reasoning-level?entityId=not-a-room",
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Read_WithEntityId_NoneStored_ReturnsNull()
     {
         var roomId = await CreateRoomAsync();
 
-        var preferences = await ReadPreferencesAsync(roomId.ToString());
+        var preferences = await ReadPreferencesInternalAsync(roomId.ToString());
 
         preferences.Should().BeNull();
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Read_WithEntityId_Existing_ReturnsScopedValue()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
-        var preferences = await ReadPreferencesAsync(roomId.ToString());
+        var preferences = await ReadPreferencesInternalAsync(roomId.ToString());
 
         preferences.Should().NotBeNull();
         preferences!.Depth.Should().Be(ReasoningDepth.High);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Read_Global_NotAffectedByScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
-        var global = await ReadPreferencesAsync();
+        var global = await ReadPreferencesInternalAsync();
 
         global.Should().BeNull();
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Read_WithEntityId_NotAffectedByGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
 
-        var scoped = await ReadPreferencesAsync(roomId.ToString());
+        var scoped = await ReadPreferencesInternalAsync(roomId.ToString());
 
         scoped.Should().BeNull();
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Read_GlobalAndScoped_StoreDifferentValues()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
-        var global = await ReadPreferencesAsync();
-        var scoped = await ReadPreferencesAsync(roomId.ToString());
+        var global = await ReadPreferencesInternalAsync();
+        var scoped = await ReadPreferencesInternalAsync(roomId.ToString());
 
         global.Should().NotBeNull();
         global!.Depth.Should().Be(ReasoningDepth.High);
@@ -117,6 +144,7 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         scoped!.Depth.Should().Be(ReasoningDepth.None);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes never forward entityId, so a nonexistent room is not looked up).
     [Fact]
     public async Task Read_NonExistentEntityId_Returns404()
     {

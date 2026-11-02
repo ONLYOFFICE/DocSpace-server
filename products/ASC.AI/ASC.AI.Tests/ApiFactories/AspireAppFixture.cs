@@ -34,24 +34,35 @@
 namespace ASC.AI.Tests.ApiFactories;
 
 /// <summary>
-/// The AI suite's Aspire host: AI itself, plus Files and People for the entities an AI test needs
-/// (a room to scope preferences to, a member to act as).
+/// The AI suite's Aspire host: the Node chat service (the public <c>/api/2.0/ai</c> surface) and ASC.AI behind it,
+/// plus Files and People for the entities an AI test needs (a room to scope preferences to, a member to act as),
+/// and the stub model provider every profile of the run points at.
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
-    protected override IEnumerable<string> Resources => [ResourceNames.Ai, ResourceNames.Files, ResourceNames.People];
+    protected override IEnumerable<string> Resources => [ResourceNames.AiChat, ResourceNames.Ai, ResourceNames.Files, ResourceNames.People];
+
+    /// <summary>The model provider shared by the run: profiles are created against it, chats answered by it.</summary>
+    public StubModelProvider ModelProvider { get; } = new();
 
     protected override PortalClients CreateClients(PortalContext context)
     {
         return new PortalClients(context);
     }
 
+    protected override ValueTask OnDisposingAsync()
+    {
+        ModelProvider.Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+
     protected override async ValueTask WarmUpAsync(PortalClients clients)
     {
-        await clients.AiHttpClient.Authenticate(clients.Owner);
+        await clients.AiChatHttpClient.Authenticate(clients.Owner);
         await clients.FilesHttpClient.Authenticate(clients.Owner);
 
-        using var profiles = await clients.Ai.GetAsync("/internal/ai/profiles", TestContext.Current.CancellationToken);
+        await clients.AiProfilesApi.AiProfilesListAsync(TestContext.Current.CancellationToken);
 
         // The owner's root folder tree is provisioned lazily on first access — warm that too,
         // it is what every test creating a room hits right after registration.

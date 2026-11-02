@@ -41,29 +41,31 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task Update_Owner_PersistsChanges()
     {
         var created = await CreateProfileAsync();
-        var update = BuildUpdateBody("renamed-profile");
 
-        using var updateResponse = await _ai.PutAsync($"{ProfilesPath}/{created.Id}", update, TestContext.Current.CancellationToken);
-        var updated = await _ai.ReadAsync<ProfileDto>(updateResponse, TestContext.Current.CancellationToken);
+        // The provider, base URL and model stay on the stub: the chat service re-checks the key against the
+        // provider on every update, and re-probes the model when any of the three changes.
+        created.Name = "renamed-profile";
 
-        updated.Id.Should().Be(created.Id);
-        updated.Name.Should().Be(update.Name);
-        updated.ProviderType.Should().Be(update.ProviderType);
-        updated.BaseUrl.Should().Be(update.BaseUrl);
-        updated.ModelId.Should().Be(update.ModelId);
-        updated.Reasoning.Should().BeEquivalentTo(update.Reasoning);
-        updated.Capabilities.Should().Be(update.Capabilities);
-        updated.UseResponsesApi.Should().Be(update.UseResponsesApi);
-        updated.CanUseTool.Should().Be(update.CanUseTool);
+        var result = await _aiProfiles.AiProfilesUpdateAsync(created, TestContext.Current.CancellationToken);
 
-        using var getResponse = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        var fetched = await _ai.ReadAsync<ProfileDto>(getResponse, TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue($"profiles/update rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        result.Profile.Id.Should().Be(created.Id);
+        result.Profile.Name.Should().Be("renamed-profile");
+        result.Profile.ProviderType.GetString().Should().Be("openai");
+        result.Profile.BaseUrl.Should().Be(ModelProvider.BaseUrl);
+        result.Profile.ModelId.Should().Be(StubModelProvider.ModelId);
 
-        fetched.Name.Should().Be(update.Name);
-        fetched.ProviderType.Should().Be(update.ProviderType);
-        fetched.Key.Should().Be(update.Key);
-        fetched.UseResponsesApi.Should().Be(update.UseResponsesApi);
-        fetched.CanUseTool.Should().Be(update.CanUseTool);
+        var fetched = await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken);
+
+        fetched.Name.Should().Be("renamed-profile");
+        fetched.ProviderType.GetString().Should().Be("openai");
+        fetched.BaseUrl.Should().Be(ModelProvider.BaseUrl);
+        fetched.ModelId.Should().Be(StubModelProvider.ModelId);
+        fetched.UseResponsesApi.Should().Be(created.UseResponsesApi);
+        fetched.CanUseTool.Should().Be(created.CanUseTool);
+
+        // The key is only on the list (the single read drops it), and only for an administrator.
+        var listed = await _aiProfiles.AiProfilesListAsync(TestContext.Current.CancellationToken);
+        listed.Should().ContainSingle(p => p.Id == created.Id).Which.Key.Should().Be(StubModelProvider.Key);
     }
-
 }

@@ -198,6 +198,7 @@
     <PackageVersion Include="Twilio" Version="7.13.5" />
     <PackageVersion Include="UAParser" Version="3.1.47" />
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
+    <PackageVersion Include="WireMock.Net" Version="2.21.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="xunit.v3.extensibility.core" Version="4.0.2" />

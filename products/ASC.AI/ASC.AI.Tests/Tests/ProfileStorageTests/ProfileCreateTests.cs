@@ -37,34 +37,53 @@ namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 [Trait("Feature", "AI/Profiles")]
 public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    private const string CreatePath = "/api/2.0/ai/profiles/create";
+
     [Fact]
     public async Task Create_Owner_ReturnsCreatedProfile()
     {
-        var dto = BuildCreateDto("my-profile");
+        var input = BuildProfileInput("my-profile");
 
-        var created = await CreateProfileAsync(dto);
+        var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
 
+        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        result.Error.Should().BeNull();
+
+        var created = result.Profile;
         created.Should().NotBeNull();
-        created.Id.Should().NotBe(Guid.Empty);
-        created.Name.Should().Be(dto.Name);
-        created.ProviderType.Should().Be(dto.ProviderType);
-        created.BaseUrl.Should().Be(dto.BaseUrl);
-        created.ModelId.Should().Be(dto.ModelId);
-        created.Reasoning.Should().BeEquivalentTo(dto.Reasoning);
-        created.Capabilities.Should().Be(dto.Capabilities);
-        created.UseResponsesApi.Should().Be(dto.UseResponsesApi);
-        created.CanUseTool.Should().Be(dto.CanUseTool);
-        created.Key.Should().Be(dto.Key);
+        Guid.TryParse(created.Id, out var id).Should().BeTrue();
+        id.Should().NotBe(Guid.Empty);
+        created.Name.Should().Be(input.Name);
+        created.ProviderType.GetString().Should().Be("openai");
+        created.BaseUrl.Should().Be(input.BaseUrl);
+        created.ModelId.Should().Be(input.ModelId);
+        created.Key.Should().Be(input.Key, "the owner is an administrator, whose answer carries the key");
         created.CreatedAt.Should().BeGreaterThan(0);
+
+        var stored = await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken);
+        stored.Name.Should().Be(input.Name);
     }
 
     [Fact]
     public async Task Create_InvalidJson_Returns400()
     {
-        const string invalidJson = """{ "name": "x", "providerType": "openai", "baseUrl": "https://api.openai.com", "modelId": "gpt", "capabilities": "INVALID_VALUE" }""";
-
-        using var response = await _ai.PostRawAsync(ProfilesPath, invalidJson, TestContext.Current.CancellationToken);
+        // Raw on purpose: `capabilities` is a number in the SDK model, so a typed call cannot send a string there.
+        // The provider fields point at the stub, so the chat service's live key check passes and the request
+        // reaches the storage, which refuses the value.
+        using var response = await new RawApiClient(_aiChatClient).PostAsync(
+            CreatePath,
+            new
+            {
+                name = "x",
+                providerType = "openai",
+                baseUrl = ModelProvider.BaseUrl,
+                key = StubModelProvider.Key,
+                modelId = StubModelProvider.ModelId,
+                capabilities = "INVALID_VALUE"
+            },
+            TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await _aiProfiles.AiProfilesListAsync(TestContext.Current.CancellationToken)).Should().BeEmpty("a refused create stores nothing");
     }
 }

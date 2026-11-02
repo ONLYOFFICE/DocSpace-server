@@ -48,6 +48,9 @@ public static class ResourceNames
     public const string Files = "onlyoffice-files";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
+
+    /// <summary>The Node chat service (common/ASC.AI.Chat) that serves <c>/api/2.0/ai</c> and talks to the model.</summary>
+    public const string AiChat = "onlyoffice-aiChat";
     public const string Backup = "onlyoffice-data-backup";
     public const string BackupWorker = "onlyoffice-data-backup-worker";
 

@@ -35,47 +35,44 @@ namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
-public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class PreferencesDeleteTests(AspireAppFixture fixture) : PreferencesTestBase(fixture)
 {
     [Fact]
     public async Task Delete_Global_RemovesValue()
     {
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await SetReasoningLevelAsync(AiReasoningLevel.High);
 
-        using var response = await _ai.DeleteAsync(
-            PreferencesPath,
-            TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await ClearAsync();
 
-        var stored = await ReadPreferencesAsync();
-        stored.Should().BeNull();
+        (await IsDepthStoredAsync()).Should().BeFalse();
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.Off);
     }
 
+    [Fact]
+    public async Task Delete_Global_NoneStored_Succeeds()
+    {
+        await ClearAsync();
+
+        (await IsDepthStoredAsync()).Should().BeFalse();
+    }
+
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Delete_WithEntityId_RemovesScopedValue()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var stored = await ReadPreferencesAsync(roomId.ToString());
+        var stored = await ReadPreferencesInternalAsync(roomId.ToString());
         stored.Should().BeNull();
     }
 
-    [Fact]
-    public async Task Delete_Global_NoneStored_NoContent()
-    {
-        using var response = await _ai.DeleteAsync(
-            PreferencesPath,
-            TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-    }
-
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Delete_WithEntityId_NoneStored_NoContent()
     {
@@ -88,66 +85,70 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Delete_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var global = await ReadPreferencesAsync();
+        var global = await ReadPreferencesInternalAsync();
         global.Should().NotBeNull();
         global!.Depth.Should().Be(ReasoningDepth.High);
 
-        var scoped = await ReadPreferencesAsync(roomId.ToString());
+        var scoped = await ReadPreferencesInternalAsync(roomId.ToString());
         scoped.Should().BeNull();
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Delete_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             PreferencesPath,
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var global = await ReadPreferencesAsync();
+        var global = await ReadPreferencesInternalAsync();
         global.Should().BeNull();
 
-        var scoped = await ReadPreferencesAsync(roomId.ToString());
+        var scoped = await ReadPreferencesInternalAsync(roomId.ToString());
         scoped.Should().NotBeNull();
         scoped!.Depth.Should().Be(ReasoningDepth.None);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Delete_TwoEntities_OnlyTargetedRemoved()
     {
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={firstRoomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        (await ReadPreferencesAsync(firstRoomId.ToString())).Should().BeNull();
+        (await ReadPreferencesInternalAsync(firstRoomId.ToString())).Should().BeNull();
 
-        var second = await ReadPreferencesAsync(secondRoomId.ToString());
+        var second = await ReadPreferencesInternalAsync(secondRoomId.ToString());
         second.Should().NotBeNull();
         second!.Depth.Should().Be(ReasoningDepth.None);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes never forward entityId, so a nonexistent room is not looked up).
     [Fact]
     public async Task Delete_NonExistentEntityId_Returns404()
     {

@@ -34,10 +34,11 @@
 namespace ASC.AI.Tests.ApiFactories;
 
 /// <summary>
-/// The AI suite's per-portal clients. Only the AI service is driven through <see cref="RawApiClient"/>:
-/// its endpoints are internal (<c>[ApiExplorerSettings(IgnoreApi = true)]</c>) and therefore absent from
-/// the OpenAPI document and the generated SDK. Files and People are public APIs, so the entities an AI
-/// test needs from them (a room to scope preferences to, a member to act as) go through the typed SDK.
+/// The AI suite's per-portal clients. The public AI surface is <c>/api/2.0/ai</c>, served by the Node chat
+/// service (common/ASC.AI.Chat) and covered by the typed SDK: <see cref="AiProfilesApi"/>,
+/// <see cref="AiThreadsApi"/>, <see cref="AiChatApi"/>. Behind it the Node service keeps its data in ASC.AI over
+/// <c>/internal/ai</c>, which the router does not publish and the SDK does not describe; <see cref="Ai"/> reaches
+/// it raw, for checks of that internal contract only. Files and People go through the typed SDK.
 /// </summary>
 public sealed class PortalClients : PortalClientsBase
 {
@@ -45,15 +46,36 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
 
+    /// <summary>ASC.AI's internal storage API (<c>/internal/ai</c>), the one the Node chat service calls.</summary>
     public RawApiClient Ai { get; }
 
+    // Node chat service: the public /api/2.0/ai surface the client uses
+    public HttpClient AiChatHttpClient { get; }
+    public AiProfilesApi AiProfilesApi { get; }
+    public AiThreadsApi AiThreadsApi { get; }
+    public AiChatApi AiChatApi { get; }
+    public AiAssignmentsApi AiAssignmentsApi { get; }
+    public AiToolsApi AiToolsApi { get; }
+    public AiPromptsApi AiPromptsApi { get; }
+    public AiPreferencesApi AiPreferencesApi { get; }
+    public AiSettingsApi AiSettingsApi { get; }
+    public AiContextApi AiContextApi { get; }
+    public AiExportApi AiExportApi { get; }
+
     // Files service
+    public FilesApi FilesApi { get; }
     public FoldersApi FoldersApi { get; }
     public RoomsApi RoomsApi { get; }
     public OperationsApi OperationsApi { get; }
+    public SharingApi SharingApi { get; }
+    public FilesQuotaApi FilesQuotaApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
+
+    // Web.Api: the portal-wide AI switch (settings/ai-access)
+    public CommonSettingsApi CommonSettingsApi { get; }
+    public SettingsQuotaApi SettingsQuotaApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
@@ -63,11 +85,31 @@ public sealed class PortalClients : PortalClientsBase
 
         Ai = new RawApiClient(AiHttpClient);
 
+        AiChatHttpClient = CreateClient(ResourceNames.AiChat);
+        var aiChatConfig = new Configuration { BasePath = BasePathOf(ResourceNames.AiChat) };
+        AiProfilesApi = new AiProfilesApi(AiChatHttpClient, aiChatConfig);
+        AiThreadsApi = new AiThreadsApi(AiChatHttpClient, aiChatConfig);
+        AiChatApi = new AiChatApi(AiChatHttpClient, aiChatConfig);
+        AiAssignmentsApi = new AiAssignmentsApi(AiChatHttpClient, aiChatConfig);
+        AiToolsApi = new AiToolsApi(AiChatHttpClient, aiChatConfig);
+        AiPromptsApi = new AiPromptsApi(AiChatHttpClient, aiChatConfig);
+        AiPreferencesApi = new AiPreferencesApi(AiChatHttpClient, aiChatConfig);
+        AiSettingsApi = new AiSettingsApi(AiChatHttpClient, aiChatConfig);
+        AiContextApi = new AiContextApi(AiChatHttpClient, aiChatConfig);
+        AiExportApi = new AiExportApi(AiChatHttpClient, aiChatConfig);
+
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
+        FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
+        SharingApi = new SharingApi(FilesHttpClient, filesConfig);
+        FilesQuotaApi = new FilesQuotaApi(FilesHttpClient, filesConfig);
 
         ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
+
+        var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
+        CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
+        SettingsQuotaApi = new SettingsQuotaApi(WebApiHttpClient, webApiConfig);
     }
 }

@@ -35,53 +35,60 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadUpdateTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task Update_Existing_PersistsNewTitle()
     {
-        var created = await CreateThreadAsync("original");
+        var created = await CreateOwnThreadAsync("original");
 
-        using var response = await _ai.PutAsync(
-            $"{ThreadsPath}/{created.Id}",
-            new { title = "renamed" },
-            TestContext.Current.CancellationToken);
+        var result = await RenameAsync(created.ThreadId, "renamed");
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadThreadAsync(created.Id)).Title.Should().Be("renamed");
+        result.Success.Should().BeTrue();
+        (await GetThreadAsync(created.ThreadId)).Title.Should().Be("renamed");
     }
 
     [Fact]
     public async Task Update_Existing_MovesLastEditDate()
     {
-        var created = await CreateThreadAsync("original");
+        var created = await CreateOwnThreadAsync("original");
 
         await Task.Delay(1100, TestContext.Current.CancellationToken);
 
-        using var response = await _ai.PutAsync(
-            $"{ThreadsPath}/{created.Id}",
-            new { title = "renamed" },
-            TestContext.Current.CancellationToken);
+        await RenameAsync(created.ThreadId, "renamed");
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadThreadAsync(created.Id)).LastEditDate.Should().BeGreaterThan(created.LastEditDate);
+        (await GetThreadAsync(created.ThreadId)).LastEditDate.Should().BeGreaterThan(created.LastEditDate);
     }
 
     [Fact]
     public async Task Update_NonExisting_Returns404()
     {
-        using var response = await _ai.PutAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}",
-            new { title = "renamed" },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await RenameAsync(Guid.NewGuid().ToString(), "renamed"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Update_BlankTitle_Returns400(string title)
+    {
+        var created = await CreateOwnThreadAsync("original");
+
+        // Same title rules as create: a blank title is refused rather than blanking the stored name (Bug 83094).
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await RenameAsync(created.ThreadId, title));
+
+        exception.ErrorCode.Should().Be(400);
+        (await GetThreadAsync(created.ThreadId)).Title.Should().Be("original");
+    }
+
+    // Internal contract: a null title as a no-op update has no public route (rename refuses a missing or blank title
+    // with 400, Bug 83094 - see Update_BlankTitle_Returns400).
     [Fact]
     public async Task Update_NullTitle_Succeeds()
     {
-        var created = await CreateThreadAsync("original");
+        var created = await CreateThreadInternalAsync("original");
 
         using var response = await _ai.PutAsync(
             $"{ThreadsPath}/{created.Id}",
@@ -90,4 +97,7 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
+
+    private Task<AiSuccessResponse> RenameAsync(string threadId, string title) =>
+        _aiThreads.AiThreadsRenameAsync(new AiThreadsRenameRequest(threadId, title), TestContext.Current.CancellationToken);
 }
