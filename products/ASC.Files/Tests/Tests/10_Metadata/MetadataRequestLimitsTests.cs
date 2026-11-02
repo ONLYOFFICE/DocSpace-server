@@ -166,7 +166,7 @@ public class MetadataRequestLimitsTests(AspireAppFixture fixture) : BaseTest(fix
         var name = new string('n', MetadataService.MaxNameLength + 1);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await CreateTemplateAsync(name, []));
+            async () => await CreateTemplateAsync(name, [new MetadataFieldRequest("Client", MetadataFieldType.String)]));
 
         exception.ErrorCode.Should().Be(400, "the name column is varchar(255), the database used to answer with a server error");
     }

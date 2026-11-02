@@ -90,6 +90,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<MetadataEntryRef> MetadataEntriesWithFieldsAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds)
+    {
+        return MetadataQueries.MetadataEntriesWithFieldsAsync(this, tenantId, fileIds, folderIds);
+    }
+
+    [PreCompileQuery]
     public Task<int> DeleteMetadataLinksByEntriesAsync(int tenantId, IEnumerable<int> entryIds, FileEntryType entryType)
     {
         return MetadataQueries.DeleteMetadataLinksByEntriesAsync(this, tenantId, entryIds, entryType);
@@ -639,6 +645,30 @@ static file class MetadataQueries
                         FieldName = x.Field.Name,
                         Value = x.Value.ValueString
                     }));
+
+    /// <summary>
+    /// The files and the folders of one listing page that have a metadata field a user can see and fill: a link to a
+    /// visible user template that has at least one field, or a value in a field of the system template (a custom field,
+    /// which is never linked, only valued). One round trip for the page; the listing turns the answer into the
+    /// <c>hasMetadataFields</c> flag of every entry.
+    /// </summary>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, IAsyncEnumerable<MetadataEntryRef>> MetadataEntriesWithFieldsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds) =>
+                ctx.MetadataLinks
+                    .Where(l => l.TenantId == tenantId &&
+                        ((l.EntryType == FileEntryType.File && fileIds.Contains(l.EntryId)) ||
+                         (l.EntryType == FileEntryType.Folder && folderIds.Contains(l.EntryId))) &&
+                        ctx.MetadataTemplates.Any(t => t.TenantId == tenantId && t.Id == l.TemplateId && t.Visible && !t.IsSystem &&
+                            ctx.MetadataFields.Any(f => f.TenantId == tenantId && f.TemplateId == t.Id)))
+                    .Select(l => new MetadataEntryRef { EntryId = l.EntryId, EntryType = l.EntryType })
+                    .Union(ctx.MetadataValues
+                        .Where(v => v.TenantId == tenantId &&
+                            ((v.EntryType == FileEntryType.File && fileIds.Contains(v.EntryId)) ||
+                             (v.EntryType == FileEntryType.Folder && folderIds.Contains(v.EntryId))) &&
+                            ctx.MetadataFields.Any(f => f.TenantId == tenantId && f.Id == v.FieldId &&
+                                ctx.MetadataTemplates.Any(t => t.TenantId == tenantId && t.Id == f.TemplateId && t.IsSystem)))
+                        .Select(v => new MetadataEntryRef { EntryId = v.EntryId, EntryType = v.EntryType })));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, Task<int>> DeleteMetadataLinksByEntriesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
