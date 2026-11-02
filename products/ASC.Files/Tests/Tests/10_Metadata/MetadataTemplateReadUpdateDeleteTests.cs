@@ -43,8 +43,8 @@ public class MetadataTemplateReadUpdateDeleteTests(AspireAppFixture fixture) : M
     [Fact]
     public async Task GetTemplates_WithTheVisibleFilter_NarrowsTheListToVisibleOrHiddenTemplates()
     {
-        var visible = await CreateTemplateAsync([], visible: true);
-        var hidden = await CreateTemplateAsync([], visible: false);
+        var visible = await CreateTemplateAsync(visible: true);
+        var hidden = await CreateTemplateAsync(visible: false);
 
         var onlyVisible = (await _metadataApi.GetTemplatesAsync(true, TestContext.Current.CancellationToken)).Response.Select(t => t.Id).ToList();
         var onlyHidden = (await _metadataApi.GetTemplatesAsync(false, TestContext.Current.CancellationToken)).Response.Select(t => t.Id).ToList();

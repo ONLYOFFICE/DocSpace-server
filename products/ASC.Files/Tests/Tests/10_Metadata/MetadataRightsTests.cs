@@ -247,7 +247,7 @@ public class MetadataRightsTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task FolderMetadata_OnTheSectionRoots_IsRefused()
     {
         await _filesClient.Authenticate(Owner);
-        var template = await CreateTemplateAsync("Root " + Suffix(), []);
+        var template = await CreateTemplateAsync("Root " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var value = new CustomFieldRequest("Project code", "A-42");
 
         // the roots answer the right to create with true for their owner and for every room admin, while nobody may

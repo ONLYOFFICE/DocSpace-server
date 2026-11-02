@@ -61,7 +61,7 @@ public class MetadataTemplatePermissionsTests(AspireAppFixture fixture) : Metada
 
         await _filesClient.Authenticate(member);
 
-        var status = await StatusOfAsync(async () => await CreateTemplateAsync([], name));
+        var status = await StatusOfAsync(async () => await CreateTemplateAsync(name: name));
 
         status.Should().Be(expected);
 
@@ -143,7 +143,7 @@ public class MetadataTemplatePermissionsTests(AspireAppFixture fixture) : Metada
         {
             await StatusOfAsync(async () => await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)),
             await StatusOfAsync(async () => await _metadataApi.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken)),
-            await StatusOfAsync(async () => await CreateTemplateAsync([], "anon")),
+            await StatusOfAsync(async () => await CreateTemplateAsync(name: "anon")),
             await StatusOfAsync(async () => await _metadataApi.UpdateTemplateAsync(template.Id, new UpdateMetadataTemplate("anon"), TestContext.Current.CancellationToken)),
             await StatusOfAsync(async () => await _metadataApi.DeleteTemplateAsync(template.Id, TestContext.Current.CancellationToken)),
             await StatusOfAsync(async () => await _metadataApi.CreateFieldAsync(template.Id, new MetadataFieldRequest("x", MetadataFieldType.String), TestContext.Current.CancellationToken)),

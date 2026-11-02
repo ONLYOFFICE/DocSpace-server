@@ -97,6 +97,12 @@ public interface IMetadataDao<T>
     /// values of the hidden templates are reported only when asked for, as the search finds by them only when asked.
     /// </summary>
     Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds, string text, bool includeHiddenTemplates);
+
+    /// <summary>
+    /// The files and the folders among the given ones that have a metadata field a user can see and fill: a visible
+    /// assigned template with at least one field, or a custom field. The fields of a hidden template do not count.
+    /// </summary>
+    Task<List<MetadataEntryRef>> GetEntriesWithFieldsAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds);
     Task DeleteValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
 
     /// <summary>
