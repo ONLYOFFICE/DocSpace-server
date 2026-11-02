@@ -203,8 +203,8 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
     const share = process.env["AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS"];
     const shareSystemServers =
         share !== undefined && share !== "" ? share === "true" || share === "1" : setting?.shareSystemServers === true;
-    const portalUrl = (process.env["AI__DOCUMENT_AGENT__PORTAL_URL"] || setting?.portalUrl || "").trim();
-    const filesUrl = (process.env["AI__DOCUMENT_AGENT__FILES_URL"] || setting?.filesUrl || "").trim();
+    const portalUrl = firstText(process.env["AI__DOCUMENT_AGENT__PORTAL_URL"], setting?.portalUrl);
+    const filesUrl = firstText(process.env["AI__DOCUMENT_AGENT__FILES_URL"], setting?.filesUrl);
     return {
         url: url.replace(/\/+$/, ""),
         token,
@@ -214,6 +214,16 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
         portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
         filesUrl: (filesUrl === "" ? `http://localhost:${getAppConfig().port}` : filesUrl).replace(/\/+$/, ""),
     };
+}
+
+/** The first value that is a non-blank string, trimmed; "" when there is none. */
+function firstText(...values: unknown[]): string {
+    for (const value of values) {
+        if (typeof value === "string" && value.trim() !== "") {
+            return value.trim();
+        }
+    }
+    return "";
 }
 
 /** The environment variable when it is set at all (even empty), else the setting; trimmed. */

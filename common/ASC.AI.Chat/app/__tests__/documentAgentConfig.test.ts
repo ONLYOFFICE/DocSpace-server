@@ -84,4 +84,37 @@ describe("getDocumentAgent", () => {
     withSettings({ url: 42, token: "secret" });
     expect(getDocumentAgent()).toBeUndefined();
   });
+
+  it("ignores a non-string portal or files URL", () => {
+    withSettings({
+      url: "http://agent:9838",
+      token: "secret",
+      portalUrl: 42,
+      filesUrl: { host: "x" },
+    });
+    expect(getDocumentAgent()).toMatchObject({
+      portalUrl: undefined,
+      filesUrl: expect.stringMatching(/^http:\/\/localhost:/),
+    });
+  });
+
+  it("falls back to the appsettings for an empty portal or files URL in the environment", () => {
+    withSettings({
+      url: "http://agent:9838",
+      token: "secret",
+      portalUrl: "http://portal/",
+      filesUrl: "http://files:5157/",
+    });
+    process.env["AI__DOCUMENT_AGENT__PORTAL_URL"] = "";
+    process.env["AI__DOCUMENT_AGENT__FILES_URL"] = " ";
+    try {
+      expect(getDocumentAgent()).toMatchObject({
+        portalUrl: "http://portal",
+        filesUrl: "http://files:5157",
+      });
+    } finally {
+      delete process.env["AI__DOCUMENT_AGENT__PORTAL_URL"];
+      delete process.env["AI__DOCUMENT_AGENT__FILES_URL"];
+    }
+  });
 });
