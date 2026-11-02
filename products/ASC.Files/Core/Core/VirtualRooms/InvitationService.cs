@@ -398,7 +398,7 @@ public class InvitationService(
 
     private static void ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
     {
-        if (folder.FolderType is FolderType.AiRoom or FolderType.AiProjectRoom && 
+        if (folder.FolderType is FolderType.AiRoom && 
             type == EmployeeType.Guest && 
             data.Share is FileShare.RoomManager or FileShare.ContentCreator)
         {
