@@ -6594,7 +6594,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("created_on");
 
                     b.Property<bool>("Enabled")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("enabled")
                         .HasDefaultValueSql("'1'");
@@ -6630,7 +6629,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("name");
 
                     b.Property<bool>("SSL")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("ssl")
                         .HasDefaultValueSql("'1'");
@@ -6684,6 +6682,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("Attempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempts");
+
                     b.Property<int>("ConfigId")
                         .HasColumnType("int")
                         .HasColumnName("config_id");
@@ -6695,6 +6699,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime?>("Delivery")
                         .HasColumnType("datetime")
                         .HasColumnName("delivery");
+
+                    b.Property<string>("LeaseId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("lease_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("NextAttemptOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("next_attempt_on");
 
                     b.Property<string>("RequestHeaders")
                         .HasColumnType("json")
@@ -6716,6 +6730,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("response_payload")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("RetriedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("retried_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int?>("RetryOf")
+                        .HasColumnType("int")
+                        .HasColumnName("retry_of");
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
@@ -6745,8 +6769,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("ConfigId");
 
+                    b.HasIndex("CreationTime")
+                        .HasDatabaseName("creation_time");
+
+                    b.HasIndex("NextAttemptOn")
+                        .HasDatabaseName("next_attempt_on");
+
                     b.HasIndex("TenantId")
                         .HasDatabaseName("tenant_id");
+
+                    b.HasIndex("TenantId", "RetryOf")
+                        .HasDatabaseName("tenant_id_retry_of");
 
                     b.ToTable("webhooks_logs", (string)null);
 

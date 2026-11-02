@@ -1080,14 +1080,26 @@ public enum MessageAction
     [Description("Service spending limit deleted")]
     CustomerServiceLimitDeleted = 6116,
 
+    [Description("App enabled")]
+    AppEnabled = 6119,
+
+    [Description("App disabled")]
+    AppDisabled = 6120,
+
+    /// <summary>
+    /// A member queued a past webhook delivery to be sent again; the target is the subscription.
+    /// </summary>
+    [Description("Webhook delivery retried")]
+    WebhookRetried = 6117,
+
     [Description("Rooms linked to AI project")]
-    RoomsLinkedToAiProject = 6117,
+    RoomsLinkedToAiProject = 6121,
 
     [Description("Rooms unlinked from AI project")]
-    RoomsUnlinkedFromAiProject = 6118,
+    RoomsUnlinkedFromAiProject = 6122,
 
     [Description("AI project model changed")]
-    AiProjectProfileAssigned = 6119,
+    AiProjectProfileAssigned = 6123,
 
     #endregion
 

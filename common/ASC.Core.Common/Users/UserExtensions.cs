@@ -100,6 +100,16 @@ public static class UserExtensions
             return await userManager.IsUserInGroupAsync(id, Constants.GroupUser.ID);
         }
 
+        /// <summary>
+        /// Whether the viewer is a User or a Guest: neither may see the contacts of another user, that is their
+        /// groups and their profile link. The profile link is a people search by email (bug 81093), so it would
+        /// hand them an address they have no access to.
+        /// </summary>
+        public async Task<bool> IsWithoutContactsAccessAsync(Guid viewerId)
+        {
+            return await userManager.IsUserAsync(viewerId) || await userManager.IsGuestAsync(viewerId);
+        }
+
         public async Task<bool> IsOutsiderAsync(Guid id)
         {
             return await userManager.IsGuestAsync(id) && id == Constants.OutsideUser.Id;

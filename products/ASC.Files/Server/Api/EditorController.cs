@@ -117,6 +117,7 @@ public abstract class EditorController<T>(
     /// Save edited file content
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content")]
@@ -240,6 +241,7 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when a PDF form whose filling had started in a form-filling room is opened with `edit` true")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]

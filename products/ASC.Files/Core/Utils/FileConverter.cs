@@ -308,6 +308,10 @@ public class FileConverter(
             return false;
         }
 
+        // the lists below hold extensions with the dot, while the API takes `outputType` without one ("pdf"): such a
+        // value never matched, and the conversion silently fell back to the internal format
+        toExtension = "." + toExtension.Trim('.').ToLowerInvariant();
+
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {

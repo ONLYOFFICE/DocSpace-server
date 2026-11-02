@@ -1317,6 +1317,12 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Datoteku je otvorila skripta Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplikacija omogućena: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplikacija onemogućena: {0}</value>
+  </data>
   <data name="RoomsLinkedToAiProject" xml:space="preserve">
     <value>Sobe povezane sa AI projektom {0}: [{1}]</value>
   </data>

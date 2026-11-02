@@ -37,12 +37,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Templates;
 /// What POST /files/rooms/fromTemplate actually copies into the new room: folders, files, nested
 /// hierarchies, and the isolation of the copy from both the template and the source room.
 /// </summary>
-/// <remarks>
-/// <see cref="DocSpace.API.SDK.Model.FolderContentDto.Folders"/> and <c>.Files</c> are typed
-/// <c>List&lt;FileEntryBaseDto&gt;</c>, which carries <c>Title</c> but neither <c>Id</c> nor
-/// <c>Logo</c>. Tests that need the id of a copied entry read the raw JSON instead (see
-/// <see cref="GetFolderContentRaw"/>) — this is an SDK model gap, not a preference.
-/// </remarks>
 [Trait("Category", "Rooms")]
 public class RoomFromTemplateContentTests(
     AspireAppFixture fixture)
@@ -109,10 +103,10 @@ public class RoomFromTemplateContentTests(
         var roomId = await WaitForRoomFromTemplate();
 
         // Assert
-        var rootContent = await GetFolderContentRaw(roomId);
+        var rootContent = await GetFolderEntries(roomId);
         var copiedParent = rootContent.Folders.Should().ContainSingle(f => f.Title == "Parent").Which;
 
-        var parentContent = await GetFolderContentRaw(copiedParent.Id);
+        var parentContent = await GetFolderEntries(copiedParent.Id);
         parentContent.Folders.ConvertAll(f => f.Title).Should().Contain("Child");
     }
 
@@ -155,7 +149,7 @@ public class RoomFromTemplateContentTests(
         // Assert
         roomId.Should().NotBe(sourceRoom.Id);
 
-        var content = await GetFolderContentRaw(roomId);
+        var content = await GetFolderEntries(roomId);
         var copiedFolder = content.Folders.Should().ContainSingle(f => f.Title == "Folder For Ids").Which;
         copiedFolder.Id.Should().NotBe(sourceFolder.Id);
     }
@@ -174,7 +168,7 @@ public class RoomFromTemplateContentTests(
         await _roomsApi.CreateRoomFromTemplateAsync(new CreateRoomFromTemplateDto(templateId, "Isolate Room"), TestContext.Current.CancellationToken);
         var roomId = await WaitForRoomFromTemplate();
 
-        var copyContent = await GetFolderContentRaw(roomId);
+        var copyContent = await GetFolderEntries(roomId);
         var copiedFolder = copyContent.Folders.Should().ContainSingle(f => f.Title == "Isolated Folder").Which;
 
         // Act
@@ -186,36 +180,14 @@ public class RoomFromTemplateContentTests(
         sourceContent.Folders.ConvertAll(f => f.Title).Should().Contain("Isolated Folder");
     }
 
-    /// <summary>An entry (folder or file) as it comes back from a raw GET /files/{folderId} read.</summary>
-    private sealed record RawEntry(int Id, string Title);
-
-    /// <summary>The parsed body of a raw GET /files/{folderId} read.</summary>
-    private sealed record RawFolderContent(List<RawEntry> Folders, List<RawEntry> Files);
-
     /// <summary>
-    /// Reads a folder's content straight from the JSON response, for the id of an entry that
-    /// <see cref="DocSpace.API.SDK.Model.FileEntryBaseDto"/> does not carry.
+    /// A folder's content, with each entry as the <c>FileDto</c> or <c>FolderDto</c> the <c>entryKind</c>
+    /// discriminator makes of it, so the id of a copied entry is at hand.
     /// </summary>
-    private async Task<RawFolderContent> GetFolderContentRaw(int folderId)
+    private async Task<(List<FolderDto> Folders, List<FileDto> Files)> GetFolderEntries(int folderId)
     {
-        using var response = await _filesClient.GetAsync($"api/2.0/files/{folderId}", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var content = (await _foldersApi.GetFolderByFolderIdAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to read folder {folderId} content ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var rootElement = json.RootElement.GetProperty("response");
-
-        return new RawFolderContent(ReadEntries(rootElement, "folders"), ReadEntries(rootElement, "files"));
-    }
-
-    private static List<RawEntry> ReadEntries(JsonElement rootElement, string propertyName)
-    {
-        return rootElement.GetProperty(propertyName).EnumerateArray()
-            .Select(entry => new RawEntry(entry.GetProperty("id").GetInt32(), entry.GetProperty("title").GetString()!))
-            .ToList();
+        return ([.. (content.Folders ?? []).OfType<FolderDto>()], [.. (content.Files ?? []).OfType<FileDto>()]);
     }
 }

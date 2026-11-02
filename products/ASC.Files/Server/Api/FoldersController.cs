@@ -339,6 +339,7 @@ public abstract class FoldersController<T>(
     /// Create a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
@@ -369,6 +370,10 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "once the queued operation moves the folder to the trash; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage")]
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the folder, or the folder is a room and `immediately` is not set")]
@@ -399,6 +404,7 @@ public abstract class FoldersController<T>(
     /// Set folder order
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the order changes")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with the position it now holds", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -649,6 +655,9 @@ public abstract class FoldersController<T>(
     /// Rename a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the title changes")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]

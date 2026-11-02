@@ -42,6 +42,29 @@ public class ProjectConfigurator(
     bool isDocker,
     bool isIntegrationTest = false)
 {
+    // The queues a test class has to wait on, by task type name (core:queue:<name>:maxThreadsCount). Single-thread
+    // queues go to 8, the file operations, already at 10, to 20.
+    private static readonly (string Queue, int Threads)[] _integrationTestQueueThreads =
+    [
+        ("AuditReportTask", 8),
+        ("RoomIndexExportTask", 8),
+        ("FormFillingReportTask", 8),
+        ("CustomerOperationsReportTask", 8),
+        ("CreateRoomTemplateOperation", 8),
+        ("CreateRoomFromTemplateOperation", 8),
+        ("MetadataCascadeOperation", 8),
+        ("RemoveProgressItem", 8),
+        ("ReassignProgressItem", 8),
+        ("DeletePersonalFolderProgressItem", 8),
+        ("UpdateUserTypeProgressItem", 8),
+        ("FileDeleteOperation", 20),
+        ("FileMoveCopyOperation", 20),
+        ("FileDuplicateOperation", 20),
+        ("FileDownloadOperation", 20),
+        ("FileMarkAsReadOperation", 20),
+        ("FileBuilderOperation", 20)
+    ];
+
     public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new()
     {
         var name = typeof(TProject).Name.ToLower().Replace('_', '-');
@@ -56,17 +79,30 @@ public class ProjectConfigurator(
         }
         else
         {
-            AddProjectWithDefaultConfiguration<TProject>();
+            AddProjectWithDefaultConfiguration<TProject>(projectPort);
         }
 
         return this;
     }
 
-    private void AddProjectWithDefaultConfiguration<TProject>() where TProject : IProjectMetadata, new()
+    private void AddProjectWithDefaultConfiguration<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+        // The testing builder randomizes every endpoint port, but the router's upstream map (NginxConfiguration)
+        // and the document server reach the services at their fixed ports through host.docker.internal. With
+        // random ports every request through 8092 failed: the editors could not fetch a docbuilder script, a
+        // file to convert or a callback, so no document-server scenario could run in the tests.
+        if (isIntegrationTest)
+        {
+            project.WithEndpoint("http", e =>
+            {
+                e.Port = e.TargetPort = projectPort;
+                e.IsProxied = false;
+            });
+        }
 
         if (int.TryParse(builder.Configuration["Replicas"], out var replicas) && replicas > 1)
         {
@@ -105,7 +141,23 @@ public class ProjectConfigurator(
                 // loop does not observe the token, so every Files run paid a measured 31.3 s of teardown.
                 // Nothing here needs a graceful stop — the portals and their storage are thrown away —
                 // and an honest shutdown takes ~0.5 s, so this only trims the hang.
-                .WithEnvironment("shutdownTimeoutSeconds", "3");
+                .WithEnvironment("shutdownTimeoutSeconds", "3")
+
+                // Without an absolute authority IdentityClient calls {ServerRootPath}/api/2.0/oauth2/, the
+                // portal's own host on the calling service's port: <alias>.docspace.localhost, which Windows
+                // does not resolve, so deleting a user failed. Before the tests had a base domain that host was
+                // localhost and the call reached the calling service itself, whose 404 was ignored, so the
+                // identity service never saw it. The router sends /api/2.0/oauth2/clients to identity. 127.0.0.1, not
+                // localhost: the router's port listens on IPv4 only and Windows would try ::1 first, ~2 s per call.
+                .WithEnvironment("core:oidc:authority", new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), Constants.RestyPort, "api/2.0/oauth2").Uri.ToString());
+
+            // A queue runs as many of its tasks at once as its registration says, one unless stated. Fine for an
+            // installation, but here every test class starts its own reports and operations in parallel, so a test
+            // waited in the queue behind the tasks of the other classes and ran out of its deadline.
+            foreach (var (queue, threads) in _integrationTestQueueThreads)
+            {
+                project.WithEnvironment($"core:queue:{queue}:maxThreadsCount", threads.ToString(CultureInfo.InvariantCulture));
+            }
         }
 
         switch (builder.Configuration["APP_EDITION"])

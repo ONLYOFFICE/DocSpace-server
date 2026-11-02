@@ -370,6 +370,12 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
             Err = FilesCommonResource.ErrorMessage_SecurityException;
             Logger.ErrorWithException(new SecurityException(Err, e));
         }
+        catch (OperationCanceledException e) when (cancellationToken.IsCancellationRequested)
+        {
+            // a cancel that lands before the first entry is processed used to end with an empty error, as if the
+            // operation had finished; the half-way cancel reports the same text from the per-entry handlers
+            Err = e.Message;
+        }
         catch (AggregateException ae)
         {
             ae.Flatten().Handle(e => e is TaskCanceledException or OperationCanceledException);

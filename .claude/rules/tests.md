@@ -28,6 +28,10 @@ A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire re
 `PortalClients` deriving from `PortalClientsBase`, which calls `CreateClient(ResourceNames.X)` per
 service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
 registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
+Services only some classes need go in `LazyResources` instead: they start with the stack but the run
+does not wait for them, and a class that uses them overrides `NeedsLazyResources` (so far only in the
+Web.Api `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
+before the portal is registered.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.
@@ -128,10 +132,15 @@ nullable property. The DTO accepts all of those and the server does the rejectin
 ordinary typed calls.
 
 One more carve-out, on the response side: a generated model can be too narrow to carry what the
-endpoint returns. `FolderContentDto.Folders` is typed `List<FileEntryBaseDto>`, which has
-`Title` but neither `Id` nor `Logo`, so a room read through a folder listing loses both. When the
-assertion needs a field the model drops, read the raw JSON — and say so in a comment, because
-that is an SDK defect worth reporting, not a preference.
+endpoint returns. When the assertion needs a field the model drops, read the raw JSON — and say
+so in a comment, because that is an SDK defect worth reporting, not a preference.
+
+A list typed with the base `FileEntryBaseDto` is not such a case. `FolderContentDto.Files` and
+`.Folders`, the preflight answers and the other entry lists arrive as their concrete models,
+picked by the `entryKind` discriminator, so take the fields from those:
+`content.Folders.OfType<FolderDto>()` carries `Id`, `RoomType`, `Logo`, `Pinned`;
+`OfType<ThirdPartyFolderDto>()` the third-party rooms with their string ids.
+`FolderListing` (`products/ASC.Files/Tests/Tests/06_Operations/`) reads a listing that way.
 
 Decide these by evidence, not by feel: read the `[DataMember(..., EmitDefaultValue = ...)]`
 attributes on the generated model and the constructor, which together determine what an
@@ -253,6 +262,15 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 
 Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-class`,
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
+
+The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to a WireMock
+receiver that the `integration-test` profile publishes on the loopback alias `127.0.0.2:18089`
+(`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
+`127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
+`127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
+the receiver container cannot bind. The receiver is a lazy resource, so the rest of the suite
+still runs, but every class that creates a subscription (`NeedsLazyResources`) fails on waiting
+for it — an environment problem, not a product regression.
 
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
