@@ -46,6 +46,7 @@ spring:
     import:
       - "classpath:application-datasource.yml"
       - "classpath:application-resilience.yml"
+      - "classpath:application-grpc-client-resilience.yml"
       - "classpath:application-service-minified.yml"
       - "classpath:application-security.yml"
   threads:
