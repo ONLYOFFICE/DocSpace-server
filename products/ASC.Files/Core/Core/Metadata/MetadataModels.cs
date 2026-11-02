@@ -126,6 +126,16 @@ public class MetadataTextMatch
 }
 
 /// <summary>
+/// A file or a folder named by the metadata tables: the shape the page queries answer with when the question is which
+/// entries of a listing page satisfy a condition, not what their metadata are.
+/// </summary>
+public class MetadataEntryRef
+{
+    public int EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+}
+
+/// <summary>
 /// The metadata template to entry binding.
 /// </summary>
 public class MetadataTemplateLink
@@ -182,4 +192,11 @@ public class EntryMetadata
 {
     public List<TemplateMetadata> Templates { get; set; } = [];
     public List<CustomFieldValue> CustomFields { get; set; } = [];
+
+    /// <summary>
+    /// Whether the entry has a field a user can see and fill: a field of a visible assigned template, or a custom field.
+    /// The fields of a hidden template do not count, the way the UI, the search and the AI filling leave them out. The
+    /// same rule answers <c>hasMetadataFields</c> on the entry in a listing, so a client decides from either.
+    /// </summary>
+    public bool HasMetadataFields { get; set; }
 }

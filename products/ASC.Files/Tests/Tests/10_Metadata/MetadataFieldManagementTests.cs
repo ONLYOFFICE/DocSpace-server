@@ -43,7 +43,8 @@ public class MetadataFieldManagementTests(AspireAppFixture fixture) : MetadataAp
     [Fact]
     public async Task CreateField_OfEveryType_IsAddedWithItsOptions()
     {
-        var template = await CreateTemplateAsync([]);
+        // a template is created with at least one field, so the ones added here land after it
+        var template = await CreateTemplateAsync([new MetadataFieldRequest("seed", MetadataFieldType.String)]);
 
         List<MetadataFieldRequest> requests =
         [
@@ -65,7 +66,7 @@ public class MetadataFieldManagementTests(AspireAppFixture fixture) : MetadataAp
 
         var reloaded = await GetTemplateAsync(template.Id);
 
-        reloaded.Fields.Select(f => f.Name).Should().Equal(requests.Select(r => r.Name));
+        reloaded.Fields.Select(f => f.Name).Should().Equal(requests.Select(r => r.Name).Prepend("seed"));
         reloaded.Field("sc").Options.Select(o => o.Value).Should().Equal("one", "two");
         reloaded.Field("sc").Options.Should().OnlyContain(o => o.Id != Guid.Empty);
     }
@@ -91,7 +92,7 @@ public class MetadataFieldManagementTests(AspireAppFixture fixture) : MetadataAp
     [InlineData("unknown type")]
     public async Task CreateField_WithAnInvalidField_ReturnsBadRequestAndAddsNothing(string scenario)
     {
-        var template = await CreateTemplateAsync([]);
+        var template = await CreateTemplateAsync([new MetadataFieldRequest("seed", MetadataFieldType.String)]);
 
         var request = scenario switch
         {
@@ -108,7 +109,7 @@ public class MetadataFieldManagementTests(AspireAppFixture fixture) : MetadataAp
             async () => await _metadataApi.CreateFieldAsync(template.Id, request, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
-        (await GetTemplateAsync(template.Id)).Fields.Should().BeEmpty();
+        (await GetTemplateAsync(template.Id)).Fields.Should().ContainSingle().Which.Name.Should().Be("seed");
     }
 
     [Fact]
@@ -231,14 +232,15 @@ public class MetadataFieldManagementTests(AspireAppFixture fixture) : MetadataAp
     [Fact]
     public async Task DeleteField_ThroughAnotherTemplateOrTwice_ReturnsNotFound()
     {
-        var first = await CreateTemplateAsync([new MetadataFieldRequest("A", MetadataFieldType.String)]);
+        // a second field keeps the first template deletable: its last field may only go with the template
+        var first = await CreateTemplateAsync([new MetadataFieldRequest("A", MetadataFieldType.String), new MetadataFieldRequest("Keep", MetadataFieldType.String)]);
         var second = await CreateTemplateAsync([new MetadataFieldRequest("B", MetadataFieldType.String)]);
         var fieldId = first.Field("A").Id;
 
         var foreign = await Assert.ThrowsAsync<ApiException>(
             async () => await _metadataApi.DeleteFieldAsync(second.Id, fieldId, TestContext.Current.CancellationToken));
         foreign.ErrorCode.Should().Be(404, "the field belongs to the other template");
-        (await GetTemplateAsync(first.Id)).Fields.Should().HaveCount(1);
+        (await GetTemplateAsync(first.Id)).Fields.Should().HaveCount(2);
 
         await _metadataApi.DeleteFieldAsync(first.Id, fieldId, TestContext.Current.CancellationToken);
 

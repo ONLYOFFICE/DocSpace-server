@@ -80,7 +80,7 @@ public class MetadataUnicodeTests(AspireAppFixture fixture) : MetadataApiTestBas
     {
         var name = $"{Suffix()} {sample}";
 
-        var created = await CreateTemplateAsync([], name);
+        var created = await CreateTemplateAsync(name: name);
 
         created.Name.Should().Be(name, "the create answer echoes the input");
         (await GetTemplateAsync(created.Id)).Name.Should().Be(name, "the stored name must be the one that was sent");
@@ -90,12 +90,12 @@ public class MetadataUnicodeTests(AspireAppFixture fixture) : MetadataApiTestBas
     [Trait("Category", "Bug")]
     public async Task CreateField_WithAnEmojiInTheFieldNameAndTheOptionValue_StoresThemIntact()
     {
-        var template = await CreateTemplateAsync([]);
+        var template = await CreateTemplateAsync([new MetadataFieldRequest("plain", MetadataFieldType.String)]);
 
         await _metadataApi.CreateFieldAsync(template.Id,
             new MetadataFieldRequest("field \U0001F642", MetadataFieldType.SingleChoice, [new MetadataFieldOptionRequest(value: "option \U0001F642")]), TestContext.Current.CancellationToken);
 
-        var field = (await GetTemplateAsync(template.Id)).Fields.Single();
+        var field = (await GetTemplateAsync(template.Id)).Fields.Single(f => f.Name != "plain");
 
         field.Name.Should().Be("field \U0001F642");
         field.Options.Single().Value.Should().Be("option \U0001F642");
