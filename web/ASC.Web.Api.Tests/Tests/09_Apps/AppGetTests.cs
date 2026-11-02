@@ -122,8 +122,8 @@ public class AppGetTests(
     }
 
     // Every one of these is addressed as a literal application key, so none may resolve to a real
-    // application or fail with a server error. Raw HTTP: the typed client would encode them the same
-    // way, but "a/b" and "../settings" are route shapes, not ids, and the case must see the raw status.
+    // application or fail with a server error. The typed client escapes the path segment with
+    // Uri.EscapeDataString, so "a/b" and "../settings" reach the server as one encoded segment.
     [Theory]
     [InlineData("   ")]
     [InlineData("приложение-😀")]
@@ -133,20 +133,22 @@ public class AppGetTests(
     public async Task Get_IdThatCannotBeAnApplication_ReturnsNotFound(string id)
     {
         // Act
-        var (status, _) = await SendAsync(HttpMethod.Get, AppPath(id));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await AppsApi.GetAsync(id, Ct));
 
         // Assert
-        status.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
     public async Task Get_VeryLongId_ReturnsNotFound()
     {
         // Act
-        var (status, _) = await SendAsync(HttpMethod.Get, AppPath(new string('x', 2000)));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await AppsApi.GetAsync(new string('x', 2000), Ct));
 
         // Assert
-        status.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]

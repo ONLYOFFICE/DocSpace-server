@@ -320,7 +320,25 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("ApiKeyUpdated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to App disabled: {0}.
+        /// </summary>
+        public static string AppDisabled {
+            get {
+                return ResourceManager.GetString("AppDisabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to App enabled: {0}.
+        /// </summary>
+        public static string AppEnabled {
+            get {
+                return ResourceManager.GetString("AppEnabled", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Attach.
         /// </summary>
@@ -3579,6 +3597,15 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook delivery retried: {0}.
+        /// </summary>
+        public static string WebhookRetried {
+            get {
+                return ResourceManager.GetString("WebhookRetried", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Webhook updated: {0}.
         /// </summary>

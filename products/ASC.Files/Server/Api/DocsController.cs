@@ -69,6 +69,7 @@ public class DocsController(
     /// </remarks>
     /// <summary>Convert a file</summary>
     /// <path>api/2.0/docs/converter</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Docs")]
     [SwaggerResponse(200, "The converted file, as it was saved in the portal", typeof(FileDto<int>))]
     [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it, `folderId` is missing for a caller without \"My documents\", or the document service rejects the source: a wrong or missing password, or a file too large")]
@@ -118,6 +119,7 @@ public class DocsController(
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUpdated, When = "for each file the queued script saves: `file.created` for a new file, `file.updated` for an existing one")]
     [Tags("Docs")]
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "The script or the argument is malformed or too long, the script calls OpenFile or SaveFile too often, a file is addressed by an address, an `outputs` entry breaks the rules above, or a saved file has nowhere to go")]

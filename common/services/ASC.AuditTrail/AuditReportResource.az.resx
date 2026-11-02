@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Fayl Document Builder skripti tərəfindən açıldı: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Tətbiq aktivləşdirildi: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Tətbiq deaktiv edildi: {0}</value>
+  </data>
 </root>

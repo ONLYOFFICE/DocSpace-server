@@ -43,8 +43,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 ///   "secretKey": "my-secret-key-123",
 ///   "enabled": true,
 ///   "sSL": true,
-///   "triggers": {},
-///   "targetId": "00000000-0000-0000-0000-000000000001"
+///   "triggers": 0,
+///   "targetId": "9924256a-739c-462b-be1a-e1d3a1d6f2d4"
 /// }
 /// </example>
 public class CreateWebhooksConfigRequestsDto
@@ -85,25 +85,29 @@ public class CreateWebhooksConfigRequestsDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Whether the target certificate is verified. Setting it demands an `https` target with a valid certificate;
-    /// leaving it off delivers without checking the certificate at all.
+    /// Whether the target certificate is verified. `true` demands an `https` address with a valid certificate; `false`
+    /// delivers without checking the certificate, and is what a plain `http` target needs.
     /// </summary>
     /// <example>true</example>
-    public bool SSL { get; set; }
+    public bool? SSL { get; set; }
 
     /// <summary>
-    /// The events the subscription listens for, as a bitmask combining the flags; 0 subscribes to all of them. Take
-    /// the flags the caller role is allowed to use from `GET api/2.0/settings/webhook/triggers`, since a flag beyond
-    /// that set is refused with 400. A subscription still only fires for events its creator may see.
+    /// The events the subscription listens for, as a bitmask adding together the `id` values of the entries of `GET
+    /// api/2.0/settings/webhook/triggers`. 0 is the catch-all, not "none": it stands for every event the
+    /// subscription creator's role may receive, not for every event of the portal.
     /// </summary>
     /// <example>0</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// The single entity the subscription is narrowed to, by its identifier - a room or a file, for instance.
-    /// Leaving it out delivers events about every entity the subscribed triggers cover.
+    /// The single entity the subscription is narrowed to, by its identifier in the API that owns it. For user events
+    /// it is the GUID of a user (`id` of `GET api/2.0/people`), for group events the GUID of a group (`id` of `GET
+    /// api/2.0/group`), and either must be one the subscription's creator may see; for file, folder, room and form
+    /// events it is the entry ID from the Files API (`id` of `GET api/2.0/files/rooms` or of a folder listing), a
+    /// number for the portal's own storage and a string for third-party storage. Leaving it out delivers events
+    /// about every entity the subscribed triggers cover.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000001</example>
+    /// <example>9924256a-739c-462b-be1a-e1d3a1d6f2d4</example>
     [StringLength(255)]
     public string TargetId { get; set; }
 }

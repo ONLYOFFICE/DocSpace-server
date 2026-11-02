@@ -236,6 +236,11 @@ public class BatchModelBinder : BaseBatchModelBinder
             result.DeleteAfter = deleteAfter;
         }
 
+        if (bindingContext.GetBoolValue(nameof(result.Content), out var content))
+        {
+            result.Content = content;
+        }
+
         if (bindingContext.GetFirstValue(nameof(result.ConflictResolveType), out var conflictResolveTypeValue) && FileConflictResolveTypeExtensions.TryParse(conflictResolveTypeValue, out var conflictResolveType))
         {
             result.ConflictResolveType = conflictResolveType;
@@ -254,6 +259,8 @@ public class BatchModelBinder : BaseBatchModelBinder
 
 public class InsertFileModelBinder : IModelBinder
 {
+    private const string InsertFilePrefix = "insertFile.";
+
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
@@ -268,17 +275,22 @@ public class InsertFileModelBinder : IModelBinder
         var result = new InsertFileRequestDto();
 #pragma warning restore CA2000
 
-        if (bindingContext.GetBoolValue(nameof(result.CreateNewIfExist), out var createNewIfExist))
+        // the published contract and the SDKs name the form fields `insertFile.title` and so on, the web client sends
+        // them flat; both are read, the flat name first
+        if (bindingContext.GetBoolValue(nameof(result.CreateNewIfExist), out var createNewIfExist) ||
+            bindingContext.GetBoolValue(InsertFilePrefix + nameof(result.CreateNewIfExist), out createNewIfExist))
         {
             result.CreateNewIfExist = createNewIfExist;
         }
 
-        if (bindingContext.GetBoolValue(nameof(result.KeepConvertStatus), out var keepConvertStatus))
+        if (bindingContext.GetBoolValue(nameof(result.KeepConvertStatus), out var keepConvertStatus) ||
+            bindingContext.GetBoolValue(InsertFilePrefix + nameof(result.KeepConvertStatus), out keepConvertStatus))
         {
             result.KeepConvertStatus = keepConvertStatus;
         }
 
-        if (bindingContext.GetFirstValue(nameof(result.Title), out var firstValue))
+        if (bindingContext.GetFirstValue(nameof(result.Title), out var firstValue) ||
+            bindingContext.GetFirstValue(InsertFilePrefix + nameof(result.Title), out firstValue))
         {
             result.Title = firstValue;
         }

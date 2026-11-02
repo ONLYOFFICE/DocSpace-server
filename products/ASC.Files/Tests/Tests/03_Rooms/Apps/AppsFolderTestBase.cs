@@ -41,8 +41,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Apps;
 /// <c>Apps</c> is already there.
 /// </summary>
 /// <remarks>
-/// Skipping the upload conversion inside <c>.ai</c> is not covered: the integration-test AppHost
-/// runs no document server, so no conversion happens anywhere and there is nothing to contrast.
+/// Skipping the upload conversion inside <c>.ai</c> is not covered yet: it needs an upload that is
+/// converted elsewhere to contrast with, which the integration-test document server can now do.
 /// </remarks>
 public abstract class AppsFolderTestBase(
     AspireAppFixture fixture)
@@ -146,26 +146,17 @@ public abstract class AppsFolderTestBase(
     }
 
     /// <summary>
-    /// The room listing is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which carries a <c>Title</c> but
-    /// no <c>Id</c> (the SDK narrowness tests.md calls out), so a room created by an operation has to be
-    /// found through the raw JSON.
+    /// Finds a room created by an operation: the first room other than <paramref name="exceptRoomId"/> whose title
+    /// starts with <paramref name="titlePrefix"/>.
     /// </summary>
     protected async Task<int> FindRoomIdByTitlePrefix(string titlePrefix, int exceptRoomId)
     {
-        var raw = await _roomsApi.GetRoomsFolderWithHttpInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(raw.RawContent);
+        var content = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        foreach (var entry in json.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray())
-        {
-            var id = entry.GetProperty("id").GetInt32();
+        var room = (content.Folders ?? []).OfType<FolderDto>()
+            .FirstOrDefault(f => f.Id != exceptRoomId && f.Title.StartsWith(titlePrefix, StringComparison.Ordinal));
 
-            if (id != exceptRoomId && entry.GetProperty("title").GetString()!.StartsWith(titlePrefix, StringComparison.Ordinal))
-            {
-                return id;
-            }
-        }
-
-        throw new InvalidOperationException($"No room titled '{titlePrefix}…' other than {exceptRoomId} was found.");
+        return room?.Id ?? throw new InvalidOperationException($"No room titled '{titlePrefix}…' other than {exceptRoomId} was found.");
     }
 
     private static BatchRequestDto BuildBatchRequest(int folderId, int destFolderId, FileConflictResolveType conflictResolveType)

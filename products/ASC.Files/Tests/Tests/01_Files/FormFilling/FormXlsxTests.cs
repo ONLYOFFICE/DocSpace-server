@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -48,12 +48,7 @@ public class FormXlsxTests(
     AspireAppFixture fixture)
     : FormResultsTestBase(fixture)
 {
-    private const string DocumentServerUnavailable =
-        "The report cannot complete in the integration-test profile: the document builder fails at " +
-        "the download step, as the room index export does (see RoomIndexExportTests). Remove this " +
-        "Skip once the integration-test host serves a working document server.";
-
-    [Fact(Skip = DocumentServerUnavailable)]
+    [Fact]
     public async Task GenerateXlsx_StartedForm_ProducesReportThatGetXlsxReportsAsCompleted()
     {
         // Arrange
@@ -100,7 +95,7 @@ public class FormXlsxTests(
         (await GetXlsxFilesIn(resultsFolderId)).Should().HaveCount(1);
     }
 
-    [Fact(Skip = DocumentServerUnavailable)]
+    [Fact]
     public async Task GenerateXlsx_ResultFileId_ResolvesToTheOriginalForm()
     {
         // Arrange

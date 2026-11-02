@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Skedari u hap nga skripti i Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplikacioni u aktivizua: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplikacioni u çaktivizua: {0}</value>
+  </data>
 </root>

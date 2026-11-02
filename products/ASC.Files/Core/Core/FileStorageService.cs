@@ -2708,8 +2708,9 @@ public class FileStorageService //: IFileStorageService
         var newOrder = await fileDao.SetCustomOrder(fileId, file.ParentId, order);
         if (newOrder != 0 && newOrder != file.Order)
         {
+            var oldOrder = file.Order;
             file.Order = order;
-            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
+            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, oldOrder.ToString(), order.ToString());
             await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
         }
 
@@ -2746,11 +2747,14 @@ public class FileStorageService //: IFileStorageService
             {
                 case File<T> file:
                     {
+                        // SetCustomOrder returns the current order when it does not change, so an unchanged entry is
+                        // told apart by comparing, as SetFileOrder does; the old value is taken before it is replaced
+                        var oldOrder = file.Order;
                         var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
-                        if (newOrder != 0)
+                        if (newOrder != 0 && newOrder != oldOrder)
                         {
                             entry.Order = item.Order;
-                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
+                            await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, oldOrder.ToString(), item.Order.ToString(), contextId);
                             await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
                         }
 
@@ -2758,11 +2762,12 @@ public class FileStorageService //: IFileStorageService
                     }
                 case Folder<T> folder:
                     {
+                        var oldOrder = folder.Order;
                         var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
-                        if (newOrder != 0)
+                        if (newOrder != 0 && newOrder != oldOrder)
                         {
                             entry.Order = item.Order;
-                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
+                            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, oldOrder.ToString(), item.Order.ToString(), contextId);
                             await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
                         }
 
@@ -2788,8 +2793,9 @@ public class FileStorageService //: IFileStorageService
 
         if (newOrder != 0 && newOrder != folder.Order)
         {
+            var oldOrder = folder.Order;
             folder.Order = order;
-            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
+            await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, oldOrder.ToString(), order.ToString());
 
             await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
         }
@@ -3240,10 +3246,17 @@ public class FileStorageService //: IFileStorageService
         return checkedFiles;
     }
 
-    public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(IEnumerable<JsonElement> filesId, IEnumerable<JsonElement> foldersId, T1 destFolderId)
+    public async Task<(List<object>, List<object>)> MoveOrCopyFilesCheckAsync<T1>(IEnumerable<JsonElement> filesId, IEnumerable<JsonElement> foldersId, T1 destFolderId, bool content = false)
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(foldersId);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(filesId);
+
+        if (content)
+        {
+            // the operation moves what the folders contain, not the folders (FileMoveCopyOperationsManager.Publish -> GetContent)
+            await ExpandContentAsync(folderIntIds, fileIntIds);
+            await ExpandContentAsync(folderStringIds, fileStringIds);
+        }
 
         var checkedFiles = new List<object>();
         var checkedFolders = new List<object>();
@@ -3273,6 +3286,22 @@ public class FileStorageService //: IFileStorageService
         }
 
         return (checkedFiles, checkedFolders);
+
+        async Task ExpandContentAsync<TId>(List<TId> folderIds, List<TId> fileIds)
+        {
+            var folderDao = daoFactory.GetFolderDao<TId>();
+            var fileDao = daoFactory.GetFileDao<TId>();
+
+            // only a folder the caller can read is opened up
+            var parents = await fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(folderIds)).Select(f => (TId)f.Id).ToListAsync();
+            folderIds.Clear();
+
+            foreach (var parentId in parents)
+            {
+                folderIds.AddRange(await folderDao.GetFoldersAsync(parentId).Select(r => r.Id).ToListAsync());
+                fileIds.AddRange(await fileDao.GetFilesAsync(parentId).ToListAsync());
+            }
+        }
     }
 
     private async Task<List<TFrom>> MoveOrCopyDestFolderCheckAsync<TFrom, TTo>(IEnumerable<TFrom> filesId, TTo destFolderId)
@@ -3292,6 +3321,12 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        // a section root holds rooms only: the operation refuses any file there (PermissionCheckStarter.CheckFilesPermissionsAsync)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
 
         var toRoom = toFolder;
@@ -3341,6 +3376,29 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        // the destinations the operation refuses (PermissionCheckStarter): a section root holds rooms only, so no file
+        // goes there; a folder that is not a room goes neither there, nor into a knowledge folder or the archive; and a
+        // room goes nowhere but the Rooms root and the archive
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
+        }
+
+        // only the folders the caller can read are looked at, so the answer tells nothing about the others
+        var readableFolders = await fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).OfType<Folder<TFrom>>().ToListAsync();
+
+        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge
+             || toFolder.RootFolderType == FolderType.Archive)
+            && readableFolders.Any(f => !f.IsRoom))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFolder);
+        }
+
+        if (toFolder.FolderType is not (FolderType.VirtualRooms or FolderType.Archive) && readableFolders.Any(f => f.IsRoom))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom);
         }
 
         foreach (var id in filesId)
@@ -3458,6 +3516,17 @@ public class FileStorageService //: IFileStorageService
 
             if (fileInfo.StartConvert && fileConverter.MustConvert(file))
             {
+                // a format that is neither an internal format nor among the conversions of this file's type used to be
+                // queued and silently converted to the internal format; thrown outside the try, so that it is not
+                // wrapped into a different error. The file's own format is not such a case: it was always converted to
+                // the internal format, and still is
+                if (!string.IsNullOrEmpty(fileInfo.OutputType)
+                    && !file.ConvertedExtension.Trim('.').Equals(fileInfo.OutputType.Trim('.'), StringComparison.OrdinalIgnoreCase)
+                    && !await fileConverter.EnableConvertAsync(file, fileInfo.OutputType, false))
+                {
+                    throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                }
+
                 try
                 {
                     if (sync)
@@ -5350,7 +5419,8 @@ public class FileStorageService //: IFileStorageService
                 var createByInfo = await userManager.GetUsersAsync(createBy);
                 await filesMessageService.SendAsync(MessageAction.RoomChangeOwner, newFolder, userInfo.Id.ToString(), userInfo.DisplayUserName(false, displayUserSettingsHelper), createByInfo.Id.ToString(), createByInfo.DisplayUserName(false, displayUserSettingsHelper));
 
-                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
+                // only a room reaches this point: CanChangeOwnerAsync refuses a folder that is not one
+                await webhookManager.PublishAsync(newFolder.IsAgent ? WebhookTrigger.AgentUpdated : WebhookTrigger.RoomUpdated, newFolder);
             }
 
             yield return newFolder;

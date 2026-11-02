@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Fichier ouvert par le script Document Builder : {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Application activée : {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Application désactivée : {0}</value>
+  </data>
 </root>

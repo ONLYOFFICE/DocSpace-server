@@ -64,6 +64,12 @@ internal static partial class RestorePortalTaskLogger
     [LoggerMessage(LogLevel.Error, "RunJob")]
     public static partial void ErrorRunJob(this ILogger<RestorePortalTask> logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Debug, "webhook deliveries unscheduled after the dump restore: {count}")]
+    public static partial void DebugClearWebhookSchedule(this ILogger<RestorePortalTask> logger, int count);
+
+    [LoggerMessage(LogLevel.Warning, "can't unschedule the webhook deliveries after the dump restore")]
+    public static partial void WarningCantClearWebhookSchedule(this ILogger<RestorePortalTask> logger, Exception exception);
+
     [LoggerMessage(LogLevel.Warning, "can't restore file ({module}:{path})")]
     public static partial void WarningCantRestoreFile(this ILogger<RestorePortalTask> logger, string module, string path, Exception exception);
 }

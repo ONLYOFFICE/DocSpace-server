@@ -210,7 +210,7 @@ public class DeleteVersionTests(
         var file = await CreateFileWithSecondVersion("Autotest DelVer SingleOp File");
 
         // Act
-        var operation = await DeleteVersionsAndWait(file.Id, [1], returnSingleOperation: true);
+        var operation = await DeleteVersionsAsSingleOperationAndWait(file.Id, [1]);
 
         // Assert
         operation.Should().NotBeNull();

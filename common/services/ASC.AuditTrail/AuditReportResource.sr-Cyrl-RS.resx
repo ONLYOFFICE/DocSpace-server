@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Датотеку је отворила скрипта Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Апликација омогућена: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Апликација онемогућена: {0}</value>
+  </data>
 </root>

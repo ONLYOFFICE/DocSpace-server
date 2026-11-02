@@ -8091,6 +8091,44 @@
               }
             }
           },
+          "402": {
+            "description": "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "403": {
             "description": "The caller cannot open the entry.",
             "content": {
@@ -8132,11 +8170,39 @@
             }
           },
           "429": {
-            "description": "The model provider is rate-limiting requests.",
+            "description": "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8152,11 +8218,39 @@
             }
           },
           "502": {
-            "description": "The model request failed; the detail is in the server log.",
+            "description": "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8176,7 +8270,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8368,6 +8490,44 @@
               }
             }
           },
+          "402": {
+            "description": "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "403": {
             "description": "The caller cannot read the entry, or cannot edit it when the values are written.",
             "content": {
@@ -8409,11 +8569,39 @@
             }
           },
           "429": {
-            "description": "The model provider is rate-limiting requests.",
+            "description": "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8429,11 +8617,39 @@
             }
           },
           "502": {
-            "description": "The model request failed; the detail is in the server log.",
+            "description": "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -8453,7 +8669,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -13021,8 +13265,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -13114,8 +13363,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -13211,8 +13465,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -13317,8 +13576,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -14623,6 +14887,13 @@
           "fileEntryType": {
             "description": "Tells a folder from a file, and so which of the two shapes the rest of the object has. A room is reported as a\r\nfolder here.",
             "$ref": "#/components/schemas/AiFileEntryType"
+          },
+          "entryKind": {
+            "examples": [
+              "file"
+            ],
+            "type": "string",
+            "description": "Which concrete type the object is: `file`, `thirdPartyFile`, `folder`, `thirdPartyFolder`. It is what tells the types apart in a list that mixes several of them; a response limited by `fields` may leave it out."
           }
         },
         "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
@@ -14835,8 +15106,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -15090,8 +15366,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -15182,8 +15463,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",
@@ -15224,8 +15510,13 @@
           },
           "count": {
             "type": "integer",
-            "description": "The total number of items in the response",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
             "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
           },
           "links": {
             "type": "array",

@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Tệp được mở bởi Script Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Đã bật ứng dụng: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Đã tắt ứng dụng: {0}</value>
+  </data>
 </root>

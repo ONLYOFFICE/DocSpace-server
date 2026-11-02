@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Το αρχείο άνοιξε από σενάριο Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Η εφαρμογή ενεργοποιήθηκε: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Η εφαρμογή απενεργοποιήθηκε: {0}</value>
+  </data>
 </root>

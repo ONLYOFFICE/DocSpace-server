@@ -76,13 +76,7 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
             return installExitCode;
         }
 
-        var packExitCode = await RunNpmAsync("pack", typeScriptSdkDirectory, cancellationToken);
-        if (packExitCode != 0)
-        {
-            return packExitCode;
-        }
-
-        return CopyPackages(typeScriptSdkDirectory);
+        return await RunNpmAsync("pack", typeScriptSdkDirectory, cancellationToken);
     }
 
     private static async Task<int> RunNpmAsync(string command, string workingDirectory, CancellationToken cancellationToken)
@@ -93,37 +87,5 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
             workingDirectory,
             cancellationToken,
             $"Failed to start npm {command}.");
-    }
-
-    private static int CopyPackages(string typeScriptSdkDirectory)
-    {
-        var packageTargetDirectory = Path.GetFullPath(
-            Path.Combine(typeScriptSdkDirectory, "..", "..", "..", "client", "libs", "ui-kit"));
-
-        if (!Directory.Exists(typeScriptSdkDirectory))
-        {
-            AnsiConsole.MarkupLine(
-                $"[red]{Markup.Escape($"Package source directory '{typeScriptSdkDirectory}' was not found after running npm pack.")}[/]");
-            return 1;
-        }
-
-        Directory.CreateDirectory(packageTargetDirectory);
-
-        var copiedPackages = 0;
-        foreach (var packagePath in Directory.EnumerateFiles(typeScriptSdkDirectory, "onlyoffice-docspace-api-sdk-*.tgz"))
-        {
-            var destinationPath = Path.Combine(packageTargetDirectory, Path.GetFileName(packagePath));
-            File.Copy(packagePath, destinationPath, overwrite: true);
-            copiedPackages++;
-        }
-
-        if (copiedPackages == 0)
-        {
-            AnsiConsole.MarkupLine(
-                $"[red]{Markup.Escape($"No .tgz files matching 'onlyoffice-docspace-api-sdk-*.tgz' were found in '{typeScriptSdkDirectory}' after running npm pack.")}[/]");
-            return 1;
-        }
-
-        return 0;
     }
 }

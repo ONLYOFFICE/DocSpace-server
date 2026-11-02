@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>تم فتح الملف بواسطة نص Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>تم تفعيل التطبيق: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>تم تعطيل التطبيق: {0}</value>
+  </data>
 </root>

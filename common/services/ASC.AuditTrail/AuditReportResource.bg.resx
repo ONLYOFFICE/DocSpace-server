@@ -1317,4 +1317,10 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Файлът е отворен от скрипт на Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Приложението е активирано: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Приложението е деактивирано: {0}</value>
+  </data>
 </root>
