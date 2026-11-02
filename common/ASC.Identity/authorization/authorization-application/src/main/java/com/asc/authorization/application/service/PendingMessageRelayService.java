@@ -58,7 +58,7 @@ public class PendingMessageRelayService {
 
   /** Sends one batch of due messages. */
   @Scheduled(fixedDelayString = "${IDENTITY_PENDING_MESSAGES_RELAY_INTERVAL:PT30S}")
-  @SchedulerLock(name = "pending_messages_relay", lockAtMostFor = "PT5M")
+  @SchedulerLock(name = "pending_messages_relay", lockAtMostFor = "PT1M")
   public void relay() {
     try {
       rabbitPersistableMessagePublisher.relayDue(BATCH_SIZE);
