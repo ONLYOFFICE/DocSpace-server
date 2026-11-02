@@ -35,13 +35,21 @@ package com.asc.registration.messaging.listener;
 
 import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
 import com.asc.common.service.transfer.message.ClientCacheRemoveEvent;
+import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientCreatedEvent;
 import com.asc.registration.core.domain.event.ClientDeletedEvent;
 import com.asc.registration.core.domain.event.ClientUpdatedEvent;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
@@ -54,10 +62,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ClientCacheEventListener {
+public class ClientCacheEventListener implements AutoCloseable {
+  private static final Duration BEFORE_COMMIT_WAIT = Duration.ofMillis(200);
+
   private final ClientCacheService clientCacheService;
   private final AuthorizationMessagePublisher<ClientCacheRemoveEvent>
       clientCacheRemoveMessagePublisher;
+  private final ExecutorService beforeCommitEvictions = Executors.newVirtualThreadPerTaskExecutor();
 
   /**
    * Handles client created events by populating the cache with the new client.
@@ -69,6 +80,72 @@ public class ClientCacheEventListener {
     log.debug(
         "Handling client created event for client ID: {}", event.getClient().getId().getValue());
     clientCacheService.put(event.getClient());
+  }
+
+  /**
+   * Evicts a client here and, through the broadcast, in every other region, before its change
+   * commits. Evicting an entry that turns out to be still valid only costs a refill, while a
+   * process that dies right after the commit would otherwise leave every region serving the old
+   * value until it expires. The eviction and broadcast after the commit still run.
+   */
+  private void evictBeforeCommit(Client client) {
+    var tenantId =
+        client.getClientTenantInfo() != null ? client.getClientTenantInfo().tenantId() : null;
+    if (tenantId == null) return;
+
+    var eviction =
+        CompletableFuture.runAsync(
+            () -> {
+              clientCacheService.evict(client.getId(), tenantId);
+              clientCacheRemoveMessagePublisher.publish(
+                  ClientCacheRemoveEvent.builder()
+                      .clientId(client.getId().getValue().toString())
+                      .tenantId(tenantId.getValue())
+                      .build());
+            },
+            beforeCommitEvictions);
+    try {
+      eviction.get(BEFORE_COMMIT_WAIT.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (TimeoutException e) {
+      log.warn(
+          "Eviction of client {} before the commit is taking longer than {}; committing without it",
+          client.getId().getValue(),
+          BEFORE_COMMIT_WAIT);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } catch (Exception e) {
+      log.warn("Could not evict client {} before the commit", client.getId().getValue(), e);
+    }
+  }
+
+  @Override
+  public void close() {
+    beforeCommitEvictions.close();
+  }
+
+  /**
+   * Evicts an updated client in every region before the change commits, so that a process that dies
+   * between the commit and {@link #handleClientUpdated} leaves no stale entry behind. A value
+   * refilled from the old row in between is removed by the eviction after the commit.
+   *
+   * @param event The client updated event.
+   */
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  public void evictBeforeUpdateCommits(ClientUpdatedEvent event) {
+    evictBeforeCommit(event.getClient());
+  }
+
+  /**
+   * Evicts a deleted client in every region before the delete commits, so that a process that dies
+   * between the commit and {@link #handleClientDeleted} does not leave the deleted client in any
+   * cache until it expires. A value refilled from the old row in between is removed by the eviction
+   * after the commit.
+   *
+   * @param event The client deleted event.
+   */
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  public void evictBeforeDeleteCommits(ClientDeletedEvent event) {
+    evictBeforeCommit(event.getClient());
   }
 
   /**
