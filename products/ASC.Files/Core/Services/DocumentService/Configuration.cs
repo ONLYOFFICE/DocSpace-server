@@ -930,6 +930,14 @@ public class CustomizationConfig<T>(
 
     public async Task<AiConfigDto> GetAIConfigAsync()
     {
+        if (!authContext.IsAuthenticated)
+        {
+            return new AiConfigDto
+            {
+                Disabled = true
+            };
+        }
+
         var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
         return new AiConfigDto
         {

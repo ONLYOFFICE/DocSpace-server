@@ -85,7 +85,7 @@ public class MetadataTemplateCreateTests(AspireAppFixture fixture) : MetadataApi
     [InlineData("A&B 'q' %20 ;")]
     public async Task CreateTemplate_WithUnicodeOrSpecialCharactersInTheName_KeepsTheName(string name)
     {
-        var created = await CreateTemplateAsync([], name);
+        var created = await CreateTemplateAsync(name: name);
 
         (await GetTemplateAsync(created.Id)).Name.Should().Be(name);
     }
@@ -96,7 +96,7 @@ public class MetadataTemplateCreateTests(AspireAppFixture fixture) : MetadataApi
         var existing = await CreateTemplateAsync();
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await CreateTemplateAsync([], existing.Name.ToUpperInvariant()));
+            async () => await CreateTemplateAsync(name: existing.Name.ToUpperInvariant()));
 
         exception.ErrorCode.Should().Be(400);
 
@@ -113,7 +113,7 @@ public class MetadataTemplateCreateTests(AspireAppFixture fixture) : MetadataApi
     {
         var before = (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Count;
 
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateTemplateAsync([], name));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateTemplateAsync(name: name));
 
         exception.ErrorCode.Should().Be(400);
         (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Count.Should().Be(before);
@@ -136,7 +136,7 @@ public class MetadataTemplateCreateTests(AspireAppFixture fixture) : MetadataApi
     {
         var name = new string('n', MetadataService.MaxNameLength);
 
-        var created = await CreateTemplateAsync([], name);
+        var created = await CreateTemplateAsync(name: name);
 
         created.Name.Should().Be(name);
     }
