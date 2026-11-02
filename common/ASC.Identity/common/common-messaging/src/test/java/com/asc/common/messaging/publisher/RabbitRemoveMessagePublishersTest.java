@@ -128,36 +128,43 @@ class RabbitRemoveMessagePublishersTest {
                 publisher ->
                     new RabbitAuthorizationRemoveMessagePublisher(publisher, INLINE)
                         .publish(clientRemoved),
-            clientRemoved),
+            clientRemoved,
+            true),
         Arguments.of(
             (AuthorizationMessagingConfiguration.ENTRY_EXCHANGE),
             (AuthorizationMessagePublisherAction)
                 publisher ->
                     new RabbitUserClientsRemoveMessagePublisher(publisher, INLINE)
                         .publish(userRemoved),
-            userRemoved),
+            userRemoved,
+            false),
         Arguments.of(
             (AuthorizationMessagingConfiguration.ENTRY_EXCHANGE),
             (AuthorizationMessagePublisherAction)
                 publisher ->
                     new RabbitTenantClientsRemoveMessagePublisher(publisher, INLINE)
                         .publish(tenantRemoved),
-            tenantRemoved));
+            tenantRemoved,
+            false));
   }
 
   @ParameterizedTest
   @MethodSource("authorizationPublisherCases")
-  void whenAuthorizationRemovalPublished_thenSendsReliablyNowAndForDelayedSecondRun(
-      String expectedExchange, AuthorizationMessagePublisherAction action, Object message) {
+  void whenAuthorizationRemovalPublished_thenSendsReliablyNowAndOnlyClientRemovalsRunAgainLater(
+      String expectedExchange,
+      AuthorizationMessagePublisherAction action,
+      Object message,
+      boolean runsAgainLater) {
     var reliable = mock(RabbitPersistableMessagePublisher.class);
 
     action.publish(reliable);
 
     var order = inOrder(reliable);
     order.verify(reliable).send(expectedExchange, Strings.EMPTY, message);
-    order
-        .verify(reliable)
-        .send(AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE, Strings.EMPTY, message);
+    if (runsAgainLater)
+      order
+          .verify(reliable)
+          .send(AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE, Strings.EMPTY, message);
     verifyNoMoreInteractions(reliable);
   }
 
@@ -177,8 +184,7 @@ class RabbitRemoveMessagePublishersTest {
   }
 
   @Test
-  void
-      whenClientCacheTenantRemovalPublished_thenSendsToEveryRegionAndToLocalAuthorizationQueue() {
+  void whenClientCacheTenantRemovalPublished_thenSendsToEveryRegionAndToLocalAuthorizationQueue() {
     var amqpClient = mock(AmqpTemplate.class);
     var message = ClientCacheTenantRemoveEvent.builder().tenantId(TENANT_ID).build();
 
@@ -232,5 +238,19 @@ class RabbitRemoveMessagePublishersTest {
     verifyNoInteractions(reliable);
     held.forEach(Runnable::run);
     verify(reliable, times(2)).send(anyString(), anyString(), any());
+  }
+
+  @Test
+  void givenFirstCleanupCanNeitherBeSentNorKept_whenPublished_thenDelayedOneStillSent() {
+    var reliable = mock(RabbitPersistableMessagePublisher.class);
+    var message = ClientRemovedEvent.builder().clientId(CLIENT_ID).build();
+    doThrow(new IllegalStateException("broker and store down"))
+        .when(reliable)
+        .send(AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+
+    new RabbitAuthorizationRemoveMessagePublisher(reliable, INLINE).publish(message);
+
+    verify(reliable)
+        .send(AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE, Strings.EMPTY, message);
   }
 }

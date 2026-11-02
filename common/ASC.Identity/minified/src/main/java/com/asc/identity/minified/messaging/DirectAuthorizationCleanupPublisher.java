@@ -166,7 +166,6 @@ public class DirectAuthorizationCleanupPublisher {
   public static class UserClientsRemovedPublisher
       implements AuthorizationMessagePublisher<UserClientsRemovedEvent> {
     private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
-    private final DelayedCleanup delayedCleanup;
 
     /**
      * Deletes all authorizations and consents the given user made, and those made to the clients
@@ -179,11 +178,6 @@ public class DirectAuthorizationCleanupPublisher {
     public void publish(UserClientsRemovedEvent message) {
       log.info("Directly cleaning up authorizations for user: {}", message.getUserId());
       try {
-        delayedCleanup.schedule(
-            "user " + message.getUserId(),
-            () ->
-                authorizationMessagingCleanupService.onUserRemoved(
-                    message.getTenantId(), message.getUserId()));
         authorizationMessagingCleanupService.onUserRemoved(
             message.getTenantId(), message.getUserId());
         log.info("Authorizations and consents for user {} have been removed", message.getUserId());
@@ -208,7 +202,6 @@ public class DirectAuthorizationCleanupPublisher {
   public static class TenantClientsRemovedPublisher
       implements AuthorizationMessagePublisher<TenantClientsRemovedEvent> {
     private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
-    private final DelayedCleanup delayedCleanup;
 
     /**
      * Deletes all consents and authorizations the users of the specified tenant made, and those
@@ -221,9 +214,6 @@ public class DirectAuthorizationCleanupPublisher {
     public void publish(TenantClientsRemovedEvent message) {
       log.info("Directly cleaning up authorizations for tenant: {}", message.getTenantId());
       try {
-        delayedCleanup.schedule(
-            "tenant " + message.getTenantId(),
-            () -> authorizationMessagingCleanupService.onTenantRemoved(message.getTenantId()));
         authorizationMessagingCleanupService.onTenantRemoved(message.getTenantId());
         log.info(
             "Authorizations and consents for tenant {} have been removed", message.getTenantId());

@@ -48,6 +48,6 @@ public class RabbitAuthorizationRemoveMessagePublisher
     extends AuthorizationCleanupPublisher<ClientRemovedEvent> {
   public RabbitAuthorizationRemoveMessagePublisher(
       RabbitPersistableMessagePublisher publisher, RabbitBackgroundPublisher background) {
-    super(publisher, background);
+    super(publisher, background, true);
   }
 }

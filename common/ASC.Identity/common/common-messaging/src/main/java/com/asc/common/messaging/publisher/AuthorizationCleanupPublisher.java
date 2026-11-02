@@ -39,10 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
 /**
- * Publishes a cleanup of authorizations and consents, twice: for every region after the usual short
- * delay, and once more a minute later to remove grants that requests already in flight wrote after
- * the first run. Both go through {@link RabbitPersistableMessagePublisher}, so a broker outage
- * delays the cleanup instead of losing it.
+ * Publishes a cleanup of authorizations and consents for every region after the usual short delay.
+ * A cleanup that may race requests still in flight is published once more for a run a minute later,
+ * which removes grants those requests wrote after the first run. Every message goes through {@link
+ * RabbitPersistableMessagePublisher}, so a broker outage delays the cleanup instead of losing it.
  *
  * @param <E> the type of the cleanup event
  */
@@ -50,15 +50,22 @@ import org.apache.logging.log4j.util.Strings;
 public abstract class AuthorizationCleanupPublisher<E> implements AuthorizationMessagePublisher<E> {
   private final RabbitPersistableMessagePublisher publisher;
   private final RabbitBackgroundPublisher background;
+  private final boolean runAgainLater;
 
   /**
    * @param publisher the publisher that keeps messages the broker could not take
    * @param background runs the sends off the caller's thread
+   * @param runAgainLater whether to publish the delayed second run too; only a cleanup scoped to
+   *     the removed clients may run again, since one scoped to a user or a tenant would also remove
+   *     grants made after it
    */
   protected AuthorizationCleanupPublisher(
-      RabbitPersistableMessagePublisher publisher, RabbitBackgroundPublisher background) {
+      RabbitPersistableMessagePublisher publisher,
+      RabbitBackgroundPublisher background,
+      boolean runAgainLater) {
     this.publisher = publisher;
     this.background = background;
+    this.runAgainLater = runAgainLater;
   }
 
   @Override
@@ -66,11 +73,16 @@ public abstract class AuthorizationCleanupPublisher<E> implements AuthorizationM
     log.debug("Broadcasting a cleanup event: {}", message);
     background.run(
         message,
-        () -> {
-          publisher.send(
-              AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
-          publisher.send(
-              AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE, Strings.EMPTY, message);
-        });
+        () ->
+            publisher.send(
+                AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message));
+    if (!runAgainLater) return;
+    background.run(
+        message,
+        () ->
+            publisher.send(
+                AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE,
+                Strings.EMPTY,
+                message));
   }
 }
