@@ -23,6 +23,17 @@
             <artifactId>common-service</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-utilities</artifactId>
+        </dependency>
+
+        <!-- Spring JDBC Dependencies -->
+        <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
         <!-- Spring AMQP Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

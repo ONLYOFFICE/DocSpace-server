@@ -34,6 +34,8 @@
 package com.asc.authorization.data.consent.repository;
 
 import com.asc.authorization.data.consent.entity.ConsentEntity;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -178,4 +180,15 @@ public interface JpaConsentRepository
           "DELETE FROM identity_authorizations WHERE registered_client_id = :registeredClientId",
       nativeQuery = true)
   void deleteAllAuthorizationsByClientId(@Param("registeredClientId") String registeredClientId);
+
+  /**
+   * Returns when the most recently written consent of a client was written.
+   *
+   * @param registeredClientId the client whose consents to look at
+   * @return the latest modification time, or empty if the client has no consents
+   */
+  @Query(
+      "SELECT MAX(c.modifiedAt) FROM ConsentEntity c WHERE c.registeredClientId = :registeredClientId")
+  Optional<ZonedDateTime> findLatestModificationByClientId(
+      @Param("registeredClientId") String registeredClientId);
 }

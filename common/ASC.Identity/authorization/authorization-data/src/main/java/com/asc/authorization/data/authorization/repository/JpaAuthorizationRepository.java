@@ -226,4 +226,15 @@ public interface JpaAuthorizationRepository
       @Param("principalId") String principalId,
       @Param("lastModifiedAt") ZonedDateTime lastModifiedAt,
       @Param("limit") int limit);
+
+  /**
+   * Returns when the most recently written authorization of a client was written.
+   *
+   * @param registeredClientId the client whose authorizations to look at
+   * @return the latest modification time, or empty if the client has no authorizations
+   */
+  @Query(
+      "SELECT MAX(a.modifiedAt) FROM AuthorizationEntity a WHERE a.registeredClientId = :registeredClientId")
+  Optional<ZonedDateTime> findLatestModificationByClientId(
+      @Param("registeredClientId") String registeredClientId);
 }
