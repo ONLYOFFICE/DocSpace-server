@@ -71,18 +71,11 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo.Operation = operation;
 
         var files = Directory.GetFiles(path);
-        if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
+        _takeout = files.FirstOrDefault(IsSupportedArchive);
+        if (_takeout == null)
         {
             MigrationInfo.FailedArchives = files.ToList();
-            throw new Exception("Archive must be .zip");
-        }
-        foreach (var t in files)
-        {
-            if (t.EndsWith(".zip"))
-            {
-                _takeout = t;
-                break;
-            }
+            throw new Exception("Archive must be .zip, .tar.gz or .tgz");
         }
         MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
@@ -97,35 +90,14 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         try
         {
-            double progress = 5;
             try
             {
-                await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
-                foreach (var entry in archive.Entries)
+                var extracted = IsZip(_takeout)
+                    ? await ExtractZipAsync(reportProgress)
+                    : await ExtractTarGzAsync(reportProgress);
+                if (!extracted)
                 {
-                    if (reportProgress)
-                    {
-                        progress += 45d / archive.Entries.Count;
-                        await ReportProgressAsync(progress, MigrationResource.Unzipping);
-                    }
-                    var destPath = GetSafeExtractPath(TmpFolder, entry.FullName);
-                    if (string.IsNullOrEmpty(entry.Name))
-                    {
-                        Directory.CreateDirectory(destPath);
-                    }
-                    else
-                    {
-                        var dir = Path.GetDirectoryName(destPath);
-                        if (!Directory.Exists(dir))
-                        {
-                            Directory.CreateDirectory(dir);
-                        }
-                        await entry.ExtractToFileAsync(destPath, _cancellationToken);
-                    }
-                    if (_cancellationToken.IsCancellationRequested && reportProgress)
-                    {
-                        return null;
-                    }
+                    return null;
                 }
             }
             catch (Exception ex)
@@ -149,7 +121,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(60, MigrationResource.DumpParse);
             }
             var users = DbExtractUser(dbFile);
-            progress = 60;
+            double progress = 60;
             foreach (var user in users)
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -234,6 +206,83 @@ public class NextcloudWorkspaceMigrator : Migrator
             await ReportProgressAsync(100, MigrationResource.DataProcessingCompleted);
         }
         return MigrationInfo.ToApiInfo();
+    }
+
+    private static bool IsSupportedArchive(string file)
+    {
+        return IsZip(file)
+            || file.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsZip(string file)
+    {
+        return file.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<bool> ExtractZipAsync(bool reportProgress)
+    {
+        double progress = 5;
+        await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
+        foreach (var entry in archive.Entries)
+        {
+            if (reportProgress)
+            {
+                progress += 45d / archive.Entries.Count;
+                await ReportProgressAsync(progress, MigrationResource.Unzipping);
+            }
+            var destPath = GetSafeExtractPath(TmpFolder, entry.FullName);
+            if (string.IsNullOrEmpty(entry.Name))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+            else
+            {
+                var dir = Path.GetDirectoryName(destPath);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                await entry.ExtractToFileAsync(destPath, _cancellationToken);
+            }
+            if (_cancellationToken.IsCancellationRequested && reportProgress)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private async Task<bool> ExtractTarGzAsync(bool reportProgress)
+    {
+        await using var fileStream = File.OpenRead(_takeout);
+        await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+        await using var reader = new TarReader(gzipStream);
+        while (await reader.GetNextEntryAsync(cancellationToken: _cancellationToken) is { } entry)
+        {
+            if (reportProgress)
+            {
+                // a gzip stream has no entry count up front, so progress follows the compressed bytes read
+                await ReportProgressAsync(5 + 45d * fileStream.Position / fileStream.Length, MigrationResource.Unzipping);
+            }
+
+            // symbolic and hard links are skipped: their target may lie outside the extraction folder
+            if (entry.EntryType == TarEntryType.Directory)
+            {
+                Directory.CreateDirectory(GetSafeExtractPath(TmpFolder, entry.Name));
+            }
+            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
+            {
+                var destPath = GetSafeExtractPath(TmpFolder, entry.Name);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                await entry.ExtractToFileAsync(destPath, false, _cancellationToken);
+            }
+            if (_cancellationToken.IsCancellationRequested && reportProgress)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void DbExtractGroup(string dbFile)

@@ -36,7 +36,9 @@ extern alias ASCWebApi;
 
 global using System.Collections.Concurrent;
 global using System.Diagnostics;
+global using System.Formats.Tar;
 global using System.Globalization;
+global using System.IO.Compression;
 global using System.Net;
 global using System.Net.Http.Json;
 global using System.Security.Cryptography;
