@@ -156,6 +156,12 @@ public class RabbitPersistableMessagePublisher {
     var sent = 0;
     for (var pending : store.findDue(limit)) {
       if (pending.ageSeconds() > MAX_PENDING_AGE.toSeconds()) {
+        log.error(
+            "Giving up on pending message {} for exchange {} after {} attempts: kept longer than {}",
+            pending.id(),
+            pending.exchange(),
+            pending.attempts(),
+            MAX_PENDING_AGE);
         store.delete(pending.id());
         continue;
       }
