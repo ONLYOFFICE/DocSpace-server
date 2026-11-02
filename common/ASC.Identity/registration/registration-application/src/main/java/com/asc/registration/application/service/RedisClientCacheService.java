@@ -36,6 +36,7 @@ package com.asc.registration.application.service;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.common.utilities.cache.CompositeCache;
 import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
 import com.asc.registration.application.transfer.CachedClient;
@@ -120,6 +121,28 @@ public class RedisClientCacheService extends CompositeCache<Client> implements C
     }
 
     write(client.getId().getValue().toString(), client);
+  }
+
+  @Override
+  public CacheTicket ticket(ClientId clientId) {
+    return ticket(clientId.getValue().toString());
+  }
+
+  /**
+   * Stores a client read from the store, unless the cache was invalidated since {@code ticket} was
+   * taken.
+   *
+   * @param client The client read from the store. Must not be null and must have a non-null ID.
+   * @param ticket The ticket taken with {@link #ticket(ClientId)} before the store was read.
+   */
+  @Override
+  public void putUnlessInvalidated(Client client, CacheTicket ticket) {
+    if (client == null || client.getId() == null) {
+      log.warn("Attempted to cache null client or client with null ID");
+      return;
+    }
+
+    writeUnlessInvalidated(client.getId().getValue().toString(), client, ticket);
   }
 
   /**
