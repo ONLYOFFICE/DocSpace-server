@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,48 +31,40 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Tests.Tests._03_Rooms.Apps;
+namespace ASC.Files.Core.Data;
 
-/// <summary>
-/// Trashing the <c>.ai</c> folder frees the room's slot and turns it into a regular folder; restoring
-/// it to the room root makes it the room's <c>Ai</c> folder again.
-/// </summary>
-[Trait("Category", "Rooms")]
-[Trait("Feature", "AppsFolder")]
-public class AppsFolderTrashTests(
-    AspireAppFixture fixture)
-    : AppsFolderTestBase(fixture)
+[Scope]
+public class SkillDao(IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    [Fact]
-    public async Task DeleteAppsFolder_ToTrash_FreesRoomSlot()
+    private static readonly Comparison<Skill> _byTitle = (a, b) =>
     {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var room = await CreateSmartRoom("Autotest Apps Trash");
-        var apps = await CreateAppsFolder(room.Id);
+        var byTitle = string.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
 
-        // Act
-        await DeleteToTrashAndWait(apps.Id);
+        return byTitle != 0 ? byTitle : a.FileId.CompareTo(b.FileId);
+    };
 
-        // Assert
-        (await GetFolderTitles(room.Id)).Should().NotContain(AppsTitle);
-        await AssertAppsFolderAbsent(room.Id);
-    }
-
-    [Fact]
-    public async Task RestoreAppsFolder_FromTrashToRoomRoot_BecomesAppsFolderAgain()
+    public async Task<Dictionary<int, List<Skill>>> GetSkillsAsync(int tenantId, IEnumerable<int> roomIds)
     {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var room = await CreateSmartRoom("Autotest Apps Restore");
-        var apps = await CreateAppsFolder(room.Id);
-        await DeleteToTrashAndWait(apps.Id);
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Act
-        await MoveAndWait(apps.Id, room.Id);
+        var result = new Dictionary<int, List<Skill>>();
 
-        // Assert
-        (await GetFolderTitles(room.Id)).Should().Contain(AppsTitle);
-        await AssertAppsFolderPresent(room.Id);
+        await foreach (var skill in filesDbContext.SkillsByRoomsAsync(tenantId, roomIds))
+        {
+            if (!result.TryGetValue(skill.RoomId, out var skills))
+            {
+                skills = [];
+                result[skill.RoomId] = skills;
+            }
+
+            skills.Add(skill);
+        }
+
+        foreach (var skills in result.Values)
+        {
+            skills.Sort(_byTitle);
+        }
+
+        return result;
     }
 }

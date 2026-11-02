@@ -108,7 +108,8 @@ public class FileStorageService //: IFileStorageService
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
-    EncryptionLoginProvider encryptionLoginProvider)
+    EncryptionLoginProvider encryptionLoginProvider,
+    AiAccessibility aiAccessibility)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
@@ -241,9 +242,9 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
-            if (parent.RootFolderType == FolderType.VirtualRooms)
+            if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub)
             {
-                parentRoom = !parent.IsRoom && parent.FolderType != FolderType.VirtualRooms ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+                parentRoom = !parent.IsRoom && !DocSpaceHelper.IsRoomsSectionRoot(parent.FolderType) ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
             }
 
             if (!await fileSecurity.CanReadAsync(parent))
@@ -321,9 +322,9 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
-            if (parent.RootFolderType == FolderType.VirtualRooms)
+            if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub)
             {
-                parentRoom = !parent.IsRoom && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+                parentRoom = !parent.IsRoom && !DocSpaceHelper.IsRoomsSectionRoot(parent.FolderType) && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
 
                 parent.ParentRoomType = parentRoom.FolderType;
                 parent.ParentRoomCreatedBy = parentRoom.CreateBy;
@@ -405,6 +406,7 @@ public class FileStorageService //: IFileStorageService
             // so the requested FormTemplates area must be preserved to keep the split.
             FolderType.RoomTemplates => searchArea == SearchArea.FormTemplates ? SearchArea.FormTemplates : SearchArea.Templates,
             FolderType.AiAgents => SearchArea.AiAgents,
+            FolderType.AiHub => SearchArea.AiHub,
             FolderType.Forms => SearchArea.Forms,
             _ => searchArea
         };
@@ -663,13 +665,27 @@ public class FileStorageService //: IFileStorageService
         bool? sendFormToExternalDB = null,
         bool? saveFormAsXLSX = null)
     {
-        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
-
         var tenantId = tenantManager.GetCurrentTenantId();
-        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
+        if (folderType.IsAiHubRoom() && (privacy || indexing.HasValue || lifetime != null || denyDownload.HasValue || watermark != null || chatSettings != null ||
+                                          sendFormToExternalDB.HasValue || saveFormAsXLSX.HasValue || (quota.HasValue && folderType == FolderType.AiProjectRoom)))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(roomType));
+        }
+
+        await CheckQuotaFeatureAsync<TenantRoomQuotaSettings>(quota);
         await CheckPublicRoomCreationAsync(folderType);
+        await CheckKnowledgeRoomCreationAsync(folderType);
+
+        if (folderType.IsAiHubRoom())
+        {
+            var aiHubId = await globalFolderHelper.GetFolderAiHubAsync();
+
+            return await CreateRoomAsync(() => InternalCreateFolderAsync(aiHubId, title, folderType, privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings, sendFormToExternalDB, saveFormAsXLSX));
+        }
+
+        var parentId = await globalFolderHelper.GetFolderVirtualRooms();
 
         return await CreateRoomAsync(async () =>
         {
@@ -749,6 +765,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderType = DocSpaceHelper.MapToFolderType(roomType);
 
+        if (folderType.IsAiHubRoom())
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
         await CheckPublicRoomCreationAsync(folderType);
 
         var room = await CreateRoomAsync(async () =>
@@ -813,6 +834,11 @@ public class FileStorageService //: IFileStorageService
         if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (room.FolderType.IsAiHubRoom())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         if (room.RootId == await globalFolderHelper.FolderArchiveAsync)
@@ -971,6 +997,11 @@ public class FileStorageService //: IFileStorageService
         var template = await folderDao.GetFolderAsync(templateId);
 
         await CheckPublicRoomCreationAsync(template.FolderType);
+
+        if (template.FolderType.IsAiHubRoom())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
 
         WatermarkRequestDto watermarkDto = null;
         if (watermark != null)
@@ -1156,7 +1187,12 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        if (isRoom && (parent.FolderType == FolderType.AiHub) != folderType.IsAiHubRoom())
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1306,12 +1342,16 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<Folder<int>> GetRoomAiFolderAsync(int roomId)
+    /// <summary>
+    /// The folder whose Markdown files are the AI chat skills of a room: the root of an Instructions room.
+    /// Any other room has no skills folder and is answered as not found.
+    /// </summary>
+    public async Task<Folder<int>> GetRoomSkillsFolderAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
 
-        if (room is not { IsRoom: true })
+        if (room is not { IsRoom: true, FolderType: FolderType.InstructionsRoom })
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
@@ -1321,7 +1361,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        return await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
+        return room;
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
@@ -1466,6 +1506,13 @@ public class FileStorageService //: IFileStorageService
         // ArgumentException is what the middleware maps to 400; BadHttpRequestException is not in
         // that table and would surface as 500.
         if (updateData.ChatSettings != null && folder.FolderType != FolderType.AiRoom)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
+        }
+
+        if (folder.FolderType.IsAiHubRoom() && (updateData.Indexing.HasValue || updateData.DenyDownload.HasValue || updateData.Lifetime != null || updateData.Watermark != null ||
+                                                 updateData.SendFormToExternalDB.HasValue || updateData.SaveFormAsXLSX.HasValue ||
+                                                 (updateData.Quota.HasValue && folder.FolderType == FolderType.AiProjectRoom)))
         {
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
         }
@@ -1867,10 +1914,13 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.AiAgents &&
+                            folder.FolderType != FolderType.AiProjectRoom &&
+                            folder.FolderType != FolderType.AiHub &&
                             folder.FolderType != FolderType.RoomTemplates &&
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
-                            folder.FolderType != FolderType.Forms;
+                            folder.FolderType != FolderType.Forms &&
+                            folder.FolderType != FolderType.KnowledgeRoom;
 
             if (!canCreate)
             {
@@ -3707,12 +3757,15 @@ public class FileStorageService //: IFileStorageService
     {
         var entries = await GetEntriesAsync(await globalFolderHelper.GetFolderVirtualRooms());
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
+        entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiHubAsync()));
 
-        var ids = entries.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
-        var thirdIds = entries.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+        var ids = entries.OfType<Folder<int>>().Where(f => f.FolderType != FolderType.AiProjectRoom).Select(f => f.Id);
+        var thirdIds = entries.OfType<Folder<string>>().Select(f => f.Id);
+        var projectIds = entries.OfType<Folder<int>>().Where(f => f.FolderType == FolderType.AiProjectRoom).Select(f => f.Id);
 
         await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(projectIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.Read).ToListAsync();
 
         return;
 
@@ -3742,19 +3795,31 @@ public class FileStorageService //: IFileStorageService
             .Where(r => r.EntryType == FileEntryType.Folder && r.Share == FileShare.RoomManager)
             .ToListAsync();
 
+        var intEntryIds = shareRercords
+            .Select(r => int.TryParse(r.EntryId, out var id) ? id : (int?)null)
+            .OfType<int>()
+            .ToList();
+
+        var projectIds = intEntryIds.Count == 0
+            ? []
+            : await daoFactory.GetFolderDao<int>()
+                .GetRoomsAsync(intEntryIds, [FilterType.AiProjectRooms], null, Guid.Empty, null, false, false, false, ProviderFilter.None, Guid.Empty, null, parentsIds: null)
+                .Select(f => f.Id)
+                .ToHashSetAsync();
+
         foreach (var shareRercord in shareRercords)
         {
             if (int.TryParse(shareRercord.EntryId, out var intEntryId))
             {
-                await SetAccessAsync(intEntryId);
+                await SetAccessAsync(intEntryId, projectIds.Contains(intEntryId) ? FileShare.Read : FileShare.ContentCreator);
             }
             else
             {
-                await SetAccessAsync(shareRercord.EntryId);
+                await SetAccessAsync(shareRercord.EntryId, FileShare.ContentCreator);
             }
         }
 
-        async Task SetAccessAsync<T>(T entryId)
+        async Task SetAccessAsync<T>(T entryId, FileShare access)
         {
             await SetAceObjectAsync(new AceCollection<T>
             {
@@ -3762,7 +3827,7 @@ public class FileStorageService //: IFileStorageService
                 Folders = [entryId],
                 Aces =
                 [
-                    new AceWrapper { Access = FileShare.ContentCreator, Id = user }
+                    new AceWrapper { Access = access, Id = user }
                 ]
             }, false, socket: false, beforeOwnerChange: true);
         }
@@ -5021,9 +5086,12 @@ public class FileStorageService //: IFileStorageService
                 var internalFolders = await daoFactory.GetFolderDao<int>().GetFoldersAsync(internalIds).ToListAsync();
 
                 var agentTagsCount = internalFolders.Count(x => x.IsAgent);
-                var roomTagsCount = tags.Count - agentTagsCount;
+                var aiHubTagsCount = internalFolders.Count(x => x.RootFolderType == FolderType.AiHub);
+                var roomTagsCount = tags.Count - agentTagsCount - aiHubTagsCount;
 
-                var tagsCount = room.IsAgent ? agentTagsCount : roomTagsCount;
+                var tagsCount = room.IsAgent
+                    ? agentTagsCount
+                    : room.RootFolderType == FolderType.AiHub ? aiHubTagsCount : roomTagsCount;
 
                 if (tagsCount >= fileUtilityConfiguration.MaxPinnedRooms)
                 {
@@ -5361,7 +5429,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents and not FolderType.AiHub)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -6588,7 +6656,7 @@ public class FileStorageService //: IFileStorageService
 
     private async Task DetermineParentRoomType<T>(FileEntry<T> entry)
     {
-        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null)
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && entry.ParentRoomType == null)
         {
             var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
             if (room != null)
@@ -6659,6 +6727,19 @@ public class FileStorageService //: IFileStorageService
         if (await externalShare.IsPublicRoomCreationRestrictedAsync())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
+
+    private async Task CheckKnowledgeRoomCreationAsync(FolderType folderType)
+    {
+        if (folderType != FolderType.KnowledgeRoom)
+        {
+            return;
+        }
+
+        if (!await aiAccessibility.IsVectorizationEnabledAsync())
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
     }
 

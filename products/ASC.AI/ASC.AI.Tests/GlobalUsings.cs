@@ -40,8 +40,8 @@ global using System.Text.Json;
 
 global using ASC.AI.Integration.Profiles;
 global using ASC.AI.Integration.ToolPrefs;
-global using ASC.Core.Common.EF.Model.Ai.Legacy;
 global using ASC.AI.Tests.ApiFactories;
+global using ASC.Core.Common.EF.Model.Ai.Legacy;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
@@ -63,6 +63,7 @@ global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;
 global using MessagesPageDto = ASCAi::ASC.AI.Models.ResponseDto.MessagesPageDto;
+global using OperationsApi = DocSpace.API.SDK.Api.Files.OperationsApi;
 global using PreferencesDto = ASCAi::ASC.AI.Models.ResponseDto.PreferencesDto;
 global using ProfileDto = ASCAi::ASC.AI.Models.ResponseDto.ProfileDto;
 global using PromptDto = ASCAi::ASC.AI.Models.ResponseDto.PromptDto;

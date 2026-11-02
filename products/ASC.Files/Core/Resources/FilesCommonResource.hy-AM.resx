@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Չատի արդյունքներ</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Սենյակն արդեն պարունակում է .ai թղթապանակ</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Պահոցը չի կարող անջատվել, մինչ սենյակն օգտագործում է այն։ Փոխարենը ջնջեք սենյակը</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Որոնել թղթապանակի մետատվյալներում</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>ԱԲ նախագծին կարելի է կապել առավելագույնը {0} հրահանգների սենյակ</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>ԱԲ նախագծին կարելի է կապել առավելագույնը {0} գիտելիքների սենյակ</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Այս սենյակները հնարավոր չէ կապել ԱԲ նախագծին՝ {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Հրահանգների սենյակում կարելի է ավելացնել միայն Markdown (.md) ֆայլեր</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Հրահանգների սենյակը կարող է պարունակել առավելագույնը {0} հմտություն</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Հմտության նկարագրությունը պետք է լինի 1-ից 1024 նիշ և չպետք է պարունակի XML պիտակներ</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Հմտության ֆայլը պետք է սկսվի YAML frontmatter բլոկով երկու --- տողերի միջև՝ name և description դաշտերով</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Հմտության անունը պետք է լինի 1-ից 64 նիշ, պարունակի միայն փոքրատառեր, թվանշաններ և առանձին գծիկներ և չսկսվի կամ չավարտվի գծիկով</value>
   </data>
 </root>

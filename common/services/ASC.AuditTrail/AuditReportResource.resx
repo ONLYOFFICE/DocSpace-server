@@ -180,6 +180,9 @@
   <data name="AiProfileUpdated" xml:space="preserve">
     <value>AI model profile updated: {0}</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI model of AI project {0} changed to {1}</value>
+  </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
   </data>
@@ -1325,5 +1328,11 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>App disabled: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Rooms linked to AI project {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Rooms unlinked from AI project {0}: [{1}]</value>
   </data>
 </root>

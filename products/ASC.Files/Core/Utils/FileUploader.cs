@@ -171,7 +171,7 @@ public class FileUploader(
 
             if (!string.IsNullOrEmpty(subFolderTitle))
             {
-                if (folder.FolderType is FolderType.Knowledge)
+                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
@@ -280,7 +280,9 @@ public class FileUploader(
 
         var folder = await folderDao.GetFolderAsync(folderId);
 
-        if (folder is { FolderType: FolderType.Knowledge })
+        var (_, _, roomType) = folder != null ? await folderDao.GetParentRoomInfoFromFileEntryAsync(folder) : default;
+
+        if (folder is { FolderType: FolderType.Knowledge } || roomType == FolderType.KnowledgeRoom)
         {
             if (!vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
             {

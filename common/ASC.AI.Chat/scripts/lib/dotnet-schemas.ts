@@ -38,7 +38,7 @@ import { claim } from "./schema-names.js";
 
 // Reuse of the .NET AI service's OpenAPI document for the proxy routes.
 //
-// The `/agents/*` and `/config/*` routes forward verbatim to the .NET AI
+// The `/config/*` routes forward verbatim to the .NET AI
 // service and return its raw DocSpace response envelope (the `*Wrapper`
 // schemas). Rather than re-describe those responses by hand — and drift from
 // the C# DTOs' XML docs — this module reads the sibling `ai_2.0.json` (already
@@ -78,19 +78,10 @@ const SCHEMA_NAMESPACE = "Ai";
 // Local operationId → .NET AI operationId. Each local proxy route forwards
 // verbatim to the .NET AI service and returns the same-shaped response as the
 // .NET operation named here; kept in sync by hand with `apiCatalog.ts` (the
-// custom routes) and the .NET controllers (`AgentsController`,
-// `SettingsController`). Only operations with a JSON 200 response belong here —
+// custom routes) and the .NET controllers (`SettingsController`). Only operations with a JSON 200 response belong here —
 // fire-and-forget routes (e.g. `vectorization/tasks`, which returns no body)
 // are intentionally omitted and fall back to the generic response shape.
 const PROXY_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
-  aiAgentsList: "getAgents",
-  aiAgentsCreate: "createAgent",
-  aiAgentsNews: "getAgentsNewItems",
-  aiAgentsGet: "getAgentInfo",
-  aiAgentsUpdate: "updateAgent",
-  aiAgentsDelete: "deleteAgent",
-  aiAgentsUpdateQuota: "updateAgentsQuota",
-  aiAgentsResetQuota: "resetAgentsQuota",
   aiSettingsGet: "getAiSettings",
   aiSettingsGetVectorization: "getVectorizationSettings",
   aiSettingsSetVectorization: "setVectorizationSettings",

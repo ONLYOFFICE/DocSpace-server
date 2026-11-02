@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>聊天输出</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>该房间已包含 .ai 文件夹</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>房间使用存储时无法断开连接。请改为删除该房间</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>在文件夹元数据中搜索</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>一个 AI 项目最多可关联 {0} 个指令房间</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>一个 AI 项目最多可关联 {0} 个知识房间</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>无法将这些房间关联到 AI 项目：{0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>指令房间中只能添加 Markdown (.md) 文件</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>一个指令房间最多可包含 {0} 个技能</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>技能描述必须为 1 到 1024 个字符，且不能包含 XML 标签</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>技能文件必须以位于两行 --- 之间、包含 name 和 description 字段的 YAML frontmatter 块开头</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>技能名称必须为 1 到 64 个字符，只能包含小写字母、数字和单个连字符，且不能以连字符开头或结尾</value>
   </data>
 </root>

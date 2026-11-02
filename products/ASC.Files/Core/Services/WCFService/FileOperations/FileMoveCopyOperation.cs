@@ -297,7 +297,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                 try
                                 {
-                                    if (isRoomCopying)
+                                    if (isRoomCopying && toFolder.FolderType == FolderType.VirtualRooms)
                                     {
                                         roomsCountCheckLock = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(CurrentTenantId));
                                         await countRoomChecker.CheckAppend();
@@ -555,11 +555,8 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                         else
                                         {
                                             // Duplicate keeps both folders, so - as a copy does - the moved one arrives under
-                                            // the first free title of the destination. The system .ai folder is never renamed:
-                                            // it keeps its title, and the folder DAO refuses a second one in a room root
-                                            var newTitle = folder.Title == FileConstant.AiFolderTitle
-                                                ? null
-                                                : await GetDuplicateTitleAsync(folder.Title, folder.ParentId, toFolderId, folderDao.GetAvailableTitleAsync);
+                                            // the first free title of the destination
+                                            var newTitle = await GetDuplicateTitleAsync(folder.Title, folder.ParentId, toFolderId, _resolveType, folderDao.GetAvailableTitleAsync);
 
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
@@ -685,6 +682,8 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
         var toFolderId = toFolder.Id;
         var sb = new StringBuilder();
 
+        var resolveType = toParentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom) ? FileConflictResolveType.Duplicate : _resolveType;
+
         // files of one operation usually share a handful of parents
         var parentFoldersCache = new Dictionary<T, Folder<T>>();
 
@@ -717,7 +716,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
             var file = await FileDao.GetFileAsync(fileId);
 
-            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, _resolveType);
+            Err = await permissionsManager.CheckFilesPermissionsAsync(file, toFolder, _copy, resolveType);
 
             var errorMsg = await permissionsManager.CheckFilesSecurityPermissionsAsync([file], checkPermissions);
 
@@ -733,12 +732,12 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 }
 
                 var deleteLinks = file.RootFolderType == FolderType.USER &&
-                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.TRASH;
+                                  toFolder.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive or FolderType.TRASH;
 
                 var parentFolder = await GetParentFolderAsync(file.ParentId);
                 try
                 {
-                    var conflict = _resolveType == FileConflictResolveType.Duplicate ||
+                    var conflict = resolveType == FileConflictResolveType.Duplicate ||
                                    file.RootFolderType == FolderType.Privacy ||
                                    file.Encrypted ||
                                    toFolder.FolderType == FolderType.Knowledge
@@ -808,7 +807,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                 // Duplicate keeps both files, so - as a copy does - the moved one arrives under the
                                 // first free title of the destination
-                                var newTitle = await GetDuplicateTitleAsync(file.Title, file.ParentId, toFolderId, fileDao.GetAvailableTitleAsync);
+                                var newTitle = await GetDuplicateTitleAsync(file.Title, file.ParentId, toFolderId, resolveType, fileDao.GetAvailableTitleAsync);
 
                                 TTo newFileId = default;
                                 await socketManager.DeleteFileAsync(file, action: async () =>
@@ -910,7 +909,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     }
                     else
                     {
-                        if (_resolveType == FileConflictResolveType.Overwrite)
+                        if (resolveType == FileConflictResolveType.Overwrite)
                         {
                             if (checkPermissions && !await FilesSecurity.CanEditAsync(conflict) && !await FilesSecurity.CanFillFormsAsync(conflict))
                             {
@@ -1027,7 +1026,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                 }
                             }
                         }
-                        else if (_resolveType == FileConflictResolveType.Skip)
+                        else if (resolveType == FileConflictResolveType.Skip)
                         {
                             //nothing
                         }
@@ -1060,9 +1059,9 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
     /// destination when its own is taken there, otherwise null - the entry keeps its title. A move inside the
     /// same folder keeps the title as well.
     /// </summary>
-    private async Task<string> GetDuplicateTitleAsync<TTo>(string title, T parentId, TTo toFolderId, Func<string, TTo, Task<string>> getAvailableTitle)
+    private static async Task<string> GetDuplicateTitleAsync<TTo>(string title, T parentId, TTo toFolderId, FileConflictResolveType resolveType, Func<string, TTo, Task<string>> getAvailableTitle)
     {
-        if (_resolveType != FileConflictResolveType.Duplicate || Equals(parentId?.ToString(), toFolderId.ToString()))
+        if (resolveType != FileConflictResolveType.Duplicate || Equals(parentId?.ToString(), toFolderId.ToString()))
         {
             return null;
         }

@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Изходи от чат</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Стаята вече съдържа папката .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Хранилището не може да бъде изключено, докато стая го използва. Вместо това изтрийте стаята</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Търсене в метаданни на папка</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>ИИ проект може да свърже най-много {0} стаи с инструкции</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>ИИ проект може да свърже най-много {0} стаи със знания</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Тези стаи не могат да бъдат свързани с ИИ проекта: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>В стая с инструкции могат да се добавят само файлове Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Стая с инструкции може да съдържа най-много {0} умения</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Описанието на умението трябва да е от 1 до 1024 знака и не трябва да съдържа XML тагове</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Файлът на умението трябва да започва с блок YAML frontmatter между два реда ---, с полетата name и description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Името на умението трябва да е от 1 до 64 знака, да съдържа само малки букви, цифри и единични тирета и да не започва или завършва с тире</value>
   </data>
 </root>

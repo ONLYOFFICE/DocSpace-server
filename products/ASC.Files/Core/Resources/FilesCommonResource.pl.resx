@@ -613,9 +613,6 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Wyniki czatu</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Pokój zawiera już folder .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Nie można odłączyć magazynu, gdy pokój go używa. Zamiast tego usuń pokój</value>
   </data>
@@ -624,5 +621,29 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Szukaj w metadanych folderu</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt AI może być powiązany z maksymalnie {0} pokojami instrukcji</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt AI może być powiązany z maksymalnie {0} pokojami wiedzy</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Tych pokojów nie można powiązać z projektem AI: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Do pokoju instrukcji można dodawać tylko pliki Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Pokój instrukcji może zawierać maksymalnie {0} umiejętności</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Opis umiejętności musi mieć od 1 do 1024 znaków i nie może zawierać znaczników XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Plik umiejętności musi zaczynać się od bloku YAML frontmatter między dwoma wierszami --- z polami name i description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Nazwa umiejętności musi mieć od 1 do 64 znaków, zawierać tylko małe litery, cyfry i pojedyncze łączniki oraz nie może zaczynać się ani kończyć łącznikiem</value>
   </data>
 </root>
