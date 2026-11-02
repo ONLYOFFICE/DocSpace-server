@@ -181,12 +181,15 @@ const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
 // `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`,
 // `AI__DOCUMENT_AGENT__FILES_URL`).
 // Undefined without a URL and a token: the tool is then simply not offered.
+// An environment variable that is set wins even when empty, so the Docker
+// install's empty DOCUMENT_AGENT_URL / DOCUMENT_AGENT_TOKEN switch the agent
+// off whatever the appsettings name.
 export function getDocumentAgent(): DocumentAgentConfig | undefined {
     const ai: RootConfig["ai"] = nconf.get("ai");
     const setting: DocumentAgentSetting | undefined =
         ai?.documentAgent && typeof ai.documentAgent === "object" ? ai.documentAgent : undefined;
-    const url = (process.env["AI__DOCUMENT_AGENT__URL"] || setting?.url || "").trim();
-    const token = (process.env["AI__DOCUMENT_AGENT__TOKEN"] || setting?.token || "").trim();
+    const url = envOrSetting("AI__DOCUMENT_AGENT__URL", setting?.url);
+    const token = envOrSetting("AI__DOCUMENT_AGENT__TOKEN", setting?.token);
     if (!url || !token) {
         return undefined;
     }
@@ -211,6 +214,13 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
         portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
         filesUrl: (filesUrl === "" ? `http://localhost:${getAppConfig().port}` : filesUrl).replace(/\/+$/, ""),
     };
+}
+
+/** The environment variable when it is set at all (even empty), else the setting; trimmed. */
+function envOrSetting(name: string, setting: unknown): string {
+    const env = process.env[name];
+    const value = env !== undefined ? env : setting;
+    return typeof value === "string" ? value.trim() : "";
 }
 
 function positiveInt(value: unknown): number | undefined {
