@@ -83,7 +83,7 @@ public abstract class AssignmentsTestBase(AspireAppFixture fixture) : BaseTest(f
     }
 
     protected Task<Dictionary<string, string>> GetAllAssignmentsAsync(string? entityId = null) =>
-        _aiAssignments.AiAssignmentsGetAllAssignmentsAsync(entityId, TestContext.Current.CancellationToken);
+        _aiAssignments.AiAssignmentsGetAllAssignmentsAsync(entityId, cancellationToken: TestContext.Current.CancellationToken);
 
     // SDK defect: an operation typed `string` hands back the raw response body, so the JSON string "<id>" keeps
     // its quotes and a JSON null comes back as the text "null". Decode it here until the client is fixed.

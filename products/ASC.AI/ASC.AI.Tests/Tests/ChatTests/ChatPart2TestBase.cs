@@ -130,18 +130,8 @@ public abstract class ChatPart2TestBase(AspireAppFixture fixture) : AssignmentsS
     protected static List<string?> AssistantTexts(IEnumerable<AiThreadMessageLike> messages) =>
         messages.Where(m => m.Role == AiThreadMessageLike.RoleEnum.Assistant).Select(TextOf).ToList();
 
-    /// <summary>
-    /// A chat round that really answered: HTTP 200, no error frame, no incomplete reply, and some text. A refused
-    /// inference still ends in a stored assistant message (with an error status), so "an assistant message exists"
-    /// is not enough.
-    /// </summary>
-    protected static void AssertHealthyReply(ChatRound round)
-    {
-        round.StatusCode.Should().Be(HttpStatusCode.OK, round.ToString());
-        round.StreamError.Should().BeNull(round.ToString());
-        round.IncompleteStatus.Should().BeNull(round.ToString());
-        round.AssistantText.Should().NotBeNullOrEmpty(round.ToString());
-    }
+    /// <summary>A chat round that really answered; see <see cref="ChatRound.ShouldBeHealthy"/>.</summary>
+    protected static void AssertHealthyReply(ChatRound round) => round.ShouldBeHealthy();
 
     /// <summary>
     /// Two profiles on the run-wide stub that a Chat binding accepts. The first one created on the portal also holds

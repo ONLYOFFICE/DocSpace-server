@@ -1,0 +1,136 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.AI.Tests.Tests.SettingsTests;
+
+/// <summary>
+/// The readable half of the web-search config: <c>GET web-search/is-configured</c> and
+/// <c>GET web-search/get-active-config</c>. Everyone but a Guest may read whether web search is wired up (a fresh
+/// portal has no provider: <c>false</c> and <c>null</c>); a Guest gets 403 and anonymous 401. The 403 for a Guest is
+/// also what proves, in the other settings suites, that a caller really is being treated as a Guest.
+/// </summary>
+[Trait("Category", "Permissions")]
+[Trait("Feature", "AI/Settings")]
+public class SettingsWebSearchPermissionsTests(AspireAppFixture fixture) : SettingsTestBase(fixture)
+{
+    [Theory]
+    [InlineData(null)]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task IsConfigured_ByRole_IsReadableExceptForAGuest(EmployeeType? type)
+    {
+        if (type is not null)
+        {
+            await ActAsMemberAsync(type.Value);
+        }
+
+        // Raw for every role: the typed call returns a bool and throws NullReferenceException (an SDK defect) on the
+        // Guest's 403, so one path is used for all of them.
+        var (status, body) = await RawAsync(HttpMethod.Get, WebSearchIsConfiguredRoute);
+
+        if (type == EmployeeType.Guest)
+        {
+            status.Should().Be(HttpStatusCode.Forbidden, body);
+            body.Should().Contain("Forbidden");
+        }
+        else
+        {
+            status.Should().Be(HttpStatusCode.OK, body);
+            body.Trim().Should().Be("false", "a fresh portal has no web-search provider");
+        }
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task GetActiveConfig_ByRole_IsReadableExceptForAGuest(EmployeeType? type)
+    {
+        if (type is not null)
+        {
+            await ActAsMemberAsync(type.Value);
+        }
+
+        var (status, body) = await ReadActiveConfigAsync();
+
+        if (type == EmployeeType.Guest)
+        {
+            status.Should().Be(HttpStatusCode.Forbidden, body);
+            body.Should().Contain("Forbidden");
+        }
+        else
+        {
+            // `null` while no web-search provider is configured on the portal.
+            status.Should().Be(HttpStatusCode.OK, body);
+            body.Trim().Should().Be("null");
+        }
+    }
+
+    [Theory]
+    [InlineData(WebSearchIsConfiguredRoute)]
+    [InlineData(WebSearchActiveConfigRoute)]
+    public async Task WebSearchRead_Anonymous_Returns401(string route)
+    {
+        await _aiChatClient.Authenticate(null);
+
+        var (status, body) = await ReadWebSearchRouteAsync(route);
+
+        status.Should().Be(HttpStatusCode.Unauthorized, body);
+        body.Should().Contain("Unauthorized");
+    }
+
+    [Fact]
+    public async Task GetAiSettings_Guest_IsShownNoFieldTheViewerIsNot()
+    {
+        // A Guest is a Viewer, and this config is what a Viewer is shown, so the 200 is the contract. Values are not
+        // compared field by field here (portal state is identical for both, see SettingsGetTests); the scope is.
+        // The web-search 403 is the discriminator that the caller really is a Guest and not the User beside them.
+        var viewer = await InviteMemberAsync(EmployeeType.User);
+        var guest = await InviteMemberAsync(EmployeeType.Guest);
+
+        await _aiChatClient.Authenticate(viewer);
+        var seenByViewer = await ReadRawResponseAsync(ConfigRoute);
+
+        await _aiChatClient.Authenticate(guest);
+        var isGuest = await RawAsync(HttpMethod.Get, WebSearchIsConfiguredRoute);
+        var seenByGuest = await ReadRawResponseAsync(ConfigRoute);
+
+        isGuest.Status.Should().Be(HttpStatusCode.Forbidden, "the caller really is a Guest, not the User");
+        seenByGuest.EnumerateObject().Select(p => p.Name).Order()
+            .Should().Equal(seenByViewer.EnumerateObject().Select(p => p.Name).Order(), "a Guest must be shown no field the Viewer is not");
+    }
+}

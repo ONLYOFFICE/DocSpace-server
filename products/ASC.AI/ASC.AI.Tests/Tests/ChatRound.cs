@@ -111,6 +111,19 @@ public sealed record ChatRound(HttpStatusCode StatusCode, string Raw, IReadOnlyL
     public string? ThreadId =>
         Frames.Select(f => f.TryGetProperty("threadId", out var t) ? t.GetString() : null).FirstOrDefault(t => t is not null);
 
+    /// <summary>
+    /// Asserts a round that really answered: HTTP 200, no error frame, no incomplete reply, and some text. A refused
+    /// inference still ends in a stored assistant message (with an error status), so "an assistant message exists"
+    /// is not enough.
+    /// </summary>
+    public void ShouldBeHealthy()
+    {
+        StatusCode.Should().Be(HttpStatusCode.OK, ToString());
+        StreamError.Should().BeNull(ToString());
+        IncompleteStatus.Should().BeNull(ToString());
+        AssistantText.Should().NotBeNullOrEmpty(ToString());
+    }
+
     /// <summary>The raw stream, for an assertion message.</summary>
     public override string ToString() => $"{(int)StatusCode}: {Raw}";
 }

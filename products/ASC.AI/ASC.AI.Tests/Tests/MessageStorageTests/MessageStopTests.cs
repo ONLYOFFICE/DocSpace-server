@@ -49,6 +49,7 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 [Trait("Category", "Chat")]
 [Trait("Feature", "AI/Messages")]
 [Trait("Bug", "84028")]
+[Trait("Bug", "82898")]
 public class MessageStopTests(AspireAppFixture fixture) : MessagePart1TestBase(fixture)
 {
     private const string LongQuestion = "Write a detailed essay about the history of typography.";

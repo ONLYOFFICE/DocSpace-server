@@ -283,14 +283,27 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         while (DateTime.UtcNow < deadline)
         {
-            using var response = await new RawApiClient(_aiChatClient).GetAsync("/api/2.0/ai/threads/list?count=1", TestContext.Current.CancellationToken);
-
-            if ((response.StatusCode == HttpStatusCode.Forbidden) != enabled)
+            if (await IsAiRefusedAsync() != enabled)
             {
                 return;
             }
 
             await Task.Delay(100, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>Whether a gated read (<c>threads/list</c>) is refused with 403 for the current caller.</summary>
+    private async Task<bool> IsAiRefusedAsync()
+    {
+        try
+        {
+            await _aiThreads.AiThreadsListAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken);
+
+            return false;
+        }
+        catch (ApiException e)
+        {
+            return e.ErrorCode == (int)HttpStatusCode.Forbidden;
         }
     }
 
