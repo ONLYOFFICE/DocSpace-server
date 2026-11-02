@@ -107,13 +107,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             OperationMap operationMap = objs.getOperations();
             List<CodegenOperation> operationList = operationMap.getOperation();
             String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - 3);
-            }
-            String sanitizedTag = sanitizeTag(className);
-            TagParts tagParts = tagMap.get(camelize(sanitizedTag));
-            operationMap.put("x-folder", tagParts.folderPart);
-            operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            operationMap.put("x-folder", folderOf(className));
+            operationMap.put("x-classname", className);
             boolean shouldSupportFields = false;
             boolean supportUseAt = false;
             Map<String, Map<String, Object>> rateLimitHeaders = new LinkedHashMap<>();
@@ -188,15 +183,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         for (OperationsMap api : apiInfo.getApis()) {
 
             OperationMap operationMap = api.getOperations();
-            String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - 3);
-            }
-            String sanitizedTag = sanitizeTag(className);
-            TagParts tagParts = tagMap.get(camelize(sanitizedTag));
-
-            String folder = tagParts.folderPart;
-            String classname = tagParts.classPart + apiNameSuffix;
+            String classname = operationMap.getClassname();
+            String folder = folderOf(classname);
             api.put("x-folder", folder);
             api.put("x-classname", classname);
 
@@ -227,6 +215,37 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
 
 
     private final Map<String, TagParts> tagMap = new HashMap<>();
+    private final Map<String, TagParts> apiNames = new HashMap<>();
+
+    // Every API class of the module lives in one namespace, so the folder of its tag stays in the name to keep
+    // it unique ("Files / Quota" and "People / Quota" are FilesQuotaApi and PeopleQuotaApi). A tag that repeats
+    // its folder ("AI / AI", "Files / Files") or has none ("Backup") takes the folder alone: AIApi, FilesApi,
+    // BackupApi. The base generator would name them <tag>API, which the suffix turned into AIAIAPIApi.
+    @Override
+    public String toApiName(String name) {
+        TagParts parts = tagMap.get(name);
+        if (parts == null) {
+            parts = tagMap.get(camelize(name));
+        }
+        if (parts == null) {
+            return camelize(name) + apiNameSuffix;
+        }
+
+        String base = parts.folderPart.equals(parts.classPart) ? parts.folderPart : parts.folderPart + parts.classPart;
+        String apiName = base + apiNameSuffix;
+        TagParts known = apiNames.putIfAbsent(apiName, parts);
+        if (known != null && !known.original.equals(parts.original)) {
+            throw new IllegalStateException("Tags '" + known.original + "' and '" + parts.original + "' both name the Swift API class " + apiName);
+        }
+
+        return apiName;
+    }
+
+    private String folderOf(String apiName) {
+        TagParts parts = apiNames.get(apiName);
+
+        return parts != null ? parts.folderPart : apiName;
+    }
 
     @Override
     public String sanitizeTag(String tag) {
@@ -255,22 +274,18 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         String suffix = apiTemplateFiles().get(templateName);
         TagParts tagParts = tagMap.get(camelize(uniqueTag));
         if (tagParts == null) {
-            return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
+            return apiFileFolder() + File.separator + toApiName(uniqueTag) + suffix;
         }
 
-        String folderPath = apiFileFolder() + File.separator + tagParts.folderPart;
-        // SwiftPM names object files after the source file alone, so the same file name in two folders
-        // ("Files / Quota", "People / Quota") fails the build; such a name takes its folder as a prefix.
-        String classPart = isSharedClassPart(tagParts) ? tagParts.folderPart + tagParts.classPart : tagParts.classPart;
-        String filename = toApiFilename(classPart) + suffix;
-
-        return folderPath + File.separator + filename;
+        // The file is named after its class. SwiftPM names object files after the source file alone, so two
+        // files of one name in different folders would fail the build; the class names are unique already.
+        return apiFileFolder() + File.separator + tagParts.folderPart + File.separator + toApiName(uniqueTag) + suffix;
     }
 
-    private boolean isSharedClassPart(TagParts tagParts) {
-        return tagMap.values().stream()
-            .filter(t -> !t.folderPart.equals(tagParts.folderPart))
-            .anyMatch(t -> t.classPart.equalsIgnoreCase(tagParts.classPart));
+    // The API reference page is named after its class too, which is what the README links to.
+    @Override
+    public String toApiDocFilename(String name) {
+        return toApiName(name);
     }
 
     // The document writes patterns for JavaScript; the base class wraps them in /.../ delimiters, which
