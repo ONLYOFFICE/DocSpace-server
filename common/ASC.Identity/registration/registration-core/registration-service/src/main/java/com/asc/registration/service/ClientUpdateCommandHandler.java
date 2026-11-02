@@ -266,24 +266,28 @@ public class ClientUpdateCommandHandler {
    * @return the result of the delete operation, the number of rows affected.
    */
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
-    return retryExecutor.executeWithRetry(
-        OPTIMISTIC_LOCKING_RETRY,
-        () -> {
-          log.info("Trying to remove client");
+    var deleted =
+        retryExecutor.executeWithRetry(
+            OPTIMISTIC_LOCKING_RETRY,
+            () -> {
+              log.info("Trying to remove client");
 
-          var client = getClient(audit, role, command.getClientId(), command.getTenantId());
-          var event = clientDomainService.deleteClient(audit, client);
-          // TODO: Move it later to core application service. Now we depend on getClient check
-          clientMessagePublisher.publish(
-              ClientRemovedEvent.builder().clientId(command.getClientId()).build());
-          return clientCommandRepository.deleteByTenantIdAndClientId(
-              event, client.getClientTenantInfo().tenantId(), client.getId());
-        },
-        OptimisticLockingException.class,
-        () ->
-            new ClientDomainException(
-                String.format(
-                    "Could not delete client %s due to concurrent access", command.getClientId())));
+              var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+              var event = clientDomainService.deleteClient(audit, client);
+              return clientCommandRepository.deleteByTenantIdAndClientId(
+                  event, client.getClientTenantInfo().tenantId(), client.getId());
+            },
+            OptimisticLockingException.class,
+            () ->
+                new ClientDomainException(
+                    String.format(
+                        "Could not delete client %s due to concurrent access",
+                        command.getClientId())));
+
+    // TODO: Move it later to core application service. Now we depend on getClient check
+    clientMessagePublisher.publish(
+        ClientRemovedEvent.builder().clientId(command.getClientId()).build());
+    return deleted;
   }
 
   /**
