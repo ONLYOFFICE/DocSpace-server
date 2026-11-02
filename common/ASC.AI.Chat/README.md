@@ -31,7 +31,9 @@ environment, which wins:
 | `ai.documentAgent.filesUrl`           | `AI__DOCUMENT_AGENT__FILES_URL`            | `http://localhost:<port>` |
 
 In the Docker install the two required values come from `DOCUMENT_AGENT_URL` and
-`DOCUMENT_AGENT_TOKEN` in `install/docker/.env`.
+`DOCUMENT_AGENT_TOKEN` in `install/docker/.env`. For the URL and the token a variable that is set
+wins even when it is empty, so leaving either empty there switches the agent off whatever
+`appsettings.json` names.
 
 A task runs on the chat's own model profile and sees the custom MCP servers of the current
 scope. A profile of the portal's own provider is reached through `/api/2.0/ai/gateway` under
