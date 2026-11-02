@@ -33,8 +33,15 @@
 
 package com.asc.common.messaging.publisher;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
@@ -44,18 +51,70 @@ import com.asc.common.service.transfer.message.ClientCacheTenantRemoveEvent;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 
 class RabbitRemoveMessagePublishersTest {
+  private static class InlineExecutor extends AbstractExecutorService {
+    private final java.util.function.Consumer<Runnable> sink;
+
+    InlineExecutor(java.util.function.Consumer<Runnable> sink) {
+      this.sink = sink;
+    }
+
+    @Override
+    public void execute(Runnable command) {
+      sink.accept(command);
+    }
+
+    @Override
+    public void shutdown() {}
+
+    @Override
+    public List<Runnable> shutdownNow() {
+      return List.of();
+    }
+
+    @Override
+    public boolean isShutdown() {
+      return false;
+    }
+
+    @Override
+    public boolean isTerminated() {
+      return false;
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) {
+      return true;
+    }
+  }
+
+  interface AuthorizationMessagePublisherAction {
+    void publish(RabbitPersistableMessagePublisher publisher);
+  }
+
+  private static final RabbitBackgroundPublisher INLINE =
+      new RabbitBackgroundPublisher(new InlineExecutor(Runnable::run));
+
   private static final String CLIENT_ID = "client-1";
   private static final long TENANT_ID = 10L;
   private static final String USER_ID = "user-1";
+
+  private static final String REGION = "EU";
+  private static final String LOCAL_AUTHORIZATION_QUEUE =
+      "asc_identity_authorization_client_cache_eu_queue";
 
   static Stream<Arguments> authorizationPublisherCases() {
     var clientRemoved = ClientRemovedEvent.builder().clientId(CLIENT_ID).build();
@@ -67,59 +126,111 @@ class RabbitRemoveMessagePublishersTest {
             (AuthorizationMessagingConfiguration.ENTRY_EXCHANGE),
             (AuthorizationMessagePublisherAction)
                 publisher ->
-                    new RabbitAuthorizationRemoveMessagePublisher(publisher).publish(clientRemoved),
+                    new RabbitAuthorizationRemoveMessagePublisher(publisher, INLINE)
+                        .publish(clientRemoved),
             clientRemoved),
         Arguments.of(
             (AuthorizationMessagingConfiguration.ENTRY_EXCHANGE),
             (AuthorizationMessagePublisherAction)
                 publisher ->
-                    new RabbitUserClientsRemoveMessagePublisher(publisher).publish(userRemoved),
+                    new RabbitUserClientsRemoveMessagePublisher(publisher, INLINE)
+                        .publish(userRemoved),
             userRemoved),
         Arguments.of(
             (AuthorizationMessagingConfiguration.ENTRY_EXCHANGE),
             (AuthorizationMessagePublisherAction)
                 publisher ->
-                    new RabbitTenantClientsRemoveMessagePublisher(publisher).publish(tenantRemoved),
+                    new RabbitTenantClientsRemoveMessagePublisher(publisher, INLINE)
+                        .publish(tenantRemoved),
             tenantRemoved));
   }
 
   @ParameterizedTest
   @MethodSource("authorizationPublisherCases")
-  void whenAuthorizationRemovalPublished_thenSendsToEntryExchange(
+  void whenAuthorizationRemovalPublished_thenSendsReliablyNowAndForDelayedSecondRun(
       String expectedExchange, AuthorizationMessagePublisherAction action, Object message) {
-    var amqpClient = mock(AmqpTemplate.class);
+    var reliable = mock(RabbitPersistableMessagePublisher.class);
 
-    action.publish(amqpClient);
+    action.publish(reliable);
 
-    verify(amqpClient).convertAndSend(expectedExchange, Strings.EMPTY, message);
-    verifyNoMoreInteractions(amqpClient);
-  }
-
-  interface AuthorizationMessagePublisherAction {
-    void publish(AmqpTemplate amqpClient);
+    var order = inOrder(reliable);
+    order.verify(reliable).send(expectedExchange, Strings.EMPTY, message);
+    order
+        .verify(reliable)
+        .send(AuthorizationMessagingConfiguration.DELAYED_ENTRY_EXCHANGE, Strings.EMPTY, message);
+    verifyNoMoreInteractions(reliable);
   }
 
   @Test
-  void whenClientCacheRemovalPublished_thenSendsToCacheEntryExchange() {
+  void whenClientCacheRemovalPublished_thenSendsToEveryRegionAndToLocalAuthorizationQueue() {
     var amqpClient = mock(AmqpTemplate.class);
     var message = ClientCacheRemoveEvent.builder().clientId(CLIENT_ID).tenantId(TENANT_ID).build();
 
-    new RabbitClientCacheRemoveMessagePublisher(amqpClient).publish(message);
+    new RabbitClientCacheRemoveMessagePublisher(amqpClient, REGION, INLINE).publish(message);
 
-    verify(amqpClient)
+    var order = inOrder(amqpClient);
+    order
+        .verify(amqpClient)
         .convertAndSend(ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    order.verify(amqpClient).convertAndSend(Strings.EMPTY, LOCAL_AUTHORIZATION_QUEUE, message);
     verifyNoMoreInteractions(amqpClient);
   }
 
   @Test
-  void whenClientCacheTenantRemovalPublished_thenSendsToCacheEntryExchange() {
+  void
+      whenClientCacheTenantRemovalPublished_thenSendsToEveryRegionAndToLocalAuthorizationQueue() {
     var amqpClient = mock(AmqpTemplate.class);
     var message = ClientCacheTenantRemoveEvent.builder().tenantId(TENANT_ID).build();
 
-    new RabbitClientCacheTenantRemoveMessagePublisher(amqpClient).publish(message);
+    new RabbitClientCacheTenantRemoveMessagePublisher(amqpClient, REGION, INLINE).publish(message);
 
-    verify(amqpClient)
+    var order = inOrder(amqpClient);
+    order
+        .verify(amqpClient)
         .convertAndSend(ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    order.verify(amqpClient).convertAndSend(Strings.EMPTY, LOCAL_AUTHORIZATION_QUEUE, message);
     verifyNoMoreInteractions(amqpClient);
+  }
+
+  @Test
+  void givenDirectSendFails_whenEvictionPublished_thenPublishStillSucceeds() {
+    var amqpClient = mock(AmqpTemplate.class);
+    var message = ClientCacheRemoveEvent.builder().clientId(CLIENT_ID).tenantId(TENANT_ID).build();
+    doThrow(new AmqpException("queue gone"))
+        .when(amqpClient)
+        .convertAndSend(Strings.EMPTY, LOCAL_AUTHORIZATION_QUEUE, message);
+
+    assertDoesNotThrow(
+        () ->
+            new RabbitClientCacheRemoveMessagePublisher(amqpClient, REGION, INLINE)
+                .publish(message));
+  }
+
+  @Test
+  void givenDelayedSendFails_whenEvictionPublished_thenCallerNotFailed() {
+    var amqpClient = mock(AmqpTemplate.class);
+    var message = ClientCacheRemoveEvent.builder().clientId(CLIENT_ID).tenantId(TENANT_ID).build();
+    doThrow(new AmqpException("broker down"))
+        .when(amqpClient)
+        .convertAndSend(ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+
+    assertDoesNotThrow(
+        () ->
+            new RabbitClientCacheRemoveMessagePublisher(amqpClient, REGION, INLINE)
+                .publish(message));
+  }
+
+  @Test
+  void whenCleanupPublished_thenCallerReturnsBeforeAnythingSent() {
+    var reliable = mock(RabbitPersistableMessagePublisher.class);
+    var held = new ArrayList<Runnable>();
+    var background = new RabbitBackgroundPublisher(new InlineExecutor(held::add));
+
+    new RabbitAuthorizationRemoveMessagePublisher(reliable, background)
+        .publish(ClientRemovedEvent.builder().clientId(CLIENT_ID).build());
+
+    verifyNoInteractions(reliable);
+    held.forEach(Runnable::run);
+    verify(reliable, times(2)).send(anyString(), anyString(), any());
   }
 }
