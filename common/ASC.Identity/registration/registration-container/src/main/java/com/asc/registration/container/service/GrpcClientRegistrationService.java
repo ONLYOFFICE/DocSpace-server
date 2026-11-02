@@ -117,7 +117,8 @@ public class GrpcClientRegistrationService
       log.error("Failed to retrieve client with id: {}", request.getClientId(), e);
       responseObserver.onError(
           Status.UNAVAILABLE
-              .withDescription("Could not retrieve client with id %s".formatted(request.getClientId()))
+              .withDescription(
+                  "Could not retrieve client with id %s".formatted(request.getClientId()))
               .asRuntimeException());
     }
   }

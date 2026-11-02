@@ -289,11 +289,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
 
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
 
-    AfterCommitPublisher.publish(
-        clientCacheTenantRemoveMessagePublisher,
+    clientCacheTenantRemoveMessagePublisher.publish(
         ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
-    AfterCommitPublisher.publish(
-        userClientsMessagePublisher,
+    userClientsMessagePublisher.publish(
         UserClientsRemovedEvent.builder()
             .userId(command.getUserId())
             .tenantId(command.getTenantId())
@@ -315,11 +313,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
 
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
 
-    AfterCommitPublisher.publish(
-        clientCacheTenantRemoveMessagePublisher,
+    clientCacheTenantRemoveMessagePublisher.publish(
         ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
-    AfterCommitPublisher.publish(
-        tenantClientsMessagePublisher,
+    tenantClientsMessagePublisher.publish(
         TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
 
     return deleted;
