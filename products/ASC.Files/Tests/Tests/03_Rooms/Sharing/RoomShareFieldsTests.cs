@@ -177,11 +177,12 @@ public class RoomShareFieldsTests(
     /// <summary>
     /// Projecting <c>sharedTo</c> failed with System.Text.Json "possible object cycle": the body was
     /// half-written and ended with an <c>error</c> object under HTTP 500, while every other field projected
-    /// fine. The TypeScript original marks these as a known failure without a bug number yet, so there is
-    /// <c>Category=Bug</c> and no <c>Bug</c> number; the cases assert the intended 200 and stay red while the defect is open.
+    /// fine. The projecting serializer walked the static <c>EmployeeDto.Default</c>, a new instance with a
+    /// <c>Default</c> of its own, until the depth limit; it now skips static and ignored properties and writes a
+    /// property selected as a whole exactly as the unfiltered response does. The TypeScript original marked these as
+    /// a known failure without a bug number.
     /// </summary>
     [Theory]
-    [Trait("Category", "Bug")]
     [InlineData("sharedTo", "")]
     [InlineData("access|sharedTo", "")]
     [InlineData("access|sharedTo|isOwner", "")]

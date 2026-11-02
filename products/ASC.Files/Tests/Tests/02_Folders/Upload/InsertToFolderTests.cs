@@ -45,13 +45,11 @@ public class InsertToFolderTests(
 {
     /// <summary>
     /// The generated <c>InsertFileAsync</c> sends the multipart fields as <c>insertFile.file</c> and
-    /// <c>insertFile.title</c>, while the endpoint binds the flat <c>file</c> and <c>title</c> names and
-    /// answers 400 ("Value cannot be null. (Parameter 'title')"). The test asserts the intended
-    /// behaviour, so it stays red until the SDK and the endpoint agree. The TypeScript suite has no bug
-    /// number for it yet, hence <c>Category=Bug</c> and no <c>Bug</c> number.
+    /// <c>insertFile.title</c>, as the published contract names them, while the endpoint used to bind only the flat
+    /// <c>file</c> and <c>title</c> names and answered 400 ("Value cannot be null. (Parameter 'title')"). The binder
+    /// now reads both forms, the flat one first. The TypeScript suite had no bug number for it.
     /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task InsertFile_Owner_ReturnsInsertedFileDescription()
     {
         // Arrange

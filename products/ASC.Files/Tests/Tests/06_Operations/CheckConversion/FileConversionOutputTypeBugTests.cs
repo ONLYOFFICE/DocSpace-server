@@ -34,12 +34,12 @@
 namespace ASC.Files.Tests.Tests._06_Operations.CheckConversion;
 
 /// <summary>
-/// <c>PUT /api/2.0/files/file/{fileId}/checkconversion</c> — <c>outputType</c>. The TypeScript suite
-/// marks these <c>BUG-PENDING</c> (no bug number yet): the method documentation says that what the
-/// portal cannot produce is answered without work or rejected, but <c>outputType</c> is ignored and an
-/// unknown value is accepted.
+/// <c>PUT /api/2.0/files/file/{fileId}/checkconversion</c> — <c>outputType</c>. The TypeScript suite marks
+/// these <c>BUG-PENDING</c> (no bug number): the method documentation says that what the portal cannot produce
+/// is answered without work or rejected, but an unknown value used to be queued and silently converted to the
+/// internal format. It is now refused with 400; a value without the dot (<c>pdf</c>) is also matched now, where it
+/// used to fall back to the internal format as well.
 /// </summary>
-[Trait("Category", "Bug")]
 [Trait("Feature", "Files")]
 public class FileConversionOutputTypeBugTests(
     AspireAppFixture fixture)

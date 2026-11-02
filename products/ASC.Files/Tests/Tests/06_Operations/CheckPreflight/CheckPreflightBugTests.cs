@@ -34,12 +34,13 @@
 namespace ASC.Files.Tests.Tests._06_Operations.CheckPreflight;
 
 /// <summary>
-/// Open defects of the preflight endpoints that have no bug number yet (the TypeScript suite marks
-/// them <c>BUG-PENDING</c>): the expected behaviour is that a preflight agrees with the operation it
-/// announces. Both were reproduced with the real <c>PUT /fileops/copy</c> on the same inputs (copy
-/// only, so nothing is removed), so the contract is the operation's own answer.
+/// Defects of the preflight endpoints that had no bug number (the TypeScript suite marks them
+/// <c>BUG-PENDING</c>): a preflight has to agree with the operation it announces. Both were reproduced with
+/// the real <c>PUT /fileops/copy</c> on the same inputs (copy only, so nothing is removed), so the contract is
+/// the operation's own answer. The preflights used to count a repeated file id twice, to accept the Rooms,
+/// Forms and AI agents section roots the operation refuses, and to ignore <c>content</c>; they now read the
+/// distinct ids, refuse those roots with 403 and look for clashes among the folders' contents.
 /// </summary>
-[Trait("Category", "Bug")]
 [Trait("Feature", "Files")]
 public class CheckPreflightBugTests(
     AspireAppFixture fixture)

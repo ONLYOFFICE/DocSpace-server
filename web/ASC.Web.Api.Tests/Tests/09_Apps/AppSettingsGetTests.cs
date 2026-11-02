@@ -115,9 +115,10 @@ public class AppSettingsGetTests(
     public async Task GetSettings_IdThatCannotBeAnApplication_ReturnsNotFound(string id)
     {
         // Act
-        var (status, _) = await SendAsync(HttpMethod.Get, $"{AppPath(id)}/settings");
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await AppsApi.GetSettingsAsync(id, Ct));
 
         // Assert
-        status.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 }

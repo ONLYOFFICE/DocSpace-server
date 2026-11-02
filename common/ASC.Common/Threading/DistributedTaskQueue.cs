@@ -127,9 +127,11 @@ public class DistributedTaskQueue<T>(
 
     public async Task DequeueTask(string id)
     {
-        await cancelTaskNotify.PublishAsync(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
-
+        // the record goes first: a worker that reacts to the notify writes its final state after this removal,
+        // never before it - in the other order the removal could wipe the record the cancelled task had just written
         await hybridCache.RemoveAsync(_name + id);
+
+        await cancelTaskNotify.PublishAsync(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
 
         logger.TraceEnqueueTask(id, INSTANCE_ID);
     }
@@ -217,12 +219,21 @@ public class DistributedTaskQueueService<T>(
                 // status) must not fault the reader loop: that would stop the host process itself
                 try
                 {
+                    // not disposed: the cancel notify may still hold it after the task is removed from the dictionary
                     var cancellation = new CancellationTokenSource();
                     var token = cancellation.Token;
                     _cancellations[distributedTask.Id] = cancellation;
 
-                    var task = distributedTask.RunJob(token);
-                    await task.ContinueWith(async t => await OnCompleted(t, distributedTask), CancellationToken.None).Unwrap().ConfigureAwait(false);
+                    try
+                    {
+                        var task = distributedTask.RunJob(token);
+                        await task.ContinueWith(async t => await OnCompleted(t, distributedTask, queue, token), CancellationToken.None).Unwrap().ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        // ids are reused (a report is restarted under the same id), so only this run's entry goes
+                        _cancellations.TryRemove(new KeyValuePair<string, CancellationTokenSource>(distributedTask.Id, cancellation));
+                    }
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -265,8 +276,19 @@ public class DistributedTaskQueueService<T>(
                     {
                         await using (await distributedLockProvider.TryAcquireFairLockAsync(queue.LockKey, cancellationToken: stoppingToken))
                         {
+                            // a task that finished after the sweep looked at it (a cancelled one republishes its final
+                            // state) has a record again and keeps its key; under the lock, as OnCompleted adds keys under it
+                            var stillGone = new List<string>();
+                            foreach (var id in toRemove)
+                            {
+                                if (await queue.PeekTask(id) == null)
+                                {
+                                    stillGone.Add(id);
+                                }
+                            }
+
                             var queueTasksFromCache = await queue.LoadKeysFromCache();
-                            await queue.SaveKeysToCache(queueTasksFromCache.Except(toRemove).ToList());
+                            await queue.SaveKeysToCache(queueTasksFromCache.Except(stillGone).ToList());
                         }
                     }
                 }
@@ -286,11 +308,12 @@ public class DistributedTaskQueueService<T>(
         await Task.WhenAll(tasks);
     }
 
-    private static async Task OnCompleted(Task task, DistributedTask distributedTask)
+    private static async Task OnCompleted(Task task, DistributedTask distributedTask, DistributedTaskQueue<T> queue, CancellationToken token)
     {
         if (distributedTask.Status is not (DistributedTaskStatus.Failted or DistributedTaskStatus.Canceled))
         {
-            distributedTask.Status = DistributedTaskStatus.Completed;
+            // a job that swallows its cancellation still ends normally; the token tells a cancelled one from a finished one
+            distributedTask.Status = token.IsCancellationRequested ? DistributedTaskStatus.Canceled : DistributedTaskStatus.Completed;
         }
 
         if (task.Exception != null)
@@ -309,5 +332,13 @@ public class DistributedTaskQueueService<T>(
         }
 
         await distributedTask.PublishChanges();
+
+        // a cancel removes the record, and the cleaner may already have dropped its id from the key list, after which
+        // the final state would sit where no listing finds it: the key is put back then. Only then, so that an ordinary
+        // finish does not take the queue's lock
+        if (!(await queue.LoadKeysFromCache()).Contains(distributedTask.Id))
+        {
+            await queue.PublishTask((T)distributedTask);
+        }
     }
 }

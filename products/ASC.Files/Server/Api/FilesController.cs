@@ -777,6 +777,7 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The conversion entry to poll, or the finished result when the conversion is synchronous", typeof(IAsyncEnumerable<ConversationResultDto>))]
+    [SwaggerResponse(400, "`outputType` names a format the portal cannot convert this file to")]
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartFileConversion(StartConversionRequestDto<T> inDto)
     {

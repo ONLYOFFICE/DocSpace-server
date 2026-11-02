@@ -74,11 +74,11 @@ public class TerminateRunningOperationsTests(
     }
 
     /// <remarks>
-    /// The status of a cancelled task is supposed to tell it from one that ran to its end, but a cancelled
-    /// operation reports Completed (2). The number is pending: the bug is not filed yet.
+    /// The status of a cancelled task is supposed to tell it from one that ran to its end. A cancelled operation
+    /// used to report Completed (2), because the job swallows its cancellation and ends normally; the queue now
+    /// reads the task's token and reports Canceled (3). No bug number was filed.
     /// </remarks>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task TerminateTasks_CancelledOperation_ReportsTheCanceledTaskStatus()
     {
         // Arrange
@@ -136,8 +136,7 @@ public class TerminateRunningOperationsTests(
         // Assert
         (await CountFiles(folderId)).Should().Be(LongFiles);
 
-        var (_, folders) = await RawFolderListing.ReadAsync(
-            _filesClient, myDocs.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (_, folders) = await FolderListing.ReadAsync(_foldersApi, myDocs, TestContext.Current.CancellationToken);
         var copies = folders.FindAll(f => f.Id != folderId && f.Title.StartsWith("Autotest Terminate Duplicate", StringComparison.Ordinal));
         copies.Should().ContainSingle();
 
@@ -189,11 +188,12 @@ public class TerminateRunningOperationsTests(
     }
 
     /// <remarks>
-    /// Red whenever the copy is still waiting for a free worker thread when the cancel arrives, which is the common
-    /// case in a full run, where every portal's operations share one queue. The worker cancels only a task one of its
-    /// threads has already taken (<c>DistributedTaskQueueService</c> looks the id up in <c>_cancellations</c>); for a
-    /// task still in the channel the cancel is dropped, the thread later runs it with a fresh token, and all 40 files
-    /// are copied with no error. Run alone, the task is taken at once and the test passes. No bug number yet.
+    /// Red in two ways, one of them fixed. A cancel that landed before the first entry was processed used to end the
+    /// operation with an empty error, as if it had finished; it now reports the cancellation the way a half-way cancel
+    /// does. Still open: a cancel that arrives while the copy waits for a free worker thread is dropped
+    /// (<c>DistributedTaskQueueService</c> cancels only a task one of its threads has taken), so the test goes red when
+    /// the copy queue is busy; remembering such a cancel by id is not safe, since report tasks reuse their id. No bug
+    /// number yet.
     /// </remarks>
     [Fact]
     [Trait("Category", "Bug")]
@@ -234,7 +234,7 @@ public class TerminateRunningOperationsTests(
 
         // Assert
         var inPlace = await Settled(() => CountFiles(folderId));
-        var (trashFiles, _) = await RawFolderListing.ReadAsync(_filesClient, "@trash", TestContext.Current.CancellationToken);
+        var (trashFiles, _) = await FolderListing.ReadAsync(_foldersApi, "@trash", TestContext.Current.CancellationToken);
         var trashed = trashFiles.Count(f => fileIds.Contains(f.Id));
         (inPlace + trashed).Should().Be(100);
 
@@ -298,11 +298,11 @@ public class TerminateRunningOperationsTests(
     }
 
     /// <remarks>
-    /// A whitespace-only id is read as the omitted id and stops every operation of the caller, instead of
-    /// cancelling nothing like any other id that is not the caller's operation. Bug number pending.
+    /// A whitespace-only id used to be bound as the omitted id (MVC turns a blank route value into null) and stopped
+    /// every operation of the caller; the id is now bound as sent, so it cancels nothing like any other id that is not
+    /// the caller's operation. No bug number was filed.
     /// </remarks>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task TerminateTasks_WhitespaceOnlyId_CancelsNothing()
     {
         // Arrange
@@ -370,8 +370,7 @@ public class TerminateRunningOperationsTests(
         dupRecord.Status.Should().Be(DistributedTaskStatus.Completed);
         (await Settled(() => CountFiles(room.Id))).Should().BeLessThan(LongFiles);
 
-        var (_, folders) = await RawFolderListing.ReadAsync(
-            _filesClient, myDocs.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+        var (_, folders) = await FolderListing.ReadAsync(_foldersApi, myDocs, TestContext.Current.CancellationToken);
         var duplicate = folders.Find(f => f.Id != folderB && f.Title.StartsWith("Autotest Terminate Pair B", StringComparison.Ordinal));
         duplicate.Should().NotBeNull();
         (await CountFiles(duplicate!.Id)).Should().Be(LongFiles);

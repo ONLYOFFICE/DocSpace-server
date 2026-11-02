@@ -34,9 +34,10 @@
 namespace ASC.Files.Tests.Tests._02_Folders.History;
 
 /// <summary>
-/// Shared setup of the history report status and terminate suites. Reports are built as CSV: a
-/// spreadsheet report needs the document server, which the integration host does not run, and it
-/// would hold the worker until that request times out. The format is not what these suites are about.
+/// Shared setup of the history report status and terminate suites. Reports are built as CSV: the format
+/// is not what these suites are about, and a spreadsheet report goes through the document builder, which
+/// takes seconds. The worker runs audit reports one at a time, so slow reports in one class hold up the
+/// reports of every other class.
 /// </summary>
 public abstract class FolderHistoryReportTestBase(
     AspireAppFixture fixture)

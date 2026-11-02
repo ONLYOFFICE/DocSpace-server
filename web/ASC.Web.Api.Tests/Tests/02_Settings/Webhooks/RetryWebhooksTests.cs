@@ -80,7 +80,7 @@ public class RetryWebhooksTests(
         });
 
         var newIds = result.Response.Select(r => r.Id).ToList();
-        var records = await GetDeliveryRecordsAsync(configId);
+        var records = await GetLogAsync(configId);
         records.Where(r => newIds.Contains(r.Id)).Select(r => r.EventId).Should().BeEquivalentTo(ids);
     }
 
@@ -103,7 +103,7 @@ public class RetryWebhooksTests(
         var retry = result.Response.Should().ContainSingle().Subject;
         retry.Id.Should().NotBe(original.Id).And.NotBe(firstRetry.Id);
 
-        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        var records = await GetLogAsync(subscription.Id);
         records.Should().HaveCount(3, "the event's first record, the earlier retry and the one queued now");
         records.Single(r => r.Id == retry.Id).EventId.Should().Be(original.Id);
     }

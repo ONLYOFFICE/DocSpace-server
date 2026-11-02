@@ -41,15 +41,16 @@ namespace ASC.Files.Tests.Tests._06_Operations.UploadSession;
 /// file on the first <c>uploadAsyncSession</c> call, before finalize, although the contract says that call
 /// "never completes the upload".
 /// </summary>
-[Trait("Category", "Bug")]
 [Trait("Feature", "Files")]
 public class UploadSessionDefectTests(
     AspireAppFixture fixture)
     : UploadSessionTestBase(fixture)
 {
-    /// <summary>A missing multipart file part answers 500 (a NullReferenceException) instead of a client error.</summary>
+    /// <summary>
+    /// A missing multipart file part used to answer 500 (a NullReferenceException) instead of a client error; it is
+    /// now refused with 400. The exact code matters: a 415 would mean the request never reached the action.
+    /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task UploadAsyncSession_WithoutFilePart_ReturnsClientError()
     {
         // Arrange
@@ -61,7 +62,7 @@ public class UploadSessionDefectTests(
             folderId, sessionId, 1, null, TestContext.Current.CancellationToken));
 
         // Assert
-        status.Should().BeInRange(400, 499);
+        status.Should().Be(400);
     }
 
     /// <summary>Finalize without any chunk answers 201 with <c>uploaded=true</c> and file id 0, and stores nothing.</summary>
@@ -138,9 +139,11 @@ public class UploadSessionDefectTests(
         await AssertFinalizeIsHonest(folderId, fileName, status, result);
     }
 
-    /// <summary>Chunk numbering starts at 1, but 0 and -1 answer 500 on a large session.</summary>
+    /// <summary>
+    /// Chunk numbering starts at 1; 0 and -1 used to be stored under a name the assembly never reads and answered
+    /// as taken. 0 and a negative number are now refused with 400.
+    /// </summary>
     [Theory]
-    [Trait("Category", "Bug")]
     [InlineData(0)]
     [InlineData(-1)]
     public async Task UploadAsyncSession_NonPositiveChunkNumberOnLargeSession_ReturnsClientError(int chunkNumber)
@@ -241,9 +244,11 @@ public class UploadSessionDefectTests(
         (await VersionsOf(result.File.Id)).Should().Equal(1);
     }
 
-    /// <summary>A fileSize of -1 opens a session with bytes_total -1; finalize fails later with 400.</summary>
+    /// <summary>
+    /// A fileSize of -1 used to open a session with bytes_total -1 that finalize could never complete; a negative
+    /// size is now refused when the session opens.
+    /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task CreateUploadSessionInFolder_NegativeFileSize_IsRejectedWhenTheSessionOpens()
     {
         // Arrange

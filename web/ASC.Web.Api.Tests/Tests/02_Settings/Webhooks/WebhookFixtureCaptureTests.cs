@@ -44,8 +44,9 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// <c>dotnet test web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj -- --filter-trait "Category=WebhookFixtures" --explicit only</c>.
 /// The subscriptions are signed with the secret of <c>Fixtures/SECRET</c>, set with a MySQL statement because the
 /// password rules may refuse it through the API. Bodies and signature headers are written byte for byte as the
-/// receiver got them. <c>unknown.trigger.json</c> is not a real delivery and is left alone; form.submit cannot be
-/// captured, since the integration-test profile runs no Document Server.
+/// receiver got them. <c>unknown.trigger.json</c> is not a real delivery and is left alone; form.submit is not
+/// captured: it is published from the Document Server's save callback for a filled form, and nothing here drives
+/// an editor session to send one.
 /// </remarks>
 [Trait("Category", "WebhookFixtures")]
 public class WebhookFixtureCaptureTests(

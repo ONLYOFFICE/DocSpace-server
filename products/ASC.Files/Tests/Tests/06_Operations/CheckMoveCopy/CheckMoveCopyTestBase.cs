@@ -44,9 +44,8 @@ public abstract class CheckMoveCopyTestBase(
     : BaseTest(fixture)
 {
     /// <summary>
-    /// The parsed result of a <c>GET /api/2.0/files/fileops/move</c> call. <c>FileEntryBaseDto</c>
-    /// (what the endpoint's response array actually deserializes to) carries a <c>Title</c> but no
-    /// <c>Id</c>, so conflicting items are identified by title here as well.
+    /// The parsed result of a <c>GET /api/2.0/files/fileops/move</c> call. The tests of this folder name the
+    /// conflicting items by title, which every entry carries whatever its kind.
     /// </summary>
     protected sealed record CheckMoveOrCopyResult(HttpStatusCode StatusCode, List<string> Titles, string RawBody);
 

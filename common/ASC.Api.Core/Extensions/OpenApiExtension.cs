@@ -135,6 +135,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<ErrorResponseFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
+            c.DocumentFilter<DiscriminatorTargetsDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();

@@ -129,11 +129,11 @@ public class UploadSessionLifecycleTests(
     }
 
     /// <remarks>
-    /// On a disk storage the abort answers 500 with "The directory is not empty" for the session's chunks folder:
-    /// the folder is removed while the stored chunk is still in it. No bug number yet.
+    /// On a disk storage the abort used to answer 500 with "The directory is not empty" for the session's chunks
+    /// folder: it was removed non-recursively while the stored chunk was still in it. The folder is now removed with
+    /// its parts. No bug number was filed.
     /// </remarks>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task AbortUploadSession_LargeSessionAfterOneChunk_LeavesNoFileClosesSessionAndSparesNeighbour()
     {
         // Arrange

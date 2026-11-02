@@ -184,10 +184,10 @@ public class WebhookLogFilterTests(
         // Assert
         first.Total.Should().Be(3, "total counts every matching record, not the page");
         second.Total.Should().Be(3);
-        first.Response.Should().HaveCount(2);
-        second.Response.Should().ContainSingle();
-        first.Response!.Select(r => r.Id).Should().NotIntersectWith(second.Response!.Select(r => r.Id));
-        first.Response!.Select(r => r.Id).Should().BeInDescendingOrder("records come newest first");
+        first.Records.Should().HaveCount(2);
+        second.Records.Should().ContainSingle();
+        first.Records.Select(r => r.Id).Should().NotIntersectWith(second.Records.Select(r => r.Id));
+        first.Records.Select(r => r.Id).Should().BeInDescendingOrder("records come newest first");
     }
 
     [Theory]
@@ -247,18 +247,14 @@ public class WebhookLogFilterTests(
         return logs.Response.Select(l => l.ConfigName).Distinct().ToList();
     }
 
-    /// <summary>
-    /// One page of a subscription's records with the <c>total</c> the response reports beside them, which the
-    /// generated SDK wrapper does not carry, so it is read from the raw envelope.
-    /// </summary>
-    private async Task<RawApiResponse<List<DeliveryRecord>>> ReadPageAsync(int configId, int startIndex, int count)
+    /// <summary>One page of a subscription's records with the <c>total</c> the response reports beside them.</summary>
+    private async Task<(long? Total, List<WebhooksLogDto> Records)> ReadPageAsync(int configId, int startIndex, int count)
     {
         await _webApiClient.Authenticate(Owner);
 
-        using var response = await _webApi.GetAsync(
-            $"api/2.0/settings/webhooks/log?configId={configId}&startIndex={startIndex}&count={count}",
-            TestContext.Current.CancellationToken);
+        var page = await _webhooksApi.GetWebhooksLogsAsync(
+            configId: configId, count: count, startIndex: startIndex, cancellationToken: TestContext.Current.CancellationToken);
 
-        return await _webApi.ReadEnvelopeAsync<List<DeliveryRecord>>(response, TestContext.Current.CancellationToken);
+        return (page.Total, page.Response);
     }
 }

@@ -123,8 +123,8 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// The delivery log of one subscription as the generated SDK reads it, as the owner, newest first. Enough for
-    /// everything but the retry fields the pinned SDK model does not carry (<see cref="GetDeliveryRecordsAsync"/>).
+    /// The delivery log of one subscription as the generated SDK reads it, as the owner, newest first, retry fields
+    /// (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>, <c>retriedBy</c>) included.
     /// </summary>
     protected async Task<List<WebhooksLogDto>> GetLogAsync(int configId)
     {
@@ -199,34 +199,18 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// The delivery records of one subscription with the retry fields the pinned SDK model (<see cref="WebhooksLogDto"/>
-    /// of DocSpace.API.SDK 4.0.0) does not carry yet (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>,
-    /// <c>retriedBy</c>), read as raw JSON as the owner, newest first. Anything else goes through
-    /// <see cref="GetLogAsync"/>; move these reads there too once the SDK is regenerated with the fields.
-    /// </summary>
-    protected async Task<List<DeliveryRecord>> GetDeliveryRecordsAsync(int configId)
-    {
-        await _webApiClient.Authenticate(Owner);
-
-        using var response = await _webApi.GetAsync(
-            $"api/2.0/settings/webhooks/log?configId={configId}", TestContext.Current.CancellationToken);
-
-        return await _webApi.ReadAsync<List<DeliveryRecord>>(response, TestContext.Current.CancellationToken);
-    }
-
-    /// <summary>
     /// Polls the delivery records of one subscription until there is exactly one and it satisfies
     /// <paramref name="until"/>, and returns that record, or the only record there is at the deadline whether it
     /// satisfies <paramref name="until"/> or not, so the caller asserts what it waited for. Fails with the records it
     /// saw when the subscription has none or more than one by the deadline.
     /// </summary>
-    protected async Task<DeliveryRecord> WaitForRecordAsync(int configId, Func<DeliveryRecord, bool> until, int timeoutSeconds = 90)
+    protected async Task<WebhooksLogDto> WaitForRecordAsync(int configId, Func<WebhooksLogDto, bool> until, int timeoutSeconds = 90)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
         while (true)
         {
-            var records = await GetDeliveryRecordsAsync(configId);
+            var records = await GetLogAsync(configId);
 
             if (records is [var record] && until(record))
             {
@@ -538,23 +522,3 @@ public abstract class WebhookDeliveryTestBase(
 }
 
 public sealed record WebhookSubscription(int Id, string Name, string Uri, string SecretKey);
-
-/// <summary>A delivery record as <c>GET settings/webhooks/log</c> returns it, retry fields included.</summary>
-public sealed class DeliveryRecord
-{
-    public int Id { get; init; }
-    public int EventId { get; init; }
-    public DeliveryRecordAuthor? RetriedBy { get; init; }
-    public int Status { get; init; }
-    public DateTime? Delivery { get; init; }
-    public int Attempts { get; init; }
-    public DateTime? NextAttemptOn { get; init; }
-    public string RequestPayload { get; init; } = "";
-    public string? ResponsePayload { get; init; }
-}
-
-/// <summary>The member a delivery record names, of whom only the id is compared.</summary>
-public sealed class DeliveryRecordAuthor
-{
-    public Guid Id { get; init; }
-}
