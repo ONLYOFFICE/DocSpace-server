@@ -79,9 +79,27 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
 
+    verify(authorizationMessagingCleanupService, times(3)).onClientRemoved("client");
     verify(registeredClientCacheService, never()).evict(anyString(), anyLong());
     verify(channel, never()).basicAck(anyLong(), anyBoolean());
     verify(channel).basicNack(1L, false, false);
+  }
+
+  @Test
+  void whenClientRemovedEvent_andCleanupFailsOnce_thenRetriesAndAcks() throws IOException {
+    var event = mock(ClientRemovedEvent.class);
+
+    when(event.getClientId()).thenReturn("client");
+    doThrow(new RuntimeException("Lock wait timeout"))
+        .doNothing()
+        .when(authorizationMessagingCleanupService)
+        .onClientRemoved("client");
+
+    cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
+
+    verify(authorizationMessagingCleanupService, times(2)).onClientRemoved("client");
+    verify(channel).basicAck(1L, false);
+    verify(channel, never()).basicNack(anyLong(), anyBoolean(), anyBoolean());
   }
 
   @Test

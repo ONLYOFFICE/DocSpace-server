@@ -68,6 +68,8 @@ import org.springframework.stereotype.Component;
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class AuthorizationMessagingCleanupListener {
   /** Removes the authorizations and consents of the removed clients, chunk by chunk. */
+  private static final long[] RETRY_DELAYS_MS = {500, 2_000};
+
   private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
 
   /** Cache holding the clients resolved from the registration service. */
@@ -97,7 +99,7 @@ public class AuthorizationMessagingCleanupListener {
       String entityType)
       throws IOException {
     try {
-      operation.run();
+      runWithRetries(operation, entityType);
       cacheEviction.run();
       channel.basicAck(deliveryTag, false);
     } catch (IOException e) {
@@ -108,6 +110,37 @@ public class AuthorizationMessagingCleanupListener {
       channel.basicNack(deliveryTag, false, false);
     } finally {
       MDC.clear();
+    }
+  }
+
+  /**
+   * Runs a cleanup, retrying it after a short pause when it fails, so that a passing database
+   * hiccup does not send the cleanup to the dead-letter queue. A cleanup that still fails is left
+   * to its delayed second run.
+   *
+   * @param operation the cleanup to run
+   * @param entityType what is being cleaned up, for the log
+   */
+  private void runWithRetries(Runnable operation, String entityType) {
+    for (var attempt = 1; ; attempt++) {
+      try {
+        operation.run();
+        return;
+      } catch (RuntimeException e) {
+        if (attempt > RETRY_DELAYS_MS.length) throw e;
+
+        log.warn(
+            "Cleanup for {} failed (attempt {}), retrying: {}",
+            entityType,
+            attempt,
+            e.getMessage());
+        try {
+          Thread.sleep(RETRY_DELAYS_MS[attempt - 1]);
+        } catch (InterruptedException interrupted) {
+          Thread.currentThread().interrupt();
+          throw e;
+        }
+      }
     }
   }
 
