@@ -255,9 +255,9 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.Read, FileShare.None] },
+                    { SubjectType.Group, [FileShare.Read, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -1157,7 +1157,7 @@ public class FileSecurity(
             FolderType.AiRoom => FileShare.ContentCreator,
             FolderType.InstructionsRoom => FileShare.ContentCreator,
             FolderType.KnowledgeRoom => FileShare.ContentCreator,
-            FolderType.AiProjectRoom => FileShare.ContentCreator,
+            FolderType.AiProjectRoom => FileShare.Read,
             _ => FileShare.None
         };
     }

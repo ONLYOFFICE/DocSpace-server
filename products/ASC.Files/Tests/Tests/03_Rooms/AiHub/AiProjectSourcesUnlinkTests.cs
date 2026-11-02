@@ -96,7 +96,7 @@ public class AiProjectSourcesUnlinkTests(AspireAppFixture fixture) : AiHubTestBa
         using var linked = await LinkSourcesAsync(projectId, room);
 
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, roomAdmin.Id, FileShare.Read);
         await ShareRoomAsync(room, roomAdmin.Id, FileShare.RoomManager);
 
         await _filesClient.Authenticate(roomAdmin);

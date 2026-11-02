@@ -62,7 +62,7 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
         // Arrange
         var projectId = await CreateProjectAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -80,7 +80,7 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
         var projectId = await CreateProjectAsync();
         var member = await InviteContact(EmployeeType.User);
         var groupId = await CreateGroupAsync(member);
-        await ShareRoomAsync(projectId, groupId, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, groupId, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -126,7 +126,7 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
         // Arrange
         var projectId = await CreateProjectAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 

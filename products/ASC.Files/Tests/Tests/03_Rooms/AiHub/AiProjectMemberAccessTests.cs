@@ -47,7 +47,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         // Arrange
         var (projectId, roomId, fileId) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -88,7 +88,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         var (projectId, _, fileId) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
         var groupId = await CreateGroupAsync(member);
-        await ShareRoomAsync(projectId, groupId, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, groupId, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -105,7 +105,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         // Arrange
         var (projectId, roomId, fileId) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
         using var unlinked = await UnlinkSourcesAsync(projectId, roomId);
 
         await _filesClient.Authenticate(member);
@@ -124,7 +124,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         // Arrange
         var (projectId, _, fileId) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
         await ShareRoomAsync(projectId, member.Id, FileShare.None);
 
         await _filesClient.Authenticate(member);
@@ -144,7 +144,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         var member = await InviteContact(EmployeeType.User);
         var groupId = await CreateGroupAsync(member);
         await ShareRoomAsync(roomId, groupId, FileShare.ContentCreator);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -162,7 +162,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         // Arrange
         var (projectId, roomId, _) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
@@ -179,7 +179,7 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
         // Arrange
         var (projectId, roomId, _) = await CreateLinkedRoomWithSkillAsync();
         var member = await InviteContact(EmployeeType.User);
-        await ShareRoomAsync(projectId, member.Id, FileShare.ContentCreator);
+        await ShareRoomAsync(projectId, member.Id, FileShare.Read);
 
         await _filesClient.Authenticate(member);
 
