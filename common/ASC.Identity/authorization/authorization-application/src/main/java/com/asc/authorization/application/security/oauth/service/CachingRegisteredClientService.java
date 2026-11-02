@@ -39,9 +39,11 @@ import com.asc.common.utilities.cache.CacheNamespaceRegistry;
 import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.common.utilities.cache.CompositeCache;
 import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
+import java.time.Duration;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -67,8 +69,9 @@ public class CachingRegisteredClientService extends CompositeCache<CachedRegiste
   public CachingRegisteredClientService(
       @Qualifier("registeredClientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate,
       CacheNamespaceRegistry versionRegistry,
-      CacheInvalidationBus invalidationBus) {
-    super(CACHE_PREFIX, invalidationBus, versionRegistry, redisTemplate);
+      CacheInvalidationBus invalidationBus,
+      @Value("${IDENTITY_AUTHORIZATION_CLIENT_CACHE_TTL:PT30S}") Duration ttl) {
+    super(CACHE_PREFIX, invalidationBus, versionRegistry, redisTemplate, ttl);
   }
 
   @Override

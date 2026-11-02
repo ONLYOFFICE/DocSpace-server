@@ -69,7 +69,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 public abstract class CompositeCache<V> {
   private static final String KEY_SEPARATOR = ":";
   private static final int MEMORY_MAX_SIZE = 10_000;
-  private static final Duration REDIS_EXPIRE_AFTER_WRITE = Duration.ofMinutes(3);
+  private static final Duration DEFAULT_REDIS_EXPIRE_AFTER_WRITE = Duration.ofMinutes(3);
   private static final Duration MEMORY_EXPIRE_AFTER_WRITE = Duration.ofSeconds(10);
   private static final String VERSION_SUFFIX = ":version";
   private static final RedisSerializer<Long> VERSION_SERIALIZER =
@@ -117,6 +117,7 @@ public abstract class CompositeCache<V> {
   private final MemoryCache<V> memoryCache;
   private final CacheNamespaceRegistry registry;
   private final RedisTemplate<String, Object> redisTemplate;
+  private final Duration redisExpireAfterWrite;
 
   /**
    * @param keyPrefix the prefix of this cache's Redis keys.
@@ -129,8 +130,26 @@ public abstract class CompositeCache<V> {
       CacheInvalidationBus bus,
       CacheNamespaceRegistry registry,
       RedisTemplate<String, Object> redisTemplate) {
+    this(keyPrefix, bus, registry, redisTemplate, DEFAULT_REDIS_EXPIRE_AFTER_WRITE);
+  }
+
+  /**
+   * @param keyPrefix the prefix of this cache's Redis keys.
+   * @param bus the bus broadcasting evictions to the instance tier of every instance.
+   * @param registry the registry resolving per-tenant namespaces.
+   * @param redisTemplate the Redis template storing the entries.
+   * @param redisExpireAfterWrite how long a Redis entry lives after it was written; it bounds how
+   *     long a value whose eviction was lost can be served.
+   */
+  protected CompositeCache(
+      String keyPrefix,
+      CacheInvalidationBus bus,
+      CacheNamespaceRegistry registry,
+      RedisTemplate<String, Object> redisTemplate,
+      Duration redisExpireAfterWrite) {
     this.keyPrefix = keyPrefix;
     this.redisTemplate = redisTemplate;
+    this.redisExpireAfterWrite = redisExpireAfterWrite;
     this.registry = registry;
     this.memoryCache = new MemoryCache<>(registry, bus, MEMORY_MAX_SIZE, MEMORY_EXPIRE_AFTER_WRITE);
   }
@@ -165,8 +184,8 @@ public abstract class CompositeCache<V> {
     return keyPrefix + KEY_SEPARATOR + id;
   }
 
-  private static String ttlMillis() {
-    return String.valueOf(REDIS_EXPIRE_AFTER_WRITE.toMillis());
+  private String ttlMillis() {
+    return String.valueOf(redisExpireAfterWrite.toMillis());
   }
 
   private static byte[] raw(Object arg) {
