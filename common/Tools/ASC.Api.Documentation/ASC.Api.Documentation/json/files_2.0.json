@@ -12,7 +12,7 @@
       "name": "AGPL-3.0-only",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
     },
-    "version": "4.0.0",
+    "version": "4.1.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -8123,7 +8123,7 @@
           "Files / Files"
         ],
         "summary": "Create the editing session",
-        "description": "Opens a chunked session that replaces the content of an existing file, which is how WebDAV clients save over a\r\ndocument. The answer carries the session id the later calls quote, the address of the standalone chunk\r\nhandler, the expiry and the reserved size, and nothing is written until the parts reach\r\n`POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the session is closed with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`, where `folderId` is the folder the file lives in.\r\nUnlike an upload into a folder, the finished content does not become a new version: it overwrites the current\r\none, and the file loses its encrypted flag and its stored conversion result in the process. The caller must be\r\nallowed to edit the file, as the owner, a room manager and a member invited with editing rights are; a reader\r\nand a guest get 403. A file that does not exist is answered as missing, and a payload above the portal limit\r\nfor chunked uploads is refused before the session is created.",
+        "description": "Opens a chunked session that replaces the content of an existing file, which is how WebDAV clients save over a\r\ndocument. The answer carries the session id the later calls quote, the address of the standalone chunk\r\nhandler, the expiry and the reserved size, and nothing is written until the parts reach\r\n`POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the session is closed with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`, where `folderId` is the folder the file lives in.\r\nUnlike an upload into a folder, the finished content does not become a new version: it overwrites the current\r\none, and the file loses its encrypted flag and its stored conversion result in the process. The caller must be\r\nallowed to edit the file, as the owner, a room manager and a member invited with editing rights are; a reader\r\nand a guest get 403. A file that does not exist is answered as missing, a payload above the portal limit for\r\nchunked uploads is refused before the session is created. A `fileSize` of -1 means the size is not known in\r\nadvance, as for a WebDAV body sent without Content-Length; a smaller value is rejected as an invalid request.",
         "operationId": "createEditSession",
         "parameters": [
           {
@@ -8174,6 +8174,9 @@
               }
             }
           },
+          "400": {
+            "description": "`fileSize` is below -1"
+          },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads"
           },
@@ -8210,16 +8213,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10100,10 +10093,14 @@
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms",
-                      "Ai"
+                      "Ai",
+                      "InstructionsRoom",
+                      "KnowledgeRoom",
+                      "AiProjectRoom",
+                      "AiHub"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
                   },
                   {
                     "examples": [
@@ -10140,10 +10137,14 @@
                       34,
                       35,
                       36,
-                      37
+                      37,
+                      38,
+                      39,
+                      40,
+                      41
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -10175,7 +10176,11 @@
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms",
-                      "Ai"
+                      "Ai",
+                      "InstructionsRoom",
+                      "KnowledgeRoom",
+                      "AiProjectRoom",
+                      "AiHub"
                     ]
                   }
                 ]
@@ -14072,7 +14077,7 @@
           "Files / Metadata"
         ],
         "summary": "Create a metadata template",
-        "description": "Creates a metadata template for the whole portal, optionally with its fields in one call. Only a DocSpace admin can\r\ncreate templates. The template name must be unique on the portal regardless of case, at most 255 characters, and the\r\nname `System` is reserved. Every field needs a name unique within the template and a type from the published set; a\r\nchoice field requires at least one option and the options must be unique, a field of another type takes no options.\r\nA field without `order` is placed after the fields that have one, in the order of the request. The template and\r\nits fields are stored together: an invalid field rejects the whole request and nothing is created.\r\nThe answer is the created template with its fields and the generated option identifiers, which the values written\r\nwith `PUT api/2.0/files/metadata/file/{fileId}/values` refer to. A name already in use or an invalid field is\r\nanswered with 400; the request of a member who is not a DocSpace admin with 403.",
+        "description": "Creates a metadata template for the whole portal together with its fields in one call. Only a DocSpace admin can\r\ncreate templates. The template name must be unique on the portal regardless of case, at most 255 characters, and the\r\nname `System` is reserved. The template needs at least one field: a request without fields is refused, more fields\r\nare added later with `POST api/2.0/files/metadata/templates/{templateId}/fields`. Every field needs a name unique\r\nwithin the template and a type from the published set; a\r\nchoice field requires at least one option and the options must be unique, a field of another type takes no options.\r\nA field without `order` is placed after the fields that have one, in the order of the request. The template and\r\nits fields are stored together: an invalid field rejects the whole request and nothing is created.\r\nThe answer is the created template with its fields and the generated option identifiers, which the values written\r\nwith `PUT api/2.0/files/metadata/file/{fileId}/values` refer to. A name already in use or an invalid field is\r\nanswered with 400; the request of a member who is not a DocSpace admin with 403.",
         "operationId": "createTemplate",
         "requestBody": {
           "content": {
@@ -14107,7 +14112,7 @@
             }
           },
           "400": {
-            "description": "An invalid template or field: a name in use, reserved or too long, an unknown field type, duplicate field names or wrong options"
+            "description": "An invalid template or field: no fields, a name in use, reserved or too long, an unknown field type, duplicate field names or wrong options"
           },
           "403": {
             "description": "The caller is not a DocSpace admin"
@@ -14308,7 +14313,7 @@
           "Files / Metadata"
         ],
         "summary": "Update a metadata template",
-        "description": "Renames a metadata template or changes whether it is shown in the pickers. Only a DocSpace admin can change\r\ntemplates. The request is partial: a property left out keeps its value, the fields are not touched here and are\r\nchanged with `PUT api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`. The new name follows the rules\r\nof the creation: unique on the portal regardless of case and at most 255 characters. The answer is the whole template\r\nwith its fields. A template that does not exist is answered with 404, a name already in use or too long with 400.",
+        "description": "Renames a metadata template or changes whether it is shown in the pickers. Only a DocSpace admin can change\r\ntemplates. The request is partial: a property left out keeps its value, the fields are not touched here and are\r\nchanged with `PUT api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`. The new name follows the rules\r\nof the creation: unique on the portal regardless of case and at most 255 characters. Hiding a template keeps it\r\nassigned and keeps its values, but takes its fields out of the pickers, the search and the filling: every entry\r\nit is assigned to reports `hasMetadataFields` false unless another visible template or a custom field is on it,\r\nand the clients showing those entries are told to re-read them. Showing it again reverses that. The answer is the\r\nwhole template with its fields. A template that does not exist is answered with 404, a name already in use or too\r\nlong with 400.",
         "operationId": "updateTemplate",
         "parameters": [
           {
@@ -14837,7 +14842,7 @@
           "Files / Metadata"
         ],
         "summary": "Delete a metadata field",
-        "description": "Deletes a metadata field from its template together with every value written for it on any file, folder or room of\r\nthe portal. Only a DocSpace admin can change templates. The deletion is irreversible: the affected entries lose the\r\nvalue at once, their search documents are rebuilt and the clients viewing them are told to refresh. The template and\r\nits other fields stay as they are. A field that does not exist, or that belongs to another template than the one in\r\nthe route, is answered with 404.",
+        "description": "Deletes a metadata field from its template together with every value written for it on any file, folder or room of\r\nthe portal. Only a DocSpace admin can change templates. The deletion is irreversible: the affected entries lose the\r\nvalue at once, their search documents are rebuilt and the clients viewing them are told to refresh. The template and\r\nits other fields stay as they are. The last field of a template cannot be deleted, a template always keeps at least\r\none: to get rid of it, delete the template with `DELETE api/2.0/files/metadata/templates/{templateId}`; such a\r\nrequest is answered with 400 and the field stays. A field that does not exist, or that belongs to another template\r\nthan the one in the route, is answered with 404.",
         "operationId": "deleteField",
         "parameters": [
           {
@@ -14882,6 +14887,9 @@
               }
             }
           },
+          "400": {
+            "description": "The field is the last one of the template; delete the template instead"
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
@@ -14915,16 +14923,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14971,7 +14969,7 @@
           "Files / Metadata"
         ],
         "summary": "Get file metadata",
-        "description": "Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above\r\nit, each with its fields, and the custom text fields set on the file. The caller needs read access to the file: a\r\nmember of the portal, or an anonymous caller through an external link that grants access to the file or to a\r\nfolder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is\r\nread-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.\r\nA file never cascades, so every template reports `cascade` false and no `conflictResolveType`; whether it was\r\ninherited from a folder above is not told apart from a direct assignment. The custom fields are name and value\r\npairs and are not part of any template. A file without metadata is answered with empty lists, not with an error.\r\nThe same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values` after a write. A request with\r\nneither a session nor a link key is answered with 401; a file the caller cannot read with 403, a file that does\r\nnot exist with 404.",
+        "description": "Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above\r\nit, each with its fields, and the custom text fields set on the file. The caller needs read access to the file: a\r\nmember of the portal, or an anonymous caller through an external link that grants access to the file or to a\r\nfolder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is\r\nread-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.\r\nA file never cascades, so every template reports `cascade` false and no `conflictResolveType`; whether it was\r\ninherited from a folder above is not told apart from a direct assignment. The custom fields are name and value\r\npairs and are not part of any template. A file without metadata is answered with empty lists, not with an error.\r\n`hasMetadataFields` sums the answer up for a client that decides whether to offer the filling: true when a visible\r\ntemplate has a field or a custom field exists, false otherwise; the fields of a hidden template do not count.\r\nThe same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values` after a write. A request with\r\nneither a session nor a link key is answered with 401; a file the caller cannot read with 403, a file that does\r\nnot exist with 404.",
         "operationId": "getFileMetadata",
         "parameters": [
           {
@@ -15093,7 +15091,7 @@
           "Files / Metadata"
         ],
         "summary": "Get folder metadata",
-        "description": "Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading\r\nfolder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the\r\nfolder: a member of the portal, or an anonymous caller through an external link to the folder or to a folder\r\nabove it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is\r\nread-only. A field carries its value inside it; a field without a value on the folder comes without `value`. Each\r\ntemplate reports whether this folder cascades it to its content in `cascade`, with the rule of that cascade in\r\n`conflictResolveType`, absent while it does not; an inherited template reports false unless this folder cascades it\r\non its own. The custom fields are name and value pairs outside any template. A folder without metadata is answered\r\nwith empty lists. The cascade is changed with `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.\r\nA request with neither a session nor a link key is answered with 401; a folder the caller cannot read with 403, a\r\nfolder that does not exist with 404.",
+        "description": "Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading\r\nfolder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the\r\nfolder: a member of the portal, or an anonymous caller through an external link to the folder or to a folder\r\nabove it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is\r\nread-only. A field carries its value inside it; a field without a value on the folder comes without `value`. Each\r\ntemplate reports whether this folder cascades it to its content in `cascade`, with the rule of that cascade in\r\n`conflictResolveType`, absent while it does not; an inherited template reports false unless this folder cascades it\r\non its own. The custom fields are name and value pairs outside any template. A folder without metadata is answered\r\nwith empty lists. `hasMetadataFields` sums the answer up for a client that decides whether to offer the filling:\r\ntrue when a visible template has a field or a custom field exists, false otherwise; the fields of a hidden template\r\ndo not count. The cascade is changed with `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.\r\nA request with neither a session nor a link key is answered with 401; a folder the caller cannot read with 403, a\r\nfolder that does not exist with 404.",
         "operationId": "getFolderMetadata",
         "parameters": [
           {
@@ -16740,6 +16738,9 @@
               }
             }
           },
+          "400": {
+            "description": "`outputType` names a format the portal cannot convert this file to"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -16767,16 +16768,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17576,10 +17567,14 @@
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms",
-                      "Ai"
+                      "Ai",
+                      "InstructionsRoom",
+                      "KnowledgeRoom",
+                      "AiProjectRoom",
+                      "AiHub"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
                   },
                   {
                     "examples": [
@@ -17616,10 +17611,14 @@
                       34,
                       35,
                       36,
-                      37
+                      37,
+                      38,
+                      39,
+                      40,
+                      41
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -17651,7 +17650,11 @@
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms",
-                      "Ai"
+                      "Ai",
+                      "InstructionsRoom",
+                      "KnowledgeRoom",
+                      "AiProjectRoom",
+                      "AiHub"
                     ]
                   }
                 ]
@@ -18245,7 +18248,7 @@
           "Files / Operations"
         ],
         "summary": "Check move or copy conflicts",
-        "description": "Reports which of the requested files and folders already have a same-named entry in `destFolderId`, so that\r\nthe clash can be settled before the move or the copy is started. Nothing is moved, copied or changed by the\r\ncall, although the address is shared with `PUT api/2.0/files/fileops/move`: the answer is the part of the\r\nrequest that clashes, and an empty array means the batch would go through without one. The\r\n`conflictResolveType` of the request is not taken into account — clashing items are reported whatever it says\r\n— and encrypted files are left out of the report. A source id that resolves to nothing is not an error and is\r\npassed over. The caller needs create access to the destination: an archived room and a room the caller cannot\r\nwrite to are refused with 403, a destination that does not exist is answered as missing, and a request without\r\n`destFolderId` is rejected as an invalid request. To learn whether the destination accepts the files at all\r\nuse `GET api/2.0/files/fileops/checkdestfolder`.",
+        "description": "Reports which of the requested files and folders already have a same-named entry in `destFolderId`, so that\r\nthe clash can be settled before the move or the copy is started. Nothing is moved, copied or changed by the\r\ncall, although the address is shared with `PUT api/2.0/files/fileops/move`: the answer is the part of the\r\nrequest that clashes, and an empty array means the batch would go through without one. With `content` true the\r\nlisted folders are replaced by what they directly contain, as the operation does, so the clashes are looked for\r\namong their files and sub-folders. The `conflictResolveType` of the request is not taken into account —\r\nclashing items are reported whatever it says — and encrypted files are left out of the report. A source id\r\nthat resolves to nothing is not an error and is passed over. The caller needs create access to the\r\ndestination: an archived room and a room the caller cannot write to are refused with 403, and so is a file,\r\nor a folder that is not a room, offered to the Rooms, Forms or AI agents section root (a knowledge folder and\r\nthe archive refuse such folders too), and a room offered anywhere but the Rooms root or the archive; only the\r\nlisted folders the caller can read are considered. A destination that does not exist is answered as missing, and a request without\r\n`destFolderId` is rejected as an invalid request. To learn whether the destination accepts the files at all\r\nuse `GET api/2.0/files/fileops/checkdestfolder`.",
         "operationId": "checkMoveOrCopyBatchItems",
         "parameters": [
           {
@@ -18388,7 +18391,7 @@
             "description": "`destFolderId` is not given"
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder, or the destination is a listed folder or lies inside one"
+            "description": "The caller cannot create items in the destination folder, the destination is a listed folder or lies inside one, a file or a folder that is not a room is offered to the Rooms, Forms or AI agents section root, or a room is offered anywhere but the Rooms root or the archive"
           },
           "404": {
             "description": "The destination folder does not exist"
@@ -18599,7 +18602,7 @@
           "Files / Operations"
         ],
         "summary": "Check the destination folder",
-        "description": "Reports whether the destination folder accepts the listed files, before a move or a copy is started. Only\r\n`fileIds` and `destFolderId` are read from the request: `result` says whether all of the files are accepted,\r\nonly some of them or none, and `files` names the ones that are. The check is about what the destination allows\r\nto be stored in it rather than about name clashes — everywhere except a form-filling room every file is\r\naccepted, while a form-filling room accepts only PDF forms, so a text document offered to one comes back as\r\nnone accepted. The caller needs create access to the destination, so a room the caller cannot write to and an\r\narchived room are refused with 403, a destination that does not exist is answered as missing, and a request\r\nwithout `destFolderId` is rejected as an invalid request. Folder ids and the copying options of the request\r\nplay no part here. The call changes nothing; for same-named entries at the destination use\r\n`GET api/2.0/files/fileops/move`.",
+        "description": "Reports whether the destination folder accepts the listed files, before a move or a copy is started. Only\r\n`fileIds` and `destFolderId` are read from the request: `result` says whether all of the files are accepted,\r\nonly some of them or none, and `files` names the ones that are. The check is about what the destination allows\r\nto be stored in it rather than about name clashes — everywhere except a form-filling room every file is\r\naccepted, while a form-filling room accepts only PDF forms, so a text document offered to one comes back as\r\nnone accepted. A file listed twice is counted once, as the operation moves it once. The caller needs create\r\naccess to the destination, so a room the caller cannot write to and an archived room are refused with 403, as\r\nare the Rooms, Forms and AI agents section roots, which hold rooms only; a destination that does not exist is\r\nanswered as missing, and a request without `destFolderId` is rejected as an invalid request. Folder ids and\r\nthe copying options of the request play no part here. The call changes nothing; for same-named entries at the\r\ndestination use\r\n`GET api/2.0/files/fileops/move`.",
         "operationId": "checkMoveOrCopyDestFolder",
         "parameters": [
           {
@@ -18742,7 +18745,7 @@
             "description": "`destFolderId` is not given"
           },
           "403": {
-            "description": "The caller cannot create items in the destination folder"
+            "description": "The caller cannot create items in the destination folder, or the destination is the Rooms, Forms or AI agents section root, which holds rooms only"
           },
           "404": {
             "description": "The destination folder does not exist"
@@ -18813,7 +18816,7 @@
           "Files / Operations"
         ],
         "summary": "Cancel file operations",
-        "description": "Cancels a background file operation of the caller and answers with the operations that are left. Pass the `id`\r\nthat was reported when the operation started to stop that one; a call that leaves the trailing route segment\r\nout stops every operation the caller has running, of every kind. Cancelling stops the job where it stands and\r\ndoes not undo it: what has already been copied, moved or deleted stays that way, so a cancelled batch can\r\nleave part of itself at the destination and part of it at the source, and the result has to be read back\r\nrather than assumed. The cancelled record is dropped from `GET api/2.0/files/fileops` at once, which is why\r\nthe answer here is usually empty. An id that is not among the caller's operations cancels nothing and is not\r\nan error. Operations are private to the account that started them, an anonymous caller being scoped to the\r\nsession of the external link, so the call can never reach an operation of anyone else.",
+        "description": "Cancels a background file operation of the caller and answers with the operations that are left. Pass the `id`\r\nthat was reported when the operation started to stop that one; a call that leaves the trailing route segment\r\nout stops every operation the caller has running, of every kind. Cancelling stops the job where it stands and\r\ndoes not undo it: what has already been copied, moved or deleted stays that way, so a cancelled batch can\r\nleave part of itself at the destination and part of it at the source, and the result has to be read back\r\nrather than assumed. The cancelled record leaves the answer of this call, which is why it is usually empty, and\r\ncomes back once the job has actually stopped: the next `GET api/2.0/files/fileops` lists it a single time,\r\nfinished, with the status Canceled and the cancellation in `error`. An id that is not among the caller's operations cancels nothing and is not\r\nan error. Operations are private to the account that started them, an anonymous caller being scoped to the\r\nsession of the external link, so the call can never reach an operation of anyone else.",
         "operationId": "terminateTasks",
         "parameters": [
           {
@@ -19138,7 +19141,7 @@
           "Files / Operations"
         ],
         "summary": "Chunked upload",
-        "description": "Deprecated in favour of `POST api/2.0/files/{folderId}/session`, which opens the same session and returns it\r\nwithout the success envelope used here; new callers should go there. Reserves a chunked upload of a file in\r\nthe folder named by the path: the title comes from `fileName`, the declared payload size from `fileSize`, and\r\nthe answer carries the session id every later call quotes, the address of the standalone chunk handler, the\r\nmoment an idle session is dropped and the reserved byte count. No content is stored yet. Send the payload as\r\nmultipart parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`, keeping each part within\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, then close the session with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller needs the right to add content to the\r\ntarget folder, which room managers and content creators have and readers, editors and guests do not: they get\r\n403, as does a section root such as Rooms or Archive, while an unknown folder is answered as missing. A\r\npayload above the portal limit for chunked uploads is refused before the session exists.",
+        "description": "Deprecated in favour of `POST api/2.0/files/{folderId}/session`, which opens the same session and returns it\r\nwithout the success envelope used here; new callers should go there. Reserves a chunked upload of a file in\r\nthe folder named by the path: the title comes from `fileName`, the declared payload size from `fileSize`, and\r\nthe answer carries the session id every later call quotes, the address of the standalone chunk handler, the\r\nmoment an idle session is dropped and the reserved byte count. No content is stored yet. Send the payload as\r\nmultipart parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`, keeping each part within\r\n`chunkUploadSize` from `GET api/2.0/files/settings`, then close the session with\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller needs the right to add content to the\r\ntarget folder, which room managers and content creators have and readers, editors and guests do not: they get\r\n403, as does a section root such as Rooms or Archive, while an unknown folder is answered as missing. A\r\npayload above the portal limit for chunked uploads is refused before the session exists, and a negative\r\n`fileSize` is rejected as an invalid request.",
         "operationId": "createUploadSession",
         "parameters": [
           {
@@ -19190,7 +19193,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `fileName`"
+            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
@@ -19317,7 +19320,7 @@
           "Files / Operations"
         ],
         "summary": "Create an upload session",
-        "description": "Opens a chunked upload session for a file in the folder named by the path and returns the session itself,\r\nwhich is the difference from the deprecated `POST api/2.0/files/{folderId}/upload/create_session` and its\r\nsuccess envelope. The answer gives `id`, quoted by every later call, `location` for the standalone chunk\r\nhandler used by clients that bypass this API, `expired`, and `bytes_total` echoing the reserved size. Whether\r\nparts are really needed follows from `fileSize`: below `chunkUploadSize` from `GET api/2.0/files/settings` the\r\nwhole payload goes in one `POST api/2.0/files/{folderId}/session/{sessionId}`, which stores the file and\r\nanswers 201, and above it the parts go one by one to\r\n`POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the file appears only after\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller must be allowed to add content to the\r\nfolder, so readers, editors and guests are refused, a section root is refused as well, and an unknown folder\r\nis answered as missing. Nothing is written until the parts arrive, and an abandoned session disappears twelve\r\nhours later.",
+        "description": "Opens a chunked upload session for a file in the folder named by the path and returns the session itself,\r\nwhich is the difference from the deprecated `POST api/2.0/files/{folderId}/upload/create_session` and its\r\nsuccess envelope. The answer gives `id`, quoted by every later call, `location` for the standalone chunk\r\nhandler used by clients that bypass this API, `expired`, and `bytes_total` echoing the reserved size. Whether\r\nparts are really needed follows from `fileSize`: below `chunkUploadSize` from `GET api/2.0/files/settings` the\r\nwhole payload goes in one `POST api/2.0/files/{folderId}/session/{sessionId}`, which stores the file and\r\nanswers 201, and above it the parts go one by one to\r\n`POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the file appears only after\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller must be allowed to add content to the\r\nfolder, so readers, editors and guests are refused, a section root is refused as well, and an unknown folder\r\nis answered as missing, and a negative `fileSize` is rejected as an invalid request. Nothing is written until\r\nthe parts arrive, and an abandoned session disappears twelve hours later.",
         "operationId": "createUploadSessionInFolder",
         "parameters": [
           {
@@ -19369,7 +19372,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `fileName`"
+            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
@@ -19716,6 +19719,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request has no `File` part"
+          },
           "402": {
             "description": "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit"
           },
@@ -19723,7 +19729,7 @@
             "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
           },
           "500": {
-            "description": "The request has no `File` part, or a file that is not a PDF is stored in a form-filling room"
+            "description": "A file that is not a PDF is stored in a form-filling room"
           },
           "401": {
             "description": "Unauthorized",
@@ -19742,16 +19748,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19843,7 +19839,7 @@
           "Files / Operations"
         ],
         "summary": "Upload a numbered chunk",
-        "description": "Stores one part of a file under the number given in `chunkNumber`, which is what the ordinary chunked flow\r\nuses: parts are kept by their number rather than by arrival, so a part that failed can be resent under the\r\nsame number without restarting the session. Numbering starts at 1, and leaving the number out makes the server\r\ncount the parts itself. The answer is always the session, never the file, and this call never completes the\r\nupload: the file appears only after `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Use\r\n`POST api/2.0/files/{folderId}/session/{sessionId}` instead when the parts go strictly in order and the upload\r\nshould complete by itself. A part bigger than `chunkUploadSize` from `GET api/2.0/files/settings` is refused,\r\nso that value is also the size to split the payload by. The first part of a PDF is inspected, and a PDF that\r\nis not a fillable form is refused when the session targets a form-filling room. The session is found by its id\r\nalone.",
+        "description": "Stores one part of a file under the number given in `chunkNumber`, which is what the ordinary chunked flow\r\nuses: parts are kept by their number rather than by arrival, so a part that failed can be resent under the\r\nsame number without restarting the session. Numbering starts at 1, so 0 and a negative number are rejected as\r\nan invalid request, and leaving the number out makes the server count the parts itself. The answer is always the session, never the file, and this call never completes the\r\nupload: the file appears only after `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Use\r\n`POST api/2.0/files/{folderId}/session/{sessionId}` instead when the parts go strictly in order and the upload\r\nshould complete by itself. A part bigger than `chunkUploadSize` from `GET api/2.0/files/settings` is refused,\r\nso that value is also the size to split the payload by. The first part of a PDF is inspected, and a PDF that\r\nis not a fillable form is refused when the session targets a form-filling room. The session is found by its id\r\nalone.",
         "operationId": "uploadAsyncSession",
         "parameters": [
           {
@@ -19929,6 +19925,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request has no `File` part, or `chunkNumber` is 0 or negative"
+          },
           "402": {
             "description": "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file"
           },
@@ -19936,7 +19935,7 @@
             "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
           },
           "500": {
-            "description": "The request has no `File` part, or a session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room"
+            "description": "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room"
           },
           "401": {
             "description": "Unauthorized",
@@ -19955,16 +19954,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27632,7 +27621,7 @@
           {
             "name": "withAiFolder",
             "in": "query",
-            "description": "Keeps only the rooms that hold a .ai folder in their root. The content of that folder is read with\r\n`GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms with and without the folder.",
+            "description": "Keeps only the rooms that provide skills to the AI chat: Instructions rooms, whose Markdown files are read\r\nwith `GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms of every type.",
             "schema": {
               "examples": [
                 true
@@ -27844,14 +27833,14 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Get the .ai folder of a room",
-        "description": "Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as\r\n`GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with\r\n`GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot\r\nis refused, and a room that does not exist is answered as not found. A room that holds no .ai folder is\r\nanswered with an empty page: no files and folders, a zero `total`, no `current` folder and empty `pathParts`.",
+        "summary": "Get the skills folder of an Instructions room",
+        "description": "Returns one page of the root contents of an Instructions room, whose Markdown files are the skills of the AI\r\nchat, in the same shape as `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that provide\r\nskills are listed with `GET api/2.0/files/rooms?withAiFolder=true` (or `type=10`). Any member who can read the\r\nroom may call it; somebody who cannot is refused, and a room that does not exist or is not an Instructions room\r\nis answered as not found.",
         "operationId": "getRoomAiFolder",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "The room whose .ai folder is listed, named by the identifier that `GET api/2.0/files/rooms` reports for it.",
+            "description": "The Instructions room whose skills are listed, named by the identifier that `GET api/2.0/files/rooms` reports\r\nfor it.",
             "required": true,
             "schema": {
               "examples": [
@@ -27930,7 +27919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One page of the .ai folder contents, with the folder itself and the chain of its parents, or an empty page without `current` when the room holds no .ai folder",
+            "description": "One page of the Instructions room root, with the room itself and the chain of its parents",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -27957,7 +27946,7 @@
             "description": "The caller may not read this room"
           },
           "404": {
-            "description": "The room does not exist"
+            "description": "The room does not exist or is not an Instructions room"
           },
           "401": {
             "description": "Unauthorized",
@@ -28972,7 +28961,7 @@
           "Rooms"
         ],
         "summary": "Archive a room",
-        "description": "Queues a background job that moves one room from the Rooms section to the Archive section, and returns the\r\noperation record of that job. An archived room stays readable to its members and becomes read only: files\r\ncannot be created, renamed or edited in it, and its settings, tags, logo and links can no longer be changed,\r\nwhich is why many other room operations answer an archived room with a refusal. The caller must be a manager\r\nof the room; administrators of the portal cannot archive a room they were not invited to, and a room template\r\ncannot be archived at all and is answered as missing. The room is not archived when the response arrives: poll\r\n`GET api/2.0/files/fileops` until `finished` is true. Archiving an already archived room is harmless.\r\n`deleteAfter` decides only how long the finished record survives, not what happens to the room. Use\r\n`PUT api/2.0/files/rooms/{id}/unarchive` to bring the room back.\n\nRaises the `room.archived` webhook once the queued operation moves the room to the archive, for an AI agent as well.",
+        "description": "Queues a background job that moves one room from the Rooms section to the Archive section, and returns the\r\noperation record of that job. An archived room stays readable to its members and becomes read only: files\r\ncannot be created, renamed or edited in it, and its settings, tags, logo and links can no longer be changed,\r\nwhich is why many other room operations answer an archived room with a refusal. The caller must be a manager\r\nof the room; administrators of the portal cannot archive a room they were not invited to, and a room template\r\ncannot be archived at all and is answered as missing. Instructions and Knowledge rooms are never archived and\r\nare refused with 403: delete them with `DELETE api/2.0/files/rooms/{id}` instead. The room is not archived when the response arrives: poll\r\n`GET api/2.0/files/fileops` until `finished` is true. Archiving an already archived room is harmless.\r\n`deleteAfter` decides only how long the finished record survives, not what happens to the room. Use\r\n`PUT api/2.0/files/rooms/{id}/unarchive` to bring the room back.\n\nRaises the `room.archived` webhook once the queued operation moves the room to the archive, for an AI agent as well.",
         "operationId": "archiveRoom",
         "parameters": [
           {
@@ -29026,7 +29015,7 @@
             "description": "A third-party identifier refers to a storage account that is not connected"
           },
           "403": {
-            "description": "The caller may not read or archive this room, the id names a folder that is not a room, or a file in the room is locked or being edited"
+            "description": "The caller may not read or archive this room, the id names a folder that is not a room, the room is an Instructions or Knowledge room, which is never archived, or a file in the room is locked or being edited"
           },
           "404": {
             "description": "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type"
@@ -30905,7 +30894,7 @@
           "Rooms"
         ],
         "summary": "Pin a room",
-        "description": "Pins a room to the top of the room list of the calling account and returns the room with the pinned flag set.\r\nPinning is personal: it changes the order only for the caller, is invisible to the other members of the room,\r\nand does not survive a trip through the Archive section, so an unarchived room has to be pinned again. Pinned\r\nrooms stay above the unpinned ones whatever sorting or filter the listing uses, and their own order between\r\neach other is stable. An account may keep only a limited number of pinned rooms at a time, ten on a portal\r\nwith the default configuration, and AI rooms are counted separately against their own allowance; a request\r\nover the limit is refused until something is unpinned with `PUT api/2.0/files/rooms/{id}/unpin`. Pinning a\r\nroom that is already pinned changes nothing and is safe to repeat. Anybody who can read the room may pin it,\r\nincluding guests and portal administrators who were never invited, while somebody who is not in the room is\r\nrefused, an archived room is rejected and an unknown room is answered as missing.",
+        "description": "Pins a room to the top of the room list of the calling account and returns the room with the pinned flag set.\r\nPinning is personal: it changes the order only for the caller, is invisible to the other members of the room,\r\nand does not survive a trip through the Archive section, so an unarchived room has to be pinned again. Pinned\r\nrooms stay above the unpinned ones whatever sorting or filter the listing uses, and their own order between\r\neach other is stable. An account may keep only a limited number of pinned rooms at a time, ten on a portal\r\nwith the default configuration, and AI agents and AI rooms are counted separately; a request\r\nover the limit is refused until something is unpinned with `PUT api/2.0/files/rooms/{id}/unpin`. Pinning a\r\nroom that is already pinned changes nothing and is safe to repeat. Anybody who can read the room may pin it,\r\nincluding guests and portal administrators who were never invited, while somebody who is not in the room is\r\nrefused, an archived room is rejected and an unknown room is answered as missing.",
         "operationId": "pinRoom",
         "parameters": [
           {
@@ -30948,7 +30937,7 @@
             "description": "A third-party identifier refers to a storage account that is not connected"
           },
           "403": {
-            "description": "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents are counted separately)"
+            "description": "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents and AI rooms are counted separately)"
           },
           "404": {
             "description": "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type"
@@ -33054,6 +33043,873 @@
         ]
       }
     },
+    "/api/2.0/files/rooms/{id}/sources": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI project sources",
+        "description": "Returns the Instructions and Knowledge rooms linked to an AI project as its sources.",
+        "operationId": "getProjectSources",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room to act on, named by the identifier that `GET api/2.0/files/rooms` reports for it. Rooms kept in the\r\nportal itself use whole numbers, while a room backed by a connected third-party account uses the string form\r\nof the same listing.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Instructions and Knowledge rooms linked to the project",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectSourcesWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Link sources to an AI project",
+        "description": "Links Instructions and Knowledge rooms to an AI project as its sources, which gives every project member read access to them. The caller must manage the project and each listed room; rooms that are already linked are skipped.",
+        "operationId": "linkProjectSources",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The rooms to link.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "The rooms to link.",
+                "$ref": "#/components/schemas/LinkAiProjectSourcesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "The rooms are linked"
+          },
+          "400": {
+            "description": "`roomIds` is empty or longer than 40 items, a room is not an active Instructions or Knowledge room the caller manages, or the project would hold more than 20 rooms of one kind"
+          },
+          "403": {
+            "description": "The caller may not edit the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Unlink sources from an AI project",
+        "description": "Unlinks Instructions and Knowledge rooms from an AI project; project members lose the access the link gave them. The caller must manage the project, rights on the rooms are not checked; the rooms themselves are not changed.",
+        "operationId": "unlinkProjectSources",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The rooms to unlink.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "The rooms to unlink.",
+                "$ref": "#/components/schemas/UnlinkAiProjectSourcesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "The rooms are unlinked"
+          },
+          "400": {
+            "description": "`roomIds` is empty or longer than 40 items"
+          },
+          "403": {
+            "description": "The caller may not edit the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/skills": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the skills of an AI room",
+        "description": "Returns the skills of an Instructions room, or of the Instructions rooms linked to an AI project.",
+        "operationId": "getRoomSkills",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room to act on, named by the identifier that `GET api/2.0/files/rooms` reports for it. Rooms kept in the\r\nportal itself use whole numbers, while a room backed by a connected third-party account uses the string form\r\nof the same listing.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Instructions rooms with their skills",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSkillsWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not read the room, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No active Instructions room or AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/skills": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the skills of Instructions rooms",
+        "description": "Returns the skills of several Instructions rooms. Rooms the caller cannot read are left out.",
+        "operationId": "getRoomsSkills",
+        "parameters": [
+          {
+            "name": "roomIds",
+            "in": "query",
+            "description": "IDs of the Instructions rooms, one `roomIds` query item per room; 1 to 20 items.",
+            "schema": {
+              "examples": [
+                [
+                  17001,
+                  17002
+                ]
+              ],
+              "maxItems": 20,
+              "minItems": 1,
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The readable Instructions rooms among the requested ones, with their skills",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSkillsWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`roomIds` is empty or longer than 20 items"
+          },
+          "403": {
+            "description": "The AI features are turned off on the portal"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/rooms/{id}/model": {
+      "get": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Get the AI project model",
+        "description": "Returns the AI model selected for the chat of an AI project, as the ID of an AI model profile. Any project member with read access may call it. The call is read-only. The result holds only the project's own choice: `profileId` is null when nobody has selected a model for the project yet, or when the selected profile has been removed from the portal since. In both cases the portal-wide model is used instead, which this operation does not return. To change the model, use `PUT api/2.0/files/rooms/{id}/model`.",
+        "operationId": "getProjectModel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room to act on, named by the identifier that `GET api/2.0/files/rooms` reports for it. Rooms kept in the\r\nportal itself use whole numbers, while a room backed by a connected third-party account uses the string form\r\nof the same listing.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The AI model profile selected for the project, or null when none is selected",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectModelWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not read the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Rooms / AI"
+        ],
+        "summary": "Set the AI project model",
+        "description": "Selects the AI model that answers in the chat of an AI project, replacing the previous choice, and returns the model now selected. Take `profileId` from the profiles that `GET api/2.0/ai/profiles/list` returns. The caller must be able to edit the project; reading it is not enough. The change applies to every member of the project, is recorded in the audit trail and notifies the project's open clients. Repeating the call with the same profile changes nothing. A model can only be replaced by another one: there is no operation that clears the selection and returns the project to the portal-wide model. The profile must exist on the portal and be able to chat; a profile known to serve only other kinds of tasks, such as image generation, is refused with 400.",
+        "operationId": "setProjectModel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the project.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The model to set.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "The model to set.",
+                "$ref": "#/components/schemas/UpdateAiProjectModelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The AI model profile now selected for the project",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiProjectModelWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body cannot be read or has no `profileId`, the portal has no AI model profile with this id, or the profile cannot be used for chat"
+          },
+          "403": {
+            "description": "The caller may not edit the project, or the AI features are turned off on the portal"
+          },
+          "404": {
+            "description": "No AI project has this id"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/group": {
       "post": {
         "tags": [
@@ -34503,10 +35359,372 @@
               true
             ],
             "type": "boolean",
-            "description": "Indicates whether the AI feature is disabled."
+            "description": "Whether the editor hides its AI tools. It is set when AI is turned off for the portal, and always for an\r\nanonymous visitor of an external link."
           }
         },
-        "description": "The AI settings the editor opens with. They follow the portal-wide AI access setting, so every document of the\r\nportal gets the same value."
+        "description": "The AI settings the editor opens with. They follow the portal-wide AI access setting for signed-in users; an\r\nanonymous visitor who opened the document through an external link always gets AI disabled."
+      },
+      "AiProjectModelDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "examples": [
+              "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "ID of the AI model profile selected for the project, as listed by `GET api/2.0/ai/profiles/list`. Null when no model has been selected for the project, or the selected profile no longer exists.",
+            "format": "uuid"
+          }
+        },
+        "description": "The AI model selected for an AI project's chat."
+      },
+      "AiProjectModelWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The AiProjectModelDto object returned by the operation.",
+            "$ref": "#/components/schemas/AiProjectModelDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the AiProjectModelDto object."
+      },
+      "AiProjectSourceDto": {
+        "required": [
+          "id",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              17001
+            ],
+            "type": "integer",
+            "description": "ID of the room.",
+            "format": "int32"
+          },
+          "title": {
+            "examples": [
+              "Brand voice"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Room title."
+          },
+          "logo": {
+            "description": "Room logo.",
+            "$ref": "#/components/schemas/LogoDto"
+          }
+        },
+        "description": "A room linked to an AI project as its source."
+      },
+      "AiProjectSourcesDto": {
+        "required": [
+          "instructionsRooms",
+          "knowledgeRooms"
+        ],
+        "type": "object",
+        "properties": {
+          "instructionsRooms": {
+            "examples": [
+              [
+                {
+                  "id": 17001,
+                  "title": "Brand voice"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "A room linked to an AI project as its source.",
+              "$ref": "#/components/schemas/AiProjectSourceDto"
+            },
+            "description": "Linked Instructions rooms, sorted by title."
+          },
+          "knowledgeRooms": {
+            "examples": [
+              [
+                {
+                  "id": 17020,
+                  "title": "Product catalogue"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "A room linked to an AI project as its source.",
+              "$ref": "#/components/schemas/AiProjectSourceDto"
+            },
+            "description": "Linked Knowledge rooms, sorted by title."
+          }
+        },
+        "description": "The sources of an AI project: the Instructions and Knowledge rooms linked to it."
+      },
+      "AiProjectSourcesWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The AiProjectSourcesDto object returned by the operation.",
+            "$ref": "#/components/schemas/AiProjectSourcesDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the AiProjectSourcesDto object."
+      },
+      "AiSkillDto": {
+        "required": [
+          "description",
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "9911"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "ID of the skill file."
+          },
+          "name": {
+            "examples": [
+              "brand-voice"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Skill name from the frontmatter."
+          },
+          "description": {
+            "examples": [
+              "Writes marketing texts in the brand voice."
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Skill description from the frontmatter."
+          }
+        },
+        "description": "A skill of an Instructions room: a Markdown file in the room root with a YAML frontmatter."
+      },
+      "AiSkillsDto": {
+        "required": [
+          "rooms"
+        ],
+        "type": "object",
+        "properties": {
+          "rooms": {
+            "examples": [
+              [
+                {
+                  "id": 17001,
+                  "title": "Brand voice",
+                  "skills": [ ]
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "An Instructions room with its skills.",
+              "$ref": "#/components/schemas/AiSkillsRoomDto"
+            },
+            "description": "The rooms, sorted by title."
+          }
+        },
+        "description": "Instructions rooms with their skills."
+      },
+      "AiSkillsRoomDto": {
+        "required": [
+          "id",
+          "logo",
+          "skills",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              17001
+            ],
+            "type": "integer",
+            "description": "ID of the room.",
+            "format": "int32"
+          },
+          "title": {
+            "examples": [
+              "Brand voice"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Room title."
+          },
+          "logo": {
+            "description": "Room logo.",
+            "$ref": "#/components/schemas/LogoDto"
+          },
+          "skills": {
+            "examples": [
+              [
+                {
+                  "id": "9911",
+                  "name": "brand-voice",
+                  "description": "Writes marketing texts in the brand voice."
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "A skill of an Instructions room: a Markdown file in the room root with a YAML frontmatter.",
+              "$ref": "#/components/schemas/AiSkillDto"
+            },
+            "description": "Skills of the room, sorted by file title."
+          }
+        },
+        "description": "An Instructions room with its skills."
+      },
+      "AiSkillsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The AiSkillsDto object returned by the operation.",
+            "$ref": "#/components/schemas/AiSkillsDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the AiSkillsDto object."
       },
       "AnonymousConfigDto": {
         "required": [
@@ -36745,7 +37963,7 @@
               "description": "The parameters of a metadata field.",
               "$ref": "#/components/schemas/MetadataFieldRequest"
             },
-            "description": "The template metadata fields."
+            "description": "The template metadata fields. At least one field is required: a template without fields is not created."
           }
         },
         "description": "The request parameters for creating a metadata template."
@@ -39978,6 +41196,13 @@
               "$ref": "#/components/schemas/CustomFieldValueDto"
             },
             "description": "The custom fields with their values."
+          },
+          "hasMetadataFields": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the entry has a metadata field a user can see and fill, by hand or with the AI filling: a field of a\r\ntemplate in `templates` whose `visible` is true, or a custom field in `customFields`. False when both lists are\r\nempty, when every template is hidden, or when none of the visible ones has a field. It says nothing about the\r\nvalues: it stays true once every field is filled. The same flag is carried by the entry in a folder listing and\r\nin the file and folder info responses as `hasMetadataFields`, so a client that has the listing needs no call here\r\nto decide whether to offer the filling."
           }
         },
         "description": "The metadata of an entry: the assigned templates with their values, and the custom fields holding a value."
@@ -41619,6 +42844,10 @@
                   "PrimaryExternalLink": {
                     "type": "integer",
                     "format": "int32"
+                  },
+                  "AiProject": {
+                    "type": "integer",
+                    "format": "int32"
                   }
                 },
                 "description": "How many links of each kind currently exist for the entry, counted separately for the primary link and the\r\nadditional ones. Kinds with no links are left out, and the whole field is null when the caller may not change\r\nthe access or no link exists at all."
@@ -41823,6 +43052,12 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "AiProject": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "description": "Which access levels may be handed out on this entry, listed per kind of recipient, so that a client offers\r\nonly levels the entry actually supports - a room for filling forms and a plain folder do not accept the same\r\nones."
@@ -41871,6 +43106,16 @@
                   "format": "int32"
                 },
                 "description": "The IDs of the metadata templates assigned to the file entry."
+              },
+              "hasMetadataFields": {
+                "examples": [
+                  true
+                ],
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "description": "Whether the entry has a metadata field a user can see and fill, by hand or with the AI filling: a field of a\r\nvisible assigned template, or a custom field. False when the entry has no metadata, when its assigned templates\r\nare all hidden, or when they have no fields. It says nothing about the values: it stays true once every field is\r\nfilled, and nothing about the caller's rights: writing the values still needs the right to edit the entry\r\n(`security.Edit`). It cannot be derived from `assignedMetadataTemplates`, which lists hidden templates too and\r\nnever lists the custom fields. Present, with a value, in the folder listing and in the file and folder info\r\nresponses; absent in the other responses that carry an entry (the answer to a creation, an upload or a rename),\r\nwhich do not compute it, and for an entry of a third-party storage, which has no metadata. The same flag is\r\nanswered by `GET api/2.0/files/metadata/file/{fileId}` and `GET api/2.0/files/metadata/folder/{folderId}`."
               },
               "metadataMatches": {
                 "type": [
@@ -44280,10 +45525,13 @@
               "PdfForm",
               "VirtualDataRooms",
               "DiagramsOnly",
-              "AiRooms"
+              "AiRooms",
+              "InstructionsRooms",
+              "KnowledgeRooms",
+              "AiProjectRooms"
             ],
             "type": "string",
-            "description": "[None - None, FilesOnly - Files  only, FoldersOnly - Folders only, DocumentsOnly - Documents only, PresentationsOnly - Presentations only, SpreadsheetsOnly - Spreadsheets only, ImagesOnly - Images only, ByUser - By user, ByDepartment - By department, ArchiveOnly - Archive only, ByExtension - By extension, MediaOnly - Media only, FillingFormsRooms - Filling forms rooms, EditingRooms - Editing rooms, CustomRooms - Custom rooms, PublicRooms - Public rooms, Pdf - Pdf, PdfForm - Pdf form, VirtualDataRooms - Virtual data rooms, DiagramsOnly - Diagrams only, AiRooms - Ai rooms]"
+            "description": "[None - None, FilesOnly - Files  only, FoldersOnly - Folders only, DocumentsOnly - Documents only, PresentationsOnly - Presentations only, SpreadsheetsOnly - Spreadsheets only, ImagesOnly - Images only, ByUser - By user, ByDepartment - By department, ArchiveOnly - Archive only, ByExtension - By extension, MediaOnly - Media only, FillingFormsRooms - Filling forms rooms, EditingRooms - Editing rooms, CustomRooms - Custom rooms, PublicRooms - Public rooms, Pdf - Pdf, PdfForm - Pdf form, VirtualDataRooms - Virtual data rooms, DiagramsOnly - Diagrams only, AiRooms - Ai rooms, InstructionsRooms - Instructions rooms, KnowledgeRooms - Knowledge rooms, AiProjectRooms - AI project rooms]"
           },
           {
             "examples": [
@@ -44310,10 +45558,13 @@
               23,
               24,
               25,
-              26
+              26,
+              27,
+              28,
+              29
             ],
             "type": "integer",
-            "description": "[0 - None, 1 - Files  only, 2 - Folders only, 3 - Documents only, 4 - Presentations only, 5 - Spreadsheets only, 7 - Images only, 8 - By user, 9 - By department, 10 - Archive only, 11 - By extension, 12 - Media only, 13 - Filling forms rooms, 14 - Editing rooms, 17 - Custom rooms, 20 - Public rooms, 22 - Pdf, 23 - Pdf form, 24 - Virtual data rooms, 25 - Diagrams only, 26 - Ai rooms]",
+            "description": "[0 - None, 1 - Files  only, 2 - Folders only, 3 - Documents only, 4 - Presentations only, 5 - Spreadsheets only, 7 - Images only, 8 - By user, 9 - By department, 10 - Archive only, 11 - By extension, 12 - Media only, 13 - Filling forms rooms, 14 - Editing rooms, 17 - Custom rooms, 20 - Public rooms, 22 - Pdf, 23 - Pdf form, 24 - Virtual data rooms, 25 - Diagrams only, 26 - Ai rooms, 27 - Instructions rooms, 28 - Knowledge rooms, 29 - AI project rooms]",
             "x-enum-varnames": [
               "None",
               "FilesOnly",
@@ -44335,7 +45586,10 @@
               "PdfForm",
               "VirtualDataRooms",
               "DiagramsOnly",
-              "AiRooms"
+              "AiRooms",
+              "InstructionsRooms",
+              "KnowledgeRooms",
+              "AiProjectRooms"
             ]
           }
         ],
@@ -45027,10 +46281,14 @@
               "AiAgents",
               "DefaultTemplates",
               "Forms",
-              "Ai"
+              "Ai",
+              "InstructionsRoom",
+              "KnowledgeRoom",
+              "AiProjectRoom",
+              "AiHub"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
           },
           {
             "examples": [
@@ -45067,10 +46325,14 @@
               34,
               35,
               36,
-              37
+              37,
+              38,
+              39,
+              40,
+              41
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -45102,7 +46364,11 @@
               "AiAgents",
               "DefaultTemplates",
               "Forms",
-              "Ai"
+              "Ai",
+              "InstructionsRoom",
+              "KnowledgeRoom",
+              "AiProjectRoom",
+              "AiHub"
             ]
           }
         ],
@@ -46397,6 +47663,35 @@
         },
         "description": "The successful API response containing the ItemKeyValuePairBooleanString object."
       },
+      "LinkAiProjectSourcesRequest": {
+        "required": [
+          "roomIds"
+        ],
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "examples": [
+              [
+                17001,
+                17020
+              ]
+            ],
+            "maxItems": 40,
+            "minItems": 1,
+            "uniqueItems": true,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "IDs of the Instructions and Knowledge rooms to link. Each must be an active room the caller can read; rooms already linked are skipped."
+          }
+        },
+        "description": "Rooms to link to the AI project."
+      },
       "LinkType": {
         "oneOf": [
           {
@@ -47186,6 +48481,9 @@
               "WebhookRetried",
               "AppEnabled",
               "AppDisabled",
+              "RoomsLinkedToAiProject",
+              "RoomsUnlinkedFromAiProject",
+              "AiProjectProfileAssigned",
               "ContactAdminMailSent",
               "RoomInviteLinkUsed",
               "UserCreatedAndAddedToRoom",
@@ -47204,7 +48502,7 @@
               "None"
             ],
             "type": "string",
-            "description": "[LoginSuccess - Login success, LoginSuccessViaSocialAccount - Login success via social account, LoginFailInvalidCombination - Login fail invalid combination, LoginFailSocialAccountNotFound - Login fail social account not found, LoginFailDisabledProfile - Login fail disabled profile, LoginFail - Login fail, Logout - Logout, LoginSuccessViaSms - Login success via sms, LoginFailViaSms - Login fail via sms, LoginFailIpSecurity - Login fail ip security, LoginSuccessViaApi - Login success via api, LoginSuccessViaSocialApp - Login success via social app, LoginSuccessViaApiSms - Login success via api sms, LoginFailViaApi - Login fail via api, LoginFailViaApiSms - Login fail via api sms, LoginSuccessViaSSO - Login success via SSO, SessionStarted - Session started, SessionCompleted - Session completed, LoginFailViaSSO - Login fail via SSO, LoginSuccessViaApiSocialAccount - Login success via api social account, LoginFailViaApiSocialAccount - Login fail via api social account, LoginSuccesViaTfaApp - Login succes via tfa app, LoginFailViaTfaApp - Login fail via Tfa app, LoginFailBruteForce - Login fail brute force, LoginSuccessViaApiTfa - Login success via api tfa, LoginFailViaApiTfa - Login fail via api tfa, LoginFailRecaptcha - Login fail recaptcha, AuthLinkActivated - Authorization link activated, LoginSuccessViaOAuth - Login success via OAuth 2.0, LoginSuccessViaPassword - Login success via login and password, UserCreated - User created, GuestCreated - Guest created, UserCreatedViaInvite - User created via invite, GuestCreatedViaInvite - Guest created via invite, UserActivated - User activated, GuestActivated - Guest activated, UserUpdated - User updated, UserUpdatedLanguage - User updated language, UserAddedAvatar - User added avatar, UserDeletedAvatar - User deleted avatar, UserUpdatedAvatarThumbnails - User updated avatar thumbnails, UserLinkedSocialAccount - User linked social account, UserUnlinkedSocialAccount - User unlinked social account, UserSentActivationInstructions - User sent activation instructions, UserSentEmailChangeInstructions - User sent email change instructions, UserSentPasswordChangeInstructions - User sent password change instructions, UserSentDeleteInstructions - User sent delete instructions, UserUpdatedPassword - User updated password, UserDeleted - User deleted, UsersUpdatedType - Users updated type, UsersUpdatedStatus - Users updated status, UsersSentActivationInstructions - Users sent activation instructions, UsersDeleted - Users deleted, SentInviteInstructions - Sent invite instructions, UserImported - User imported, GuestImported - Guest imported, GroupCreated - Group created, GroupUpdated - Group updated, GroupDeleted - Group deleted, UserUpdatedMobileNumber - User updated mobile number, UserDataReassigns - User data reassigns, UserDataRemoving - User data removing, UserConnectedTfaApp - User connected tfa app, UserDisconnectedTfaApp - User disconnected tfa app, UserLogoutActiveConnections - User logout active connections, UserLogoutActiveConnection - User logout active connection, UserLogoutActiveConnectionsForUser - User logout active connections for user, SendJoinInvite - Send join invite, FileCreated - File created, FileRenamed - File renamed, FileUpdated - File updated, FileCreatedVersion - File created version, FileDeletedVersion - File deleted version, FileUpdatedRevisionComment - File updated revision comment, FileLocked - File locked, FileUnlocked - File unlocked, FileUpdatedAccess - File updated access, FileDownloaded - File downloaded, FileDownloadedAs - File downloaded as, FileUploaded - File uploaded, FileImported - File imported, FileCopied - File copied, FileCopiedWithOverwriting - File copied with overwriting, FileMoved - File moved, FileMovedWithOverwriting - File moved with overwriting, FileMovedToTrash - File moved to trash, FileDeleted - File deleted, FolderCreated - Folder created, FolderRenamed - Folder renamed, FolderUpdatedAccess - Folder updated access, FolderCopied - Folder copied, FolderCopiedWithOverwriting - Folder copied with overwriting, FolderMoved - Folder moved, FolderMovedWithOverwriting - Folder moved with overwriting, FolderMovedToTrash - Folder moved to trash, FolderDeleted - Folder deleted, ThirdPartyCreated - ThirdParty created, ThirdPartyUpdated - ThirdParty updated, ThirdPartyDeleted - ThirdParty deleted, DocumentsThirdPartySettingsUpdated - Documents ThirdParty settings updated, DocumentsOverwritingSettingsUpdated - Documents overwriting settings updated, DocumentsUploadingFormatsSettingsUpdated - Documents uploading formats settings updated, UserFileUpdated - User file updated, FileConverted - File converted, FileSendAccessLink - File send access link, DocumentServiceLocationSetting - Document service location setting, AuthorizationKeysSetting - Authorization keys setting, FullTextSearchSetting - Full text search setting, StartTransferSetting - Start transfer setting, BackupStarted - Backup started, LicenseKeyUploaded - License key uploaded, FileChangeOwner - File change owner, FileRestoreVersion - File restore version, DocumentSendToSign - Document send to sign, DocumentSignComplete - Document sign complete, UserUpdatedEmail - User updated email, DocumentsStoreForcesave - Documents store forcesave, DocumentsForcesave - Documents forcesave, StartStorageEncryption - Start storage encryption, StartStorageDecryption - Start storage decryption, FileOpenedForChange - File opened for change, FileMarkedAsFavorite - File marked as favorite, FileRemovedFromFavorite - File removed from favorite, FolderDownloaded - Folder downloaded, FileRemovedFromList - File removed from list, FolderRemovedFromList - Folder removed from list, FileExternalLinkAccessUpdated - File external link access updated, TrashEmptied - Trash emptied, FileRevisionDownloaded - File revision downloaded, FileMarkedAsRead - File marked as read, FileReaded - File readed, FolderMarkedAsRead - Folder marked as read, FolderUpdatedAccessFor - Folder updated access for, FileUpdatedAccessFor - File updated access for, DocumentsExternalShareSettingsUpdated - Documents external share settings updated, RoomCreated - Room created, RoomRenamed - Room renamed, RoomArchived - Room archived, RoomUnarchived - Room unarchived, RoomDeleted - Room deleted, RoomUpdateAccessForUser - Room update access for user, TagCreated - Tag created, TagsDeleted - Tags deleted, AddedRoomTags - Added room tags, DeletedRoomTags - Deleted room tags, RoomLogoCreated - Room logo created, RoomLogoDeleted - Room logo deleted, RoomInvitationLinkUpdated - Room invitation link updated, DocumentsKeepNewFileNameSettingsUpdated - Documents keep new file name settings updated, RoomRemoveUser - Room remove user, RoomCreateUser - Room create user, RoomInvitationLinkCreated - Room invitation link created, RoomInvitationLinkDeleted - Room invitation link deleted, RoomExternalLinkCreated - Room external link created, RoomExternalLinkUpdated - Room external link updated, RoomExternalLinkDeleted - Room external link deleted, FileExternalLinkCreated - File external link created, FileExternalLinkUpdated - File external link updated, FileExternalLinkDeleted - File external link deleted, RoomGroupAdded - Room group added, RoomUpdateAccessForGroup - Room update access for group, RoomGroupRemove - Room group remove, RoomExternalLinkRevoked - Room external link revoked, RoomExternalLinkRenamed - Room external link renamed, FileUploadedWithOverwriting - File uploaded with overwriting, RoomCopied - Room copied, DocumentsDisplayFileExtensionUpdated - Documents display file extension updated, RoomColorChanged - Room color changed, RoomCoverChanged - Room cover changed, RoomIndexingChanged - Room indexing changed, RoomDenyDownloadChanged - Room deny download changed, RoomIndexExportSaved - Room index export saved, FolderIndexChanged - Folder index changed, FolderIndexReordered - Folder index reordered, RoomDenyDownloadEnabled - Room deny download enabled, RoomDenyDownloadDisabled - Room deny download disabled, FileIndexChanged - File index changed, RoomWatermarkSet - Room watermark set, RoomWatermarkDisabled - Room watermark disabled, RoomIndexingEnabled - Room index export saved, RoomIndexingDisabled - Room indexing disabled, RoomLifeTimeSet - Room life time set, RoomLifeTimeDisabled - Room life time disabled, RoomInviteResend - Room invite resend, FileVersionRemoved - File version deleted, FileCustomFilterEnabled - File custom filter enabled, FileCustomFilterDisabled - File custom filter disabled, FolderExternalLinkCreated - Folder external link created, FolderExternalLinkUpdated - Folder external link updated, FolderExternalLinkDeleted - Folder external link deleted, BackupCompleted - Backup completed, BackupFailed - Backup failed, ScheduledBackupStarted - Scheduled backup started, ScheduledBackupCompleted - Scheduled backup completed, ScheduledBackupFailed - Scheduled backup failed, ScheduledBackupDeleted - Scheduled backup deleted, BackupCancelled - Backup cancelled, RestoreStarted - Restore started, RestoreCancelled - Restore cancelled, FormStartedToFill - Form started to fill, FormPartiallyFilled - Form partially filled, FormCompletelyFilled - Form completely filled, FormStopped - Form stopped, AgentCreated - AI agent created, AgentRenamed - AI agent renamed, AgentDeleted - AI agent deleted, AddedServerToAgent - MCP server added to AI agent, DeletedServerFromAgent - MCP server deleted from AI agent, RoomChangeOwner - Room change owner, DocumentsDefaultTemplatesSettingsUpdated - Documents default templates settings updated, PrivacyRoomKeyCreated - Private room encryption key created, PrivacyRoomKeyUpdated - Private room encryption key updated, PrivacyRoomKeyDeleted - Private room encryption key deleted, FileSavedButUserQuotaExceeded - File saved, user quota exceeded, FileNotSavedDueToUserQuota - File not saved due to user quota exceeded, FileSavedButRoomQuotaExceeded - File saved, room quota exceeded, FileNotSavedDueToRoomQuota - File not saved due to room quota exceeded, FileSavedButTenantQuotaExceeded - File saved, tenant quota exceeded, FileNotSavedDueToTenantQuota - File not saved due to tenant quota exceeded, DocumentsShowQuickActionsUpdated - Documents show quick actions updated, FileOpenedByDocumentBuilder - File opened by a document builder script, MetadataTemplateCreated - Metadata template created, MetadataTemplateUpdated - Metadata template updated, MetadataTemplateDeleted - Metadata template deleted, MetadataFieldCreated - Metadata field created, MetadataFieldUpdated - Metadata field updated, MetadataFieldDeleted - Metadata field deleted, MetadataTemplateAssigned - Metadata template assigned, MetadataTemplateUnassigned - Metadata template unassigned, MetadataValuesUpdated - Metadata values updated, MetadataCascadeStarted - Metadata cascade assignment started, LdapEnabled - Ldap enabled, LdapDisabled - Ldap disabled, LdapSync - LDAP synchronization completed, LanguageSettingsUpdated - Language settings updated, TimeZoneSettingsUpdated - Time zone settings updated, DnsSettingsUpdated - Dns settings updated, TrustedMailDomainSettingsUpdated - Trusted mail domain settings updated, PasswordStrengthSettingsUpdated - Password strength settings updated, TwoFactorAuthenticationSettingsUpdated - Two factor authentication settings updated, AdministratorMessageSettingsUpdated - Administrator message settings updated, DefaultStartPageSettingsUpdated - Default start page settings updated, ProductsListUpdated - Products list updated, AdministratorAdded - Administrator added, AdministratorOpenedFullAccess - Administrator opened full access, AdministratorDeleted - Administrator deleted, UsersOpenedProductAccess - Users opened product access, GroupsOpenedProductAccess - Groups opened product access, ProductAccessOpened - Product access opened, ProductAccessRestricted - Product access restricted, ProductAddedAdministrator - Product added administrator, ProductDeletedAdministrator - Product deleted administrator, GreetingSettingsUpdated - Greeting settings updated, TeamTemplateChanged - Team template changed, ColorThemeChanged - Color theme changed, OwnerSentChangeOwnerInstructions - Owner sent change owner instructions, OwnerUpdated - Owner updated, OwnerSentPortalDeactivationInstructions - Owner sent portal deactivation instructions, OwnerSentPortalDeleteInstructions - Owner sent portal delete instructions, PortalDeactivated - Portal deactivated, PortalDeleted - Portal deleted, LoginHistoryReportDownloaded - Login history report downloaded, AuditTrailReportDownloaded - Audit trail report downloaded, SSOEnabled - SSO enabled, SSODisabled - SSO disabled, PortalAccessSettingsUpdated - Portal access settings updated, CookieSettingsUpdated - Cookie settings updated, MailServiceSettingsUpdated - Mail service settings updated, CustomNavigationSettingsUpdated - Custom navigation settings updated, AuditSettingsUpdated - Audit settings updated, TwoFactorAuthenticationDisabled - Two factor authentication disabled, TwoFactorAuthenticationEnabledBySms - Two factor authentication enabled by sms, TwoFactorAuthenticationEnabledByTfaApp - Two factor authentication enabled by tfa app, PortalRenamed - Portal renamed, QuotaPerRoomChanged - Quota per room changed, QuotaPerRoomDisabled - Quota per room disabled, QuotaPerUserChanged - Quota per user changed, QuotaPerUserDisabled - Quota per user disabled, QuotaPerPortalChanged - Quota per portal changed, QuotaPerPortalDisabled - Quota per portal disabled, FormSubmit - Form submit, FormOpenedForFilling - Form opened for filling, CustomQuotaPerRoomDefault - Custom quota per room default, CustomQuotaPerRoomChanged - Custom quota per room changed, CustomQuotaPerRoomDisabled - Custom quota per room disabled, CustomQuotaPerUserDefault - Custom quota per user default, CustomQuotaPerUserChanged - Custom quota per user changed, CustomQuotaPerUserDisabled - Custom quota per user disabled, DevToolsAccessSettingsChanged - DevTools access settings changed, WebhookCreated - Webhook created, WebhookUpdated - Webhook updated, WebhookDeleted - Webhook deleted, ApiKeyCreated - Created api key, ApiKeyUpdated - Update api key, ApiKeyDeleted - Deleted User api key, CustomerWalletToppedUp - Customer wallet topped up, CustomerOperationPerformed - Customer operation performed, CustomerOperationsReportDownloaded - Customer operations report downloaded, CustomerWalletTopUpSettingsUpdated - Customer wallet top up settings updated, CustomerSubscriptionUpdated - Customer subscription updated, BannerSettingsChanged - Promotional banners visibility settings changed, CustomerWalletServicesSettingsUpdated - Customer wallet services settings updated, QuotaPerAiAgentChanged - Quota per AI agent changed, QuotaPerAiAgentDisabled - Quota per AI agent disabled, CustomQuotaPerAiAgentDefault - Custom quota per AI agent default, CustomQuotaPerAiAgentChanged - Custom quota per AI agent changed, CustomQuotaPerAiAgentDisabled - Custom quota per AI agent disabled, AIProviderCreated - AI provider created, AIProviderUpdated - AI provider updated, AIProviderDeleted - AI provider deleted, ServerCreated - MCP server created, ServerUpdated - MCP server updated, ServerEnabled - MCP server enabled, ServerDisabled - MCP server disabled, ServerDeleted - MCP server deleted, SetWebSearchSettings - WebSearch settings configured, ResetWebSearchSettings - WebSearch settings reset, SetVectorizationSettings - Vectorization settings configured, ResetVectorizationSettings - Vectorization settings reset, WebpluginUploaded - Webplugin uploaded, WebpluginUpdated - Webplugin updated, WebpluginDeleted - Webplugin deleted, WhiteLabelSettingsLogoTextUpdated - Whitelabel settings logo text updated, WhiteLabelSettingsLogosUpdated - Whitelabel settings logos updated, WhiteLabelCompanySettingsUpdated - Whitelabel company settings updated, WhiteLabelAdditionalSettingsUpdated - Whitelabel additional settings updated, WhiteLabelMailSettingsUpdated - Whitelabel mail settings updated, InvitationSettingsUpdated - Invitation settings updated, IPRestrictionsSettingsUpdated - IP restrictions settings updated, LoginSettingsUpdated - Login settings updated, AIDefaultProviderSet - AI default provider set, AIAccessEnabled - AI access enabled, AIAccessDisabled - AI access disabled, UserUpdatedAiSettings - User AI settings updated, SubscriptionBalanceMovedToWallet - Subscription balance moved to wallet, DocsCloudConfigUpdated - Docs Cloud config updated, DocsCloudQuotaReportDownloaded - Docs Cloud quota report downloaded, AiProfileCreated - AI model profile created, AiProfileUpdated - AI model profile updated, AiProfileDeleted - AI model profile deleted, AiProfileAssigned - AI model profile assigned to action, AiProfileUnassigned - AI model profile unassigned from action, AiAgentProfileAssigned - AI model profile assigned to AI agent action, UpdatedServerOfAgent - MCP server of AI agent updated, PortalBlocked - Portal blocked, PortalUnblocked - Portal unblocked, CustomerServiceLimitCreated - Service spending limit created, CustomerServiceLimitUpdated - Service spending limit updated, CustomerServiceLimitsSet - Personal service spending limits set, CustomerServiceLimitsDisabled - Personal service spending limits disabled, CustomerServiceLimitDeleted - Service spending limit deleted, WebhookRetried - Webhook delivery retried, AppEnabled - App enabled, AppDisabled - App disabled, ContactAdminMailSent - Contact admin mail sent, RoomInviteLinkUsed - Room invite link used, UserCreatedAndAddedToRoom - User created and added to room, GuestCreatedAndAddedToRoom - Guest created and added to room, ContactSalesMailSent - Contact sales mail sent, SuspiciousLoginDetected - Suspicious login detected, CreateClient - Create client, UpdateClient - Update client, RegenerateSecret - Regenerate secret, DeleteClient - Delete client, ChangeClientActivation - Change client activation, ChangeClientVisibility - Change client visibility, RevokeUserClient - Revoke user client, GenerateAuthorizationCodeToken - Generate authorization code token, GeneratePersonalAccessToken - Generate personal access token, None - None]"
+            "description": "[LoginSuccess - Login success, LoginSuccessViaSocialAccount - Login success via social account, LoginFailInvalidCombination - Login fail invalid combination, LoginFailSocialAccountNotFound - Login fail social account not found, LoginFailDisabledProfile - Login fail disabled profile, LoginFail - Login fail, Logout - Logout, LoginSuccessViaSms - Login success via sms, LoginFailViaSms - Login fail via sms, LoginFailIpSecurity - Login fail ip security, LoginSuccessViaApi - Login success via api, LoginSuccessViaSocialApp - Login success via social app, LoginSuccessViaApiSms - Login success via api sms, LoginFailViaApi - Login fail via api, LoginFailViaApiSms - Login fail via api sms, LoginSuccessViaSSO - Login success via SSO, SessionStarted - Session started, SessionCompleted - Session completed, LoginFailViaSSO - Login fail via SSO, LoginSuccessViaApiSocialAccount - Login success via api social account, LoginFailViaApiSocialAccount - Login fail via api social account, LoginSuccesViaTfaApp - Login succes via tfa app, LoginFailViaTfaApp - Login fail via Tfa app, LoginFailBruteForce - Login fail brute force, LoginSuccessViaApiTfa - Login success via api tfa, LoginFailViaApiTfa - Login fail via api tfa, LoginFailRecaptcha - Login fail recaptcha, AuthLinkActivated - Authorization link activated, LoginSuccessViaOAuth - Login success via OAuth 2.0, LoginSuccessViaPassword - Login success via login and password, UserCreated - User created, GuestCreated - Guest created, UserCreatedViaInvite - User created via invite, GuestCreatedViaInvite - Guest created via invite, UserActivated - User activated, GuestActivated - Guest activated, UserUpdated - User updated, UserUpdatedLanguage - User updated language, UserAddedAvatar - User added avatar, UserDeletedAvatar - User deleted avatar, UserUpdatedAvatarThumbnails - User updated avatar thumbnails, UserLinkedSocialAccount - User linked social account, UserUnlinkedSocialAccount - User unlinked social account, UserSentActivationInstructions - User sent activation instructions, UserSentEmailChangeInstructions - User sent email change instructions, UserSentPasswordChangeInstructions - User sent password change instructions, UserSentDeleteInstructions - User sent delete instructions, UserUpdatedPassword - User updated password, UserDeleted - User deleted, UsersUpdatedType - Users updated type, UsersUpdatedStatus - Users updated status, UsersSentActivationInstructions - Users sent activation instructions, UsersDeleted - Users deleted, SentInviteInstructions - Sent invite instructions, UserImported - User imported, GuestImported - Guest imported, GroupCreated - Group created, GroupUpdated - Group updated, GroupDeleted - Group deleted, UserUpdatedMobileNumber - User updated mobile number, UserDataReassigns - User data reassigns, UserDataRemoving - User data removing, UserConnectedTfaApp - User connected tfa app, UserDisconnectedTfaApp - User disconnected tfa app, UserLogoutActiveConnections - User logout active connections, UserLogoutActiveConnection - User logout active connection, UserLogoutActiveConnectionsForUser - User logout active connections for user, SendJoinInvite - Send join invite, FileCreated - File created, FileRenamed - File renamed, FileUpdated - File updated, FileCreatedVersion - File created version, FileDeletedVersion - File deleted version, FileUpdatedRevisionComment - File updated revision comment, FileLocked - File locked, FileUnlocked - File unlocked, FileUpdatedAccess - File updated access, FileDownloaded - File downloaded, FileDownloadedAs - File downloaded as, FileUploaded - File uploaded, FileImported - File imported, FileCopied - File copied, FileCopiedWithOverwriting - File copied with overwriting, FileMoved - File moved, FileMovedWithOverwriting - File moved with overwriting, FileMovedToTrash - File moved to trash, FileDeleted - File deleted, FolderCreated - Folder created, FolderRenamed - Folder renamed, FolderUpdatedAccess - Folder updated access, FolderCopied - Folder copied, FolderCopiedWithOverwriting - Folder copied with overwriting, FolderMoved - Folder moved, FolderMovedWithOverwriting - Folder moved with overwriting, FolderMovedToTrash - Folder moved to trash, FolderDeleted - Folder deleted, ThirdPartyCreated - ThirdParty created, ThirdPartyUpdated - ThirdParty updated, ThirdPartyDeleted - ThirdParty deleted, DocumentsThirdPartySettingsUpdated - Documents ThirdParty settings updated, DocumentsOverwritingSettingsUpdated - Documents overwriting settings updated, DocumentsUploadingFormatsSettingsUpdated - Documents uploading formats settings updated, UserFileUpdated - User file updated, FileConverted - File converted, FileSendAccessLink - File send access link, DocumentServiceLocationSetting - Document service location setting, AuthorizationKeysSetting - Authorization keys setting, FullTextSearchSetting - Full text search setting, StartTransferSetting - Start transfer setting, BackupStarted - Backup started, LicenseKeyUploaded - License key uploaded, FileChangeOwner - File change owner, FileRestoreVersion - File restore version, DocumentSendToSign - Document send to sign, DocumentSignComplete - Document sign complete, UserUpdatedEmail - User updated email, DocumentsStoreForcesave - Documents store forcesave, DocumentsForcesave - Documents forcesave, StartStorageEncryption - Start storage encryption, StartStorageDecryption - Start storage decryption, FileOpenedForChange - File opened for change, FileMarkedAsFavorite - File marked as favorite, FileRemovedFromFavorite - File removed from favorite, FolderDownloaded - Folder downloaded, FileRemovedFromList - File removed from list, FolderRemovedFromList - Folder removed from list, FileExternalLinkAccessUpdated - File external link access updated, TrashEmptied - Trash emptied, FileRevisionDownloaded - File revision downloaded, FileMarkedAsRead - File marked as read, FileReaded - File readed, FolderMarkedAsRead - Folder marked as read, FolderUpdatedAccessFor - Folder updated access for, FileUpdatedAccessFor - File updated access for, DocumentsExternalShareSettingsUpdated - Documents external share settings updated, RoomCreated - Room created, RoomRenamed - Room renamed, RoomArchived - Room archived, RoomUnarchived - Room unarchived, RoomDeleted - Room deleted, RoomUpdateAccessForUser - Room update access for user, TagCreated - Tag created, TagsDeleted - Tags deleted, AddedRoomTags - Added room tags, DeletedRoomTags - Deleted room tags, RoomLogoCreated - Room logo created, RoomLogoDeleted - Room logo deleted, RoomInvitationLinkUpdated - Room invitation link updated, DocumentsKeepNewFileNameSettingsUpdated - Documents keep new file name settings updated, RoomRemoveUser - Room remove user, RoomCreateUser - Room create user, RoomInvitationLinkCreated - Room invitation link created, RoomInvitationLinkDeleted - Room invitation link deleted, RoomExternalLinkCreated - Room external link created, RoomExternalLinkUpdated - Room external link updated, RoomExternalLinkDeleted - Room external link deleted, FileExternalLinkCreated - File external link created, FileExternalLinkUpdated - File external link updated, FileExternalLinkDeleted - File external link deleted, RoomGroupAdded - Room group added, RoomUpdateAccessForGroup - Room update access for group, RoomGroupRemove - Room group remove, RoomExternalLinkRevoked - Room external link revoked, RoomExternalLinkRenamed - Room external link renamed, FileUploadedWithOverwriting - File uploaded with overwriting, RoomCopied - Room copied, DocumentsDisplayFileExtensionUpdated - Documents display file extension updated, RoomColorChanged - Room color changed, RoomCoverChanged - Room cover changed, RoomIndexingChanged - Room indexing changed, RoomDenyDownloadChanged - Room deny download changed, RoomIndexExportSaved - Room index export saved, FolderIndexChanged - Folder index changed, FolderIndexReordered - Folder index reordered, RoomDenyDownloadEnabled - Room deny download enabled, RoomDenyDownloadDisabled - Room deny download disabled, FileIndexChanged - File index changed, RoomWatermarkSet - Room watermark set, RoomWatermarkDisabled - Room watermark disabled, RoomIndexingEnabled - Room index export saved, RoomIndexingDisabled - Room indexing disabled, RoomLifeTimeSet - Room life time set, RoomLifeTimeDisabled - Room life time disabled, RoomInviteResend - Room invite resend, FileVersionRemoved - File version deleted, FileCustomFilterEnabled - File custom filter enabled, FileCustomFilterDisabled - File custom filter disabled, FolderExternalLinkCreated - Folder external link created, FolderExternalLinkUpdated - Folder external link updated, FolderExternalLinkDeleted - Folder external link deleted, BackupCompleted - Backup completed, BackupFailed - Backup failed, ScheduledBackupStarted - Scheduled backup started, ScheduledBackupCompleted - Scheduled backup completed, ScheduledBackupFailed - Scheduled backup failed, ScheduledBackupDeleted - Scheduled backup deleted, BackupCancelled - Backup cancelled, RestoreStarted - Restore started, RestoreCancelled - Restore cancelled, FormStartedToFill - Form started to fill, FormPartiallyFilled - Form partially filled, FormCompletelyFilled - Form completely filled, FormStopped - Form stopped, AgentCreated - AI agent created, AgentRenamed - AI agent renamed, AgentDeleted - AI agent deleted, AddedServerToAgent - MCP server added to AI agent, DeletedServerFromAgent - MCP server deleted from AI agent, RoomChangeOwner - Room change owner, DocumentsDefaultTemplatesSettingsUpdated - Documents default templates settings updated, PrivacyRoomKeyCreated - Private room encryption key created, PrivacyRoomKeyUpdated - Private room encryption key updated, PrivacyRoomKeyDeleted - Private room encryption key deleted, FileSavedButUserQuotaExceeded - File saved, user quota exceeded, FileNotSavedDueToUserQuota - File not saved due to user quota exceeded, FileSavedButRoomQuotaExceeded - File saved, room quota exceeded, FileNotSavedDueToRoomQuota - File not saved due to room quota exceeded, FileSavedButTenantQuotaExceeded - File saved, tenant quota exceeded, FileNotSavedDueToTenantQuota - File not saved due to tenant quota exceeded, DocumentsShowQuickActionsUpdated - Documents show quick actions updated, FileOpenedByDocumentBuilder - File opened by a document builder script, MetadataTemplateCreated - Metadata template created, MetadataTemplateUpdated - Metadata template updated, MetadataTemplateDeleted - Metadata template deleted, MetadataFieldCreated - Metadata field created, MetadataFieldUpdated - Metadata field updated, MetadataFieldDeleted - Metadata field deleted, MetadataTemplateAssigned - Metadata template assigned, MetadataTemplateUnassigned - Metadata template unassigned, MetadataValuesUpdated - Metadata values updated, MetadataCascadeStarted - Metadata cascade assignment started, LdapEnabled - Ldap enabled, LdapDisabled - Ldap disabled, LdapSync - LDAP synchronization completed, LanguageSettingsUpdated - Language settings updated, TimeZoneSettingsUpdated - Time zone settings updated, DnsSettingsUpdated - Dns settings updated, TrustedMailDomainSettingsUpdated - Trusted mail domain settings updated, PasswordStrengthSettingsUpdated - Password strength settings updated, TwoFactorAuthenticationSettingsUpdated - Two factor authentication settings updated, AdministratorMessageSettingsUpdated - Administrator message settings updated, DefaultStartPageSettingsUpdated - Default start page settings updated, ProductsListUpdated - Products list updated, AdministratorAdded - Administrator added, AdministratorOpenedFullAccess - Administrator opened full access, AdministratorDeleted - Administrator deleted, UsersOpenedProductAccess - Users opened product access, GroupsOpenedProductAccess - Groups opened product access, ProductAccessOpened - Product access opened, ProductAccessRestricted - Product access restricted, ProductAddedAdministrator - Product added administrator, ProductDeletedAdministrator - Product deleted administrator, GreetingSettingsUpdated - Greeting settings updated, TeamTemplateChanged - Team template changed, ColorThemeChanged - Color theme changed, OwnerSentChangeOwnerInstructions - Owner sent change owner instructions, OwnerUpdated - Owner updated, OwnerSentPortalDeactivationInstructions - Owner sent portal deactivation instructions, OwnerSentPortalDeleteInstructions - Owner sent portal delete instructions, PortalDeactivated - Portal deactivated, PortalDeleted - Portal deleted, LoginHistoryReportDownloaded - Login history report downloaded, AuditTrailReportDownloaded - Audit trail report downloaded, SSOEnabled - SSO enabled, SSODisabled - SSO disabled, PortalAccessSettingsUpdated - Portal access settings updated, CookieSettingsUpdated - Cookie settings updated, MailServiceSettingsUpdated - Mail service settings updated, CustomNavigationSettingsUpdated - Custom navigation settings updated, AuditSettingsUpdated - Audit settings updated, TwoFactorAuthenticationDisabled - Two factor authentication disabled, TwoFactorAuthenticationEnabledBySms - Two factor authentication enabled by sms, TwoFactorAuthenticationEnabledByTfaApp - Two factor authentication enabled by tfa app, PortalRenamed - Portal renamed, QuotaPerRoomChanged - Quota per room changed, QuotaPerRoomDisabled - Quota per room disabled, QuotaPerUserChanged - Quota per user changed, QuotaPerUserDisabled - Quota per user disabled, QuotaPerPortalChanged - Quota per portal changed, QuotaPerPortalDisabled - Quota per portal disabled, FormSubmit - Form submit, FormOpenedForFilling - Form opened for filling, CustomQuotaPerRoomDefault - Custom quota per room default, CustomQuotaPerRoomChanged - Custom quota per room changed, CustomQuotaPerRoomDisabled - Custom quota per room disabled, CustomQuotaPerUserDefault - Custom quota per user default, CustomQuotaPerUserChanged - Custom quota per user changed, CustomQuotaPerUserDisabled - Custom quota per user disabled, DevToolsAccessSettingsChanged - DevTools access settings changed, WebhookCreated - Webhook created, WebhookUpdated - Webhook updated, WebhookDeleted - Webhook deleted, ApiKeyCreated - Created api key, ApiKeyUpdated - Update api key, ApiKeyDeleted - Deleted User api key, CustomerWalletToppedUp - Customer wallet topped up, CustomerOperationPerformed - Customer operation performed, CustomerOperationsReportDownloaded - Customer operations report downloaded, CustomerWalletTopUpSettingsUpdated - Customer wallet top up settings updated, CustomerSubscriptionUpdated - Customer subscription updated, BannerSettingsChanged - Promotional banners visibility settings changed, CustomerWalletServicesSettingsUpdated - Customer wallet services settings updated, QuotaPerAiAgentChanged - Quota per AI agent changed, QuotaPerAiAgentDisabled - Quota per AI agent disabled, CustomQuotaPerAiAgentDefault - Custom quota per AI agent default, CustomQuotaPerAiAgentChanged - Custom quota per AI agent changed, CustomQuotaPerAiAgentDisabled - Custom quota per AI agent disabled, AIProviderCreated - AI provider created, AIProviderUpdated - AI provider updated, AIProviderDeleted - AI provider deleted, ServerCreated - MCP server created, ServerUpdated - MCP server updated, ServerEnabled - MCP server enabled, ServerDisabled - MCP server disabled, ServerDeleted - MCP server deleted, SetWebSearchSettings - WebSearch settings configured, ResetWebSearchSettings - WebSearch settings reset, SetVectorizationSettings - Vectorization settings configured, ResetVectorizationSettings - Vectorization settings reset, WebpluginUploaded - Webplugin uploaded, WebpluginUpdated - Webplugin updated, WebpluginDeleted - Webplugin deleted, WhiteLabelSettingsLogoTextUpdated - Whitelabel settings logo text updated, WhiteLabelSettingsLogosUpdated - Whitelabel settings logos updated, WhiteLabelCompanySettingsUpdated - Whitelabel company settings updated, WhiteLabelAdditionalSettingsUpdated - Whitelabel additional settings updated, WhiteLabelMailSettingsUpdated - Whitelabel mail settings updated, InvitationSettingsUpdated - Invitation settings updated, IPRestrictionsSettingsUpdated - IP restrictions settings updated, LoginSettingsUpdated - Login settings updated, AIDefaultProviderSet - AI default provider set, AIAccessEnabled - AI access enabled, AIAccessDisabled - AI access disabled, UserUpdatedAiSettings - User AI settings updated, SubscriptionBalanceMovedToWallet - Subscription balance moved to wallet, DocsCloudConfigUpdated - Docs Cloud config updated, DocsCloudQuotaReportDownloaded - Docs Cloud quota report downloaded, AiProfileCreated - AI model profile created, AiProfileUpdated - AI model profile updated, AiProfileDeleted - AI model profile deleted, AiProfileAssigned - AI model profile assigned to action, AiProfileUnassigned - AI model profile unassigned from action, AiAgentProfileAssigned - AI model profile assigned to AI agent action, UpdatedServerOfAgent - MCP server of AI agent updated, PortalBlocked - Portal blocked, PortalUnblocked - Portal unblocked, CustomerServiceLimitCreated - Service spending limit created, CustomerServiceLimitUpdated - Service spending limit updated, CustomerServiceLimitsSet - Personal service spending limits set, CustomerServiceLimitsDisabled - Personal service spending limits disabled, CustomerServiceLimitDeleted - Service spending limit deleted, WebhookRetried - Webhook delivery retried, AppEnabled - App enabled, AppDisabled - App disabled, RoomsLinkedToAiProject - Rooms linked to AI project, RoomsUnlinkedFromAiProject - Rooms unlinked from AI project, AiProjectProfileAssigned - AI project model changed, ContactAdminMailSent - Contact admin mail sent, RoomInviteLinkUsed - Room invite link used, UserCreatedAndAddedToRoom - User created and added to room, GuestCreatedAndAddedToRoom - Guest created and added to room, ContactSalesMailSent - Contact sales mail sent, SuspiciousLoginDetected - Suspicious login detected, CreateClient - Create client, UpdateClient - Update client, RegenerateSecret - Regenerate secret, DeleteClient - Delete client, ChangeClientActivation - Change client activation, ChangeClientVisibility - Change client visibility, RevokeUserClient - Revoke user client, GenerateAuthorizationCodeToken - Generate authorization code token, GeneratePersonalAccessToken - Generate personal access token, None - None]"
           },
           {
             "examples": [
@@ -47565,6 +48863,9 @@
               6117,
               6119,
               6120,
+              6121,
+              6122,
+              6123,
               7000,
               7001,
               7002,
@@ -47583,7 +48884,7 @@
               -1
             ],
             "type": "integer",
-            "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5130 - Scheduled backup deleted, 5131 - Backup cancelled, 5132 - Restore started, 5133 - Restore cancelled, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5160 - Documents default templates settings updated, 5161 - Private room encryption key created, 5162 - Private room encryption key updated, 5163 - Private room encryption key deleted, 5201 - File saved, user quota exceeded, 5202 - File not saved due to user quota exceeded, 5203 - File saved, room quota exceeded, 5204 - File not saved due to room quota exceeded, 5205 - File saved, tenant quota exceeded, 5206 - File not saved due to tenant quota exceeded, 5207 - Documents show quick actions updated, 5208 - File opened by a document builder script, 5300 - Metadata template created, 5301 - Metadata template updated, 5302 - Metadata template deleted, 5303 - Metadata field created, 5304 - Metadata field updated, 5305 - Metadata field deleted, 5306 - Metadata template assigned, 5307 - Metadata template unassigned, 5308 - Metadata values updated, 5309 - Metadata cascade assignment started, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 6096 - AI default provider set, 6097 - AI access enabled, 6098 - AI access disabled, 6099 - User AI settings updated, 6100 - Subscription balance moved to wallet, 6101 - Docs Cloud config updated, 6102 - Docs Cloud quota report downloaded, 6103 - AI model profile created, 6104 - AI model profile updated, 6105 - AI model profile deleted, 6106 - AI model profile assigned to action, 6107 - AI model profile unassigned from action, 6108 - AI model profile assigned to AI agent action, 6109 - MCP server of AI agent updated, 6110 - Portal blocked, 6111 - Portal unblocked, 6112 - Service spending limit created, 6113 - Service spending limit updated, 6114 - Personal service spending limits set, 6115 - Personal service spending limits disabled, 6116 - Service spending limit deleted, 6117 - Webhook delivery retried, 6119 - App enabled, 6120 - App disabled, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 7005 - Suspicious login detected, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
+            "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5130 - Scheduled backup deleted, 5131 - Backup cancelled, 5132 - Restore started, 5133 - Restore cancelled, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5160 - Documents default templates settings updated, 5161 - Private room encryption key created, 5162 - Private room encryption key updated, 5163 - Private room encryption key deleted, 5201 - File saved, user quota exceeded, 5202 - File not saved due to user quota exceeded, 5203 - File saved, room quota exceeded, 5204 - File not saved due to room quota exceeded, 5205 - File saved, tenant quota exceeded, 5206 - File not saved due to tenant quota exceeded, 5207 - Documents show quick actions updated, 5208 - File opened by a document builder script, 5300 - Metadata template created, 5301 - Metadata template updated, 5302 - Metadata template deleted, 5303 - Metadata field created, 5304 - Metadata field updated, 5305 - Metadata field deleted, 5306 - Metadata template assigned, 5307 - Metadata template unassigned, 5308 - Metadata values updated, 5309 - Metadata cascade assignment started, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 6096 - AI default provider set, 6097 - AI access enabled, 6098 - AI access disabled, 6099 - User AI settings updated, 6100 - Subscription balance moved to wallet, 6101 - Docs Cloud config updated, 6102 - Docs Cloud quota report downloaded, 6103 - AI model profile created, 6104 - AI model profile updated, 6105 - AI model profile deleted, 6106 - AI model profile assigned to action, 6107 - AI model profile unassigned from action, 6108 - AI model profile assigned to AI agent action, 6109 - MCP server of AI agent updated, 6110 - Portal blocked, 6111 - Portal unblocked, 6112 - Service spending limit created, 6113 - Service spending limit updated, 6114 - Personal service spending limits set, 6115 - Personal service spending limits disabled, 6116 - Service spending limit deleted, 6117 - Webhook delivery retried, 6119 - App enabled, 6120 - App disabled, 6121 - Rooms linked to AI project, 6122 - Rooms unlinked from AI project, 6123 - AI project model changed, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 7005 - Suspicious login detected, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
             "x-enum-varnames": [
               "LoginSuccess",
               "LoginSuccessViaSocialAccount",
@@ -47939,6 +49240,9 @@
               "WebhookRetried",
               "AppEnabled",
               "AppDisabled",
+              "RoomsLinkedToAiProject",
+              "RoomsUnlinkedFromAiProject",
+              "AiProjectProfileAssigned",
               "ContactAdminMailSent",
               "RoomInviteLinkUsed",
               "UserCreatedAndAddedToRoom",
@@ -50954,10 +52258,13 @@
               "CustomRoom",
               "PublicRoom",
               "VirtualDataRoom",
-              "AiRoom"
+              "AiRoom",
+              "InstructionsRoom",
+              "KnowledgeRoom",
+              "AiProjectRoom"
             ],
             "type": "string",
-            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]"
+            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room]"
           },
           {
             "examples": [
@@ -50969,17 +52276,23 @@
               5,
               6,
               8,
-              9
+              9,
+              10,
+              11,
+              12
             ],
             "type": "integer",
-            "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
+            "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room, 10 - Instructions room, 11 - Knowledge room, 12 - AI project room]",
             "x-enum-varnames": [
               "FillingFormsRoom",
               "EditingRoom",
               "CustomRoom",
               "PublicRoom",
               "VirtualDataRoom",
-              "AiRoom"
+              "AiRoom",
+              "InstructionsRoom",
+              "KnowledgeRoom",
+              "AiProjectRoom"
             ]
           }
         ],
@@ -51297,10 +52610,11 @@
               "ResultStorage",
               "AiAgents",
               "Forms",
-              "FormTemplates"
+              "FormTemplates",
+              "AiHub"
             ],
             "type": "string",
-            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents, Forms - Forms, FormTemplates - Form templates]"
+            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents, Forms - Forms, FormTemplates - Form templates, AiHub - AiHub]"
           },
           {
             "examples": [
@@ -51316,10 +52630,11 @@
               6,
               7,
               8,
-              9
+              9,
+              10
             ],
             "type": "integer",
-            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates]",
+            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates, 10 - AiHub]",
             "x-enum-varnames": [
               "Active",
               "Archive",
@@ -51330,7 +52645,8 @@
               "ResultStorage",
               "AiAgents",
               "Forms",
-              "FormTemplates"
+              "FormTemplates",
+              "AiHub"
             ]
           }
         ],
@@ -52066,10 +53382,11 @@
               "ExternalLink",
               "Group",
               "InvitationLink",
-              "PrimaryExternalLink"
+              "PrimaryExternalLink",
+              "AiProject"
             ],
             "type": "string",
-            "description": "[User - User, ExternalLink - External link, Group - Group, InvitationLink - Invitation link, PrimaryExternalLink - Primary external link]"
+            "description": "[User - User, ExternalLink - External link, Group - Group, InvitationLink - Invitation link, PrimaryExternalLink - Primary external link, AiProject - Read access to a room linked to an AI project the user is a member of]"
           },
           {
             "examples": [
@@ -52080,16 +53397,18 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "[0 - User, 1 - External link, 2 - Group, 3 - Invitation link, 4 - Primary external link]",
+            "description": "[0 - User, 1 - External link, 2 - Group, 3 - Invitation link, 4 - Primary external link, 5 - Read access to a room linked to an AI project the user is a member of]",
             "x-enum-varnames": [
               "User",
               "ExternalLink",
               "Group",
               "InvitationLink",
-              "PrimaryExternalLink"
+              "PrimaryExternalLink",
+              "AiProject"
             ]
           }
         ],
@@ -53314,6 +54633,10 @@
                   "PrimaryExternalLink": {
                     "type": "integer",
                     "format": "int32"
+                  },
+                  "AiProject": {
+                    "type": "integer",
+                    "format": "int32"
                   }
                 },
                 "description": "How many links of each kind currently exist for the entry, counted separately for the primary link and the\r\nadditional ones. Kinds with no links are left out, and the whole field is null when the caller may not change\r\nthe access or no link exists at all."
@@ -53518,6 +54841,12 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "AiProject": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "description": "Which access levels may be handed out on this entry, listed per kind of recipient, so that a client offers\r\nonly levels the entry actually supports - a room for filling forms and a plain folder do not accept the same\r\nones."
@@ -53566,6 +54895,16 @@
                   "format": "int32"
                 },
                 "description": "The IDs of the metadata templates assigned to the file entry."
+              },
+              "hasMetadataFields": {
+                "examples": [
+                  true
+                ],
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "description": "Whether the entry has a metadata field a user can see and fill, by hand or with the AI filling: a field of a\r\nvisible assigned template, or a custom field. False when the entry has no metadata, when its assigned templates\r\nare all hidden, or when they have no fields. It says nothing about the values: it stays true once every field is\r\nfilled, and nothing about the caller's rights: writing the values still needs the right to edit the entry\r\n(`security.Edit`). It cannot be derived from `assignedMetadataTemplates`, which lists hidden templates too and\r\nnever lists the custom fields. Present, with a value, in the folder listing and in the file and folder info\r\nresponses; absent in the other responses that carry an entry (the answer to a creation, an upload or a rename),\r\nwhich do not compute it, and for an entry of a third-party storage, which has no metadata. The same flag is\r\nanswered by `GET api/2.0/files/metadata/file/{fileId}` and `GET api/2.0/files/metadata/folder/{folderId}`."
               },
               "metadataMatches": {
                 "type": [
@@ -54363,6 +55702,52 @@
         ],
         "description": "The file thumbnail status.",
         "x-enum-type": "integer"
+      },
+      "UnlinkAiProjectSourcesRequest": {
+        "required": [
+          "roomIds"
+        ],
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "examples": [
+              [
+                17001,
+                17020
+              ]
+            ],
+            "maxItems": 40,
+            "minItems": 1,
+            "uniqueItems": true,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "IDs of the rooms to unlink. IDs that are not linked to the project are ignored."
+          }
+        },
+        "description": "Rooms to unlink from the AI project."
+      },
+      "UpdateAiProjectModelRequest": {
+        "required": [
+          "profileId"
+        ],
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "examples": [
+              "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90"
+            ],
+            "type": "string",
+            "description": "ID of the AI model profile that answers in the project's chat; take it from the `id` of a profile that `GET api/2.0/ai/profiles/list` returns.",
+            "format": "uuid"
+          }
+        },
+        "description": "The AI model to set for the AI project."
       },
       "UpdateCommentRequest": {
         "required": [
