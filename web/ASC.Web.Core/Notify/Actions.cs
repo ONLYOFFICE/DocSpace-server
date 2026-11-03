@@ -38,6 +38,9 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 {
     public override string ID => "portal_deactivate";
 
+    // a caller can repeat POST portal/suspend at will
+    public override bool SuppressRepeats => true;
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -67,6 +70,9 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_delete";
+
+    // a caller can repeat POST portal/delete at will
+    public override bool SuppressRepeats => true;
 
     public override List<Pattern> Patterns
     {
@@ -154,6 +160,9 @@ public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper
 public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtility, AuthContext authContext, IUrlShortener urlShortener, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "profile_delete";
+
+    // a caller can repeat PUT people/self/delete at will
+    public override bool SuppressRepeats => true;
 
     public override List<Pattern> Patterns
     {
@@ -401,6 +410,9 @@ public sealed class ActivateEmailNotifyAction(DisplayUserSettingsHelper displayU
 {
     public override string ID => "activate_email";
 
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -460,9 +472,6 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
 {
     public override string ID => "for_admin_notify";
 
-    // a letter carries what one person wrote, so a second one is a different message rather than a repeat
-    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
-
     public override List<Pattern> Patterns
     {
         get =>
@@ -493,9 +502,6 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
 public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "for_sales_notify";
-
-    // a letter carries what one person wrote, so a second one is a different message rather than a repeat
-    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
 
     public override List<Pattern> Patterns
     {
@@ -591,9 +597,6 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
 public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "suspicious_login";
-
-    // every suspicious sign-in has to be reported, it is a security alert rather than a request somebody can repeat
-    public override TimeSpan? DeduplicationPeriod => TimeSpan.Zero;
 
     public override List<Pattern> Patterns
     {
@@ -1304,6 +1307,9 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
 {
     public override string ID => "saas_room_invite";
 
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
+
     // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
     public override string[] DeduplicationTags => [CommonTags.InviteType];
 
@@ -1337,6 +1343,9 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
 public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_agent_invite";
+
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
 
     // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
     public override string[] DeduplicationTags => [CommonTags.InviteType];
@@ -1372,6 +1381,9 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
 {
     public override string ID => "saas_room_invite_existing_user";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1401,6 +1413,9 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
 {
     public override string ID => "saas_agent_invite_existing_user";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1429,6 +1444,9 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
 public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_docspace_invite";
+
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
 
     public override List<Pattern> Patterns
     {
@@ -3564,6 +3582,9 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "user_type_changed";
 
+    // a caller can repeat PUT people/type/{type} at will
+    public override bool SuppressRepeats => true;
+
     public override string[] DeduplicationTags => [CommonTags.NewUserType];
 
     public override List<Pattern> Patterns
@@ -3594,6 +3615,9 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "user_role_changed";
+
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
 
     public override string[] DeduplicationTags => [CommonTags.AccessLevel];
 
@@ -3627,6 +3651,9 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "user_agent_role_changed";
+
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
 
     public override string[] DeduplicationTags => [CommonTags.AccessLevel];
 

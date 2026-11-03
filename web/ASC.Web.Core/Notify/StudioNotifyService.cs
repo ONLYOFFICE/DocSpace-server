@@ -431,7 +431,7 @@ public class StudioNotifyService(
             var profileHasDeletedItselfNotifyAction = serviceProvider.GetService<ProfileHasDeletedItselfNotifyAction>();
             await profileHasDeletedItselfNotifyAction.Init(user, culture.Name);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(profileHasDeletedItselfNotifyAction, user.Id.ToString(), [recipient], [EMailSenderName]);
+            await studioNotifyServiceHelper.SendNoticeToAsync(profileHasDeletedItselfNotifyAction, [recipient], [EMailSenderName]);
         }
     }
 
@@ -440,7 +440,7 @@ public class StudioNotifyService(
         var reassignsCompletedNotifyAction = serviceProvider.GetService<ReassignsCompletedNotifyAction>();
         await reassignsCompletedNotifyAction.Init(recipientId, fromUser, toUser);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(reassignsCompletedNotifyAction, fromUser.Id.ToString(), [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(reassignsCompletedNotifyAction, [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
     }
 
     public async Task SendMsgReassignsFailedAsync(Guid recipientId, UserInfo fromUser, UserInfo toUser, string message)
@@ -448,7 +448,7 @@ public class StudioNotifyService(
         var reassignsFailedNotifyAction = serviceProvider.GetService<ReassignsFailedNotifyAction>();
         await reassignsFailedNotifyAction.Init(recipientId, fromUser, toUser, message);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(reassignsFailedNotifyAction, fromUser.Id.ToString(), [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(reassignsFailedNotifyAction, [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
     }
 
     public async Task SendMsgRemoveUserDataCompletedAsync(Guid recipientId, UserInfo user, string fromUserName, long docsSpace, long crmSpace, long mailSpace, long talkSpace)
@@ -461,7 +461,6 @@ public class StudioNotifyService(
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
             coreBaseSettings.CustomMode ? removeUserDataCompletedCustomModeNotifyAction : removeUserDataCompletedNotifyAction,
-            user.Id.ToString(),
             [await studioNotifyHelper.ToRecipientAsync(recipientId)],
             [EMailSenderName]);
     }
@@ -471,7 +470,7 @@ public class StudioNotifyService(
         var removeUserDataFailedNotifyAction = serviceProvider.GetService<RemoveUserDataFailedNotifyAction>();
         await removeUserDataFailedNotifyAction.Init(recipientId, user, fromUserName, message);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(removeUserDataFailedNotifyAction, user.Id.ToString(), [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(removeUserDataFailedNotifyAction, [await studioNotifyHelper.ToRecipientAsync(recipientId)], [EMailSenderName]);
     }
 
     public async Task SendAdminWelcomeAsync(UserInfo newUserInfo)
@@ -603,7 +602,7 @@ public class StudioNotifyService(
         var confirmOwnerChangeNotifyAction = serviceProvider.GetService<ConfirmOwnerChangeNotifyAction>();
         confirmOwnerChangeNotifyAction.Init(owner, newOwner, confirmOwnerUpdateUrl);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(confirmOwnerChangeNotifyAction, newOwner.Id.ToString(), [owner], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(confirmOwnerChangeNotifyAction, [owner], [EMailSenderName]);
     }
 
     public async Task SendCongratulationsAsync(UserInfo u)
@@ -940,7 +939,7 @@ public class StudioNotifyService(
             renewSubscriptionErrorNotifyAction.Init(user, serviceName, quantity);
 
             var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
-            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, serviceName, [recipient], [EMailSenderName, TelegramSenderName]);
+            await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);
         }
     }
 
@@ -955,7 +954,7 @@ public class StudioNotifyService(
         var apiKeyExpiredNotifyAction = serviceProvider.GetService<ApiKeyExpiredNotifyAction>();
         apiKeyExpiredNotifyAction.Init(userInfo, keyName);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(apiKeyExpiredNotifyAction, keyName, [userInfo], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(apiKeyExpiredNotifyAction, [userInfo], [EMailSenderName]);
     }
 
     #endregion

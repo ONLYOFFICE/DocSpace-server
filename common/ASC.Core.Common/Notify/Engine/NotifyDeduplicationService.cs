@@ -34,9 +34,10 @@
 namespace ASC.Notify.Engine;
 
 /// <summary>
-/// Lets the same letter reach the same recipient through the same channel only once per period, however many times
-/// the event that produces it is repeated. The mark lives in the distributed cache because letters of one tenant are
-/// produced by several services and their replicas; the lock keeps parallel sends from slipping past the check.
+/// Lets a letter that opts in (<see cref="INotifyAction.SuppressRepeats"/>) reach the same recipient through the same
+/// channel only once per period, however many times the event that produces it is repeated. The mark lives in the
+/// distributed cache because letters of one tenant are produced by several services and their replicas; the lock
+/// keeps parallel sends from slipping past the check.
 /// With <c>Redis:Enabled=false</c> the cache has no distributed level, so the mark is seen only by the process that
 /// set it and a repeat produced by another process goes out - enough for a single-node installation, not for a cluster.
 /// </summary>
@@ -61,12 +62,12 @@ public class NotifyDeduplicationService(
 
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
     {
-        var period = request.NotifyAction.DeduplicationPeriod ?? _period;
-        if (period > _maxPeriod)
+        if (!request.NotifyAction.SuppressRepeats)
         {
-            period = _maxPeriod;
+            return false;
         }
 
+        var period = _period > _maxPeriod ? _maxPeriod : _period;
         if (period <= TimeSpan.Zero)
         {
             return false;

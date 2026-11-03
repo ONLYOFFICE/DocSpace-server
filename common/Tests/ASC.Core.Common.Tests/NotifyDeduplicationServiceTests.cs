@@ -34,9 +34,9 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// The repeat check every letter passes right before it is sent: the same letter about the same entity reaches the
-/// same recipient through the same channel once per period, while anything that tells two letters apart lets the
-/// second one through.
+/// The repeat check every letter passes right before it is sent: a letter that opts in reaches the same recipient
+/// about the same entity through the same channel once per period, while anything that tells two letters apart lets
+/// the second one through, and a letter that does not opt in always goes out.
 /// </summary>
 /// <remarks>
 /// Each test gets a cache of its own, so no mark leaks from one test into another. The cache is memory-only and the
@@ -193,10 +193,10 @@ public class NotifyDeduplicationServiceTests
     }
 
     [Fact]
-    public async Task ActionThatOptsOut_IsNeverSuppressed()
+    public async Task ActionNotOptedIn_IsNeverSuppressed()
     {
         var service = CreateService();
-        var action = new TestAction("for_admin_notify", period: TimeSpan.Zero);
+        var action = new TestAction("change_password_v115", suppressRepeats: false);
 
         var first = await service.IsDuplicateAsync(Request(action, null));
         var second = await service.IsDuplicateAsync(Request(action, null));
@@ -233,10 +233,10 @@ public class NotifyDeduplicationServiceTests
     [Fact]
     public async Task PeriodLongerThanTheInvitationVisitWindow_IsCappedByIt()
     {
-        // An hour asked for by both the configuration and the action, a visit window of one second: an invitation
-        // opened once is dead after a second, so a resend may not stay suppressed for longer than that.
+        // An hour configured, a visit window of one second: an invitation opened once is dead after a second, so a
+        // resend may not stay suppressed for longer than that.
         var service = CreateService(period: "01:00:00", visitInterval: "00:00:01");
-        var action = new TestAction("saas_room_invite", period: TimeSpan.FromHours(1));
+        var action = new TestAction("saas_room_invite");
 
         await service.IsDuplicateAsync(Request(action, RoomId));
         await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
@@ -278,12 +278,12 @@ public class NotifyDeduplicationServiceTests
         };
     }
 
-    private sealed class TestAction(string id, TimeSpan? period = null, string[]? tags = null) : INotifyAction
+    private sealed class TestAction(string id, bool suppressRepeats = true, string[]? tags = null) : INotifyAction
     {
         public string ID => id;
         public List<Pattern> Patterns => [];
         public List<ITagValue> Tags { get; set; } = [];
-        public TimeSpan? DeduplicationPeriod => period;
+        public bool SuppressRepeats => suppressRepeats;
         public string[] DeduplicationTags => tags ?? [];
     }
 

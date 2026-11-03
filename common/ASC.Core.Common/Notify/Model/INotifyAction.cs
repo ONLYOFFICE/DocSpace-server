@@ -40,9 +40,13 @@ public interface INotifyAction
     List<ITagValue> Tags { get; set; }
 
     /// <summary>
-    /// How long a repeat of this letter to the same recipient is suppressed: null takes the configured period, TimeSpan.Zero turns the check off.
+    /// Whether a repeat of this letter to the same recipient within the configured period is dropped. Turned on only
+    /// for letters a caller can make the server send again and again through the API (an invitation, a share, a role
+    /// change). Never for a security alert, for a letter whose link is keyed on the latest request (the newest password
+    /// or email change instructions are the only valid ones), or for a letter whose key cannot tell two events apart
+    /// (who joined, which backup failed): dropping any of those loses something the recipient needs.
     /// </summary>
-    TimeSpan? DeduplicationPeriod => null;
+    bool SuppressRepeats => false;
 
     /// <summary>
     /// Tags whose values become part of the duplicate key. Only values the server controls (ids, enum states) belong here,

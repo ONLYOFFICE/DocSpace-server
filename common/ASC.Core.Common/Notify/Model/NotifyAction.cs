@@ -42,7 +42,7 @@ public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
     
     public List<ITagValue> Tags { get; set; }
 
-    public virtual TimeSpan? DeduplicationPeriod => null;
+    public virtual bool SuppressRepeats => false;
 
     public virtual string[] DeduplicationTags => [];
 
