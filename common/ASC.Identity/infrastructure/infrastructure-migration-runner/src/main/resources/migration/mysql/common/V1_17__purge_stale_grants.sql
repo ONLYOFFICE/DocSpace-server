@@ -20,35 +20,31 @@ CREATE EVENT identity_purge_stale_grants
         DECLARE cutoff DATETIME(6) DEFAULT UTC_TIMESTAMP(6) - INTERVAL 30 DAY;
         DECLARE removed INT;
         DECLARE chunks INT;
+        DECLARE budget INT DEFAULT 100000;
+        DECLARE client VARCHAR(255);
+        DECLARE done INT DEFAULT 0;
+        DECLARE invalidated CURSOR FOR SELECT client_id FROM identity_clients WHERE is_invalidated = 1;
+        DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
         SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
         IF GET_LOCK('identity_purge_stale_grants', 0) = 1 THEN
-            SET chunks = 0;
-            REPEAT
-                DELETE FROM identity_authorizations
-                WHERE registered_client_id = (SELECT client_id FROM (
-                          SELECT c.client_id FROM identity_clients c
-                          WHERE c.is_invalidated = 1
-                            AND EXISTS (SELECT 1 FROM identity_authorizations a
-                                        WHERE a.registered_client_id = c.client_id)
-                          LIMIT 1) AS next_client)
-                LIMIT 1000;
-                SET removed = ROW_COUNT(), chunks = chunks + 1;
-            UNTIL removed = 0 OR chunks = 500 END REPEAT;
-
-            SET chunks = 0;
-            REPEAT
-                DELETE FROM identity_consents
-                WHERE registered_client_id = (SELECT client_id FROM (
-                          SELECT c.client_id FROM identity_clients c
-                          WHERE c.is_invalidated = 1
-                            AND EXISTS (SELECT 1 FROM identity_consents s
-                                        WHERE s.registered_client_id = c.client_id)
-                          LIMIT 1) AS next_client)
-                LIMIT 1000;
-                SET removed = ROW_COUNT(), chunks = chunks + 1;
-            UNTIL removed = 0 OR chunks = 500 END REPEAT;
+            OPEN invalidated;
+            clients: LOOP
+                FETCH invalidated INTO client;
+                IF done = 1 OR budget <= 0 THEN
+                    LEAVE clients;
+                END IF;
+                REPEAT
+                    DELETE FROM identity_authorizations WHERE registered_client_id = client LIMIT 1000;
+                    SET removed = ROW_COUNT(), budget = budget - removed;
+                UNTIL removed < 1000 OR budget <= 0 END REPEAT;
+                REPEAT
+                    DELETE FROM identity_consents WHERE registered_client_id = client LIMIT 1000;
+                    SET removed = ROW_COUNT(), budget = budget - removed;
+                UNTIL removed < 1000 OR budget <= 0 END REPEAT;
+            END LOOP;
+            CLOSE invalidated;
 
             DELETE FROM identity_clients
             WHERE is_invalidated = 1
