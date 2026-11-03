@@ -1300,8 +1300,11 @@ public class FileSecurity(
             }
         }
 
+        // The room owner holds no share record of their own on the room, so the one found here can be a link's or a
+        // group's - it must not hide the form from the owner.
         if (room is { FolderType: FolderType.FillingFormsRoom } && file is { IsPdf: true } &&
-            !parentFolders.Exists(f => DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)))
+            !parentFolders.Exists(f => DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)) &&
+            !await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
         {
             var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
             if (shareRecord is { Share: FileShare.FillForms })
