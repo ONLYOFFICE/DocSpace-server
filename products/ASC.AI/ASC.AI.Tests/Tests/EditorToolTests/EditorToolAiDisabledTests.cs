@@ -55,7 +55,7 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
         var before = await ListAsync();
         await SetPortalAiAccessAsync(false);
 
-        var reply = await UntilRefusedAsync(ListAsync);
+        var reply = await ListAsync();
 
         before.Status.Should().Be(200, "the list works while the switch is on");
         reply.Error.Should().Be("Forbidden");
@@ -89,7 +89,7 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
     {
         await SetPortalAiAccessAsync(false);
 
-        var reply = await UntilRefusedAsync(() => CallToolAsync("no_such_tool_zz"));
+        var reply = await CallToolAsync("no_such_tool_zz");
 
         reply.Error.Should().Be("Forbidden");
         reply.Status.Should().Be(403, reply.ToString());

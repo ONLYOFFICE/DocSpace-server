@@ -165,37 +165,17 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
     protected Task<Reply> CallRawAsync(string body) => SendAsync(HttpMethod.Post, CallPath, body);
 
     /// <summary>
-    /// Repeats a request that changes nothing until it is refused with 403 or the deadline passes, and returns the last
-    /// reply. <see cref="BaseTest.SetPortalAiAccessAsync"/> waits until <c>threads/list</c> sees the switch; the
-    /// editor-tools routes read it on their own and may still answer as before for a moment, so an off-state check
-    /// polls here instead of taking the first answer. Never pass a call that creates or deletes anything.
-    /// </summary>
-    protected static async Task<Reply> UntilRefusedAsync(Func<Task<Reply>> request)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-
-        while (true)
-        {
-            var reply = await request();
-
-            if (reply.Status == (int)HttpStatusCode.Forbidden || DateTime.UtcNow >= deadline)
-            {
-                return reply;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
-    }
-
-    /// <summary>
-    /// Switches AI off and waits until the editor-tools routes see it (<c>list</c> is refused), so the request that
-    /// follows meets the off state. The wait polls <c>list</c>, never the call under test, which may create or delete.
+    /// Switches AI off and fails unless <c>list</c> is refused afterwards, so the request that follows meets the off state:
+    /// <see cref="BaseTest.SetPortalAiAccessAsync"/> waits for <c>threads/list</c> to be refused but does not require it.
+    /// The chat service has no switch of its own: <c>list</c> reaches the AI service's <c>tools/list</c> and <c>call</c>
+    /// its tool-prefs read first, both behind the same <c>[AiFeature]</c> gate as <c>threads/list</c>. The probe is
+    /// <c>list</c>, a read, never the call under test, which may create or delete.
     /// </summary>
     protected async Task SwitchAiOffAsync()
     {
         await SetPortalAiAccessAsync(false);
 
-        var list = await UntilRefusedAsync(ListAsync);
+        var list = await ListAsync();
         list.Status.Should().Be(403, $"the editor-tools routes must see the switch before the call under test: {list}");
     }
 
@@ -327,29 +307,31 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
     }
 
     /// <summary>
-    /// Skips the test when the portal's quota lacks <c>automationapi</c>, the feature without which ASC.AI publishes no
-    /// document generators (the standalone test portals do not have it). The decision is read from the quota, not from
-    /// the catalogue the tests then check: on a portal that has the feature, a catalogue without the generators fails.
+    /// Skips the test when the portal's quota lacks <c>automationapi</c> (<see cref="GeneratorQuota"/>), then requires
+    /// the catalogue to publish every generator.
     /// </summary>
     protected async Task RequireGeneratorsAsync()
     {
         await WebApiHttpClient.Authenticate(Owner);
-        var quota = (await QuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
-        Assert.SkipUnless(quota.AutomationApi, "The document generators are not offered on this portal: its quota lacks automationapi (EditorToolsFactory returns no tools).");
+        await GeneratorQuota.SkipUnlessOfferedAsync(QuotaApi);
 
         var names = (await ToolsAsync()).Select(t => t.Name).ToList();
         names.Should().Contain(GeneratorTools, "the portal quota has automationapi, so the catalogue publishes every generator");
     }
 
     /// <summary>
-    /// Skips the test when the owner's catalogue lacks the DocSpace REST tools, which the onlyoffice-docspace-mcp
-    /// container publishes and the integration-test AppHost does not start.
+    /// Skips the test when the launch profile does not start the onlyoffice-docspace-mcp container, the only publisher of
+    /// the DocSpace REST tools (the integration-test profile does not). Where it runs, a catalogue without them fails:
+    /// the gate is on the environment, not on the catalogue the tests then check.
     /// </summary>
     protected async Task RequireRestToolsAsync()
     {
-        var names = (await ToolsAsync()).Select(t => t.Name).ToList();
+        Assert.SkipUnless(
+            StackHasResource(ResourceNames.DocSpaceMcp),
+            "The launch profile does not start the onlyoffice-docspace-mcp container, which alone publishes the DocSpace REST tools.");
 
-        Assert.SkipWhen(!names.Contains("get_room_types"), "The DocSpace REST tools are not published: the onlyoffice-docspace-mcp container is not part of the integration-test profile.");
+        var names = (await ToolsAsync()).Select(t => t.Name).ToList();
+        names.Should().Contain("get_room_types", "the onlyoffice-docspace-mcp container runs, so the catalogue publishes its REST tools");
     }
 
     protected async Task<User> ActAsAsync(EmployeeType type)

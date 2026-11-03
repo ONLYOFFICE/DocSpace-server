@@ -42,8 +42,10 @@ namespace ASC.AI.Tests.Tests.AttachmentTests;
 /// <remarks>
 /// The switch propagates, and propagation is not instant: a 200 can still slip through after the first 403. So a gated route
 /// is polled for a short run of refusals before the rest of the calls are required to be refused too. The mutating versions
-/// aim at an id that does not exist, so the calls that slip through cannot destroy a draft the test still needs. The
-/// "AI Tools wallet service not paid for" case of the TypeScript suite needs the AI gateway's wallet and is not ported.
+/// aim at an id that does not exist, so the calls that slip through cannot destroy a draft the test still needs. The save
+/// routes would create an attachment from a call that slips through, so they are never polled: each is called once, after
+/// <see cref="BaseTest.SwitchPortalAiOffAsync"/> has seen a read-only gated route refused. The "AI Tools wallet service not paid for" case
+/// of the TypeScript suite needs the AI gateway's wallet and is not ported.
 /// </remarks>
 [Trait("Category", "AiDisabled")]
 [Trait("Feature", "AI/Attachments")]
@@ -108,13 +110,6 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         after.Where(status => status != 403).Should().BeEmpty($"{label} answered these once the refusal had settled: {string.Join(",", after)}");
     }
 
-    /// <summary>
-    /// Waits until the switch has reached the AI service, measured on a gated route that is not under test (delete-many of
-    /// an id that does not exist, so nothing is destroyed), so that a read sampled afterwards answers for the new state only.
-    /// </summary>
-    private Task AwaitSwitchTakenEffectAsync() =>
-        ExpectRefusedOnceSettledAsync(async () => (await DeleteManyAsync(MissingId)).Status, "delete-many (the settle marker)");
-
     [Fact]
     public async Task LinkToMessage_WhenAiAccessIsDisabled_Returns403()
     {
@@ -170,10 +165,9 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         // The file is uploaded while AI is still on, so the 403 below cannot be the upload.
         var fileId = await BackingFileIdAsync(Owner, "Autotest off.docx", "created with AI off");
 
-        await SetPortalAiAccessAsync(false);
         await ActAsAsync(Owner);
+        await SwitchPortalAiOffAsync();
 
-        await ExpectRefusedOnceSettledAsync(async () => (await AttachByIdAsync(fileId)).Status, "save-file");
         var refused = await AttachByIdAsync(fileId);
 
         refused.Status.Should().Be(403);
@@ -185,10 +179,9 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
     {
         var fileId = await BackingFileIdAsync(Owner, "off-batch.docx", "x");
 
-        await SetPortalAiAccessAsync(false);
         await ActAsAsync(Owner);
+        await SwitchPortalAiOffAsync();
 
-        await ExpectRefusedOnceSettledAsync(async () => (await SaveFilesManyAsync([fileId])).Status, "save-files-many");
         var refused = await SaveFilesManyAsync([fileId]);
 
         refused.Status.Should().Be(403);
@@ -205,8 +198,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         // assertion rather than pinned.
         var draftId = await SaveDraftAsync(Owner, "Autotest before-off.docx");
 
-        await SetPortalAiAccessAsync(false);
-        await AwaitSwitchTakenEffectAsync();
+        await SwitchPortalAiOffAsync();
 
         var statuses = await CollectStatusesAsync(async () => (await GetAsync(draftId)).Status, ConsistencyAttempts);
 
@@ -221,8 +213,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
     {
         var draftId = await SaveDraftAsync(Owner, "Autotest before-off.docx");
 
-        await SetPortalAiAccessAsync(false);
-        await AwaitSwitchTakenEffectAsync();
+        await SwitchPortalAiOffAsync();
 
         var statuses = await CollectStatusesAsync(async () => (await GetManyAsync(draftId)).Status, ConsistencyAttempts);
 

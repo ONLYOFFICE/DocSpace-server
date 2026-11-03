@@ -36,10 +36,13 @@ before the portal is registered. A lazy Nextcloud still gets its `NEXTCLOUD_*` s
 The document server has no health check of its own and restarts its converter ~70 s after the container
 starts, so a class that converts through it (an export to .docx/.pdf) overrides `NeedsDocumentServer` in the
 AI `BaseTest`; its setup awaits `WaitForDocumentServerAsync()`, which waits for that restart once per run.
-Set it on the classes that convert, not on a shared base, so the others do not wait.
+Set it on the classes that convert; a shared base gets it only when every class under it converts (the
+TextToDocx base), so the others do not wait.
 
-A test class cleans up in an override of `BaseTest.DisposeAsync` (calling base in a `finally`), never in
-`Dispose`: xUnit v3 calls only `DisposeAsync` on an `IAsyncLifetime` class.
+In the AI suite a test class cleans up in an override of `BaseTest.DisposeAsync` (calling base in a
+`finally`), never in `Dispose`: xUnit v3 calls only `DisposeAsync` on an `IAsyncLifetime` class. The other
+suites' `BaseTest.DisposeAsync` is not virtual yet; a class there that owns something to release needs that
+made virtual first.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.
@@ -47,7 +50,7 @@ the base.
 ## The SDK is the source of truth for signatures
 
 Tests call the API through the generated `DocSpace.API.SDK` (pinned in
-`Directory.Packages.props`, currently 4.0.0). **Read its source from the repo, never guess a
+`Directory.Packages.props`, currently 4.1.0). **Read its source from the repo, never guess a
 signature and never dig through the NuGet cache.** Paths are relative to the repo root
 (`server/`):
 

@@ -60,10 +60,12 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
             (await DeleteThreadAsync(target)).Success.Should().BeTrue();
         }
 
-        var status = await AppendStatusAsync(target, BuildUserMessage("x"));
+        var status = await StatusOfAsync(() => _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: target, message: BuildUserMessage("x")),
+            TestContext.Current.CancellationToken));
 
         (await ReadTextsAsync(threadId)).Should().Equal(["control"], "nothing was stored");
-        ((int)status).Should().Be(expected, kind);
+        status.Should().Be(expected, kind);
     }
 
     [Theory]
@@ -103,10 +105,12 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
         var threadId = await NewThreadAsync("No blanks");
         await AppendAsync(threadId, "control");
 
-        var status = await AppendStatusAsync(threadId, BuildUserMessage(text));
+        var status = await StatusOfAsync(() => _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text)),
+            TestContext.Current.CancellationToken));
 
         (await ReadTextsAsync(threadId)).Should().Equal(["control"], "nothing blank was stored");
-        status.Should().Be(HttpStatusCode.BadRequest);
+        status.Should().Be(400);
     }
 
     /// <summary>
@@ -145,11 +149,13 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
 
         var forged = BuildUserMessage("forged");
         forged.Role = role;
-        var status = await AppendStatusAsync(threadId, forged);
+        var status = await StatusOfAsync(() => _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: forged),
+            TestContext.Current.CancellationToken));
 
         var stored = await ReadMessagesAsync(threadId);
         stored.Select(m => m.Role).Should().Equal([AiThreadMessageLike.RoleEnum.User], "only the control user message is stored");
-        status.Should().Be(HttpStatusCode.BadRequest, $"role {role}");
+        status.Should().Be(400, $"role {role}");
     }
 
     [Theory]

@@ -154,12 +154,12 @@ export type AiActionArgs = {
    */
   toolInstructions?: Record<string, string>;
   /**
-   * Instructions rooms connected as context in the composer, each with the
+   * Instructions rooms connected to the chat as context, each with the
    * skills the round may use.
    */
   contextRooms?: ContextRoomRef[];
   /**
-   * Knowledge rooms connected in the composer; the knowledge search tool of
+   * Knowledge rooms connected to the chat; the knowledge search tool of
    * the round is limited to them. Each `id` has to be a DocSpace room id.
    */
   knowledgeRooms?: KnowledgeRoomRef[];
@@ -171,7 +171,7 @@ export type AiActionArgs = {
    */
   knowledgeRoom?: KnowledgeRoomRef;
   /**
-   * The folder connected as the round's context in the composer. It becomes
+   * The folder connected to the chat as the round's context. It becomes
    * the location the model is told the user works in, and the entry the
    * round is attributed to.
    */
@@ -188,7 +188,7 @@ export type Req_aiSend = {
   actionType: ActionType;
   /** The user turn to send. */
   userMessage: ThreadMessageLike;
-  /** Per-request engine options: extra tools, reasoning, prompt override. */
+  /** Per-request options of the round: extra tools, reasoning, a prompt override and the connected context. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
@@ -206,7 +206,7 @@ export type Req_aiSendCustom = {
   /** Caller-supplied system prompt for this one-turn call. */
   systemPrompt: string;
   userMessage: ThreadMessageLike;
-  /** Per-request engine options: extra tools, reasoning, prompt override. */
+  /** Per-request options of the round: extra tools, reasoning, a prompt override and the connected context. */
   actionArgs?: AiActionArgs;
   /**
    * Profile to run this call on. When omitted, or when no profile has this
@@ -230,7 +230,7 @@ export type AiSendStreamBody = {
   threadId?: string;
   /** The user turn to send. */
   userMessage: ThreadMessageLike;
-  /** Per-request engine options: extra tools, reasoning, prompt override. */
+  /** Per-request options of the round: extra tools, reasoning, a prompt override and the connected context. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
@@ -273,7 +273,7 @@ export type Req_aiRegenerateStream = {
    * @asType integer
    */
   expectedLength?: number;
-  /** Per-request engine options: extra tools, reasoning, prompt override. */
+  /** Per-request options of the round: extra tools, reasoning, a prompt override and the connected context. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
@@ -304,7 +304,7 @@ export type AiToolCallData = {
    * out - a long conversation's copy can push the body past the size limit.
    */
   message?: ThreadMessageLike;
-  /** Per-request engine options: extra tools, reasoning, prompt override. */
+  /** Per-request options of the round: extra tools, reasoning, a prompt override and the connected context. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;

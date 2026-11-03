@@ -154,16 +154,14 @@ public class ProfileAccessReadTests(AspireAppFixture fixture) : ProfileTestBase(
     {
         var profile = await CreateProfileAsync();
 
-        // Raw on purpose - an SDK defect: the typed AiProfilesTestConnectionAsync cannot deserialize the bool-or-object
-        // AiProfilesTestConnection200Response (the generated client throws from its reflection), so only the JSON can be compared.
-        var ownerConnection = await RawPostAsync($"{ProfilesRoute}/test-connection", $"\"{profile.Id}\"");
+        var ownerConnection = await _aiProfiles.AiProfilesTestConnectionAsync(profile.Id, TestContext.Current.CancellationToken);
         var ownerModels = (await _aiProfiles.AiProfilesListModelsAsync(profile.Id, TestContext.Current.CancellationToken)).Select(m => m.Id).ToList();
 
         await ActAsAsync(role);
-        var connection = await RawPostAsync($"{ProfilesRoute}/test-connection", $"\"{profile.Id}\"");
+        var connection = await _aiProfiles.AiProfilesTestConnectionAsync(profile.Id, TestContext.Current.CancellationToken);
         var models = (await _aiProfiles.AiProfilesListModelsAsync(profile.Id, TestContext.Current.CancellationToken)).Select(m => m.Id).ToList();
 
-        connection.Should().Be(ownerConnection, $"{role} test-connection");
+        connection.ToJson().Should().Be(ownerConnection.ToJson(), $"{role} test-connection");
         models.Should().Equal(ownerModels, $"{role} list-models");
     }
 }

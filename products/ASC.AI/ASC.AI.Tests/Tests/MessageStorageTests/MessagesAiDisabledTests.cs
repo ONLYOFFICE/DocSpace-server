@@ -46,30 +46,11 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
     // Waits for the export it accepts to land as a .docx, so the document server has to be up.
     protected override bool NeedsDocumentServer => true;
 
-    /// <summary>
-    /// Waits on a deadline until a complete export is refused with 403, i.e. the switch has reached the AI service, and
-    /// fails when it never is: without it a 400 below would pass on a portal whose switch never took effect. A probe that
-    /// slips through during propagation only adds a document under its own title.
-    /// </summary>
-    private async Task ExpectSwitchOffInEffectAsync(int folderId)
+    /// <summary>Switches AI off as the Owner; see <see cref="BaseTest.SwitchPortalAiOffAsync"/>.</summary>
+    private async Task SwitchAiOffAsync()
     {
-        var seen = new List<int>();
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-
-        while (true)
-        {
-            var status = await StatusOfAsync(() => ExportAsAsync(Owner, BuildExport(folderId, ExportTitle("Probe"))));
-            seen.Add(status);
-
-            if (status == 403 || DateTime.UtcNow >= deadline)
-            {
-                break;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
-
-        seen[^1].Should().Be(403, $"text-to-docx was never refused after the switch was turned off: {string.Join(",", seen)}");
+        await _aiChatClient.Authenticate(Owner);
+        await SwitchPortalAiOffAsync();
     }
 
     // A transition, not an end state: a test that only asserted 403 after the flip would also pass if the route were
@@ -86,8 +67,7 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
         (await WaitForExportedFileAsync(Owner, folderId, $"{beforeTitle}.docx"))
             .Should().NotBeNull("the export has to work before the switch is flipped");
 
-        await SetPortalAiAccessAsync(false);
-        await ExpectSwitchOffInEffectAsync(folderId);
+        await SwitchAiOffAsync();
 
         var afterTitle = ExportTitle("Exported after");
         var exception = await ExportRefusedAsAsync(Owner, BuildExport(folderId, afterTitle));
@@ -105,8 +85,7 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
     public async Task TextToDocx_EmptyContentWithTheSwitchOff_Returns400Not403()
     {
         var folderId = await MyDocumentsOfAsync(Owner);
-        await SetPortalAiAccessAsync(false);
-        await ExpectSwitchOffInEffectAsync(folderId);
+        await SwitchAiOffAsync();
 
         var exception = await ExportRefusedAsAsync(Owner, BuildExport(folderId, "T", string.Empty));
 
@@ -125,8 +104,7 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
     public async Task TextToDocx_InvalidBodyWithTheSwitchOff_Returns400Not403(string kind, string message)
     {
         var folderId = await MyDocumentsOfAsync(Owner);
-        await SetPortalAiAccessAsync(false);
-        await ExpectSwitchOffInEffectAsync(folderId);
+        await SwitchAiOffAsync();
 
         // Only the folderId cases leave the folder out; every other body fails on its own defect and no other.
         var body = kind switch

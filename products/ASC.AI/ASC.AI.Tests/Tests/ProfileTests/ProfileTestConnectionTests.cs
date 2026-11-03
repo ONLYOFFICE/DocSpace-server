@@ -48,19 +48,10 @@ public class ProfileTestConnectionTests(AspireAppFixture fixture) : ProfileTestB
     {
         var profile = await CreateProfileAsync();
 
-        // Raw on purpose - an SDK defect: the typed AiProfilesTestConnectionAsync cannot deserialize its bool-or-object
-        // answer (it throws ArgumentException from the generated client's reflection), so only the JSON can be read.
-        var verdict = await RawPostAsync(TestConnectionPath, $"\"{profile.Id}\"");
+        var verdict = await _aiProfiles.AiProfilesTestConnectionAsync(profile.Id, TestContext.Current.CancellationToken);
 
-        verdict.Status.Should().Be(200, verdict.Body);
-        if (verdict.Body.TrimStart().StartsWith('{'))
-        {
-            PropertyNamesOf(verdict.Body).Should().NotContain(["field", "message"], "a working provider is not complained about");
-        }
-        else
-        {
-            verdict.Body.Trim().Should().Be("true");
-        }
+        // The engine answers `true | TErrorData`: anything but `true` is a complaint about the provider.
+        verdict.ActualInstance.Should().Be(true, $"a working provider is not complained about: {verdict.ToJson()}");
     }
 
     [Fact]

@@ -37,6 +37,8 @@ namespace ASC.AI.Tests.Tests.TextToDocxTests;
 [Trait("Feature", "AI/TextToDocx")]
 public class TextToDocxPublishTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    // No NeedsDocumentServer: the 202 only means the job was queued, and no test here waits for the converted file.
+
     [Fact]
     public async Task Publish_MyDocuments_ReturnsAccepted()
     {

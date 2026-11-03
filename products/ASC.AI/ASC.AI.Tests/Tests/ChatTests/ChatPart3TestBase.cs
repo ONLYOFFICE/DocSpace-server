@@ -66,9 +66,23 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
     {
         try
         {
+            List<Exception> failures = [];
             foreach (var provider in _providers)
             {
-                provider.Dispose();
+                try
+                {
+                    provider.Dispose();
+                }
+                catch (Exception exception)
+                {
+                    // One stub that fails to stop does not leave the others running.
+                    failures.Add(exception);
+                }
+            }
+
+            if (failures.Count > 0)
+            {
+                throw new AggregateException(failures);
             }
         }
         finally

@@ -86,12 +86,9 @@ public class McpHostToolsChatTests(AspireAppFixture fixture) : McpTestBase(fixtu
 
     private async Task<McpChat> AskedWithoutClientToolsAsync()
     {
-        // The editor tools list is empty unless the portal quota has automationapi (EditorToolsFactory returns an empty bundle
-        // otherwise), which the standalone test portals lack. The skip reads that precondition from the quota itself, not
-        // from what the model was offered: an offer that goes missing on a portal that has the feature is a failure.
+        // The built-in generator is offered only on a portal whose quota has automationapi.
         await WebApiHttpClient.Authenticate(Owner);
-        var quota = (await QuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
-        Assert.SkipUnless(quota.AutomationApi, "the editor (onlyoffice_generate_*) tools are not offered on this portal: its quota lacks automationapi");
+        await EditorToolTests.GeneratorQuota.SkipUnlessOfferedAsync(QuotaApi);
 
         var chat = await StartChatAsync();
         chat.Provider.Enqueue(StubModelProvider.Text("OK"));

@@ -73,6 +73,12 @@ public static class ResourceNames
     /// </summary>
     public const string Editors = "onlyoffice-editors";
 
+    /// <summary>
+    /// The DocSpace MCP server container that offers the AI chat its DocSpace REST tools. Not every launch profile starts
+    /// it; <see cref="AspireHostFixture{TClients}.HasResource"/> tells.
+    /// </summary>
+    public const string DocSpaceMcp = "onlyoffice-docspace-mcp";
+
     /// <summary>The identity (OAuth2) containers — Spring services built from common/ASC.Identity.</summary>
     public const string IdentityRegistration = "onlyoffice-identity-registration";
     public const string IdentityAuthorization = "onlyoffice-identity-authorization";

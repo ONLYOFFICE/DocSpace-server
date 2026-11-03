@@ -154,8 +154,10 @@ function tag(name: string): string {
 // `serverType`/`toolName` pair), while these six are read through
 // `asString`/`parseInt10`/`parseThreadsCursor`/`parseMessagesCursor`/
 // `parseDirection`, which all yield `undefined` on an absent value and let the
-// engine apply its own default. A name means the same thing wherever it
-// appears, as with `PARAM_DOCS` - none of the six is guarded in any operation.
+// service apply its own default. A name means the same thing wherever it
+// appears, as with `PARAM_DOCS` - none of these is guarded in any operation.
+// `cloud` is read and then ignored: the context storage takes it as `_cloud`
+// (storage/index.ts), since this portal is the only account there is.
 const OPTIONAL_QUERY_PARAMS = new Set([
   "expand",
   "limit",
@@ -166,6 +168,7 @@ const OPTIONAL_QUERY_PARAMS = new Set([
   "entityId",
   "folderId",
   "query",
+  "cloud",
 ]);
 const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex", "count"]);
 
@@ -184,6 +187,8 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex", "count"]);
 const PARAM_DOCS: Readonly<Record<string, string>> = {
   actionType:
     'The AI action the request applies to - one of "Default", "Chat", "Code", "Summarization", "Translation", "TextAnalyze", "ImageGeneration", "OCR", "Vision", "FormAnalysis".',
+  cloud:
+    "The account the room belongs to. Only `docspace`, this portal, exists, and the value is not read; omit it.",
   count: "The maximum number of items to return in one page.",
   cursor:
     "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
@@ -199,7 +204,9 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
   name: "The custom MCP server name.",
   profileId: "The AI provider profile identifier.",
   query: "The full-text query the thread list is filtered by.",
+  roomId: "The Instructions room identifier.",
   serverType: "The MCP server type the tool belongs to.",
+  skillId: "The skill identifier, as `GET api/2.0/ai/context/get-room-skills` lists it.",
   startIndex: "The zero-based index of the first item to return.",
   threadId: "The chat thread identifier.",
   toolName: "The tool name.",
@@ -291,17 +298,17 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiRegenerateStream:
     "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
   aiApproveToolCall:
-    "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it.",
+    "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it. The project context is applied again on resume: when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
   aiDenyToolCall:
-    'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
+    'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead. The project context is applied again on resume: when `entityId` names an AI project, the project\'s own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.',
 
   // Context - the rooms a chat can be connected to and the skills inside them.
   aiContextGetContextFolders:
-    "Lists the Instructions rooms the caller can connect to a chat as context, grouped under the account they belong to (`docspace` for this portal). Only a room the caller can read that holds at least one skill is listed: one without skills would connect nothing. An empty list means there is nothing to connect. Read the skills of one room with `GET api/2.0/ai/context/get-room-skills`. This is a read-only operation.",
+    "Lists the Instructions rooms the caller can connect to a chat as context, grouped under the account they belong to (`docspace` for this portal). Only a room the caller can read that holds at least one skill is listed: one without skills would connect nothing. An empty list means there is nothing to connect. At most 1000 Instructions rooms are read; any beyond them are left out without a signal. Read the skills of one room with `GET api/2.0/ai/context/get-room-skills`. This is a read-only operation.",
   aiContextGetKnowledgeFolders:
-    "Lists the Knowledge rooms the caller can connect to a chat as its knowledge base, grouped under the account they belong to (`docspace` for this portal). A connected Knowledge room limits the knowledge search of a round to it (`actionArgs.knowledgeRooms`). An empty list means there is none the caller can read. This is a read-only operation.",
+    "Lists the Knowledge rooms the caller can connect to a chat as its knowledge base, grouped under the account they belong to (`docspace` for this portal). A connected Knowledge room limits the knowledge search of a round to it (`actionArgs.knowledgeRooms`). An empty list means there is none the caller can read. At most 1000 Knowledge rooms are listed; any beyond them are left out without a signal. This is a read-only operation.",
   aiContextGetRoomSkills:
-    "Lists the skills of one Instructions room: the ID, name and description from the frontmatter of each skill file, not its body. `roomId` is required; `cloud` names the account (`docspace` for this portal). A room that is not an Instructions room the caller can read answers 404. Read the body of one skill with `GET api/2.0/ai/context/get-room-skill`. This is a read-only operation.",
+    "Lists the skills of one Instructions room: the ID, name and description from the frontmatter of each skill file, not its body. `roomId` is required; `cloud` is accepted and not read. A room that is not an Instructions room the caller can read answers 404. Read the body of one skill with `GET api/2.0/ai/context/get-room-skill`. This is a read-only operation.",
   aiContextGetRoomSkill:
     "Returns the Markdown file of one skill of an Instructions room as a JSON string. `roomId` and `skillId` are required, and the skill has to be one of that room's skills: the ID of any other file, readable or not, answers 404, as does a room that is not an Instructions room the caller can read. Only the first 256 KiB of the file are read, which covers the 64 K characters a chat passes to the model; a longer file comes back cut there without a signal. This is a read-only operation.",
 
@@ -336,7 +343,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiAttachmentsSaveFilesMany:
     'Stores several file attachments as drafts in one round trip and returns them in the order they were sent. Each entry is validated exactly as the single-file operation validates its `input`, and the first bad one rejects the whole batch with its index named in the message - nothing is stored. `inputs` has to be present and an array: an absent or null value is a malformed request rather than an empty batch, and only an explicit empty array means "no files". Follow up with `POST api/2.0/ai/attachments/link-to-message` to bind the drafts to a message.',
   aiAttachmentsGetSuggestedQuestions:
-    "Returns the starter questions proposed for a form attached to a chat. The body is the attachment ID itself, as a bare JSON string. The questions are generated by the model of the `FormAnalysis` assignment the first time they are asked for: that call answers `status: pending` with no questions and starts the generation in the background, and a later call answers `status: ready` with up to four questions, each with the prompt sent when the user picks it. `status: unavailable` means none will come for this attachment, and asking again does not change it. Poll until the status is no longer `pending`.",
+    "Returns the starter questions proposed for a form attached to a chat. The body is the attachment ID itself, as a bare JSON string. The questions are generated by the model of the `FormAnalysis` slot, or of the `Default` slot when that one is empty. The first call answers `status: pending` with no questions and starts the generation in the background; once it succeeds the questions are stored, pushed over the socket as the `form-suggested-questions` event to the room `{tenant}-form-analysis-{attachmentId}`, and every later call answers `status: ready` with up to four questions, each with the prompt sent when the user picks it. `status: unavailable` means the attachment is not a form that can be analysed, and asking again does not change it. A generation that finds no model, fails, or returns no usable question stores nothing, so the next call answers `pending` again and starts a new generation - a model call each time, and with no model configured the answer stays `pending` for good. Wait for the socket event rather than polling, and give up after a timeout.",
   aiAttachmentsGet:
     'Returns one attachment by its ID, whether it is still a draft or already bound to a message. The ID is required and has to be a non-empty string. An ID that no longer exists is not reported as 404: the answer is a null body with status 200, so treat a missing payload as "no such attachment". Use `POST api/2.0/ai/attachments/get-many` to read several at once.',
   aiAttachmentsGetMany:
@@ -458,7 +465,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsOpenOrCreate:
     "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; threads are one list per user whatever it names.",
   aiThreadsAppendUserMessage:
-    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer is the stored message itself under `messageId` - the field name is historical, the ID is `messageId.id`; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the chat input is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer is the stored message itself under `messageId` - the field name is historical, the ID is `messageId.id`; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
   aiThreadsTouch:
     "Bumps a thread's last-edit date without adding a message, which resurfaces it in the list. Passing `profileId` also rebinds the thread to another model, so this is the operation to call when a model switch alone should count as activity. Nothing else about the thread changes and the answer only confirms the write. It is idempotent: repeating it simply moves the date forward again.",
   aiThreadsRename:
@@ -498,7 +505,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiToolsListSystemTools:
     "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the portal's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
-    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
+    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the toggles in the chat the first.",
   aiToolsGetDisabled:
     "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. Without `scope` the answer is the caller's effective list, with the tools an administrator switched off for everyone folded in; `scope=tenant` reads that administrator list alone, which is what the settings page shows. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
   aiToolsIsToolDisabled:
@@ -623,10 +630,26 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "profile could be resolved for the requested action.",
     "402": true,
     "404": "The `entityId` names a room the caller cannot open, or no live profile is bound to it.",
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiSendWithStreamOpenAI: {
     "400": "The prompt is empty, or no AI profile could be resolved for the requested action.",
     "402": true,
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+  },
+  aiRegenerateStream: {
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+  },
+  aiApproveToolCall: {
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+  },
+  aiDenyToolCall: {
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
 
   aiProjectsGetModel: {
@@ -647,6 +670,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiSend: {
     "400":
       "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+    "409":
+      "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
   },
   aiSendCustom: {
     "400":
@@ -1425,7 +1450,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiThreadsDelete: "Confirms the thread and its messages are gone.",
   aiThreadsClearMessages: "Confirms the request was accepted. It does not mean the thread existed.",
   aiThreadsRegenerateTitle: "The newly generated title, already stored on the thread.",
-  aiThreadsList: "The threads of the scope, most recently edited first.",
+  aiThreadsList: "The caller's threads, most recently edited first.",
   aiThreadsReadMessages: "The thread's messages, oldest first unless `direction` reversed them.",
   aiThreadsGetById: "The thread, without its messages.",
   aiThreadsGetMessageById: "The message.",

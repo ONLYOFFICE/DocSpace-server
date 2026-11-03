@@ -240,9 +240,23 @@ public abstract class ProfileTestBase(AspireAppFixture fixture) : BaseTest(fixtu
     {
         try
         {
+            List<Exception> failures = [];
             foreach (var socket in _closedPorts)
             {
-                socket.Dispose();
+                try
+                {
+                    socket.Dispose();
+                }
+                catch (Exception exception)
+                {
+                    // One socket that fails to close does not leave the other ports held.
+                    failures.Add(exception);
+                }
+            }
+
+            if (failures.Count > 0)
+            {
+                throw new AggregateException(failures);
             }
         }
         finally

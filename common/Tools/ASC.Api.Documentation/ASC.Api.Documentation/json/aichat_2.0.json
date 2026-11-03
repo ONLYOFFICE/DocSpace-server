@@ -189,6 +189,16 @@
               }
             }
           },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -374,6 +384,16 @@
               }
             }
           },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -467,6 +487,16 @@
               }
             }
           },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -540,6 +570,16 @@
               }
             }
           },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -580,7 +620,7 @@
         ],
         "operationId": "aiApproveToolCall",
         "summary": "Approve tool call",
-        "description": "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it.",
+        "description": "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it. The project context is applied again on resume: when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -604,6 +644,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -652,7 +702,7 @@
         ],
         "operationId": "aiDenyToolCall",
         "summary": "Deny tool call",
-        "description": "Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `\"User deny tool call\"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.",
+        "description": "Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `\"User deny tool call\"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead. The project context is applied again on resume: when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -676,6 +726,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`entityId` names an AI project whose model is gone or cannot chat (`code: projectModelUnavailable`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -2059,7 +2119,7 @@
         ],
         "operationId": "aiAttachmentsGetSuggestedQuestions",
         "summary": "Get suggested questions",
-        "description": "Returns the starter questions proposed for a form attached to a chat. The body is the attachment ID itself, as a bare JSON string. The questions are generated by the model of the `FormAnalysis` assignment the first time they are asked for: that call answers `status: pending` with no questions and starts the generation in the background, and a later call answers `status: ready` with up to four questions, each with the prompt sent when the user picks it. `status: unavailable` means none will come for this attachment, and asking again does not change it. Poll until the status is no longer `pending`.",
+        "description": "Returns the starter questions proposed for a form attached to a chat. The body is the attachment ID itself, as a bare JSON string. The questions are generated by the model of the `FormAnalysis` slot, or of the `Default` slot when that one is empty. The first call answers `status: pending` with no questions and starts the generation in the background; once it succeeds the questions are stored, pushed over the socket as the `form-suggested-questions` event to the room `{tenant}-form-analysis-{attachmentId}`, and every later call answers `status: ready` with up to four questions, each with the prompt sent when the user picks it. `status: unavailable` means the attachment is not a form that can be analysed, and asking again does not change it. A generation that finds no model, fails, or returns no usable question stores nothing, so the next call answers `pending` again and starts a new generation - a model call each time, and with no model configured the answer stays `pending` for good. Wait for the socket event rather than polling, and give up after a timeout.",
         "responses": {
           "200": {
             "description": "The form's starter questions when they are ready; otherwise the status says whether they are still being generated or will never come.",
@@ -2146,7 +2206,7 @@
         ],
         "operationId": "aiContextGetContextFolders",
         "summary": "Get context folders",
-        "description": "Lists the Instructions rooms the caller can connect to a chat as context, grouped under the account they belong to (`docspace` for this portal). Only a room the caller can read that holds at least one skill is listed: one without skills would connect nothing. An empty list means there is nothing to connect. Read the skills of one room with `GET api/2.0/ai/context/get-room-skills`. This is a read-only operation.",
+        "description": "Lists the Instructions rooms the caller can connect to a chat as context, grouped under the account they belong to (`docspace` for this portal). Only a room the caller can read that holds at least one skill is listed: one without skills would connect nothing. An empty list means there is nothing to connect. At most 1000 Instructions rooms are read; any beyond them are left out without a signal. Read the skills of one room with `GET api/2.0/ai/context/get-room-skills`. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The Instructions rooms the caller can connect, grouped by account.",
@@ -2201,7 +2261,7 @@
         ],
         "operationId": "aiContextGetKnowledgeFolders",
         "summary": "Get knowledge folders",
-        "description": "Lists the Knowledge rooms the caller can connect to a chat as its knowledge base, grouped under the account they belong to (`docspace` for this portal). A connected Knowledge room limits the knowledge search of a round to it (`actionArgs.knowledgeRooms`). An empty list means there is none the caller can read. This is a read-only operation.",
+        "description": "Lists the Knowledge rooms the caller can connect to a chat as its knowledge base, grouped under the account they belong to (`docspace` for this portal). A connected Knowledge room limits the knowledge search of a round to it (`actionArgs.knowledgeRooms`). An empty list means there is none the caller can read. At most 1000 Knowledge rooms are listed; any beyond them are left out without a signal. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The Knowledge rooms the caller can connect, grouped by account.",
@@ -2256,7 +2316,7 @@
         ],
         "operationId": "aiContextGetRoomSkills",
         "summary": "Get room skills",
-        "description": "Lists the skills of one Instructions room: the ID, name and description from the frontmatter of each skill file, not its body. `roomId` is required; `cloud` names the account (`docspace` for this portal). A room that is not an Instructions room the caller can read answers 404. Read the body of one skill with `GET api/2.0/ai/context/get-room-skill`. This is a read-only operation.",
+        "description": "Lists the skills of one Instructions room: the ID, name and description from the frontmatter of each skill file, not its body. `roomId` is required; `cloud` is accepted and not read. A room that is not an Instructions room the caller can read answers 404. Read the body of one skill with `GET api/2.0/ai/context/get-room-skill`. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The skills of the room, frontmatter only.",
@@ -2326,7 +2386,8 @@
           {
             "name": "cloud",
             "in": "query",
-            "required": true,
+            "description": "The account the room belongs to. Only `docspace`, this portal, exists, and the value is not read; omit it.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2334,6 +2395,7 @@
           {
             "name": "roomId",
             "in": "query",
+            "description": "The Instructions room identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2417,7 +2479,8 @@
           {
             "name": "cloud",
             "in": "query",
-            "required": true,
+            "description": "The account the room belongs to. Only `docspace`, this portal, exists, and the value is not read; omit it.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2425,6 +2488,7 @@
           {
             "name": "roomId",
             "in": "query",
+            "description": "The Instructions room identifier.",
             "required": true,
             "schema": {
               "type": "string"
@@ -2433,6 +2497,7 @@
           {
             "name": "skillId",
             "in": "query",
+            "description": "The skill identifier, as `GET api/2.0/ai/context/get-room-skills` lists it.",
             "required": true,
             "schema": {
               "type": "string"
@@ -3704,7 +3769,7 @@
                     },
                     "providerType": {
                       "$ref": "#/components/schemas/AiProviderType",
-                      "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+                      "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`."
                     },
                     "basedOn": {
                       "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -3724,7 +3789,7 @@
                     },
                     "reasoningSupport": {
                       "$ref": "#/components/schemas/AiReasoningSupport",
-                      "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+                      "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
                     },
                     "capabilities": {
                       "type": "number",
@@ -5180,7 +5245,7 @@
         ],
         "operationId": "aiThreadsAppendUserMessage",
         "summary": "Append user message",
-        "description": "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer is the stored message itself under `messageId` - the field name is historical, the ID is `messageId.id`; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+        "description": "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the chat input is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer is the stored message itself under `messageId` - the field name is historical, the ID is `messageId.id`; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
         "responses": {
           "200": {
             "description": "The stored message, under `messageId`, with the ID storage assigned to it in `messageId.id`.",
@@ -5708,7 +5773,7 @@
         "description": "Lists the threads of the caller, most recently edited first, and searches their titles case-insensitively when `query` is given. Threads are one list per user: `entityId` is accepted and ignored, so naming a room lists the same threads as naming none. Every parameter is optional, and omitting `count` lets the service apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{\"id\": <last thread id>, \"lastEditDate\": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.",
         "responses": {
           "200": {
-            "description": "The threads of the scope, most recently edited first.",
+            "description": "The caller's threads, most recently edited first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6920,7 +6985,7 @@
         ],
         "operationId": "aiToolsSetDisabled",
         "summary": "Set disabled",
-        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
+        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the toggles in the chat the first.",
         "responses": {
           "200": {
             "description": "Confirms the new disable list was stored for that server type.",
@@ -10745,14 +10810,14 @@
             "items": {
               "$ref": "#/components/schemas/AiContextRoomRef"
             },
-            "description": "Instructions rooms connected as context in the composer, each with the skills the round may use."
+            "description": "Instructions rooms connected to the chat as context, each with the skills the round may use."
           },
           "knowledgeRooms": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiKnowledgeRoomRef"
             },
-            "description": "Knowledge rooms connected in the composer; the knowledge search tool of the round is limited to them. Each `id` has to be a DocSpace room id."
+            "description": "Knowledge rooms connected to the chat; the knowledge search tool of the round is limited to them. Each `id` has to be a DocSpace room id."
           },
           "knowledgeRoom": {
             "$ref": "#/components/schemas/AiKnowledgeRoomRef",
@@ -10761,7 +10826,7 @@
           },
           "folderContext": {
             "$ref": "#/components/schemas/AiFolderContextRef",
-            "description": "The folder connected as the round's context in the composer. It becomes the location the model is told the user works in, and the entry the round is attributed to."
+            "description": "The folder connected to the chat as the round's context. It becomes the location the model is told the user works in, and the entry the round is attributed to."
           },
           "entityId": {
             "type": "string",
@@ -10821,14 +10886,14 @@
           },
           "requireApproval": {
             "type": "boolean",
-            "description": "Whether the tool asks for approval before it runs. Under the `auto` tool permission mode `false` runs it without asking, `true` or absent leaves it to the tools the user always allows; `ask` asks for every tool, `allow` for none. Host tools default to `false`; MCP and custom-server tools leave it unset.",
+            "description": "Whether the tool asks for approval before it runs, under the `auto` tool permission mode: `false` runs it without asking; `true` or absent leaves it to the always-allow list and the tool's MCP annotations (see `annotations`). Under `ask` every call asks and under `allow` none does, whatever this says. Host tools default to `false`; MCP and custom-server tools leave it unset.",
             "examples": [
               false
             ]
           },
           "annotations": {
             "$ref": "#/components/schemas/AiToolAnnotations",
-            "description": "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool annotated `readOnlyHint: true` and `destructiveHint: false` runs without approval, a destructive or unannotated one asks."
+            "description": "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool that cannot destroy anything runs without approval - one annotated `readOnlyHint: true`, or one with an explicit `destructiveHint: false`; a destructive tool, and one with no annotations (the protocol's default is destructive), keeps asking."
           }
         },
         "required": [
@@ -11058,11 +11123,11 @@
                     },
                     "image": {
                       "type": "string",
-                      "description": "An `image` part's picture, as a URL (usually a `data:` URL). For an image the composer attached, a JSON string `{ ref, title, kind: \"image\" }` naming the stored attachment instead."
+                      "description": "An `image` part's picture, as a URL (usually a `data:` URL). For an image the user attached, a JSON string `{ ref, title, kind: \"image\" }` naming the stored attachment instead."
                     },
                     "mimeType": {
                       "type": "string",
-                      "description": "A `file` part's media type. For a file the composer attached, a JSON string `{ ref, title, kind: \"file\", path, type }` naming the stored attachment instead - the chat library carries the reference here."
+                      "description": "A `file` part's media type. For a file the user attached, a JSON string `{ ref, title, kind: \"file\", path, type }` naming the stored attachment instead - the chat library carries the reference here."
                     },
                     "data": {
                       "type": "string",
@@ -11275,7 +11340,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context.",
             "examples": [
               {
                 "isReasoning": false
@@ -11351,7 +11416,7 @@
           },
           "autoAllow": {
             "type": "boolean",
-            "description": "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never; under `auto` a tool the user always allows, one that opts out of approval (`requireApproval: false`) or one annotated read-only and non-destructive; under `allow` every tool."
+            "description": "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never - the always-allow list, `requireApproval` and the annotations are all ignored; under `auto` a tool on the always-allow list, one with `requireApproval: false`, or one annotated `readOnlyHint: true` or `destructiveHint: false`; under `allow` every tool."
           },
           "serverExecuted": {
             "type": "boolean",
@@ -11596,7 +11661,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context.",
             "examples": [
               {
                 "isReasoning": false
@@ -11668,7 +11733,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+            "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
             "examples": [
               "openai"
             ]
@@ -11722,7 +11787,7 @@
           },
           "reasoningSupport": {
             "$ref": "#/components/schemas/AiReasoningSupport",
-            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+            "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
           },
           "capabilities": {
             "type": "number",
@@ -11809,7 +11874,7 @@
           "onlyoffice",
           "external"
         ],
-        "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
+        "description": "The built-in AI provider types. `external` has no transport of its own: the requests go through a transport the embedding application supplies and are parsed with the provider named in `basedOn`."
       },
       "AiReasoningSupport": {
         "type": "object",
@@ -11853,7 +11918,7 @@
         "description": "A `ReasoningLevel` above off — a depth the model can think at."
       },
       "AiAssignmentMutationResult": {
-        "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
+        "description": "The outcome of an assign or unassign: a success, or an error naming the field that was refused.",
         "type": "object",
         "properties": {
           "success": {
@@ -11912,7 +11977,7 @@
         "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
       },
       "AiBulkAssignmentResult": {
-        "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
+        "description": "The outcome of a bulk assign: either every entry was stored, or none was and the errors are reported per action. Every entry is validated before anything is written, so one bad entry never leaves the assignments half-written.",
         "type": "object",
         "properties": {
           "success": {
@@ -12011,7 +12076,7 @@
               "user",
               "tool"
             ],
-            "description": "Origin of the attachment. `\"user\"` — uploaded by the user in the composer (the default when unset, for backward compatibility). `\"tool\"` — produced by a tool call (e.g. `generate_image`). Lets the integrator's adapter route or apply policies (separate bucket, quotas, TTL, CDN) per source.",
+            "description": "Where the attachment came from: `user` - attached by the user (also when unset); `tool` - produced by a tool call (for example `generate_image`).",
             "examples": [
               "user"
             ]
@@ -12064,7 +12129,7 @@
           },
           "entityId": {
             "type": "string",
-            "description": "Opaque scope token (entity / \"room\") the attachment was created in. Drafts carry it so an entity switch keeps in-flight composer state isolated; once linked to a message the field is redundant with the thread's own entity binding.",
+            "description": "The room or folder the attachment was created in, as an opaque token; once the attachment is bound to a message it repeats the thread's own scope.",
             "examples": [
               "1234"
             ]
@@ -12233,7 +12298,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+            "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
             "examples": [
               "openai"
             ]
@@ -12287,7 +12352,7 @@
           },
           "reasoningSupport": {
             "$ref": "#/components/schemas/AiReasoningSupport",
-            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+            "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
           },
           "capabilities": {
             "type": "number",
@@ -12640,10 +12705,10 @@
           "replace",
           "merge"
         ],
-        "description": "Mode passed to `PromptsEngine.importBundle`."
+        "description": "How an imported prompt bundle meets the library: `merge` adds to it, `replace` replaces it."
       },
       "AiImportResult": {
-        "description": "Outcome of `PromptsEngine.importBundle`. Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
+        "description": "The outcome of a prompt bundle import: either every entry was stored, with counts, or none was and the errors are reported per entry.",
         "type": "object",
         "properties": {
           "success": {
@@ -12726,7 +12791,7 @@
           "error"
         ],
         "additionalProperties": false,
-        "description": "Per-entry error reported by `PromptsEngine.importBundle`."
+        "description": "One refused entry of a prompt bundle import."
       },
       "AiThread": {
         "type": "object",
@@ -12839,7 +12904,7 @@
           "priorMessages"
         ],
         "additionalProperties": false,
-        "description": "Resolved thread state returned by `ThreadsEngine.openOrCreate`."
+        "description": "The thread that was opened or created, with its stored messages."
       },
       "AiMcpServerConfig": {
         "type": "object",
@@ -12866,7 +12931,7 @@
         ]
       },
       "AiToolsBulkResult": {
-        "description": "Outcome of `ToolsEngine.replaceAllCustomServers` — either every entry persisted, or no entries persisted plus a per-key error report.",
+        "description": "The outcome of replacing the custom MCP servers: either every entry was stored, or none was and the errors are reported per server.",
         "type": "object",
         "properties": {
           "success": {
@@ -12953,7 +13018,7 @@
         "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
       },
       "AiWebSearchMutationResult": {
-        "description": "Outcome of `WebSearchEngine.configure` — either the persisted config or a field-scoped error suitable for the settings form.",
+        "description": "The outcome of storing a web-search configuration: the stored configuration, or an error naming the field that was refused.",
         "type": "object",
         "properties": {
           "success": {
@@ -13524,7 +13589,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",
@@ -13557,7 +13622,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "profileId": {
             "type": "string",
@@ -13592,7 +13657,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",
@@ -13641,7 +13706,7 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",

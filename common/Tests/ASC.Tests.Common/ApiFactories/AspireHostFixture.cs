@@ -439,6 +439,13 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Whether the suite's launch profile starts the resource at all - the environment signal for a feature whose
+    /// container only some profiles include (<see cref="ResourceNames.DocSpaceMcp"/>).
+    /// </summary>
+    public bool HasResource(string resourceName) =>
+        _app.Services.GetRequiredService<DistributedApplicationModel>().Resources.Any(resource => resource.Name == resourceName);
+
+    /// <summary>
     /// A value of the AppHost configuration. The services read the same <c>buildtools/config</c>
     /// files, so a setting such as <c>core:machinekey</c> read here is the one they work with.
     /// </summary>

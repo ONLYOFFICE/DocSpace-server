@@ -48,13 +48,13 @@ declare module "@assistant-ui/react" {
           /** A `source` part's title. */
           title?: string;
           /**
-           * An `image` part's picture, as a URL (usually a `data:` URL). For an image the composer
+           * An `image` part's picture, as a URL (usually a `data:` URL). For an image the user
            * attached, a JSON string `{ ref, title, kind: "image" }` naming the
            * stored attachment instead.
            */
           image?: string;
           /**
-           * A `file` part's media type. For a file the composer attached, a JSON
+           * A `file` part's media type. For a file the user attached, a JSON
            * string `{ ref, title, kind: "file", path, type }` naming the stored
            * attachment instead - the chat library carries the reference here.
            */

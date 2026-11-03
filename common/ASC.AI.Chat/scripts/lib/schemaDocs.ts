@@ -46,11 +46,14 @@ import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../../app/exampleIds
 // `OPERATION_DOCS` in `app/openapi.ts`, whose engine entries are likewise
 // distilled from the library's own JSDoc. Two rules keep the table honest:
 //
-//   - Fill-in only, never override. A description the library declares always
-//     wins, so a future release that documents a type turns the entry here
-//     dead rather than putting the two in conflict.
-//   - A dead entry is reported rather than silently ignored, because the same
-//     silence would also swallow a typo. See `applySchemaDocs`.
+//   - Fill-in by default. A description the library declares wins over
+//     `description`/`properties`, so a future release that documents a type
+//     turns the entry here dead rather than putting the two in conflict. The
+//     one exception is `replaceDescription`/`replaceProperties`, for a library
+//     text that names the library's internals; each is pinned to the start of
+//     the text it replaces, so a rewritten library text is caught.
+//   - A dead entry fails the generation rather than being ignored, because the
+//     same silence would also swallow a typo. See `applySchemaDocs`.
 //
 // Keys are the final, namespaced component names - exactly what the lint
 // report cites (`components.schemas.AiChatEvent.properties.idx`).
@@ -103,6 +106,14 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
 
   AiProfile: {
     replaceProperties: {
+      providerType: {
+        replacing: "Provider type for this profile.",
+        text: "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
+      },
+      reasoningSupport: {
+        replacing: "Extended-thinking capabilities of the selected model",
+        text: "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID.",
+      },
       useProxy: {
         replacing: "Route every provider request through the host's `fetchProxy`",
         text: "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
@@ -133,6 +144,14 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       text: "Input for creating a new profile: the shape of a profile without the fields the service fills in (`id`, `createdAt`).",
     },
     replaceProperties: {
+      providerType: {
+        replacing: "Provider type for this profile.",
+        text: "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
+      },
+      reasoningSupport: {
+        replacing: "Extended-thinking capabilities of the selected model",
+        text: "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID.",
+      },
       useProxy: {
         replacing: "Route every provider request through the host's `fetchProxy`",
         text: "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
@@ -227,11 +246,11 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       },
       requireApproval: {
         replacing: "Whether the consumer must show an approval dialog",
-        text: "Whether the tool asks for approval before it runs. Under the `auto` tool permission mode `false` runs it without asking, `true` or absent leaves it to the tools the user always allows; `ask` asks for every tool, `allow` for none. Host tools default to `false`; MCP and custom-server tools leave it unset.",
+        text: "Whether the tool asks for approval before it runs, under the `auto` tool permission mode: `false` runs it without asking; `true` or absent leaves it to the always-allow list and the tool's MCP annotations (see `annotations`). Under `ask` every call asks and under `allow` none does, whatever this says. Host tools default to `false`; MCP and custom-server tools leave it unset.",
       },
       annotations: {
         replacing: "The MCP tool annotations as the server declared them",
-        text: "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool annotated `readOnlyHint: true` and `destructiveHint: false` runs without approval, a destructive or unannotated one asks.",
+        text: "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool that cannot destroy anything runs without approval - one annotated `readOnlyHint: true`, or one with an explicit `destructiveHint: false`; a destructive tool, and one with no annotations (the protocol's default is destructive), keeps asking.",
       },
     },
     examples: {
@@ -359,6 +378,20 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
+  AiImportMode: {
+    replaceDescription: {
+      replacing: "Mode passed to `PromptsEngine.importBundle`",
+      text: "How an imported prompt bundle meets the library: `merge` adds to it, `replace` replaces it.",
+    },
+  },
+
+  AiBuiltinProviderType: {
+    replaceDescription: {
+      replacing: "Union of all 17 built-in AI provider type identifiers.",
+      text: "The built-in AI provider types. `external` has no transport of its own: the requests go through a transport the embedding application supplies and are parsed with the provider named in `basedOn`.",
+    },
+  },
+
   /* --- Response-side types: what a caller has to parse ------------------ */
 
   AiErrorResponse: { examples: { error: "threadId required" } },
@@ -409,6 +442,16 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   // rest without one rather than filling the gap. `AiChatEvent` below is the
   // other such type here.
   AiAttachment: {
+    replaceProperties: {
+      source: {
+        replacing: "Origin of the attachment.",
+        text: "Where the attachment came from: `user` - attached by the user (also when unset); `tool` - produced by a tool call (for example `generate_image`).",
+      },
+      entityId: {
+        replacing: 'Opaque scope token (entity / "room")',
+        text: "The room or folder the attachment was created in, as an opaque token; once the attachment is bound to a message it repeats the thread's own scope.",
+      },
+    },
     examples: {
       id: EXAMPLE_IDS.attachment,
       kind: "file",
@@ -495,7 +538,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     replaceProperties: {
       autoAllow: {
         replacing: "The consumer should execute the tool without prompting the user.",
-        text: "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never; under `auto` a tool the user always allows, one that opts out of approval (`requireApproval: false`) or one annotated read-only and non-destructive; under `allow` every tool.",
+        text: "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never - the always-allow list, `requireApproval` and the annotations are all ignored; under `auto` a tool on the always-allow list, one with `requireApproval: false`, or one annotated `readOnlyHint: true` or `destructiveHint: false`; under `allow` every tool.",
       },
       serverExecuted: {
         replacing: "Set when the tool is served by a server-side system source",
@@ -553,6 +596,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiAssignmentMutationResult: {
+    replaceDescription: {
+      replacing: "Outcome of `AssignmentsEngine.assign`",
+      text: "The outcome of an assign or unassign: a success, or an error naming the field that was refused.",
+    },
     examples: { success: true },
     properties: {
       success: "True when the assignment was persisted.",
@@ -569,6 +616,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiWebSearchMutationResult: {
+    replaceDescription: {
+      replacing: "Outcome of `WebSearchEngine.configure`",
+      text: "The outcome of storing a web-search configuration: the stored configuration, or an error naming the field that was refused.",
+    },
     examples: { success: true },
     properties: {
       success: "True when the configuration was persisted.",
@@ -580,6 +631,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Bulk outcomes: on failure nothing at all was persisted ------------ */
 
   AiBulkAssignmentResult: {
+    replaceDescription: {
+      replacing: "Outcome of `AssignmentsEngine.bulkAssign`",
+      text: "The outcome of a bulk assign: either every entry was stored, or none was and the errors are reported per action. Every entry is validated before anything is written, so one bad entry never leaves the assignments half-written.",
+    },
     examples: { success: true, errors: [] },
     properties: {
       success: "True when every entry was persisted.",
@@ -589,6 +644,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsBulkResult: {
+    replaceDescription: {
+      replacing: "Outcome of `ToolsEngine.replaceAllCustomServers`",
+      text: "The outcome of replacing the custom MCP servers: either every entry was stored, or none was and the errors are reported per server.",
+    },
     examples: { success: true, errors: [] },
     properties: {
       success: "True when every custom MCP server was persisted.",
@@ -598,6 +657,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportResult: {
+    replaceDescription: {
+      replacing: "Outcome of `PromptsEngine.importBundle`",
+      text: "The outcome of a prompt bundle import: either every entry was stored, with counts, or none was and the errors are reported per entry.",
+    },
     examples: { success: true, imported: { folders: 2, prompts: 12 }, errors: [] },
     properties: {
       success: "True when the whole bundle was imported.",
@@ -607,6 +670,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportError: {
+    replaceDescription: {
+      replacing: "Per-entry error reported by `PromptsEngine.importBundle`",
+      text: "One refused entry of a prompt bundle import.",
+    },
     examples: {
       kind: "prompt",
       ref: EXAMPLE_IDS.prompt,
@@ -648,6 +715,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiOpenOrCreateResult: {
+    replaceDescription: {
+      replacing: "Resolved thread state returned by `ThreadsEngine.openOrCreate`",
+      text: "The thread that was opened or created, with its stored messages.",
+    },
     replaceProperties: {
       title: {
         replacing: "Empty string for existing threads",

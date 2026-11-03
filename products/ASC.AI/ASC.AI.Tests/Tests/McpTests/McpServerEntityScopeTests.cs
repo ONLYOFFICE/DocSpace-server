@@ -130,8 +130,9 @@ public class McpServerEntityScopeTests(AspireAppFixture fixture) : McpTestBase(f
         // checked: the refusal has to be the entity gate's (Entity "<id>" is not accessible), which names the room.
         await ActAsAsync(outsider);
         var outsiderRefusal = await AssertForbiddenAsync(() => AddServerAsync("autotest-outsider-server", UrlConfig(), roomId.ToString()), "the outsider names the room");
-        (outsiderRefusal.ErrorContent?.ToString() ?? string.Empty).Should().Contain("is not accessible", "the room is what the outsider is refused")
-            .And.Contain(roomId.ToString());
+        using var refusal = JsonDocument.Parse(outsiderRefusal.ErrorContent?.ToString() ?? "{}");
+        refusal.RootElement.TryGetProperty("error", out var error).Should().BeTrue(refusal.RootElement.ToString());
+        error.GetString().Should().Be($"Entity \"{roomId}\" is not accessible", "the room is what the outsider is refused");
 
         await ActAsAsync(Owner);
         ShouldHold(await ListServersAsync(), new Dictionary<string, object> { ["autotest-owner-server"] = UrlConfig() }, "the registration survived every refused write");

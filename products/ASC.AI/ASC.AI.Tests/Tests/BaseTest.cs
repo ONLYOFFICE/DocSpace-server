@@ -88,6 +88,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>The stub model provider every profile of the run points at.</summary>
     protected StubModelProvider ModelProvider => fixture.ModelProvider;
 
+    /// <summary>Whether the suite's launch profile starts the resource (a container only some profiles include).</summary>
+    protected bool StackHasResource(string resourceName) => fixture.HasResource(resourceName);
+
     /// <summary>
     /// True for a class whose tests convert through the document server (an export that renders a .docx or a .pdf):
     /// its setup then waits until that server is up, instead of each test waiting out its export timeout.
@@ -357,6 +360,20 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
             await Task.Delay(100, TestContext.Current.CancellationToken);
         }
+    }
+
+    /// <summary>
+    /// Switches AI off for the whole portal and fails unless a gated read (<c>threads/list</c>) is then refused for the
+    /// current caller. <see cref="SetPortalAiAccessAsync"/> waits for that refusal but does not require it, so a check
+    /// after it would also pass on a portal whose switch never took effect. Every AI route goes to the same AI service
+    /// behind the same <c>[AiFeature]</c> gate, so a refused <c>threads/list</c> stands for all of them; the probe is a
+    /// read, so it creates nothing.
+    /// </summary>
+    protected async Task SwitchPortalAiOffAsync()
+    {
+        await SetPortalAiAccessAsync(false);
+
+        (await IsAiRefusedAsync()).Should().BeTrue("the AI service must see the switch before the call under test");
     }
 
     /// <summary>Whether a gated read (<c>threads/list</c>) is refused with 403 for the current caller.</summary>
