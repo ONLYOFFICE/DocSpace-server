@@ -611,7 +611,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return result;
         }
 
-        if (edit)
+        if (edit && await fileSecurity.CanEditAsync(file))
         {
             result.CanEdit = true;
             result.EditorType = editorType;
