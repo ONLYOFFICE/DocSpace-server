@@ -716,7 +716,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "429":
       "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
     "502":
-      "The model request failed or returned an empty skill; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
+      "The model request failed or returned an empty skill; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
     "503": "No profile is bound to `Chat` and the `Default` slot is empty too.",
     "504": "The model round did not finish within the time budget.",
   },

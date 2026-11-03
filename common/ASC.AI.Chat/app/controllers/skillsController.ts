@@ -67,6 +67,21 @@ function asInput(body: unknown): GenerateSkillInput {
   return { destId, title, description };
 }
 
+// The provider's own text reaches every member who may create a skill, not
+// only the admin who set the provider up: it is relayed for what the client
+// explains - a rate limit, a lack of credit and the portal's spending limit -
+// and left in the log otherwise (an auth failure quotes the masked API key).
+function relaysProviderMessage(err: ModelCallError): boolean {
+  if (err.providerMessage === undefined) {
+    return false;
+  }
+  return (
+    err.code === "rate_limit" ||
+    err.code === "insufficient_funds" ||
+    /service limit exceeded/i.test(err.providerMessage)
+  );
+}
+
 export const skillsController = {
   generate: asyncHandler(async (req, res) => {
     await assertAiAccess();
@@ -80,7 +95,7 @@ export const skillsController = {
         res.status(err.status).json({
           error: err.message,
           code: err.code,
-          ...(err.providerMessage !== undefined && { providerMessage: err.providerMessage }),
+          ...(relaysProviderMessage(err) && { providerMessage: err.providerMessage }),
         });
         return;
       }

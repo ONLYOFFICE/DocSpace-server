@@ -8949,7 +8949,7 @@
             }
           },
           "502": {
-            "description": "The model request failed or returned an empty skill; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
+            "description": "The model request failed or returned an empty skill; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
             "content": {
               "application/json": {
                 "schema": {

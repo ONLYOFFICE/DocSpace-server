@@ -123,6 +123,26 @@ describe("generateSkill", () => {
     expect(content).toContain('description: "Write weekly sales reports"');
   });
 
+  it("passes the description to the model as written, angle brackets included", async () => {
+    customSync.mockResolvedValue({ content: "# Invoices\n\nBody" });
+    await generateSkill({
+      ...input,
+      description: "Flag invoices where the total < 100 EUR.\nThen check List<String> fields.",
+    });
+    const [request] = customSync.mock.calls.at(-1)!;
+    expect(JSON.stringify(request)).toContain(
+      "Flag invoices where the total < 100 EUR.\\nThen check List<String> fields.",
+    );
+  });
+
+  it("refuses a description of control characters only before calling the model", async () => {
+    customSync.mockClear();
+    await expect(
+      generateSkill({ ...input, description: "\u0000\u0007\u001f" }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(customSync).not.toHaveBeenCalled();
+  });
+
   it("refuses a folder that is not an Instructions room before calling the model", async () => {
     vi.mocked(getFolderInfo).mockResolvedValue({ folderType: 6, roomType: 2 });
     await expect(generateSkill(input)).rejects.toMatchObject({ status: 400 });

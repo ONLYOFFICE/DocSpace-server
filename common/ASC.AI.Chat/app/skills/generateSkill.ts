@@ -46,7 +46,6 @@ import { ActionType } from "@onlyoffice/ai-chat/core";
 import type { Profile } from "@onlyoffice/ai-chat/core";
 import { markForwardHeadersToProvider } from "../requestContext.js";
 import { extractText } from "../forms/suggestedQuestions.js";
-import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { storage } from "../storage/index.js";
 import { getFolderInfo } from "../storage/docspaceFilesApi.js";
 import logger from "../log.js";
@@ -213,6 +212,10 @@ async function resolveSkillProfile(): Promise<Profile | undefined> {
   return storage.profiles.readById(profileId);
 }
 
+// Control characters other than tab and line breaks, which carry no meaning
+// in a description and could break the user message apart.
+const CONTROL_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
+
 function httpError(status: number, message: string): Error {
   return Object.assign(new Error(message), { status, expose: true });
 }
@@ -243,7 +246,14 @@ export async function generateSkill(input: GenerateSkillInput): Promise<Generate
     throw new NoSkillProfileError();
   }
 
-  const request = sanitizeInstruction(input.description).trim();
+  // The description is data for the model, never markup: the generated
+  // skill comes back to its author as plain text, and the model writes the
+  // file whatever the request holds, so stripping tags here would only cut
+  // a spec like "total < 100" short. The system prompt keeps it a spec.
+  const request = input.description.replace(CONTROL_CHARS, "").trim();
+  if (!request) {
+    throw httpError(400, "description must contain text");
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   let text: string;
