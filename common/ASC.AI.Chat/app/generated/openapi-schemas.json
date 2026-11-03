@@ -4011,7 +4011,7 @@
               "string",
               "number"
             ],
-            "description": "The integer id of the Instructions room the skill is saved in."
+            "description": "The integer id of the Instructions room the skill is written for."
           },
           "title": {
             "type": "string",
@@ -4032,23 +4032,18 @@
       "response": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "The id of the saved Markdown file."
-          },
-          "title": {
-            "type": "string",
-            "description": "The file's title as saved, `<name>.md` or a numbered variant of it."
-          },
           "name": {
             "type": "string",
-            "description": "The skill's name as written in the frontmatter."
+            "description": "The skill's name as written in the frontmatter; the file is saved as `<name>.md`."
+          },
+          "content": {
+            "type": "string",
+            "description": "The whole Markdown file, frontmatter included. Nothing is saved."
           }
         },
         "required": [
-          "id",
-          "title",
-          "name"
+          "name",
+          "content"
         ],
         "additionalProperties": false
       }

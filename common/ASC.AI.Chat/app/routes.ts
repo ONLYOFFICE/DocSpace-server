@@ -201,7 +201,8 @@ export default function registerRoutes(app: Application): void {
   // writes the values the text supports through the Files metadata API.
   router.post("/meta/fill", metaController.fill);
   // Skill generation: writes one Markdown skill from a title and the user's
-  // description and saves it in an Instructions room (see skillsController).
+  // description for an Instructions room; the client saves it after review
+  // (see skillsController).
   router.post("/skills/generate", skillsController.generate);
 
   router.get("/config", settingsController.getAiSettings);

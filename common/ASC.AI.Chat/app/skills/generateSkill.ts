@@ -32,12 +32,14 @@
 
 /**
  * Skill generation: turn a title and the user's description of the skill
- * they need into one Markdown skill file and save it in an Instructions
- * room. One model round, no tools. The file follows the format the Files
- * service validates on save (`SkillFrontmatter` in ASC.Files.Core): a YAML
- * frontmatter with a kebab-case `name` and a `description`, then the body.
- * The frontmatter is written here, not taken from the model, so a file the
- * server would refuse is never uploaded.
+ * they need into the text of one Markdown skill file for an Instructions
+ * room. One model round, no tools, nothing saved: the caller shows the text
+ * for review and saves what the user accepts through the Files API. The
+ * text follows the format the Files service validates on save
+ * (`SkillFrontmatter` in ASC.Files.Core): a YAML frontmatter with a
+ * kebab-case `name` and a `description`, then the body. The frontmatter is
+ * written here, not taken from the model, so an unedited answer always
+ * passes that validation.
  */
 
 import { ActionType } from "@onlyoffice/ai-chat/core";
@@ -47,9 +49,6 @@ import { extractText } from "../forms/suggestedQuestions.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
 import { storage } from "../storage/index.js";
 import { getFolderInfo } from "../storage/docspaceFilesApi.js";
-import { uploadFile } from "../storage/docspaceFileTransfer.js";
-import { AiServiceHttpError } from "../storage/httpClient.js";
-import { getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { GENERATION_BUDGET_MS, ModelCallError, runModel } from "../meta/common.js";
 
@@ -76,9 +75,10 @@ export interface GenerateSkillInput {
 }
 
 export interface GenerateSkillResult {
-  id: string;
-  title: string;
+  /** The skill's name, as the frontmatter carries it; the file is `<name>.md`. */
   name: string;
+  /** The whole file: frontmatter and body. */
+  content: string;
 }
 
 export class NoSkillProfileError extends Error {
@@ -217,23 +217,6 @@ function httpError(status: number, message: string): Error {
   return Object.assign(new Error(message), { status, expose: true });
 }
 
-// The Files service's own reason for refusing the file (a broken
-// frontmatter, the per-room limit), relayed with its 4xx status.
-function uploadRefusal(err: unknown): Error | undefined {
-  if (!(err instanceof AiServiceHttpError) || err.status < 400 || err.status >= 500) {
-    return undefined;
-  }
-  let message: string | undefined;
-  try {
-    const parsed: unknown = JSON.parse(err.body);
-    const error = isObject(parsed) ? parsed["error"] : undefined;
-    message = isObject(error) ? getString(error, "message") : undefined;
-  } catch {
-    // Not a JSON envelope: the status alone is relayed.
-  }
-  return httpError(err.status, message ?? "The skill could not be saved");
-}
-
 async function assertInstructionsRoom(destId: string): Promise<void> {
   const info = await getFolderInfo(destId);
   if (!info) {
@@ -298,16 +281,5 @@ export async function generateSkill(input: GenerateSkillInput): Promise<Generate
     );
   }
 
-  const content = buildSkillFile(name, description, parsed.body);
-  try {
-    const file = await uploadFile(
-      input.destId,
-      `${name}.md`,
-      new TextEncoder().encode(content),
-      "text/markdown",
-    );
-    return { id: file.id, title: file.title, name };
-  } catch (err) {
-    throw uploadRefusal(err) ?? err;
-  }
+  return { name, content: buildSkillFile(name, description, parsed.body) };
 }

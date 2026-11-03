@@ -8,7 +8,6 @@ vi.mock("../../storage/index.js", () => ({
   storage: { assignments: { readByType: vi.fn() }, profiles: { readById: vi.fn() } },
 }));
 vi.mock("../../storage/docspaceFilesApi.js", () => ({ getFolderInfo: vi.fn() }));
-vi.mock("../../storage/docspaceFileTransfer.js", () => ({ uploadFile: vi.fn() }));
 vi.mock("../../forms/suggestedQuestions.js", () => ({
   extractText: (message: { content: string }) => message.content,
 }));
@@ -20,8 +19,6 @@ vi.mock("@onlyoffice/ai-chat/core", async (importOriginal) => ({
 
 const { storage } = await import("../../storage/index.js");
 const { getFolderInfo } = await import("../../storage/docspaceFilesApi.js");
-const { uploadFile } = await import("../../storage/docspaceFileTransfer.js");
-const { AiServiceHttpError } = await import("../../storage/httpClient.js");
 const {
   buildSkillFile,
   cleanDescription,
@@ -105,32 +102,25 @@ describe("generateSkill", () => {
       type === "Default" ? "p1" : null,
     );
     vi.mocked(storage.profiles.readById).mockResolvedValue(PROFILE as never);
-    vi.mocked(uploadFile).mockResolvedValue({ id: "7", title: "sales-report.md" });
   });
 
-  it("writes the frontmatter itself and saves the file in the room", async () => {
+  it("writes the frontmatter itself and returns the file without saving it", async () => {
     customSync.mockResolvedValue({
       content:
         "---\nname: other\ndescription: Writes <i>weekly</i> sales reports.\n---\n# Sales report\n\n1. Do it.",
     });
 
     await expect(generateSkill(input)).resolves.toEqual({
-      id: "7",
-      title: "sales-report.md",
       name: "sales-report",
+      content:
+        '---\nname: "sales-report"\ndescription: "Writes weekly sales reports."\n---\n\n# Sales report\n\n1. Do it.\n',
     });
-    const [folderId, title, bytes, mediaType] = vi.mocked(uploadFile).mock.calls[0]!;
-    expect([folderId, title, mediaType]).toEqual(["42", "sales-report.md", "text/markdown"]);
-    expect(new TextDecoder().decode(bytes)).toBe(
-      '---\nname: "sales-report"\ndescription: "Writes weekly sales reports."\n---\n\n# Sales report\n\n1. Do it.\n',
-    );
   });
 
   it("falls back to the user's words when the model wrote no description", async () => {
     customSync.mockResolvedValue({ content: "# Sales report\n\nBody" });
-    await generateSkill(input);
-    const bytes = vi.mocked(uploadFile).mock.calls[0]![2];
-    expect(new TextDecoder().decode(bytes)).toContain('description: "Write weekly sales reports"');
+    const { content } = await generateSkill(input);
+    expect(content).toContain('description: "Write weekly sales reports"');
   });
 
   it("refuses a folder that is not an Instructions room before calling the model", async () => {
@@ -142,16 +132,5 @@ describe("generateSkill", () => {
   it("answers 503 without a profile", async () => {
     vi.mocked(storage.assignments.readByType).mockResolvedValue(null);
     await expect(generateSkill(input)).rejects.toBeInstanceOf(NoSkillProfileError);
-  });
-
-  it("relays the Files service's refusal", async () => {
-    customSync.mockResolvedValue({ content: "# X\n\nBody" });
-    vi.mocked(uploadFile).mockRejectedValue(
-      new AiServiceHttpError(400, "Bad Request", '{"error":{"message":"Limit reached"}}', "u"),
-    );
-    await expect(generateSkill(input)).rejects.toMatchObject({
-      status: 400,
-      message: "Limit reached",
-    });
   });
 });

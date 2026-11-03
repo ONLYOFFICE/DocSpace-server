@@ -299,7 +299,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
   Export: "Markdown → docx export.",
   Metadata: "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
-  Skills: "AI-written skills saved in Instructions rooms.",
+  Skills: "AI-written skills for Instructions rooms.",
   Settings: "Portal-wide, vectorization and per-user AI settings.",
   Vectorization: "Vectorization tasks over portal content.",
   "OpenAI passthrough": "OpenAI-compatible endpoints proxied to a profile's provider.",
