@@ -49,7 +49,7 @@ export interface ByokKey {
   id: string;
   /** Model display name; absent when the model is no longer in the gateway catalogue. */
   name?: string;
-  /** Model type from the gateway catalogue, e.g. `chat`, `image` or `embedding`; absent when the model is no longer in it. */
+  /** Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine); absent when the model is no longer in it. */
   type?: string;
   /** BYOK provider id the key belongs to, e.g. `anthropic`. */
   provider: string;
@@ -60,7 +60,7 @@ export interface ByokModel {
   id: string;
   /** Model display name. */
   name: string;
-  /** Model type from the gateway catalogue, e.g. `chat`, `image` or `embedding`. */
+  /** Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine). */
   type: string;
 }
 

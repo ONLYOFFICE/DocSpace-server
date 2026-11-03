@@ -61,6 +61,7 @@ public class AiGateway(
     public const int ProviderId = -1;
 
     private const string ModelsCacheKey = "ai:gateway:models";
+    private const string SearchEnginesCacheKey = "ai:gateway:search-engines";
     private static readonly TimeSpan _modelsCacheDuration = TimeSpan.FromSeconds(60);
 
     public string Url => aiGatewayConfiguration.Settings?.Url;
@@ -177,6 +178,15 @@ public class AiGateway(
         return await fusionCache.GetOrSetAsync<ModelsResponse>(
             ModelsCacheKey,
             async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
+            opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
+    }
+
+    public async Task<SearchEnginesResponse> GetSearchEnginesAsync()
+    {
+        return await fusionCache.GetOrSetAsync<SearchEnginesResponse>(
+            SearchEnginesCacheKey,
+            async (_, _) => await SendAsync<SearchEnginesResponse>(HttpMethod.Get, "/search/engines"),
+            new SearchEnginesResponse { Engines = [] },
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
@@ -464,6 +474,11 @@ public record AiWebSearchPricing
     public string Id { get; init; }
 
     /// <summary>
+    /// The gateway revision of the search engine, the id BYOK keys are stored under.
+    /// </summary>
+    public required Guid RevisionId { get; init; }
+
+    /// <summary>
     /// The provider that serves the web search requests.
     /// </summary>
     /// <example>brave</example>
@@ -584,4 +599,20 @@ public record ModelByokProvider
 public record ModelsResponse
 {
     public required IReadOnlyList<Model> Data { get; init; }
+}
+
+public record SearchEngine
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+
+    [JsonPropertyName("revision_id")]
+    public required Guid RevisionId { get; init; }
+
+    public bool Byok { get; init; }
+}
+
+public record SearchEnginesResponse
+{
+    public required IReadOnlyList<SearchEngine> Engines { get; init; }
 }

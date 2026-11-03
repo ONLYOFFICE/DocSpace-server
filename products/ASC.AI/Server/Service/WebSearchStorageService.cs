@@ -50,6 +50,8 @@ public class WebSearchStorageService(
     private static readonly EmployeeType[] _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly EmployeeType[] _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
+    private const string GatewayEngine = "exa";
+
     public async Task<WebSearchConfig?> ReadAsync()
     {
         await AssertUserHasAccessAsync(_readTypes);
@@ -69,10 +71,13 @@ public class WebSearchStorageService(
             return null;
         }
 
+        var engines = await _gateway.GetSearchEnginesAsync();
+
         return new WebSearchConfig
         {
             Provider = "onlyoffice",
             BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
+            RevisionId = engines.Engines.FirstOrDefault(e => e.Id == GatewayEngine)?.RevisionId
         };
     }
 

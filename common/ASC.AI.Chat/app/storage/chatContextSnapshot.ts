@@ -31,8 +31,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { McpServerConfig, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Thread } from "@onlyoffice/ai-chat/core";
 import type { DocspaceProfile } from "./profilesStorage.js";
+import type { DocspaceWebSearchConfig } from "./webSearchStorage.js";
 import type { ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import type { ReasoningLevel } from "./reasoningDepth.js";
 import type { ThreadMessageLike } from "@assistant-ui/react";
@@ -107,7 +108,7 @@ export interface ChatContextSnapshot {
   thread: Thread | null;
   /** The requested thread's full history, or `null` when not requested. */
   messages: ThreadMessageLike[] | null;
-  webSearch: WebSearchConfig | null;
+  webSearch: DocspaceWebSearchConfig | null;
   stale: Set<ChatContextSlice>;
 }
 

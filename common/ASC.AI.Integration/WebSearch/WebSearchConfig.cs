@@ -38,4 +38,5 @@ public class WebSearchConfig
     public required string Provider { get; init; }
     public string? Key { get; init; }
     public string? BaseUrl { get; init; }
+    public Guid? RevisionId { get; init; }
 }

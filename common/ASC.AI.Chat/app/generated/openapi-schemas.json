@@ -1350,7 +1350,7 @@
         },
         "type": {
           "type": "string",
-          "description": "Model type from the gateway catalogue, e.g. `chat`, `image` or `embedding`; absent when the model is no longer in it."
+          "description": "Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine); absent when the model is no longer in it."
         },
         "provider": {
           "type": "string",
@@ -1402,7 +1402,7 @@
         },
         "type": {
           "type": "string",
-          "description": "Model type from the gateway catalogue, e.g. `chat`, `image` or `embedding`."
+          "description": "Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine)."
         }
       },
       "required": [
