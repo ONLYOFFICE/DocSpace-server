@@ -35,78 +35,98 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadCreateTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task Create_Owner_PersistsAndIsReadable()
     {
-        var created = await CreateThreadAsync("my-thread");
+        var created = await CreateOwnThreadAsync("my-thread");
 
-        created.Id.Should().NotBe(Guid.Empty);
+        Guid.TryParse(created.ThreadId, out _).Should().BeTrue();
         created.Title.Should().Be("my-thread");
-        created.ProfileId.Should().BeNull();
-        created.EntityId.Should().BeNull();
 
-        var stored = await ReadThreadAsync(created.Id);
-        stored.Id.Should().Be(created.Id);
+        var stored = await GetThreadAsync(created.ThreadId);
+        stored.ThreadId.Should().Be(created.ThreadId);
         stored.Title.Should().Be("my-thread");
     }
 
     [Fact]
     public async Task Create_WithProfileId_PersistsProfile()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await GetProfileAsync();
 
         var created = await CreateThreadAsync(profileId: profile.Id);
 
         created.ProfileId.Should().Be(profile.Id);
-        (await ReadThreadAsync(created.Id)).ProfileId.Should().Be(profile.Id);
+        (await GetThreadAsync(created.ThreadId)).ProfileId.Should().Be(profile.Id);
     }
 
     [Fact]
-    public async Task Create_WithEntityId_PersistsForFolder()
+    public async Task Create_WithEntityId_LandsInTheOneThreadListOfTheUser()
+    {
+        var profile = await GetProfileAsync();
+        var folderId = (await GetMyDocumentsFolderIdAsync()).ToString();
+
+        var created = await CreateThreadAsync(profileId: profile.Id, entityId: folderId);
+
+        // By design (Bug 82719): threads are one list per user whatever folder the chat is opened in. The chat
+        // service checks that the entity is accessible, then stores the thread unscoped and ignores the entityId
+        // of the list, so the thread shows up both with and without it.
+        (await ListThreadsAsync()).Should().ContainSingle(t => t.ThreadId == created.ThreadId);
+        (await ListThreadsAsync(entityId: folderId)).Should().ContainSingle(t => t.ThreadId == created.ThreadId);
+    }
+
+    // Internal contract: entityId scoping of the stored thread has no public route (the chat service stores every
+    // thread under entityId null and ignores the entityId of the list, by design - Bug 82719).
+    [Fact]
+    public async Task Create_WithEntityId_InternalStorageScopesToFolder()
     {
         var roomId = await CreateRoomAsync();
 
-        var created = await CreateThreadAsync(entityId: roomId.ToString());
+        var created = await CreateThreadInternalAsync(entityId: roomId.ToString());
 
         created.EntityId.Should().Be(roomId.ToString());
 
-        var scoped = await ReadAllThreadsAsync(roomId.ToString());
+        var scoped = await ReadAllThreadsInternalAsync(roomId.ToString());
         scoped.Should().ContainSingle(t => t.Id == created.Id);
 
-        var global = await ReadAllThreadsAsync();
+        var global = await ReadAllThreadsInternalAsync();
         global.Should().NotContain(t => t.Id == created.Id);
     }
 
     [Fact]
     public async Task Create_NonExistentProfileId_Returns404()
     {
-        using var response = await _ai.PostAsync(
-            ThreadsPath,
-            new { title = "x", profileId = Guid.NewGuid() },
-            TestContext.Current.CancellationToken);
+        // A profile exists, so whichever way the chat service resolves the model the unknown profileId is what fails.
+        await GetProfileAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateThreadAsync("x", Guid.NewGuid().ToString()));
+
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
     public async Task Create_NonExistentEntityId_Returns404()
     {
-        using var response = await _ai.PostAsync(
-            ThreadsPath,
-            new { title = "x", entityId = "999999999" },
-            TestContext.Current.CancellationToken);
+        var profile = await GetProfileAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateThreadAsync("x", profile.Id, "999999999"));
+
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
-    public async Task Create_InvalidJson_Returns400()
+    public async Task Create_MissingTitle_Returns400()
     {
-        const string invalidJson = """{ "profileId": null }""";
+        var profile = await GetProfileAsync();
 
-        using var response = await _ai.PostRawAsync(ThreadsPath, invalidJson, TestContext.Current.CancellationToken);
+        // Raw on purpose: title is a required constructor parameter of AiThreadsCreateRequest, so the SDK refuses to
+        // send a body without one.
+        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
+            $"{PublicThreadsPath}/create",
+            $$"""{ "profileId": "{{profile.Id}}" }""",
+            TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

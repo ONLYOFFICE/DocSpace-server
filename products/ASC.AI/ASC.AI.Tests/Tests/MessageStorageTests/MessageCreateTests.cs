@@ -31,71 +31,70 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+
 namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
-public class MessageCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class MessageCreateTests(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
     [Fact]
     public async Task Create_Owner_PersistsAndIsReadable()
     {
-        var thread = await CreateThreadAsync();
-        var contents = BuildMessageContents("hello world");
+        var threadId = await CreateMessageThreadAsync();
 
-        var created = await CreateMessageAsync(thread.Id, contents);
+        var messageId = await AppendAsync(threadId, "hello world");
 
-        created.Id.Should().NotBe(Guid.Empty);
-        created.ThreadId.Should().Be(thread.Id);
-        JsonEquals(created.Contents, contents).Should().BeTrue();
-        created.Timestamp.Should().BeGreaterThan(0);
+        var stored = await GetMessageAsync(messageId);
+        stored.Id.Should().Be(messageId);
+        stored.Role.Should().Be(AiThreadMessageLike.RoleEnum.User);
+        TextOf(stored).Should().Be("hello world");
+        stored.CreatedAt.Should().NotBeNullOrEmpty();
 
-        var stored = await ReadMessageAsync(created.Id);
-        stored.Id.Should().Be(created.Id);
-        stored.ThreadId.Should().Be(thread.Id);
-        JsonEquals(stored.Contents, contents).Should().BeTrue();
+        // The public message carries no thread id: it belongs to the thread whose history holds it.
+        var messages = await ReadMessagesAsync(threadId);
+        messages.Should().ContainSingle(m => m.Id == messageId);
     }
 
     [Fact]
     public async Task Create_MultipleMessages_AllPersisted()
     {
-        var thread = await CreateThreadAsync();
-        var firstContents = BuildMessageContents("first");
-        var secondContents = BuildMessageContents("second");
+        var threadId = await CreateMessageThreadAsync();
 
-        var first = await CreateMessageAsync(thread.Id, firstContents);
-        var second = await CreateMessageAsync(thread.Id, secondContents);
+        var first = await AppendAsync(threadId, "first");
+        var second = await AppendAsync(threadId, "second");
 
-        first.Id.Should().NotBe(second.Id);
+        first.Should().NotBe(second);
 
-        var messages = await ReadMessagesByThreadAsync(thread.Id);
+        var messages = await ReadMessagesAsync(threadId);
         messages.Should().HaveCount(2);
-        messages.Should().Contain(m => m.Id == first.Id && JsonEquals(m.Contents, firstContents));
-        messages.Should().Contain(m => m.Id == second.Id && JsonEquals(m.Contents, secondContents));
+        messages.Should().Contain(m => m.Id == first && TextOf(m) == "first");
+        messages.Should().Contain(m => m.Id == second && TextOf(m) == "second");
     }
 
     [Fact]
     public async Task Create_NonExistentThread_Returns404()
     {
-        using var response = await _ai.PostAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}/messages",
-            new { contents = BuildMessageContents() },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: Guid.NewGuid().ToString(), message: BuildUserMessage()),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
-    public async Task Create_InvalidJson_Returns400()
+    public async Task Create_MissingMessage_Returns400()
     {
-        var thread = await CreateThreadAsync();
-        const string invalidJson = """{ "foo": "bar" }""";
+        var threadId = await CreateMessageThreadAsync();
 
-        using var response = await _ai.PostRawAsync(
-            $"{ThreadsPath}/{thread.Id}/messages",
-            invalidJson,
+        // Raw on purpose: `message` is a required constructor parameter of the SDK request, so a typed call cannot
+        // leave it out.
+        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
+            AppendUserMessagePath,
+            JsonSerializer.Serialize(new { threadId }),
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await ReadMessagesAsync(threadId)).Should().BeEmpty("a rejected append stores nothing");
     }
 }

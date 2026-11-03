@@ -35,32 +35,27 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadDeleteTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task Delete_Existing_Removes()
     {
-        var created = await CreateThreadAsync();
+        var created = await CreateOwnThreadAsync();
 
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{created.Id}",
-            TestContext.Current.CancellationToken);
+        var result = await _aiThreads.AiThreadsDeleteAsync(created.ThreadId, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        using var readResponse = await _ai.GetAsync(
-            $"{ThreadsPath}/{created.Id}",
-            TestContext.Current.CancellationToken);
-        readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetThreadAsync(created.ThreadId));
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
     public async Task Delete_NonExisting_Returns404()
     {
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiThreads.AiThreadsDeleteAsync(Guid.NewGuid().ToString(), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 }

@@ -486,6 +486,19 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
+            if (isIntegrationTest)
+            {
+                // The AI tests stand in for the model provider with a WireMock in the test process, which a
+                // profile reaches through a loopback baseUrl — refused by default as an SSRF target.
+                resourceBuilder.WithEnvironment("AI__ALLOW_PRIVATE_BASE_URL", "true");
+                // The SSRF and validation tests hand the service names that do not resolve (`example.invalid`).
+                // Node resolves through getaddrinfo on the libuv threadpool, 4 threads by default, and on Windows
+                // one such lookup holds a thread for ~11 s (the guard's 3 s cap returns early but does not free
+                // it). Four of them at once queue every other lookup behind them, including `localhost` for each
+                // call to the AI service and the router, and undici gives up after 10 s: random 500s in the run.
+                resourceBuilder.WithEnvironment("UV_THREADPOOL_SIZE", "64");
+            }
+
             resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
             resourceBuilder.WithOtlpExporter();
             ApplyServiceName(resourceBuilder);

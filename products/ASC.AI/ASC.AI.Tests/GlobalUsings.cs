@@ -33,6 +33,7 @@
 
 extern alias ASCAi;
 
+global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Net;
 global using System.Net.Http.Json;
@@ -47,17 +48,42 @@ global using ASC.Tests.Common.Data;
 
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Client;
+global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
-global using Xunit;
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Types;
+global using WireMock.Util;
 
+global using Xunit;
+// The public AI surface (/api/2.0/ai, the Node chat service). Aliased: several names clash with other SDK areas.
+global using AiAssignmentsApi = DocSpace.API.SDK.Api.AI.AssignmentsApi;
+global using AiChatApi = DocSpace.API.SDK.Api.AI.AIApi;
+global using AiContextApi = DocSpace.API.SDK.Api.AI.ContextApi;
+global using AiExportApi = DocSpace.API.SDK.Api.AI.ExportApi;
+global using AiMessageContent = DocSpace.API.SDK.Model.AiThreadMessageLikeContent;
+global using AiMessageContentBlock = DocSpace.API.SDK.Model.AiThreadMessageLikeContentAnyOfInner;
+global using AiPreferencesApi = DocSpace.API.SDK.Api.AI.PreferencesApi;
+global using AiProfilesApi = DocSpace.API.SDK.Api.AI.ProfilesApi;
+global using AiPromptsApi = DocSpace.API.SDK.Api.AI.PromptsApi;
+global using AiSettingsApi = DocSpace.API.SDK.Api.AI.SettingsApi;
+global using AiThreadsApi = DocSpace.API.SDK.Api.AI.ThreadsApi;
+global using AiToolsApi = DocSpace.API.SDK.Api.AI.ToolsApi;
 global using ChatContextDto = ASCAi::ASC.AI.Models.ResponseDto.ChatContextDto;
+global using CommonSettingsApi = DocSpace.API.SDK.Api.Settings.CommonSettingsApi;
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
+global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
+global using FileShare = DocSpace.API.SDK.Model.FileShare;
+global using FilesQuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
@@ -70,6 +96,8 @@ global using PromptDto = ASCAi::ASC.AI.Models.ResponseDto.PromptDto;
 global using PromptFolderDto = ASCAi::ASC.AI.Models.ResponseDto.PromptFolderDto;
 global using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
+global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
+global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using Task = System.Threading.Tasks.Task;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
 global using ThreadsPageDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadsPageDto;
