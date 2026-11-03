@@ -158,6 +158,69 @@ public class NextcloudParseTests(
         status.ParseResult.WithoutEmailUsers.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// An archive may hold the same path twice - <c>tar czf b.tgz nextcloud nextcloud/data</c> stores
+    /// <c>data/</c> twice. The later entry wins, as with unzip and tar, and the entries after the
+    /// repeated one are still unpacked.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.zip")]
+    [InlineData("backup.tar.gz")]
+    public async Task Parse_ArchiveWithRepeatedPath_KeepsLaterEntry(string fileName)
+    {
+        // Arrange
+        var helloPath = $"nextcloud/data/{Uid}/files/hello.txt";
+        var dump = AddRows(Dump, "oc_filecache", "(13,7,'files/after.txt')");
+        await UploadBackupAsync(fileName, BuildArchive(fileName,
+            ("nextcloud/nextcloud.sql", dump),
+            (helloPath, "stale"),
+            (helloPath, FileContent),
+            ($"nextcloud/data/{Uid}/files/after.txt", FileContent)));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.MigratingFiles.FilesCount.Should().Be(2);
+        user.MigratingFiles.BytesTotal.Should().Be(2 * Encoding.UTF8.GetByteCount(FileContent));
+    }
+
+    /// <summary>
+    /// Every progress report publishes the operation state and writes a line to the migration log,
+    /// so unpacking reports at most once per whole percent of its 5-50% share, however many entries
+    /// the backup holds.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.zip")]
+    [InlineData("backup.tar.gz")]
+    public async Task Parse_ArchiveWithManyEntries_ReportsUnpackingOncePerPercent(string fileName)
+    {
+        // Arrange
+        const int extraFiles = 300;
+        var entries = new List<(string Name, string Content)>
+        {
+            ("nextcloud/nextcloud.sql", Dump),
+            ($"nextcloud/data/{Uid}/files/hello.txt", FileContent)
+        };
+        entries.AddRange(Enumerable.Range(0, extraFiles).Select(i => ($"nextcloud/data/{Uid}/files/extra/{i}.txt", FileContent)));
+        await UploadBackupAsync(fileName, BuildArchive(fileName, [.. entries]));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+        var log = await GetMigrationLogAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var unzippingReports = log.Split('\n').Count(line => line.TrimEnd().EndsWith("progress: Unzipping...", StringComparison.Ordinal));
+        unzippingReports.Should().BeInRange(1, 46, log);
+    }
+
     [Fact]
     public async Task Parse_UnsupportedArchive_ReportsAcceptedFormats()
     {
@@ -181,6 +244,41 @@ public class NextcloudParseTests(
         var start = dump.IndexOf($"INSERT INTO `{table}` VALUES ", StringComparison.Ordinal);
         var end = dump.IndexOf(";\n", start, StringComparison.Ordinal);
         return dump.Insert(end, "," + rows);
+    }
+
+    /// <summary>
+    /// The SDK's <c>GetMigrationLogsWithHttpInfoAsync</c> is typed <c>Object</c> and parses the body as
+    /// JSON, while the endpoint answers <c>text/plain</c>, so the log is read over raw HTTP.
+    /// </summary>
+    private async Task<string> GetMigrationLogAsync()
+    {
+        using var response = await _webApiClient.GetAsync("api/2.0/migration/logs", TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static byte[] BuildArchive(string fileName, params (string Name, string Content)[] entries)
+    {
+        using var buffer = new MemoryStream();
+        if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            using var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true);
+            foreach (var (name, content) in entries)
+            {
+                WriteZipEntry(zip, name, content);
+            }
+        }
+        else
+        {
+            using var gzip = new GZipStream(buffer, CompressionLevel.Fastest, leaveOpen: true);
+            using var tar = new TarWriter(gzip);
+            foreach (var (name, content) in entries)
+            {
+                WriteTarEntry(tar, name, content);
+            }
+        }
+
+        return buffer.ToArray();
     }
 
     private static byte[] BuildZip(string dump = Dump, string? extraFile = null)

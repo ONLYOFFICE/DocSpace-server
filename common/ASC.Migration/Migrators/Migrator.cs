@@ -139,10 +139,11 @@ public abstract class Migrator(
 
     /// <summary>
     /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.
+    /// With <paramref name="overwrite"/> the file may already exist and is replaced; its bytes are counted again.
     /// </summary>
-    protected async Task ExtractEntryAsync(Stream source, string destPath, CancellationToken cancellationToken)
+    protected async Task ExtractEntryAsync(Stream source, string destPath, bool overwrite, CancellationToken cancellationToken)
     {
-        await using var target = new FileStream(destPath, FileMode.CreateNew, FileAccess.Write);
+        await using var target = new FileStream(destPath, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write);
         var buffer = new byte[81920];
         int read;
         while ((read = await source.ReadAsync(buffer, cancellationToken)) > 0)

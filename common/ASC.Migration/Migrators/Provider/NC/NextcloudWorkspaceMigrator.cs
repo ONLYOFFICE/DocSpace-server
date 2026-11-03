@@ -221,16 +221,31 @@ public class NextcloudWorkspaceMigrator : Migrator
         return file.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Reports unpacking once per whole percent rather than per entry: every report publishes the operation state
+    /// and writes a line to the migration log, and a backup may hold hundreds of thousands of files.
+    /// </summary>
+    private async Task ReportUnzippingAsync(double progress)
+    {
+        if (Math.Floor(progress) > Math.Floor(_lastProgressUpdate))
+        {
+            await ReportProgressAsync(progress, MigrationResource.Unzipping);
+        }
+    }
+
     private async Task<bool> ExtractZipAsync(bool reportProgress)
     {
         double progress = 5;
+        // a path met twice in one archive keeps the later entry, as unzip and tar do; a file that was there before
+        // the extraction (the uploaded archive, a tree unpacked by the parse) is never replaced
+        var written = new HashSet<string>();
         await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
         foreach (var entry in archive.Entries)
         {
             if (reportProgress)
             {
                 progress += 45d / archive.Entries.Count;
-                await ReportProgressAsync(progress, MigrationResource.Unzipping);
+                await ReportUnzippingAsync(progress);
             }
             var destPath = GetSafeExtractPath(TmpFolder, entry.FullName);
             if (string.IsNullOrEmpty(entry.Name))
@@ -245,7 +260,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     Directory.CreateDirectory(dir);
                 }
                 await using var entryStream = await entry.OpenAsync(_cancellationToken);
-                await ExtractEntryAsync(entryStream, destPath, _cancellationToken);
+                await ExtractEntryAsync(entryStream, destPath, !written.Add(destPath), _cancellationToken);
             }
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
@@ -260,12 +275,14 @@ public class NextcloudWorkspaceMigrator : Migrator
         await using var fileStream = File.OpenRead(_takeout);
         await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
         await using var reader = new TarReader(gzipStream);
+        // as in ExtractZipAsync: a repeated path keeps the later entry, a file that was there before is never replaced
+        var written = new HashSet<string>();
         while (await reader.GetNextEntryAsync(cancellationToken: _cancellationToken) is { } entry)
         {
             if (reportProgress)
             {
                 // a gzip stream has no entry count up front, so progress follows the compressed bytes read
-                await ReportProgressAsync(5 + 45d * fileStream.Position / fileStream.Length, MigrationResource.Unzipping);
+                await ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length);
             }
 
             // symbolic and hard links are skipped: their target may lie outside the extraction folder
@@ -277,7 +294,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             {
                 var destPath = GetSafeExtractPath(TmpFolder, entry.Name);
                 Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, _cancellationToken);
+                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, !written.Add(destPath), _cancellationToken);
             }
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
