@@ -96,6 +96,11 @@
       "x-displayName": "Settings"
     },
     {
+      "name": "AI / Skills",
+      "description": "AI-written skills saved in Instructions rooms.",
+      "x-displayName": "Skills"
+    },
+    {
       "name": "AI / Threads",
       "description": "Chat threads and their messages.",
       "x-displayName": "Threads"
@@ -132,6 +137,7 @@
         "AI / Profiles",
         "AI / Prompts",
         "AI / Settings",
+        "AI / Skills",
         "AI / Threads",
         "AI / Tools",
         "AI / Vectorization",
@@ -8772,6 +8778,280 @@
         }
       }
     },
+    "/api/2.0/ai/skills/generate": {
+      "post": {
+        "tags": [
+          "AI / Skills"
+        ],
+        "operationId": "aiSkillsGenerate",
+        "summary": "Generate a skill",
+        "description": "Writes one skill from a title and the caller's description of the skill they need, and saves it in an Instructions room as a Markdown file. `destId` is the integer id of the Instructions room, which the caller has to be able to create files in; any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`, and the file is saved as `<name>.md` (a same-named file gets a numbered title, nothing is overwritten). `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the file always passes the Files service's skill validation. The answer carries the new file's id and title and the skill's name; the file also arrives in the room through the ordinary socket event.",
+        "responses": {
+          "200": {
+            "description": "The saved skill file's id and title, and the skill's name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The id of the saved Markdown file."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "The file's title as saved, `<name>.md` or a numbered variant of it."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The skill's name as written in the frontmatter."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`destId` is not an integer id, `title` or `description` is missing or too long, `title` has no letter or digit, the folder is not an Instructions room, or the Files service refused the file (the room already holds 100 skills).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot create files in the room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The room does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model request failed or returned an empty skill; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No profile is bound to `Chat` and the `Default` slot is empty too.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The model round did not finish within the time budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Short reason, ready to be shown to the caller.",
+                      "examples": [
+                        "The model provider refused the request for lack of credit"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Stable classification of the failure: `rate_limit`, `insufficient_funds`, `auth`, `model_not_found`, `timeout`, `network`, `bad_request`, `server`, `unknown`, or a provider-specific code relayed as it came.",
+                      "examples": [
+                        "insufficient_funds"
+                      ]
+                    },
+                    "providerMessage": {
+                      "type": "string",
+                      "description": "The provider's own error message, cut to 500 characters. Absent when the failure never reached the provider, or was a timeout.",
+                      "examples": [
+                        "402 Insufficient Balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSkillsGenerateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/config": {
       "get": {
         "tags": [
@@ -13759,6 +14039,32 @@
         "required": [
           "kind",
           "id"
+        ],
+        "additionalProperties": false
+      },
+      "AiSkillsGenerateRequest": {
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The integer id of the Instructions room the skill is saved in."
+          },
+          "title": {
+            "type": "string",
+            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name."
+          },
+          "description": {
+            "type": "string",
+            "description": "What the skill should do, at most 2000 characters; a specification for the model."
+          }
+        },
+        "required": [
+          "destId",
+          "title",
+          "description"
         ],
         "additionalProperties": false
       },
