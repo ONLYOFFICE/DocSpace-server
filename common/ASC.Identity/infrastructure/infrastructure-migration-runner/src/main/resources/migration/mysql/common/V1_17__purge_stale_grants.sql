@@ -27,18 +27,28 @@ CREATE EVENT identity_purge_stale_grants
             SET chunks = 0;
             REPEAT
                 DELETE FROM identity_authorizations
-                WHERE registered_client_id IN (SELECT client_id FROM identity_clients WHERE is_invalidated = 1)
+                WHERE registered_client_id = (SELECT client_id FROM (
+                          SELECT c.client_id FROM identity_clients c
+                          WHERE c.is_invalidated = 1
+                            AND EXISTS (SELECT 1 FROM identity_authorizations a
+                                        WHERE a.registered_client_id = c.client_id)
+                          LIMIT 1) AS next_client)
                 LIMIT 1000;
                 SET removed = ROW_COUNT(), chunks = chunks + 1;
-            UNTIL removed < 1000 OR chunks = 50 END REPEAT;
+            UNTIL removed = 0 OR chunks = 500 END REPEAT;
 
             SET chunks = 0;
             REPEAT
                 DELETE FROM identity_consents
-                WHERE registered_client_id IN (SELECT client_id FROM identity_clients WHERE is_invalidated = 1)
+                WHERE registered_client_id = (SELECT client_id FROM (
+                          SELECT c.client_id FROM identity_clients c
+                          WHERE c.is_invalidated = 1
+                            AND EXISTS (SELECT 1 FROM identity_consents s
+                                        WHERE s.registered_client_id = c.client_id)
+                          LIMIT 1) AS next_client)
                 LIMIT 1000;
                 SET removed = ROW_COUNT(), chunks = chunks + 1;
-            UNTIL removed < 1000 OR chunks = 50 END REPEAT;
+            UNTIL removed = 0 OR chunks = 500 END REPEAT;
 
             DELETE FROM identity_clients
             WHERE is_invalidated = 1
