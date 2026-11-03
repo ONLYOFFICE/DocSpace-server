@@ -44,12 +44,11 @@ namespace ASC.AI.Tests.Tests.AttachmentTests;
 /// discarded). So a test that needs a draft holding some text uploads a file holding it (<see cref="SaveDraftAsync"/>).
 /// The model is a <see cref="StubModelProvider"/> of the test's own; the TypeScript suite asked a real model and read its
 /// reply, here the assertion is on what the provider was sent. Derives from the chat suites' base for its providers,
-/// profiles, raw message reads and the Files helpers (rooms, members, listings).
+/// profiles, stored-message reads and the Files helpers (rooms, members, listings).
 /// </remarks>
 public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.ChatPart3TestBase(fixture)
 {
     protected const string AttachmentsPath = "/api/2.0/ai/attachments";
-    protected const string AppendUserMessagePath = "/api/2.0/ai/threads/append-user-message";
 
     /// <summary>Well-formed, never issued.</summary>
     protected const string MissingId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
@@ -408,10 +407,6 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
     /// <summary>
     /// Stores a user message that carries <paramref name="attachments"/> without running the model; returns the status.
     /// </summary>
-    /// <remarks>
-    /// Raw on purpose — an SDK defect: the route answers <c>messageId</c> with the whole stored message, which the typed
-    /// response declares a string (see <see cref="BaseTest.AppendUserMessageAsync"/>). The request body is the SDK model.
-    /// </remarks>
     protected async Task<HttpStatusCode> AppendWithAttachmentsAsync(string threadId, string profileId, string text, List<object> attachments)
     {
         var message = new AiThreadMessageLike(
@@ -420,15 +415,22 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
             attachments: attachments);
         var request = new AiThreadsAppendUserMessageRequest(threadId: threadId, message: message, profileId: profileId);
 
-        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(AppendUserMessagePath, request.ToJson(), TestContext.Current.CancellationToken);
+        try
+        {
+            var response = await _aiThreads.AiThreadsAppendUserMessageWithHttpInfoAsync(request, TestContext.Current.CancellationToken);
 
-        return response.StatusCode;
+            return response.StatusCode;
+        }
+        catch (ApiException exception)
+        {
+            return (HttpStatusCode)exception.ErrorCode;
+        }
     }
 
-    /// <summary>The attachments the first stored user message of the thread carries, as raw JSON.</summary>
+    /// <summary>The attachments the first stored user message of the thread carries, as JSON.</summary>
     protected async Task<JsonElement?> StoredUserAttachmentsAsync(string threadId)
     {
-        var user = UserMessages(await ReadMessagesRawAsync(threadId)).FirstOrDefault();
+        var user = UserMessages(await ReadStoredMessagesAsync(threadId)).FirstOrDefault();
 
         return user.ValueKind == JsonValueKind.Object && user.TryGetProperty("attachments", out var attachments) ? attachments : null;
     }

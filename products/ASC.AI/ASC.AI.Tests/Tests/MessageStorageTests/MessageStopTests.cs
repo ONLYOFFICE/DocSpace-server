@@ -76,7 +76,7 @@ public class MessageStopTests(AspireAppFixture fixture) : MessagePart1TestBase(f
             await Task.Delay(remaining, TestContext.Current.CancellationToken);
         }
 
-        var settled = await ReadMessagesRawAsync(threadId);
+        var settled = await ReadStoredMessagesAsync(threadId);
         var reply = settled.Where(m => m.IsAssistant).Should().ContainSingle($"one reply for the stopped turn: {string.Join("; ", settled)}").Subject;
         reply.Id.Should().Be(abandoned.Id);
         reply.Text.Should().NotContain(Sentinel, "a generation the user stopped must not run to its end");
@@ -108,7 +108,7 @@ public class MessageStopTests(AspireAppFixture fixture) : MessagePart1TestBase(f
         resumed.StreamError.Should().BeNull(resumed.ToString());
         resumed.OfType("message-end").Should().NotBeEmpty(resumed.ToString());
 
-        var messages = await WaitForRawMessagesAsync(threadId, m => m.Count(x => x.IsAssistant && x.Text == "OK") == 1);
+        var messages = await WaitForStoredMessagesAsync(threadId, m => m.Count(x => x.IsAssistant && x.Text == "OK") == 1);
         var context = string.Join("; ", messages);
 
         messages.Where(m => m.IsUser).Should().HaveCount(2, context);
@@ -145,7 +145,7 @@ public class MessageStopTests(AspireAppFixture fixture) : MessagePart1TestBase(f
         round.StatusCode.Should().Be(HttpStatusCode.OK, round.ToString());
         round.StreamError.Should().BeNull(round.ToString());
 
-        var messages = await WaitForRawMessagesAsync(threadId, m =>
+        var messages = await WaitForStoredMessagesAsync(threadId, m =>
             m.Where(x => x.IsAssistant).All(x => x.Id != abandoned.Id) && m.Any(x => x.IsAssistant && x.Text == complete));
         var context = string.Join("; ", messages);
 
@@ -160,9 +160,9 @@ public class MessageStopTests(AspireAppFixture fixture) : MessagePart1TestBase(f
     /// Waits for the stopped turn's reply to be marked cancelled and checks what it holds: incomplete, cancelled,
     /// not an error, and the fragment generated before the hang-up — kept, and unfinished.
     /// </summary>
-    private async Task<RawMessage> WaitForCancelledReplyAsync(string threadId)
+    private async Task<StoredMessage> WaitForCancelledReplyAsync(string threadId)
     {
-        var messages = await WaitForRawMessagesAsync(threadId, m => m.Any(x => x.IsAssistant && x.StatusReason == "cancelled"));
+        var messages = await WaitForStoredMessagesAsync(threadId, m => m.Any(x => x.IsAssistant && x.StatusReason == "cancelled"));
         var context = $"{string.Join("; ", messages)}\n{Provider.Describe()}";
 
         var reply = messages.Where(m => m.IsAssistant).Should().ContainSingle($"the abandoned turn left a reply behind: {context}").Subject;

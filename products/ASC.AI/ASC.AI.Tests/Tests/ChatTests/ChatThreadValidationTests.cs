@@ -122,7 +122,7 @@ public class ChatThreadValidationTests(AspireAppFixture fixture) : ChatPart3Test
         read.ErrorCode.Should().Be(404);
         read.ErrorContent?.ToString().Should().Contain("thread not found");
 
-        var (status, messages) = await TryReadMessagesRawAsync(doomed.ThreadId);
+        var (status, messages) = await TryReadStoredMessagesAsync(doomed.ThreadId);
         status.Should().Be(HttpStatusCode.NotFound);
         messages.Should().BeEmpty("its messages went with it");
 
@@ -148,7 +148,7 @@ public class ChatThreadValidationTests(AspireAppFixture fixture) : ChatPart3Test
         await AssertIntactAsync("after clearing a thread that was already empty");
 
         await AppendUserMessageAsync(thread.ThreadId, "Something to clear");
-        (await ReadMessagesRawAsync(thread.ThreadId)).Should().HaveCount(1);
+        (await ReadStoredMessagesAsync(thread.ThreadId)).Should().HaveCount(1);
 
         (await ClearAsync(thread.ThreadId)).Success.Should().BeTrue();
         await AssertIntactAsync("after clearing a thread that held a message");
@@ -160,7 +160,7 @@ public class ChatThreadValidationTests(AspireAppFixture fixture) : ChatPart3Test
 
         async Task AssertIntactAsync(string when)
         {
-            (await ReadMessagesRawAsync(thread.ThreadId)).Should().BeEmpty($"{when}: no messages");
+            (await ReadStoredMessagesAsync(thread.ThreadId)).Should().BeEmpty($"{when}: no messages");
 
             var stored = await GetThreadAsync(thread.ThreadId);
             stored.ThreadId.Should().Be(thread.ThreadId, $"{when}: the same thread");

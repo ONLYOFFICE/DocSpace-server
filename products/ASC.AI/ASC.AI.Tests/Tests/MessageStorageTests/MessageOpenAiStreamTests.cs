@@ -119,27 +119,18 @@ public class MessageOpenAiStreamTests(AspireAppFixture fixture) : MessagePart2Te
             .Should().Contain("get_weather", context);
 
         // The pause is stored through the same mechanism as the plain endpoint's, so it resumes through the shared
-        // approve/deny routes. Read raw — an SDK defect: AiThreadMessageLike cannot deserialize a stored tool-call
-        // block ("cannot be deserialized into any schema defined"), so the typed read-messages throws on this thread.
+        // approve/deny routes.
         var deadline = DateTime.UtcNow.AddSeconds(20);
-        string body;
-        List<JsonElement> toolCalls;
+        List<AiThreadMessageLike> messages;
+        List<AiMessageContentBlock> toolCalls;
 
         while (true)
         {
-            using var response = await new RawApiClient(_aiChatClient).GetAsync(
-                $"/api/2.0/ai/threads/read-messages?threadId={Uri.EscapeDataString(thread.ThreadId)}",
-                TestContext.Current.CancellationToken);
-            body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-            response.IsSuccessStatusCode.Should().BeTrue(body);
-
-            using var document = JsonDocument.Parse(body);
-            toolCalls = [.. document.RootElement.EnumerateArray()
-                .Where(m => m.TryGetProperty("role", out var role) && role.GetString() == "assistant")
-                .Where(m => m.TryGetProperty("content", out var content) && content.ValueKind == JsonValueKind.Array)
-                .SelectMany(m => m.GetProperty("content").EnumerateArray())
-                .Where(block => block.TryGetProperty("type", out var type) && type.GetString() == "tool-call")
-                .Select(block => block.Clone())];
+            messages = await _aiThreads.AiThreadsReadMessagesAsync(thread.ThreadId, cancellationToken: TestContext.Current.CancellationToken);
+            toolCalls = [.. messages
+                .Where(m => m.Role == AiThreadMessageLike.RoleEnum.Assistant)
+                .SelectMany(m => m.Content?.ActualInstance as List<AiMessageContentBlock> ?? [])
+                .Where(block => block.Type == "tool-call")];
 
             if (toolCalls.Count > 0 || DateTime.UtcNow >= deadline)
             {
@@ -149,8 +140,9 @@ public class MessageOpenAiStreamTests(AspireAppFixture fixture) : MessagePart2Te
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
 
-        toolCalls.Should().ContainSingle($"the paused reply is stored and holds the one tool call: {body}")
-            .Which.GetProperty("toolName").GetString().Should().Be("get_weather", body);
+        var history = string.Join("\n", messages.Select(m => m.ToJson()));
+        toolCalls.Should().ContainSingle($"the paused reply is stored and holds the one tool call: {history}")
+            .Which.ToolName.Should().Be("get_weather", history);
     }
 
     [Fact]

@@ -163,7 +163,7 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
 
         while (!inFlight.IsCompleted && DateTime.UtcNow < deadline)
         {
-            var (_, messages) = await TryReadMessagesRawAsync(threadId);
+            var (_, messages) = await TryReadStoredMessagesAsync(threadId);
 
             if (messages.Any(IsUser))
             {
@@ -177,43 +177,49 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
     }
 
     // ---------------------------------------------------------------------------------------------------------------
-    // Stored messages, read raw
+    // Stored messages
 
     /// <summary>
-    /// The stored messages of a thread as raw JSON.
+    /// The stored messages of a thread, read through the typed <c>read-messages</c> and handed out as the JSON the SDK
+    /// model serialises to.
     /// </summary>
     /// <remarks>
-    /// Raw on purpose — an SDK defect: <c>AiThreadMessageLikeStatus</c> keeps only <c>type</c> and drops the
-    /// <c>reason</c> and <c>error {code, message}</c> a failed reply carries, and
-    /// <c>AiThreadMessageLikeContentAnyOfInner</c> keeps only <c>type</c> and <c>text</c>, dropping the
-    /// <c>toolName</c> and <c>result</c> of a tool-call part. Both are what these tests assert.
+    /// The JSON view is kept because the same helpers (<see cref="MessageText"/>, <see cref="StatusOf"/>,
+    /// <see cref="ToolCallsOf"/>) read the messages of the ndjson stream frames, which stay raw. Going through the model
+    /// first means a field it drops (the <c>reason</c> and <c>error</c> of a failed reply, the <c>toolName</c> and
+    /// <c>result</c> of a tool-call part) is missing here too, so the assertions still check the SDK contract.
     /// </remarks>
-    protected async Task<List<JsonElement>> ReadMessagesRawAsync(string threadId)
+    protected async Task<List<JsonElement>> ReadStoredMessagesAsync(string threadId)
     {
-        var (status, messages) = await TryReadMessagesRawAsync(threadId);
+        var (status, messages) = await TryReadStoredMessagesAsync(threadId);
         status.Should().Be(HttpStatusCode.OK, $"read-messages of thread {threadId}");
 
         return messages;
     }
 
     /// <summary>The status of read-messages and the messages it returned (empty on a failure).</summary>
-    protected async Task<(HttpStatusCode Status, List<JsonElement> Messages)> TryReadMessagesRawAsync(string threadId)
+    protected async Task<(HttpStatusCode Status, List<JsonElement> Messages)> TryReadStoredMessagesAsync(string threadId)
     {
-        using var response = await new RawApiClient(_aiChatClient).GetAsync(
-            $"/api/2.0/ai/threads/read-messages?threadId={Uri.EscapeDataString(threadId)}",
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        List<AiThreadMessageLike> messages;
 
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            return (response.StatusCode, []);
+            messages = await _aiThreads.AiThreadsReadMessagesAsync(threadId, cancellationToken: TestContext.Current.CancellationToken);
+        }
+        catch (ApiException exception)
+        {
+            return ((HttpStatusCode)exception.ErrorCode, []);
         }
 
-        using var document = JsonDocument.Parse(body);
+        return (HttpStatusCode.OK, [.. messages.Select(JsonOfMessage)]);
+    }
 
-        return (response.StatusCode, document.RootElement.ValueKind == JsonValueKind.Array
-            ? [.. document.RootElement.EnumerateArray().Select(m => m.Clone())]
-            : []);
+    /// <summary>A stored message as the JSON its SDK model serialises to.</summary>
+    protected static JsonElement JsonOfMessage(AiThreadMessageLike message)
+    {
+        using var document = JsonDocument.Parse(message.ToJson());
+
+        return document.RootElement.Clone();
     }
 
     /// <summary>
@@ -226,7 +232,7 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
 
         while (true)
         {
-            var messages = await ReadMessagesRawAsync(threadId);
+            var messages = await ReadStoredMessagesAsync(threadId);
 
             if (messages.Count(IsAssistant) >= count || DateTime.UtcNow >= deadline)
             {

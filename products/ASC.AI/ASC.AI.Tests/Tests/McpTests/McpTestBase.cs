@@ -524,19 +524,13 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
     }
 
     /// <summary>
-    /// The request body the SDK model serialises to, with the two parts the model cannot carry put right: the stored
-    /// message of a decision (the SDK message model drops the tool-call parts), and a flag left unset
-    /// (<c>requireApproval</c> of a tool, <c>result</c> of a server-executed approval, <c>allowAlways</c>), which the
-    /// generated models always emit.
+    /// The request body the SDK model serialises to, with the one thing the model cannot carry put right: a flag left
+    /// unset (<c>requireApproval</c> of a tool, <c>result</c> of a server-executed approval, <c>allowAlways</c>), which
+    /// the generated models always emit.
     /// </summary>
-    private static string Patched(string sdkJson, IEnumerable<HostTool>? tools = null, JsonElement? message = null, params string[] unset)
+    private static string Patched(string sdkJson, IEnumerable<HostTool>? tools = null, params string[] unset)
     {
         var body = Newtonsoft.Json.Linq.JObject.Parse(sdkJson);
-
-        if (message is not null)
-        {
-            body["message"] = Newtonsoft.Json.Linq.JToken.Parse(message.Value.GetRawText());
-        }
 
         foreach (var name in unset)
         {
@@ -581,6 +575,10 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
 
     private static decimal IdxOf(JsonElement pending) => pending.TryGetProperty("idx", out var idx) ? idx.GetInt32() : 0;
 
+    /// <summary>The stored message a pending frame carries, as the SDK message model a decision sends back.</summary>
+    private static AiThreadMessageLike MessageOf(JsonElement pending) =>
+        Newtonsoft.Json.JsonConvert.DeserializeObject<AiThreadMessageLike>(pending.GetProperty("message").GetRawText())!;
+
     /// <summary>Approves a paused call. <paramref name="result"/> is what the client says the tool returned (null: a server-executed tool).</summary>
     protected Task<ChatRound> ApproveAsync(
         McpChat chat,
@@ -597,6 +595,7 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
             threadId: threadId ?? chat.ThreadId,
             messageId: pending.GetProperty("messageId").GetString()!,
             idx: IdxOf(pending),
+            message: MessageOf(pending),
             actionArgs: ActionArgsOf(tools)!,
             entityId: chat.RoomId.ToString(),
             profileId: chat.Profile.Id);
@@ -613,7 +612,7 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
             unset.Add("allowAlways");
         }
 
-        return PostChatAsync("approve-tool-call", Patched(body.ToJson(), tools, pending.GetProperty("message"), [.. unset]));
+        return PostChatAsync("approve-tool-call", Patched(body.ToJson(), tools, [.. unset]));
     }
 
     protected Task<ChatRound> DenyAsync(McpChat chat, JsonElement pending, IEnumerable<HostTool>? tools = null, string? threadId = null)
@@ -622,11 +621,12 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
             threadId: threadId ?? chat.ThreadId,
             messageId: pending.GetProperty("messageId").GetString()!,
             idx: IdxOf(pending),
+            message: MessageOf(pending),
             actionArgs: ActionArgsOf(tools)!,
             entityId: chat.RoomId.ToString(),
             profileId: chat.Profile.Id);
 
-        return PostChatAsync("deny-tool-call", Patched(body.ToJson(), tools, pending.GetProperty("message")));
+        return PostChatAsync("deny-tool-call", Patched(body.ToJson(), tools));
     }
 
     protected Task<ChatRound> RegenerateAsync(McpChat chat, IEnumerable<HostTool>? tools = null, string? replacePrompt = null)

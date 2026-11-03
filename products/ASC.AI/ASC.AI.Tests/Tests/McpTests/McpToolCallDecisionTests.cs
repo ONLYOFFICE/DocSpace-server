@@ -78,7 +78,7 @@ public class McpToolCallDecisionTests(AspireAppFixture fixture) : McpTestBase(fi
         text.Should().Contain(messageId, "the refusal names the message").And.Contain("has no tool call at index 0");
 
         // Neither decision invented a tool result or a reply in the thread.
-        var messages = await ReadMessagesRawAsync(chat.ThreadId);
+        var messages = await ReadStoredMessagesAsync(chat.ThreadId);
         messages.Select(m => Str(m, "id")).Should().Equal(messageId);
         AssistantMessages(messages).Should().BeEmpty();
     }
@@ -95,7 +95,7 @@ public class McpToolCallDecisionTests(AspireAppFixture fixture) : McpTestBase(fi
         var (status, text) = await DecideAsync("approve-tool-call", chat, messageId, idx);
 
         status.Should().Be(HttpStatusCode.Conflict, text);
-        (await ReadMessagesRawAsync(chat.ThreadId)).Should().BeEmpty("nothing was created");
+        (await ReadStoredMessagesAsync(chat.ThreadId)).Should().BeEmpty("nothing was created");
     }
 
     [Theory]
@@ -133,7 +133,7 @@ public class McpToolCallDecisionTests(AspireAppFixture fixture) : McpTestBase(fi
         await ActAsAsync(Owner);
 
         status.Should().Be(HttpStatusCode.Forbidden, text);
-        (await ReadMessagesRawAsync(chat.ThreadId)).Select(m => Str(m, "id")).Should().Equal(messageId);
+        (await ReadStoredMessagesAsync(chat.ThreadId)).Select(m => Str(m, "id")).Should().Equal(messageId);
     }
 
     /// <summary>The switch is meant to stop "an MCP tool cannot be invoked"; the decision half used to be accepted with it off.</summary>

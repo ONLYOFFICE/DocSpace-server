@@ -61,6 +61,12 @@ public static class ResourceNames
     /// </summary>
     public const string WebStudio = "onlyoffice-web-studio";
 
+    /// <summary>
+    /// The document server container (conversions, editors). Not something a suite lists in <c>Resources</c>: it has
+    /// no health check, so <see cref="AspireHostFixture{TClients}.WaitForDocumentServerAsync"/> is the wait for it.
+    /// </summary>
+    public const string Editors = "onlyoffice-editors";
+
     /// <summary>The identity (OAuth2) containers — Spring services built from common/ASC.Identity.</summary>
     public const string IdentityRegistration = "onlyoffice-identity-registration";
     public const string IdentityAuthorization = "onlyoffice-identity-authorization";

@@ -55,7 +55,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
 
         while (true)
         {
-            var messages = await ReadMessagesRawAsync(chat.ThreadId);
+            var messages = await ReadStoredMessagesAsync(chat.ThreadId);
             var replies = AssistantMessages(messages);
 
             if ((replies.Count >= 1 && replies.All(r => Str(r, "id") != oldReplyId)) || DateTime.UtcNow >= deadline)
@@ -75,7 +75,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         var pending = Pending(await SendAsync(chat, AskForWeather, _tools));
         await ApproveAsync(chat, pending, "14C and sunny", tools: _tools);
 
-        var before = await ReadMessagesRawAsync(chat.ThreadId);
+        var before = await ReadStoredMessagesAsync(chat.ThreadId);
         var question = UserMessages(before)[0];
         var oldReply = AssistantMessages(before)[0];
         var oldToolCallId = Str(ToolCallParts(oldReply)[0], "toolCallId");
@@ -117,7 +117,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         var pendingB = Pending(await ApproveAsync(chat, pendingA, "14", tools: both), "for the second hop");
         await ApproveAsync(chat, pendingB, "wear a light jacket", tools: both);
 
-        var oldReply = AssistantMessages(await ReadMessagesRawAsync(chat.ThreadId))[0];
+        var oldReply = AssistantMessages(await ReadStoredMessagesAsync(chat.ThreadId))[0];
         var oldCalls = ToolCallParts(oldReply);
         oldCalls.Should().HaveCount(2, "both hops resolved before the regenerate");
         var oldIds = oldCalls.Select(c => Str(c, "toolCallId")!).ToList();
@@ -146,7 +146,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
             StubModelProvider.Text("It is windy."));
         var pending = Pending(await SendAsync(chat, AskForWeather, _tools));
         await ApproveAsync(chat, pending, "OLD RESULT 14C and sunny", tools: _tools);
-        var oldReply = AssistantMessages(await ReadMessagesRawAsync(chat.ThreadId))[0];
+        var oldReply = AssistantMessages(await ReadStoredMessagesAsync(chat.ThreadId))[0];
         var oldToolCallId = Str(ToolCallParts(oldReply)[0], "toolCallId");
 
         // `tools` IS re-offered this time, so the model can redo the call.
@@ -163,7 +163,7 @@ public class McpToolCallRegenerateTests(AspireAppFixture fixture) : McpTestBase(
         approved.StatusCode.Should().Be(HttpStatusCode.OK, approved.ToString());
         FrameTypes(approved).Should().Contain("message-end");
 
-        var final = await ReadMessagesRawAsync(chat.ThreadId);
+        var final = await ReadStoredMessagesAsync(chat.ThreadId);
         var replies = AssistantMessages(final);
         replies.Should().ContainSingle("one message, the regenerated one");
         Str(replies[0], "id").Should().Be(newPending.GetProperty("messageId").GetString());

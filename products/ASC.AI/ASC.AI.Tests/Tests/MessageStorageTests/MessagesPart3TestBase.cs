@@ -41,6 +41,8 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 /// </summary>
 public abstract class MessagesPart3TestBase(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
+    protected override bool NeedsDocumentServer => true;
+
     protected const string TextToDocxPath = "/api/2.0/ai/text-to-docx";
     protected const string ReadMessagesPath = "/api/2.0/ai/threads/read-messages";
     protected const string GetThreadByIdPath = "/api/2.0/ai/threads/get-by-id";
@@ -314,7 +316,7 @@ public abstract class MessagesPart3TestBase(AspireAppFixture fixture) : MessageT
 
     /// <summary>
     /// Posts a verbatim body to <c>text-to-docx</c> as the Owner. Raw on purpose: the SDK request rejects a missing
-    /// title, content or folder id client-side, and it has no <c>format</c> property at all.
+    /// title, content or folder id client-side, and its <c>format</c> enum cannot carry an unrecognised value.
     /// </summary>
     protected async Task<(HttpStatusCode Status, string Body)> PostExportRawAsync(string json)
     {

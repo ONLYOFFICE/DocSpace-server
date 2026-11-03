@@ -146,11 +146,4 @@ public abstract class AssignmentTestBase(AspireAppFixture fixture) : Assignments
 
         return ((int)response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
-
-    protected async Task<(int Status, string Body)> GetRawAsync(string route)
-    {
-        using var response = await new RawApiClient(_aiChatClient).GetAsync($"{AssignmentsRoute}/{route}", TestContext.Current.CancellationToken);
-
-        return ((int)response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-    }
 }

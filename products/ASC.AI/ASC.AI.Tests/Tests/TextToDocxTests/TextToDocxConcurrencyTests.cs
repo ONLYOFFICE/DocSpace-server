@@ -77,11 +77,8 @@ public class TextToDocxConcurrencyTests(AspireAppFixture fixture) : TextToDocxPo
 
         string[] names = [$"{title}.docx", $"{title} (1).docx"];
 
-        foreach (var name in names)
-        {
-            (await WaitForExportedFileAsync(folderId, name)).Should().NotBeNull(
-                $"expected \"{name}\" — one of the two simultaneous exports was lost or collided");
-        }
+        // Both exports land, under whatever names; the comparison below is what catches a collision.
+        await WaitForNewFilesAsync(folderId, before, names.Length);
 
         var added = (await WaitForStableFolderFilesAsync(folderId)).Where(file => !before.Contains(file.Id)).ToList();
         added.Select(file => file.Title).Should().BeEquivalentTo(

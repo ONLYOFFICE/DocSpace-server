@@ -84,7 +84,8 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
         exception.ErrorContent?.ToString().Should().Contain("title and content are required");
     }
 
-    // Raw bodies: the SDK request rejects a missing title, content or folder id client-side, and has no `format`.
+    // Raw bodies: the SDK request rejects a missing title, content or folder id client-side, and its `format` enum
+    // cannot carry an unrecognised value.
     [Theory]
     [InlineData("a missing title", "title and content are required")]
     [InlineData("a missing folderId", "folderId is required")]

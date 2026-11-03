@@ -229,7 +229,10 @@ public abstract class PromptsTestBase(AspireAppFixture fixture) : BaseTest(fixtu
     protected Task<(int Status, string Body)> UpdateRawAsync(string id, Dictionary<string, object?> updates) =>
         SendRawAsync(HttpMethod.Put, "update", Json(new { id, updates }));
 
-    /// <summary>The export as the service wrote it, to feed back into an import untouched.</summary>
+    /// <summary>
+    /// The export as the service wrote it. Raw on purpose, only where the assertion is on the whole wire body (that a
+    /// text does not appear anywhere in it): a field the generated bundle model drops would hide exactly that.
+    /// </summary>
     protected async Task<string> ExportRawAsync()
     {
         var (status, body) = await GetRawAsync("export");
@@ -278,33 +281,20 @@ public abstract class PromptsTestBase(AspireAppFixture fixture) : BaseTest(fixtu
 
     protected sealed record ImportOutcome(bool Success, ImportCounts Imported);
 
+    /// <summary><c>import-bundle</c> through the typed client; <paramref name="mode"/> null sends no options.</summary>
+    protected Task<AiImportResult> ImportBundleAsync(AiPromptBundle bundle, AiImportMode? mode) =>
+        _aiPrompts.AiPromptsImportBundleAsync(
+            new AiPromptsImportBundleRequest(bundle, mode is null ? null! : new AiPromptsImportBundleRequestOptions(mode)),
+            Token);
+
     /// <summary>
     /// Imports a version 1 bundle built from the typed models and returns the counts; a refusal throws the
-    /// <see cref="ApiException"/> the typed call would have.
+    /// <see cref="ApiException"/> of the typed call.
     /// </summary>
-    /// <remarks>
-    /// Sent raw on purpose, an SDK defect: <c>AiPromptBundle.Version</c> is an enum whose member serializes as the
-    /// string <c>"1"</c>, while the service only accepts the number 1 ("Unsupported bundle version: 1"), so no typed
-    /// import can succeed.
-    /// </remarks>
     protected async Task<ImportOutcome> ImportAsync(List<AiPromptFolder> folders, List<AiPrompt> prompts, AiImportMode? mode)
     {
-        var bundle = new
-        {
-            version = 1,
-            folders = folders.Select(f => new { id = f.Id, name = f.Name }),
-            prompts = prompts.Select(p => new { id = p.Id, name = p.Name, text = p.Text, folderId = p.FolderId })
-        };
+        var result = await ImportBundleAsync(new AiPromptBundle(version: 1, folders: folders, prompts: prompts), mode);
 
-        var (status, body) = await ImportBundleRawAsync(Json(bundle), mode?.ToString().ToLowerInvariant());
-
-        if (status is < 200 or >= 300)
-        {
-            throw new ApiException(status, $"Error calling AiPromptsImportBundle: {body}", body);
-        }
-
-        var imported = ParseBody(body).GetProperty("imported");
-
-        return new ImportOutcome(true, new ImportCounts(imported.GetProperty("folders").GetInt32(), imported.GetProperty("prompts").GetInt32()));
+        return new ImportOutcome(result.Success, new ImportCounts((int)result.Imported.Folders, (int)result.Imported.Prompts));
     }
 }

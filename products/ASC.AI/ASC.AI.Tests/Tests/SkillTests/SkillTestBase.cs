@@ -121,11 +121,7 @@ public abstract class SkillTestBase(AspireAppFixture fixture) : BaseTest(fixture
     /// would have read when the room was connected; the server replaces them with the room's current ones whenever it can
     /// read the room.
     /// </summary>
-    /// <remarks>
-    /// Raw on purpose — an SDK defect: <c>AiActionArgs</c> has no <c>contextRooms</c> property, so the connected rooms
-    /// cannot be expressed through the typed model. The rest of the body is the SDK's own <see cref="AiSendStreamBody"/>.
-    /// </remarks>
-    protected async Task<ChatRound> SendWithSkillsAsync(
+    protected Task<ChatRound> SendWithSkillsAsync(
         string threadId,
         string text,
         string profileId,
@@ -133,38 +129,12 @@ public abstract class SkillTestBase(AspireAppFixture fixture) : BaseTest(fixture
         int skillRoomId,
         IEnumerable<SkillFile>? clientSkills = null)
     {
-        var body = new AiSendStreamBody(threadId: threadId, userMessage: BuildUserMessage(text), entityId: entityId, profileId: profileId);
-        var json = System.Text.Json.Nodes.JsonNode.Parse(body.ToJson())!.AsObject();
+        var room = new AiContextRoomRef(
+            cloud: "docspace",
+            id: skillRoomId.ToString(),
+            skills: clientSkills?.Select(skill => new AiRoomSkill(id: skill.Id.ToString(), name: skill.Name, description: skill.Description)).ToList()!);
 
-        var room = new System.Text.Json.Nodes.JsonObject { ["cloud"] = "docspace", ["id"] = skillRoomId.ToString() };
-        if (clientSkills is not null)
-        {
-            var skills = new System.Text.Json.Nodes.JsonArray();
-            foreach (var skill in clientSkills)
-            {
-                skills.Add(new System.Text.Json.Nodes.JsonObject
-                {
-                    ["id"] = skill.Id.ToString(),
-                    ["name"] = skill.Name,
-                    ["description"] = skill.Description
-                });
-            }
-
-            room["skills"] = skills;
-        }
-
-        json["actionArgs"] = new System.Text.Json.Nodes.JsonObject
-        {
-            ["isReasoning"] = false,
-            ["contextRooms"] = new System.Text.Json.Nodes.JsonArray(room)
-        };
-
-        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
-            "/api/2.0/ai/ai/send-with-stream",
-            json.ToJsonString(),
-            TestContext.Current.CancellationToken);
-
-        return ChatRound.Parse(response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        return SendWithStreamAsync(threadId, text, profileId, entityId, new AiActionArgs(isReasoning: false, contextRooms: [room]));
     }
 
     /// <summary>The chat requests the model saw, oldest first: the streamed completions, without the profile's tool probe.</summary>

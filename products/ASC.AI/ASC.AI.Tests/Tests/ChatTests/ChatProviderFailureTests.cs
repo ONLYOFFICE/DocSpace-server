@@ -126,7 +126,7 @@ public class ChatProviderFailureTests(AspireAppFixture fixture) : ChatPart3TestB
         failed!.Value.GetProperty("reason").GetString().Should().Be("error");
         failed.Value.GetProperty("error").GetProperty("code").GetString().Should().Be("auth");
 
-        var after = await ReadMessagesRawAsync(thread.ThreadId);
+        var after = await ReadStoredMessagesAsync(thread.ThreadId);
         MessageText(UserMessages(after).Should().ContainSingle("the thread did not gain a second question").Subject)
             .Should().Be("Say hi");
     }

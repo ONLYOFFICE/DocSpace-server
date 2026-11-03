@@ -101,7 +101,7 @@ public class AttachmentLinkToMessageTests(AspireAppFixture fixture) : Attachment
         stored.MessageId.Should().BeNull();
         stored.ThreadId.Should().BeNull();
 
-        var message = (await ReadMessagesRawAsync(threadId)).Find(m => Str(m, "id") == messageId);
+        var message = (await ReadStoredMessagesAsync(threadId)).Find(m => Str(m, "id") == messageId);
         message.ValueKind.Should().Be(JsonValueKind.Object, "the message is readable");
         (message.TryGetProperty("attachments", out var attachments) ? attachments.GetArrayLength() : 0).Should().Be(0);
     }

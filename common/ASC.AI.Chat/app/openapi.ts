@@ -446,7 +446,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsOpenOrCreate:
     "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; threads are one list per user whatever it names.",
   aiThreadsAppendUserMessage:
-    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer is the stored message itself under `messageId` - the field name is historical, the ID is `messageId.id`; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
   aiThreadsTouch:
     "Bumps a thread's last-edit date without adding a message, which resurfaces it in the list. Passing `profileId` also rebinds the thread to another model, so this is the operation to call when a model switch alone should count as activity. Nothing else about the thread changes and the answer only confirms the write. It is idempotent: repeating it simply moves the date forward again.",
   aiThreadsRename:
@@ -668,11 +668,16 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`inputs` is not an array, or one of its entries is malformed.",
   },
   aiAttachmentsGet: { "400": "The attachment ID is missing." },
+  aiAttachmentsGetSuggestedQuestions: { "400": "The attachment ID is missing." },
   aiAttachmentsGetMany: { "400": "The list of attachment IDs is malformed." },
   aiAttachmentsLinkToMessage: {
     "400": "The attachment or message reference is malformed.",
     "404": "The message or the attachment does not exist.",
   },
+
+  // Context rooms.
+  aiContextGetRoomSkills: { "400": "`roomId` is missing." },
+  aiContextGetRoomSkill: { "400": "`roomId` or `skillId` is missing." },
 
   // Editor tools.
   aiEditorToolsCall: {
@@ -1089,6 +1094,12 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
     description: "The ID of the attachment to delete, as a bare JSON string.",
     example: EXAMPLE_IDS.attachment,
   },
+  aiAttachmentsGetSuggestedQuestions: {
+    description:
+      "The ID of the attachment the form was attached under, as a bare JSON string. " +
+      '`{ "id": "..." }` is accepted as well.',
+    example: EXAMPLE_IDS.attachment,
+  },
   aiAttachmentsDeleteMany: {
     description: "The IDs of the attachments to delete, as a bare JSON array of strings.",
     example: [EXAMPLE_IDS.attachment, EXAMPLE_IDS.attachmentSecond],
@@ -1303,6 +1314,15 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiAttachmentsDeleteMany:
     "Confirms the request was accepted, whether or not anything was deleted.",
   aiAttachmentsLinkToMessage: "Confirms the attachments are now bound to the message.",
+  aiAttachmentsGetSuggestedQuestions:
+    "The form's starter questions when they are ready; otherwise the status says whether they " +
+    "are still being generated or will never come.",
+
+  aiContextGetContextFolders: "The Instructions rooms the caller can connect, grouped by account.",
+  aiContextGetKnowledgeFolders: "The Knowledge rooms the caller can connect, grouped by account.",
+  aiContextGetRoomSkills: "The skills of the room, frontmatter only.",
+  aiContextGetRoomSkill:
+    "The skill's Markdown body, or a null body when the room has no such skill.",
 
   aiEditorToolsList: "The tools the editor plugin may offer the model, four fields each.",
   aiEditorToolsCall:
@@ -1371,14 +1391,16 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSettingsSetVectorization: "The stored vectorization settings.",
   aiSettingsGetUser: "The calling user's AI settings.",
   aiSettingsSetUser: "The calling user's stored AI settings.",
-  aiSettingsGetToolMode: "The calling user's tool permission mode, as `{ mode }`.",
-  aiSettingsSetToolMode: "The calling user's stored tool permission mode, as `{ mode }`.",
+  aiSettingsGetToolMode: "The calling user's tool permission mode, `{ mode }` under `response`.",
+  aiSettingsSetToolMode:
+    "The calling user's stored tool permission mode, `{ mode }` under `response`.",
 
   aiThreadsCreate: "The created thread.",
   aiThreadsOpenOrCreate:
     "The thread that was opened or created, with its prior messages. A created one carries the " +
     "generated title.",
-  aiThreadsAppendUserMessage: "The stored message, with the ID storage assigned to it.",
+  aiThreadsAppendUserMessage:
+    "The stored message, under `messageId`, with the ID storage assigned to it in `messageId.id`.",
   aiThreadsTouch: "Confirms the thread's activity date moved forward.",
   aiThreadsRename: "Confirms the new title was stored.",
   aiThreadsDelete: "Confirms the thread and its messages are gone.",
@@ -1450,18 +1472,14 @@ const PROVIDER_RELAY_SCHEMA: Json = {
 // it, replaces it, or relays somebody else's body - so the shape is declared here
 // and wins over the generated one. Every entry was read off the controller.
 const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
-  // `res.json({ messageId })` - the identifier only, not the stored message.
-  aiThreadsAppendUserMessage: {
-    type: "object",
-    properties: {
-      messageId: {
-        type: "string",
-        description: "Identifier of the message that was appended to the thread.",
-        examples: [EXAMPLE_IDS.message],
-      },
-    },
-    required: ["messageId"],
-    additionalProperties: false,
+  // `get-all-assignments` answers one of two shapes, chosen by `expand=profile`.
+  // The generated union is an `anyOf`; the two are exclusive (the expanded one
+  // carries integer counts a string map cannot hold), so `oneOf` says it exactly.
+  aiAssignmentsGetAllAssignments: {
+    oneOf: [
+      { $ref: "#/components/schemas/AiAssignmentsMap" },
+      { $ref: "#/components/schemas/AiAssignmentsExpanded" },
+    ],
   },
 
   // `res.json({ title })` - the engine returns the bare string, the controller wraps it.

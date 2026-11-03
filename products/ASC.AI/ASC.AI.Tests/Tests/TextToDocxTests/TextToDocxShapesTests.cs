@@ -40,7 +40,8 @@ namespace ASC.AI.Tests.Tests.TextToDocxTests;
 /// "AI Messages - text-to-docx format shapes".
 /// </summary>
 /// <remarks>
-/// Raw throughout: the SDK model has no <c>format</c> property (see <see cref="TextToDocxPortTestBase.WithFormat"/>).
+/// Raw throughout: none of these values fits the <c>format</c> enum of the SDK model, so the typed client cannot send them
+/// (see <see cref="TextToDocxPortTestBase.WithFormat"/>).
 /// </remarks>
 [Trait("Category", "API")]
 [Trait("Feature", "AI/TextToDocx")]

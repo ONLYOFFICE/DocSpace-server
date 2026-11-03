@@ -138,43 +138,35 @@ public class ThirdPartyToolsTests(AspireAppFixture fixture) : ThirdPartyTestBase
         var pending = sent.OfType("tool-call-pending").ToList();
         pending.Should().ContainSingle($"the model asked for the tool; {context}");
         // The response is raw on purpose — an SDK defect: approve-tool-call answers an ndjson stream of chat frames, which
-        // the SDK declares as one AiChatEvent. The request is the SDK model; only its `message` is spliced in from the
-        // pending frame, because the SDK message model drops the tool-call parts (toolName, args, toolCallId) the engine needs.
+        // the SDK declares as one AiChatEvent. The request is the SDK model, `message` included: the stored message the
+        // pending frame carries.
         var frame = pending[0];
         var approve = new AiApproveToolCallRequest(
             result: "21C and sunny",
             threadId: thread.ThreadId,
             messageId: frame.GetProperty("messageId").GetString()!,
             idx: frame.TryGetProperty("idx", out var idx) ? idx.GetInt32() : 0,
+            message: Newtonsoft.Json.JsonConvert.DeserializeObject<AiThreadMessageLike>(frame.GetProperty("message").GetRawText())!,
             actionArgs: actionArgs,
             entityId: roomId,
             profileId: profile.Id);
-        var approveBody = Newtonsoft.Json.Linq.JObject.Parse(approve.ToJson());
-        approveBody["message"] = Newtonsoft.Json.Linq.JToken.Parse(frame.GetProperty("message").GetRawText());
 
         using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
             "/api/2.0/ai/ai/approve-tool-call",
-            approveBody.ToString(Newtonsoft.Json.Formatting.None),
+            approve.ToJson(),
             TestContext.Current.CancellationToken);
         var resumed = ChatRound.Parse(response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
         resumed.StatusCode.Should().Be(HttpStatusCode.OK, $"{resumed}\n{provider.Describe()}");
         resumed.OfType("message-end").Should().NotBeEmpty($"the resumed round finished; {resumed}");
 
-        // The stored tool call carries the result the client supplied. Read raw: the SDK cannot deserialize a stored
-        // tool-call block (AiThreadMessageLike has no schema for it).
-        using var messages = await new RawApiClient(_aiChatClient).GetAsync(
-            $"/api/2.0/ai/threads/read-messages?threadId={Uri.EscapeDataString(thread.ThreadId)}",
-            TestContext.Current.CancellationToken);
-        var body = await messages.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        messages.IsSuccessStatusCode.Should().BeTrue(body);
-
-        using var document = JsonDocument.Parse(body);
-        var results = document.RootElement.EnumerateArray()
-            .Where(m => m.TryGetProperty("content", out var content) && content.ValueKind == JsonValueKind.Array)
-            .SelectMany(m => m.GetProperty("content").EnumerateArray())
-            .Where(block => block.TryGetProperty("type", out var type) && type.GetString() == "tool-call" && block.TryGetProperty("result", out _))
-            .Select(block => block.GetProperty("result").ToString())
+        // The stored tool call carries the result the client supplied.
+        var messages = await _aiThreads.AiThreadsReadMessagesAsync(thread.ThreadId, cancellationToken: TestContext.Current.CancellationToken);
+        var body = string.Join("\n", messages.Select(m => m.ToJson()));
+        var results = messages
+            .SelectMany(m => m.Content?.ActualInstance as List<AiMessageContentBlock> ?? [])
+            .Where(block => block.Type == "tool-call" && block.Result is not null)
+            .Select(block => block.Result.ToString())
             .ToList();
         results.Should().Contain("21C and sunny", body);
     }

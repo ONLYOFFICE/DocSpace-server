@@ -48,11 +48,10 @@ public class PromptExportTests(AspireAppFixture fixture) : PromptsTestBase(fixtu
     [Fact]
     public async Task Export_ExportsTheCallersPromptsAndFolders()
     {
-        // The version is a one-member enum in the SDK, so it is read off the wire.
-        var empty = ParseBody(await ExportRawAsync());
-        empty.GetProperty("version").GetInt32().Should().Be(1);
-        empty.GetProperty("prompts").GetArrayLength().Should().Be(0);
-        empty.GetProperty("folders").GetArrayLength().Should().Be(0);
+        var empty = await _aiPrompts.AiPromptsExportAsync(Token);
+        empty.Version.Should().Be(1);
+        empty.Prompts.Should().BeEmpty();
+        empty.Folders.Should().BeEmpty();
 
         var folder = await CreateFolderAsync("Autotest folder");
         var rootPrompt = await CreatePromptAsync("Autotest root", "Root body");
@@ -60,7 +59,7 @@ public class PromptExportTests(AspireAppFixture fixture) : PromptsTestBase(fixtu
 
         var bundle = await _aiPrompts.AiPromptsExportAsync(Token);
 
-        ParseBody(await ExportRawAsync()).GetProperty("version").GetInt32().Should().Be(1);
+        bundle.Version.Should().Be(1);
         bundle.Folders.Select(f => f.Id).Should().Equal(folder.Id);
         bundle.Prompts.Select(p => p.Id).Should().BeEquivalentTo([rootPrompt.Id, foldered.Id]);
 

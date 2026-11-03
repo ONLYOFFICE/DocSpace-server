@@ -99,11 +99,12 @@ public class TextToDocxNamingTests(AspireAppFixture fixture) : TextToDocxPortTes
         // The control file goes into its own folder so a matching name cannot be renamed to "… (1)".
         var controlFolderId = await CreateFolderAsync(folderId, "Autotest TextToDocx Control");
         var expected = await FilesApiTitleForAsync(controlFolderId, title);
+        var before = await FileIdsAsync(folderId);
 
         await ExportAcceptedAsync(title, "hello", folderId);
 
-        (await WaitForExportedFileAsync(folderId, expected)).Should().NotBeNull(
-            $"title {title} should have become {expected}, as it does through the Files API");
+        (await WaitForNewFilesAsync(folderId, before)).Select(file => file.Title).Should().Equal(
+            [expected], $"title {title} should have become {expected}, as it does through the Files API");
     }
 
     /// <summary>
@@ -121,6 +122,7 @@ public class TextToDocxNamingTests(AspireAppFixture fixture) : TextToDocxPortTes
 
         string[] titles = ["Notes 12/31", "../../Autotest Traversal", "a\\/:*?\"<>|b", "<b>bold</b>"];
         var expected = new List<string>();
+        var before = await FileIdsAsync(folderId);
 
         foreach (var title in titles)
         {
@@ -129,23 +131,10 @@ public class TextToDocxNamingTests(AspireAppFixture fixture) : TextToDocxPortTes
             await ExportAcceptedAsync(title, "hello", folderId);
         }
 
-        // Every export gets its chance to land before the folder is compared; the last listing is what is asserted.
-        var deadline = DateTime.UtcNow + ExportTimeout;
-        List<string> landed;
+        // Every export gets its chance to land, under whatever name, before the names are compared.
+        var landed = (await WaitForNewFilesAsync(folderId, before, titles.Length)).ConvertAll(file => file.Title);
 
-        while (true)
-        {
-            landed = (await ListFolderFilesAsync(folderId)).ConvertAll(file => file.Title);
-
-            if (expected.TrueForAll(landed.Contains) || DateTime.UtcNow >= deadline)
-            {
-                break;
-            }
-
-            await Task.Delay(1000, TestContext.Current.CancellationToken);
-        }
-
-        landed.Should().Contain(expected);
+        landed.Should().BeEquivalentTo(expected);
     }
 
     /// <summary>
@@ -162,9 +151,11 @@ public class TextToDocxNamingTests(AspireAppFixture fixture) : TextToDocxPortTes
 
         var title = $"Notes {RandomSuffix()[..4]}\\31";
         var expected = await FilesApiTitleForAsync(controlFolderId, title);
+        var before = await FileIdsAsync(folderId);
 
         await ExportAcceptedAsync(title, "hello", folderId);
 
-        (await WaitForExportedFileAsync(folderId, expected)).Should().NotBeNull($"title {title} should have become {expected}");
+        (await WaitForNewFilesAsync(folderId, before)).Select(file => file.Title).Should().Equal(
+            [expected], $"title {title} should have become {expected}");
     }
 }

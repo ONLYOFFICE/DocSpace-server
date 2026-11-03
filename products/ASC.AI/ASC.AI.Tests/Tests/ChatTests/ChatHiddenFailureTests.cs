@@ -61,7 +61,7 @@ public class ChatHiddenFailureTests(AspireAppFixture fixture) : ChatPart3TestBas
         bad.StatusCode.Should().Be(HttpStatusCode.BadRequest, $"a request the backend cannot run says what was wrong with it: {bad}");
         bad.StreamError.Should().BeNull(bad.ToString());
 
-        var afterBad = await ReadMessagesRawAsync(thread.ThreadId);
+        var afterBad = await ReadStoredMessagesAsync(thread.ThreadId);
         UserMessages(afterBad).Should().HaveCount(1, "the refusal never touched the thread");
         AssertHealthyReply(AssistantMessages(afterBad).Should().ContainSingle().Subject, "still just the control turn");
 
@@ -86,7 +86,7 @@ public class ChatHiddenFailureTests(AspireAppFixture fixture) : ChatPart3TestBas
 
         refused.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge, refused.StatusCode.ToString());
         refused.Frames.Should().BeEmpty();
-        (await ReadMessagesRawAsync(thread.ThreadId)).Should().BeEmpty("nothing of the refused message was stored");
+        (await ReadStoredMessagesAsync(thread.ThreadId)).Should().BeEmpty("nothing of the refused message was stored");
 
         provider.Enqueue(StubModelProvider.Text("OK"));
         var next = await SendWithStreamAsync(thread.ThreadId, "Reply with OK.", profile.Id);
@@ -148,7 +148,7 @@ public class ChatHiddenFailureTests(AspireAppFixture fixture) : ChatPart3TestBas
 
         while (!pending.IsCompleted && DateTime.UtcNow < deadline)
         {
-            if ((await ReadMessagesRawAsync(threadId)).Any(IsUser))
+            if ((await ReadStoredMessagesAsync(threadId)).Any(IsUser))
             {
                 return;
             }

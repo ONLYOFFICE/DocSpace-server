@@ -193,6 +193,72 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
+  AiContextRoomRef: {
+    properties: {
+      cloud: "The account the room belongs to; `docspace` for a room of this portal.",
+      id: "The room ID.",
+      skills:
+        "The skills of the room the round may use. For a room of this portal the list is re-read on every round, so it may be sent empty.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room, skills: [] },
+  },
+
+  AiKnowledgeRoomRef: {
+    properties: {
+      cloud: "The account the room belongs to; `docspace` for a room of this portal.",
+      id: "The room ID; anything that is not a positive integer is ignored.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room },
+  },
+
+  AiFolderContextRef: {
+    properties: {
+      cloud: "The account the folder belongs to; `docspace` for a folder of this portal.",
+      id: "The folder ID.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room },
+  },
+
+  AiRoomSkill: {
+    properties: {
+      id: "The skill's ID, as `GET api/2.0/ai/context/get-room-skill` takes it.",
+      name: "The skill's name, from its frontmatter.",
+      description: "What the skill is for, from its frontmatter; empty when it declares none.",
+    },
+    examples: {
+      id: "5678",
+      name: "contract-review",
+      description: "How to review a supply contract.",
+    },
+  },
+
+  AiContextFolder: {
+    properties: {
+      cloud: "The account the rooms belong to; `docspace` for this portal.",
+      rooms: "The rooms of that account the caller can connect.",
+    },
+    examples: { cloud: "docspace", rooms: [] },
+  },
+
+  AiContextRoom: {
+    properties: {
+      id: "The room ID.",
+      name: "The room title.",
+    },
+    examples: { id: EXAMPLE_IDS.room, name: "Contract templates" },
+  },
+
+  AiSuggestedQuestion: {
+    examples: {
+      question: "Which region had the most responses?",
+      prompt: "Group the submissions by region and show the count for each.",
+    },
+  },
+
+  AiChatErrorPayload: {
+    examples: { code: "rate_limit", message: "The provider is rate limiting requests." },
+  },
+
   AiWebSearchConfig: {
     examples: {
       provider: "exa",

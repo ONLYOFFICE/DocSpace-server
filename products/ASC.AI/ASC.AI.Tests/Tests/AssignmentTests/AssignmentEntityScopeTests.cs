@@ -87,8 +87,6 @@ public class AssignmentEntityScopeTests(AspireAppFixture fixture) : AssignmentTe
         (await StatusOfAsync(() => TryResolveAsync(nameof(AiActionType.Chat), "999999"))).Should().Be(404, "try-resolve with an unknown entity");
     }
 
-    // Raw: the SDK types get-all-assignments as Dictionary<string, string>, which cannot carry the expanded answer
-    // ({assignments, profilesTotal, chatProfilesTotal}) that expand=profile returns. An SDK defect worth reporting.
     [Fact]
     public async Task GetAll_ExpandProfile_AnswersTheProfilesAndTheCatalogueCounts()
     {
@@ -96,16 +94,13 @@ public class AssignmentEntityScopeTests(AspireAppFixture fixture) : AssignmentTe
         await CreateProfileWithAsync(ImageCapabilities);
         await AssignAsync(AiActionType.Summarization, text.Id);
 
-        var (status, body) = await GetRawAsync("get-all-assignments?expand=profile");
+        var expanded = (await _aiAssignments.AiAssignmentsGetAllAssignmentsAsync(
+            expand: "profile",
+            cancellationToken: TestContext.Current.CancellationToken)).GetAiAssignmentsExpanded();
 
-        status.Should().Be(200, body);
-        using var document = JsonDocument.Parse(body);
-        var root = document.RootElement;
-
-        var assignments = root.GetProperty("assignments");
-        assignments.GetProperty(DefaultSlot).GetProperty("id").GetString().Should().Be(text.Id, "Default is the first profile, expanded");
-        assignments.GetProperty(nameof(AiActionType.Summarization)).GetProperty("id").GetString().Should().Be(text.Id);
-        root.GetProperty("profilesTotal").GetInt32().Should().Be(2);
-        root.GetProperty("chatProfilesTotal").GetInt32().Should().Be(1, "the drawing profile cannot chat");
+        expanded.Assignments[DefaultSlot].Id.Should().Be(text.Id, "Default is the first profile, expanded");
+        expanded.Assignments[nameof(AiActionType.Summarization)].Id.Should().Be(text.Id);
+        expanded.ProfilesTotal.Should().Be(2);
+        expanded.ChatProfilesTotal.Should().Be(1, "the drawing profile cannot chat");
     }
 }

@@ -34,7 +34,8 @@
 namespace ASC.AI.Tests.Tests.AttachmentTests;
 
 /// <summary>
-/// <c>POST /api/2.0/ai/attachments/suggested-questions</c>. The request is <c>{ id: &lt;attachment uuid&gt; }</c> — the id
+/// <c>POST /api/2.0/ai/attachments/suggested-questions</c>. The request is the attachment uuid as a bare JSON string
+/// (<c>{ id: ... }</c> is accepted as well) — the id
 /// <c>save-file</c> returns, not the DocSpace file id — and the response is <c>{ status, questions }</c>. Every attachment
 /// that can be set up through the API (plain files, PDF forms) reads <c>status: "unavailable"</c> with an empty
 /// <c>questions</c> list, without a model call: <c>canAnalyze</c> is false for all of them. The branch where questions are
@@ -42,24 +43,20 @@ namespace ASC.AI.Tests.Tests.AttachmentTests;
 /// member alike, an anonymous caller 401, and gives away neither whether an attachment exists nor whose it is.
 /// </summary>
 /// <remarks>
-/// Raw on purpose — an SDK defect: the generated <c>AiAttachmentsGetSuggestedQuestions</c> answers an
-/// <see cref="AiSuccessResponse"/> (<c>{success}</c>), which drops both <c>status</c> and <c>questions</c>, the only fields
-/// that are asserted. A Guest also gets 200 here although every other attachments route is closed to a Guest; whether that
+/// A Guest also gets 200 here although every other attachments route is closed to a Guest; whether that
 /// is intended is a question for the developers, so there is no Guest test.
 /// </remarks>
 [Trait("Category", "Attachments")]
 [Trait("Feature", "AI/Attachments")]
 public class AttachmentSuggestedQuestionsTests(AspireAppFixture fixture) : AttachmentTestBase(fixture)
 {
-    private Task<RawOutcome> SuggestAsync(string id) => PostRawAsync("suggested-questions", Json(new { id }));
+    private Task<AiSuggestedQuestionsResult> SuggestAsync(string id) =>
+        Attachments.AiAttachmentsGetSuggestedQuestionsAsync(id, TestContext.Current.CancellationToken);
 
-    private static void ExpectUnavailable(RawOutcome outcome)
+    private static void ExpectUnavailable(AiSuggestedQuestionsResult result)
     {
-        outcome.Status.Should().Be(200, outcome.Body);
-        using var document = JsonDocument.Parse(outcome.Body);
-        document.RootElement.GetProperty("status").GetString().Should().Be("unavailable");
-        document.RootElement.GetProperty("questions").ValueKind.Should().Be(JsonValueKind.Array);
-        document.RootElement.GetProperty("questions").GetArrayLength().Should().Be(0);
+        result.Status.Should().Be(AiSuggestedQuestionsResult.StatusEnum.Unavailable);
+        result.Questions.Should().NotBeNull().And.BeEmpty();
     }
 
     [Fact]
@@ -110,9 +107,12 @@ public class AttachmentSuggestedQuestionsTests(AspireAppFixture fixture) : Attac
     {
         await ActAsAsync(null);
 
-        var outcome = await PostRawAsync("suggested-questions", withAValidBody ? Json(new { id = UnknownAttachmentId }) : "{}");
+        // Without a valid body the request is raw: an empty object is a body the bare-string request cannot carry.
+        var status = withAValidBody
+            ? await StatusOfAsync(() => SuggestAsync(UnknownAttachmentId))
+            : (await PostRawAsync("suggested-questions", "{}")).Status;
 
-        outcome.Status.Should().Be(401);
+        status.Should().Be(401);
     }
 
     [Fact]
@@ -141,8 +141,10 @@ public class AttachmentSuggestedQuestionsTests(AspireAppFixture fixture) : Attac
         // identical answer is not just the User seeing their own draft.
         (await ReadOnceAsync(ownerDraft)).Should().BeNull("the owner's draft is invisible to the User");
 
-        var foreign = await SuggestAsync(ownerDraft);
-        var unknown = await SuggestAsync(UnknownAttachmentId);
+        // Raw on purpose — the assertion is on the whole wire body: a field the generated model drops would hide exactly
+        // the difference (or the leaked text) this test looks for.
+        var foreign = await PostRawAsync("suggested-questions", Json(new { id = ownerDraft }));
+        var unknown = await PostRawAsync("suggested-questions", Json(new { id = UnknownAttachmentId }));
 
         foreign.Status.Should().Be(200);
         unknown.Status.Should().Be(200);

@@ -189,7 +189,7 @@ public class AttachmentComposerRuleTests(AspireAppFixture fixture) : AttachmentT
         // First half: the drafts were accepted by a thread they were not staged for.
         ExpectSameJson(await StoredUserAttachmentsAsync(other.ThreadId), attachments, "the drafts moved to the other thread");
         // The thread they were staged in stayed empty.
-        (await ReadMessagesRawAsync(abandoned.ThreadId)).Should().BeEmpty();
+        (await ReadStoredMessagesAsync(abandoned.ThreadId)).Should().BeEmpty();
 
         // Second half: sending them elsewhere consumed nothing either; a client that kept the ids could send them again.
         foreach (var draft in drafts)

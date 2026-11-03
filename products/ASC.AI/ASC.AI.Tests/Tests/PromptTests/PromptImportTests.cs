@@ -68,15 +68,11 @@ public class PromptImportTests(AspireAppFixture fixture) : PromptsTestBase(fixtu
         var folder = await CreateFolderAsync("Autotest bundle");
         await CreatePromptAsync("Autotest bundled", "Bundled body", folder.Id);
 
-        // The export goes back verbatim: the typed bundle's version is a one-member enum that does not survive a read.
-        var exported = await ExportRawAsync();
+        var exported = await _aiPrompts.AiPromptsExportAsync(Token);
 
         // Re-importing the caller's own bundle must not fail on the names that are already there; with no options the
         // import replaces the library, so whatever the merge rule is, the call has to be answered.
-        var (status, body) = await ImportBundleRawAsync(exported, null);
-
-        status.Should().Be(200, body);
-        ParseBody(body).GetProperty("success").GetBoolean().Should().BeTrue(body);
+        (await ImportBundleAsync(exported, null)).Success.Should().BeTrue();
         ShapeOf(await ReadLibraryAsync()).Prompts.Should().Equal("Autotest bundle/Autotest bundled: Bundled body");
     }
 

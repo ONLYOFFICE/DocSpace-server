@@ -81,6 +81,11 @@ import type {
   ToolsMutationResult,
   ToolsBulkResult,
   WebSearchMutationResult,
+  ContextFolder,
+  ContextRoomRef,
+  KnowledgeRoomRef,
+  FolderContextRef,
+  RoomSkill,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 
@@ -143,6 +148,42 @@ export type AiActionArgs = {
   reasoningLevel?: AiReasoningLevel;
   /** Override the action's baked-in system prompt (replace or append). */
   prompt?: { mode: "replace" | "append"; text: string };
+  /**
+   * Usage notes of the MCP servers the caller holds the connection to, keyed by
+   * server type; folded into the system prompt as advisory text.
+   */
+  toolInstructions?: Record<string, string>;
+  /**
+   * Instructions rooms connected as context in the composer, each with the
+   * skills the round may use. The skills of a DocSpace room are re-read on
+   * every round, so the list sent only has to name the rooms; inside an AI
+   * project the project's own linked rooms replace whatever is sent here.
+   */
+  contextRooms?: ContextRoomRef[];
+  /**
+   * Knowledge rooms connected in the composer; the knowledge search tool of
+   * the round is limited to them. Each `id` has to be a DocSpace room id.
+   */
+  knowledgeRooms?: KnowledgeRoomRef[];
+  /**
+   * A single knowledge room, as an older client sends it. Read only when
+   * `knowledgeRooms` is absent; send `knowledgeRooms` instead.
+   *
+   * @deprecated
+   */
+  knowledgeRoom?: KnowledgeRoomRef;
+  /**
+   * The folder connected as the round's context in the composer. It becomes
+   * the location the model is told the user works in, and the entry the
+   * round is attributed to.
+   */
+  folderContext?: FolderContextRef;
+  /**
+   * Read by `POST api/2.0/ai/ai/send-custom` only, which has no top-level
+   * scope: the entry the round is attributed to. A hint, re-resolved against
+   * the caller's own access; ignored by every other operation.
+   */
+  entityId?: string;
 };
 
 export type Req_aiSend = {
@@ -154,6 +195,11 @@ export type Req_aiSend = {
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
+  /**
+   * The folder or room the user is in. Tools run against it and the model is
+   * told it is the user's location; falls back to `entityId` when omitted.
+   */
+  contextEntityId?: string;
 };
 export type Res_aiSend = ThreadMessageLike;
 
@@ -165,6 +211,11 @@ export type Req_aiSendCustom = {
   userMessage: ThreadMessageLike;
   /** Per-request engine options: extra tools, reasoning, prompt override. */
   actionArgs?: AiActionArgs;
+  /**
+   * Profile to run this call on. When omitted, or when no profile has this
+   * id, the `Default` assignment is used.
+   */
+  profileId?: string;
 };
 /**
  * One-shot mode (`isStream: false`) returns the assistant message shown here;
@@ -186,6 +237,11 @@ export type AiSendStreamBody = {
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
+  /**
+   * The folder or room the user is in. Tools run against it and the model is
+   * told it is the user's location; falls back to `entityId` when omitted.
+   */
+  contextEntityId?: string;
   /** Session-level profile override for this request only. */
   profileId?: string;
 };
@@ -199,10 +255,36 @@ export type Res_aiSendWithStreamOpenAI = OpenAIStreamChunk;
 export type Req_aiRegenerateStream = {
   /** Target thread (must already exist). */
   threadId: string;
+  /**
+   * The user message to re-roll from: everything stored after it is deleted.
+   * When omitted, or no longer in the thread, the last user message is used.
+   */
+  messageId?: string;
+  /**
+   * How many messages from the start of the thread to keep, used when
+   * `messageId` does not resolve. The message at `keepCount - 1` has to be a
+   * user message; otherwise the value is ignored.
+   *
+   * @asType integer
+   */
+  keepCount?: number;
+  /**
+   * The thread length the caller saw when it computed `keepCount`. When it
+   * differs from the stored length, `keepCount` is discarded and the last
+   * user message is used instead.
+   *
+   * @asType integer
+   */
+  expectedLength?: number;
   /** Per-request engine options: extra tools, reasoning, prompt override. */
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
+  /**
+   * The folder or room the user is in. Tools run against it and the model is
+   * told it is the user's location; falls back to `entityId` when omitted.
+   */
+  contextEntityId?: string;
   /** Session-level profile override for this request only. */
   profileId?: string;
 };
@@ -229,6 +311,11 @@ export type AiToolCallData = {
   actionArgs?: AiActionArgs;
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
+  /**
+   * The folder or room the user is in. Tools run against it and the model is
+   * told it is the user's location; falls back to `entityId` when omitted.
+   */
+  contextEntityId?: string;
   /** Session-level profile override for this request only. */
   profileId?: string;
 };
@@ -259,7 +346,36 @@ export type Req_aiAssignmentsUnassign = ActionType;
 export type Req_aiAssignmentsBulkAssign = Record<string, string>;
 export type Res_aiAssignmentsBulkAssign = BulkAssignmentResult;
 export type Res_aiAssignmentsGetAssignment = string | null;
-export type Res_aiAssignmentsGetAllAssignments = Record<string, string>;
+/**
+ * Every action-to-profile binding of the scope: the action type is the key, the
+ * bound profile's id the value. An action with no binding is absent.
+ */
+export type AiAssignmentsMap = Record<string, string>;
+/**
+ * The bindings with `expand=profile`: the bound profiles themselves, plus how
+ * many profiles the portal has, so a chat can start on this one read.
+ */
+export type AiAssignmentsExpanded = {
+  /**
+   * The bound profiles keyed by action type, as `GET api/2.0/ai/profiles/list`
+   * describes them. A binding whose profile no longer exists is left out.
+   */
+  assignments: Record<string, Profile>;
+  /**
+   * How many profiles the portal has.
+   *
+   * @asType integer
+   */
+  profilesTotal: number;
+  /**
+   * How many of those profiles can chat; a profile without declared
+   * capabilities counts as one that can.
+   *
+   * @asType integer
+   */
+  chatProfilesTotal: number;
+};
+export type Res_aiAssignmentsGetAllAssignments = AiAssignmentsMap | AiAssignmentsExpanded;
 export type Req_aiAssignmentsCascadeProfileDelete = string;
 
 /* ---------------------------- Attachments ------------------------------ */
@@ -312,6 +428,27 @@ export type Req_aiAttachmentsGetMany = string[];
 export type Res_aiAttachmentsGetMany = (Attachment | null)[];
 export type Req_aiAttachmentsDelete = string;
 export type Req_aiAttachmentsDeleteMany = string[];
+export type Req_aiAttachmentsGetSuggestedQuestions = string;
+/** A starter question proposed for an attached form. */
+export type AiSuggestedQuestion = {
+  /** The question as it is shown to the user. */
+  question: string;
+  /** The prompt sent to the chat when the user picks the question. */
+  prompt: string;
+};
+/** The starter questions of an attached form, and whether they are ready. */
+export type AiSuggestedQuestionsResult = {
+  /**
+   * `ready` - the questions are there; `pending` - they are being generated
+   * and arrive over the socket, ask again later; `unavailable` - the
+   * attachment is not a form that can have any.
+   */
+  status: "ready" | "pending" | "unavailable";
+  /** The questions; empty unless `status` is `ready`. */
+  questions: AiSuggestedQuestion[];
+};
+export type Res_aiAttachmentsGetSuggestedQuestions = AiSuggestedQuestionsResult;
+
 export type Req_aiAttachmentsLinkToMessage = {
   /** Attachment ids to bind. */
   ids: string[];
@@ -320,6 +457,14 @@ export type Req_aiAttachmentsLinkToMessage = {
   /** Owning thread id. */
   threadId: string;
 };
+
+/* ------------------------------ Context -------------------------------- */
+
+export type Res_aiContextGetContextFolders = ContextFolder[];
+export type Res_aiContextGetKnowledgeFolders = ContextFolder[];
+export type Res_aiContextGetRoomSkills = RoomSkill[];
+/** The skill's Markdown body, or null when the room has no such skill. */
+export type Res_aiContextGetRoomSkill = string | null;
 
 /* ---------------------------- Preferences ------------------------------ */
 
@@ -452,7 +597,14 @@ export type Req_aiThreadsAppendUserMessage = {
   message: ThreadMessageLike;
   profileId?: string;
 };
-export type Res_aiThreadsAppendUserMessage = ThreadMessageLike;
+export type Res_aiThreadsAppendUserMessage = {
+  /**
+   * The stored message itself - with its storage-assigned `id` and
+   * `createdAt` - despite the field name, which is kept for the clients that
+   * already read it. The message ID is `messageId.id`.
+   */
+  messageId: ThreadMessageLike;
+};
 export type Req_aiThreadsTouch = {
   threadId: string;
   profileId?: string;
@@ -562,6 +714,11 @@ export type Req_aiExportTextToDocx = {
   content: string;
   /** Target folder id (int or string). */
   folderId: string | number;
+  /**
+   * Output format: `Docx` (the default when omitted), `Pdf`, or `Md`, which
+   * stores the markdown verbatim instead of converting it.
+   */
+  format?: "Docx" | "Pdf" | "Md";
 };
 /** Accepted-for-processing acknowledgement (conversion is asynchronous). */
 export type Res_aiExportTextToDocx = { success: boolean };

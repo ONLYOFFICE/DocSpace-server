@@ -218,12 +218,12 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         var draftId = await SaveDraftAsync(Owner, "Autotest before-off suggested questions.docx");
 
         // Control: answered while the switch is on.
-        (await PostRawAsync("suggested-questions", Json(new { id = draftId }))).Status.Should().Be(200);
+        (await StatusOfAsync(() => Attachments.AiAttachmentsGetSuggestedQuestionsAsync(draftId, TestContext.Current.CancellationToken))).Should().Be(200);
 
         await SetPortalAiAccessAsync(false);
 
         await ExpectRefusedOnceSettledAsync(
-            async () => (await PostRawAsync("suggested-questions", Json(new { id = draftId }))).Status,
+            () => StatusOfAsync(() => Attachments.AiAttachmentsGetSuggestedQuestionsAsync(draftId, TestContext.Current.CancellationToken)),
             "suggested-questions");
     }
 }

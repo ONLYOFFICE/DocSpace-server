@@ -84,6 +84,12 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>The stub model provider every profile of the run points at.</summary>
     protected StubModelProvider ModelProvider => fixture.ModelProvider;
 
+    /// <summary>
+    /// True for a class whose tests convert through the document server (an export that renders a .docx or a .pdf):
+    /// its setup then waits until that server is up, instead of each test waiting out its export timeout.
+    /// </summary>
+    protected virtual bool NeedsDocumentServer => false;
+
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
@@ -108,6 +114,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         await _aiClient.Authenticate(Owner);
         await _aiChatClient.Authenticate(Owner);
+
+        if (NeedsDocumentServer)
+        {
+            await fixture.WaitForDocumentServerAsync().WaitAsync(TestContext.Current.CancellationToken);
+        }
 
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
@@ -199,19 +210,12 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>Stores a user message on a thread without running the model; returns the message id.</summary>
     protected async Task<string> AppendUserMessageAsync(string threadId, string? text = null)
     {
-        // Raw on purpose — an SDK defect: AiThreadsAppendUserMessage200Response declares `messageId` a string, but
-        // the route answers with the whole stored message there ({"messageId": {id, role, content, createdAt}}), so
-        // the typed call cannot deserialize it. The request body is the SDK model all the same.
-        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
-            "/api/2.0/ai/threads/append-user-message",
-            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text)).ToJson(),
+        // The route answers with the whole stored message under `messageId`; its id is the message id.
+        var result = await _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text)),
             TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        response.IsSuccessStatusCode.Should().BeTrue($"append-user-message answered {(int)response.StatusCode}: {body}");
 
-        var messageId = JsonDocument.Parse(body).RootElement.GetProperty("messageId");
-
-        return messageId.ValueKind == JsonValueKind.Object ? messageId.GetProperty("id").GetString()! : messageId.GetString()!;
+        return result.MessageId.Id;
     }
 
     /// <summary>The text of a stored message: a plain string, or its text blocks joined.</summary>

@@ -41,6 +41,8 @@ namespace ASC.AI.Tests.Tests.TextToDocxTests;
 /// </summary>
 public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    protected override bool NeedsDocumentServer => true;
+
     protected const string TextToDocxPath = "/api/2.0/ai/text-to-docx";
 
     protected const string RequiredError = "title and content are required";
@@ -112,9 +114,9 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
     /// The SDK request with a <c>format</c> (and optionally an <c>extension</c>) added as raw JSON values.
     /// </summary>
     /// <remarks>
-    /// Raw on purpose — an SDK defect: the route takes an optional <c>format</c> ("Docx" | "Pdf" | "Md", see
-    /// textToDocxController.ts and its 400 text in openapi.ts), but <c>AiExportTextToDocxRequest</c> has no such
-    /// property, so the typed client can only ever ask for a .docx.
+    /// Only for bodies the SDK model cannot carry: a <c>format</c> outside the <c>Docx</c> | <c>Pdf</c> | <c>Md</c> enum
+    /// (another casing, a wrong JSON type, null), or an <c>extension</c>, which is not a property of
+    /// <c>AiExportTextToDocxRequest</c>. A valid format goes through <see cref="AiExportTextToDocxRequest.Format"/>.
     /// </remarks>
     protected static string WithFormat(AiExportTextToDocxRequest request, string formatJson, string? extension = null)
     {
@@ -198,6 +200,31 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
             await Task.Delay(1000, TestContext.Current.CancellationToken);
         }
     }
+
+    /// <summary>
+    /// Waits until <paramref name="count"/> files that were not in <paramref name="before"/> are in the folder, whatever
+    /// their titles, and returns the new files of the last listing. For a test whose bug is the name an export lands
+    /// under: waiting for the expected title would wait out the whole timeout while the file sits there misnamed.
+    /// </summary>
+    protected async Task<List<FileDto>> WaitForNewFilesAsync(int folderId, IReadOnlyCollection<int> before, int count = 1)
+    {
+        var deadline = DateTime.UtcNow + ExportTimeout;
+
+        while (true)
+        {
+            var added = (await ListFolderFilesAsync(folderId)).FindAll(file => !before.Contains(file.Id));
+
+            if (added.Count >= count || DateTime.UtcNow >= deadline)
+            {
+                return added;
+            }
+
+            await Task.Delay(1000, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>The ids of the files in a folder: the baseline <see cref="WaitForNewFilesAsync"/> counts against.</summary>
+    protected async Task<List<int>> FileIdsAsync(int folderId) => (await ListFolderFilesAsync(folderId)).ConvertAll(file => file.Id);
 
     /// <summary>Reads a folder until two consecutive listings hold the same files: the baseline for counting.</summary>
     protected async Task<List<FileDto>> WaitForStableFolderFilesAsync(int folderId, TimeSpan? timeout = null)

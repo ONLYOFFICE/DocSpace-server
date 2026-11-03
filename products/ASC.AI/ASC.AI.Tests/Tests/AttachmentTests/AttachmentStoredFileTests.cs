@@ -42,6 +42,8 @@ namespace ASC.AI.Tests.Tests.AttachmentTests;
 [Trait("Feature", "AI/Attachments")]
 public class AttachmentStoredFileTests(AspireAppFixture fixture) : AttachmentTestBase(fixture)
 {
+    protected override bool NeedsDocumentServer => true;
+
     /// <summary>Comfortably past the ~128 KB cap on a request body.</summary>
     private static readonly string _largeFileText = string.Concat(Enumerable.Repeat("lorem ipsum ", 20000));
 

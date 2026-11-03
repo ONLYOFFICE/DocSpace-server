@@ -42,7 +42,6 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
 {
     protected const string RegenerateStreamPath = "/api/2.0/ai/ai/regenerate-stream";
     protected const string SendWithStreamPath = "/api/2.0/ai/ai/send-with-stream";
-    protected const string ReadMessagesPath = "/api/2.0/ai/threads/read-messages";
 
     /// <summary>A well-formed message id no message has.</summary>
     protected const string UnknownMessageId = "019fcc1d-478e-749f-85df-7427ca64566b";
@@ -332,34 +331,24 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
     }
 
     /// <summary>
-    /// Reads the history raw and returns it with each message's status.
+    /// Reads the history and returns it with each message's status: the <c>reason</c> (<c>cancelled</c> vs
+    /// <c>error</c>) and the <c>error</c> of an incomplete reply are what tells a stopped reply from a failed one.
     /// </summary>
-    /// <remarks>
-    /// Raw on purpose — an SDK defect: <c>AiThreadMessageLikeStatus</c> declares only <c>type</c>, so the
-    /// <c>reason</c> (<c>cancelled</c> vs <c>error</c>) and the <c>error</c> of an incomplete reply are dropped by
-    /// the model, and they are what tells a stopped reply from a failed one.
-    /// </remarks>
-    protected async Task<List<RawMessage>> ReadMessagesRawAsync(string threadId)
+    protected async Task<List<StoredMessage>> ReadStoredMessagesAsync(string threadId)
     {
-        using var response = await new RawApiClient(_aiChatClient).GetAsync(
-            $"{ReadMessagesPath}?threadId={Uri.EscapeDataString(threadId)}",
-            TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.OK, body);
+        var messages = await _aiThreads.AiThreadsReadMessagesAsync(threadId, cancellationToken: TestContext.Current.CancellationToken);
 
-        using var document = JsonDocument.Parse(body);
-
-        return [.. document.RootElement.EnumerateArray().Select(RawMessage.From)];
+        return [.. messages.Select(StoredMessage.From)];
     }
 
-    /// <summary>Polls the raw history until <paramref name="until"/> holds or the deadline passes; returns the last read.</summary>
-    protected async Task<List<RawMessage>> WaitForRawMessagesAsync(string threadId, Func<List<RawMessage>, bool> until)
+    /// <summary>Polls the history until <paramref name="until"/> holds or the deadline passes; returns the last read.</summary>
+    protected async Task<List<StoredMessage>> WaitForStoredMessagesAsync(string threadId, Func<List<StoredMessage>, bool> until)
     {
         var deadline = DateTime.UtcNow + ReplyTimeout;
 
         while (true)
         {
-            var messages = await ReadMessagesRawAsync(threadId);
+            var messages = await ReadStoredMessagesAsync(threadId);
 
             if (until(messages) || DateTime.UtcNow >= deadline)
             {
@@ -378,48 +367,31 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
         public override string ToString() => $"HTTP {(int)StatusCode}, frames [{string.Join(",", FramesSeen)}], streamed \"{StreamedText}\"";
     }
 
-    /// <summary>One stored message as the raw JSON has it, status included.</summary>
-    protected sealed record RawMessage(string? Id, string? Role, string Text, string? StatusType, string? StatusReason, string? StatusError)
+    /// <summary>One stored message flattened for the assertions, status included.</summary>
+    protected sealed record StoredMessage(string? Id, string? Role, string Text, string? StatusType, string? StatusReason, string? StatusError)
     {
         public bool IsAssistant => Role == "assistant";
 
         public bool IsUser => Role == "user";
 
-        public static RawMessage From(JsonElement message)
-        {
-            string? type = null, reason = null, error = null;
-
-            if (message.TryGetProperty("status", out var status) && status.ValueKind == JsonValueKind.Object)
-            {
-                type = StringOf(status, "type");
-                reason = StringOf(status, "reason");
-                error = status.TryGetProperty("error", out var e) && e.ValueKind is not (JsonValueKind.Null or JsonValueKind.Undefined)
-                    ? e.ToString()
-                    : null;
-            }
-
-            return new RawMessage(StringOf(message, "id"), StringOf(message, "role"), TextOfContent(message), type, reason, error);
-        }
-
-        private static string? StringOf(JsonElement element, string name) =>
-            element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
-
-        private static string TextOfContent(JsonElement message)
-        {
-            if (!message.TryGetProperty("content", out var content))
-            {
-                return string.Empty;
-            }
-
-            return content.ValueKind switch
-            {
-                JsonValueKind.String => content.GetString() ?? string.Empty,
-                JsonValueKind.Array => string.Concat(content.EnumerateArray()
-                    .Where(b => b.ValueKind == JsonValueKind.Object && StringOf(b, "type") == "text")
-                    .Select(b => StringOf(b, "text"))),
-                _ => string.Empty
-            };
-        }
+        public static StoredMessage From(AiThreadMessageLike message) =>
+            new(
+                message.Id,
+                message.Role switch
+                {
+                    AiThreadMessageLike.RoleEnum.User => "user",
+                    AiThreadMessageLike.RoleEnum.Assistant => "assistant",
+                    _ => message.Role.ToString().ToLowerInvariant()
+                },
+                message.Content?.ActualInstance switch
+                {
+                    string text => text,
+                    List<AiMessageContentBlock> blocks => string.Concat(blocks.Where(b => b.Type == "text").Select(b => b.Text)),
+                    _ => string.Empty
+                },
+                message.Status?.Type,
+                message.Status?.Reason,
+                message.Status?.Error?.ToJson());
 
         public override string ToString() => $"{Role} {Id} [{StatusType}/{StatusReason}] \"{Text}\"";
     }

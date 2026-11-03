@@ -107,7 +107,7 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
             async () => await _aiThreads.AiThreadsGetByIdAsync(doomed.ThreadId, TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(404);
 
-        (await TryReadMessagesRawAsync(doomed.ThreadId)).Messages.Should().BeEmpty("and it holds no messages either");
+        (await TryReadStoredMessagesAsync(doomed.ThreadId)).Messages.Should().BeEmpty("and it holds no messages either");
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
 
         // Whether the late reply is dropped or lands in the emptied thread is the backend's choice; the cleared
         // question coming back is not — that is history the user asked to be gone.
-        var messages = await ReadMessagesRawAsync(thread.ThreadId);
+        var messages = await ReadStoredMessagesAsync(thread.ThreadId);
         UserMessages(messages).Should().BeEmpty($"the cleared question must stay cleared: {string.Join("\n", messages)}");
 
         (await _aiThreads.AiThreadsGetByIdAsync(thread.ThreadId, TestContext.Current.CancellationToken)).Title

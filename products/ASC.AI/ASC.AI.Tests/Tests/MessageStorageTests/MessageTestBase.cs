@@ -57,34 +57,17 @@ public abstract class MessageTestBase(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     /// <summary>Stores a user message through <c>append-user-message</c>; returns the new message id.</summary>
-    /// <remarks>
-    /// The request is the SDK model, the response is read raw on purpose — an SDK defect:
-    /// <c>AiThreadsAppendUserMessage200Response.MessageId</c> is declared a string, but the route answers
-    /// <c>{"messageId": {id, role, content, createdAt}}</c> (the controller wraps the whole stored message the engine
-    /// returns), so the typed call fails to deserialize. Both shapes are accepted here so the helper keeps working
-    /// once either side is fixed.
-    /// </remarks>
+    /// <remarks>The route answers with the whole stored message under <c>messageId</c>; its id is the message id.</remarks>
     protected async Task<string> AppendAsync(string threadId, string? text = null)
     {
-        var request = new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text));
-
-        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
-            AppendUserMessagePath,
-            request.ToJson(),
+        var result = await _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text)),
             TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK, body);
+        result.MessageId.Should().NotBeNull();
+        result.MessageId.Id.Should().NotBeNullOrEmpty();
 
-        using var document = JsonDocument.Parse(body);
-        var messageId = document.RootElement.GetProperty("messageId");
-        var id = messageId.ValueKind == JsonValueKind.Object
-            ? messageId.GetProperty("id").GetString()
-            : messageId.GetString();
-
-        id.Should().NotBeNullOrEmpty(body);
-
-        return id!;
+        return result.MessageId.Id;
     }
 
     /// <summary>

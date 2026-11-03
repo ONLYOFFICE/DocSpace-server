@@ -141,7 +141,7 @@ public class McpToolCallReplayTests(AspireAppFixture fixture) : McpTestBase(fixt
         // The stale decision, made against a message that is no longer the thread's last one at all.
         await ApproveAsync(chat, pending, "STALE REPLAY RESULT", tools: _tools);
 
-        var final = await ReadMessagesRawAsync(chat.ThreadId);
+        var final = await ReadStoredMessagesAsync(chat.ThreadId);
         final.Should().HaveCount(4, "the later turn was not deleted by the stale decision");
         var finalReplies = AssistantMessages(final);
         Str(finalReplies[1], "id").Should().Be(Str(secondReply, "id"));

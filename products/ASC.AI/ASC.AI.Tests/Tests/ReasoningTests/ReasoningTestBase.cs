@@ -126,23 +126,20 @@ public abstract class ReasoningTestBase(AspireAppFixture fixture) : BaseTest(fix
             ["type"] = draft["type"]?.DeepClone()
         };
 
-        var body = new AiSendStreamBody(
-            threadId: thread.ThreadId,
-            userMessage: BuildUserMessage("How many employees are in the attached CSV file?"),
-            entityId: roomId,
-            profileId: profile.Id);
-        var json = System.Text.Json.Nodes.JsonNode.Parse(body.ToJson())!.AsObject();
-        json["userMessage"]!["content"]!.AsArray().Insert(0, new System.Text.Json.Nodes.JsonObject
-        {
-            ["type"] = "file",
-            ["mimeType"] = reference.ToJsonString(),
-            ["data"] = string.Empty
-        });
+        var userMessage = new AiThreadMessageLike(
+            role: AiThreadMessageLike.RoleEnum.User,
+            content: new AiMessageContent(
+            [
+                new AiMessageContentBlock(type: "file", mimeType: reference.ToJsonString(), data: string.Empty),
+                new AiMessageContentBlock(type: "text", text: "How many employees are in the attached CSV file?")
+            ]));
+        var body = new AiSendStreamBody(threadId: thread.ThreadId, userMessage: userMessage, entityId: roomId, profileId: profile.Id);
 
         provider.Enqueue(StubModelProvider.Text("Three."));
+        // The response is raw for the same reason as BaseTest.SendWithStreamAsync: an ndjson stream the SDK declares as one frame.
         using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
             "/api/2.0/ai/ai/send-with-stream",
-            json.ToJsonString(),
+            body.ToJson(),
             TestContext.Current.CancellationToken);
         var round = ChatRound.Parse(response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 

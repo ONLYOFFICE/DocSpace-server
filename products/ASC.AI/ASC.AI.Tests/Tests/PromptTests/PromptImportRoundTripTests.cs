@@ -46,20 +46,18 @@ public class PromptImportRoundTripTests(AspireAppFixture fixture) : PromptsTestB
     {
         var folder = await SeedLibraryAsync();
         var original = await ReadLibraryAsync();
-        var exported = await ExportRawAsync();
+        var exported = await _aiPrompts.AiPromptsExportAsync(Token);
 
         // Change everything the export holds.
         await _aiPrompts.AiPromptsRenameFolderAsync(new AiPromptsRenameFolderRequest(folder.Id, "Autotest moved"), Token);
         await CreatePromptAsync("Autotest stray", "added afterwards");
         await _aiPrompts.AiPromptsDeleteAsync(original.Prompts[0].Id, Token);
 
-        var (status, body) = await ImportBundleRawAsync(exported, "replace");
+        var answer = await ImportBundleAsync(exported, AiImportMode.Replace);
 
-        status.Should().Be(200, body);
-        var answer = ParseBody(body);
-        answer.GetProperty("success").GetBoolean().Should().BeTrue(body);
-        answer.GetProperty("imported").GetProperty("folders").GetInt32().Should().Be(original.Folders.Count);
-        answer.GetProperty("imported").GetProperty("prompts").GetInt32().Should().Be(original.Prompts.Count);
+        answer.Success.Should().BeTrue();
+        answer.Imported.Folders.Should().Be(original.Folders.Count);
+        answer.Imported.Prompts.Should().Be(original.Prompts.Count);
 
         ShapeOf(await ReadLibraryAsync()).Should().BeEquivalentTo(ShapeOf(original), "names, texts and which folder holds what");
     }
@@ -69,7 +67,7 @@ public class PromptImportRoundTripTests(AspireAppFixture fixture) : PromptsTestB
     {
         await SeedLibraryAsync();
         var original = await ReadLibraryAsync();
-        var exported = await ExportRawAsync();
+        var exported = await _aiPrompts.AiPromptsExportAsync(Token);
 
         foreach (var folder in original.Folders)
         {
@@ -85,13 +83,11 @@ public class PromptImportRoundTripTests(AspireAppFixture fixture) : PromptsTestB
         emptied.Folders.Should().BeEmpty("the library really was emptied first");
         emptied.Prompts.Should().BeEmpty();
 
-        var (status, body) = await ImportBundleRawAsync(exported, "merge");
+        var answer = await ImportBundleAsync(exported, AiImportMode.Merge);
 
-        status.Should().Be(200, body);
-        var answer = ParseBody(body);
-        answer.GetProperty("success").GetBoolean().Should().BeTrue(body);
-        answer.GetProperty("imported").GetProperty("folders").GetInt32().Should().Be(original.Folders.Count);
-        answer.GetProperty("imported").GetProperty("prompts").GetInt32().Should().Be(original.Prompts.Count);
+        answer.Success.Should().BeTrue();
+        answer.Imported.Folders.Should().Be(original.Folders.Count);
+        answer.Imported.Prompts.Should().Be(original.Prompts.Count);
 
         var restored = await ReadLibraryAsync();
         ShapeOf(restored).Should().BeEquivalentTo(ShapeOf(original));
@@ -103,12 +99,13 @@ public class PromptImportRoundTripTests(AspireAppFixture fixture) : PromptsTestB
     {
         await SeedLibraryAsync();
         var before = await ReadLibraryAsync();
-        var exported = await ExportRawAsync();
+        var exported = await _aiPrompts.AiPromptsExportAsync(Token);
 
-        var (status, body) = await ImportBundleRawAsync(exported, "merge");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ImportBundleAsync(exported, AiImportMode.Merge));
 
-        status.Should().Be(409, body);
-        var answer = ParseBody(body);
+        var body = exception.ErrorContent?.ToString();
+        exception.ErrorCode.Should().Be(409, body);
+        var answer = BodyOf(exception);
         answer.GetProperty("success").GetBoolean().Should().BeFalse(body);
         answer.GetProperty("errors").EnumerateArray().Select(e => e.GetProperty("ref").GetString())
             .Order(StringComparer.Ordinal)

@@ -63,7 +63,7 @@ public class ChatClearedThreadTests(AspireAppFixture fixture) : ChatPart3TestBas
 
         var cleared = await _aiThreads.AiThreadsClearMessagesAsync(thread.ThreadId, TestContext.Current.CancellationToken);
         cleared.Success.Should().BeTrue();
-        (await ReadMessagesRawAsync(thread.ThreadId)).Should().BeEmpty();
+        (await ReadStoredMessagesAsync(thread.ThreadId)).Should().BeEmpty();
 
         // The same question again, in the same thread.
         var afterClear = await SendWithStreamAsync(thread.ThreadId, Recall, profile.Id);

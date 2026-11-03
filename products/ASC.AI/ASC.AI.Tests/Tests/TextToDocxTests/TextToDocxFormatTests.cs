@@ -64,16 +64,18 @@ public class TextToDocxFormatTests(AspireAppFixture fixture) : TextToDocxPortTes
     }
 
     [Theory]
-    [InlineData("Docx", ".docx")]
-    [InlineData("Pdf", ".pdf")]
-    [InlineData("Md", ".md")]
-    public async Task Export_WithFormat_WritesAFileOfThatFormat(string format, string extension)
+    [InlineData(AiExportTextToDocxRequest.FormatEnum.Docx, ".docx")]
+    [InlineData(AiExportTextToDocxRequest.FormatEnum.Pdf, ".pdf")]
+    [InlineData(AiExportTextToDocxRequest.FormatEnum.Md, ".md")]
+    public async Task Export_WithFormat_WritesAFileOfThatFormat(AiExportTextToDocxRequest.FormatEnum format, string extension)
     {
         var folderId = await GetMyDocumentsFolderIdAsync();
         var title = $"Exported format {format} {RandomSuffix()}";
+        var request = BuildExport(title, "The assistant said hello.", folderId);
+        request.Format = format;
 
-        var result = await PostExportRawAsync(WithFormat(BuildExport(title, "The assistant said hello.", folderId), $"\"{format}\""));
-        result.StatusCode.Should().Be(HttpStatusCode.Accepted, result.Body);
+        var result = await TryExportAsync(request);
+        result.StatusCode.Should().Be(HttpStatusCode.Accepted, result.Error);
 
         var exported = await WaitForExportedFileAsync(folderId, $"{title}{extension}");
         exported.Should().NotBeNull($"no \"{title}{extension}\" for format \"{format}\"");
@@ -86,6 +88,7 @@ public class TextToDocxFormatTests(AspireAppFixture fixture) : TextToDocxPortTes
         var folderId = await GetMyDocumentsFolderIdAsync();
         var title = $"Exported format override {RandomSuffix()}";
 
+        // Raw on purpose: `extension` is not a property of the SDK request, so the typed client cannot send it.
         var result = await PostExportRawAsync(WithFormat(BuildExport(title, "The assistant said hello.", folderId), "\"Pdf\"", ".txt"));
         result.StatusCode.Should().Be(HttpStatusCode.Accepted, result.Body);
 
