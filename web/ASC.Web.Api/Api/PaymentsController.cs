@@ -1878,7 +1878,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimitDto))]
-    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given, `userId` is missing for the scope `Custom` or given for another scope, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(400, "`scope` is missing, neither `amountValue` nor `quantityValue` is given, `userId` is missing for the scope `Custom` or given for another scope, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or the user does not exist")]
     [SwaggerResponse(409, "A limit of this scope, or for this user, exists already")]
@@ -1896,8 +1896,10 @@ public class PaymentController(
             throw new ArgumentException("Either the amount or the quantity threshold must be set");
         }
 
+        var scope = inDto.Scope.Value;
+
         string participantName = null;
-        if (inDto.Scope == ServiceLimitScope.Custom)
+        if (scope == ServiceLimitScope.Custom)
         {
             if (!inDto.UserId.HasValue)
             {
@@ -1913,12 +1915,12 @@ public class PaymentController(
             throw new ArgumentException("Only a personal limit is set for a user");
         }
 
-        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Scope, participantName,
+        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, scope, participantName,
             inDto.AmountValue, inDto.QuantityValue, inDto.Period);
 
-        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, inDto.Scope, participantName);
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, scope, participantName);
 
-        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, inDto.Scope, participantName);
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, scope, participantName);
 
         return serviceLimit.Map();
     }
