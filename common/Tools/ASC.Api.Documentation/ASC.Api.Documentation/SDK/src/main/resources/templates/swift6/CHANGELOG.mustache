@@ -1,5 +1,27 @@
 # Change Log
 
+## 4.1.0
+
+### Added
+
+- Added the AI project API in `Sources/OpenAPIClient/APIs/Rooms/RoomsAIApi.swift`: `RoomsAIApi` with `getProjectModel` and `setProjectModel` (the chat model of an AI project), `getProjectSources`, `linkProjectSources` and `unlinkProjectSources` (the rooms linked to a project as its sources), `getRoomSkills` and `getRoomsSkills` (the skills of an Instructions room and the skills catalog), with the models `AiProjectModel`, `AiProjectModelDto`, `AiProjectModelWrapper`, `AiProjectSourceDto`, `AiProjectSourcesDto`, `AiProjectSourcesWrapper`, `AiSkillDto`, `AiSkillsDto`, `AiSkillsRoomDto`, `AiSkillsWrapper`, `LinkAiProjectSourcesRequest`, `UnlinkAiProjectSourcesRequest` and `UpdateAiProjectModelRequest`
+- Added `aiContextGetKnowledgeFolders` to `AIContextApi`
+- `aiAssignmentsGetAllAssignments` takes `expand`: `profile` answers the assigned profiles themselves instead of their IDs
+- Added `hasMetadataFields` to `EntryMetadataDto`
+- Added enum values: `RoomType.InstructionsRoom`, `KnowledgeRoom` and `AiProjectRoom`; `FolderType.InstructionsRoom`, `KnowledgeRoom`, `AiProjectRoom` and `AiHub`; `FilterType.InstructionsRooms`, `KnowledgeRooms` and `AiProjectRooms`; `SearchArea.AiHub`; `SubjectType.AiProject`; `MessageAction.RoomsLinkedToAiProject`, `RoomsUnlinkedFromAiProject` and `AiProjectProfileAssigned`
+
+### Changed
+
+- The API classes are renamed: the doubled `APIApi` suffix is gone, and a tag that repeats its folder or has none takes the folder alone. `AIAIAPIApi` → `AIApi`, `AIContextAPIApi` → `AIContextApi`, `FilesFilesAPIApi` → `FilesApi`, `FilesFoldersAPIApi` → `FilesFoldersApi`, `RoomsAPIApi` → `RoomsApi`, `BackupAPIApi` → `BackupApi`, `AuthenticationAPIApi` → `AuthenticationApi`, and so on for every class (`<Folder><Tag>APIApi` → `<Folder><Tag>Api`)
+- Each API class lives in a source file named after it (`Sources/OpenAPIClient/APIs/AI/AIContextApi.swift`, `APIs/Files/FilesApi.swift`) and is described in `docs/<class>.md` (`docs/AIContextApi.md`)
+- The inline models of `FileEntryDto` lost their `Ai` prefix: `AiFileEntryDtoAllOfAvailableShareRights`, `AiFileEntryDtoAllOfSecurity` and `AiFileEntryDtoAllOfShareSettings` are now `FileEntryDtoAllOfAvailableShareRights`, `FileEntryDtoAllOfSecurity` and `FileEntryDtoAllOfShareSettings`
+- `OpenAPIClient.podspec` and `project.yml` carry the package version
+- The API version is 4.1.0
+
+### Removed
+
+- Removed the AI agents: `AIAgentsAPIApi` in 4.0.0 naming (`aiAgentsList`, `aiAgentsCreate`, `aiAgentsGet`, `aiAgentsUpdate`, `aiAgentsDelete`, `aiAgentsNews`, `aiAgentsUpdateQuota` and `aiAgentsResetQuota`) and the `Ai`-prefixed models it used (`AiFolderWrapper`, `AiFolderContentWrapper`, `AiFileOperationWrapper`, `AiAgentsCreateRequest`, `AiAgentsUpdateRequest` and the others). The server no longer serves `/api/2.0/ai/agents`; an AI project (`RoomType.AiProjectRoom`) takes the place of an agent
+
 ## 4.0.0
 
 ### Added

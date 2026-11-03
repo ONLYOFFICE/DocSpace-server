@@ -66,13 +66,53 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     // their Origin/Authorization default headers never collide across parallel tests), but they all
     // reuse this one handler, which avoids creating a short-lived connection pool per test and the
     // socket churn / TIME_WAIT exhaustion that comes with it.
-    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false };
+    //
+    // The links a portal returns carry its own host, <alias>.docspace.localhost (see SetBaseDomainAsync).
+    // Windows does not resolve *.localhost, so the handler connects every such host to the loopback itself.
+    // "localhost" goes there too: Windows tries ::1 first, and the ports Docker publishes (identity, OpenSearch)
+    // listen on 127.0.0.1 only, so every new connection waited ~2 s for the refusal before falling back.
+    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false, ConnectCallback = ConnectAsync };
+
+    /// <summary>The base domain of the test portals: each one is <c>&lt;alias&gt;.docspace.localhost</c>.</summary>
+    public const string BaseDomain = "docspace.localhost";
+
+    private static async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    {
+        var host = context.DnsEndPoint.Host;
+        EndPoint endPoint = host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase)
+            ? new IPEndPoint(IPAddress.Loopback, context.DnsEndPoint.Port)
+            : context.DnsEndPoint;
+
+        var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+
+        try
+        {
+            await socket.ConnectAsync(endPoint, cancellationToken);
+
+            return new NetworkStream(socket, ownsSocket: true);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
+    }
 
     /// <summary>
     /// The services this suite needs on top of ApiSystem and WebApi, which are always started
     /// (portal registration and authentication). Names come from <see cref="ResourceNames"/>.
     /// </summary>
     protected abstract IEnumerable<string> Resources { get; }
+
+    /// <summary>
+    /// Services only some test classes of the suite need. They start with the stack and get their clients at once,
+    /// but the run does not wait for them: a test that uses them calls <see cref="WaitForLazyResourcesAsync"/>, so the
+    /// other classes start as soon as <see cref="Resources"/> are healthy.
+    /// </summary>
+    protected virtual IEnumerable<string> LazyResources => [];
+
+    private readonly Lock _lazyResourcesLock = new();
+    private Task? _lazyResourcesHealthy;
 
     /// <summary>
     /// The AppHost launch profile this suite's stack is built from. The profile is where the resource
@@ -146,7 +186,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
                 + "went healthy is the one to read, not this.");
         }
 
-        foreach (var resource in resources)
+        foreach (var resource in resources.Union(LazyResources))
         {
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
@@ -164,6 +204,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         await DisableStartDocsAsync();
 
         await InitializePasswordSaltAsync();
+
+        await SetBaseDomainAsync();
 
         await OnStartedAsync();
 
@@ -224,6 +266,39 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     ///
     /// A failure is reported and left non-fatal: the suite still passes, just slower.
     /// </remarks>
+    /// <summary>
+    /// Gives the installation a base domain the way a server installation sets it: through ApiSystem
+    /// <c>settings/save</c>, stored for tenant -1. The services keep <c>core:base-domain=localhost</c>, which is
+    /// what switches the standalone mode on, but with only that every portal's domain is "localhost"
+    /// (<c>Tenant.GetTenantDomain</c>): the links the server hands the document server (a docbuilder script, a
+    /// file to convert, a callback) then led to the default portal and were refused there. With the base domain
+    /// each portal is <c>&lt;alias&gt;.docspace.localhost</c> and those links reach the portal that signed them.
+    /// On a server installation the call needs a DocSpace admin, so it is made as the owner of a portal of its own.
+    /// </summary>
+    private async Task SetBaseDomainAsync()
+    {
+        await Timing.Measure("basedomain.set", async () =>
+        {
+            using var clients = await CreatePortalAsync(TestContext.Current.CancellationToken);
+            await clients.WebApiHttpClient.Authenticate(clients.Owner);
+
+            using var apiSystem = CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], $"http://{clients.PortalName}");
+            apiSystem.DefaultRequestHeaders.Authorization = clients.WebApiHttpClient.DefaultRequestHeaders.Authorization;
+
+            using var response = await apiSystem.PostAsJsonAsync(
+                "settings/save",
+                new { tenantId = -1, key = "BaseDomain", value = BaseDomain },
+                TestContext.Current.CancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+                throw new HttpRequestException($"Setting the base domain failed ({(int)response.StatusCode}): {body}");
+            }
+        });
+    }
+
     private async Task DisableStartDocsAsync()
     {
         // AdditionalWhiteLabelSettings.ID, as EF stores it in the varchar(64) key column.
@@ -406,6 +481,34 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         Environment.SetEnvironmentVariable("NEXTCLOUD_URL", $"{origin}/remote.php/dav/files/{user}/");
         Environment.SetEnvironmentVariable("NEXTCLOUD_LOGIN", user);
         Environment.SetEnvironmentVariable("NEXTCLOUD_PASSWORD", ASC.AppHost.Configuration.Constants.NextcloudPassword);
+    }
+
+    /// <summary>
+    /// Waits until every service of <see cref="LazyResources"/> is healthy. The first caller starts the wait and the
+    /// others share it, so it costs the run once.
+    /// </summary>
+    public Task WaitForLazyResourcesAsync()
+    {
+        lock (_lazyResourcesLock)
+        {
+            return _lazyResourcesHealthy ??= WaitForHealthyAsync(LazyResources.ToList());
+        }
+    }
+
+    private async Task WaitForHealthyAsync(List<string> resources)
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+
+        try
+        {
+            await Task.WhenAll(resources.Select(r => _app.ResourceNotifications.WaitForResourceHealthyAsync(r, startUp.Token)));
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"{string.Join(", ", resources)} did not come up within {_startUpBudget.TotalMinutes} minutes. The log "
+                + "of whichever of them never went healthy is the one to read, not this.");
+        }
     }
 
     private Uri ResolveBaseAddress(string resourceName)

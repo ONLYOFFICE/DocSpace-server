@@ -40,11 +40,11 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 internal static class WebhooksTestData
 {
     /// <summary>
-    /// A fresh webhook configuration payload with a unique name and target URL. The backend
-    /// validates the URL with a HEAD request and requires a 200 response — with redirects NOT
-    /// followed, so <c>onlyoffice.com</c> (301 to www) fails; <c>example.com</c> answers 200
-    /// directly, which is also what the TS suite uses. <c>secretKey</c> is required by the
-    /// backend on create/update even though the SDK marks it optional.
+    /// A fresh webhook configuration payload with a unique name, for a caller that sets <c>uri</c> itself. The
+    /// backend probes the URL with a HEAD request and wants a success code, so the default points at a path of
+    /// the WireMock receiver that nothing is stubbed for: it answers 404 and the create fails at once, offline,
+    /// instead of reaching the internet. Use <see cref="CreateWebhookDtoAsync"/> for a body that is accepted.
+    /// <c>secretKey</c> is required by the backend on create even though the SDK marks it optional.
     /// </summary>
     public static CreateWebhooksConfigRequestDto CreateWebhookDto(
         bool enabled = false, bool ssl = false, WebhookTrigger? triggers = null)
@@ -53,10 +53,30 @@ internal static class WebhooksTestData
 
         return new CreateWebhooksConfigRequestDto(
             name: $"webhook-{suffix}",
-            uri: $"https://example.com/?id={suffix}",
+            uri: $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}/hooks/unstubbed-{suffix}",
             secretKey: Initializer.Faker.Random.AlphaNumeric(20),
             enabled: enabled,
             ssl: ssl,
             triggers: triggers);
+    }
+
+    /// <summary>
+    /// A fresh webhook configuration payload pointed at an endpoint of its own on the WireMock receiver, which
+    /// answers the HEAD probe with 200 and every delivery with 200. The suite needs no internet for it.
+    /// </summary>
+    public static async Task<CreateWebhooksConfigRequestDto> CreateWebhookDtoAsync(
+        HttpClient receiverAdmin, bool enabled = false, WebhookTrigger? triggers = null, string? targetId = null)
+    {
+        var receiver = await WebhookReceiver.CreateAsync(receiverAdmin);
+        var dto = CreateWebhookDto(enabled: enabled, triggers: triggers);
+
+        dto.Uri = receiver.TargetUri;
+
+        if (targetId is not null)
+        {
+            dto.TargetId = targetId;
+        }
+
+        return dto;
     }
 }

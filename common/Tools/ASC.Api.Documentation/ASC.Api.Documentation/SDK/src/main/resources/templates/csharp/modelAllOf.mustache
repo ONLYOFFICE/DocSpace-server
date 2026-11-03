@@ -133,7 +133,7 @@
     {{#hasOnlyReadOnly}}
         [JsonConstructor]
     {{/hasOnlyReadOnly}}
-        public {{classname}}({{#vendorExtensions.x-localVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}} = {{#defaultValue}}{{^isDateTime}}{{#isString}}{{^isEnum}}@{{/isEnum}}{{/isString}}{{{defaultValue}}}{{/isDateTime}}{{#isDateTime}}default{{/isDateTime}}{{/defaultValue}}{{^defaultValue}}default{{/defaultValue}}{{^-last}}, {{/-last}}{{/vendorExtensions.x-localVars}}){{#parent}} : base({{#parentVars}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{^-last}}, {{/-last}}{{/parentVars}}){{/parent}}
+        public {{classname}}({{#vendorExtensions.x-localVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}} = {{#defaultValue}}{{^isDateTime}}{{#isString}}{{^isEnum}}@{{/isEnum}}{{/isString}}{{{defaultValue}}}{{/isDateTime}}{{#isDateTime}}default{{/isDateTime}}{{/defaultValue}}{{^defaultValue}}default{{/defaultValue}}{{^-last}}, {{/-last}}{{/vendorExtensions.x-localVars}}){{#parent}} : base(){{/parent}}
         {
             {{^vendorExtensions.isApiDateTime}}
             {{#vendorExtensions.x-localVars}}

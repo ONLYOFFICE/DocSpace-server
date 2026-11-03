@@ -37,14 +37,17 @@ namespace ASC.Files.Tests.Tests._01_Files.Forms;
 /// Shared setup for the form-metadata suites (<c>isformpdf</c>, <c>formroles</c>, <c>fillresult</c>).
 /// </summary>
 /// <remarks>
-/// The integration-test AppHost provisions no document-server resource, so nothing that needs a real
-/// document conversion (<c>SaveFileAsPdf</c>, or <c>CopyFileAs</c> with <c>toForm</c>/a mismatched
-/// extension) can run here — see the porting report for what that ruled out and what replaced it.
-/// A genuine ONLYOFFICE PDF form is instead obtained by uploading the shared <c>new.pdf</c> asset
-/// (embedded resource <c>ASC.Files.Tests.Data.new.pdf</c>), which already carries the
-/// <c>ONLYOFFICEFORM</c> signature the product's <c>FileChecker</c> looks for. A deliberately
-/// non-form PDF is built in memory instead, since the product's own blank-PDF template is itself an
-/// ONLYOFFICE form and would defeat a "not a form" test.
+/// A genuine ONLYOFFICE PDF form is obtained by uploading the shared <c>new.pdf</c> asset (embedded
+/// resource <c>ASC.Files.Tests.Data.new.pdf</c>), which carries the <c>ONLYOFFICEFORM</c> signature the
+/// product's <c>FileChecker</c> looks for. The TypeScript suite converts .docx → .docxf → .pdf through
+/// the document server instead; the upload is kept on purpose: these suites are about how the portal
+/// treats a form, not how one is made, and an upload takes milliseconds and does not depend on the
+/// document server. A converted upload ends up in the same <c>InsertFileAsync</c> and <c>isformpdf</c>
+/// reads the content each time, so the two are the same file to the portal. The forms the document
+/// server produces are checked once, in <see cref="IsFormPdfTests"/>, through
+/// <see cref="ConvertToOoFormAsync"/> — which also catches a change of the signature that a fixed
+/// asset would not. A deliberately non-form PDF is built in memory, since the product's own blank-PDF
+/// template is itself an ONLYOFFICE form and would defeat a "not a form" test.
 /// </remarks>
 public abstract class FormsTestBase(
     AspireAppFixture fixture)
@@ -65,6 +68,30 @@ public abstract class FormsTestBase(
         }
 
         return await UploadFileAsync(folderId, fileName, content.ToArray());
+    }
+
+    /// <summary>
+    /// Makes an ONLYOFFICE PDF form the way a user does and the TypeScript <c>createOoForm</c> helper
+    /// does: a new .docx in My documents, turned into a .docxf template and then into a .pdf form in
+    /// <paramref name="folderId"/>, both steps through <c>copyas</c> with <c>toForm</c>, which the
+    /// document server converts.
+    /// </summary>
+    protected async Task<int> ConvertToOoFormAsync(int folderId, string fileName)
+    {
+        var source = await CreateFileInMy("Autotest OO Form Source.docx", Owner);
+        var myDocsId = source.FolderId;
+
+        var template = (await _filesApi.CopyFileAsAsync(
+            source.Id,
+            new CopyAsRequest("Autotest OO Form Template.docxf", new CopyAsRequestDestFolderId(myDocsId), toForm: true),
+            TestContext.Current.CancellationToken)).Response;
+
+        var form = (await _filesApi.CopyFileAsAsync(
+            template.Should().BeOfType<FileDto>().Subject.Id,
+            new CopyAsRequest(fileName, new CopyAsRequestDestFolderId(folderId), toForm: true),
+            TestContext.Current.CancellationToken)).Response;
+
+        return form.Should().BeOfType<FileDto>().Subject.Id;
     }
 
     /// <summary>

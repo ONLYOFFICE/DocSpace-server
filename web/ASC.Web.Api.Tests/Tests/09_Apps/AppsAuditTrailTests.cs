@@ -40,7 +40,6 @@ namespace ASC.Web.Api.Tests.Tests._09_Apps;
 /// so they are compared as numbers.
 /// </summary>
 [Trait("Category", "Apps")]
-[Trait("Category", "Bug")]
 [Trait("Bug", "84747")]
 public class AppsAuditTrailTests(
     AspireAppFixture fixture)
@@ -61,7 +60,7 @@ public class AppsAuditTrailTests(
         await SaveEnabledAsync(id, enabled);
 
         // Assert
-        var events = await PollAuditEventsAsync(e => IsAppEvent(e, expectedAction, id));
+        var events = await PollAuditEventsAsync(all => all.Any(e => IsAppEvent(e, expectedAction, id)));
         events.Should().ContainSingle(e => IsAppEvent(e, expectedAction, id));
     }
 
@@ -73,10 +72,13 @@ public class AppsAuditTrailTests(
 
         // Act
         await SaveEnabledAsync(id, false);
+        // The audit date is stored to the second and same-second events are written by parallel consumers,
+        // so the order of two events is defined only when they fall into different seconds.
+        await Task.Delay(TimeSpan.FromSeconds(1.1), Ct);
         await SaveEnabledAsync(id, true);
 
         // Assert — the trail lists the newest event first
-        var events = await PollAuditEventsAsync(e => IsAppEvent(e, AppEnabled, id));
+        var events = await PollAuditEventsAsync(all => all.Any(e => IsAppEvent(e, AppEnabled, id)) && all.Any(e => IsAppEvent(e, AppDisabled, id)));
         var switches = events
             .Where(e => IsAppEvent(e, AppEnabled, id) || IsAppEvent(e, AppDisabled, id))
             .Select(e => (int)e.ActionId!.Value)
@@ -90,7 +92,7 @@ public class AppsAuditTrailTests(
         return auditEvent.ActionId is { } actionId && (int)actionId == action && auditEvent.Action.Contains(id);
     }
 
-    private async Task<List<AuditEventDto>> PollAuditEventsAsync(Func<AuditEventDto, bool> until)
+    private async Task<List<AuditEventDto>> PollAuditEventsAsync(Func<List<AuditEventDto>, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
@@ -98,7 +100,7 @@ public class AppsAuditTrailTests(
         {
             var events = (await _auditTrailDataApi.GetAuditEventsByFilterAsync(cancellationToken: Ct)).Response ?? [];
 
-            if (events.Any(until) || DateTime.UtcNow >= deadline)
+            if (until(events) || DateTime.UtcNow >= deadline)
             {
                 return events;
             }

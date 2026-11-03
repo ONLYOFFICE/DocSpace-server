@@ -94,12 +94,11 @@ public class RoomLogoLifecycleTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(Encoding.UTF8.GetBytes("this is not a valid image"), "logo.png", "image/png")]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await UploadLogo(Encoding.UTF8.GetBytes("this is not a valid image")));
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)400);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]

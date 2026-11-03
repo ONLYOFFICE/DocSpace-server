@@ -144,6 +144,11 @@ LINE_CHECKS = [
      re.compile(r"\.Log(Trace|Debug|Information|Warning|Error|Critical)\s*\(|\b_?logger\.Log\s*\("), is_cs),
     ("logging.md", "string interpolation in a log call",
      re.compile(r"\.Log\w*\(\s*\$\""), is_cs),
+    ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
+     re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
+    ("correctness", "* configuration value read - bounds checked (0, negative, above a framework limit)?",
+     re.compile(r"\.GetValue<\s*(int|long|double|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
+     lambda p: is_cs(p) and not is_test(p)),
     ("http-clients.md", "`new HttpClient(` (IHttpClientFactory required)",
      re.compile(r"new\s+HttpClient\s*\("), is_cs),
     ("http-clients.md", "new named HttpClient registered",
@@ -218,6 +223,9 @@ LINE_CHECKS = [
     ("ts-ai-style.md", "`any` / console.* in ASC.AI.Chat",
      re.compile(r":\s*any\b|\bas\s+any\b|console\.(log|error|warn|info)"), lambda p: p.endswith(".ts")),
 ]
+
+
+EMPTY_CATCH = re.compile(r"catch\s*(?:\([^)]*\))?\s*(?:when\s*\((?:[^()]|\([^()]*\))*\)\s*)?\{\s*(?://[^\n]*\s*)*\}")
 
 
 # --- localized resources (.resx) -----------------------------------------------------------------
@@ -326,6 +334,98 @@ def print_resx_section(files: list[tuple[str, str]], base: str, head: str | None
                 print(f"      !! placeholder mismatch: {', '.join(broken)}")
         if len(keys) > 20:
             print(f"    ... and {len(keys) - 20} more keys")
+    print()
+
+
+# --- changed endpoints, stateful code, size ------------------------------------------------------
+# These sections feed the cross-cutting matrix (SKILL.md §3 A0), reviewer G and the chunking of
+# reviewers (SKILL.md §3 "Coverage"): a reviewer handed a large area samples it, and these lists make
+# the work enumerable.
+
+HTTP_ATTR = re.compile(r'^\s*\[Http(Get|Post|Put|Delete|Patch)(?:\(\s*"([^"]*)")?')
+ACTION = re.compile(r"^\s*public\s+(?:async\s+)?[\w<>\[\],.? ]+?\s+(\w+)\s*\(")
+# the controllers here name their route with [ApiEndpoint("...")]; [Route] is the plain ASP.NET form
+CLASS_ROUTE = re.compile(r'^\s*\[(?:Route|ApiEndpoint)\(\s*"([^"]*)"')
+
+
+def method_end(lines: list[str], start: int) -> int:
+    """The 1-based line of the brace that closes the member declared on line `start`: the first `}` at the
+    member's own indentation (or the end of an expression-bodied member)."""
+    indent = len(lines[start - 1]) - len(lines[start - 1].lstrip())
+    for i in range(start, len(lines)):
+        text = lines[i]
+        if text.strip() == "}" and len(text) - len(text.lstrip()) == indent:
+            return i + 1
+        if i == start - 1 and text.rstrip().endswith(";"):
+            return i + 1
+    return len(lines)
+
+
+def print_endpoints_section(files, added, read_head) -> None:
+    print("## Changed endpoints (one row each in the cross-cutting matrix, SKILL.md §3 A0)")
+    rows = []
+    for st, p in files:
+        if not p.endswith("Controller.cs") or not is_cs(p) or is_test(p) or st.startswith("D"):
+            continue
+        changed = {n for n, _ in added.get(p, [])}
+        blob = read_head(p) if changed else None
+        if not blob:
+            continue
+        lines = blob.decode("utf-8", "replace").splitlines()
+        prefix, actions, pending = "", [], None
+        for i, line in enumerate(lines, 1):
+            if not prefix and (m := CLASS_ROUTE.match(line)):
+                prefix = m.group(1)
+            if m := HTTP_ATTR.match(line):
+                pending = (i, m.group(1).upper(), m.group(2) or "")
+            elif pending and (m := ACTION.match(line)):
+                lo = pending[0]
+                while lo > 1 and lines[lo - 2].strip().startswith(("///", "[")):
+                    lo -= 1
+                actions.append([lo, pending[0], pending[1], pending[2], m.group(1), method_end(lines, i)])
+                pending = None
+        for k, (lo, attr, verb, route, name, end) in enumerate(actions):
+            # the action ends at its own closing brace: the private helpers and any class below it are not its lines
+            hi = min(end, actions[k + 1][0] - 1) if k + 1 < len(actions) else end
+            n = sum(1 for x in changed if lo <= x <= hi)
+            if n:
+                mark = "new" if attr in changed else f"{n} changed line(s)"
+                rows.append(f"  {verb:6} {prefix}/{route}".rstrip("/") + f"  {name}  [{p}:{attr}]  ({mark})")
+    print("\n".join(rows) if rows else "  none")
+    print()
+
+
+STATEFUL = re.compile(
+    r"\b(BackgroundService|IHostedService|PeriodicTimer|Channel<|SemaphoreSlim|IDistributedLockProvider|"
+    r"DistributedLock|StopAsync|IIntegrationEventHandler|Interlocked)\b|(\w*(?:lease|nextattempt|retry)\w*)", re.I)
+
+
+def print_stateful_section(added) -> None:
+    print("## Stateful / background processing (reviewer G, SKILL.md §3 G)")
+    rows = []
+    for path, lines in sorted(added.items()):
+        if not is_cs(path) or is_test(path):
+            continue
+        kinds = sorted({m.group(1) or m.group(2) for _, t in lines for m in STATEFUL.finditer(t)})
+        if len(kinds) >= 2:
+            rows.append(f"  {path}: {', '.join(kinds[:8])}")
+    print("\n".join(rows) if rows else "  none")
+    print()
+
+
+CHUNK_LINES = 1500
+
+
+def print_size_section(added) -> None:
+    prod = {p: len(ls) for p, ls in added.items() if is_cs(p) and not is_test(p)
+            and not p.endswith((".Designer.cs", "ModelSnapshot.cs"))}
+    total = sum(prod.values())
+    chunks = max(1, -(-total // CHUNK_LINES))
+    print("## Size (SKILL.md §3 Coverage)")
+    print(f"  added lines in product .cs: {total} in {len(prod)} file(s) -> "
+          f"{chunks} chunk(s) of ~{CHUNK_LINES} lines for reviewers B, D, E, G")
+    for p, n in sorted(prod.items(), key=lambda x: -x[1])[:10]:
+        print(f"    {n:5}  {p}")
     print()
 
 
@@ -438,6 +538,21 @@ def main() -> None:
                 hits[("performance", "* await inside a loop - N+1 round-trips?")].append(f"{path}:{loop_line}")
                 loop_indent = None
 
+    # empty catch / swallowed failure, across lines (the braces are on lines of their own here), with or without a
+    # `when` filter; a catch whose body is only a comment counts as empty too
+    for path, lines in added.items():
+        if not is_cs(path) or is_test(path):
+            continue
+        blob = Path(path).read_bytes() if a.worktree and Path(path).exists() else git_bytes("show", f"{a.head}:{path}")
+        if not blob:
+            continue
+        text = blob.decode("utf-8", "replace")
+        added_numbers = {n for n, _ in lines}
+        for m in EMPTY_CATCH.finditer(text):
+            line = text.count("\n", 0, m.start()) + 1
+            if added_numbers & set(range(line, line + m.group(0).count("\n") + 1)):
+                hits[("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?")].append(f"{path}:{line}")
+
     # license header on new source files
     for st, p in files:
         if st.startswith("A") and p.endswith((".cs", ".ts")) and not p.startswith(("migrations/", "sdk/")):
@@ -523,6 +638,12 @@ def main() -> None:
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
     print()
+
+    read_head = (lambda p: Path(p).read_bytes() if Path(p).exists() else None) if a.worktree \
+        else (lambda p: git_bytes("show", f"{a.head}:{p}"))
+    print_endpoints_section(files, added, read_head)
+    print_stateful_section(added)
+    print_size_section(added)
 
     # --- localized resources -------------------------------------------------------------------
     print_resx_section(files, merge_base, None if a.worktree else a.head)

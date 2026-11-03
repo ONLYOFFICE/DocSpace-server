@@ -1,5 +1,24 @@
 # Change Log
 
+## 4.1.0
+
+### Added
+
+- Added the AI project API in `lib/docspace-api-sdk/api/Rooms/ai-api.rb`: `Rooms::AIApi` with `get_project_model` and `set_project_model` (the chat model of an AI project), `get_project_sources`, `link_project_sources` and `unlink_project_sources` (the rooms linked to a project as its sources), `get_room_skills` and `get_rooms_skills` (the skills of an Instructions room and the skills catalog), with the models `AiProjectModel`, `AiProjectModelDto`, `AiProjectModelWrapper`, `AiProjectSourceDto`, `AiProjectSourcesDto`, `AiProjectSourcesWrapper`, `AiSkillDto`, `AiSkillsDto`, `AiSkillsRoomDto`, `AiSkillsWrapper`, `LinkAiProjectSourcesRequest`, `UnlinkAiProjectSourcesRequest` and `UpdateAiProjectModelRequest`
+- Added `ai_context_get_knowledge_folders` to `AI::ContextApi`
+- `ai_assignments_get_all_assignments` takes `expand`: `profile` answers the assigned profiles themselves instead of their IDs
+- Added `hasMetadataFields` to `EntryMetadataDto`
+- Added enum values: `RoomType.InstructionsRoom`, `KnowledgeRoom` and `AiProjectRoom`; `FolderType.InstructionsRoom`, `KnowledgeRoom`, `AiProjectRoom` and `AiHub`; `FilterType.InstructionsRooms`, `KnowledgeRooms` and `AiProjectRooms`; `SearchArea.AiHub`; `SubjectType.AiProject`; `MessageAction.RoomsLinkedToAiProject`, `RoomsUnlinkedFromAiProject` and `AiProjectProfileAssigned`
+
+### Changed
+
+- The inline models of `FileEntryDto` lost their `Ai` prefix: `AiFileEntryDtoAllOfAvailableShareRights`, `AiFileEntryDtoAllOfSecurity` and `AiFileEntryDtoAllOfShareSettings` are now `FileEntryDtoAllOfAvailableShareRights`, `FileEntryDtoAllOfSecurity` and `FileEntryDtoAllOfShareSettings`
+- The API version is 4.1.0
+
+### Removed
+
+- Removed the AI agents: `AI::AgentsApi` (`ai_agents_list`, `ai_agents_create`, `ai_agents_get`, `ai_agents_update`, `ai_agents_delete`, `ai_agents_news`, `ai_agents_update_quota` and `ai_agents_reset_quota`) and the `Ai`-prefixed models it used (`AiFolderWrapper`, `AiFolderContentWrapper`, `AiFileOperationWrapper`, `AiAgentsCreateRequest`, `AiAgentsUpdateRequest` and the others). The server no longer serves `/api/2.0/ai/agents`; an AI project (`RoomType.AiProjectRoom`) takes the place of an agent
+
 ## 4.0.0
 
 ### Added

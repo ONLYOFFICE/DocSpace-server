@@ -80,5 +80,8 @@ public enum SubjectType
     InvitationLink = 3,
 
     [Description("Primary external link")]
-    PrimaryExternalLink = 4
+    PrimaryExternalLink = 4,
+
+    [Description("Read access to a room linked to an AI project the user is a member of")]
+    AiProject = 5
 }

@@ -78,4 +78,11 @@ public static class ResourceNames
     /// account configured from outside in charge.
     /// </summary>
     public const string Nextcloud = "nextcloud";
+
+    /// <summary>
+    /// The WireMock the webhook delivery tests subscribe to. Its admin API (<c>/__admin</c>) is reached
+    /// through this resource; the portal itself sends to it as
+    /// <c>ASC.AppHost.Configuration.Constants.WebhookReceiverHost</c> on the same port.
+    /// </summary>
+    public const string WebhookReceiver = ASC.AppHost.Configuration.Constants.WebhookReceiverContainer;
 }

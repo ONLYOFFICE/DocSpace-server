@@ -41,6 +41,46 @@ namespace ASC.Files.Tests.Tests._10_Metadata;
 [Trait("Category", "Metadata")]
 public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CreateTemplate_WithoutFields_ReturnsBadRequestAndCreatesNothing(bool fieldsOmitted)
+    {
+        await _filesClient.Authenticate(Owner);
+        var name = "Empty " + Suffix();
+
+        // a template is a set of fields: an empty one used to be created and could then be assigned, with nothing to fill in
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateTemplateAsync(name, fieldsOmitted ? null : []));
+
+        exception.ErrorCode.Should().Be(400);
+
+        var templates = (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        templates.Should().NotContain(t => t.Name == name, "a refused template leaves nothing behind");
+    }
+
+    [Fact]
+    public async Task DeleteField_TheLastOne_ReturnsBadRequestAndKeepsTheField()
+    {
+        await _filesClient.Authenticate(Owner);
+        var template = await CreateTemplateAsync("Last field " + Suffix(),
+        [
+            new MetadataFieldRequest("Client", MetadataFieldType.String),
+            new MetadataFieldRequest("Amount", MetadataFieldType.Number)
+        ]);
+
+        // the first of two goes, the template keeps the other one
+        await _metadataApi.DeleteFieldAsync(template.Id, template.Field("Amount").Id, TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _metadataApi.DeleteFieldAsync(template.Id, template.Field("Client").Id, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400, "the last field goes with the template, not on its own");
+
+        var reloaded = await GetTemplateAsync(template.Id);
+        reloaded.Fields.Should().ContainSingle().Which.Name.Should().Be("Client");
+    }
+
     [Fact]
     public async Task UpdateField_WithNameOnly_KeepsTheFieldType()
     {
@@ -82,7 +122,7 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     public async Task UpdateTemplate_PersistsTheNewNameAndVisibility()
     {
         await _filesClient.Authenticate(Owner);
-        var template = await CreateTemplateAsync("Before " + Suffix(), []);
+        var template = await CreateTemplateAsync("Before " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var newName = "After " + Suffix();
 
         var updated = (await _metadataApi.UpdateTemplateAsync(template.Id, new UpdateMetadataTemplate(newName, visible: false), TestContext.Current.CancellationToken)).Response;
@@ -99,7 +139,7 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     public async Task GetTemplates_ReportsTheAuthorsAsUsers()
     {
         await _filesClient.Authenticate(Owner);
-        var template = await CreateTemplateAsync("Authored " + Suffix(), []);
+        var template = await CreateTemplateAsync("Authored " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
 
         // the author used to be a bare id, and a templates table resolved every author with a request of its own
         var listed = (await _metadataApi.GetTemplatesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Single(t => t.Id == template.Id);
@@ -148,7 +188,7 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     {
         await _filesClient.Authenticate(Owner);
         var owner = await CreateTemplateAsync("Owner " + Suffix(), [new MetadataFieldRequest("Amount", MetadataFieldType.Number)]);
-        var other = await CreateTemplateAsync("Other " + Suffix(), []);
+        var other = await CreateTemplateAsync("Other " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _metadataApi.UpdateFieldAsync(other.Id, owner.Field("Amount").Id, new UpdateMetadataFieldRequest(name: "Hijacked"), TestContext.Current.CancellationToken));
@@ -164,7 +204,7 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     {
         await _filesClient.Authenticate(Owner);
 
-        var template = await CreateTemplateAsync("Hidden " + Suffix(), [], visible: false);
+        var template = await CreateTemplateAsync("Hidden " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)], visible: false);
 
         template.Visible.Should().BeFalse();
 

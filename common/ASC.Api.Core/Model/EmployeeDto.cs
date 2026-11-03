@@ -124,7 +124,7 @@ public class EmployeeDto
 public class EmployeeDtoHelper(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserPhotoManager userPhotoManager,
-    CommonLinkUtility commonLinkUtility,
+    UserFieldsHelper userFieldsHelper,
     UserManager userManager,
     AuthContext authContext,
     ILogger<EmployeeDtoHelper> logger)
@@ -134,6 +134,7 @@ public class EmployeeDtoHelper(
     protected readonly UserManager _userManager = userManager;
     protected readonly AuthContext _authContext = authContext;
     protected readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
+    protected readonly UserFieldsHelper _userFieldsHelper = userFieldsHelper;
 
     public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
     {
@@ -178,29 +179,31 @@ public class EmployeeDtoHelper(
         //     result.Title = userInfo.Title;
         // }
 
-        var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
+        var avatars = await _userFieldsHelper.GetAvatarUrlsAsync(userInfo, absolute: false);
 
-        result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarSmall = avatars.AvatarSmall;
+        result.AvatarOriginal = avatars.AvatarOriginal;
+        result.AvatarMax = avatars.AvatarMax;
+        result.AvatarMedium = avatars.AvatarMedium;
+        result.Avatar = avatars.Avatar;
 
         // The profile link is a people search by email, so it would hand a User or a Guest the email of someone
         // else (bug 81093); neither of them has access to the contacts anyway.
-        if (result.Id != Guid.Empty && !await IsWithoutContactsAccessAsync(userInfo.Id))
+        if (!await IsWithoutContactsAccessAsync(userInfo.Id))
         {
-            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
-            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
+            result.ProfileUrl = await _userFieldsHelper.GetProfileUrlAsync(userInfo.Id);
         }
 
         return result;
     }
 
-    private async Task<bool> IsWithoutContactsAccessAsync(Guid userId)
+    /// <summary>
+    /// Whether the current account may not see the contacts of the user: a User or a Guest looking at someone else.
+    /// </summary>
+    protected async Task<bool> IsWithoutContactsAccessAsync(Guid userId)
     {
         var currentId = _authContext.CurrentAccount.ID;
 
-        return currentId != userId && (await _userManager.IsUserAsync(currentId) || await _userManager.IsGuestAsync(currentId));
+        return currentId != userId && await _userManager.IsWithoutContactsAccessAsync(currentId);
     }
 }

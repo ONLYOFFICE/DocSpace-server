@@ -117,30 +117,40 @@ public class KnowledgeSearchToolFactory(
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
         // The form-analysis sub-agent gets only the form-data tools.
-        if (context.FormSubAgent)
+        if (context.FormSubAgent || !await aiAccessibility.IsVectorizationEnabledAsync())
         {
             return ToolBundle.Empty;
         }
 
-        if (context.Folder is not Folder<int> { IsAgent: true } agent ||
-            !await aiAccessibility.IsVectorizationEnabledAsync() ||
-            !await fileSecurity.CanUseAiAsync(agent))
+        var rooms = context.KnowledgeRooms.Count > 0
+            ? await fileSecurity.FilterReadAsync(context.KnowledgeRooms.ToAsyncEnumerable()).Cast<Folder<int>>().ToListAsync()
+            : context.Folder switch
+            {
+                Folder<int> { IsAgent: true } agent => await fileSecurity.CanUseAiAsync(agent) && await HasKnowledgeAsync(agent) ? [agent] : [],
+                Folder<int> { FolderType: FolderType.KnowledgeRoom } room => await fileSecurity.CanReadAsync(room) ? [room] : [],
+                _ => []
+            };
+
+        if (rooms.Count == 0)
         {
             return ToolBundle.Empty;
         }
 
-        var folderDao = daoFactory.GetFolderDao<int>();
+        var chatFolder = context.Folder as Folder<int> ?? rooms[0];
 
-        var knowledge = await folderDao.GetFoldersAsync(agent.Id, FolderType.Knowledge).FirstAsync();
-        if (knowledge is null || knowledge.FilesCount == 0)
-        {
-            return ToolBundle.Empty;
-        }
-
-        return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(agent))]);
+        return new ToolBundle(Prompt, [new AiTool(Name, MakeFunction(chatFolder, rooms.Select(room => room.Id).ToList()))]);
     }
 
-    private AIFunction MakeFunction(Folder<int> agent)
+    private async Task<bool> HasKnowledgeAsync(Folder<int> agent)
+    {
+        var knowledge = await daoFactory.GetFolderDao<int>()
+            .GetFoldersAsync(agent.Id, FolderType.Knowledge)
+            .FirstOrDefaultAsync();
+
+        return knowledge is { FilesCount: > 0 };
+    }
+
+    private AIFunction MakeFunction(Folder<int> chatFolder, List<int> roomIds)
     {
         return AIFunctionFactory.Create(Function, new AIFunctionFactoryOptions
         {
@@ -149,6 +159,6 @@ public class KnowledgeSearchToolFactory(
         });
 
         Task<List<KnowledgeSearchResult>> Function([Description("Search query")] string query) =>
-            searchEngine.SearchAsync(agent, query);
+            searchEngine.SearchAsync(chatFolder, roomIds, query);
     }
 }

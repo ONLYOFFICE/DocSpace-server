@@ -126,4 +126,28 @@
   <data name="User" xml:space="preserve">
     <value>පරිශ්‍රීලකයා</value>
   </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI ව්‍යාපෘතියකට උපදෙස් කාමර {0} කට වඩා සම්බන්ධ කළ නොහැක</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI ව්‍යාපෘතියකට දැනුම් කාමර {0} කට වඩා සම්බන්ධ කළ නොහැක</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>මෙම කාමර AI ව්‍යාපෘතියට සම්බන්ධ කළ නොහැක: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>උපදෙස් කාමරයකට එක් කළ හැක්කේ Markdown (.md) ගොනු පමණි</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>උපදෙස් කාමරයක කුසලතා {0} කට වඩා තිබිය නොහැක</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>කුසලතා විස්තරය අනුලකුණු 1 සිට 1024 දක්වා විය යුතු අතර XML ටැග් අඩංගු නොවිය යුතුය</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>කුසලතා ගොනුව name සහ description ක්ෂේත්‍ර සහිතව --- පේළි දෙකක් අතර ඇති YAML frontmatter කොටසකින් ආරම්භ විය යුතුය</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>කුසලතා නාමය අනුලකුණු 1 සිට 64 දක්වා විය යුතු අතර කුඩා අකුරු, ඉලක්කම් සහ තනි හයිෆන පමණක් අඩංගු විය යුතු අතර හයිෆනයකින් ආරම්භ හෝ අවසන් නොවිය යුතුය</value>
+  </data>
 </root>

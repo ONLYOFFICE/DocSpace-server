@@ -65,13 +65,12 @@ public class RoomsFolderFilterTests(
         var created = await CreateCustomRoom(title);
 
         // Act - filterValue is served from the search index, so poll instead of reading once.
-        // The typed model also drops id/roomType (see RoomsFolderTestBase.GetRoomsFolderRawAsync).
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(filterValue: title),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(filterValue: title),
             r => r.Folders.Any(f => f.Id == created.Id));
 
         // Assert
-        var folder = raw.Folders.Should().ContainSingle(f => f.Id == created.Id).Which;
+        var folder = rooms.Folders.Should().ContainSingle(f => f.Id == created.Id).Which;
         folder.Title.Should().Be(title);
         folder.RoomType.Should().Be(RoomType.CustomRoom);
 
@@ -91,11 +90,11 @@ public class RoomsFolderFilterTests(
         await CreateAllRoomTypesAsync();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(type: [RoomType.PublicRoom]);
+        var rooms = await ListRoomsAsync(type: [RoomType.PublicRoom]);
 
         // Assert
-        raw.Folders.Should().HaveCount(1);
-        raw.Folders.Should().OnlyContain(f => f.RoomType == RoomType.PublicRoom);
+        rooms.Folders.Should().HaveCount(1);
+        rooms.Folders.Should().OnlyContain(f => f.RoomType == RoomType.PublicRoom);
     }
 
     [Fact]
@@ -106,12 +105,12 @@ public class RoomsFolderFilterTests(
         await CreateAllRoomTypesAsync();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(type: [RoomType.CustomRoom, RoomType.PublicRoom]);
+        var rooms = await ListRoomsAsync(type: [RoomType.CustomRoom, RoomType.PublicRoom]);
 
         // Assert
-        raw.Folders.Should().HaveCount(2);
-        raw.Folders.Select(f => f.RoomType).Should().OnlyContain(t => t == RoomType.CustomRoom || t == RoomType.PublicRoom);
-        raw.Folders.Select(f => f.RoomType).Should().Contain(RoomType.CustomRoom).And.Contain(RoomType.PublicRoom);
+        rooms.Folders.Should().HaveCount(2);
+        rooms.Folders.Select(f => f.RoomType).Should().OnlyContain(t => t == RoomType.CustomRoom || t == RoomType.PublicRoom);
+        rooms.Folders.Select(f => f.RoomType).Should().Contain(RoomType.CustomRoom).And.Contain(RoomType.PublicRoom);
     }
 
     [Fact]
@@ -122,10 +121,10 @@ public class RoomsFolderFilterTests(
         await CreateAllRoomTypesAsync();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(type: [RoomType.VirtualDataRoom]);
+        var rooms = await ListRoomsAsync(type: [RoomType.VirtualDataRoom]);
 
         // Assert
-        var types = raw.Folders.Select(f => f.RoomType).ToList();
+        var types = rooms.Folders.Select(f => f.RoomType).ToList();
         types.Should().NotContain(RoomType.CustomRoom);
         types.Should().NotContain(RoomType.PublicRoom);
         types.Should().NotContain(RoomType.EditingRoom);
@@ -142,16 +141,14 @@ public class RoomsFolderFilterTests(
 
         // Act - filterValue is served from the search index, so poll instead of reading once.
         var result = await PollAsync(
-            async () => (await _roomsApi.GetRoomsFolderAsync(filterValue: exactTitle, cancellationToken: TestContext.Current.CancellationToken)).Response,
+            () => ListRoomsAsync(filterValue: exactTitle),
             r => r.Folders.Any(f => f.Title == exactTitle));
 
         // Assert
-        result.Folders.Should().ContainSingle();
-        result.Folders[0].Title.Should().Be(exactTitle);
-
-        // room.Id has no counterpart on FileEntryBaseDto (see GetRoomsFolderRawAsync), so this
-        // test can only assert the room was created, not that the returned entry is the same one.
-        room.RoomType.Should().Be(RoomType.CustomRoom);
+        var found = result.Folders.Should().ContainSingle().Which;
+        found.Id.Should().Be(room.Id);
+        found.Title.Should().Be(exactTitle);
+        found.RoomType.Should().Be(RoomType.CustomRoom);
     }
 
     [Fact]
@@ -199,14 +196,14 @@ public class RoomsFolderFilterTests(
         await CreateCustomRoom("Autotest Unrelated " + Guid.NewGuid().ToString()[..8]);
 
         // Act - filterValue is served from the search index, so poll instead of reading once.
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(filterValue: shared, type: [RoomType.CustomRoom]),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(filterValue: shared, type: [RoomType.CustomRoom]),
             r => r.Folders.Count > 0);
 
         // Assert
-        raw.Folders.Should().ContainSingle();
-        raw.Folders[0].Title.Should().Be($"{shared} Custom");
-        raw.Folders[0].RoomType.Should().Be(RoomType.CustomRoom);
+        rooms.Folders.Should().ContainSingle();
+        rooms.Folders[0].Title.Should().Be($"{shared} Custom");
+        rooms.Folders[0].RoomType.Should().Be(RoomType.CustomRoom);
     }
 
     /// <remarks>
@@ -229,10 +226,10 @@ public class RoomsFolderFilterTests(
         var untagged = await CreateCustomRoom("Autotest Room No Tag");
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tag }));
+        var rooms = await ListRoomsAsync(tags: JsonSerializer.Serialize(new[] { tag }));
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(tagged.Id);
         ids.Should().NotContain(untagged.Id);
     }
@@ -283,10 +280,10 @@ public class RoomsFolderFilterTests(
         var withNeither = await CreateCustomRoom("Autotest None");
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(tags: JsonSerializer.Serialize(new[] { tagA, tagB }));
+        var rooms = await ListRoomsAsync(tags: JsonSerializer.Serialize(new[] { tagA, tagB }));
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(withA.Id);
         ids.Should().Contain(withB.Id);
         ids.Should().NotContain(withNeither.Id);
@@ -305,10 +302,10 @@ public class RoomsFolderFilterTests(
         var untagged = await CreateCustomRoom("Autotest Untagged");
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(withoutTags: true);
+        var rooms = await ListRoomsAsync(withoutTags: true);
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(untagged.Id);
         ids.Should().NotContain(tagged.Id);
     }
@@ -321,10 +318,10 @@ public class RoomsFolderFilterTests(
         var created = await CreateCustomRoom("Autotest Untagged Only");
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(withoutTags: true);
+        var rooms = await ListRoomsAsync(withoutTags: true);
 
         // Assert
-        raw.Folders.Select(f => f.Id).Should().Contain(created.Id);
+        rooms.Folders.Select(f => f.Id).Should().Contain(created.Id);
     }
 
     [Fact]
@@ -342,10 +339,10 @@ public class RoomsFolderFilterTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(subjectOwnerId: admin.Id);
+        var rooms = await ListRoomsAsync(subjectOwnerId: admin.Id);
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(adminRoom.Id);
         ids.Should().NotContain(ownerRoom.Id);
     }
@@ -365,10 +362,10 @@ public class RoomsFolderFilterTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(subjectOwnerId: admin.Id, excludeSubject: true);
+        var rooms = await ListRoomsAsync(subjectOwnerId: admin.Id, excludeSubject: true);
 
         // Assert
-        var ids = raw.Folders.Select(f => f.Id).ToList();
+        var ids = rooms.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(ownerRoom.Id);
         ids.Should().NotContain(adminRoom.Id);
     }

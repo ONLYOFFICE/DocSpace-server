@@ -32,7 +32,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
-import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString, getNumber, getObject, getArray } from "../narrow.js";
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
 import type { ThreadsStorage, ThreadsCursor } from "@onlyoffice/ai-chat/core";
@@ -43,6 +42,10 @@ import {
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 
+// Threads are one list per user, whatever folder or AI project the chat is
+// opened in. The `entityId` the library passes on create and list (the
+// project id, or nothing) is accepted for the interface's sake and ignored;
+// the C# storage keeps the list under `entityId: null`.
 const PATH = "/threads";
 
 const MAX_PAGES = 1000;
@@ -97,12 +100,11 @@ export function dtoToThread(raw: unknown): Thread | null {
 }
 
 export class HttpThreadsStorage implements ThreadsStorage {
-  async create(title: string, profileId?: string, entityId?: string): Promise<Thread> {
-    const scopedEntityId = await resolveAgentEntityId(entityId);
+  async create(title: string, profileId?: string, _entityId?: string): Promise<Thread> {
     const raw = await aiService.post(PATH, {
       title,
       profileId: profileId ?? null,
-      entityId: scopedEntityId ?? null,
+      entityId: null,
     });
     const thread = dtoToThread(raw);
     if (!thread) {
@@ -131,12 +133,11 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   async readAll(
-    entityId?: string,
+    _entityId?: string,
     count?: number,
     cursor?: ThreadsCursor,
     query?: string,
   ): Promise<Thread[]> {
-    const scopedEntityId = await resolveAgentEntityId(entityId);
     if (cursor && cursor.lastEditDate === null) {
       return [];
     }
@@ -146,14 +147,14 @@ export class HttpThreadsStorage implements ThreadsStorage {
         : undefined;
 
     if (count !== undefined) {
-      const page = await this.readPage(scopedEntityId, count, wireCursor, query);
+      const page = await this.readPage(count, wireCursor, query);
       return page.items;
     }
 
     const result: Thread[] = [];
     let next = wireCursor ?? null;
     for (let i = 0; i < MAX_PAGES; i++) {
-      const page = await this.readPage(scopedEntityId, PAGE_SIZE, next ?? undefined, query);
+      const page = await this.readPage(PAGE_SIZE, next ?? undefined, query);
       result.push(...page.items);
       next = page.next;
       if (!next) {
@@ -164,15 +165,11 @@ export class HttpThreadsStorage implements ThreadsStorage {
   }
 
   private async readPage(
-    entityId: string | undefined,
     count: number,
     cursor: WireThreadsCursor | undefined,
     query: string | undefined,
   ): Promise<ThreadsPage> {
     const params: Record<string, QueryValue> = { count };
-    if (entityId) {
-      params["entityId"] = entityId;
-    }
     if (query) {
       params["query"] = query;
     }

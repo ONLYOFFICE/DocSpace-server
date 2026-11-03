@@ -82,7 +82,7 @@ public static class OpenApiExtension
             var openApiInfo = new OpenApiInfo
             {
                 Title = "ONLYOFFICE DocSpace API",
-                Version = "4.0.0",
+                Version = "4.1.0",
                 // One Info object serves every service document (a single AddOpenApi call site in
                 // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
                 Description = "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, " +
@@ -135,6 +135,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<ErrorResponseFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
+            c.DocumentFilter<DiscriminatorTargetsDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
@@ -152,6 +153,8 @@ public static class OpenApiExtension
             // Must stay after every filter that produces content: it rewrites what the filters above have
             // produced into openapi 3.1 form.
             c.DocumentFilter<OpenApi31SchemaDocumentFilter>();
+            // Reads the examples the filter above has just moved into `examples`.
+            c.DocumentFilter<IntegerOrStringParameterFilter>();
             // Last of all: it only moves the finished third-party operations into the real ones, and has to
             // see them in their final 3.1 form.
             c.DocumentFilter<ThirdPartyVariantDocumentFilter>();
@@ -318,6 +321,9 @@ public static class OpenApiExtension
                     c.IncludeXmlComments(() => doc);
                 }
             }
+
+            // after the XML comments: their filter sets the description this one appends to
+            c.OperationFilter<WebhookOperationFilter>();
         });
     }
 
@@ -549,6 +555,83 @@ public static class OpenApiExtension
         }
     }
 
+    /// <summary>
+    /// Describes an id that is "an integer or a string" (a <see cref="JsonElement"/>) as a plain string when it travels
+    /// in a query, path or header.
+    /// </summary>
+    /// <remarks>
+    /// There the value is text either way, and the binder (<c>ParseQueryParam</c>) reads a numeric text as a number
+    /// and anything else as a string, so <c>type: string</c> describes the wire exactly. The <c>oneOf</c> that suits a
+    /// JSON body made every generator build a wrapper class for the parameter and put that wrapper's
+    /// <c>toString()</c> on the query (<c>destFolderId=class ... { ActualInstance: 5 }</c>), so the generated methods
+    /// of <c>GET files/fileops/move</c> and <c>GET files/fileops/checkdestfolder</c> could not send a valid request.
+    /// It runs on the finished 3.1 document, where every example already sits in <c>examples</c>. The flattened query
+    /// parameters share their schema objects with the body component, so the schemas are replaced, never changed in
+    /// place.
+    /// </remarks>
+    private class IntegerOrStringParameterFilter : IDocumentFilter
+    {
+        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+        {
+            var operations = (swaggerDoc.Paths ?? []).Values.SelectMany(path => path.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>());
+
+            foreach (var parameter in operations.SelectMany(operation => operation.Parameters ?? []))
+            {
+                if (parameter is not OpenApiParameter { In: not ParameterLocation.Cookie, Schema: OpenApiSchema schema } concrete)
+                {
+                    continue;
+                }
+
+                if (IsIntegerOrString(schema.OneOf) || IsIntegerOrString(schema.AnyOf))
+                {
+                    concrete.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Description = schema.Description,
+                        Examples = ToStringExamples(schema.Examples)
+                    };
+                }
+                else if (schema.Items is OpenApiSchema items && (IsIntegerOrString(items.OneOf) || IsIntegerOrString(items.AnyOf)))
+                {
+                    concrete.Schema = new OpenApiSchema
+                    {
+                        Type = schema.Type,
+                        Description = schema.Description,
+                        Examples = ToStringExamples(schema.Examples),
+                        Items = new OpenApiSchema { Type = JsonSchemaType.String }
+                    };
+                }
+            }
+        }
+
+        /// <summary>
+        /// The two variants a <see cref="JsonElement"/> id is described with. An enum is described by a string and an
+        /// integer variant too, but each of those lists its members, and a query enum keeps its schema.
+        /// </summary>
+        private static bool IsIntegerOrString(IList<IOpenApiSchema> variants)
+        {
+            return variants is { Count: 2 } &&
+                   variants.All(v => v.Enum is not { Count: > 0 }) &&
+                   variants.Any(v => v.Type == JsonSchemaType.Integer) &&
+                   variants.Any(v => v.Type == JsonSchemaType.String);
+        }
+
+        private static List<JsonNode> ToStringExamples(IList<JsonNode> examples)
+        {
+            return examples?.Select(ToStringExample).ToList();
+        }
+
+        private static JsonNode ToStringExample(JsonNode example)
+        {
+            return example switch
+            {
+                JsonArray array => new JsonArray([.. array.Select(ToStringExample)]),
+                JsonValue value => JsonValue.Create(value.ToJsonString().Trim('"')),
+                _ => example?.DeepClone()
+            };
+        }
+    }
+
     private class FlattenObjectQueryParameterFilter : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
@@ -618,6 +701,66 @@ public static class OpenApiExtension
             {
                 properties.TryAdd(name, property);
             }
+        }
+    }
+
+    /// <summary>
+    /// Publishes the webhooks an action declares with <see cref="RaisesWebhookAttribute"/>: each trigger with its
+    /// condition in <c>x-docspace-webhooks</c>, and one sentence per attribute at the end of the description.
+    /// </summary>
+    /// <remarks>
+    /// The sentence is for everything that only shows the description - Scalar, the SDK doc comments, an agent's tool
+    /// definition. The extension is what the webhooks contract is built from: ASC.Webhooks.Contract reads it from the
+    /// generated documents and lists, under every trigger, the operations that raise it. The trigger names are the
+    /// ones a receiver sees in <c>event.trigger</c>, not the enum member names.
+    /// </remarks>
+    private class WebhookOperationFilter : IOperationFilter
+    {
+        private const string ExtensionName = "x-docspace-webhooks";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var raises = context.MethodInfo.GetCustomAttributes<RaisesWebhookAttribute>().ToList();
+            if (raises.Count == 0)
+            {
+                return;
+            }
+
+            var entries = raises
+                .SelectMany(r => r.Triggers.Select(t => (Trigger: t, r.When)))
+                .OrderBy(e => e.Trigger.GetOrder())
+                .Select(e =>
+                {
+                    var entry = new JsonObject { ["trigger"] = e.Trigger.ToCustomString() };
+
+                    if (e.When is not null)
+                    {
+                        entry["when"] = e.When;
+                    }
+
+                    return (JsonNode)entry;
+                })
+                .ToArray();
+
+            operation.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            operation.Extensions[ExtensionName] = new JsonNodeExtension(new JsonArray(entries));
+
+            var sentences = string.Join(" ", raises.Select(Describe));
+
+            operation.Description = string.IsNullOrWhiteSpace(operation.Description)
+                ? sentences
+                : $"{operation.Description.TrimEnd()}\n\n{sentences}";
+        }
+
+        private static string Describe(RaisesWebhookAttribute raises)
+        {
+            var names = raises.Triggers.OrderBy(t => t.GetOrder()).Select(t => $"`{t.ToCustomString()}`").ToList();
+            var list = names.Count == 1 ? names[0] : $"{string.Join(", ", names[..^1])} and {names[^1]}";
+            var noun = names.Count == 1 ? "webhook" : "webhooks";
+
+            return raises.When is null
+                ? $"Raises the {list} {noun}."
+                : $"Raises the {list} {noun} {raises.When}.";
         }
     }
 

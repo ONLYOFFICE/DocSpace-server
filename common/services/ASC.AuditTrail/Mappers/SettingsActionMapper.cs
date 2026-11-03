@@ -165,7 +165,8 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Send, [
-                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
+                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions,
+                    MessageAction.WebhookRetried
                 ]
             },
             {

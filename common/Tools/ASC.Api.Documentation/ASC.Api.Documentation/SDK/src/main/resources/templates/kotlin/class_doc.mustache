@@ -1,10 +1,13 @@
 # {{classname}}
 
-## Properties
+{{#parent}}
+Inherits from [{{{parent}}}]({{{parent}}}.md).
+
+{{/parent}}## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-{{#vars}}| **{{name}}** | {{#isEnum}}[**inline**](#{{datatypeWithEnum}}){{/isEnum}}{{^isEnum}}{{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}[**{{dataType}}**]({{complexType}}.md){{/isPrimitiveType}}{{/isEnum}} | {{{description}}} | {{^required}} [optional]{{/required}}{{#isReadOnly}} [readonly]{{/isReadOnly}} |
-{{/vars}}
+{{#allVars}}| **{{name}}** | {{#isEnum}}[**inline**](#{{datatypeWithEnum}}){{/isEnum}}{{^isEnum}}{{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}[**{{dataType}}**]({{complexType}}.md){{/isPrimitiveType}}{{/isEnum}} | {{{description}}} | {{^required}} [optional]{{/required}}{{#isReadOnly}} [readonly]{{/isReadOnly}} |
+{{/allVars}}
 {{#vars}}{{#isEnum}}
 
 <a id="{{{datatypeWithEnum}}}"></a>{{!NOTE: see java's resources "pojo_doc.mustache" once enums are fully implemented}}

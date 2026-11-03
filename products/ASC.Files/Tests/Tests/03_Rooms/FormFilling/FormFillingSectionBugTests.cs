@@ -48,8 +48,7 @@ public class FormFillingSectionBugTests(
 
     /// <summary>
     /// Creates a form filling room holding one form and a custom room holding one .docx, adds both
-    /// files to Recent, and returns their titles (the SDK's <see cref="FileEntryBaseDto"/> carries a
-    /// <c>Title</c> but no <c>Id</c> for Recent listings, so titles are the only stable identity here).
+    /// files to Recent, and returns their titles, which a random suffix keeps unique.
     /// </summary>
     private async Task<(string FormTitle, string DocxTitle)> SeedRecent()
     {

@@ -43,8 +43,17 @@ public record WebhookRequestIntegrationEvent : IntegrationEvent
     public WebhookRequestIntegrationEvent(Guid createBy, int tenantId, int webhookLogId) : base(createBy, tenantId)
     {
         WebhookLogId = webhookLogId;
+        Scheduled = true;
     }
 
     [ProtoMember(1)]
     public int WebhookLogId { get; init; }
+
+    /// <summary>
+    /// Set by every publisher of this version, which writes its row already on the schedule and in the current
+    /// payload format. A publisher of the previous version does not know this member, so its events arrive with
+    /// false: their rows were written without a schedule and carry a body in the old payload format.
+    /// </summary>
+    [ProtoMember(2)]
+    public bool Scheduled { get; init; }
 }

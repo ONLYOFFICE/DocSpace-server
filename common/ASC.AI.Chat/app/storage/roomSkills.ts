@@ -31,24 +31,25 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// The skills of a DocSpace room: the Markdown files of the `.ai` folder that
-// lies in the room's root. `GET api/2.0/files/rooms/{id}/ai` (added on the
-// server branch feature/ai-folder) lists that folder in the shape of any
-// other folder listing; a room without the folder answers 404, a caller who
-// cannot read the room 403 — both propagate as `DocspaceApiHttpError`.
+// The skills of a DocSpace room: the Markdown files in the root of an
+// Instructions room (`RoomType.InstructionsRoom`). The .NET side checks each
+// file's YAML frontmatter (`name`, `description`) when it is saved, refuses a
+// file without a valid one, and keeps the pair in its skills catalog; this
+// module reads that catalog through the Files API
+// (`GET api/2.0/files/rooms/skills?roomIds=…`) with the caller's credentials,
+// so a room the caller cannot read is left out.
 //
-// A skill is an Agent Skills Markdown file: YAML frontmatter with `name` and
-// `description`, then the instructions. The widget reads the frontmatter of
-// every skill once, when the room is connected (`getRoomSkills`), and one
-// body on demand through its built-in `read_skill` tool (`getRoomSkill`).
-// The skill id is the DocSpace file id, so the body read is a plain file
-// read with the caller's own credentials.
+// The widget reads the catalog of every room once, when the room is
+// connected (`getRoomSkills`), and one body on demand through its built-in
+// `read_skill` tool (`getRoomSkill`). The skill id is the DocSpace file id,
+// so the body read is a plain file read with the caller's own credentials.
 
 import type { ContextFolder, RoomSkill } from "@onlyoffice/ai-chat/core";
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { countFilesApiRead, getForwardedHeaders } from "../requestContext.js";
 import {
   asString,
+  getArray,
   getEntityId,
   getNumber,
   getObject,
@@ -56,20 +57,23 @@ import {
   getString,
   isObject,
 } from "../narrow.js";
-import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
+import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
 import logger from "../log.js";
 
-/** `FilterType.FilesOnly` on the C# side — the listing skips subfolders. */
-const FILTER_FILES_ONLY = 1;
+/** `RoomType.InstructionsRoom` on the C# side — the rooms whose Markdown files are skills. */
+const INSTRUCTIONS_ROOM_TYPE = 10;
 
-/** Page size of the `.ai` listing; a room holds a handful of skills, not thousands. */
+/** `RoomType.KnowledgeRoom` on the C# side — the rooms whose files are a searchable knowledge base. */
+const KNOWLEDGE_ROOM_TYPE = 11;
+
+/** Page size of the rooms listing (`ApiContext.MaxCount`). */
 const PAGE_SIZE = 100;
 
 /** Pages read at most — a runaway `total` must not turn into an endless loop. */
 const MAX_PAGES = 10;
 
-/** Frontmatter reads run this many at a time so a large folder does not fan out into the Files API all at once. */
-const READ_CONCURRENCY = 4;
+/** Rooms per catalog read: `roomIds` takes 1 to 20 ids (`AiHubService.MaxRoomsPerType`). */
+const SKILLS_BATCH_SIZE = 20;
 
 /**
  * Bytes of a skill file read at most. The widget cuts a body at 64 K
@@ -79,8 +83,6 @@ const READ_CONCURRENCY = 4;
  * fetched.
  */
 const MAX_SKILL_BYTES = 4 * 64 * 1024;
-
-const MARKDOWN_EXTENSION = ".md";
 
 /**
  * The one cloud DocSpace is to the chat widget. The client connects the
@@ -99,33 +101,74 @@ const CONDITIONAL_HEADERS = new Set([
   "range",
 ]);
 
-interface AiFolderFile {
+/** A room of the skills catalog with its skills, as `AiSkillsDto` carries it. */
+export interface CatalogRoom {
   id: string;
   title: string;
+  logo: Record<string, unknown> | null;
+  skills: RoomSkill[];
 }
 
-function isMarkdown(title: string, fileExst: string | undefined): boolean {
-  const ext = fileExst ?? title.slice(title.lastIndexOf("."));
-  return ext.toLowerCase() === MARKDOWN_EXTENSION;
-}
-
-function parseAiFolderPage(raw: unknown): { files: AiFolderFile[]; total: number } | undefined {
-  const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
-  if (!envelope) {
+function parseSkill(raw: unknown): RoomSkill | undefined {
+  if (!isObject(raw)) {
     return undefined;
   }
-  const files: AiFolderFile[] = [];
-  for (const entry of getObjectArray(envelope, "files") ?? []) {
+  const id = getEntityId(raw, "id");
+  const name = getString(raw, "name");
+  if (id === undefined || !name) {
+    return undefined;
+  }
+  return { id, name, description: getString(raw, "description") ?? "" };
+}
+
+/** The rooms of a catalog answer (`{ rooms: [{ id, title, logo, skills }] }`). */
+export function parseSkillsCatalog(raw: unknown): CatalogRoom[] {
+  const rooms: CatalogRoom[] = [];
+  for (const entry of (isObject(raw) ? getObjectArray(raw, "rooms") : undefined) ?? []) {
     const id = getEntityId(entry, "id");
-    const title = getString(entry, "title");
-    if (id === undefined || !title) {
+    if (id === undefined) {
       continue;
     }
-    if (isMarkdown(title, getString(entry, "fileExst"))) {
-      files.push({ id, title });
+    const skills: RoomSkill[] = [];
+    for (const item of getArray(entry, "skills") ?? []) {
+      const skill = parseSkill(item);
+      if (skill) {
+        skills.push(skill);
+      }
+    }
+    rooms.push({
+      id,
+      title: getString(entry, "title") ?? "",
+      logo: getObject(entry, "logo") ?? null,
+      skills,
+    });
+  }
+  return rooms;
+}
+
+/**
+ * The skills of the given Instructions rooms, by room id —
+ * `GET api/2.0/files/rooms/skills?roomIds=…` (one `roomIds` item per room),
+ * 20 rooms a call. A room that does not
+ * exist, is not an Instructions room under the AI rooms root, or that the
+ * caller cannot read is absent from the map.
+ */
+export async function getRoomsSkills(roomIds: string[]): Promise<Map<string, RoomSkill[]>> {
+  const ids = [...new Set(roomIds)];
+  const batches: string[][] = [];
+  for (let i = 0; i < ids.length; i += SKILLS_BATCH_SIZE) {
+    batches.push(ids.slice(i, i + SKILLS_BATCH_SIZE));
+  }
+  const answers = await Promise.all(
+    batches.map((batch) => filesApiGet("rooms/skills", { roomIds: batch })),
+  );
+  const result = new Map<string, RoomSkill[]>();
+  for (const answer of answers) {
+    for (const room of parseSkillsCatalog(answer)) {
+      result.set(room.id, room.skills);
     }
   }
-  return { files, total: getNumber(envelope, "total") ?? files.length };
+  return result;
 }
 
 function parseRoomsPage(
@@ -147,17 +190,27 @@ function parseRoomsPage(
 }
 
 /**
- * The rooms the caller can read whose `.ai` folder holds at least one skill
- * file, as one cloud entry — `GET api/2.0/files/rooms?withAiFolder=true`,
- * paged, then one look into each folder. The server already leaves out
- * rooms the caller may not see and third-party rooms (which cannot carry the
- * folder). Empty when there is none, so the widget shows no picker at all.
+ * The Instructions rooms the caller can read that hold at least one skill
+ * file, as one cloud entry — `GET api/2.0/files/rooms?type=10`, paged, then
+ * one look into each room. The server already leaves out rooms the caller
+ * may not see. Empty when there is none, so the widget shows no picker at
+ * all.
  */
-export async function getContextFolders(): Promise<ContextFolder[]> {
+/** The search area of the root that keeps the Instructions and Knowledge rooms. */
+const AI_HUB_SEARCH_AREA = "AiHub";
+
+/**
+ * The rooms of one type the caller can read — `GET api/2.0/files/rooms?type=…`,
+ * paged. Instructions and Knowledge rooms are kept under their own root (the
+ * "AI rooms" section, `searchArea=AiHub`), never in Rooms, so the listing
+ * asks for that search area.
+ */
+async function listRoomsOfType(roomType: number): Promise<ContextFolder["rooms"]> {
   const rooms: ContextFolder["rooms"] = [];
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const params = new URLSearchParams({
-      withAiFolder: "true",
+      type: String(roomType),
+      searchArea: AI_HUB_SEARCH_AREA,
       count: String(PAGE_SIZE),
       startIndex: String(page * PAGE_SIZE),
     });
@@ -171,7 +224,7 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
       }
       const parsed = parseRoomsPage(await res.json());
       if (!parsed) {
-        logger.warn(`getContextFolders -> unparseable response from ${url}`);
+        logger.warn(`listRoomsOfType(${roomType}) -> unparseable response from ${url}`);
         break;
       }
       rooms.push(...parsed.rooms);
@@ -182,59 +235,30 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
       cancel();
     }
   }
-  // A `.ai` folder with no skill file in it connects nothing, so such a
-  // room is not offered either. A room whose folder cannot be read is left
-  // out rather than failing the whole list.
-  const withSkills = await mapLimit(rooms, READ_CONCURRENCY, async (room) => {
-    try {
-      return (await listRoomSkillFiles(room.id)).length > 0 ? room : undefined;
-    } catch (error) {
-      logger.warn(`getContextFolders: skipping room ${room.id} (${room.name}): ${String(error)}`);
-      return undefined;
-    }
-  });
-  const offered = withSkills.filter(
-    (room): room is ContextFolder["rooms"][number] => room !== undefined,
-  );
+  return rooms;
+}
+
+export async function getContextFolders(): Promise<ContextFolder[]> {
+  const rooms = await listRoomsOfType(INSTRUCTIONS_ROOM_TYPE);
+  if (rooms.length === 0) {
+    return [];
+  }
+  // An Instructions room with no skill in it connects nothing, so such a
+  // room is not offered either.
+  const skills = await getRoomsSkills(rooms.map((room) => room.id));
+  const offered = rooms.filter((room) => (skills.get(room.id)?.length ?? 0) > 0);
   return offered.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms: offered }] : [];
 }
 
 /**
- * Every Markdown file directly inside the room's `.ai` folder, in the
- * server's order. Throws `DocspaceApiHttpError` (404: no room or no `.ai`
- * folder; 403: the caller cannot read the room) like the other Files API
- * reads.
+ * The Knowledge rooms the caller can read, as one cloud entry — `GET
+ * api/2.0/files/rooms?type=11`, paged. The composer offers them as the
+ * chat's knowledge base; the connected one scopes the .NET knowledge search
+ * tool. Empty when there is none, so the widget shows no knowledge row.
  */
-export async function listRoomSkillFiles(roomId: string): Promise<AiFolderFile[]> {
-  const files: AiFolderFile[] = [];
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const params = new URLSearchParams({
-      filterType: String(FILTER_FILES_ONLY),
-      count: String(PAGE_SIZE),
-      startIndex: String(page * PAGE_SIZE),
-    });
-    const url = `${proxyBaseUrl}/api/2.0/files/rooms/${encodeURIComponent(roomId)}/ai?${params}`;
-    const { signal, cancel } = withTimeout(undefined);
-    countFilesApiRead();
-    try {
-      const res = await fetch(url, { headers: getForwardedHeaders(), signal });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, url);
-      }
-      const parsed = parseAiFolderPage(await res.json());
-      if (!parsed) {
-        logger.warn(`listRoomSkillFiles(${roomId}) -> unparseable response from ${url}`);
-        break;
-      }
-      files.push(...parsed.files);
-      if ((page + 1) * PAGE_SIZE >= parsed.total) {
-        break;
-      }
-    } finally {
-      cancel();
-    }
-  }
-  return files;
+export async function getKnowledgeFolders(): Promise<ContextFolder[]> {
+  const rooms = await listRoomsOfType(KNOWLEDGE_ROOM_TYPE);
+  return rooms.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms }] : [];
 }
 
 // The download address names the portal as the browser sees it: the path
@@ -247,13 +271,38 @@ export async function listRoomSkillFiles(roomId: string): Promise<AiFolderFile[]
 // the same address works on localhost, where the two hosts coincide. A
 // host-relative address (`/storage/files/...`) resolves against the proxy
 // the same way.
-function throughProxy(url: string): string {
-  const base = proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`;
+export function throughProxy(url: string, base: string = proxyBaseUrl): string {
+  const root = base.endsWith("/") ? base : `${base}/`;
   if (!/^https?:\/\//i.test(url)) {
-    return new URL(url, base).toString();
+    return new URL(url, root).toString();
   }
   const { pathname, search } = new URL(url);
-  return new URL(`${pathname}${search}`, base).toString();
+  return new URL(`${pathname}${search}`, root).toString();
+}
+
+/**
+ * `GET api/2.0/files/file/{id}/presigneduri` with the caller's credentials: the
+ * download address it mints, as the portal names it (its public host, or
+ * host-relative); see {@link throughProxy} for where to fetch it from.
+ */
+export async function presignedDownloadUrl(fileId: string): Promise<string> {
+  const uriUrl = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
+  const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
+  try {
+    const res = await fetch(uriUrl, { headers: getForwardedHeaders(), signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, uriUrl);
+    }
+    const raw: unknown = await res.json();
+    const downloadUrl = isObject(raw) ? asString(raw["response"]) : undefined;
+    if (!downloadUrl) {
+      throw new Error(`No download address for file ${fileId}`);
+    }
+    return downloadUrl;
+  } finally {
+    cancel();
+  }
 }
 
 /**
@@ -263,36 +312,10 @@ function throughProxy(url: string): string {
  * `MAX_SKILL_BYTES`.
  */
 export async function readFileText(fileId: string): Promise<string> {
-  const uriUrl = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}/presigneduri`;
-  let downloadUrl: string | undefined;
-  {
-    const { signal, cancel } = withTimeout(undefined);
-    countFilesApiRead();
-    try {
-      const res = await fetch(uriUrl, { headers: getForwardedHeaders(), signal });
-      if (!res.ok) {
-        throw new DocspaceApiHttpError(res.status, res.statusText, uriUrl);
-      }
-      const raw: unknown = await res.json();
-      downloadUrl = isObject(raw) ? asString(raw["response"]) : undefined;
-    } finally {
-      cancel();
-    }
-  }
-  if (!downloadUrl) {
-    throw new Error(`No download address for file ${fileId}`);
-  }
-  const url = throughProxy(downloadUrl);
+  const url = throughProxy(await presignedDownloadUrl(fileId));
   const { signal, cancel } = withTimeout(undefined);
   try {
-    // The caller's conditional headers describe the widget's request, not this
-    // file: relayed, they could turn the download into a bodiless 304.
-    const headers = Object.fromEntries(
-      Object.entries(getForwardedHeaders()).filter(
-        ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
-      ),
-    );
-    const res = await fetch(url, { headers, signal });
+    const res = await fetch(url, { headers: downloadHeaders(), signal });
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
@@ -302,6 +325,71 @@ export async function readFileText(fileId: string): Promise<string> {
   } finally {
     cancel();
   }
+}
+
+/** A file the caller may read is larger than the limit its reader set. */
+export class FileTooLargeError extends Error {
+  constructor(fileId: string, limit: number) {
+    super(`file ${fileId} is over the limit of ${limit} bytes`);
+    this.name = "FileTooLargeError";
+  }
+}
+
+/**
+ * The file's bytes, as they are in the workspace, under the caller's
+ * session: the pre-signed address of {@link presignedDownloadUrl} fetched
+ * through the proxy. Read whole, so `limit` caps what is held in memory: a
+ * larger file throws {@link FileTooLargeError} as soon as the limit is
+ * passed, by the declared length or by the bytes received.
+ */
+export async function readFileBytes(fileId: string, limit: number): Promise<Uint8Array> {
+  const url = throughProxy(await presignedDownloadUrl(fileId));
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, { headers: downloadHeaders(), signal });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const declared = Number(res.headers.get("content-length"));
+    if (Number.isFinite(declared) && declared > limit) {
+      await res.body?.cancel();
+      throw new FileTooLargeError(fileId, limit);
+    }
+    if (!res.body) {
+      return new Uint8Array(0);
+    }
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        received += value.byteLength;
+        if (received > limit) {
+          throw new FileTooLargeError(fileId, limit);
+        }
+        chunks.push(value);
+      }
+    } finally {
+      await reader.cancel().catch(() => undefined);
+    }
+    return Buffer.concat(chunks, received);
+  } finally {
+    cancel();
+  }
+}
+
+// The caller's conditional headers describe the widget's request, not the
+// file: relayed, they could turn the download into a bodiless 304.
+function downloadHeaders(): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(getForwardedHeaders()).filter(
+      ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
+    ),
+  );
 }
 
 /**
@@ -335,142 +423,32 @@ async function readTextCapped(res: Response, limit: number): Promise<string> {
   return text + decoder.decode();
 }
 
-export interface SkillFrontmatter {
-  name?: string;
-  description?: string;
-}
-
-const FRONTMATTER_KEYS = new Set(["name", "description"]);
-
-function unquote(value: string): string {
-  if (
-    value.length >= 2 &&
-    ((value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'")))
-  ) {
-    return value.slice(1, -1);
-  }
-  return value;
-}
-
 /**
- * The `name` and `description` of an Agent Skills file's YAML frontmatter,
- * the block between the opening and closing `---` lines. Only the flat
- * top-level keys are read: `key: value` on one line (a pair of surrounding
- * quotes is dropped), or a block scalar (`key: >` folded into one line,
- * `key: |` kept line by line) made of the indented lines that follow. A
- * file without frontmatter yields nothing.
- */
-export function parseSkillFrontmatter(text: string): SkillFrontmatter {
-  const source = text.replace(/^\uFEFF/, "");
-  const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(source);
-  if (!match) {
-    return {};
-  }
-  const lines = (match[1] ?? "").split(/\r?\n/);
-  const result: SkillFrontmatter = {};
-  for (let i = 0; i < lines.length; i += 1) {
-    const pair = /^([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(lines[i] ?? "");
-    if (!pair) {
-      continue;
-    }
-    const key = (pair[1] ?? "").toLowerCase();
-    const inline = (pair[2] ?? "").trim();
-    const block = /^([>|])[+-]?$/.exec(inline);
-    let value: string;
-    if (block) {
-      // The scalar is the run of indented lines below; blank lines belong to
-      // it as long as an indented line follows.
-      const body: string[] = [];
-      let j = i + 1;
-      for (; j < lines.length; j += 1) {
-        const line = lines[j] ?? "";
-        if (/^\s+\S/.test(line)) {
-          body.push(line.trim());
-        } else if (line.trim() === "" && lines.slice(j + 1).some((l) => /^\s+\S/.test(l))) {
-          body.push("");
-        } else {
-          break;
-        }
-      }
-      i = j - 1;
-      value =
-        block[1] === ">" ? body.join(" ").replace(/ {2,}/g, " ").trim() : body.join("\n").trim();
-    } else {
-      value = unquote(inline);
-    }
-    if (FRONTMATTER_KEYS.has(key) && value) {
-      result[key as "name" | "description"] = value;
-    }
-  }
-  return result;
-}
-
-function stripMarkdownExtension(title: string): string {
-  return title.toLowerCase().endsWith(MARKDOWN_EXTENSION)
-    ? title.slice(0, -MARKDOWN_EXTENSION.length)
-    : title;
-}
-
-async function mapLimit<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array<R>(items.length);
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    while (next < items.length) {
-      const index = next;
-      next += 1;
-      const item = items[index];
-      if (item !== undefined) {
-        results[index] = await fn(item);
-      }
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
-
-/**
- * The frontmatter of every skill in the room. A file whose frontmatter has
- * no `name` is listed under its file name; a file that cannot be read is
- * skipped with a log line rather than failing the whole list.
+ * The skills of one Instructions room, from the catalog. Throws
+ * `DocspaceApiHttpError` 404 when the room is not an Instructions room the
+ * caller can read (the catalog leaves such a room out).
  */
 export async function getRoomSkills(roomId: string): Promise<RoomSkill[]> {
-  const files = await listRoomSkillFiles(roomId);
-  const skills = await mapLimit(
-    files,
-    READ_CONCURRENCY,
-    async (file): Promise<RoomSkill | undefined> => {
-      try {
-        const frontmatter = parseSkillFrontmatter(await readFileText(file.id));
-        return {
-          id: file.id,
-          name: frontmatter.name ?? stripMarkdownExtension(file.title),
-          description: frontmatter.description ?? "",
-        };
-      } catch (error) {
-        logger.warn(
-          `getRoomSkills(${roomId}): skipping file ${file.id} (${file.title}): ${String(error)}`,
-        );
-        return undefined;
-      }
-    },
-  );
-  return skills.filter((skill): skill is RoomSkill => skill !== undefined);
+  const skills = (await getRoomsSkills([roomId])).get(roomId);
+  if (!skills) {
+    throw new DocspaceApiHttpError(
+      404,
+      "Not Found",
+      `api/2.0/files/rooms/skills?roomIds=${encodeURIComponent(roomId)}`,
+    );
+  }
+  return skills;
 }
 
 /**
  * The whole file of one skill — the widget reads it as text either way.
- * The id must name a Markdown file of this room's `.ai` folder: a file id
- * from elsewhere is answered as not found, whatever the caller may read.
+ * The id must name a skill of this Instructions room: a file id from
+ * elsewhere is answered as not found, whatever the caller may read.
  */
 export async function getRoomSkill(roomId: string, skillId: string): Promise<string> {
-  const files = await listRoomSkillFiles(roomId);
-  if (!files.some((file) => file.id === skillId)) {
-    throw Object.assign(new Error(`Skill ${skillId} is not in the .ai folder of room ${roomId}`), {
+  const skills = await getRoomSkills(roomId);
+  if (!skills.some((skill) => skill.id === skillId)) {
+    throw Object.assign(new Error(`Skill ${skillId} is not a skill of room ${roomId}`), {
       status: 404,
       expose: true,
     });

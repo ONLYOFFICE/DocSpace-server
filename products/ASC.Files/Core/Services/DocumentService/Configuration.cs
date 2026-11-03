@@ -882,7 +882,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
-            if (file.RootFolderType == FolderType.VirtualRooms &&
+            if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub &&
                 !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
@@ -930,6 +930,14 @@ public class CustomizationConfig<T>(
 
     public async Task<AiConfigDto> GetAIConfigAsync()
     {
+        if (!authContext.IsAuthenticated)
+        {
+            return new AiConfigDto
+            {
+                Disabled = true
+            };
+        }
+
         var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
         return new AiConfigDto
         {

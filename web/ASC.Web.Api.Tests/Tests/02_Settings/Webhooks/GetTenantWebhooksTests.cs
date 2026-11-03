@@ -34,20 +34,24 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
-/// GET /api/2.0/settings/webhook — listing the tenant's webhook configurations. Any portal
-/// member except a Guest may see the whole tenant list, not just their own webhooks.
+/// GET /api/2.0/settings/webhook — listing the tenant's webhook configurations. A DocSpace admin sees every
+/// subscription of the portal; any other member except a Guest sees only the subscriptions they created, since a
+/// subscription carries the target address and the delivery log behind it holds whole payloads.
 /// </summary>
 [Trait("Category", "Settings")]
 public class GetTenantWebhooksTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    // every subscription it creates is probed at the webhook receiver
+    protected override bool NeedsLazyResources => true;
+
     [Fact]
     public async Task GetTenantWebhooks_Owner_ContainsCreatedWebhook()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         // Act
@@ -77,18 +81,44 @@ public class GetTenantWebhooksTests(
     [Theory]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]
-    public async Task GetTenantWebhooks_RoomAdminOrUser_ReturnsList(EmployeeType employeeType)
+    public async Task GetTenantWebhooks_RoomAdminOrUser_ListsOnlyOwnSubscriptions(EmployeeType employeeType)
     {
-        // Arrange
+        // Arrange: a subscription of the owner, one of another member, and one of the caller
         var member = await InviteContact(employeeType);
-        await _webApiClient.Authenticate(member);
+        var otherMember = await InviteContact(EmployeeType.User);
+
+        var ownerSubscription = await CreateSubscriptionAsync(Owner);
+        var otherSubscription = await CreateSubscriptionAsync(otherMember);
+        var ownSubscription = await CreateSubscriptionAsync(member);
 
         // Act
+        await _webApiClient.Authenticate(member);
         var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
 
         // Assert
         list.StatusCode.Should().Be(200);
-        list.Response.Should().NotBeNull();
+        list.Response.Select(w => w.Configs.Id).Should().BeEquivalentTo([ownSubscription],
+            "a member who is not an admin sees only the subscriptions they created, not {0} or {1}", ownerSubscription, otherSubscription);
+    }
+
+    [Theory]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(null)]
+    public async Task GetTenantWebhooks_Admin_ListsEverySubscription(EmployeeType? employeeType)
+    {
+        // Arrange: null stands for the owner
+        var caller = employeeType is { } type ? await InviteContact(type) : Owner;
+        var member = await InviteContact(EmployeeType.User);
+
+        var ownerSubscription = await CreateSubscriptionAsync(Owner);
+        var memberSubscription = await CreateSubscriptionAsync(member);
+
+        // Act
+        await _webApiClient.Authenticate(caller);
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        list.Response.Select(w => w.Configs.Id).Should().Contain([ownerSubscription, memberSubscription]);
     }
 
     [Fact]
@@ -105,5 +135,15 @@ public class GetTenantWebhooksTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
+    }
+
+    private async Task<int> CreateSubscriptionAsync(User creator)
+    {
+        await _webApiClient.Authenticate(creator);
+
+        var created = await _webhooksApi.CreateWebhookAsync(
+            await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient), TestContext.Current.CancellationToken);
+
+        return created.Response.Id;
     }
 }
