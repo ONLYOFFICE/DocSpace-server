@@ -1722,6 +1722,7 @@ public class EntryManager(IDaoFactory daoFactory,
         // Also for a save that overwrites the version.
         if (file is File<int> form && properties is EntryProperties<int> formProperties)
         {
+            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
             await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
         }
     }

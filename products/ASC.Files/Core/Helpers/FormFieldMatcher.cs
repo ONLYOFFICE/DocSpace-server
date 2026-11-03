@@ -93,6 +93,74 @@ internal static class FormFieldMatcher
         return renames;
     }
 
+    /// <summary>
+    /// The renamed fields when only keys changed: the two versions have as many fields, in the same order, of the same
+    /// types and options, and each field is paired with the one in its place. Null when anything else changed, or when a
+    /// key moved to another place, since the fields may then have been reordered.
+    /// </summary>
+    public static List<FormFieldRename> MatchSameLayout(IEnumerable<FormMetadata> previous, IEnumerable<FormMetadata> current)
+    {
+        var previousFields = ToFields(previous);
+        var currentFields = ToFields(current);
+        if (previousFields.Count == 0 || previousFields.Count != currentFields.Count)
+        {
+            return null;
+        }
+
+        var previousNames = previousFields.Select(f => f.Column.Name).ToHashSet();
+        var currentNames = currentFields.Select(f => f.Column.Name).ToHashSet();
+        var renames = new List<FormFieldRename>();
+
+        for (var i = 0; i < previousFields.Count; i++)
+        {
+            var (before, after) = (previousFields[i], currentFields[i]);
+            if (!SameColumnType(before.Column, after.Column))
+            {
+                return null;
+            }
+
+            if (before.Column.Name == after.Column.Name)
+            {
+                continue;
+            }
+
+            if (currentNames.Contains(before.Column.Name) || previousNames.Contains(after.Column.Name))
+            {
+                return null;
+            }
+
+            renames.Add(new FormFieldRename { OldKey = before.Metadata.Key, NewKey = after.Metadata.Key });
+        }
+
+        return renames;
+    }
+
+    /// <summary>
+    /// The number of fields the two versions share by column name; null when one of them kept its name under another
+    /// type, so that the versions cannot share a table. The options of a list may differ: its column takes them all.
+    /// </summary>
+    public static int? CountShared(IEnumerable<FormMetadata> previous, IEnumerable<FormMetadata> current)
+    {
+        var previousByName = ToFields(previous).ToDictionary(f => f.Column.Name);
+        var shared = 0;
+        foreach (var field in ToFields(current))
+        {
+            if (!previousByName.TryGetValue(field.Column.Name, out var p))
+            {
+                continue;
+            }
+
+            if (p.Column.Type != field.Column.Type)
+            {
+                return null;
+            }
+
+            shared++;
+        }
+
+        return shared;
+    }
+
     // The longest pairing of the fields by column type, kept in form order on both sides; null when another pairing is
     // as long, since which field became which is then a guess. The pairing that takes the earliest fields and the one
     // that takes the latest are the two extremes of all the longest ones, so they agree only when it is the one.

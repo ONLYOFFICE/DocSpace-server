@@ -134,5 +134,49 @@ public class FormTableSchemaTests
         act.Should().Throw<ArgumentException>();
     }
 
+    [Fact]
+    public void ParseOptions_MySqlEnum_UnescapesQuoteAndBackslash()
+    {
+        ExternalDatabaseClient.ParseOptions(@"enum('Yes','O''Brien','a\\b')", CoreExternalDatabaseType.MySql).Should().Equal("Yes", "O'Brien", @"a\b");
+    }
+
+    [Fact]
+    public void ParseOptions_PostgreSqlCheck_ReadsTheArray()
+    {
+        var definition = "CHECK ((col_answer = ANY (ARRAY['Yes'::text, 'O''Brien'::text])))";
+
+        ExternalDatabaseClient.ParseOptions(definition, CoreExternalDatabaseType.PostgreSql).Should().Equal("Yes", "O'Brien");
+    }
+
+    [Fact]
+    public void BuildWidenOptions_MySql_KeepsOldOptionsAndAddsNew()
+    {
+        var result = ExternalDatabaseClient.BuildWidenOptions("form_1_v1", "col_answer", ["Yes", "No"], ["No", "Maybe"], null, CoreExternalDatabaseType.MySql);
+
+        result.Should().Equal("ALTER TABLE `form_1_v1` MODIFY COLUMN `col_answer` ENUM('Yes', 'No', 'Maybe')");
+    }
+
+    [Fact]
+    public void BuildWidenOptions_PostgreSql_ReplacesTheCheck()
+    {
+        var result = ExternalDatabaseClient.BuildWidenOptions("form_1_v1", "col_answer", ["Yes", "No"], ["Maybe"], "form_1_v1_col_answer_check", CoreExternalDatabaseType.PostgreSql);
+
+        result.Should().Equal(
+            @"ALTER TABLE ""form_1_v1"" DROP CONSTRAINT ""form_1_v1_col_answer_check""",
+            @"ALTER TABLE ""form_1_v1"" ADD CONSTRAINT ""form_1_v1_col_answer_check"" CHECK (""col_answer"" IN ('Yes', 'No', 'Maybe')) NOT VALID");
+    }
+
+    [Fact]
+    public void BuildWidenOptions_NothingNew_ChangesNothing()
+    {
+        ExternalDatabaseClient.BuildWidenOptions("form_1_v1", "col_answer", ["Yes", "No"], ["No"], null, CoreExternalDatabaseType.Sqlite).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void BuildWidenOptions_Sqlite_CannotChangeTheList()
+    {
+        ExternalDatabaseClient.BuildWidenOptions("form_1_v1", "col_answer", ["Yes"], ["No"], null, CoreExternalDatabaseType.Sqlite).Should().BeNull();
+    }
+
     private static Dictionary<string, string> Columns() => new() { ["col_a"] = "text", ["col_b"] = "integer" };
 }

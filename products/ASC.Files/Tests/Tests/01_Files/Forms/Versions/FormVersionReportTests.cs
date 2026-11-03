@@ -34,8 +34,7 @@
 namespace ASC.Files.Tests.Tests._01_Files.Forms.Versions;
 
 /// <summary>
-/// The pieces of the spreadsheet report and the field question that do not need a portal: the names of the report
-/// sheets, one per group of linked versions, and the field tips the document builder script reads.
+/// The names of the spreadsheet report sheets, one per group of linked form versions. Pure logic, no portal.
 /// </summary>
 [Trait("Category", "Unit")]
 [Trait("Feature", "Forms")]
@@ -58,22 +57,5 @@ public class FormVersionReportTests
         var result = FormFillingReportBuilder.GetSheetName([1, 3, 5, 7, 9, 11, 13, 15, 17, 19]);
 
         result.Should().HaveLength(31).And.StartWith("v1, v3, v5").And.EndWith("...");
-    }
-
-    [Fact]
-    public void ParseTips_KeepsNonBlankStringTips()
-    {
-        var result = FormFillingReportCreator.ParseTips("""{"formsdata":[],"tips":{"name":"Your full name","email":"  ","age":5}}""");
-
-        result.Should().Equal(new Dictionary<string, string> { ["name"] = "Your full name" });
-    }
-
-    [Theory]
-    [InlineData("""{"formsdata":[]}""")]
-    [InlineData("""{"formsdata":[],"tips":["a"]}""")]
-    [InlineData("""{"formsdata":null,"tips":null}""")]
-    public void ParseTips_NoTipsObject_ReturnsEmpty(string json)
-    {
-        FormFillingReportCreator.ParseTips(json).Should().BeEmpty();
     }
 }

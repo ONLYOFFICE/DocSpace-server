@@ -95,6 +95,10 @@ internal static partial class FormFillingReportCreatorLogger
     public static partial void WarnSubmissionSkipped(
         this ILogger<FormFillingReportCreator> logger, int fileId, int formId, int version);
 
+    [LoggerMessage(LogLevel.Warning, "Forms DB: the field renames of the editor are not tied to version {Version} of form {FormId}")]
+    public static partial void WarnEditorRenamesNotSaved(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, int version);
+
     [LoggerMessage(LogLevel.Warning, "Form report of form {FormId} lists only the first {Count} submissions")]
     public static partial void WarnFormReportTruncated(
         this ILogger<FormFillingReportCreator> logger, int formId, int count);

@@ -5917,32 +5917,15 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<FormFieldRenamesDto> ConfirmFormFieldRenamesAsync(int formId, int version, bool confirm)
+    public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, List<FormFieldKeyChangeRequest> renames)
     {
-        var (form, _) = await GetFormForFieldRenamesAsync(formId);
+        var form = await GetStartedFormAsync(formId);
 
-        await formFillingReportCreator.AnswerFieldRenamesAsync(form.Id, version, confirm);
-
-        return ToFormFieldRenamesDto((await daoFactory.GetFileDao<int>().GetProperties(form.Id)).FormFilling);
+        await formFillingReportCreator.SetEditorFieldRenamesAsync(form.Id, openedVersion, sequence, authContext.CurrentAccount.ID, renames.Select(r => r.Map()).ToList());
     }
 
-    public async Task<FormFieldRenamesDto> GetFormFieldRenamesAsync(int formId)
-    {
-        var (_, formFilling) = await GetFormForFieldRenamesAsync(formId);
-
-        return ToFormFieldRenamesDto(formFilling);
-    }
-
-    private static FormFieldRenamesDto ToFormFieldRenamesDto(FormFillingProperties<int> formFilling)
-    {
-        return new FormFieldRenamesDto
-        {
-            Versions = FormFillingReportCreator.GetOpenQuestions(formFilling).Select(q => q.Map()).ToList()
-        };
-    }
-
-    // The original PDF form of a form-filling room whose filling the caller may start.
-    private async Task<(File<int> Form, FormFillingProperties<int> FormFilling)> GetFormForFieldRenamesAsync(int formId)
+    // The original PDF form of a form-filling room, started before, whose filling the caller may start.
+    private async Task<File<int>> GetStartedFormAsync(int formId)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var form = await fileDao.GetFileAsync(formId) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
@@ -5969,7 +5952,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException();
         }
 
-        return (form, formFilling);
+        return form;
     }
 
     private async Task<List<Guid>> GetFormFillersAsync<T>(Folder<T> room)

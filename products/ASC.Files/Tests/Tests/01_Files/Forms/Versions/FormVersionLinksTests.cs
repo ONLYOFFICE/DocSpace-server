@@ -34,7 +34,7 @@
 namespace ASC.Files.Tests.Tests._01_Files.Forms.Versions;
 
 /// <summary>
-/// How a decision about renamed fields joins a version to an earlier table: applied to the saved links
+/// How the decision about a version joins it to an earlier table: applied to the saved links
 /// (<see cref="FormFillingReportCreator.AddLink"/>, <see cref="FormFillingReportCreator.RetargetLinks"/>) and, before it is
 /// applied, already shown in the spreadsheet report (<see cref="FormFillingReportCreator.WithDecidedLinks"/>).
 /// Pure logic, no portal.
@@ -44,18 +44,18 @@ namespace ASC.Files.Tests.Tests._01_Files.Forms.Versions;
 public class FormVersionLinksTests
 {
     [Fact]
-    public void WithDecidedLinks_NothingDecided_ReturnsSameState()
+    public void WithDecidedLinks_NothingPending_ReturnsSameState()
     {
-        var formFilling = new FormFillingProperties { PendingVersionLinks = [Link(2, 1, Rename("a", "b"))] };
+        var formFilling = new FormFillingProperties { VersionLinks = [Link(2, 1)] };
 
         FormFillingReportCreator.WithDecidedLinks(formFilling).Should().BeSameAs(formFilling);
         FormFillingReportCreator.WithDecidedLinks(null).Should().BeNull();
     }
 
     [Fact]
-    public void WithDecidedLinks_ConfirmedVersion_JoinsTableOfPreviousVersion()
+    public void WithDecidedLinks_PendingVersion_JoinsTableOfPreviousVersion()
     {
-        var formFilling = new FormFillingProperties { PendingVersionLinks = [Confirmed(Link(2, 1, Rename("a", "b")))] };
+        var formFilling = new FormFillingProperties { PendingVersionLinks = [Link(2, 1, Rename("a", "b"))] };
 
         var result = FormFillingReportCreator.WithDecidedLinks(formFilling);
 
@@ -69,7 +69,7 @@ public class FormVersionLinksTests
         var formFilling = new FormFillingProperties
         {
             VersionLinks = [Link(2, 1)],
-            PendingVersionLinks = [Confirmed(Link(3, 2, Rename("b", "c")))]
+            PendingVersionLinks = [Link(3, 2, Rename("b", "c"))]
         };
 
         var result = FormFillingReportCreator.WithDecidedLinks(formFilling);
@@ -83,42 +83,13 @@ public class FormVersionLinksTests
         var formFilling = new FormFillingProperties
         {
             VersionLinks = [Link(3, 2)],
-            PendingVersionLinks = [Confirmed(Link(2, 1, Rename("a", "b")))]
+            PendingVersionLinks = [Link(2, 1, Rename("a", "b"))]
         };
 
         var result = FormFillingReportCreator.WithDecidedLinks(formFilling);
 
         FormFillingReportCreator.GetTableVersions(result, 1).Should().Equal(1, 3, 2);
         formFilling.VersionLinks.Single().TableVersion.Should().Be(2, "the saved links are not changed");
-    }
-
-    [Fact]
-    public void WithDecidedLinks_OpenQuestion_IsNotShownAsLinked()
-    {
-        var formFilling = new FormFillingProperties
-        {
-            PendingVersionLinks = [Link(2, 1, Rename("a", "b")), Confirmed(Link(3, 2, Rename("b", "c")))]
-        };
-
-        var result = FormFillingReportCreator.WithDecidedLinks(formFilling);
-
-        FormFillingReportCreator.GetTableVersion(result, 2).Should().Be(2);
-        FormFillingReportCreator.GetTableVersion(result, 3).Should().Be(2);
-    }
-
-    [Fact]
-    public void AddLink_KeepsKeysAndDropsFieldDescriptions()
-    {
-        var state = new FormFillingProperties();
-        var rename = new FormFieldRename { OldKey = "a", NewKey = "b", Type = "comboBox", Options = ["x"], Tip = "Tip" };
-
-        FormFillingReportCreator.AddLink(state, Link(2, 1, rename));
-
-        var saved = state.VersionLinks.Single().Renames.Single();
-        (saved.OldKey, saved.NewKey).Should().Be(("a", "b"));
-        saved.Type.Should().BeNull();
-        saved.Options.Should().BeNull();
-        saved.Tip.Should().BeNull();
     }
 
     [Fact]
@@ -137,13 +108,12 @@ public class FormVersionLinksTests
     public void RetargetLinks_MovesLinkAndTheVersionsContinuingIt()
     {
         var state = new FormFillingProperties();
-        var link = Confirmed(Link(3, 2, Rename("b", "c")));
+        var link = Link(3, 2, Rename("b", "c"));
         var continuing = Link(4, 3);
 
         FormFillingReportCreator.RetargetLinks(state, link, [continuing], 1);
 
         link.TableVersion.Should().Be(1);
-        link.Confirmed.Should().BeNull();
         continuing.TableVersion.Should().Be(1);
         state.VersionLinks.Should().ContainSingle().Which.Should().BeSameAs(link);
     }
@@ -152,10 +122,4 @@ public class FormVersionLinksTests
 
     private static FormVersionLink Link(int version, int tableVersion, params FormFieldRename[] renames) =>
         new() { Version = version, TableVersion = tableVersion, Renames = [.. renames] };
-
-    private static FormVersionLink Confirmed(FormVersionLink link)
-    {
-        link.Confirmed = true;
-        return link;
-    }
 }

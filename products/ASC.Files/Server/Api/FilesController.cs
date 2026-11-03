@@ -1197,57 +1197,37 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
-    /// Reports the versions of a PDF form in a form-filling room whose field keys look changed since the version before
-    /// them while the fields stayed in place, so that the user can say whether they keep their meaning. A confirmed
-    /// version keeps its submissions together with the earlier ones for the analysis of responses; until the answer its
-    /// submissions are kept in a table of their own, nothing is lost either way. Each pair is described by the field
-    /// type, its options and the tip the author set, never by entered values. The answer goes to `PUT
-    /// api/2.0/files/file/{fileId}/fieldrenames`. The comparison runs in the background once the filling is started and
-    /// after each save of a started form, or with the first submission of a version at the latest; when it opens a
-    /// question, the form is updated through the socket and lists `fieldRenamesPending` as the cue to call this. A form
-    /// that is not started has nothing to ask yet. The caller needs the right to start the filling, which the room
-    /// admin and a member with content-creator rights have. The call is read-only.
+    /// Reports which fields of a PDF form open in the editor the user renamed since the editor opened `version`, as the
+    /// editor tells them apart by the field ids it keeps. The editor reports them while the form is edited and before the
+    /// filling of a form-filling room is started from it; a later report of the same user's session replaces the earlier
+    /// one, and a report whose `sequence` is not above the last one taken is dropped, so a late request changes nothing.
+    /// The sessions of users editing the form together are kept apart.
+    /// The version the editor saves the session as, and the later ones, are then compared with the last version that has
+    /// responses by these renames, joined with those of the other editor sessions saved since: when the fields only got
+    /// new keys, were added or removed, the version continues the same table of the forms database and the same sheet of
+    /// the spreadsheet report, with the columns renamed, so the earlier responses are analysed together with the new
+    /// ones; when a field kept its key under another type, took the key of another field, or no field is left, the
+    /// version gets a table and a sheet of its own. Nothing is asked of the user either way. Without editor reports the
+    /// fields are paired by place only when the form kept its fields in the same order, of the same types and options,
+    /// and only keys changed; otherwise a field with a new key is taken for a new field: the version continues the
+    /// table, and the earlier answers of the field stay in its old column. A session the form moved past without saving
+    /// it is dropped, and a `version` the form does not have yet is ignored, so a repeated call is harmless. The caller
+    /// needs the right to start the filling of the form, which must have been started before. The call changes only the
+    /// stored renames.
     /// </remarks>
     /// <summary>
-    /// Get renamed form fields
+    /// Report renamed form fields
     /// </summary>
-    /// <path>api/2.0/files/file/{fileId}/fieldrenames</path>
+    /// <path>api/2.0/files/file/{fileId}/fieldchanges</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The form versions whose renamed fields wait for an answer", typeof(FormFieldRenamesDto))]
-    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, is a copy of a form, or the caller may not start its filling")]
+    [SwaggerResponse(200, "The renames were stored for the version the editor session is saved as")]
+    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, or a key is empty or longer than 255 characters")]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, its filling was never started, it is a copy of a form, or the caller may not start its filling")]
     [SwaggerResponse(404, "No file with this identifier exists")]
-    [HttpGet("file/{fileId}/fieldrenames")]
-    public Task<FormFieldRenamesDto> GetFormFieldRenames(FileIdRequestDto<int> inDto)
+    [HttpPut("file/{fileId}/fieldchanges")]
+    public Task SetFormFieldChanges(FormFieldChangesRequestDto inDto)
     {
-        return fileStorageService.GetFormFieldRenamesAsync(inDto.FileId);
-    }
-
-    /// <remarks>
-    /// Answers whether the renamed fields of one form version, as `GET api/2.0/files/file/{fileId}/fieldrenames`
-    /// reported them, keep their meaning. True keeps the submissions of the version together with the earlier ones, on
-    /// one sheet of the spreadsheet report and in one table of the forms database the room writes to: the columns of
-    /// that table are renamed, and submissions the version already has are copied there in the background, so the
-    /// analysis may show them apart for a short while; the spreadsheet report shows them together at once and is rebuilt,
-    /// also while the database is unreachable. The built-in database then drops the table of the version, while
-    /// an external database keeps it as it was. When the copy is not possible at the moment, as while the search index
-    /// is unavailable, it is retried with the next submission of the version or the next start or save of the form; the
-    /// answer is kept and not asked again. False leaves the version a table and a sheet of its own. The answer is
-    /// accepted at any time while the question is open, also after the filling started and responses arrived; a
-    /// `version` without an open question changes nothing, so a repeated answer is harmless. The caller needs the right
-    /// to start the filling. The call is mutating and answers with the questions left open.
-    /// </remarks>
-    /// <summary>
-    /// Answer renamed form fields
-    /// </summary>
-    /// <path>api/2.0/files/file/{fileId}/fieldrenames</path>
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "The form versions whose renamed fields still wait for an answer", typeof(FormFieldRenamesDto))]
-    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, is a copy of a form, or the caller may not start its filling")]
-    [SwaggerResponse(404, "No file with this identifier exists")]
-    [HttpPut("file/{fileId}/fieldrenames")]
-    public Task<FormFieldRenamesDto> ConfirmFormFieldRenames(ConfirmFormFieldRenamesRequestDto inDto)
-    {
-        return fileStorageService.ConfirmFormFieldRenamesAsync(inDto.FileId, inDto.Answer.Version, inDto.Answer.Confirm);
+        return fileStorageService.SetEditorFieldRenamesAsync(inDto.FileId, inDto.Changes.Version, inDto.Changes.Sequence, inDto.Changes.Renames);
     }
 
     /// <remarks>

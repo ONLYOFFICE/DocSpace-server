@@ -448,7 +448,7 @@ public class FormFillingReportCreator(
     {
         var formFilling = await GetFormFillingAsync(originalFormId);
         if (formFilling == null
-            || !HasDecisionToApply(formFilling, originalFormVersion)
+            || formFilling.PendingVersionLinks?.Exists(p => p.Version == originalFormVersion) != true
                && (originalFormVersion < formFilling.FieldsCheckedVersion
                    || !NeedsCheck(formFilling, await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId, originalFormVersion))))
         {
@@ -485,8 +485,8 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// Compares the fields of the current version of an original form in a form-filling room with the last version that
-    /// has data and keeps the question about renamed fields for the room; moves the confirmed versions that have
-    /// submissions into the shared table.
+    /// has data and decides the table of the version; moves the decided versions that have submissions into the shared
+    /// table.
     /// </summary>
     public async Task CheckVersionFieldsAsync(int originalFormId)
     {
@@ -507,7 +507,7 @@ public class FormFillingReportCreator(
             }
 
             var changed = NeedsCheck(state, current) && await CheckVersionAsync(db, current, state);
-            foreach (var link in state.PendingVersionLinks?.Where(p => p.Confirmed == true).ToList() ?? [])
+            foreach (var link in state.PendingVersionLinks?.ToList() ?? [])
             {
                 if (await HasDataAsync(db, originalFormId, link.Version, state.RoomId))
                 {
@@ -520,58 +520,7 @@ public class FormFillingReportCreator(
         });
     }
 
-    /// <summary>
-    /// Records the answer about the renamed fields of a form version. A confirmed version is moved into the shared table
-    /// with its first submission, or in the background when it has submissions already; the spreadsheet report shows the
-    /// answer at once. Only an open question takes an answer.
-    /// </summary>
-    public async Task AnswerFieldRenamesAsync(int originalFormId, int version, bool confirm)
-    {
-        var hasData = false;
-        var formFilling = await UpdateVersionStateAsync(originalFormId, null, async (_, state) =>
-        {
-            var link = state.PendingVersionLinks?.Find(p => p.Version == version && IsOpenQuestion(p));
-            if (link == null)
-            {
-                return false;
-            }
-
-            if (!confirm)
-            {
-                state.PendingVersionLinks.Remove(link);
-                return true;
-            }
-
-            link.Confirmed = true;
-            hasData = await HasDataAsync(await GetFormsDbAsync(state.RoomId), originalFormId, version, state.RoomId);
-            if (hasData)
-            {
-                await PublishVersionCheckAsync(originalFormId);
-            }
-
-            return true;
-        });
-
-        if (!hasData)
-        {
-            return;
-        }
-
-        // Best effort: the answer is saved, and the next submission rebuilds the report anyway.
-        try
-        {
-            if (await daoFactory.GetFolderDao<int>().GetFolderAsync(formFilling.RoomId) is { SettingsSaveFormAsXLSX: true })
-            {
-                await exportToXLSX.UpdateXlsxReport(formFilling.RoomId, originalFormId, version, isNewFile: false);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.WarnFormReportRebuildFailed(e, originalFormId);
-        }
-    }
-
-    // Every change of the state is made from properties read under the version lock; the clients learn of changed questions.
+    // Every change of the state is made from properties read under the version lock.
     private async Task<FormFillingProperties<int>> UpdateVersionStateAsync(int originalFormId, int? version, Func<File<int>, FormFillingProperties<int>, Task<bool>> change)
     {
         await using (await AcquireVersionLockAsync(originalFormId))
@@ -584,8 +533,7 @@ public class FormFillingReportCreator(
                 return state;
             }
 
-            var questions = GetOpenQuestionVersions(state);
-            var decided = GetDecidedVersions(state);
+            var pending = GetPendingVersions(state);
             if (!await change(form, state))
             {
                 return state;
@@ -593,13 +541,8 @@ public class FormFillingReportCreator(
 
             await SaveVersionStateAsync(originalFormId, state);
 
-            if (!questions.SequenceEqual(GetOpenQuestionVersions(state)))
-            {
-                await socketManager.UpdateFileAsync(form);
-            }
-
-            // The report showed a decided version with the shared ones; the database refused it, so it gets its sheet back.
-            if (decided.Exists(v => state.VersionLinks?.Exists(l => l.Version == v) != true && !GetDecidedVersions(state).Contains(v)))
+            // The report showed a pending version with the shared ones; the database refused it, so it gets its sheet back.
+            if (pending.Exists(v => state.VersionLinks?.Exists(l => l.Version == v) != true && !GetPendingVersions(state).Contains(v)))
             {
                 await RequestReportRebuildAsync(state.RoomId, form);
             }
@@ -608,27 +551,9 @@ public class FormFillingReportCreator(
         }
     }
 
-    public static bool HasOpenQuestions(FormFillingProperties<int> formFilling)
+    private static List<int> GetPendingVersions(FormFillingProperties<int> formFilling)
     {
-        return formFilling?.PendingVersionLinks?.Any(IsOpenQuestion) == true;
-    }
-
-    /// <summary>
-    /// The versions whose renamed fields wait for an answer, oldest first.
-    /// </summary>
-    public static List<FormVersionLink> GetOpenQuestions(FormFillingProperties<int> formFilling)
-    {
-        return (formFilling?.PendingVersionLinks ?? [])
-            .Where(IsOpenQuestion)
-            .OrderBy(p => p.Version)
-            .ToList();
-    }
-
-    private static bool IsOpenQuestion(FormVersionLink link) => link.Renames?.Count > 0 && link.Confirmed == null;
-
-    internal static List<int> GetDecidedVersions(FormFillingProperties<int> formFilling)
-    {
-        return (formFilling?.PendingVersionLinks ?? []).Where(p => !IsOpenQuestion(p)).Select(p => p.Version).ToList();
+        return (formFilling?.PendingVersionLinks ?? []).Select(p => p.Version).ToList();
     }
 
     // Best effort, on behalf of the form owner: the next submission rebuilds the report anyway.
@@ -648,22 +573,12 @@ public class FormFillingReportCreator(
         }
     }
 
-    private static List<int> GetOpenQuestionVersions(FormFillingProperties<int> formFilling)
-    {
-        return GetOpenQuestions(formFilling).Select(p => p.Version).ToList();
-    }
-
     // A version compared already is compared again only when it was overwritten (a save that replaces the version).
     private static bool NeedsCheck(FormFillingProperties<int> formFilling, File<int> form)
     {
         return formFilling != null && form != null
             && (form.Version > formFilling.FieldsCheckedVersion
                 || form.Version == formFilling.FieldsCheckedVersion && form.ModifiedOn.Ticks != formFilling.FieldsCheckedStamp);
-    }
-
-    private static bool HasDecisionToApply(FormFillingProperties<int> formFilling, int version)
-    {
-        return formFilling.PendingVersionLinks?.Any(p => p.Version == version && !IsOpenQuestion(p)) == true;
     }
 
     private Task<IDistributedLockHandle> AcquireVersionLockAsync(int originalFormId)
@@ -718,6 +633,7 @@ public class FormFillingReportCreator(
         to.FieldsCheckedStamp = from.FieldsCheckedStamp;
         to.VersionLinks = from.VersionLinks;
         to.PendingVersionLinks = from.PendingVersionLinks;
+        to.EditorFieldRenames = from.EditorFieldRenames;
     }
 
     private async Task<FormFillingProperties<int>> GetFormFillingAsync(int originalFormId)
@@ -801,10 +717,11 @@ public class FormFillingReportCreator(
     {
         try
         {
-            // A version linked or with a table of its own keeps its decision and its open question.
+            // A version linked or with a table of its own keeps its decision.
             if (state.VersionLinks?.Any(l => l.Version == form.Version) == true
                 || await TableExistsOrUnknownAsync(db, GetTableName(form.Id, form.Version)))
             {
+                ConsumeEditorRenames(state, form.Version);
                 MarkChecked(state, form);
                 return true;
             }
@@ -814,6 +731,8 @@ public class FormFillingReportCreator(
             {
                 return false;
             }
+
+            ConsumeEditorRenames(state, form.Version);
 
             var pending = state.PendingVersionLinks ??= [];
 
@@ -826,17 +745,10 @@ public class FormFillingReportCreator(
                 }
             }
 
-            var previous = pending.Find(p => p.Version == form.Version);
             pending.RemoveAll(p => p.Version == form.Version);
 
             if (link.Version > 0)
             {
-                // An answer survives an overwrite of the version that renamed the same fields.
-                if (previous?.Confirmed != null && SameRenames(previous, link))
-                {
-                    link.Confirmed = previous.Confirmed;
-                }
-
                 pending.Add(link);
             }
 
@@ -850,16 +762,33 @@ public class FormFillingReportCreator(
         }
     }
 
+    // The sessions saved up to the compared version went into its link; a session the form moved past unsaved never will.
+    internal static void ConsumeEditorRenames(FormFillingProperties<int> state, int version)
+    {
+        state.EditorFieldRenames?.RemoveAll(r => r.SavedVersion <= version || r.SavedVersion == null && r.OpenedVersion < version);
+        if (state.EditorFieldRenames?.Count == 0)
+        {
+            state.EditorFieldRenames = null;
+        }
+    }
+
+    // Under the version lock: the editor sessions of the form open up to the saved version end with this save.
+    internal static bool MarkEditorRenamesSaved(FormFillingProperties<int> state, int savedVersion)
+    {
+        var changed = false;
+        foreach (var session in state.EditorFieldRenames?.Where(r => r.SavedVersion == null && r.OpenedVersion <= savedVersion) ?? [])
+        {
+            session.SavedVersion = savedVersion;
+            changed = true;
+        }
+
+        return changed;
+    }
+
     private static void MarkChecked(FormFillingProperties<int> state, File<int> form)
     {
         state.FieldsCheckedVersion = form.Version;
         state.FieldsCheckedStamp = form.ModifiedOn.Ticks;
-    }
-
-    internal static bool SameRenames(FormVersionLink a, FormVersionLink b)
-    {
-        return a.TableVersion == b.TableVersion
-            && a.Renames.Select(r => (r.OldKey, r.NewKey)).SequenceEqual(b.Renames.Select(r => (r.OldKey, r.NewKey)));
     }
 
     // Data of the version: its own table, or submissions in the index. An unreadable index counts as data.
@@ -955,7 +884,6 @@ public class FormFillingReportCreator(
         // A submitted version is described in the index by its submissions; an unfilled one is read from its file, which
         // may have been overwritten since it was last read.
         List<FormMetadata> metadata;
-        Dictionary<string, string> tips = [];
         if (currentSubmitted > 0)
         {
             metadata = (await GetVersionMetadataAsync(form.Id, form.Version)).ToList();
@@ -965,7 +893,6 @@ public class FormFillingReportCreator(
             using var cts = new CancellationTokenSource(_fieldsReadTimeout);
             var json = await formFieldsExtractor.ExtractFieldsJsonAsync(form, cts.Token);
             metadata = ParseSubmitAndMetadata(json).MetaData;
-            tips = ParseTips(json);
 
             // Indexed now, so that the next version is compared with this one even if this one is never filled.
             if (metadata.Count > 0)
@@ -988,54 +915,172 @@ public class FormFillingReportCreator(
             return none;
         }
 
-        var renames = FormFieldMatcher.Match(NormalizeMetadata(previous.Metadata), NormalizeMetadata(metadata));
+        var tableVersion = GetTableVersion(formFilling, previous.OriginalFormVersion);
+        var renames = MatchFields(form.Version, tableVersion, previous, metadata, formFilling);
         if (renames == null)
         {
             return none;
         }
 
-        foreach (var rename in renames)
-        {
-            var field = metadata.Find(m => m.Key == rename.NewKey);
-            rename.Type = field?.Type;
-            rename.Options = field?.PossibleValues is { Count: > 0 } options ? options : null;
-            rename.Tip = tips.GetValueOrDefault(rename.NewKey);
-        }
-
         return new FormVersionLink
         {
             Version = form.Version,
-            TableVersion = GetTableVersion(formFilling, previous.OriginalFormVersion),
+            TableVersion = tableVersion,
             Renames = renames
         };
     }
 
-    // The tips the form author set, by field key; empty when the script could not read them.
-    internal static Dictionary<string, string> ParseTips(string json)
+    /// <summary>
+    /// The fields of the version renamed since the last version with data; null when the version needs a table of its
+    /// own: a field kept its name under another type, a field took the name of another one, or no field is left. The
+    /// renames the editor tracked by field id in the sessions saved since count, with those of the versions in between,
+    /// decided the same way. Without the editor, a form whose fields kept their order, types and options while only keys
+    /// changed is the same form under new keys; otherwise a field with a new name is a new field, so answers to different
+    /// questions do not share a column.
+    /// </summary>
+    internal static List<FormFieldRename> MatchFields(int version, int tableVersion, DbFormsMetadataSearch previousVersion, List<FormMetadata> current, FormFillingProperties<int> formFilling)
     {
-        using var document = JsonDocument.Parse(json);
-        if (!document.RootElement.TryGetProperty("tips", out var tips) || tips.ValueKind != JsonValueKind.Object)
+        var since = previousVersion.OriginalFormVersion;
+        var decided = (formFilling.PendingVersionLinks ?? [])
+            .Where(p => p.Version > since && p.Version < version && p.TableVersion == tableVersion)
+            .Select(p => (Version: p.Version, p.Renames));
+        // The sessions saved as one version, by several users, in the order they began to report.
+        var sessions = (formFilling.EditorFieldRenames ?? [])
+            .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since)
+            .Select(r => (Version: r.SavedVersion.Value, r.Renames))
+            .ToList();
+
+        // A key of the previous version to its key after the known renames, applied in the order of the versions.
+        var known = new Dictionary<string, string>();
+        foreach (var (_, renames) in decided.Concat(sessions).OrderBy(r => r.Version))
         {
-            return [];
+            ComposeRenames(known, renames);
         }
 
-        return tips.EnumerateObject()
-            .Where(t => t.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(t.Value.GetString()))
-            .ToDictionary(t => t.Name, t => t.Value.GetString());
+        var tracked = sessions.Count > 0;
+
+        var before = NormalizeMetadata(previousVersion.Metadata).ToList();
+        var after = NormalizeMetadata(current).ToList();
+        var applied = new List<FormFieldRename>();
+        foreach (var (oldKey, newKey) in known.Where(k => k.Key != k.Value && before.Exists(f => f.Key == k.Key) && after.Exists(f => f.Key == k.Value)))
+        {
+            // Swapped names, or the name of another field of the previous version: its column holds that field's answers.
+            if (before.Exists(f => f.Key != oldKey && NormalizeColumnName(f.Key) == NormalizeColumnName(newKey)))
+            {
+                return null;
+            }
+
+            applied.Add(new FormFieldRename { OldKey = oldKey, NewKey = newKey });
+        }
+
+        // Fields of the previous version given one key share a column now: the first of them in the form takes it, and the
+        // others keep their earlier answers under their old names. Two columns cannot be joined.
+        applied = applied
+            .GroupBy(a => NormalizeColumnName(a.NewKey))
+            .Select(g => g.MinBy(a => before.FindIndex(f => f.Key == a.OldKey)))
+            .ToList();
+
+        var renamed = before
+            .Select(f => applied.Find(a => a.OldKey == f.Key) is { } a
+                ? new FormMetadata { Key = a.NewKey, Type = f.Type, Format = f.Format, PossibleValues = f.PossibleValues }
+                : f)
+            .ToList();
+
+        if (!tracked && FormFieldMatcher.MatchSameLayout(renamed, after) is { } positional)
+        {
+            return applied.Concat(positional).OrderBy(r => after.FindIndex(f => f.Key == r.NewKey)).ToList();
+        }
+
+        if (FormFieldMatcher.CountShared(renamed, after) is null or 0)
+        {
+            return null;
+        }
+
+        return applied.OrderBy(r => after.FindIndex(f => f.Key == r.NewKey)).ToList();
+    }
+
+    // The renames of one version or one editor session happen at once, so swapped keys stay swapped.
+    private static void ComposeRenames(Dictionary<string, string> known, IEnumerable<FormFieldRename> renames)
+    {
+        var composed = (renames ?? [])
+            .Select(r => (Origin: known.FirstOrDefault(k => k.Value == r.OldKey).Key ?? r.OldKey, r.NewKey))
+            .ToList();
+
+        foreach (var (origin, newKey) in composed)
+        {
+            known[origin] = newKey;
+        }
+    }
+
+    /// <summary>
+    /// Keeps the fields a user renamed in an editor session, which the editor tracks by field id, relative to the version
+    /// it opened; the version the session is saved as then continues the earlier answers of these fields under their new
+    /// names. A later report of the same user and session replaces the earlier one, and an older report arriving late is
+    /// dropped. A version the form does not have yet is ignored.
+    /// </summary>
+    public async Task SetEditorFieldRenamesAsync(int originalFormId, int openedVersion, long sequence, Guid userId, List<FormFieldRename> renames)
+    {
+        await UpdateVersionStateAsync(originalFormId, null, (form, state) =>
+            Task.FromResult(openedVersion <= form.Version && KeepEditorRenames(state, openedVersion, sequence, userId, renames)));
+    }
+
+    // Each user's session keeps its place in the list, which is the order the sessions began to report in.
+    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, List<FormFieldRename> renames)
+    {
+        var sessions = state.EditorFieldRenames ??= [];
+        var session = sessions.Find(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion == null);
+        if (session == null)
+        {
+            session = new FormEditorFieldRenames { OpenedVersion = openedVersion, UserId = userId };
+            sessions.Add(session);
+        }
+        else if (sequence <= session.Sequence)
+        {
+            return false;
+        }
+
+        session.Sequence = sequence;
+        session.Renames = renames
+            .Where(r => !string.IsNullOrEmpty(r.OldKey) && !string.IsNullOrEmpty(r.NewKey) && r.OldKey != r.NewKey)
+            .Select(r => new FormFieldRename { OldKey = r.OldKey, NewKey = r.NewKey })
+            .ToList();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Ties the field renames of the editor sessions open up to a save of the original form to the version it saved. Best
+    /// effort: it never fails the save, and a form with no such session is left alone.
+    /// </summary>
+    public async Task MarkEditorRenamesSavedAsync(File<int> form, FormFillingProperties<int> formFilling)
+    {
+        if (formFilling?.EditorFieldRenames?.Exists(r => r.SavedVersion == null) != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await UpdateVersionStateAsync(form.Id, form.Version, (saved, state) => Task.FromResult(MarkEditorRenamesSaved(state, saved.Version)));
+        }
+        catch (Exception e)
+        {
+            logger.WarnEditorRenamesNotSaved(e, form.Id, form.Version);
+        }
     }
 
     // The pending decision of the version, taken with its first submission. Returns whether the state changed.
     private async Task<bool> ApplyOnFirstSubmissionAsync(ExternalDatabaseClient db, File<int> form, FormFillingProperties<int> state)
     {
         var link = state.PendingVersionLinks?.Find(p => p.Version == form.Version);
-        if (link == null || IsOpenQuestion(link))
+        if (link == null)
         {
             return false;
         }
 
         if (db != null && await db.TableExistsAsync(GetTableName(form.Id, form.Version)))
         {
-            // Confirmed after its first submissions, before the background move ran.
+            // Decided after its first submissions, before the background move ran.
             await MergeVersionAsync(db, form.Id, state, link);
         }
         else
@@ -1055,7 +1100,6 @@ public class FormFillingReportCreator(
         if (db == null)
         {
             link.TableVersion = tableVersion;
-            link.Confirmed = null;
             AddLink(state, link);
             return;
         }
@@ -1087,7 +1131,6 @@ public class FormFillingReportCreator(
                 }
 
                 link.TableVersion = tableVersion;
-                link.Confirmed = null;
                 AddLink(state, link);
 
                 await SaveVersionStateAsync(form.Id, state);
@@ -1133,7 +1176,7 @@ public class FormFillingReportCreator(
             await using (await AcquireTableLockAsync(targetTable))
             await using (await AcquireTableLockAsync(sourceTable))
             {
-                // A table dropped as idle is restored from the index first; without the index the question stays open.
+                // A table dropped as idle is restored from the index first; without the index the move waits for a later try.
                 if (!await EnsureTableLockedAsync(db, targetTable, originalFormId, tableVersion, state.RoomId, state)
                     || !await EnsureTableLockedAsync(db, sourceTable, originalFormId, version, state.RoomId, state))
                 {
@@ -1189,7 +1232,6 @@ public class FormFillingReportCreator(
     internal static void RetargetLinks(FormFillingProperties<int> state, FormVersionLink link, List<FormVersionLink> continuing, int tableVersion)
     {
         link.TableVersion = tableVersion;
-        link.Confirmed = null;
         foreach (var continued in continuing)
         {
             continued.TableVersion = tableVersion;
@@ -1198,16 +1240,8 @@ public class FormFillingReportCreator(
         AddLink(state, link);
     }
 
-    // The field descriptions only serve the question, so an applied link keeps the keys alone.
     internal static void AddLink(FormFillingProperties<int> state, FormVersionLink link)
     {
-        foreach (var rename in link.Renames ?? [])
-        {
-            rename.Type = null;
-            rename.Options = null;
-            rename.Tip = null;
-        }
-
         var links = state.VersionLinks ??= [];
         links.RemoveAll(l => l.Version == link.Version);
         links.Add(link);
@@ -1478,11 +1512,11 @@ public class FormFillingReportCreator(
             .ToList();
     }
 
-    // The links as the user decided them: a decision waiting for the first submission of its version or for the database
-    // already groups the report, which reads the index alone.
+    // The links as decided: a decision waiting for the first submission of its version or for the database already groups
+    // the report, which reads the index alone.
     internal static FormFillingProperties<int> WithDecidedLinks(FormFillingProperties<int> formFilling)
     {
-        var decided = formFilling?.PendingVersionLinks?.Where(p => !IsOpenQuestion(p)).OrderBy(p => p.Version).ToList();
+        var decided = formFilling?.PendingVersionLinks?.OrderBy(p => p.Version).ToList();
         if (decided is not { Count: > 0 })
         {
             return formFilling;

@@ -172,10 +172,16 @@ public class FormFillingProperties<T>
     public List<FormVersionLink> VersionLinks { get; set; }
 
     /// <summary>
-    /// The links the form versions may take, applied with the first submission of the version or, when it already has
-    /// submissions, with the answer about its renamed fields.
+    /// The links the form versions take, applied with the first submission of the version or, when it already has
+    /// submissions, by moving them into the shared table in the background.
     /// </summary>
     public List<FormVersionLink> PendingVersionLinks { get; set; }
+
+    /// <summary>
+    /// The fields renamed in the editor sessions of the form since its versions were last compared, as the editor tracked
+    /// them by field id.
+    /// </summary>
+    public List<FormEditorFieldRenames> EditorFieldRenames { get; set; }
 
     /// <summary>
     /// The version of the completed form whose responses failed to be read back for the search index.
@@ -213,11 +219,38 @@ public class FormVersionLink
     /// The fields renamed since the previous version.
     /// </summary>
     public List<FormFieldRename> Renames { get; set; }
+}
+
+/// <summary>
+/// The fields renamed in one editor session of an original form by one user, as the editor tracked them by field id. The
+/// fields not among them were added or removed.
+/// </summary>
+public class FormEditorFieldRenames
+{
+    /// <summary>
+    /// The version the editor opened; the keys of the renames are relative to the fields the user saw when it opened.
+    /// </summary>
+    public int OpenedVersion { get; set; }
 
     /// <summary>
-    /// The answer about the renamed fields of a pending link; null while nobody answered.
+    /// The user whose editor reported the renames.
     /// </summary>
-    public bool? Confirmed { get; set; }
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The number of the report taken, growing within the session; an older report that arrives later is dropped.
+    /// </summary>
+    public long Sequence { get; set; }
+
+    /// <summary>
+    /// The version the editor saved the session as; null until it saves it.
+    /// </summary>
+    public int? SavedVersion { get; set; }
+
+    /// <summary>
+    /// The renamed fields.
+    /// </summary>
+    public List<FormFieldRename> Renames { get; set; }
 }
 
 /// <summary>
@@ -234,21 +267,6 @@ public class FormFieldRename
     /// The key in the new version.
     /// </summary>
     public string NewKey { get; set; }
-
-    /// <summary>
-    /// The field type in the new version.
-    /// </summary>
-    public string Type { get; set; }
-
-    /// <summary>
-    /// The values the field offers in the new version.
-    /// </summary>
-    public List<string> Options { get; set; }
-
-    /// <summary>
-    /// The tip the form author set for the field in the new version.
-    /// </summary>
-    public string Tip { get; set; }
 }
 
 /// <summary>

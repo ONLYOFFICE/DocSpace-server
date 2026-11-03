@@ -242,6 +242,7 @@ public record SelfJoinCondition(string LeftColumn, string Operator, string Right
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
+    private static readonly Regex _quotedOptionRegex = new("'((?:[^']|'')*)'", RegexOptions.Compiled);
 
     private static void ValidateTableName(string tableName)
     {
@@ -314,11 +315,13 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         DbColumnType.Boolean => "BOOLEAN",
         DbColumnType.Date => "DATE",
         DbColumnType.DateTime => "TIMESTAMP",
-        DbColumnType.Enum when col.EnumValues?.Count > 0 =>
-            $"TEXT CHECK (\"{col.Name}\" IN ({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "''")}'"))}))",
+        DbColumnType.Enum when col.EnumValues?.Count > 0 => $"TEXT {BuildPgOptionsCheck(col.Name, col.EnumValues)}",
         DbColumnType.Enum => "TEXT",
         _ => "TEXT"
     };
+
+    private static string BuildPgOptionsCheck(string column, IEnumerable<string> options) =>
+        $"CHECK (\"{column}\" IN ({string.Join(", ", options.Select(v => $"'{v.Replace("'", "''")}'"))}))";
 
     private static string MapSqliteType(DbColumnDefinition col) => col.Type switch
     {
@@ -397,12 +400,25 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return FormTableChange.Conflict;
         }
 
+        // The options of a list are read under its new name; MySQL keeps them in the column type it has read already.
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            await ExecuteAsync(connection, tx, statements);
+            statements.Clear();
+        }
+
         foreach (var column in columns)
         {
             var type = MapType(column, dbType);
             if (existing.TryGetValue(ValidateColumnName(column.Name), out var existingType))
             {
                 if (GetTypeClass(existingType) != GetTypeClass(type))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                if (column is { Type: DbColumnType.Enum, EnumValues.Count: > 0 }
+                    && !await TryWidenOptionsAsync(connection, tx, tableName, column.Name, existingType, column.EnumValues, dbType, statements))
                 {
                     return FormTableChange.Conflict;
                 }
@@ -453,11 +469,25 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return FormTableChange.Conflict;
         }
 
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            await ExecuteAsync(connection, tx, statements);
+            statements.Clear();
+        }
+
         foreach (var (name, type) in source)
         {
             if (target.TryGetValue(ValidateColumnName(name), out var targetType))
             {
                 if (GetTypeClass(targetType) != GetTypeClass(type))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                // A source column with any text keeps the target's list: a value outside it fails the copy, which says so.
+                var (sourceOptions, _) = await GetColumnOptionsAsync(connection, tx, sourceTable, name, type, dbType);
+                if (sourceOptions != null
+                    && !await TryWidenOptionsAsync(connection, tx, targetTable, name, targetType, sourceOptions, dbType, statements))
                 {
                     return FormTableChange.Conflict;
                 }
@@ -530,6 +560,95 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
 
         return columns;
+    }
+
+    // A list column takes the options it lacks, old ones kept, as its values must still fit; a column with any text takes
+    // anything already. False when the list cannot be changed in place (SQLite).
+    private static async Task<bool> TryWidenOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, IEnumerable<string> options, ExternalDatabaseType dbType, List<string> statements)
+    {
+        var (current, constraint) = await GetColumnOptionsAsync(connection, tx, tableName, column, type, dbType);
+        if (current == null)
+        {
+            return true;
+        }
+
+        var widen = BuildWidenOptions(tableName, column, current, options, constraint, dbType);
+        if (widen == null)
+        {
+            return false;
+        }
+
+        statements.AddRange(widen);
+        return true;
+    }
+
+    // The options a list column accepts and, in PostgreSQL, the check that holds them; null options for any text.
+    private static async Task<(List<string>? Options, string? Constraint)> GetColumnOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, ExternalDatabaseType dbType)
+    {
+        if (dbType == ExternalDatabaseType.MySql)
+        {
+            return (type.StartsWith("enum(", StringComparison.OrdinalIgnoreCase) ? ParseOptions(type, dbType) : null, null);
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = dbType == ExternalDatabaseType.Sqlite
+            ? "SELECT NULL, sql FROM sqlite_master WHERE type = 'table' AND name = @tableName"
+            : "SELECT c.conname, pg_get_constraintdef(c.oid) FROM pg_constraint c " +
+              "JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey) " +
+              "WHERE c.conrelid = to_regclass(quote_ident(@tableName)) AND c.contype = 'c' AND a.attname = @column";
+        AddParameters(cmd, dbType == ExternalDatabaseType.Sqlite
+            ? new Dictionary<string, object?> { ["@tableName"] = tableName }
+            : new Dictionary<string, object?> { ["@tableName"] = tableName, ["@column"] = column });
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync() || reader.IsDBNull(1))
+        {
+            return (null, null);
+        }
+
+        var definition = reader.GetString(1);
+        if (dbType == ExternalDatabaseType.Sqlite)
+        {
+            var check = Regex.Match(definition, $@"CHECK\(""{Regex.Escape(column)}"" IN \(((?:'(?:[^']|'')*'(?:, )?)*)\)\)");
+            return (check.Success ? ParseOptions(check.Groups[1].Value, dbType) : null, null);
+        }
+
+        return (ParseOptions(definition, dbType), reader.GetString(0));
+    }
+
+    // The quoted values of an ENUM type or a check constraint, unescaped.
+    internal static List<string> ParseOptions(string definition, ExternalDatabaseType dbType)
+    {
+        return _quotedOptionRegex.Matches(definition)
+            .Select(m => m.Groups[1].Value.Replace("''", "'"))
+            .Select(v => dbType == ExternalDatabaseType.MySql ? v.Replace(@"\\", @"\") : v)
+            .ToList();
+    }
+
+    // The statements that let a list column take the given options besides its own; empty when it has them all, null when
+    // the list cannot be changed in place.
+    internal static List<string>? BuildWidenOptions(string tableName, string column, IReadOnlyList<string> current, IEnumerable<string> options, string? constraint, ExternalDatabaseType dbType)
+    {
+        var added = options.Where(o => !current.Contains(o, StringComparer.Ordinal)).Distinct(StringComparer.Ordinal).ToList();
+        if (added.Count == 0)
+        {
+            return [];
+        }
+
+        List<string> all = [.. current, .. added];
+
+        return dbType switch
+        {
+            ExternalDatabaseType.MySql => [$"ALTER TABLE `{tableName}` MODIFY COLUMN `{column}` {MapMySqlType(new DbColumnDefinition(column, DbColumnType.Enum, all))}"],
+            ExternalDatabaseType.PostgreSql when constraint != null =>
+            [
+                $"ALTER TABLE \"{tableName}\" DROP CONSTRAINT \"{constraint}\"",
+                // The rows kept the old options, which the new list holds, so they are not scanned again.
+                $"ALTER TABLE \"{tableName}\" ADD CONSTRAINT \"{constraint}\" {BuildPgOptionsCheck(column, all)} NOT VALID"
+            ],
+            _ => null
+        };
     }
 
     // Renames in order; false when a new name is taken by another column.
