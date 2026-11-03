@@ -42,8 +42,7 @@ namespace ASC.Files.Tests.Tests._01_Files.Editing;
 /// the co-authoring branch, which calls out to the document server
 /// (<c>DocumentServiceTracker.StartTrackAsync</c> -&gt; <c>DocumentServiceConnector.CommandAsync</c>).
 /// Those two TS cases ("BUG 81267: editingAlone: false returns 403" and "BUG 81267: Request without
-/// editingAlone field returns 403") are not ported yet; the integration-test host runs a document server
-/// that reaches the portals, so they can be.
+/// editingAlone field returns 403") live in <see cref="EditingStartCoAuthoringTests"/>.
 /// </summary>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]

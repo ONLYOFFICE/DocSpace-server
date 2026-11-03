@@ -179,10 +179,10 @@ public class RoomShareFieldsTests(
     /// half-written and ended with an <c>error</c> object under HTTP 500, while every other field projected
     /// fine. The projecting serializer walked the static <c>EmployeeDto.Default</c>, a new instance with a
     /// <c>Default</c> of its own, until the depth limit; it now skips static and ignored properties and writes a
-    /// property selected as a whole exactly as the unfiltered response does. The TypeScript original marked these as
-    /// a known failure without a bug number.
+    /// property selected as a whole exactly as the unfiltered response does. BUG 84766 in the TypeScript suite.
     /// </summary>
     [Theory]
+    [Trait("Bug", "84766")]
     [InlineData("sharedTo", "")]
     [InlineData("access|sharedTo", "")]
     [InlineData("access|sharedTo|isOwner", "")]

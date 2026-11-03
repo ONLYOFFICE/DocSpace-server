@@ -65,4 +65,5 @@ global using MySqlConnector;
 global using Xunit;
 
 // Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
+global using AppHostConstants = ASC.AppHost.Configuration.Constants;
 global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;

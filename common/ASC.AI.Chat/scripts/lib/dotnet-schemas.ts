@@ -87,6 +87,8 @@ const PROXY_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
   aiSettingsSetVectorization: "setVectorizationSettings",
   aiSettingsGetUser: "getAiUserSettings",
   aiSettingsSetUser: "setAiUserSettings",
+  aiSettingsGetToolMode: "getToolPermissionMode",
+  aiSettingsSetToolMode: "setToolPermissionMode",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -101,9 +103,9 @@ export interface DotnetProxySchemas {
 
 function fail(message: string): never {
   throw new Error(
-    `Cannot enrich the proxy routes from ${AI_DOCUMENT}: ${message}. `
-    + "Build ASC.AI.Server (which emits ai_2.0.json) before generating the "
-    + "OpenAPI document for this service.",
+    `Cannot enrich the proxy routes from ${AI_DOCUMENT}: ${message}. ` +
+      "Build ASC.AI.Server (which emits ai_2.0.json) before generating the " +
+      "OpenAPI document for this service.",
   );
 }
 

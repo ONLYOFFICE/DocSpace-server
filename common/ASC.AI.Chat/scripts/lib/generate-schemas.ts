@@ -174,7 +174,14 @@ export function generateOpenApiSchemas(): OpenApiSchemaBundle {
   for (const entry of unused) {
     const target =
       entry.property === undefined ? entry.schema : `${entry.schema}.${entry.property}`;
-    console.warn(`SCHEMA_DOCS entry changed nothing: ${target} (${entry.reason})`);
+    console.error(`SCHEMA_DOCS entry changed nothing: ${target} (${entry.reason})`);
+  }
+  if (unused.length > 0) {
+    // A dead entry is a typo or a library change (a pinned replacement whose text moved): either way the
+    // document would silently lose a description, so the generation fails instead of exiting 0.
+    throw new Error(
+      `${unused.length} SCHEMA_DOCS entr${unused.length === 1 ? "y" : "ies"} changed nothing`,
+    );
   }
 
   return { components, operations: cleanOperationDescriptions(bundle.operations) };
