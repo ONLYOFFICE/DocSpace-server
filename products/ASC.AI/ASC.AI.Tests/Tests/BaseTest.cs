@@ -149,8 +149,10 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// </summary>
     public virtual ValueTask DisposeAsync()
     {
-        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
-        _clients.Dispose();
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients. They are null when the
+        // setup failed before the portal was registered (a lazy resource that never came up): the setup's own exception
+        // is the one to report, not a NullReferenceException from here.
+        _clients?.Dispose();
         return ValueTask.CompletedTask;
     }
 
@@ -208,6 +210,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;
     protected SettingsQuotaApi SettingsQuotaApi => _clients.SettingsQuotaApi;
     protected CommonSettingsApi CommonSettingsApi => _clients.CommonSettingsApi;
+    protected DocSpace.API.SDK.Api.Portal.QuotaApi QuotaApi => _clients.QuotaApi;
 
     /// <summary>
     /// The profile input a public create takes: an OpenAI-compatible provider on the stub, which the chat service
@@ -225,15 +228,22 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected async Task<AiProfile> CreateProfileAsync(string? name = null)
     {
         var result = await _aiProfiles.AiProfilesCreateAsync(BuildProfileInput(name), TestContext.Current.CancellationToken);
-
-        // Described only on a failure: the run-wide provider's log holds every request of the run, so building the
-        // message on each success made every profile create walk all of it.
-        if (!result.Success)
-        {
-            result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
-        }
+        ExpectProfileCreated(result, ModelProvider);
 
         return result.Profile;
+    }
+
+    /// <summary>
+    /// Fails the test when profiles/create rejected the profile. The provider is described only then: the run-wide
+    /// provider's log holds every request of the run, and a reason string is built before the assertion runs, so
+    /// describing it on each success made every profile create walk all of it.
+    /// </summary>
+    protected static void ExpectProfileCreated(AiProfileMutationResult result, StubModelProvider provider)
+    {
+        if (!result.Success)
+        {
+            result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{provider.Describe()}");
+        }
     }
 
     private AiProfile? _defaultProfile;
@@ -289,7 +299,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         input.BaseUrl = provider.BaseUrl;
 
         var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{provider.Describe()}");
+        ExpectProfileCreated(result, provider);
 
         return result.Profile;
     }

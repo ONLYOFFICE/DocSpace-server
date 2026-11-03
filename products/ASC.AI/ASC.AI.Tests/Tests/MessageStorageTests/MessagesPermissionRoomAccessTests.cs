@@ -43,6 +43,9 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 [Trait("Feature", "AI/Messages")]
 public class MessagesPermissionRoomAccessTests(AspireAppFixture fixture) : MessagesPart3TestBase(fixture)
 {
+    // Waits for the export it accepts to land as a .docx, so the document server has to be up.
+    protected override bool NeedsDocumentServer => true;
+
     [Theory]
     [InlineData(DocSpace.API.SDK.Model.FileShare.Read)]
     [InlineData(DocSpace.API.SDK.Model.FileShare.Editing)]

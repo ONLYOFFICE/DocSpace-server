@@ -169,16 +169,28 @@ public class McpAllowAlwaysTests(AspireAppFixture fixture) : McpTestBase(fixture
     [Theory]
     [InlineData("?toolName=kept")]
     [InlineData("?serverType=docspace")]
-    [InlineData("?serverType=&toolName=")]
     [InlineData("")]
     public async Task IsAllowAlways_MissingParameters_Is400_AndALeftOverListIsUntouched(string query)
     {
         await SetAllowAlwaysAsync("docspace", "kept");
 
+        // Raw: a missing serverType or toolName is a null the typed client rejects before sending anything.
         var reply = await GetToolsAsync("is-allow-always", query);
 
         reply.Code.Should().Be(400, reply.ToString());
         reply.Error.Should().Be("serverType and toolName required");
+        (await AllowedAsync()).Should().Equal("docspace_kept");
+    }
+
+    [Fact]
+    public async Task IsAllowAlways_EmptyParameters_Is400_AndALeftOverListIsUntouched()
+    {
+        await SetAllowAlwaysAsync("docspace", "kept");
+
+        var (status, error) = await OutcomeOfAsync(() => IsAllowedAsync(string.Empty, string.Empty));
+
+        status.Should().Be(400, error);
+        error.Should().Contain("\"serverType and toolName required\"");
         (await AllowedAsync()).Should().Equal("docspace_kept");
     }
 

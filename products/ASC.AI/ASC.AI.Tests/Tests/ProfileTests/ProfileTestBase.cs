@@ -238,11 +238,17 @@ public abstract class ProfileTestBase(AspireAppFixture fixture) : BaseTest(fixtu
 
     public override async ValueTask DisposeAsync()
     {
-        foreach (var socket in _closedPorts)
+        try
         {
-            socket.Dispose();
+            foreach (var socket in _closedPorts)
+            {
+                socket.Dispose();
+            }
         }
-
-        await base.DisposeAsync();
+        finally
+        {
+            // The portal clients go even when a socket fails to close.
+            await base.DisposeAsync();
+        }
     }
 }

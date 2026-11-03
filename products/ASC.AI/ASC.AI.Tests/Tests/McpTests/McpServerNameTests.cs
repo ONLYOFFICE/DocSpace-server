@@ -173,8 +173,13 @@ public class McpServerNameTests(AspireAppFixture fixture) : McpTestBase(fixture)
         var constructor = await AddServerAsync("constructor", UrlConfig());
         var toString = await AddServerAsync("toString", UrlConfig());
 
-        constructor.Error?.Message.Should().NotBe("Server config must be an object", "the config is valid, the name is what the API dislikes");
-        toString.Error?.Message.Should().NotBe("Server config must be an object");
+        // Each is either accepted or refused for its name, never for the config; the checks run on a null error too.
+        foreach (var (name, result) in new[] { ("constructor", constructor), ("toString", toString) })
+        {
+            (result.Error?.Message).Should().NotBe("Server config must be an object", $"the config sent with {name} is valid");
+            (result.Success || result.Error?.Field == AiErrorData.FieldEnum.Name).Should().BeTrue(
+                $"{name} is accepted or refused for its name, but was: success={result.Success}, {result.Error?.Field}: {result.Error?.Message}");
+        }
     }
 
     [Fact]

@@ -52,10 +52,6 @@ public static class AiProjects
         return room.Response.Id;
     }
 
-    /// <summary>The generated client of the project routes (<c>files/rooms/{id}/model</c>), on the Files service.</summary>
-    public static DocSpace.API.SDK.Api.Rooms.AIApi ClientOf(RoomsApi roomsApi, HttpClient filesClient) =>
-        new(filesClient, new Configuration { BasePath = roomsApi.GetBasePath() });
-
     /// <summary>Selects the model of a project.</summary>
     public static Task<AiProjectModelWrapper> SetModelAsync(DocSpace.API.SDK.Api.Rooms.AIApi client, int projectId, string profileId) =>
         client.SetProjectModelAsync(projectId, new UpdateAiProjectModelRequest(Guid.Parse(profileId)), TestContext.Current.CancellationToken);

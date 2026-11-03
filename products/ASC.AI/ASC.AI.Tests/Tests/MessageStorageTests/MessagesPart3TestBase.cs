@@ -41,8 +41,6 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 /// </summary>
 public abstract class MessagesPart3TestBase(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
-    protected override bool NeedsDocumentServer => true;
-
     protected const string TextToDocxPath = "/api/2.0/ai/text-to-docx";
     protected const string ReadMessagesPath = "/api/2.0/ai/threads/read-messages";
     protected const string GetThreadByIdPath = "/api/2.0/ai/threads/get-by-id";

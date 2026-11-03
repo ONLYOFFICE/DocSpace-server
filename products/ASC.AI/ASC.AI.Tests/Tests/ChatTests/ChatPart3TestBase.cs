@@ -64,12 +64,18 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
 
     public override async ValueTask DisposeAsync()
     {
-        foreach (var provider in _providers)
+        try
         {
-            provider.Dispose();
+            foreach (var provider in _providers)
+            {
+                provider.Dispose();
+            }
         }
-
-        await base.DisposeAsync();
+        finally
+        {
+            // The portal clients go even when a stub fails to stop.
+            await base.DisposeAsync();
+        }
     }
 
     /// <summary>A stand-in model of the test's own, disposed with the test.</summary>

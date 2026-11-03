@@ -120,7 +120,13 @@ public class AssignmentResolutionTests(AspireAppFixture fixture) : AssignmentTes
     [Fact]
     public async Task TryResolve_WithNothingToResolve_Answers200WithANullBody()
     {
-        await CreateTextProfilesAsync(1);
+        var profile = (await CreateTextProfilesAsync(1))[0];
+
+        // Positive control: try-resolve names a profile while one is bound, so the nulls below are about the empty slots
+        // and not a route that never answers anything else.
+        await AssignAsync(AiActionType.Chat, profile.Id);
+        await ExpectResolvedAsync(profile.Id, AiActionType.Chat);
+
         await EmptyChatAndDefaultAsync();
 
         (await TryResolveAsync(nameof(AiActionType.Chat))).Should().BeNull();

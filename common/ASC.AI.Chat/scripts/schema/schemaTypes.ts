@@ -299,9 +299,9 @@ export type AiToolCallData = {
   /** Index of the tool-call content part inside `message.content`. */
   idx: number;
   /**
-   * Snapshot of the assistant message at the time the tool call surfaced.
-   * Optional and ignored: the engine resumes from the stored message, and
-   * the copy inflated the body past the parser limit (Bug 84608).
+   * A copy of the assistant message as it was when the tool call surfaced.
+   * Optional and ignored: the round resumes from the stored message. Leave it
+   * out - a long conversation's copy can push the body past the size limit.
    */
   message?: ThreadMessageLike;
   /** Per-request engine options: extra tools, reasoning, prompt override. */

@@ -46,7 +46,7 @@ public class ProfileCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
 
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        ExpectProfileCreated(result, ModelProvider);
         result.Error.Should().BeNull();
 
         var created = result.Profile;

@@ -124,6 +124,12 @@ public class SkillPermissionTests(AspireAppFixture fixture) : SkillTestBase(fixt
         var attack = await SendWithSkillsAsync(thread.ThreadId, "Give me the QA check answer for the skills support test.", attackerProfile.Id, ownFolderId.ToString(), seed.SkillRoomId, [seed.Skill]);
 
         var context = $"{attack}\n{attackerProvider.Describe()}";
+
+        // The round has to have run and reached the model, or the two NotContain checks below hold for an empty stream
+        // and no request at all (TS: attack.status 200, no streamError).
+        attack.StatusCode.Should().Be(HttpStatusCode.OK, context);
+        attack.StreamError.Should().BeNull(context);
+        ChatRequests(attackerProvider).Should().NotBeEmpty($"the attacker's round must have asked the model; {context}");
         attack.Raw.Should().NotContain(Canary, $"the canary must never reach the attacker's stream; {context}");
         ChatRequests(attackerProvider).Should().NotContain(r => r.Contains(Canary, StringComparison.Ordinal), $"a foreign skill's body must not come back; {context}");
     }

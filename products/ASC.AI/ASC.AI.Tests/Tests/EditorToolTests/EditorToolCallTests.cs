@@ -45,7 +45,6 @@ public class EditorToolCallTests(AspireAppFixture fixture) : EditorToolTestBase(
 {
     public static TheoryData<string> InvalidNameBodies => new()
     {
-        BodyJson("\"\""),
         BodyJson("null"),
         BodyJson(null),
         BodyJson("7"),
@@ -81,6 +80,15 @@ public class EditorToolCallTests(AspireAppFixture fixture) : EditorToolTestBase(
     {
         // Raw: a name that is null, missing or of the wrong JSON type, which the typed request cannot carry.
         var reply = await CallRawAsync(body);
+
+        reply.Error.Should().Be(UnknownToolName);
+        reply.Status.Should().Be(400, reply.ToString());
+    }
+
+    [Fact]
+    public async Task EmptyName_Returns400()
+    {
+        var reply = await CallToolAsync(string.Empty);
 
         reply.Error.Should().Be(UnknownToolName);
         reply.Status.Should().Be(400, reply.ToString());

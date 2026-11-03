@@ -99,9 +99,13 @@ public class ThirdPartyThreadTests(AspireAppFixture fixture) : ThirdPartyTestBas
             async () => await RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken));
         roomRead.ErrorCode.Should().Be(403, "reading the room as a non-member");
 
-        // ...and the threads listed for it are the caller's own, none of the owner's.
+        // ...and the threads listed for it are the caller's own, none of the owner's. The caller's own thread is the
+        // positive control: the list really answers, so the missing owner's thread is not an empty or failed read.
         await _aiChatClient.Authenticate(user);
-        var listed = await ListThreadsForAsync(roomId);
-        listed.Select(t => t.ThreadId).Should().NotContain(ownerThread.ThreadId, "a non-member is never handed the owner's thread");
+        var ownThread = await CreateThreadAsync("Autotest non-member own thread", profile.Id);
+        var listed = (await ListThreadsForAsync(roomId)).Select(t => t.ThreadId).ToList();
+
+        listed.Should().Contain(ownThread.ThreadId, "the non-member's own thread is listed");
+        listed.Should().NotContain(ownerThread.ThreadId, "a non-member is never handed the owner's thread");
     }
 }

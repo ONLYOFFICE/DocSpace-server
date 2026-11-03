@@ -64,7 +64,9 @@ public sealed record ToolsReply(HttpStatusCode Status, string Text)
         {
             try
             {
-                return JsonDocument.Parse(Text).RootElement.Clone();
+                using var document = JsonDocument.Parse(Text);
+
+                return document.RootElement.Clone();
             }
             catch (JsonException)
             {

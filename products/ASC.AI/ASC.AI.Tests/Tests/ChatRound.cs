@@ -54,7 +54,8 @@ public sealed record ChatRound(HttpStatusCode StatusCode, string Raw, IReadOnlyL
 
             try
             {
-                frames.Add(JsonDocument.Parse(trimmed).RootElement.Clone());
+                using var frame = JsonDocument.Parse(trimmed);
+                frames.Add(frame.RootElement.Clone());
             }
             catch (JsonException)
             {

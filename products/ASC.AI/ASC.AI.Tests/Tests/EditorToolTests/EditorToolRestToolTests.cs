@@ -304,7 +304,7 @@ public class EditorToolRestToolTests(AspireAppFixture fixture) : EditorToolTestB
         var onTitle = RandomName("Autotest on");
         var on = await RunAsync("create_folder", new { parentId = folderId, title = onTitle, filters = Fields("id", "title") });
         on.IsError.Should().BeFalse(on.Text);
-        await SetPortalAiAccessAsync(false);
+        await SwitchAiOffAsync();
         var offTitle = RandomName("Autotest off");
 
         var reply = await CallToolAsync("create_folder", new { parentId = folderId, title = offTitle, filters = Fields("id", "title") });
@@ -325,7 +325,7 @@ public class EditorToolRestToolTests(AspireAppFixture fixture) : EditorToolTestB
         var control = $"Autotest AI off control {Guid.NewGuid().ToString("N")[..6]}.docx";
         var victimId = await CreateFileAsync(victim);
         await CreateFileAsync(control);
-        await SetPortalAiAccessAsync(false);
+        await SwitchAiOffAsync();
 
         var reply = await CallToolAsync("delete_file", new { fileId = victimId });
 

@@ -142,6 +142,7 @@ public class WebSearchPassthroughValidationTests(AspireAppFixture fixture) : Web
         reply.Status.Should().Be(200, reply.ToString());
         var calls = stub.CallsTo(WebSearchProviderStub.SearchPath);
         calls.Should().ContainSingle(stub.Describe());
-        JsonDocument.Parse(calls[0].Body).RootElement.TryGetProperty("engine", out _).Should().BeFalse();
+        using var document = JsonDocument.Parse(calls[0].Body);
+        document.RootElement.TryGetProperty("engine", out _).Should().BeFalse();
     }
 }

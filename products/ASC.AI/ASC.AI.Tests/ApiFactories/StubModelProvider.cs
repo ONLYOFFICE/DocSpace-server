@@ -130,7 +130,14 @@ public sealed class StubModelProvider : IDisposable
     public string BaseUrl => $"http://127.0.0.1:{_server.Port}/v1";
 
     /// <summary>The WireMock behind the provider, for a stub no helper covers (add it at priority 0 to win).</summary>
-    public WireMockServer Server => _server;
+    /// <exception cref="InvalidOperationException">
+    /// On the run-wide provider: a mapping added to it, or one deleted from it, changes the answers of every parallel test.
+    /// </exception>
+    public WireMockServer Server => _shared
+        ? throw new InvalidOperationException(
+            "The run-wide model provider is shared by every test: a mapping changed on it changes every parallel chat. "
+            + "Create a StubModelProvider of the test's own and a profile on it (CreateProfileOnAsync) to stub it.")
+        : _server;
 
     /// <summary>The bodies of the chat completion requests the provider received, oldest first.</summary>
     public IEnumerable<string> CompletionRequestBodies => _server.LogEntries
@@ -225,7 +232,9 @@ public sealed class StubModelProvider : IDisposable
 
         try
         {
-            return JsonDocument.Parse(body).RootElement.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True;
+            using var document = JsonDocument.Parse(body);
+
+            return document.RootElement.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True;
         }
         catch (JsonException)
         {
@@ -238,7 +247,9 @@ public sealed class StubModelProvider : IDisposable
     {
         try
         {
-            return JsonDocument.Parse(body!).RootElement.TryGetProperty("tools", out var tools)
+            using var document = JsonDocument.Parse(body!);
+
+            return document.RootElement.TryGetProperty("tools", out var tools)
                 && tools.ValueKind == JsonValueKind.Array
                 && tools.GetArrayLength() == 1
                 && tools[0].TryGetProperty("function", out var function)

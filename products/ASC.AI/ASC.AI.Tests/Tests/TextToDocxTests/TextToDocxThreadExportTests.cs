@@ -47,8 +47,15 @@ public class TextToDocxThreadExportTests(AspireAppFixture fixture) : TextToDocxP
 
     public override async ValueTask DisposeAsync()
     {
-        _provider.Dispose();
-        await base.DisposeAsync();
+        try
+        {
+            _provider.Dispose();
+        }
+        finally
+        {
+            // The portal clients go even when a stub fails to stop.
+            await base.DisposeAsync();
+        }
     }
 
     [Fact]

@@ -164,6 +164,41 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
 
     protected Task<Reply> CallRawAsync(string body) => SendAsync(HttpMethod.Post, CallPath, body);
 
+    /// <summary>
+    /// Repeats a request that changes nothing until it is refused with 403 or the deadline passes, and returns the last
+    /// reply. <see cref="BaseTest.SetPortalAiAccessAsync"/> waits until <c>threads/list</c> sees the switch; the
+    /// editor-tools routes read it on their own and may still answer as before for a moment, so an off-state check
+    /// polls here instead of taking the first answer. Never pass a call that creates or deletes anything.
+    /// </summary>
+    protected static async Task<Reply> UntilRefusedAsync(Func<Task<Reply>> request)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+
+        while (true)
+        {
+            var reply = await request();
+
+            if (reply.Status == (int)HttpStatusCode.Forbidden || DateTime.UtcNow >= deadline)
+            {
+                return reply;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Switches AI off and waits until the editor-tools routes see it (<c>list</c> is refused), so the request that
+    /// follows meets the off state. The wait polls <c>list</c>, never the call under test, which may create or delete.
+    /// </summary>
+    protected async Task SwitchAiOffAsync()
+    {
+        await SetPortalAiAccessAsync(false);
+
+        var list = await UntilRefusedAsync(ListAsync);
+        list.Status.Should().Be(403, $"the editor-tools routes must see the switch before the call under test: {list}");
+    }
+
     /// <summary>A call body from JSON fragments; a fragment left null is left out of the body.</summary>
     protected static string BodyJson(string? nameJson, string? argumentsJson = null, string? entityIdJson = null)
     {
@@ -195,8 +230,7 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
         var argumentsJson = arguments is null ? null : JsonSerializer.Serialize(arguments);
         // The typed arguments are a Dictionary<string, object> that the client may drop a null value from, so a null
         // argument (the tests that check it is refused) goes out as the raw body instead.
-        if (argumentsJson is not null && JsonDocument.Parse(argumentsJson).RootElement is { ValueKind: JsonValueKind.Object } root
-            && root.EnumerateObject().Any(p => p.Value.ValueKind == JsonValueKind.Null))
+        if (argumentsJson is not null && HasNullArgument(argumentsJson))
         {
             return await CallRawAsync(BodyJson(
                 JsonSerializer.Serialize(name),
@@ -220,6 +254,14 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
         {
             return new Reply(exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
         }
+    }
+
+    private static bool HasNullArgument(string argumentsJson)
+    {
+        using var document = JsonDocument.Parse(argumentsJson);
+
+        return document.RootElement.ValueKind == JsonValueKind.Object
+            && document.RootElement.EnumerateObject().Any(p => p.Value.ValueKind == JsonValueKind.Null);
     }
 
     /// <summary>Calls a tool, asserts the route answered 200 and returns what the tool produced.</summary>
@@ -285,16 +327,18 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
     }
 
     /// <summary>
-    /// Skips the test when the owner's catalogue lacks the document generators. ASC.AI publishes them only when the
-    /// portal's quota carries <c>automationapi</c>, which the standalone test portals do not have.
+    /// Skips the test when the portal's quota lacks <c>automationapi</c>, the feature without which ASC.AI publishes no
+    /// document generators (the standalone test portals do not have it). The decision is read from the quota, not from
+    /// the catalogue the tests then check: on a portal that has the feature, a catalogue without the generators fails.
     /// </summary>
     protected async Task RequireGeneratorsAsync()
     {
-        var names = (await ToolsAsync()).Select(t => t.Name).ToList();
+        await WebApiHttpClient.Authenticate(Owner);
+        var quota = (await QuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
+        Assert.SkipUnless(quota.AutomationApi, "The document generators are not offered on this portal: its quota lacks automationapi (EditorToolsFactory returns no tools).");
 
-        Assert.SkipWhen(
-            !GeneratorTools.All(names.Contains),
-            "The document generators are not published: the portal quota lacks automationapi (EditorToolsFactory returns no tools).");
+        var names = (await ToolsAsync()).Select(t => t.Name).ToList();
+        names.Should().Contain(GeneratorTools, "the portal quota has automationapi, so the catalogue publishes every generator");
     }
 
     /// <summary>

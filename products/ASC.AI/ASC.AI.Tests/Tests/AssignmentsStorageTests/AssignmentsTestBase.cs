@@ -59,7 +59,7 @@ public abstract class AssignmentsTestBase(AspireAppFixture fixture) : BaseTest(f
         input.Capabilities = AssignableCapabilities;
 
         var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        ExpectProfileCreated(result, ModelProvider);
 
         return result.Profile;
     }

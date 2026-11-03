@@ -244,14 +244,23 @@ public class McpDisabledToolsTests(AspireAppFixture fixture) : McpTestBase(fixtu
     [Theory]
     [InlineData("?toolName=p1")]
     [InlineData("?serverType=portal-srv")]
-    [InlineData("?serverType=&toolName=")]
     [InlineData("")]
-    public async Task IsToolDisabled_MissingOrEmptyParameters_Is400(string query)
+    public async Task IsToolDisabled_MissingParameters_Is400(string query)
     {
+        // Raw: a missing serverType or toolName is a null the typed client rejects before sending anything.
         var reply = await GetToolsAsync("is-tool-disabled", query);
 
         reply.Code.Should().Be(400, reply.ToString());
         reply.Error.Should().Be("serverType and toolName required");
+    }
+
+    [Fact]
+    public async Task IsToolDisabled_EmptyParameters_Is400()
+    {
+        var (status, error) = await OutcomeOfAsync(() => IsDisabledAsync(string.Empty, string.Empty));
+
+        status.Should().Be(400, error);
+        error.Should().Contain("\"serverType and toolName required\"");
     }
 
     [Fact]

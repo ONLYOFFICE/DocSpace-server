@@ -126,8 +126,12 @@ public class McpServerEntityScopeTests(AspireAppFixture fixture) : McpTestBase(f
         await AssertForbiddenAsync(() => RemoveServerAsync("autotest-owner-server", roomId.ToString()), "the member removes");
         ShouldBeConfig(await GetServerAsync("autotest-owner-server", roomId.ToString()), UrlConfig(), "reading is not refused");
 
+        // Like the member, a plain user may not register at all, so a bare 403 would pass whether or not the room was
+        // checked: the refusal has to be the entity gate's (Entity "<id>" is not accessible), which names the room.
         await ActAsAsync(outsider);
-        await AssertForbiddenAsync(() => AddServerAsync("autotest-outsider-server", UrlConfig(), roomId.ToString()), "the outsider names the room");
+        var outsiderRefusal = await AssertForbiddenAsync(() => AddServerAsync("autotest-outsider-server", UrlConfig(), roomId.ToString()), "the outsider names the room");
+        (outsiderRefusal.ErrorContent?.ToString() ?? string.Empty).Should().Contain("is not accessible", "the room is what the outsider is refused")
+            .And.Contain(roomId.ToString());
 
         await ActAsAsync(Owner);
         ShouldHold(await ListServersAsync(), new Dictionary<string, object> { ["autotest-owner-server"] = UrlConfig() }, "the registration survived every refused write");
@@ -212,10 +216,12 @@ public class McpServerEntityScopeTests(AspireAppFixture fixture) : McpTestBase(f
         ShouldHold(await ListServersAsync(), new Dictionary<string, object> { ["autotest-portal-server"] = UrlConfig() });
     }
 
-    private static async Task AssertForbiddenAsync(Func<Task> call, string because)
+    private static async Task<ApiException> AssertForbiddenAsync(Func<Task> call, string because)
     {
         var exception = await Assert.ThrowsAsync<ApiException>(call);
 
         exception.ErrorCode.Should().Be(403, because);
+
+        return exception;
     }
 }

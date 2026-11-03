@@ -208,7 +208,8 @@ public class ChatEntityContextTests(AspireAppFixture fixture) : ChatPart2TestBas
         // Assert
         info.ThreadId.Should().Be(thread.ThreadId);
         rawInfo.StatusCode.Should().Be(HttpStatusCode.OK, rawBody);
-        JsonDocument.Parse(rawBody).RootElement.TryGetProperty("entityId", out _)
+        using var record = JsonDocument.Parse(rawBody);
+        record.RootElement.TryGetProperty("entityId", out _)
             .Should().BeFalse($"a thread record carries no entity field: {rawBody}");
         read.Should().HaveCount(2);
 

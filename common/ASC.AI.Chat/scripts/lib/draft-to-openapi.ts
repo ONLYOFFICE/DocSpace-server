@@ -268,18 +268,26 @@ function convertNode(node: Json): Json {
 // by `minimum`/`maximum` says the same thing in a form every generator maps to
 // an int. A union of integer literals (`version: 1 | 2`) arrives as
 // `{ type: "number", enum: [1, 2] }` and goes the same string way unless it is
-// typed `integer`, which every generator maps to an int enum.
+// typed `integer`, which every generator maps to an int enum. The nullable
+// form of either (`1 | 2 | null`) arrives as `type: ["number", "null"]` with
+// `null` among the enum values, and is retyped the same way.
 function integerConst(node: JsonObject): JsonObject {
-  if (node["type"] !== "number") {
+  const type = node["type"];
+  const nullable =
+    Array.isArray(type) && type.length === 2 && type.includes("number") && type.includes("null");
+  if (type !== "number" && !nullable) {
     return node;
   }
   const values = node["enum"];
+  const numbers = Array.isArray(values) ? values.filter((value) => value !== null) : [];
   if (
-    Array.isArray(values) &&
-    values.length > 0 &&
-    values.every((value) => typeof value === "number" && Number.isInteger(value))
+    numbers.length > 0 &&
+    numbers.every((value) => typeof value === "number" && Number.isInteger(value))
   ) {
-    return { ...node, type: "integer" };
+    return { ...node, type: nullable ? ["integer", "null"] : "integer" };
+  }
+  if (nullable) {
+    return node;
   }
   const value = node["const"];
   if (typeof value !== "number" || !Number.isInteger(value)) {

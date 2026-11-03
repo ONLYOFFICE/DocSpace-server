@@ -59,8 +59,15 @@ public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fix
 
     public override async ValueTask DisposeAsync()
     {
-        _provider?.Dispose();
-        await base.DisposeAsync();
+        try
+        {
+            _provider?.Dispose();
+        }
+        finally
+        {
+            // The portal clients go even when a stub fails to stop.
+            await base.DisposeAsync();
+        }
     }
 
     /// <summary>

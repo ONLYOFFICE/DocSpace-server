@@ -55,8 +55,7 @@ public class MessageRegenerateProjectTests(AspireAppFixture fixture) : MessagePa
 
         await FilesHttpClient.Authenticate(Owner);
         var projectId = await AgentsTests.AiProjects.CreateAsync(RoomsApi);
-        await AgentsTests.AiProjects.SetModelAsync(
-            AgentsTests.AiProjects.ClientOf(RoomsApi, FilesHttpClient), projectId, projectModel.Id);
+        await AgentsTests.AiProjects.SetModelAsync(RoomsAiApi, projectId, projectModel.Id);
         var entityId = projectId.ToString();
 
         var thread = await CreateThreadAsync(profileId: projectModel.Id, entityId: entityId);

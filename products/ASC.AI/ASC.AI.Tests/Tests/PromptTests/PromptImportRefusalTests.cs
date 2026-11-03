@@ -37,40 +37,34 @@ namespace ASC.AI.Tests.Tests.PromptTests;
 /// A bundle the import refuses with a per-entry report (an unsupported version, a prompt pointing at a folder the bundle
 /// does not have, twin names) is refused whole in both modes: nothing is written, and a <c>replace</c> deletes nothing.
 /// The documented promise is "either every entry persisted with counts, or no entries persisted plus a per-entry error
-/// report". The bundles are written by hand: a version other than 1 does not exist in the typed model.
+/// report". Only the version cases are written by hand: a version other than 1 does not exist in the typed model.
 /// </summary>
 [Trait("Category", "Validation")]
 [Trait("Feature", "AI/Prompts")]
 public class PromptImportRefusalTests(AspireAppFixture fixture) : PromptsTestBase(fixture)
 {
-    private const string CleanPrompt = "{\"id\":\"ok\",\"name\":\"Autotest clean\",\"text\":\"t\"}";
-    private const string OrphanPrompt = "{\"id\":\"orphan\",\"name\":\"Autotest orphan\",\"text\":\"t\",\"folderId\":\"nope\"}";
-
-    public static TheoryData<string, string, string, string> SoftRefusals
+    public static TheoryData<string, string, string> VersionRefusals
     {
         get
         {
-            var data = new TheoryData<string, string, string, string>();
+            var data = new TheoryData<string, string, string>();
 
             foreach (var mode in new[] { "merge", "replace" })
             {
-                data.Add(mode, "a bundle version of 0", BundleJson(string.Empty, string.Empty, "0"), "Unsupported bundle version");
-                data.Add(mode, "a bundle version of 2", BundleJson(string.Empty, string.Empty, "2"), "Unsupported bundle version");
-                data.Add(mode, "no bundle version", "{\"folders\":[],\"prompts\":[]}", "Unsupported bundle version");
-                data.Add(mode, "a prompt in a folder the bundle does not have, next to a clean prompt", BundleJson(string.Empty, $"{CleanPrompt},{OrphanPrompt}"), "references missing folder");
+                data.Add(mode, "a bundle version of 0", BundleJson(string.Empty, string.Empty, "0"));
+                data.Add(mode, "a bundle version of 2", BundleJson(string.Empty, string.Empty, "2"));
+                data.Add(mode, "no bundle version", "{\"folders\":[],\"prompts\":[]}");
             }
 
             return data;
         }
     }
 
+    public static TheoryData<AiImportMode> Modes => new() { AiImportMode.Merge, AiImportMode.Replace };
+
     [Theory]
-    [MemberData(nameof(SoftRefusals))]
-    public async Task Import_UnsupportedVersionOrDanglingFolderReference_IsReported_AndNothingIsWrittenOrDeleted(
-        string mode,
-        string label,
-        string bundle,
-        string message)
+    [MemberData(nameof(VersionRefusals))]
+    public async Task Import_UnsupportedVersion_IsReported_AndNothingIsWrittenOrDeleted(string mode, string label, string bundle)
     {
         await SeedLibraryAsync();
         var before = await ReadLibraryAsync();
@@ -81,9 +75,29 @@ public class PromptImportRefusalTests(AspireAppFixture fixture) : PromptsTestBas
         var answer = ParseBody(body);
         answer.GetProperty("success").GetBoolean().Should().BeFalse(label);
         answer.TryGetProperty("imported", out _).Should().BeFalse(label);
-        answer.GetProperty("errors")[0].GetProperty("error").GetProperty("message").GetString().Should().Contain(message, label);
+        answer.GetProperty("errors")[0].GetProperty("error").GetProperty("message").GetString().Should().Contain("Unsupported bundle version", label);
 
         (await ReadLibraryAsync()).Should().BeEquivalentTo(before, $"{label}: the library");
+    }
+
+    [Theory]
+    [MemberData(nameof(Modes))]
+    public async Task Import_APromptInAFolderTheBundleDoesNotHave_NextToACleanOne_IsReported_AndNothingIsWrittenOrDeleted(AiImportMode mode)
+    {
+        await SeedLibraryAsync();
+        var before = await ReadLibraryAsync();
+
+        var refused = await ExpectRefusalAsync(
+            () => ImportAsync([], [new AiPrompt("ok", "Autotest clean", "t"), new AiPrompt("orphan", "Autotest orphan", "t", "nope")], mode),
+            null,
+            400);
+
+        var answer = BodyOf(refused);
+        answer.GetProperty("success").GetBoolean().Should().BeFalse(refused.ErrorContent?.ToString());
+        answer.TryGetProperty("imported", out _).Should().BeFalse(refused.ErrorContent?.ToString());
+        answer.GetProperty("errors")[0].GetProperty("error").GetProperty("message").GetString().Should().Contain("references missing folder");
+
+        (await ReadLibraryAsync()).Should().BeEquivalentTo(before, $"{mode}: the library");
     }
 
     [Fact]
@@ -91,17 +105,17 @@ public class PromptImportRefusalTests(AspireAppFixture fixture) : PromptsTestBas
     {
         await SeedLibraryAsync();
         var before = await ReadLibraryAsync();
-        var prompts = string.Join(
-            ",",
-            CleanPrompt,
-            "{\"id\":\"b\",\"name\":\"Autotest twin\",\"text\":\"first\"}",
-            "{\"id\":\"c\",\"name\":\"Autotest twin\",\"text\":\"second\"}");
+        List<AiPrompt> prompts =
+        [
+            new("ok", "Autotest clean", "t"),
+            new("b", "Autotest twin", "first"),
+            new("c", "Autotest twin", "second")
+        ];
 
-        var (status, body) = await ImportBundleRawAsync(BundleJson(string.Empty, prompts), "merge");
+        var refused = await ExpectRefusalAsync(() => ImportAsync([], prompts, AiImportMode.Merge), null, 400);
 
-        status.Should().Be(400, body);
-        var answer = ParseBody(body);
-        answer.GetProperty("success").GetBoolean().Should().BeFalse(body);
+        var answer = BodyOf(refused);
+        answer.GetProperty("success").GetBoolean().Should().BeFalse(refused.ErrorContent?.ToString());
         answer.GetProperty("errors")[0].GetProperty("error").GetProperty("message").GetString()
             .Should().Be("The bundle holds two prompts of this name in one folder");
 

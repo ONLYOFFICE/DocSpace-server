@@ -90,8 +90,7 @@ public class McpHostToolsChatTests(AspireAppFixture fixture) : McpTestBase(fixtu
         // otherwise), which the standalone test portals lack. The skip reads that precondition from the quota itself, not
         // from what the model was offered: an offer that goes missing on a portal that has the feature is a failure.
         await WebApiHttpClient.Authenticate(Owner);
-        var quotaApi = new DocSpace.API.SDK.Api.Portal.QuotaApi(WebApiHttpClient, new Configuration { BasePath = SettingsQuotaApi.GetBasePath() });
-        var quota = (await quotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
+        var quota = (await QuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
         Assert.SkipUnless(quota.AutomationApi, "the editor (onlyoffice_generate_*) tools are not offered on this portal: its quota lacks automationapi");
 
         var chat = await StartChatAsync();
@@ -232,7 +231,9 @@ public class McpHostToolsChatTests(AspireAppFixture fixture) : McpTestBase(fixtu
         var replies = AssistantMessages(await WaitForAssistantRepliesAsync(chat.ThreadId, 2));
         replies.Should().HaveCount(2);
         replies.Should().OnlyContain(r => MessageText(r).Length > 0);
-        foreach (var call in ToolCallParts(replies[1]).Where(c => ToolNameOf(c) == _weatherTool.Name))
+        var withdrawnCalls = ToolCallParts(replies[1]).Where(c => ToolNameOf(c) == _weatherTool.Name).ToList();
+        withdrawnCalls.Should().NotBeEmpty("the model called the withdrawn tool, and that call is stored with its answer");
+        foreach (var call in withdrawnCalls)
         {
             ResultOf(call).Should().MatchRegex("(?i)not available", "a call to the withdrawn tool is answered as unavailable");
         }

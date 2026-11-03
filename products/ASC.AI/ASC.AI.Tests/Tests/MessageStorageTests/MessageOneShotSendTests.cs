@@ -55,7 +55,7 @@ public class MessageOneShotSendTests(AspireAppFixture fixture) : MessagePart2Tes
         input.BaseUrl = provider.BaseUrl;
         input.Capabilities = ChatCapability;
         var created = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
-        created.Success.Should().BeTrue($"profiles/create rejected the profile: {created.Error}\n{provider.Describe()}");
+        ExpectProfileCreated(created, provider);
         var profile = created.Profile;
 
         // `send` resolves the model through the assignments, so Chat gets a binding of its own.

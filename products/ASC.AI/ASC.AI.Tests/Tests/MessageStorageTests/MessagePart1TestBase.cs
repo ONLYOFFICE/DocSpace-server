@@ -74,8 +74,15 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
 
     public override async ValueTask DisposeAsync()
     {
-        _provider?.Dispose();
-        await base.DisposeAsync();
+        try
+        {
+            _provider?.Dispose();
+        }
+        finally
+        {
+            // The portal clients go even when a stub fails to stop.
+            await base.DisposeAsync();
+        }
     }
 
     /// <summary>A profile on <see cref="Provider"/> and a thread bound to it.</summary>
@@ -95,7 +102,7 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
         input.Capabilities = ChatCapabilities;
 
         var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{provider.Describe()}");
+        ExpectProfileCreated(result, provider);
 
         return result.Profile;
     }

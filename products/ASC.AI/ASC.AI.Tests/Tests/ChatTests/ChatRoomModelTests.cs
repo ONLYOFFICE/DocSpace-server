@@ -65,7 +65,10 @@ public class ChatRoomModelTests(AspireAppFixture fixture) : ChatPart2TestBase(fi
 
         // Assert
         assigned.StatusCode.Should().Be(HttpStatusCode.OK, assignedBody);
-        JsonDocument.Parse(assignedBody).RootElement.GetProperty("success").GetBoolean().Should().BeTrue(assignedBody);
+        using (var assignedJson = JsonDocument.Parse(assignedBody))
+        {
+            assignedJson.RootElement.GetProperty("success").GetBoolean().Should().BeTrue(assignedBody);
+        }
 
         // The room appears to have its own binding...
         (await GetAllAssignmentsAsync(roomId.ToString()))

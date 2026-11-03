@@ -72,7 +72,8 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : AssignmentsTestB
             new { actionType = "Chat", profileId = profile.Id },
             TestContext.Current.CancellationToken);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        // A refusal, not a crash: the service throws InvalidOperationException for an existing binding, which the API maps to 403.
+        ((int)response.StatusCode).Should().BeInRange(400, 499, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
     // Internal contract: entity-scoped assignments have no public route (the Node assign takes no entityId and its storage adapter drops it).

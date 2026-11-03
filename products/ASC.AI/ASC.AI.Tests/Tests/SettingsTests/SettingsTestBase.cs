@@ -132,7 +132,9 @@ public abstract class SettingsTestBase(AspireAppFixture fixture) : ChatTests.Cha
         var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK, body);
 
-        return JsonDocument.Parse(body).RootElement.GetProperty("response").Clone();
+        using var document = JsonDocument.Parse(body);
+
+        return document.RootElement.GetProperty("response").Clone();
     }
 
     /// <summary>The status and body of a raw request on the chat service, signed in as whoever the chat client is.</summary>

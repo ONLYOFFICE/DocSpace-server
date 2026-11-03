@@ -29,9 +29,17 @@ A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire re
 service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
 registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
 Services only some classes need go in `LazyResources` instead: they start with the stack but the run
-does not wait for them, and a class that uses them overrides `NeedsLazyResources` (so far only in the
-Web.Api `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
-before the portal is registered.
+does not wait for them, and a class that uses them overrides `NeedsLazyResources` (in the Web.Api and the
+AI `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
+before the portal is registered. A lazy Nextcloud still gets its `NEXTCLOUD_*` settings published at start-up.
+
+The document server has no health check of its own and restarts its converter ~70 s after the container
+starts, so a class that converts through it (an export to .docx/.pdf) overrides `NeedsDocumentServer` in the
+AI `BaseTest`; its setup awaits `WaitForDocumentServerAsync()`, which waits for that restart once per run.
+Set it on the classes that convert, not on a shared base, so the others do not wait.
+
+A test class cleans up in an override of `BaseTest.DisposeAsync` (calling base in a `finally`), never in
+`Dispose`: xUnit v3 calls only `DisposeAsync` on an `IAsyncLifetime` class.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.

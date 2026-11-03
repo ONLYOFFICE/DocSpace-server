@@ -269,7 +269,10 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
     protected async Task<string> FilesApiTitleForAsync(int folderId, string title) =>
         (await FilesApi.CreateFileAsync(folderId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response.Title;
 
-    /// <summary>Waits until no file operation of the caller is running any more.</summary>
+    /// <summary>
+    /// Waits until no file operation of the caller is running any more; fails the test with the operations still running
+    /// when they do not finish within a minute, rather than letting the caller go on as if they had.
+    /// </summary>
     protected async Task WaitForFileOperationsAsync()
     {
         var deadline = DateTime.UtcNow.AddMinutes(1);
@@ -277,10 +280,17 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
         while (true)
         {
             var statuses = (await OperationsApi.GetOperationStatusesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            var running = statuses.FindAll(status => !status.Finished);
 
-            if (statuses.Count == 0 || statuses.TrueForAll(status => status.Finished) || DateTime.UtcNow >= deadline)
+            if (running.Count == 0)
             {
                 return;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                running.Should().BeEmpty(
+                    $"file operations still running after a minute: {string.Join(", ", running.Select(status => $"{status.Id} ({status.Progress}%)"))}");
             }
 
             await Task.Delay(500, TestContext.Current.CancellationToken);

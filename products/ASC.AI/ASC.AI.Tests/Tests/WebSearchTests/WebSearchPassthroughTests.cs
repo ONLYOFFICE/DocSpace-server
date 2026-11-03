@@ -118,7 +118,8 @@ public class WebSearchPassthroughTests(AspireAppFixture fixture) : WebSearchTest
         var calls = stub.CallsTo(WebSearchProviderStub.SearchPath);
         calls.Should().ContainSingle(stub.Describe());
         calls[0].Authorization.Should().Be($"Bearer {StubKey}");
-        var sent = JsonDocument.Parse(calls[0].Body).RootElement;
+        using var document = JsonDocument.Parse(calls[0].Body);
+        var sent = document.RootElement;
         sent.GetProperty("query").GetString().Should().Be(query);
         sent.GetProperty("numResults").GetInt32().Should().Be(2);
         sent.TryGetProperty("metadata", out _).Should().BeFalse("no entry was named");
@@ -137,7 +138,8 @@ public class WebSearchPassthroughTests(AspireAppFixture fixture) : WebSearchTest
         reply.Str("requestId").Should().Be("stub-contents-1");
         var calls = stub.CallsTo(WebSearchProviderStub.ContentsPath);
         calls.Should().ContainSingle(stub.Describe());
-        JsonDocument.Parse(calls[0].Body).RootElement.GetProperty("urls").EnumerateArray()
+        using var document = JsonDocument.Parse(calls[0].Body);
+        document.RootElement.GetProperty("urls").EnumerateArray()
             .Select(u => u.GetString()).Should().Equal("https://example.com/a", "https://example.com/b");
     }
 

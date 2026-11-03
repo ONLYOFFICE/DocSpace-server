@@ -108,6 +108,13 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         after.Where(status => status != 403).Should().BeEmpty($"{label} answered these once the refusal had settled: {string.Join(",", after)}");
     }
 
+    /// <summary>
+    /// Waits until the switch has reached the AI service, measured on a gated route that is not under test (delete-many of
+    /// an id that does not exist, so nothing is destroyed), so that a read sampled afterwards answers for the new state only.
+    /// </summary>
+    private Task AwaitSwitchTakenEffectAsync() =>
+        ExpectRefusedOnceSettledAsync(async () => (await DeleteManyAsync(MissingId)).Status, "delete-many (the settle marker)");
+
     [Fact]
     public async Task LinkToMessage_WhenAiAccessIsDisabled_Returns403()
     {
@@ -166,6 +173,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         await SetPortalAiAccessAsync(false);
         await ActAsAsync(Owner);
 
+        await ExpectRefusedOnceSettledAsync(async () => (await AttachByIdAsync(fileId)).Status, "save-file");
         var refused = await AttachByIdAsync(fileId);
 
         refused.Status.Should().Be(403);
@@ -180,6 +188,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         await SetPortalAiAccessAsync(false);
         await ActAsAsync(Owner);
 
+        await ExpectRefusedOnceSettledAsync(async () => (await SaveFilesManyAsync([fileId])).Status, "save-files-many");
         var refused = await SaveFilesManyAsync([fileId]);
 
         refused.Status.Should().Be(403);
@@ -197,6 +206,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         var draftId = await SaveDraftAsync(Owner, "Autotest before-off.docx");
 
         await SetPortalAiAccessAsync(false);
+        await AwaitSwitchTakenEffectAsync();
 
         var statuses = await CollectStatusesAsync(async () => (await GetAsync(draftId)).Status, ConsistencyAttempts);
 
@@ -212,6 +222,7 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
         var draftId = await SaveDraftAsync(Owner, "Autotest before-off.docx");
 
         await SetPortalAiAccessAsync(false);
+        await AwaitSwitchTakenEffectAsync();
 
         var statuses = await CollectStatusesAsync(async () => (await GetManyAsync(draftId)).Status, ConsistencyAttempts);
 

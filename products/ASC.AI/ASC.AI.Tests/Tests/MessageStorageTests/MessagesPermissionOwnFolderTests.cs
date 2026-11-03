@@ -43,6 +43,9 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 [Trait("Feature", "AI/Messages")]
 public class MessagesPermissionOwnFolderTests(AspireAppFixture fixture) : MessagesPart3TestBase(fixture)
 {
+    // Waits for the export it accepts to land as a .docx, so the document server has to be up.
+    protected override bool NeedsDocumentServer => true;
+
     // The member's own folder, not the Owner's: writing into somebody else's My Documents is refused for everyone, so
     // it could not show whether the user type may call the route at all.
     [Theory]

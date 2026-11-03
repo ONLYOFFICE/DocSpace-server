@@ -147,7 +147,7 @@
         ],
         "operationId": "aiSend",
         "summary": "Run an AI action",
-        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `contextEntityId` is the folder or room the caller is in and sets the location of the round; `entityId` is the AI project the chat runs in, and is omitted outside a project. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
+        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `contextEntityId` is the folder or room the caller is in and sets the location of the round; `entityId` is the AI project the chat runs in, and is omitted outside a project. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message. Nothing was persisted.",
@@ -312,7 +312,7 @@
         ],
         "operationId": "aiSendWithStream",
         "summary": "Send with stream",
-        "description": "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId`, when sent, names an AI project the caller can chat in, and that a profile resolves; the user message and the reply are persisted either way, and a new thread also gets a generated title. `contextEntityId` is the folder or room the caller is in: it is the location the prompt describes and the folder a generated file is saved into (My documents when there is none); inside a project it is omitted and the project's folder context takes its place. The model is settled in a fixed order - the project's model inside a project overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
+        "description": "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId`, when sent, names an AI project the caller can chat in, and that a profile resolves; the user message and the reply are persisted either way, and a new thread also gets a generated title. `contextEntityId` is the folder or room the caller is in: it is the location the prompt describes and the folder a generated file is saved into (My documents when there is none); inside a project it is omitted and the project's folder context takes its place. The model is settled in a fixed order - the project's model inside a project overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -415,7 +415,7 @@
         ],
         "operationId": "aiSendWithStreamOpenAI",
         "summary": "Stream a chat in OpenAI format",
-        "description": "The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the profile pre-flight are identical, and a tool call ends the stream with `finish_reason: \"tool_calls\"` instead of a pause event - resume it through the same approve and deny operations. Unlike `send-with-stream` it does not reject an empty user message and does not enforce the per-kind attachment cap, so validate both before calling. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one.",
+        "description": "The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the profile pre-flight are identical, and a tool call ends the stream with `finish_reason: \"tool_calls\"` instead of a pause event - resume it through the same approve and deny operations. Unlike `send-with-stream` it does not reject an empty user message and does not enforce the per-kind attachment cap, so validate both before calling. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
@@ -508,7 +508,7 @@
         ],
         "operationId": "aiRegenerateStream",
         "summary": "Regenerate stream",
-        "description": "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx.",
+        "description": "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx. The skills of the Instructions rooms in `actionArgs.contextRooms` are read again for the round, so the list only has to name the rooms; when `entityId` names an AI project, the project's own linked rooms replace `actionArgs.contextRooms` and `actionArgs.knowledgeRooms`, and its model replaces `profileId`.",
         "responses": {
           "200": {
             "description": "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
@@ -2059,6 +2059,7 @@
         ],
         "operationId": "aiAttachmentsGetSuggestedQuestions",
         "summary": "Get suggested questions",
+        "description": "Returns the starter questions proposed for a form attached to a chat. The body is the attachment ID itself, as a bare JSON string. The questions are generated by the model of the `FormAnalysis` assignment the first time they are asked for: that call answers `status: pending` with no questions and starts the generation in the background, and a later call answers `status: ready` with up to four questions, each with the prompt sent when the user picks it. `status: unavailable` means none will come for this attachment, and asking again does not change it. Poll until the status is no longer `pending`.",
         "responses": {
           "200": {
             "description": "The form's starter questions when they are ready; otherwise the status says whether they are still being generated or will never come.",
@@ -2145,6 +2146,7 @@
         ],
         "operationId": "aiContextGetContextFolders",
         "summary": "Get context folders",
+        "description": "Lists the Instructions rooms the caller can connect to a chat as context, grouped under the account they belong to (`docspace` for this portal). Only a room the caller can read that holds at least one skill is listed: one without skills would connect nothing. An empty list means there is nothing to connect. Read the skills of one room with `GET api/2.0/ai/context/get-room-skills`. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The Instructions rooms the caller can connect, grouped by account.",
@@ -2199,6 +2201,7 @@
         ],
         "operationId": "aiContextGetKnowledgeFolders",
         "summary": "Get knowledge folders",
+        "description": "Lists the Knowledge rooms the caller can connect to a chat as its knowledge base, grouped under the account they belong to (`docspace` for this portal). A connected Knowledge room limits the knowledge search of a round to it (`actionArgs.knowledgeRooms`). An empty list means there is none the caller can read. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The Knowledge rooms the caller can connect, grouped by account.",
@@ -2253,6 +2256,7 @@
         ],
         "operationId": "aiContextGetRoomSkills",
         "summary": "Get room skills",
+        "description": "Lists the skills of one Instructions room: the ID, name and description from the frontmatter of each skill file, not its body. `roomId` is required; `cloud` names the account (`docspace` for this portal). A room that is not an Instructions room the caller can read answers 404. Read the body of one skill with `GET api/2.0/ai/context/get-room-skill`. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The skills of the room, frontmatter only.",
@@ -2345,9 +2349,10 @@
         ],
         "operationId": "aiContextGetRoomSkill",
         "summary": "Get room skill",
+        "description": "Returns the Markdown file of one skill of an Instructions room as a JSON string. `roomId` and `skillId` are required, and the skill has to be one of that room's skills: the ID of any other file, readable or not, answers 404, as does a room that is not an Instructions room the caller can read. Only the first 256 KiB of the file are read, which covers the 64 K characters a chat passes to the model; a longer file comes back cut there without a signal. This is a read-only operation.",
         "responses": {
           "200": {
-            "description": "The skill's whole Markdown file, as a JSON string.",
+            "description": "The skill's Markdown file as a JSON string, its first 256 KiB.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3739,7 +3744,7 @@
                     },
                     "useProxy": {
                       "type": "boolean",
-                      "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+                      "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured."
                     },
                     "createdAt": {
                       "type": "number",
@@ -5700,7 +5705,7 @@
         ],
         "operationId": "aiThreadsList",
         "summary": "List chat threads",
-        "description": "Lists the threads of a scope, most recently edited first, and searches their titles case-insensitively when `query` is given. Every parameter is optional: omitting `entityId` lists the global scope, and omitting `count` lets the engine apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{\"id\": <last thread id>, \"lastEditDate\": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.",
+        "description": "Lists the threads of the caller, most recently edited first, and searches their titles case-insensitively when `query` is given. Threads are one list per user: `entityId` is accepted and ignored, so naming a room lists the same threads as naming none. Every parameter is optional, and omitting `count` lets the service apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{\"id\": <last thread id>, \"lastEditDate\": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.",
         "responses": {
           "200": {
             "description": "The threads of the scope, most recently edited first.",
@@ -10809,21 +10814,21 @@
           },
           "serverType": {
             "type": "string",
-            "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine.",
+            "description": "The server or tool group the tool belongs to (an MCP server name or a host tool group ID): the key a disabled tool is stored under, so a tool sent in `actionArgs.tools` is still matched to its group.",
             "examples": [
               "docspace"
             ]
           },
           "requireApproval": {
             "type": "boolean",
-            "description": "Whether the consumer must show an approval dialog before this tool runs. Feeds the `autoAllow` flag on a `tool-call-pending` event together with the user's tool permission mode: `false` skips the dialog under the \"auto\" mode, the default (under \"ask\" only the persisted \"always-allow\" list does), `true` and `undefined` defer to that list; \"allow\" skips it for every tool. Host tools set it and default to `false`; MCP / custom-server tools leave it unset. Wire-serializable, so it survives a remote (server-side) engine.",
+            "description": "Whether the tool asks for approval before it runs. Under the `auto` tool permission mode `false` runs it without asking, `true` or absent leaves it to the tools the user always allows; `ask` asks for every tool, `allow` for none. Host tools default to `false`; MCP and custom-server tools leave it unset.",
             "examples": [
               false
             ]
           },
           "annotations": {
             "$ref": "#/components/schemas/AiToolAnnotations",
-            "description": "The MCP tool annotations as the server declared them in `tools/list` (kept verbatim on the descriptor; never sent to the model). The approval flow reads two of them under the \"auto\" permission mode: `readOnlyHint: true` and `destructiveHint: false` run without the dialog, a destructive or unannotated tool keeps asking — see `resolveAutoAllow`. Wire-serializable."
+            "description": "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool annotated `readOnlyHint: true` and `destructiveHint: false` runs without approval, a destructive or unannotated one asks."
           }
         },
         "required": [
@@ -11303,7 +11308,7 @@
         "description": "Shared body of the two streaming send endpoints (`sendWithStream` and its OpenAI-framed twin) — the `Chat` action is implied, so there is no `actionType`."
       },
       "AiChatEvent": {
-        "description": "Discriminated event emitted by the streaming methods of `AIEngine`. The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a `ChatEvent` so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via `AIEngine.approveToolCall` or `AIEngine.denyToolCall`.\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant reply lifecycle.\n- `message-incomplete` — the provider returned an error or incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
+        "description": "One event of a chat stream, told apart by `type`: `message-start`, `message-delta` and `message-end` frame the assistant reply, `message-incomplete` reports a provider error or an unfinished answer, `thread-title` carries a generated title, and `tool-call-pending` pauses the round until the call is approved (`POST api/2.0/ai/ai/approve-tool-call`) or denied (`POST api/2.0/ai/ai/deny-tool-call`).",
         "type": "object",
         "properties": {
           "type": {
@@ -11346,11 +11351,11 @@
           },
           "autoAllow": {
             "type": "boolean",
-            "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" never; under \"auto\" a tool in the persisted \"always-allow\" list or one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+            "description": "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never; under `auto` a tool the user always allows, one that opts out of approval (`requireApproval: false`) or one annotated read-only and non-destructive; under `allow` every tool."
           },
           "serverExecuted": {
             "type": "boolean",
-            "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
+            "description": "The tool is run by the service itself: the client must not run it, only ask for approval (unless `autoAllow`) and approve or deny the call - an approval needs no `result`."
           },
           "title": {
             "type": "string",
@@ -11512,7 +11517,7 @@
           "content_filter",
           null
         ],
-        "description": "OpenAI Chat Completions streaming shapes.\n\n `toOpenAIChatCompletionStream` maps the engine's transport-agnostic `ChatEvent` stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
+        "description": "Why a choice of an OpenAI-compatible streamed completion ended, as the OpenAI Chat Completions format spells it; null while the choice is still streaming."
       },
       "AiOpenAIStreamError": {
         "type": "object",
@@ -11581,7 +11586,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
+            "description": "A copy of the assistant message as it was when the tool call surfaced. Optional and ignored: the round resumes from the stored message. Leave it out - a long conversation's copy can push the body past the size limit.",
             "examples": [
               {
                 "role": "assistant",
@@ -11749,7 +11754,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+            "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
             "examples": [
               false
             ]
@@ -12314,7 +12319,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+            "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
             "examples": [
               false
             ]
@@ -12327,7 +12332,7 @@
           "modelId"
         ],
         "additionalProperties": false,
-        "description": "Input for creating a new profile — the same shape as `Profile` without the engine-generated fields (`id`, `createdAt`)."
+        "description": "Input for creating a new profile: the shape of a profile without the fields the service fills in (`id`, `createdAt`)."
       },
       "AiProfileMutationResult": {
         "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
@@ -12386,7 +12391,7 @@
           },
           "reasoningSupport": {
             "$ref": "#/components/schemas/AiReasoningSupport",
-            "description": "What the model can do with extended thinking, when the provider's catalogue says so (OpenRouter and the ONLYOFFICE route report a per-model `reasoning` object). Copied onto the profile at save time; absent, the widget falls back to the provider's id-based table."
+            "description": "What the model can do with extended thinking, when the provider's catalogue reports it (OpenRouter and the ONLYOFFICE route do). Copied onto the profile when it is saved; when absent, the abilities are taken from the model ID."
           },
           "capabilities": {
             "type": "number",
@@ -12441,7 +12446,7 @@
           "text"
         ],
         "additionalProperties": false,
-        "description": "Input for creating a prompt — the engine generates `id`/`createdAt`/`updatedAt`."
+        "description": "Input for creating a prompt; the service fills in `id`, `createdAt` and `updatedAt`."
       },
       "AiPromptMutationResult": {
         "description": "Outcome of `create` / `update` / `move` on a prompt — either the persisted prompt or a field-scoped error.",
@@ -12818,7 +12823,7 @@
           },
           "title": {
             "type": "string",
-            "description": "Empty string for existing threads — the engine doesn't re-fetch."
+            "description": "The title generated for a thread this call created; an empty string when it opened an existing thread."
           },
           "priorMessages": {
             "type": "array",
@@ -13632,7 +13637,7 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
+            "description": "A copy of the assistant message as it was when the tool call surfaced. Optional and ignored: the round resumes from the stored message. Leave it out - a long conversation's copy can push the body past the size limit."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",

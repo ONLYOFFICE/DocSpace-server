@@ -46,9 +46,7 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// </remarks>
 public abstract class ChatProjectTestBase(AspireAppFixture fixture) : ChatPart3TestBase(fixture)
 {
-    private DocSpace.API.SDK.Api.Rooms.AIApi? _projectsApi;
-
-    private DocSpace.API.SDK.Api.Rooms.AIApi ProjectsApi => _projectsApi ??= AgentsTests.AiProjects.ClientOf(RoomsApi, FilesHttpClient);
+    private DocSpace.API.SDK.Api.Rooms.AIApi ProjectsApi => RoomsAiApi;
 
     /// <summary>Creates a project as the Owner; returns its room id.</summary>
     protected async Task<int> CreateProjectAsync()

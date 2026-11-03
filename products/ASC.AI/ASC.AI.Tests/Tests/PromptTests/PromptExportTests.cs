@@ -76,7 +76,8 @@ public class PromptExportTests(AspireAppFixture fixture) : PromptsTestBase(fixtu
         var inside = await CreatePromptAsync("Autotest 提示", "Строка с \"кавычками\" и \\ слешем\n{\"k\": [1, 2]}", fullFolder.Id);
 
         using var response = await _aiChatClient.GetAsync("/api/2.0/ai/prompts/export", Token);
-        response.Content.Headers.ContentType?.MediaType.Should().Contain("application/json");
+        response.Content.Headers.ContentType.Should().NotBeNull("the export names its media type");
+        response.Content.Headers.ContentType!.MediaType.Should().Contain("application/json");
 
         var bundle = await _aiPrompts.AiPromptsExportAsync(Token);
 

@@ -45,7 +45,6 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
     public static TheoryData<string> BodiesWithoutAUsableName => new()
     {
         "{}",
-        BodyJson("\"\""),
         BodyJson("null"),
         BodyJson("7")
     };
@@ -56,7 +55,7 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
         var before = await ListAsync();
         await SetPortalAiAccessAsync(false);
 
-        var reply = await ListAsync();
+        var reply = await UntilRefusedAsync(ListAsync);
 
         before.Status.Should().Be(200, "the list works while the switch is on");
         reply.Error.Should().Be("Forbidden");
@@ -72,7 +71,7 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
         var folderId = await MyFolderIdAsync();
         var onTitle = RandomName("Autotest on");
         var on = await RunAsync(DocxTool, GeneratorArguments(tool, onTitle));
-        await SetPortalAiAccessAsync(false);
+        await SwitchAiOffAsync();
         var offTitle = RandomName("Autotest off");
 
         var reply = await CallToolAsync(DocxTool, GeneratorArguments(tool, offTitle));
@@ -90,7 +89,7 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
     {
         await SetPortalAiAccessAsync(false);
 
-        var reply = await CallToolAsync("no_such_tool_zz");
+        var reply = await UntilRefusedAsync(() => CallToolAsync("no_such_tool_zz"));
 
         reply.Error.Should().Be("Forbidden");
         reply.Status.Should().Be(403, reply.ToString());
@@ -104,10 +103,21 @@ public class EditorToolAiDisabledTests(AspireAppFixture fixture) : EditorToolTes
     [MemberData(nameof(BodiesWithoutAUsableName))]
     public async Task BodyValidation_RunsBeforeTheSwitchIsChecked(string body)
     {
-        await SetPortalAiAccessAsync(false);
+        await SwitchAiOffAsync();
 
         // Raw: bodies with a missing or wrong-typed name, which the typed request cannot carry.
         var reply = await CallRawAsync(body);
+
+        reply.Error.Should().Be(UnknownToolName);
+        reply.Status.Should().Be(400, reply.ToString());
+    }
+
+    [Fact]
+    public async Task EmptyName_IsValidatedBeforeTheSwitchIsChecked()
+    {
+        await SwitchAiOffAsync();
+
+        var reply = await CallToolAsync(string.Empty);
 
         reply.Error.Should().Be(UnknownToolName);
         reply.Status.Should().Be(400, reply.ToString());

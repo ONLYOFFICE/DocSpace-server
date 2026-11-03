@@ -48,7 +48,12 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         var result = await _aiProfiles.AiProfilesUpdateAsync(created, TestContext.Current.CancellationToken);
 
-        result.Success.Should().BeTrue($"profiles/update rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        // Described only on a refusal: the provider's log holds every request of the run.
+        if (!result.Success)
+        {
+            result.Success.Should().BeTrue($"profiles/update rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        }
+
         result.Profile.Id.Should().Be(created.Id);
         result.Profile.Name.Should().Be("renamed-profile");
         result.Profile.ProviderType.GetString().Should().Be("openai");

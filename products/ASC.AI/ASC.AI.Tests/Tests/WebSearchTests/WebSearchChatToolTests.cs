@@ -78,6 +78,11 @@ public class WebSearchChatToolTests(AspireAppFixture fixture) : WebSearchTestBas
         round.StatusCode.Should().Be(HttpStatusCode.OK, round.ToString());
         round.StreamError.Should().BeNull(round.ToString());
 
-        return string.Join("\n", model.CompletionRequestBodies.Skip(seen).Where(b => StubModelProvider.IsStreamed(b)));
+        var bodies = model.CompletionRequestBodies.Skip(seen).Where(b => StubModelProvider.IsStreamed(b)).ToList();
+
+        // Without a model call there is no tool list to look at, and the NotContain checks would pass on an empty string.
+        bodies.Should().NotBeEmpty($"the message must have reached the model; {round}");
+
+        return string.Join("\n", bodies);
     }
 }

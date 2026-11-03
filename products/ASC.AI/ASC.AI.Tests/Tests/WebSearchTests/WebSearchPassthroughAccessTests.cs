@@ -125,7 +125,9 @@ public class WebSearchPassthroughAccessTests(AspireAppFixture fixture) : WebSear
             var calls = stub.CallsTo(WebSearchProviderStub.SearchPath);
             calls.Should().HaveCount(before + 1, stub.Describe());
 
-            return JsonDocument.Parse(calls[^1].Body).RootElement.TryGetProperty("metadata", out var metadata)
+            using var document = JsonDocument.Parse(calls[^1].Body);
+
+            return document.RootElement.TryGetProperty("metadata", out var metadata)
                 ? metadata.Clone()
                 : null;
         }

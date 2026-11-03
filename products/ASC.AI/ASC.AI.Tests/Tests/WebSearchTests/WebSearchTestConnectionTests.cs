@@ -78,7 +78,8 @@ public class WebSearchTestConnectionTests(AspireAppFixture fixture) : WebSearchT
         var calls = stub.CallsTo(WebSearchProviderStub.SearchPath);
         calls.Should().ContainSingle(stub.Describe());
         calls[0].Authorization.Should().Be($"Bearer {StubKey}");
-        var body = JsonDocument.Parse(calls[0].Body).RootElement;
+        using var document = JsonDocument.Parse(calls[0].Body);
+        var body = document.RootElement;
         body.GetProperty("engine").GetString().Should().Be("exa");
         body.GetProperty("numResults").GetInt32().Should().Be(1);
     }

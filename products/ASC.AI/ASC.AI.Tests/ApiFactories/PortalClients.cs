@@ -85,6 +85,9 @@ public sealed class PortalClients : PortalClientsBase
     public CommonSettingsApi CommonSettingsApi { get; }
     public SettingsQuotaApi SettingsQuotaApi { get; }
 
+    // Web.Api: the portal quota and its features (automationapi gates the editor generator tools)
+    public DocSpace.API.SDK.Api.Portal.QuotaApi QuotaApi { get; }
+
     public PortalClients(PortalContext context) : base(context)
     {
         AiHttpClient = CreateClient(ResourceNames.Ai);
@@ -125,5 +128,6 @@ public sealed class PortalClients : PortalClientsBase
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new SettingsQuotaApi(WebApiHttpClient, webApiConfig);
+        QuotaApi = new DocSpace.API.SDK.Api.Portal.QuotaApi(WebApiHttpClient, webApiConfig);
     }
 }

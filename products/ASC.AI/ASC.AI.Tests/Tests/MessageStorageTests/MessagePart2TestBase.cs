@@ -361,7 +361,8 @@ public abstract class MessagePart2TestBase(AspireAppFixture fixture) : MessageTe
             {
                 try
                 {
-                    frames.Add(JsonDocument.Parse(line).RootElement.Clone());
+                    using var frame = JsonDocument.Parse(line);
+                    frames.Add(frame.RootElement.Clone());
                 }
                 catch (JsonException)
                 {
