@@ -155,7 +155,8 @@ public class StudioNotifyService(
         var activateEmailNotifyAction = serviceProvider.GetService<ActivateEmailNotifyAction>();
         await activateEmailNotifyAction.Init(user, email);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        // the link is bound to this account, so a profile recreated with the same address is a new letter
+        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, user.Id.ToString(), await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
     }
 
     public async Task SendEmailRoomInviteAsync(
@@ -417,7 +418,8 @@ public class StudioNotifyService(
         var profileDeleteNotifyAction = serviceProvider.GetService<ProfileDeleteNotifyAction>();
         await profileDeleteNotifyAction.Init(user);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        // the link is bound to this account, so a profile recreated with the same address is a new letter
+        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, user.Id.ToString(), await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
     }
 
     public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)

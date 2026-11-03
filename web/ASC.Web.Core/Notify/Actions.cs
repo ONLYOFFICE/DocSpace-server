@@ -41,6 +41,10 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
     // a caller can repeat POST portal/suspend at will
     public override bool SuppressRepeats => true;
 
+    // the links are valid only while the owner still has the address they were made for, so a request after an
+    // email change is a new letter
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -58,6 +62,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email?.ToLowerInvariant()),
             new TagValue(CommonTags.ActivateUrl, activateUrl),
             TagValues.OrangeButton(orangeButtonText, deactivateUrl),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
@@ -73,6 +78,10 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
     // a caller can repeat POST portal/delete at will
     public override bool SuppressRepeats => true;
+
+    // the link is valid only while the owner still has the address they were made for, so a request after an
+    // email change is a new letter
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
 
     public override List<Pattern> Patterns
     {
@@ -91,6 +100,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email?.ToLowerInvariant()),
             TagValues.OrangeButton(orangeButtonText, url),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
             new TagValue(CommonTags.AutoRenew, showAutoRenewText.ToString()),

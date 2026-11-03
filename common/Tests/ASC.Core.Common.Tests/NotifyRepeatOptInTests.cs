@@ -117,6 +117,18 @@ public class NotifyRepeatOptInTests
         action.DeduplicationTags.Should().Contain("InviteType");
     }
 
+    [Theory]
+    // the letter goes to the owner's account, but its links are checked against the owner's address, so a request
+    // after an email change has to deliver links made for the new address
+    [InlineData("portal_deactivate")]
+    [InlineData("portal_delete")]
+    public void PortalLetter_TellsApartTheAddressOfItsLinks(string id)
+    {
+        var action = Actions().Single(a => a.ID == id);
+
+        action.DeduplicationTags.Should().Contain("LinkAddress");
+    }
+
     private static IEnumerable<INotifyAction> Actions()
     {
         Assembly[] assemblies =
