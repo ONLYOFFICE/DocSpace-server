@@ -135,7 +135,7 @@ public class GoogleWorkspaceMigrator : Migrator
                                 Directory.CreateDirectory(dir);
                             }
                             await using var entryStream = await entry.OpenAsync(_cancellationToken);
-                            await ExtractEntryAsync(entryStream, destPath, _cancellationToken);
+                            await ExtractEntryAsync(entryStream, destPath, false, _cancellationToken);
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
                         {
