@@ -100,7 +100,7 @@ public class ProfileStorageService(
 
         messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
 
-        return new ByokKeyInfo { Id = id, Name = model.Alias, Provider = provider };
+        return new ByokKeyInfo { Id = id, Name = model.Alias, Type = model.Type, Provider = provider };
     }
 
     public async Task DeleteByokKeyAsync(Guid id)
@@ -129,9 +129,9 @@ public class ProfileStorageService(
             return [];
         }
 
-        var names = (await _aiGateway.GetAllModelsAsync()).Data
+        var models = (await _aiGateway.GetAllModelsAsync()).Data
             .DistinctBy(m => m.RevisionId)
-            .ToDictionary(m => m.RevisionId, m => m.Alias);
+            .ToDictionary(m => m.RevisionId);
 
         return
         [
@@ -139,7 +139,8 @@ public class ProfileStorageService(
                 .Select(k => new ByokKeyInfo
                 {
                     Id = k.Id,
-                    Name = names.GetValueOrDefault(k.Id),
+                    Name = models.GetValueOrDefault(k.Id)?.Alias,
+                    Type = models.GetValueOrDefault(k.Id)?.Type,
                     Provider = k.Provider
                 })
         ];
@@ -156,14 +157,14 @@ public class ProfileStorageService(
         return
         [
             .. models
-                .Where(m => ProfileReader.IsNotEmbedding(m) && !overridden.Contains(m.RevisionId))
+                .Where(m => !overridden.Contains(m.RevisionId))
                 .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
                 .GroupBy(x => x.Provider.Id)
                 .Select(g => new ByokProviderInfo
                 {
                     Id = g.Key,
                     Name = g.First().Provider.Name,
-                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.RevisionId, Name = x.Model.Alias })]
+                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.RevisionId, Name = x.Model.Alias, Type = x.Model.Type })]
                 })
                 .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
         ];
@@ -222,14 +223,6 @@ public class ProfileStorageService(
         return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
     }
 
-    internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
-    {
-        await AssertUserHasAccessAsync(_readTypes);
-        AssertGatewayConfigured();
-
-        return await byokKeyStorage.ReadCredentialsAsync(tenantManager.GetCurrentTenantId(), id) ?? throw new ItemNotFoundException();
-    }
-
     private void AssertGatewayConfigured()
     {
         if (!_aiGateway.Configured)
@@ -242,6 +235,6 @@ public class ProfileStorageService(
     {
         var models = (await _aiGateway.GetAllModelsAsync()).Data;
 
-        return models.FirstOrDefault(m => m.RevisionId == id && ProfileReader.IsNotEmbedding(m));
+        return models.FirstOrDefault(m => m.RevisionId == id);
     }
 }

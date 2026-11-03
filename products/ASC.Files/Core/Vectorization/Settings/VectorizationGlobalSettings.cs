@@ -38,6 +38,7 @@ public class VectorizationGlobalSettings
 {
     public const string OpenAiBaseUrl = "https://api.openai.com/v1";
     public const string OpenRouterBaseUrl = "https://openrouter.ai/api/v1";
+    public static readonly Guid ModelRevisionId = new("019ed119-b5ea-774a-b3f5-653b094bd70d");
     public int ChunkSize { get; init; }
     public float ChunkOverlap { get; init; }
     public int ChunksBatchSize { get; init; }
