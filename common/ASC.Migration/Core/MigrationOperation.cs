@@ -140,6 +140,14 @@ public class MigrationOperation : DistributedTaskProgress
                 }
             }
 
+            // The check above sees only the compressed upload, so the migrator also bounds what it unpacks: by the
+            // quota, and by the configured ceiling for portals whose quota sets no limit (unlimited plans, standalone).
+            // Zero or a negative value means no limit, as for the quota.
+            var maxExtractedSize = scope.ServiceProvider.GetRequiredService<IConfiguration>().GetValue("migration:maxExtractedSize", long.MaxValue);
+            migrator.MaxExtractedSize = Math.Min(
+                maxExtractedSize > 0 ? maxExtractedSize : long.MaxValue,
+                maxTotalSize > 0 ? maxTotalSize : long.MaxValue);
+
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
             {

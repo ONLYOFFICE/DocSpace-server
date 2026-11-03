@@ -34,16 +34,14 @@
 namespace ASC.Web.Api.Tests.Tests._07_Migration;
 
 /// <summary>
-/// POST /api/2.0/migration/init/Nextcloud on a backup uploaded through <c>migrationFileUpload.ashx</c>,
-/// read back from GET /api/2.0/migration/status. The upload handler is not an API action, so it is
-/// called over raw HTTP the way the web client calls it; the parse itself runs in Web.Studio.
-/// The backup is a minimal Nextcloud layout: one top-level folder holding a MySQL dump and
-/// <c>data/{uid}/files</c>, packed as each supported archive type.
+/// POST /api/2.0/migration/init/Nextcloud on an uploaded backup, read back from
+/// GET /api/2.0/migration/status. The backup is a minimal Nextcloud layout: one top-level folder
+/// holding a MySQL dump and <c>data/{uid}/files</c>, packed as each supported archive type.
 /// </summary>
 [Trait("Category", "Migration")]
 public class NextcloudParseTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : MigrationParseTestBase(fixture)
 {
     private const string Uid = "alice";
     private const string Email = "alice.smith@example.com";
@@ -106,6 +104,60 @@ public class NextcloudParseTests(
         user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
     }
 
+    /// <summary>
+    /// Paths in <c>oc_filecache</c> come from the uploaded dump. A row that climbs out of the user's
+    /// folder with ".." - here to the uploaded archive itself, which lies next to the extracted
+    /// backup - is skipped instead of being imported, and the user's real file is still read.
+    /// </summary>
+    [Fact]
+    public async Task Parse_FileCachePathOutsideUserFolder_SkipsEntry()
+    {
+        // Arrange
+        // every ancestor gets its own row, as the migrator resolves a file's parent folder by path
+        var dump = AddRows(Dump, "oc_filecache",
+            "(13,7,'files/..'),(14,7,'files/../..'),(15,7,'files/../../..'),(16,7,'files/../../../..'),(17,7,'files/../../../../backup.zip')");
+        await UploadBackupAsync("backup.zip", BuildZip(dump));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        var user = status.ParseResult.Users.Should().ContainSingle().Which;
+        user.MigratingFiles.FilesCount.Should().Be(1);
+        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
+    }
+
+    /// <summary>
+    /// The user id from <c>oc_accounts</c> names the user's folder under <c>data/</c>. An id of ".."
+    /// would point that folder at the backup root, so the user is not offered for import; the other
+    /// users of the dump still are.
+    /// </summary>
+    [Fact]
+    public async Task Parse_UserIdOutsideDataFolder_SkipsUser()
+    {
+        // Arrange
+        var dump = Dump;
+        dump = AddRows(dump, "oc_accounts", "('..','{}')");
+        dump = AddRows(dump, "oc_accounts_data", "(3,'..','displayname','Mallory Evil'),(4,'..','email','mallory@example.com')");
+        dump = AddRows(dump, "oc_storages", "(8,'home::..',1,NULL)");
+        dump = AddRows(dump, "oc_filecache", "(20,8,'files'),(21,8,'files/hello.txt')");
+        await UploadBackupAsync("backup.zip", BuildZip(dump, "nextcloud/files/hello.txt"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        status.ParseResult.Users.Should().ContainSingle().Which.Email.Should().Be(Email);
+        status.ParseResult.ExistUsers.Should().BeEmpty();
+        status.ParseResult.WithoutEmailUsers.Should().BeEmpty();
+    }
+
     [Fact]
     public async Task Parse_UnsupportedArchive_ReportsAcceptedFormats()
     {
@@ -121,60 +173,30 @@ public class NextcloudParseTests(
         status.Error.Should().Contain(".zip, .tar.gz or .tgz");
     }
 
-    private async Task UploadBackupAsync(string fileName, byte[] archive)
+    /// <summary>
+    /// The migrator reads only the first INSERT of each table, so extra rows go into that statement.
+    /// </summary>
+    private static string AddRows(string dump, string table, string rows)
     {
-        var cancellationToken = TestContext.Current.CancellationToken;
-
-        using var init = await _webApiClient.PostAsync("migrationFileUpload.ashx?Init=true", null, cancellationToken);
-        await AssertUploadSucceededAsync(init);
-
-        using var form = new MultipartFormDataContent();
-        form.Add(new ByteArrayContent(archive), "file", fileName);
-        using var upload = await _webApiClient.PostAsync($"migrationFileUpload.ashx?Name={Uri.EscapeDataString(fileName)}", form, cancellationToken);
-        await AssertUploadSucceededAsync(upload);
+        var start = dump.IndexOf($"INSERT INTO `{table}` VALUES ", StringComparison.Ordinal);
+        var end = dump.IndexOf(";\n", start, StringComparison.Ordinal);
+        return dump.Insert(end, "," + rows);
     }
 
-    private static async Task AssertUploadSucceededAsync(HttpResponseMessage response)
-    {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
-        json.RootElement.GetProperty("Success").GetBoolean().Should().BeTrue(body);
-    }
-
-    private async Task<MigrationStatusDto> WaitForParseAsync()
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-
-        while (true)
-        {
-            var status = (await _migrationApi.GetMigrationStatusAsync(TestContext.Current.CancellationToken)).Response;
-
-            if (status is { IsCompleted: true } || DateTime.UtcNow >= deadline)
-            {
-                return status;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
-    }
-
-    private static byte[] BuildZip()
+    private static byte[] BuildZip(string dump = Dump, string? extraFile = null)
     {
         using var buffer = new MemoryStream();
         using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
         {
-            WriteZipEntry(zip, "nextcloud/nextcloud.sql", Dump);
+            WriteZipEntry(zip, "nextcloud/nextcloud.sql", dump);
             WriteZipEntry(zip, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
+            if (extraFile != null)
+            {
+                WriteZipEntry(zip, extraFile, FileContent);
+            }
         }
 
         return buffer.ToArray();
-    }
-
-    private static void WriteZipEntry(ZipArchive zip, string name, string content)
-    {
-        using var writer = new StreamWriter(zip.CreateEntry(name).Open());
-        writer.Write(content);
     }
 
     private static byte[] BuildTarGz(bool withLink)
@@ -196,13 +218,5 @@ public class NextcloudParseTests(
         }
 
         return buffer.ToArray();
-    }
-
-    private static void WriteTarEntry(TarWriter tar, string name, string content)
-    {
-        tar.WriteEntry(new PaxTarEntry(TarEntryType.RegularFile, name)
-        {
-            DataStream = new MemoryStream(Encoding.UTF8.GetBytes(content))
-        });
     }
 }

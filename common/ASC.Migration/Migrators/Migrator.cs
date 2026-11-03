@@ -103,16 +103,53 @@ public abstract class Migrator(
 
     protected static string GetSafeExtractPath(string root, string entryName)
     {
-        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
-        var fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
-
-        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
-            && !fullPath.Equals(normalizedRoot, StringComparison.Ordinal))
+        if (!TryGetSafeExtractPath(root, entryName, out var fullPath))
         {
             throw new InvalidDataException($"Archive entry is outside the extraction directory: {entryName}");
         }
 
         return fullPath;
+    }
+
+    protected static bool TryGetSafeExtractPath(string root, string entryName, out string fullPath)
+    {
+        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
+
+        return fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            || fullPath.Equals(normalizedRoot, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// The most bytes the uploaded archives may unpack to, set by the operation from the tenant quota and the
+    /// <c>migration:maxExtractedSize</c> ceiling. The quota check before the parse sees only the compressed upload.
+    /// </summary>
+    public long MaxExtractedSize { get; set; } = long.MaxValue;
+
+    private long _extractedSize;
+
+    protected void CountExtractedSize(long length)
+    {
+        _extractedSize += length;
+        if (_extractedSize > MaxExtractedSize)
+        {
+            throw new LargeBackupException(MigrationResource.LargeBackup);
+        }
+    }
+
+    /// <summary>
+    /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.
+    /// </summary>
+    protected async Task ExtractEntryAsync(Stream source, string destPath, CancellationToken cancellationToken)
+    {
+        await using var target = new FileStream(destPath, FileMode.CreateNew, FileAccess.Write);
+        var buffer = new byte[81920];
+        int read;
+        while ((read = await source.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            CountExtractedSize(read);
+            await target.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+        }
     }
 
     public string GetLogName()
@@ -236,7 +273,8 @@ public abstract class Migrator(
                     if (user.HasPhoto)
                     {
                         using var ms = new MemoryStream();
-                        await using (var fs = File.OpenRead(user.PathToPhoto))
+                        // every migrator builds this path from the backup's contents, so it is checked once more where it is opened
+                        await using (var fs = File.OpenRead(GetSafeExtractPath(TmpFolder, user.PathToPhoto)))
                         {
                             await fs.CopyToAsync(ms);
                         }
@@ -398,7 +436,8 @@ public abstract class Migrator(
         {
             try
             {
-                await using var fs = new FileStream(file.Path, FileMode.Open);
+                // every migrator builds this path from the backup's contents, so it is checked once more where it is opened
+                await using var fs = new FileStream(GetSafeExtractPath(TmpFolder, file.Path), FileMode.Open, FileAccess.Read);
 
                 var newFile = ServiceProvider.GetService<File<int>>();
                 newFile.ParentId = matchingFilesIds[$"{FolderKey}-{file.Folder}"].Id;

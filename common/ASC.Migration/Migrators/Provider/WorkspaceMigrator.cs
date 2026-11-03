@@ -87,6 +87,7 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
+            await CountDeclaredSizeAsync();
             _dataReader = DataOperatorFactory.GetReadOperator(_backup, false, reportProgress ? _cancellationToken : CancellationToken.None);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -112,7 +113,7 @@ public class WorkspaceMigrator : Migrator
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
+            var error = e is LargeBackupException ? e.Message : string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
             await ReportProgressAsync(_lastProgressUpdate, error);
             throw new Exception(error, e);
         }
@@ -121,6 +122,27 @@ public class WorkspaceMigrator : Migrator
             await ReportProgressAsync(100, MigrationResource.DataProcessingCompleted);
         }
         return MigrationInfo.ToApiInfo();
+    }
+
+    /// <summary>
+    /// The read operator unpacks the whole backup at once, writing each entry at the size its tar header
+    /// declares, so the headers are summed against the quota before anything reaches the disk.
+    /// </summary>
+    private async Task CountDeclaredSizeAsync()
+    {
+        if (MaxExtractedSize == long.MaxValue)
+        {
+            return;
+        }
+
+        await using var file = File.OpenRead(_backup);
+        // the same test DataOperatorFactory.GetReadOperator uses to pick a gzipped or a plain tar
+        await using Stream stream = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress) : file;
+        await using var reader = new TarReader(stream);
+        while (await reader.GetNextEntryAsync(cancellationToken: _cancellationToken) is { } entry)
+        {
+            CountExtractedSize(entry.Length);
+        }
     }
 
     private async Task InnerParseAsync(bool reportProgress, int count = 1)
@@ -267,7 +289,8 @@ public class WorkspaceMigrator : Migrator
                         using var img = new MagickImage(bytes);
                         var format = img.Format;
 
-                        u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
+                        // the user id comes from the dump: the photo written under it must stay inside the backup folder
+                        u.PathToPhoto = GetSafeExtractPath(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
                         u.HasPhoto = true;
 
                         await using var fs = new FileStream(u.PathToPhoto, FileMode.Create);
@@ -471,7 +494,7 @@ public class WorkspaceMigrator : Migrator
                     Created = DateTime.Parse(row["create_on"].ToString()),
                     Modified = DateTime.Parse(row["modified_on"].ToString())
                 };
-                file.Path = Path.Combine(_dataReader.GetFolder(), $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
+                file.Path = GetSafeExtractPath(_dataReader.GetFolder(), $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
                 storage.BytesTotal += int.Parse(row["content_length"].ToString());
             }

@@ -100,7 +100,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     return null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not LargeBackupException)
             {
                 Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
             }
@@ -138,8 +138,9 @@ public class NextcloudWorkspaceMigrator : Migrator
                     try
                     {
                         var rootFolder = Directory.GetDirectories(TmpFolder)[0];
-                        var drivePath = Directory.Exists(Path.Combine(rootFolder, "data", user.Key, "cache")) ?
-                                Path.Combine(rootFolder, "data", user.Key, "cache") : null;
+                        // the user id comes from the dump, so the folder built from it must stay inside the backup
+                        var cachePath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(user.Key, "cache"));
+                        var drivePath = Directory.Exists(cachePath) ? cachePath : null;
                         if (drivePath == null)
                         {
                             user.Value.HasPhoto = false;
@@ -155,7 +156,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             var appdataDir = Directory.GetDirectories(Path.Combine(rootFolder, "data")).FirstOrDefault(dir => dir.Split(Path.DirectorySeparatorChar).Last().StartsWith("appdata_"));
                             if (appdataDir != null)
                             {
-                                var pathToAvatarDir = Path.Combine(appdataDir, "avatar", user.Key);
+                                var pathToAvatarDir = GetSafeExtractPath(Path.Combine(appdataDir, "avatar"), user.Key);
                                 user.Value.PathToPhoto = File.Exists(Path.Combine(pathToAvatarDir, "generated")) ? null : Path.Combine(pathToAvatarDir, "avatar.jpg");
                                 user.Value.HasPhoto = user.Value.PathToPhoto != null;
                             }
@@ -197,7 +198,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
-            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
+            var error = e is LargeBackupException ? e.Message : string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
             await ReportProgressAsync(100, error);
             throw new Exception(error, e);
         }
@@ -243,7 +244,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                 {
                     Directory.CreateDirectory(dir);
                 }
-                await entry.ExtractToFileAsync(destPath, _cancellationToken);
+                await using var entryStream = await entry.OpenAsync(_cancellationToken);
+                await ExtractEntryAsync(entryStream, destPath, _cancellationToken);
             }
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
@@ -275,7 +277,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             {
                 var destPath = GetSafeExtractPath(TmpFolder, entry.Name);
                 Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                await entry.ExtractToFileAsync(destPath, false, _cancellationToken);
+                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, _cancellationToken);
             }
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
@@ -434,8 +436,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     {
         var rootFolder = Directory.GetDirectories(TmpFolder)[0];
 
-        var drivePath = Directory.Exists(Path.Combine(rootFolder, "data", key, "files")) ?
-            Path.Combine(rootFolder, "data", key, "files") : null;
+        var filesPath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(key, "files"));
+        var drivePath = Directory.Exists(filesPath) ? filesPath : null;
         if (drivePath == null)
         {
             return;
@@ -497,11 +499,18 @@ public class NextcloudWorkspaceMigrator : Migrator
 
             if (paths.Length >= 1)
             {
-                var tmpPath = drivePath;
-                for (var i = 1; i < paths.Length; i++)
+                // oc_filecache.path comes from the dump: a row with ".." segments must not reach files outside the user's folder
+                string tmpPath;
+                try
                 {
-                    tmpPath = Path.Combine(tmpPath, paths[i]);
+                    tmpPath = GetSafeExtractPath(drivePath, Path.Combine(paths[1..]));
                 }
+                catch (InvalidDataException ex)
+                {
+                    Log(string.Format(MigrationResource.CanNotCreateFile, entry.Path), ex);
+                    continue;
+                }
+
                 if (Directory.Exists(tmpPath) || File.Exists(tmpPath))
                 {
                     var attr = File.GetAttributes(tmpPath);

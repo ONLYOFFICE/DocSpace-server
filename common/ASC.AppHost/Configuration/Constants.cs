@@ -128,6 +128,10 @@ public static class Constants
     // The billing tests of what it does (LowBalanceWarningTests) wait for its next run, so it is seconds, not the
     // minute buildtools/config sets.
     public static TimeSpan PaymentStubTopUpPeriod { get; } = TimeSpan.FromSeconds(5);
+    // The most bytes an uploaded migration backup may unpack to under the integration-test profile
+    // (migration:maxExtractedSize, set in ProjectConfigurator). The test portals run on an unlimited quota, which sets
+    // no limit of its own, so without it MigrationSizeLimitTests would have to unpack gigabytes to reach one.
+    public const long MigrationTestMaxExtractedSize = 64L * 1024 * 1024;
 
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
