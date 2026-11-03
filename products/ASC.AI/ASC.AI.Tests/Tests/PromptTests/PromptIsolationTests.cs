@@ -122,6 +122,9 @@ public class PromptIsolationTests(AspireAppFixture fixture) : PromptsTestBase(fi
             refusal = exception;
         }
 
+        // A refusal has to be one: a server error would pass the check below without the route having said anything.
+        refusal?.ErrorCode.Should().BeInRange(400, 499, "a refused delete answers a client error");
+
         await _aiChatClient.Authenticate(Owner);
         (await FindPromptAsync(ownerPrompt.Id))!.Id.Should().Be(ownerPrompt.Id, "the owner's prompt survives");
 

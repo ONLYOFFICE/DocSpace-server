@@ -77,7 +77,7 @@ public class TextToDocxTargetsTests(AspireAppFixture fixture) : TextToDocxPortTe
         exception.ErrorCode.Should().Be(403);
         ErrorOf(exception.ErrorContent?.ToString()).Should().Be("Forbidden");
 
-        await WaitForExportToSettleAsync();
+        // Refused there and then, so nothing was queued that could still land: one listing is the whole check.
         (await ListFolderFilesAsync(roomId)).Select(file => file.Id).Should().Equal(controlId);
     }
 
@@ -99,7 +99,7 @@ public class TextToDocxTargetsTests(AspireAppFixture fixture) : TextToDocxPortTe
         exception.ErrorCode.Should().Be(403);
         ErrorOf(exception.ErrorContent?.ToString()).Should().Be("Forbidden");
 
-        await WaitForExportToSettleAsync();
+        // Refused there and then, so nothing was queued that could still land: one listing is the whole check.
         (await ListFolderFilesAsync(trashId)).Select(file => file.Id).Should().Equal(controlId);
     }
 }

@@ -63,7 +63,7 @@ public class MessagesPermissionRoomAccessTests(AspireAppFixture fixture) : Messa
 
         var exception = await ExportRefusedAsAsync(member, BuildExport(roomId, ExportTitle(), "hello"));
 
-        await WaitForExportToSettleAsync();
+        // Refused synchronously, so nothing was queued to land later.
         IdsOf(await ListFilesAsync(member, roomId)).Should().Equal(controlId);
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Forbidden");
@@ -111,7 +111,7 @@ public class MessagesPermissionRoomAccessTests(AspireAppFixture fixture) : Messa
         var title = ExportTitle();
         var exception = await ExportRefusedAsAsync(guest, BuildExport(roomId, title));
 
-        await WaitForExportToSettleAsync();
+        // Refused synchronously, so nothing was queued to land later.
         IdsOf(await ListFilesAsync(guest, roomId)).Should().Equal(
             new[] { controlId, directId }.Order(),
             $"a Guest must not have exported \"{title}.docx\" into the room");

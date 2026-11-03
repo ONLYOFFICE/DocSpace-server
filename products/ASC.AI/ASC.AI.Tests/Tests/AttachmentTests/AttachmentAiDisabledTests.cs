@@ -49,9 +49,6 @@ namespace ASC.AI.Tests.Tests.AttachmentTests;
 [Trait("Feature", "AI/Attachments")]
 public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTestBase(fixture)
 {
-    /// <summary>Calls allowed while the flipped setting propagates.</summary>
-    private const int SettleAttempts = 12;
-
     /// <summary>Consecutive refusals that count as "the switch has taken effect"; one is not enough mid-propagation.</summary>
     private const int SettleStreak = 3;
 
@@ -60,6 +57,9 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
 
     /// <summary>Calls used to judge whether a route answers one status or several.</summary>
     private const int ConsistencyAttempts = 12;
+
+    /// <summary>How long the flipped setting is given to propagate.</summary>
+    private static readonly TimeSpan _settleTimeout = TimeSpan.FromSeconds(10);
 
     private static readonly TimeSpan _pollInterval = TimeSpan.FromMilliseconds(150);
 
@@ -85,16 +85,23 @@ public class AttachmentAiDisabledTests(AspireAppFixture fixture) : AttachmentTes
     {
         var seen = new List<int>();
         var streak = 0;
+        var deadline = DateTime.UtcNow + _settleTimeout;
 
-        for (var attempt = 0; attempt < SettleAttempts && streak < SettleStreak; attempt++)
+        while (true)
         {
             var status = await call();
             seen.Add(status);
             streak = status == 403 ? streak + 1 : 0;
+
+            if (streak >= SettleStreak || DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+
             await Task.Delay(_pollInterval, TestContext.Current.CancellationToken);
         }
 
-        streak.Should().Be(SettleStreak, $"{label} was never refused {SettleStreak} times in a row within {SettleAttempts} calls: {string.Join(",", seen)}");
+        streak.Should().Be(SettleStreak, $"{label} was never refused {SettleStreak} times in a row within {_settleTimeout.TotalSeconds} s: {string.Join(",", seen)}");
 
         var after = await CollectStatusesAsync(call, RefusedAttempts);
 

@@ -44,7 +44,7 @@ namespace ASC.AI.Tests.Tests.PreferenceTests;
 /// </remarks>
 [Trait("Category", "Chat")]
 [Trait("Feature", "AI/Preferences")]
-public class PreferenceDeepModeChatTests(AspireAppFixture fixture) : PreferenceTestBase(fixture), IDisposable
+public class PreferenceDeepModeChatTests(AspireAppFixture fixture) : PreferenceTestBase(fixture)
 {
     private const string ReasoningQuestion =
         "A bat and a ball cost $1.10 together. The bat costs $1.00 more than the ball. How much does the ball cost? Reply with the amount only.";
@@ -53,10 +53,10 @@ public class PreferenceDeepModeChatTests(AspireAppFixture fixture) : PreferenceT
 
     private readonly StubModelProvider _provider = new();
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         _provider.Dispose();
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     private async Task<AiProfile> CreateReasoningProfileAsync()
@@ -95,7 +95,9 @@ public class PreferenceDeepModeChatTests(AspireAppFixture fixture) : PreferenceT
             .Where(m => m.Role == AiThreadMessageLike.RoleEnum.Assistant)
             .ToList();
         stored.Should().ContainSingle();
-        stored[0].Status?.Type.Should().NotBe("incomplete", _provider.Describe());
+        // A completed reply is stored without a status (measured 2026-11-03), so a missing one reads as complete; only an
+        // explicit incomplete status fails the round.
+        (stored[0].Status?.Type ?? "complete").Should().NotBe("incomplete", _provider.Describe());
 
         // Neither the stream nor the stored reply carries a raw `<think>` trace.
         foreach (var marker in _thinkMarkers)
@@ -150,22 +152,10 @@ public class PreferenceDeepModeChatTests(AspireAppFixture fixture) : PreferenceT
     /// <summary>A streamed reply whose first chunks carry <c>reasoning_content</c> and whose later ones carry the answer.</summary>
     private static ScriptedAnswer ReasoningThenText(string reasoning, string answer)
     {
-        static string Chunk(object delta, string? finishReason = null) =>
-            "data: " + JsonSerializer.Serialize(new
-            {
-                id = "chatcmpl-stub",
-                @object = "chat.completion.chunk",
-                created = 0,
-                model = StubModelProvider.ModelId,
-                choices = new[] { new { index = 0, delta, finish_reason = finishReason } }
-            }) + "\n\n";
-
-        var body = Chunk(new { role = "assistant", content = "" })
-            + Chunk(new { reasoning_content = reasoning })
-            + Chunk(new { content = answer })
-            + Chunk(new { }, "stop")
-            + "data: [DONE]\n\n";
-
-        return new ScriptedAnswer(200, body);
+        return new ScriptedAnswer(200, StubModelProvider.Sse(
+            StubModelProvider.Chunk(new { role = "assistant", content = "" }),
+            StubModelProvider.Chunk(new { reasoning_content = reasoning }),
+            StubModelProvider.Chunk(new { content = answer }),
+            StubModelProvider.Chunk(new { }, "stop")));
     }
 }

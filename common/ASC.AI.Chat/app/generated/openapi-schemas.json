@@ -125,7 +125,7 @@
           "items": {
             "$ref": "#/components/schemas/AiContextRoomRef"
           },
-          "description": "Instructions rooms connected as context in the composer, each with the skills the round may use. The skills of a DocSpace room are re-read on every round, so the list sent only has to name the rooms; inside an AI project the project's own linked rooms replace whatever is sent here."
+          "description": "Instructions rooms connected as context in the composer, each with the skills the round may use."
         },
         "knowledgeRooms": {
           "type": "array",
@@ -145,10 +145,11 @@
         },
         "entityId": {
           "type": "string",
-          "description": "Read by `POST api/2.0/ai/ai/send-custom` only, which has no top-level scope: the entry the round is attributed to. A hint, re-resolved against the caller's own access; ignored by every other operation."
+          "description": "The entry the round is attributed to. A hint, resolved against the caller's own access."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Per-request options of an AI round: extra tools, the depth of reasoning, a system prompt override and the rooms and folder connected as context."
     },
     "AiMCPItem": {
       "type": "object",
@@ -262,7 +263,7 @@
           "items": {
             "$ref": "#/components/schemas/AiRoomSkill"
           },
-          "description": "The skills of the room the round may use. For a room of this portal the list is re-read on every round, so it may be sent empty.",
+          "description": "The skills of the room the round may use, as `GET api/2.0/ai/context/get-room-skills` lists them.",
           "examples": [
             []
           ]
@@ -273,7 +274,7 @@
         "id"
       ],
       "additionalProperties": false,
-      "description": "One room a round runs with as context, as the composer sends them in `ActionArgs.contextRooms`: the cloud and room id from `getContextFolders`, plus the skills the round may use — the frontmatter the clouds store read once through `getRoomSkills` when the room was connected, minus the ones the user switched off. The engine builds the skill index and the `read_skill` tool from this list without another read; only a skill's body is fetched on demand, through `getRoomSkill`."
+      "description": "One Instructions room a round runs with as context: the account and room ID from `GET api/2.0/ai/context/get-context-folders`, plus the skills of the room the round may use."
     },
     "AiRoomSkill": {
       "type": "object",
@@ -306,7 +307,7 @@
         "description"
       ],
       "additionalProperties": false,
-      "description": "A skill configured inside a room — an Agent Skills Markdown file the host makes available to the model once the room is connected. This is the file's frontmatter only: `name` and `description` go into the model's skill index, the body is read on demand through `StorageAdapter.getRoomSkill`. `id` is the host's own identifier and is only ever passed back."
+      "description": "A skill of an Instructions room: the frontmatter of one Markdown skill file. `name` and `description` are what the model is shown; the body is read through `GET api/2.0/ai/context/get-room-skill`."
     },
     "AiKnowledgeRoomRef": {
       "type": "object",
@@ -331,7 +332,7 @@
         "id"
       ],
       "additionalProperties": false,
-      "description": "One knowledge base a round searches, as the composer sends them in `ActionArgs.knowledgeRooms`: the cloud and room id from `getKnowledgeFolders`. The widget only passes them back; the host scopes its knowledge search to those rooms."
+      "description": "One Knowledge room a round searches: the account and room ID from `GET api/2.0/ai/context/get-knowledge-folders`."
     },
     "AiFolderContextRef": {
       "type": "object",
@@ -356,7 +357,7 @@
         "id"
       ],
       "additionalProperties": false,
-      "description": "A folder connected as the round's context — any folder of the cloud, not only a room — as `ActionArgs.folderContext` carries it: the reference only. The host reads it off the request and decides what the folder contributes."
+      "description": "A folder connected as the round's context - any folder of the portal, not only a room - named by its account and ID."
     },
     "AiActionType": {
       "type": "string",
@@ -630,7 +631,7 @@
         "code",
         "message"
       ],
-      "description": "Serializable error payload attached to `message-incomplete` events.\n\n`Error` instances are useless on the wire: `message`, `stack`, and `name` are non-enumerable, so `JSON.stringify(err)` collapses to `{}` (or `{ \"cause\": {} }`). The engine normalizes every error through `toChatError` before yielding it so hosts can pipe the NDJSON stream through stock `JSON.stringify` and the UI can render the message without falling back to `[object Object]`."
+      "description": "Why a round failed or stopped early, as the message status and the stream report it: a stable `code`, a message safe to show the user, and the cause when there is one."
     },
     "AiSendStreamBody": {
       "type": "object",
@@ -1573,7 +1574,7 @@
         "rooms"
       ],
       "additionalProperties": false,
-      "description": "One cloud account's rooms, as listed in the composer's settings menu. `cloud` is the account label the host wants shown as the group heading."
+      "description": "The rooms of one account the caller can connect as context, grouped under the account."
     },
     "AiContextRoom": {
       "type": "object",
@@ -1598,7 +1599,7 @@
         "name"
       ],
       "additionalProperties": false,
-      "description": "A room the user can pull into the conversation as context. `id` is the host's own identifier — the widget only passes it back, never parses it."
+      "description": "A room the caller can connect to a chat as context."
     },
     "AiCreateProfileInput": {
       "type": "object",
@@ -3464,11 +3465,8 @@
     },
     "aiContextGetRoomSkill": {
       "response": {
-        "type": [
-          "string",
-          "null"
-        ],
-        "description": "The skill's Markdown body, or null when the room has no such skill."
+        "type": "string",
+        "description": "The skill's whole Markdown file."
       }
     },
     "aiPreferencesGetDeepMode": {

@@ -63,11 +63,17 @@ public sealed class StubModelProvider : IDisposable
     private readonly WireMockServer _server = WireMockServer.Start();
     private readonly ConcurrentQueue<ScriptedAnswer> _answers = new();
     private readonly string _defaultAnswer;
+    private readonly bool _shared;
 
     /// <param name="answer">What the model streams back to a chat message when nothing is queued.</param>
-    public StubModelProvider(string answer = DefaultAnswer)
+    public StubModelProvider(string answer = DefaultAnswer) : this(answer, shared: false)
+    {
+    }
+
+    private StubModelProvider(string answer, bool shared)
     {
         _defaultAnswer = answer;
+        _shared = shared;
 
         _server
             .Given(Request.Create().WithPath("/v1/models").UsingGet())
@@ -114,6 +120,12 @@ public sealed class StubModelProvider : IDisposable
             }));
     }
 
+    /// <summary>
+    /// The provider of the whole run (<see cref="AspireAppFixture.ModelProvider"/>): every test's profiles may point at
+    /// it, so it answers with the default text only and refuses <see cref="Enqueue"/>.
+    /// </summary>
+    public static StubModelProvider CreateShared() => new(DefaultAnswer, shared: true);
+
     /// <summary>The <c>baseUrl</c> a profile is given to talk to this provider.</summary>
     public string BaseUrl => $"http://127.0.0.1:{_server.Port}/v1";
 
@@ -130,8 +142,16 @@ public sealed class StubModelProvider : IDisposable
     /// The streamed tool probe a profile create sends (<c>probe_echo</c>) is answered by its own mapping and takes
     /// nothing from the queue; queuing after the profile is created is still the clearer order.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">On the run-wide provider, where a parallel test would take the answer.</exception>
     public void Enqueue(params ScriptedAnswer[] answers)
     {
+        if (_shared)
+        {
+            throw new InvalidOperationException(
+                "The run-wide model provider is shared by every test: an answer queued on it goes to whichever chat asks first. "
+                + "Create a StubModelProvider of the test's own and a profile on it (CreateProfileOnAsync) to script answers.");
+        }
+
         foreach (var answer in answers)
         {
             _answers.Enqueue(answer);
@@ -231,14 +251,19 @@ public sealed class StubModelProvider : IDisposable
         }
     }
 
-    private static string Sse(params object[] chunks) =>
-        string.Concat(chunks.Select(c => $"data: {JsonSerializer.Serialize(c)}\n\n")) + "data: [DONE]\n\n";
+    /// <summary>An SSE body of the given <see cref="Chunk"/>s, closed with <c>data: [DONE]</c>.</summary>
+    public static string Sse(params object[] chunks) =>
+        string.Concat(chunks.Select(SseEvent)) + "data: [DONE]\n\n";
+
+    /// <summary>One <see cref="Chunk"/> as an SSE event (<c>data: {...}</c> and a blank line).</summary>
+    public static string SseEvent(object chunk) => $"data: {JsonSerializer.Serialize(chunk)}\n\n";
 
     private static object Delta(object delta) => Chunk(delta, null);
 
     private static object Finish(string reason) => Chunk(new { }, reason);
 
-    private static object Chunk(object delta, string? finishReason) => new
+    /// <summary>One <c>chat.completion.chunk</c> of a streamed reply: the delta, and the finish reason on the last one.</summary>
+    public static object Chunk(object delta, string? finishReason = null) => new
     {
         id = "chatcmpl-stub",
         @object = "chat.completion.chunk",

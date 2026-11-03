@@ -41,16 +41,16 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// </summary>
 [Trait("Category", "Chat")]
 [Trait("Feature", "AI/Chat")]
-public class ChatStreamTests(AspireAppFixture fixture) : BaseTest(fixture), IDisposable
+public class ChatStreamTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
     private const string Answer = "Stubbed answer from the provider";
 
     private readonly StubModelProvider _provider = new(Answer);
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         _provider.Dispose();
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     [Fact]

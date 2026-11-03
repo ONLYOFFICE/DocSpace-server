@@ -146,6 +146,26 @@ public abstract class MessagesPart3TestBase(AspireAppFixture fixture) : MessageT
     }
 
     /// <summary>
+    /// Appends <paramref name="message"/> through the typed SDK and returns the status: 200 when it was stored, the
+    /// <see cref="ApiException"/> code when it was refused.
+    /// </summary>
+    protected async Task<HttpStatusCode> AppendStatusAsync(string threadId, AiThreadMessageLike message)
+    {
+        try
+        {
+            await _aiThreads.AiThreadsAppendUserMessageAsync(
+                new AiThreadsAppendUserMessageRequest(threadId: threadId, message: message),
+                TestContext.Current.CancellationToken);
+
+            return HttpStatusCode.OK;
+        }
+        catch (ApiException exception)
+        {
+            return (HttpStatusCode)exception.ErrorCode;
+        }
+    }
+
+    /// <summary>
     /// Puts a verbatim JSON body to <c>update-message</c> and returns the status — for bodies the SDK request model
     /// rejects client-side (no message id, no message) or cannot express (an empty parts list, no body at all).
     /// </summary>
@@ -283,9 +303,6 @@ public abstract class MessagesPart3TestBase(AspireAppFixture fixture) : MessageT
             await Task.Delay(_pollInterval, TestContext.Current.CancellationToken);
         }
     }
-
-    /// <summary>Gives a refused export as much time to land as an accepted one would need.</summary>
-    protected static Task WaitForExportToSettleAsync() => Task.Delay(ExportSettle, TestContext.Current.CancellationToken);
 
     protected static List<int> IdsOf(IEnumerable<FileDto> files) => [.. files.Select(f => f.Id).Order()];
 

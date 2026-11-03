@@ -118,20 +118,6 @@ public abstract class AssignmentTestBase(AspireAppFixture fixture) : Assignments
         tried.Profile.Id.Should().Be(profileId, $"try-resolve {label} expanded");
     }
 
-    /// <summary>The HTTP status an SDK call ended with: 200 when it succeeded, the <see cref="ApiException"/> code otherwise.</summary>
-    protected static async Task<int> StatusOfAsync(Func<Task> call)
-    {
-        try
-        {
-            await call();
-            return 200;
-        }
-        catch (ApiException exception)
-        {
-            return exception.ErrorCode;
-        }
-    }
-
     /// <summary>A body the SDK models cannot carry (a missing field, a bare value, an unknown action), sent to a PUT route.</summary>
     protected async Task<(int Status, string Body)> PutRawAsync(string route, string json)
     {

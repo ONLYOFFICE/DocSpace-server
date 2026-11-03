@@ -262,8 +262,6 @@ public class McpDisabledToolsTests(AspireAppFixture fixture) : McpTestBase(fixtu
 
         (await IsDisabledAsync("no-such-server", "p1")).Should().BeFalse();
 
-        var viaMissingEntity = await GetToolsAsync("is-tool-disabled", $"?serverType=portal-srv&toolName=p1&entityId={MissingEntityId}");
-        viaMissingEntity.Code.Should().Be(200, viaMissingEntity.ToString());
-        viaMissingEntity.Text.Trim().Should().Be("true", "the list is the user's own whatever entity is named");
+        (await IsDisabledAsync("portal-srv", "p1", MissingEntityId)).Should().BeTrue("the list is the user's own whatever entity is named");
     }
 }

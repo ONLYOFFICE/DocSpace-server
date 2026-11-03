@@ -51,6 +51,8 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
 
     private static readonly TimeSpan _writingTime = TimeSpan.FromSeconds(6);
 
+    private static readonly TimeSpan _lateWriteWindow = TimeSpan.FromSeconds(2);
+
     [Fact]
     public async Task Rename_MidReply_SurvivesTheReply()
     {
@@ -98,10 +100,12 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
         round.StatusCode.Should().Be(HttpStatusCode.OK, round.ToString());
         round.OfType("error").Should().NotBeEmpty($"the round reports it lost its thread: {round}");
 
-        await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        // A late write could only show as the row coming back: watch for it over the window, stop at the first sight.
+        var threadIds = await WatchAsync(
+            async () => (await ListAllThreadsAsync()).Select(t => t.ThreadId).ToList(),
+            ids => ids.Contains(doomed.ThreadId));
 
-        (await ListAllThreadsAsync()).Select(t => t.ThreadId)
-            .Should().BeEquivalentTo(new[] { keeper.ThreadId }, "the deleted thread must not be resurrected by the late reply");
+        threadIds.Should().BeEquivalentTo(new[] { keeper.ThreadId }, "the deleted thread must not be resurrected by the late reply");
 
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _aiThreads.AiThreadsGetByIdAsync(doomed.ThreadId, TestContext.Current.CancellationToken));
@@ -123,11 +127,11 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
         cleared.Success.Should().BeTrue();
 
         await inFlight;
-        await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
 
         // Whether the late reply is dropped or lands in the emptied thread is the backend's choice; the cleared
-        // question coming back is not — that is history the user asked to be gone.
-        var messages = await ReadStoredMessagesAsync(thread.ThreadId);
+        // question coming back is not — that is history the user asked to be gone. A late write would bring it back
+        // after the round: watch for it over the window, stop at the first sight.
+        var messages = await WatchAsync(() => ReadStoredMessagesAsync(thread.ThreadId), m => UserMessages(m).Count > 0);
         UserMessages(messages).Should().BeEmpty($"the cleared question must stay cleared: {string.Join("\n", messages)}");
 
         (await _aiThreads.AiThreadsGetByIdAsync(thread.ThreadId, TestContext.Current.CancellationToken)).Title
@@ -177,6 +181,28 @@ public class ChatMutatedWhileWritingTests(AspireAppFixture fixture) : ChatPart3T
         AnswerSlowly(provider, _writingTime, Reply);
 
         return (provider, profile);
+    }
+
+    /// <summary>
+    /// Re-reads <paramref name="read"/> for <see cref="_lateWriteWindow"/> after the round has ended, the time a late
+    /// write of the engine would need to land, and answers the first state <paramref name="until"/> accepts (the
+    /// failure seen) or the last one observed.
+    /// </summary>
+    private static async Task<T> WatchAsync<T>(Func<Task<T>> read, Func<T, bool> until)
+    {
+        var deadline = DateTime.UtcNow + _lateWriteWindow;
+
+        while (true)
+        {
+            var observed = await read();
+
+            if (until(observed) || DateTime.UtcNow >= deadline)
+            {
+                return observed;
+            }
+
+            await Task.Delay(250, TestContext.Current.CancellationToken);
+        }
     }
 
     private Task<List<AiThread>> ListAllThreadsAsync() =>

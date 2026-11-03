@@ -75,12 +75,8 @@ public abstract class EditorToolTestBase(AspireAppFixture fixture) : BaseTest(fi
         EmployeeType.User
     };
 
-    private DocSpace.API.SDK.Api.AI.EditorToolsApi? _sdkEditorTools;
-
     /// <summary>The typed client of the editor-tools routes, on the chat client.</summary>
-    protected DocSpace.API.SDK.Api.AI.EditorToolsApi SdkEditorTools => _sdkEditorTools ??= new DocSpace.API.SDK.Api.AI.EditorToolsApi(
-        _aiChatClient,
-        new Configuration { BasePath = _aiChatClient.BaseAddress!.ToString().TrimEnd('/') });
+    protected DocSpace.API.SDK.Api.AI.EditorToolsApi SdkEditorTools => _aiEditorTools;
 
     /// <summary>One answer of an editor-tools route.</summary>
     protected sealed record Reply(int Status, string Text, string? ContentType = null)

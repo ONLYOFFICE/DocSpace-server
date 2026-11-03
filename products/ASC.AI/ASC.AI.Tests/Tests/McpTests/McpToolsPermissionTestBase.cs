@@ -57,8 +57,8 @@ namespace ASC.AI.Tests.Tests.McpTests;
 /// Registering MCP servers is administrator-only, while reading them and toggling individual tools is open to any
 /// non-guest member. The TypeScript matrix was measured on an agent the member was invited to; membership is gone with
 /// the agents and the registry is portal-wide, so the matrix is on the portal.
-/// The calls are raw on purpose: the matrix is about the status each role gets, the same way for all thirteen routes,
-/// and the SDK's bool-returning operations throw a NullReferenceException instead of an ApiException on a refusal.
+/// The calls go through <see cref="McpTestBase.CallToolsAsync"/>, which answers the status of every route the same way:
+/// the typed client's answer, or the status of its <see cref="ApiException"/> on a refusal.
 /// </remarks>
 public abstract class McpToolsPermissionTestBase(AspireAppFixture fixture) : McpTestBase(fixture)
 {

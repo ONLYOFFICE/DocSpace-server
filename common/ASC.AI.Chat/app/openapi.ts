@@ -283,7 +283,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSend:
     "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `contextEntityId` is the folder or room the caller is in and sets the location of the round; `entityId` is the AI project the chat runs in, and is omitted outside a project. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
   aiSendCustom:
-    "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
+    "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. With no thread there is no scope either: the entry the round is attributed to is `actionArgs.entityId`, which only this operation reads. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
   aiSendWithStream:
     "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId`, when sent, names an AI project the caller can chat in, and that a profile resolves; the user message and the reply are persisted either way, and a new thread also gets a generated title. `contextEntityId` is the folder or room the caller is in: it is the location the prompt describes and the folder a generated file is saved into (My documents when there is none); inside a project it is omitted and the project's folder context takes its place. The model is settled in a fixed order - the project's model inside a project overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
   aiSendWithStreamOpenAI:
@@ -436,9 +436,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSettingsSetUser:
     "Replaces the AI settings of the calling user and returns the stored result. `chatRecommendedModelVisible` is required and has to be a real boolean - a body the JSON parser cannot read, such as one sent as text/plain, used to arrive empty and answer 200 having stored nothing. The body is then proxied to the DocSpace AI service, which validates the rest, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
   aiSettingsGetToolMode:
-    "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
+    "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), inside the service's `response` envelope, proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
   aiSettingsSetToolMode:
-    "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum. The mode applies to every chat of the user in the portal.",
+    "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum with 400; the answer is the stored mode inside the service's `response` envelope. The mode applies to every chat of the user in the portal.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -676,8 +676,15 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Context rooms.
-  aiContextGetRoomSkills: { "400": "`roomId` is missing." },
-  aiContextGetRoomSkill: { "400": "`roomId` or `skillId` is missing." },
+  aiContextGetRoomSkills: {
+    "400": "`roomId` is missing.",
+    "404": "The room is not an Instructions room the caller can read.",
+  },
+  aiContextGetRoomSkill: {
+    "400": "`roomId` or `skillId` is missing.",
+    "404":
+      "The room is not an Instructions room the caller can read, or `skillId` is not one of its skills.",
+  },
 
   // Editor tools.
   aiEditorToolsCall: {
@@ -753,6 +760,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiPreferencesGetReasoningLevel: { "400": "`entityId` is not a room ID." },
   aiPreferencesGetToolPermissionMode: { "400": "`entityId` is not a room ID." },
   aiSettingsSetUser: { "400": "`chatRecommendedModelVisible` is missing or not a boolean." },
+  aiSettingsSetToolMode: { "400": "`mode` is not one of the `ToolPermissionMode` members." },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
   },
@@ -1321,8 +1329,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiContextGetContextFolders: "The Instructions rooms the caller can connect, grouped by account.",
   aiContextGetKnowledgeFolders: "The Knowledge rooms the caller can connect, grouped by account.",
   aiContextGetRoomSkills: "The skills of the room, frontmatter only.",
-  aiContextGetRoomSkill:
-    "The skill's Markdown body, or a null body when the room has no such skill.",
+  aiContextGetRoomSkill: "The skill's whole Markdown file, as a JSON string.",
 
   aiEditorToolsList: "The tools the editor plugin may offer the model, four fields each.",
   aiEditorToolsCall:

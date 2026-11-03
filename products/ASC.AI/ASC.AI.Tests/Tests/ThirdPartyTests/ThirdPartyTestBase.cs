@@ -41,9 +41,8 @@ namespace ASC.AI.Tests.Tests.ThirdPartyTests;
 /// Nextcloud is the only third-party provider with credentials a test can have. They come from the environment under
 /// the names the Files suite and the TypeScript suite use (<c>NEXTCLOUD_URL</c>, <c>NEXTCLOUD_LOGIN</c>,
 /// <c>NEXTCLOUD_PASSWORD</c>); without them a test skips rather than fails. The <c>integration-test</c> profile starts a
-/// Nextcloud container and the host fixture fills the variables from it when the suite lists
-/// <c>ResourceNames.Nextcloud</c> among its resources; the AI suite's fixture does not yet, so the variables have to be
-/// exported by hand.
+/// Nextcloud container, the AI suite's fixture lists it among its lazy resources and fills the variables from it unless
+/// they are set already, and these classes wait for it before the portal is registered (<see cref="BaseTest.NeedsLazyResources"/>).
 /// <para>
 /// One connection backs one room, so every room needs its own connection. The room is a fresh subfolder of the account
 /// (<c>createAsNewFolder</c>) with a unique title: the account root is large and slow. The subfolder stays in the remote
@@ -54,6 +53,8 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : McpServerSt
 {
     /// <summary>The marker the attachment tests put into a stored document and look for in what the chat service read.</summary>
     protected const string Marker = "TP-ATTACH-MARKER";
+
+    protected override bool NeedsLazyResources => true;
 
     private static string NextcloudUrl => Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
 
@@ -79,12 +80,9 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : McpServerSt
         await FilesHttpClient.Authenticate(Owner);
 
         var title = $"Autotest {prefix} {Guid.NewGuid():N}";
-        var thirdParty = new DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi(
-            FilesHttpClient,
-            new Configuration { BasePath = RoomsApi.Configuration.BasePath });
 
         // The generated model validates its required properties in the constructor, so they are passed as arguments.
-        var connection = (await thirdParty.SaveThirdPartyAsync(
+        var connection = (await ThirdPartyIntegrationApi.SaveThirdPartyAsync(
             new ThirdPartyRequestDto(url: NextcloudUrl, login: NextcloudLogin, password: NextcloudPassword, customerTitle: $"{title} (storage)", providerKey: "Nextcloud"),
             TestContext.Current.CancellationToken)).Response;
 

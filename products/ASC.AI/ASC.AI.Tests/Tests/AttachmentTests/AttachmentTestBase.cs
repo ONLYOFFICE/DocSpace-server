@@ -78,13 +78,9 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
     private static readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(10);
 
     private readonly Dictionary<string, int> _backingFiles = [];
-    private DocSpace.API.SDK.Api.AI.AttachmentsApi? _attachments;
 
     /// <summary>The typed attachments client over the chat service; it signs in as whoever <c>_aiChatClient</c> is.</summary>
-    protected DocSpace.API.SDK.Api.AI.AttachmentsApi Attachments =>
-        _attachments ??= new DocSpace.API.SDK.Api.AI.AttachmentsApi(
-            _aiChatClient,
-            new Configuration { BasePath = _aiChatClient.BaseAddress!.ToString().TrimEnd('/') });
+    protected DocSpace.API.SDK.Api.AI.AttachmentsApi Attachments => _aiAttachments;
 
     protected sealed record Outcome<T>(int Status, T? Data, string? Error);
 
@@ -127,21 +123,6 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
         catch (ApiException exception)
         {
             return new Outcome<T>(exception.ErrorCode, null, ErrorOf(exception.ErrorContent?.ToString()));
-        }
-    }
-
-    /// <summary>The HTTP status a typed call ended with: 200 when it succeeded, the <see cref="ApiException"/> code otherwise.</summary>
-    protected static async Task<int> StatusOfAsync(Func<Task> call)
-    {
-        try
-        {
-            await call();
-
-            return 200;
-        }
-        catch (ApiException exception)
-        {
-            return exception.ErrorCode;
         }
     }
 
@@ -358,7 +339,10 @@ public abstract class AttachmentTestBase(AspireAppFixture fixture) : ChatTests.C
         while (true)
         {
             var read = await GetManyAsync(id);
-            last = read.Status == 200 && read.Data is { Count: > 0 } ? read.Data[0] : null;
+
+            // A failed read is not a missing draft: only an answered read that holds null counts as "gone".
+            read.Status.Should().Be(200, $"reading {what} {id}");
+            last = read.Data is { Count: > 0 } ? read.Data[0] : null;
 
             if (last is null || DateTime.UtcNow >= deadline)
             {

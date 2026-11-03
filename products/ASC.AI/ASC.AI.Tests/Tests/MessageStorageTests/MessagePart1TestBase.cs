@@ -38,7 +38,7 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 /// answers, the regenerate stream, a stream the client hangs up on, and polling of the history the chat service
 /// writes after a stream has ended.
 /// </summary>
-public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTestBase(fixture), IDisposable
+public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
     protected const string RegenerateStreamPath = "/api/2.0/ai/ai/regenerate-stream";
     protected const string SendWithStreamPath = "/api/2.0/ai/ai/send-with-stream";
@@ -72,10 +72,10 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
     /// <summary>A provider of this test's own, started on first use.</summary>
     protected StubModelProvider Provider => _provider ??= new();
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         _provider?.Dispose();
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     /// <summary>A profile on <see cref="Provider"/> and a thread bound to it.</summary>
@@ -196,24 +196,10 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
         });
 
     /// <summary>The number of streamed chat requests a provider received — one per model round.</summary>
-    protected static int StreamedRequests(StubModelProvider provider) => provider.CompletionRequestBodies.Count(IsStreamed);
+    protected static int StreamedRequests(StubModelProvider provider) => provider.CompletionRequestBodies.Count(StubModelProvider.IsStreamed);
 
     /// <summary>The body of the last streamed chat request a provider received.</summary>
-    protected static string? LastStreamedRequest(StubModelProvider provider) => provider.CompletionRequestBodies.LastOrDefault(IsStreamed);
-
-    private static bool IsStreamed(string body)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(body);
-
-            return document.RootElement.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True;
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
-    }
+    protected static string? LastStreamedRequest(StubModelProvider provider) => provider.CompletionRequestBodies.LastOrDefault(StubModelProvider.IsStreamed);
 
     /// <summary>Invites a member into a room as a content creator, as the owner.</summary>
     protected async Task InviteToRoomAsync(int roomId, User member)
@@ -246,29 +232,19 @@ public abstract class MessagePart1TestBase(AspireAppFixture fixture) : MessageTe
                 .WithHeader("Content-Type", "text/event-stream")
                 .WithSseBody(async (_, queue) =>
                 {
-                    queue.Write(SseChunk(new { role = "assistant", content = "" }, null));
-                    queue.Write(SseChunk(new { content = PartialAnswer }, null));
+                    queue.Write(StubModelProvider.SseEvent(StubModelProvider.Chunk(new { role = "assistant", content = "" })));
+                    queue.Write(StubModelProvider.SseEvent(StubModelProvider.Chunk(new { content = PartialAnswer })));
 
                     await Task.Delay(StallTime);
 
-                    queue.Write(SseChunk(new { content = $" and the essay is done. {Sentinel}" }, null));
-                    queue.Write(SseChunk(new { }, "stop"));
+                    queue.Write(StubModelProvider.SseEvent(StubModelProvider.Chunk(new { content = $" and the essay is done. {Sentinel}" })));
+                    queue.Write(StubModelProvider.SseEvent(StubModelProvider.Chunk(new { }, "stop")));
                     queue.Write("data: [DONE]\n\n");
                     queue.Close();
                 }));
 
         return mappingId;
     }
-
-    private static string SseChunk(object delta, string? finishReason) =>
-        "data: " + JsonSerializer.Serialize(new
-        {
-            id = "chatcmpl-stall",
-            @object = "chat.completion.chunk",
-            created = 0,
-            model = StubModelProvider.ModelId,
-            choices = new[] { new { index = 0, delta, finish_reason = finishReason } }
-        }) + "\n\n";
 
     /// <summary>
     /// Sends a question through <c>send-with-stream</c> and hangs up on the first frame that carries reply text

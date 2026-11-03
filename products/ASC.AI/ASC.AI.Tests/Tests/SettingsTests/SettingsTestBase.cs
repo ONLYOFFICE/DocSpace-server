@@ -53,26 +53,14 @@ public abstract class SettingsTestBase(AspireAppFixture fixture) : ChatTests.Cha
 
     protected const string ChatRecommendedModelVisible = "chatRecommendedModelVisible";
 
-    private CommonSettingsApi? _commonSettings;
-
     /// <summary>The portal settings client (Web.Api), for the AI switch itself.</summary>
-    protected CommonSettingsApi CommonSettings => _commonSettings ??= new CommonSettingsApi(
-        WebApiHttpClient,
-        new Configuration { BasePath = WebApiHttpClient.BaseAddress!.ToString().TrimEnd('/') });
+    protected CommonSettingsApi CommonSettings => CommonSettingsApi;
 
-    private DocSpace.API.SDK.Api.AI.VectorizationApi? _vectorization;
+    /// <summary>The vectorization client of the chat service.</summary>
+    protected DocSpace.API.SDK.Api.AI.VectorizationApi Vectorization => _aiVectorization;
 
-    /// <summary>The vectorization client of the chat service (not exposed by <see cref="BaseTest"/>).</summary>
-    protected DocSpace.API.SDK.Api.AI.VectorizationApi Vectorization => _vectorization ??= new DocSpace.API.SDK.Api.AI.VectorizationApi(
-        _aiChatClient,
-        new Configuration { BasePath = _aiChatClient.BaseAddress!.ToString().TrimEnd('/') });
-
-    private DocSpace.API.SDK.Api.AI.WebSearchApi? _webSearch;
-
-    /// <summary>The web-search client of the chat service (not exposed by <see cref="BaseTest"/>).</summary>
-    protected DocSpace.API.SDK.Api.AI.WebSearchApi WebSearch => _webSearch ??= new DocSpace.API.SDK.Api.AI.WebSearchApi(
-        _aiChatClient,
-        new Configuration { BasePath = _aiChatClient.BaseAddress!.ToString().TrimEnd('/') });
+    /// <summary>The web-search client of the chat service.</summary>
+    protected DocSpace.API.SDK.Api.AI.WebSearchApi WebSearch => _aiWebSearch;
 
     /// <summary>
     /// <c>web-search/get-active-config</c> through the typed client: 200 with the body <c>null</c> while no provider is
@@ -93,11 +81,25 @@ public abstract class SettingsTestBase(AspireAppFixture fixture) : ChatTests.Cha
     }
 
     /// <summary>
-    /// A read of one of the two web-search routes. <c>is-configured</c> returns a bool, so it stays raw (SDK defect:
-    /// NullReferenceException instead of ApiException on a non-2xx); <c>get-active-config</c> goes through the SDK.
+    /// A read of one of the two web-search routes through the typed client.
     /// </summary>
     protected Task<(HttpStatusCode Status, string Body)> ReadWebSearchRouteAsync(string route) =>
-        route == WebSearchActiveConfigRoute ? ReadActiveConfigAsync() : RawAsync(HttpMethod.Get, route);
+        route == WebSearchActiveConfigRoute ? ReadActiveConfigAsync() : ReadIsConfiguredAsync();
+
+    /// <summary><c>web-search/is-configured</c> through the typed client: 200 with <c>true</c>/<c>false</c>, or the refusal.</summary>
+    protected async Task<(HttpStatusCode Status, string Body)> ReadIsConfiguredAsync()
+    {
+        try
+        {
+            var configured = await WebSearch.AiWebSearchIsConfiguredAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+            return (HttpStatusCode.OK, configured ? "true" : "false");
+        }
+        catch (ApiException exception)
+        {
+            return ((HttpStatusCode)exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
+        }
+    }
 
     /// <summary>Invites a member of the type and signs the chat client in as them.</summary>
     protected async Task<User> ActAsMemberAsync(EmployeeType type)
@@ -166,7 +168,7 @@ public abstract class SettingsTestBase(AspireAppFixture fixture) : ChatTests.Cha
 
         while (true)
         {
-            var (status, _) = await RawAsync(HttpMethod.Get, WebSearchIsConfiguredRoute);
+            var (status, _) = await ReadIsConfiguredAsync();
 
             if ((status == HttpStatusCode.OK) == open || DateTime.UtcNow >= deadline)
             {

@@ -188,8 +188,8 @@ public class AttachmentStoredFileTests(AspireAppFixture fixture) : AttachmentTes
         attached.Data!.Content!.Length.Should().BeGreaterThan(200_000, "the whole document came through");
     }
 
-    [Theory(Skip = "Needs the document server to convert: SaveFileAsPdf and CopyFileAs (csv to xlsx) never produce the file on the integration-test host (the document server fails at download), so the converted .pdf/.xlsx never appears. Remove this Skip when conversion works there.")]
-    [InlineData("pdf")]
+    [Theory]
+    [InlineData("pdf", Skip = "SaveFileAsPdf never produces the .pdf on the integration-test stand, even with the document server up before the test starts (checked 2026-11-03); the cause is not investigated. The .xlsx row runs.")]
     [InlineData("xlsx")]
     public async Task SaveFile_RealPdfAndXlsx_AreExtractedTheWayADocxIs(string format)
     {

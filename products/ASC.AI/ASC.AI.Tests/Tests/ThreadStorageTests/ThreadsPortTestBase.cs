@@ -120,19 +120,5 @@ public abstract class ThreadsPortTestBase(AspireAppFixture fixture) : ThreadTest
         return (response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
-    /// <summary>The HTTP status an SDK call ended with: 200 when it succeeded, the <see cref="ApiException"/> code otherwise.</summary>
-    protected static async Task<int> StatusOfAsync(Func<Task> call)
-    {
-        try
-        {
-            await call();
-            return 200;
-        }
-        catch (ApiException exception)
-        {
-            return exception.ErrorCode;
-        }
-    }
-
     protected static bool IsUuid(string? value) => Guid.TryParse(value, out _);
 }

@@ -81,16 +81,25 @@ public class AttachmentGetManyTests(AspireAppFixture fixture) : AttachmentTestBa
     }
 
     [Theory]
-    [InlineData("\"\"")]
-    [InlineData("\"not-a-uuid\"")]
-    [InlineData("null")]
-    public async Task GetMany_OneMalformedElement_RejectsTheWholeCall(string elementJson)
+    [InlineData("")]
+    [InlineData("not-a-uuid")]
+    public async Task GetMany_OneMalformedElement_RejectsTheWholeCall(string element)
     {
-        // The route pulls uuids out of whatever JSON it gets and 400s when a value is not one. Raw: a null element
-        // cannot be expressed in the typed list of strings.
+        // The route pulls uuids out of whatever JSON it gets and 400s when a value is not one.
         var id = await SaveDraftAsync(Owner, "Autotest poison.docx");
 
-        var refused = await PostRawAsync("get-many", $$$"""["{{{id}}}",{{{elementJson}}}]""");
+        var refused = await GetManyAsync(id, element);
+
+        refused.Status.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task GetMany_OneNullElement_RejectsTheWholeCall()
+    {
+        // Raw: a null array element is a body the typed list of strings is not meant to carry.
+        var id = await SaveDraftAsync(Owner, "Autotest poison-null.docx");
+
+        var refused = await PostRawAsync("get-many", $$"""["{{id}}",null]""");
 
         refused.Status.Should().Be(400, refused.Body);
     }

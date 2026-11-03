@@ -94,13 +94,18 @@ public class ChatRoomModelTests(AspireAppFixture fixture) : ChatPart2TestBase(fi
             TestContext.Current.CancellationToken);
         resolved.ProfileId.Should().Be(profile.Id);
 
-        var thread = await CreateThreadAsync("Autotest entity thread", profile.Id, roomId);
+        // A thread that names no model either: a stored one would win over the binding (aiController sendWithStream).
+        var thread = await _aiThreads.AiThreadsCreateAsync(
+            new AiThreadsCreateRequest(title: "Autotest entity thread", entityId: roomId),
+            TestContext.Current.CancellationToken);
+        (await ThreadProfileIdAsync(thread.ThreadId)).Should().BeNullOrEmpty("the thread starts with no model of its own");
 
         // Act
         var round = await SendWithStreamAsync(thread.ThreadId, ReplyOk, profileId: null, entityId: roomId);
 
         // Assert
         AssertHealthyReply(round);
+        (await ThreadProfileIdAsync(thread.ThreadId)).Should().Be(profile.Id, "the round ran on the model the binding resolved");
         AssistantTexts(await ReadMessagesAsync(thread.ThreadId))
             .Should().ContainSingle("a send without profileId was answered").Which.Should().NotBeNullOrEmpty();
     }

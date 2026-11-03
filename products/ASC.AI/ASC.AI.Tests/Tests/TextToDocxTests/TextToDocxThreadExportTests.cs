@@ -41,14 +41,14 @@ namespace ASC.AI.Tests.Tests.TextToDocxTests;
 /// </summary>
 [Trait("Category", "API")]
 [Trait("Feature", "AI/TextToDocx")]
-public class TextToDocxThreadExportTests(AspireAppFixture fixture) : TextToDocxPortTestBase(fixture), IDisposable
+public class TextToDocxThreadExportTests(AspireAppFixture fixture) : TextToDocxPortTestBase(fixture)
 {
     private readonly StubModelProvider _provider = new();
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         _provider.Dispose();
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     [Fact]
@@ -250,7 +250,7 @@ public class TextToDocxThreadExportTests(AspireAppFixture fixture) : TextToDocxP
         exception.ErrorCode.Should().Be(400);
         ErrorOf(exception.ErrorContent?.ToString()).Should().NotBeNullOrEmpty();
 
-        await WaitForExportToSettleAsync();
+        // The 400 is synchronous: nothing was queued, so the listing is final at once.
         (await ListFolderFilesAsync(folderId)).Select(file => file.Title).Should().NotContain($"{title}.docx", "no empty document was filed");
     }
 

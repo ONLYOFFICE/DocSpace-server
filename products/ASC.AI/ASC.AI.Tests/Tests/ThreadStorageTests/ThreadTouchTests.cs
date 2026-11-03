@@ -53,6 +53,7 @@ public class ThreadTouchTests(AspireAppFixture fixture) : ThreadTestBase(fixture
     {
         var created = await CreateOwnThreadAsync();
 
+        // Part of the scenario, not a wait for an asynchronous write: last_edit_date has whole-second granularity.
         await Task.Delay(1100, TestContext.Current.CancellationToken);
 
         var result = await _aiThreads.AiThreadsTouchAsync(

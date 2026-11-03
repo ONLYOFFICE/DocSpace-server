@@ -68,14 +68,9 @@ public class PreferencesReadTests(AspireAppFixture fixture) : PreferencesTestBas
     [Fact]
     public async Task Read_NonNumericEntityId_Returns400()
     {
-        // Raw on purpose — an SDK defect: the operation returns an enum, and on any non-2xx the generated
-        // ApiClient.ToApiResponse unboxes the null result into it, so the typed call throws NullReferenceException
-        // instead of ApiException. Same for every operation returning an enum or a bool.
-        using var response = await new RawApiClient(_aiChatClient).GetAsync(
-            "/api/2.0/ai/preferences/get-reasoning-level?entityId=not-a-room",
-            TestContext.Current.CancellationToken);
+        var status = await StatusOfAsync(() => _aiPreferences.AiPreferencesGetReasoningLevelAsync("not-a-room", TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        status.Should().Be((int)HttpStatusCode.BadRequest);
     }
 
     // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).

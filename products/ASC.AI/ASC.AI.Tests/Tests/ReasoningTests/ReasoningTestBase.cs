@@ -108,8 +108,7 @@ public abstract class ReasoningTestBase(AspireAppFixture fixture) : BaseTest(fix
         var thread = await CreateThreadAsync(profileId: profile.Id, entityId: roomId);
 
         // An attachment is a reference to a DocSpace file: the chat service reads it with the caller's credentials.
-        var attachments = new DocSpace.API.SDK.Api.AI.AttachmentsApi(_aiChatClient, new Configuration { BasePath = _aiAssignments.Configuration.BasePath });
-        var attachment = await attachments.AiAttachmentsSaveFileAsync(
+        var attachment = await _aiAttachments.AiAttachmentsSaveFileAsync(
             new AiAttachmentsSaveFileRequest(
                 input: new AiAttachmentsSaveFileRequestInput(path: stored.Id.ToString(), content: string.Empty, type: DocumentFileType, title: stored.Title),
                 entityId: roomId),

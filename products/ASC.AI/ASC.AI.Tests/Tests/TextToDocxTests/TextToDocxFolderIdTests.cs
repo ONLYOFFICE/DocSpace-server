@@ -56,7 +56,7 @@ public class TextToDocxFolderIdTests(AspireAppFixture fixture) : TextToDocxPortT
             await _aiExport.AiExportTextToDocxAsync(BuildExport($"Exported {RandomSuffix()}", "", folderId), TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(400);
 
-        await WaitForExportToSettleAsync();
+        // Refused there and then, so nothing was queued that could still land: one listing is the whole check.
         (await ListFolderFilesAsync(folderId)).Select(file => file.Id).Should().BeEquivalentTo(before);
     }
 

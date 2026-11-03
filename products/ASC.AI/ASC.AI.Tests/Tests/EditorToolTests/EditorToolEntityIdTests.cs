@@ -49,14 +49,19 @@ namespace ASC.AI.Tests.Tests.EditorToolTests;
 [Trait("Feature", "AI/EditorTools")]
 public class EditorToolEntityIdTests(AspireAppFixture fixture) : EditorToolTestBase(fixture)
 {
-    /// <summary>JSON literals of an <c>entityId</c> that names no entity.</summary>
+    /// <summary>String values of an <c>entityId</c> that names no entity.</summary>
     public static TheoryData<string> NonEntities => new()
     {
-        "\"999999999\"",
-        "\"abc\"",
-        "\"\"",
-        "\"0\"",
-        "\"-1\"",
+        "999999999",
+        "abc",
+        "",
+        "0",
+        "-1"
+    };
+
+    /// <summary>JSON literals of an <c>entityId</c> that names no entity and is not a string.</summary>
+    public static TheoryData<string> NonStringNonEntities => new()
+    {
         "null",
         """{"a":1}"""
     };
@@ -102,14 +107,32 @@ public class EditorToolEntityIdTests(AspireAppFixture fixture) : EditorToolTestB
 
     [Theory]
     [MemberData(nameof(NonEntities))]
-    public async Task EntityIdThatNamesNothing_FallsBackToThePortalScope(string entityIdJson)
+    public async Task EntityIdThatNamesNothing_FallsBackToThePortalScope(string entityId)
     {
         await RequireGeneratorsAsync();
         var (tool, folderId) = await StartAsync();
         var roomId = await CreateCustomRoomAsync("Autotest entity room");
         var fileName = RandomName();
 
-        // Raw: an entityId that is null or an object, which the typed (string) request cannot carry.
+        var outcome = await RunAsync(DocxTool, GeneratorArguments(tool, fileName), entityId);
+
+        outcome.IsError.Should().BeFalse(outcome.Raw);
+        outcome.File!.ParentId.Should().Be(folderId);
+        (await TitlesInAsync(folderId)).Should().Contain(fileName + ".docx");
+        (await TitlesInAsync(roomId)).Should().BeEmpty();
+    }
+
+    [Theory]
+    [MemberData(nameof(NonStringNonEntities))]
+    public async Task NonStringEntityId_FallsBackToThePortalScope(string entityIdJson)
+    {
+        await RequireGeneratorsAsync();
+        var (tool, folderId) = await StartAsync();
+        var roomId = await CreateCustomRoomAsync("Autotest entity room");
+        var fileName = RandomName();
+
+        // Raw: an explicit null (the typed request drops a null entityId, EmitDefaultValue = false) and an object, which
+        // the typed string cannot carry.
         var reply = await CallRawAsync(BodyJson(
             JsonSerializer.Serialize(DocxTool),
             JsonSerializer.Serialize(GeneratorArguments(tool, fileName)),

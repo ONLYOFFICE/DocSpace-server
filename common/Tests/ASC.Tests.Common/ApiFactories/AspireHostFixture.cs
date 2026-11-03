@@ -191,7 +191,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
 
-        if (resources.Contains(ResourceNames.Nextcloud))
+        // A lazy Nextcloud counts too: its address is known once the stack runs, and the tests that use it wait for
+        // it themselves before they read these settings.
+        if (resources.Union(LazyResources).Contains(ResourceNames.Nextcloud))
         {
             PublishNextcloudSettings();
         }
@@ -557,36 +559,37 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     {
         using var startUp = new CancellationTokenSource(_startUpBudget);
         using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
-        var healthCheck = new Uri($"http://localhost:{DocumentServerRouterPort}/ds-vpath/healthcheck");
+        // The router port the services reach the document server through.
+        var healthCheck = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/ds-vpath/healthcheck");
 
-        while (true)
+        try
         {
-            try
+            while (true)
             {
-                using var response = await client.GetAsync(healthCheck, startUp.Token);
-
-                if (response.IsSuccessStatusCode && (await response.Content.ReadAsStringAsync(startUp.Token)).Trim() == "true")
+                try
                 {
-                    return;
-                }
-            }
-            catch (OperationCanceledException) when (startUp.IsCancellationRequested)
-            {
-                throw new TimeoutException(
-                    $"The document server did not answer {healthCheck} within {_startUpBudget.TotalMinutes} minutes. "
-                    + "The editors container's log is the one to read.");
-            }
-            catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-            {
-                // Not up yet: the router answers 502 or the connection is refused until the container listens.
-            }
+                    using var response = await client.GetAsync(healthCheck, startUp.Token);
 
-            await Task.Delay(TimeSpan.FromSeconds(2), startUp.Token);
+                    if (response.IsSuccessStatusCode && (await response.Content.ReadAsStringAsync(startUp.Token)).Trim() == "true")
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the router answers 502 or the connection is refused until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(2), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The document server did not answer {healthCheck} within {_startUpBudget.TotalMinutes} minutes. "
+                + "The editors container's log is the one to read.");
         }
     }
-
-    /// <summary>The router port the services reach the document server through (<c>Constants.AppHostPort</c>).</summary>
-    private const int DocumentServerRouterPort = 8092;
 
     private async Task WaitForHealthyAsync(List<string> resources)
     {

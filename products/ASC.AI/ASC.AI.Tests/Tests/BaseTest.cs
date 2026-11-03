@@ -80,6 +80,10 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected AiSettingsApi _aiSettings = null!;
     protected AiContextApi _aiContext = null!;
     protected AiExportApi _aiExport = null!;
+    protected DocSpace.API.SDK.Api.AI.AttachmentsApi _aiAttachments = null!;
+    protected DocSpace.API.SDK.Api.AI.EditorToolsApi _aiEditorTools = null!;
+    protected DocSpace.API.SDK.Api.AI.VectorizationApi _aiVectorization = null!;
+    protected DocSpace.API.SDK.Api.AI.WebSearchApi _aiWebSearch = null!;
 
     /// <summary>The stub model provider every profile of the run points at.</summary>
     protected StubModelProvider ModelProvider => fixture.ModelProvider;
@@ -90,9 +94,21 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// </summary>
     protected virtual bool NeedsDocumentServer => false;
 
+    /// <summary>
+    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud):
+    /// its setup then waits until those are healthy, which the rest of the suite does not.
+    /// </summary>
+    protected virtual bool NeedsLazyResources => false;
+
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
+
+        if (NeedsLazyResources)
+        {
+            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+        }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
@@ -111,6 +127,10 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         _aiSettings = _clients.AiSettingsApi;
         _aiContext = _clients.AiContextApi;
         _aiExport = _clients.AiExportApi;
+        _aiAttachments = _clients.AiAttachmentsApi;
+        _aiEditorTools = _clients.AiEditorToolsApi;
+        _aiVectorization = _clients.AiVectorizationApi;
+        _aiWebSearch = _clients.AiWebSearchApi;
 
         await _aiClient.Authenticate(Owner);
         await _aiChatClient.Authenticate(Owner);
@@ -123,7 +143,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public ValueTask DisposeAsync()
+    /// <summary>
+    /// Disposes the test's clients. xUnit calls only this on a class that implements <see cref="IAsyncLifetime"/>, never
+    /// <see cref="IDisposable.Dispose"/>: a class that owns more (a stub provider of its own) overrides it and calls base.
+    /// </summary>
+    public virtual ValueTask DisposeAsync()
     {
         // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
         _clients.Dispose();
@@ -144,6 +168,26 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return Invitations.InviteGuestAsync(_clients.PeopleHttpClient, Owner, cancellationToken);
     }
 
+    /// <summary>
+    /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
+    /// code and content otherwise.
+    /// </summary>
+    protected static async Task<(int Status, string Error)> OutcomeOfAsync(Func<Task> call)
+    {
+        try
+        {
+            await call();
+            return (200, string.Empty);
+        }
+        catch (ApiException exception)
+        {
+            return (exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
+        }
+    }
+
+    /// <summary>The HTTP status an SDK call ended with: 200 when it succeeded, the <see cref="ApiException"/> code otherwise.</summary>
+    protected static async Task<int> StatusOfAsync(Func<Task> call) => (await OutcomeOfAsync(call)).Status;
+
     // The Files service, for the rooms, folders and files a chat or an export works with. Its client starts unsigned:
     // authenticate FilesHttpClient (as Owner or a member) before the first call.
     protected HttpClient FilesHttpClient => _clients.FilesHttpClient;
@@ -153,6 +197,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected OperationsApi OperationsApi => _clients.OperationsApi;
     protected SharingApi SharingApi => _clients.SharingApi;
     protected FilesQuotaApi FilesQuotaApi => _clients.FilesQuotaApi;
+    protected DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi => _clients.ThirdPartyIntegrationApi;
+    protected DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi => _clients.RoomsAiApi;
 
     // The People service: member profiles (culture, type). Starts unsigned: authenticate it before the first call.
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
@@ -161,6 +207,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.
     protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;
     protected SettingsQuotaApi SettingsQuotaApi => _clients.SettingsQuotaApi;
+    protected CommonSettingsApi CommonSettingsApi => _clients.CommonSettingsApi;
 
     /// <summary>
     /// The profile input a public create takes: an OpenAI-compatible provider on the stub, which the chat service
@@ -178,7 +225,13 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected async Task<AiProfile> CreateProfileAsync(string? name = null)
     {
         var result = await _aiProfiles.AiProfilesCreateAsync(BuildProfileInput(name), TestContext.Current.CancellationToken);
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+
+        // Described only on a failure: the run-wide provider's log holds every request of the run, so building the
+        // message on each success made every profile create walk all of it.
+        if (!result.Success)
+        {
+            result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        }
 
         return result.Profile;
     }

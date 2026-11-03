@@ -84,7 +84,7 @@ public class TextToDocxRoomTypesTests(AspireAppFixture fixture) : TextToDocxPort
         var result = await TryExportAsync(BuildExport(title, "The assistant said hello.", roomId));
 
         // The document is nowhere — root and every subfolder. This half stays true after the fix.
-        await WaitForExportToSettleAsync();
+        await WaitForExportToSettleAsync(result.StatusCode);
 
         var landed = await ListFolderFilesAsync(roomId);
         var room = (await FoldersApi.GetFolderByFolderIdAsync(roomId, cancellationToken: TestContext.Current.CancellationToken)).Response;

@@ -160,6 +160,8 @@ public class EditorToolCallTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task EveryPublishedTool_IsDispatched_NoneIsNotAvailable()
     {
+        // An empty catalogue would make the loop below assert nothing.
+        await RequireGeneratorsAsync();
         var offenders = new List<string>();
         foreach (var tool in await ToolsAsync())
         {
@@ -176,6 +178,8 @@ public class EditorToolCallTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task NoArgumentShape_TurnsIntoAServerError()
     {
+        // An empty catalogue would make the loop below assert nothing.
+        await RequireGeneratorsAsync();
         var offenders = new List<string>();
         foreach (var tool in await ToolsAsync())
         {

@@ -40,10 +40,9 @@ namespace ASC.AI.Tests.Tests.WebSearchTests;
 /// The integration-test host is standalone: the ONLYOFFICE AI gateway is not configured, so the add-on that the
 /// TypeScript suite flips through the wallet does not exist, and the web-search configuration is the one an
 /// administrator stores by hand (<c>web-search/configure</c>, <c>web-search/set-active-config</c>), kept per portal.
-/// The suites therefore store a config pointing at <see cref="WebSearchProviderStub"/>. Most checks are raw HTTP
-/// on purpose: the routes answer a bare <c>true</c>, <c>null</c> or <c>{"error":...}</c> body under statuses a
-/// value-typed SDK call turns into a NullReferenceException, and the validation cases send bodies a typed DTO cannot
-/// carry. The happy-path store goes through the typed <c>WebSearchApi</c>.
+/// The suites therefore store a config pointing at <see cref="WebSearchProviderStub"/>. The reads and the well-formed
+/// stores go through the typed <c>WebSearchApi</c>; the validation cases that send bodies a typed DTO cannot carry go
+/// raw.
 /// </remarks>
 public abstract class WebSearchTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -60,12 +59,8 @@ public abstract class WebSearchTestBase(AspireAppFixture fixture) : BaseTest(fix
     protected const string ProviderRequired = "config.provider is required and must be a non-empty string";
     protected const string ConfigRequired = "config is required and must be an object";
 
-    private DocSpace.API.SDK.Api.AI.WebSearchApi? _sdkWebSearch;
-
     /// <summary>The typed client of the web-search routes, on the chat client (so it acts as whoever that is signed in as).</summary>
-    protected DocSpace.API.SDK.Api.AI.WebSearchApi SdkWebSearch => _sdkWebSearch ??= new DocSpace.API.SDK.Api.AI.WebSearchApi(
-        _aiChatClient,
-        new Configuration { BasePath = _aiChatClient.BaseAddress!.ToString().TrimEnd('/') });
+    protected DocSpace.API.SDK.Api.AI.WebSearchApi SdkWebSearch => _aiWebSearch;
 
     /// <summary>One answer of a web-search route: status, body and the parsed JSON when there is some.</summary>
     protected sealed record Reply(int Status, string Text, string? ContentType = null)
@@ -118,10 +113,23 @@ public abstract class WebSearchTestBase(AspireAppFixture fixture) : BaseTest(fix
             response.Content.Headers.ContentType?.MediaType);
     }
 
-    private static string Scope(string? entityId) => entityId is null ? string.Empty : "?entityId=" + Uri.EscapeDataString(entityId);
+    /// <summary>
+    /// Asks <c>is-configured</c> through the typed client. A non-2xx comes back as a <see cref="Reply"/> with the status
+    /// and body of the <see cref="ApiException"/>; an answer is the text <c>true</c> or <c>false</c>.
+    /// </summary>
+    protected async Task<Reply> IsConfiguredAsync(string? entityId = null)
+    {
+        try
+        {
+            var response = await SdkWebSearch.AiWebSearchIsConfiguredWithHttpInfoAsync(entityId, TestContext.Current.CancellationToken);
 
-    protected Task<Reply> IsConfiguredAsync(string? entityId = null) =>
-        SendAsync(HttpMethod.Get, $"{WebSearchPath}/is-configured{Scope(entityId)}");
+            return new Reply((int)response.StatusCode, JsonSerializer.Serialize(response.Data), "application/json");
+        }
+        catch (ApiException exception)
+        {
+            return new Reply(exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
+        }
+    }
 
     /// <summary>
     /// Reads the active config through the typed client. A non-2xx comes back as a <see cref="Reply"/> with the status

@@ -79,15 +79,23 @@ public class AttachmentGetTests(AspireAppFixture fixture) : AttachmentTestBase(f
     }
 
     [Theory]
-    [InlineData("\"   \"")]
+    [InlineData("   ")]
+    [InlineData("3fa85f64-5717")]
+    [InlineData("definitely-not-a-uuid")]
+    public async Task Get_MalformedId_Is400(string id)
+    {
+        var refused = await GetAsync(id);
+
+        refused.Status.Should().Be(400);
+    }
+
+    [Theory]
     [InlineData("null")]
     [InlineData("123")]
-    [InlineData("\"3fa85f64-5717\"")]
-    [InlineData("\"definitely-not-a-uuid\"")]
     [InlineData(null)]
-    public async Task Get_MalformedId_Is400(string? body)
+    public async Task Get_BodyThatIsNotAString_Is400(string? body)
     {
-        // Raw: whitespace, a truncated uuid, a number, null and no body at all, none of which the typed string carries.
+        // Raw: a JSON null (the typed call rejects a null id client-side), a number and no body at all.
         var refused = await PostRawAsync("get", body);
 
         refused.Status.Should().Be(400, refused.Body);

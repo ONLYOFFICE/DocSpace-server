@@ -109,7 +109,9 @@ public class McpToolCallPauseTests(AspireAppFixture fixture) : McpTestBase(fixtu
         MessageText(reply).Should().Contain("21");
 
         // The result reached the model: it is in the continuation request the provider received.
-        chat.Provider.CompletionRequestBodies.Last().Should().Contain("21C and sunny");
+        // Picked by content, not position: the title request of a new thread goes to the same provider.
+        StreamedRequestsCarrying(chat.Provider, AskForWeather)
+            .Should().Contain(body => body.Contains("21C and sunny", StringComparison.Ordinal), chat.Provider.Describe());
     }
 
     /// <summary>
@@ -151,7 +153,8 @@ public class McpToolCallPauseTests(AspireAppFixture fixture) : McpTestBase(fixtu
         StatusOf(reply).Reason.Should().NotBe("error", reply.ToString());
         ResultOf(ToolCallParts(reply)[0]).Should().Be("User deny tool call");
         MessageText(reply).Should().NotBeEmpty();
-        chat.Provider.CompletionRequestBodies.Last().Should().Contain("User deny tool call");
+        StreamedRequestsCarrying(chat.Provider, AskForWeather)
+            .Should().Contain(body => body.Contains("User deny tool call", StringComparison.Ordinal), chat.Provider.Describe());
     }
 
     /// <summary>

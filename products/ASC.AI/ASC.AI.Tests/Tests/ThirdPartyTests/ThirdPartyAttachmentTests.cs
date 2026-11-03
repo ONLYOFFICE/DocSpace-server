@@ -46,7 +46,7 @@ public class ThirdPartyAttachmentTests(AspireAppFixture fixture) : ThirdPartyTes
     // The File type discriminator of an attachment input (FileType.Document).
     private const int DocumentFileType = 7;
 
-    private DocSpace.API.SDK.Api.AI.AttachmentsApi Attachments => new(_aiChatClient, new Configuration { BasePath = _aiAssignments.Configuration.BasePath });
+    private DocSpace.API.SDK.Api.AI.AttachmentsApi Attachments => _aiAttachments;
 
     private async Task<ThirdPartyFileDto> StoreDocumentAsync(string roomId)
     {

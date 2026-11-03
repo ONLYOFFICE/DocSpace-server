@@ -47,11 +47,13 @@ public class ChatPermissionNonMemberTests(AspireAppFixture fixture) : ChatPermis
     // room that is not private (FileSecurity's administrator bypass), so the admin is let in by design. The same rule
     // for an AI project (canChat = inRoom) is what a replacement test would have to check.
 
+    // No Guest row: a Guest is refused by user type wherever they are, invited or not, with or without a room in scope
+    // (ChatPermissionGuestTests), so a Guest outsider is answered by that gate and never reaches the membership check
+    // this test is about.
     [Theory]
     [Trait("Bug", "82715")]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]
-    [InlineData(EmployeeType.Guest)]
     public async Task Create_NonMemberOfTheAiRoom_Returns403NotA500(EmployeeType type)
     {
         await CreateInAnUninvitedRoomAndExpect403Async(type);
@@ -132,12 +134,7 @@ public class ChatPermissionNonMemberTests(AspireAppFixture fixture) : ChatPermis
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await CreateThreadAsync("Uninvited thread", profile.Id, roomId.ToString()));
 
-        // Guests cannot hold content access in an AI room, so the invite-and-look control is not available for them.
-        if (type != EmployeeType.Guest)
-        {
-            await ExpectNoThreadWasCreatedAsync(member, roomId, profile);
-        }
-
+        await ExpectNoThreadWasCreatedAsync(member, roomId, profile);
         exception.ErrorCode.Should().Be(403, "refusing an outsider is a 403, not an Internal Server Error");
     }
 

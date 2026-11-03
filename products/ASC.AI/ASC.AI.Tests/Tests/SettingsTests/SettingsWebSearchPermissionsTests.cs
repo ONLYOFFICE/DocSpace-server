@@ -56,9 +56,7 @@ public class SettingsWebSearchPermissionsTests(AspireAppFixture fixture) : Setti
             await ActAsMemberAsync(type.Value);
         }
 
-        // Raw for every role: the typed call returns a bool and throws NullReferenceException (an SDK defect) on the
-        // Guest's 403, so one path is used for all of them.
-        var (status, body) = await RawAsync(HttpMethod.Get, WebSearchIsConfiguredRoute);
+        var (status, body) = await ReadIsConfiguredAsync();
 
         if (type == EmployeeType.Guest)
         {

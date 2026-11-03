@@ -87,8 +87,7 @@ public class MessagesPermissionForeignFolderTests(AspireAppFixture fixture) : Me
 
     private async Task AssertRefusedAsync(ApiException exception, User reader, int folderId, List<int> before)
     {
-        await WaitForExportToSettleAsync();
-
+        // The export was refused synchronously: nothing was queued, so the listing is final at once.
         IdsOf(await ListFilesAsync(reader, folderId)).Should().Equal(before, "nothing was created");
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Forbidden");

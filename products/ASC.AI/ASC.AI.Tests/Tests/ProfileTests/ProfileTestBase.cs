@@ -66,19 +66,17 @@ public abstract class ProfileTestBase(AspireAppFixture fixture) : BaseTest(fixtu
 
     protected readonly record struct Outcome(int Status, string Body);
 
-    /// <summary>Runs a typed call and reports its status and error body instead of throwing; a success is 200 with no body.</summary>
+    private readonly List<System.Net.Sockets.Socket> _closedPorts = [];
+
+    /// <summary>
+    /// <see cref="BaseTest.OutcomeOfAsync"/> as an <see cref="Outcome"/>, so a typed call compares with a raw one
+    /// (<see cref="RawGetAsync"/>); a success is 200 with no body.
+    /// </summary>
     protected static async Task<Outcome> OutcomeOfAsync<T>(Func<Task<T>> call)
     {
-        try
-        {
-            await call();
+        var (status, error) = await OutcomeOfAsync((Func<Task>)call);
 
-            return new Outcome(200, string.Empty);
-        }
-        catch (ApiException exception)
-        {
-            return new Outcome(exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
-        }
+        return new Outcome(status, error);
     }
 
     protected async Task<Outcome> RawGetAsync(string path)
@@ -118,7 +116,12 @@ public abstract class ProfileTestBase(AspireAppFixture fixture) : BaseTest(fixtu
         configure(input);
 
         var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
-        result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+
+        // Described only on a failure: the run-wide provider's log holds every request of the run.
+        if (!result.Success)
+        {
+            result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{ModelProvider.Describe()}");
+        }
 
         return result.Profile;
     }
@@ -217,13 +220,29 @@ public abstract class ProfileTestBase(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     /// <summary>A loopback URL nothing listens on: the connection is refused at once.</summary>
-    protected static string CreateClosedPortUrl()
+    /// <remarks>
+    /// The port stays bound, but never listened on, until the test ends. A port that was only found free and released
+    /// could be taken by the WireMock a parallel test starts, and the "unreachable" provider would then answer.
+    /// </remarks>
+    protected string CreateClosedPortUrl()
     {
-        var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
-        listener.Start();
-        var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
+        var socket = new System.Net.Sockets.Socket(
+            System.Net.Sockets.AddressFamily.InterNetwork,
+            System.Net.Sockets.SocketType.Stream,
+            System.Net.Sockets.ProtocolType.Tcp);
+        _closedPorts.Add(socket);
+        socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
 
-        return $"http://127.0.0.1:{port}/v1";
+        return $"http://127.0.0.1:{((IPEndPoint)socket.LocalEndPoint!).Port}/v1";
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        foreach (var socket in _closedPorts)
+        {
+            socket.Dispose();
+        }
+
+        await base.DisposeAsync();
     }
 }

@@ -79,12 +79,17 @@ public class ThirdPartyThreadTests(AspireAppFixture fixture) : ThirdPartyTestBas
         fromNoEntity.Select(t => t.ThreadId).Should().Contain(thread.ThreadId, "so does the no-entity list");
     }
 
+    /// <summary>
+    /// The TypeScript original expects the list to refuse a non-member with 403. Threads are one list per user whatever
+    /// <c>entityId</c> names (the test above: an unrelated room lists the same threads), so the list cannot refuse by room;
+    /// what a non-member must not get is the owner's thread.
+    /// </summary>
     [Fact]
-    public async Task ListThreads_NonMemberOfAThirdPartyRoom_IsRefused()
+    public async Task ListThreads_NonMemberOfAThirdPartyRoom_SeesNoneOfItsThreads()
     {
         var roomId = await CreateNextcloudRoomAsync("TP NonMember Room");
         var profile = await GetDefaultProfileAsync();
-        await CreateThreadAsync("Autotest non-member thread", profile.Id, roomId);
+        var ownerThread = await CreateThreadAsync("Autotest non-member thread", profile.Id, roomId);
 
         var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
 
@@ -94,9 +99,9 @@ public class ThirdPartyThreadTests(AspireAppFixture fixture) : ThirdPartyTestBas
             async () => await RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken));
         roomRead.ErrorCode.Should().Be(403, "reading the room as a non-member");
 
-        // ...and asking for its threads refuses the same way.
+        // ...and the threads listed for it are the caller's own, none of the owner's.
         await _aiChatClient.Authenticate(user);
-        var list = await Assert.ThrowsAsync<ApiException>(async () => await ListThreadsForAsync(roomId));
-        list.ErrorCode.Should().Be(403, "listing threads as a non-member");
+        var listed = await ListThreadsForAsync(roomId);
+        listed.Select(t => t.ThreadId).Should().NotContain(ownerThread.ThreadId, "a non-member is never handed the owner's thread");
     }
 }

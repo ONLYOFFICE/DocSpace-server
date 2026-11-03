@@ -55,7 +55,7 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
     /// <summary>How long an accepted export may take to appear in its folder.</summary>
     protected static TimeSpan ExportTimeout { get; } = TimeSpan.FromSeconds(60);
 
-    /// <summary>How long a refused export is given to land anyway before "nothing was created" counts.</summary>
+    /// <summary>How long an accepted export's queue is given to land anything more before "nothing else was created" counts.</summary>
     protected static TimeSpan SettleTime { get; } = TimeSpan.FromSeconds(20);
 
     protected static string RandomSuffix() => Guid.NewGuid().ToString("N")[..8];
@@ -249,8 +249,18 @@ public abstract class TextToDocxPortTestBase(AspireAppFixture fixture) : BaseTes
         }
     }
 
-    /// <summary>Gives a refused export as much time to land as an accepted one.</summary>
+    /// <summary>
+    /// Gives an accepted export's queue time to land anything more, so "nothing else was created" is a real absence.
+    /// Only after a call that was accepted: a synchronously refused one queued nothing, and waiting checks nothing.
+    /// </summary>
     protected static Task WaitForExportToSettleAsync() => Task.Delay(SettleTime, TestContext.Current.CancellationToken);
+
+    /// <summary>
+    /// <see cref="WaitForExportToSettleAsync()"/> when the export answered <paramref name="status"/> 2xx (it queued a job
+    /// that may still land); nothing when it was refused there and then.
+    /// </summary>
+    protected static Task WaitForExportToSettleAsync(HttpStatusCode status) =>
+        (int)status is >= 200 and < 300 ? WaitForExportToSettleAsync() : Task.CompletedTask;
 
     /// <summary>
     /// The title the Files API gives a file created with <paramref name="title"/> — the oracle for what a normalised

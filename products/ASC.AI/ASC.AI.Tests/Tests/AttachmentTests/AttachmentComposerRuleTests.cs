@@ -115,6 +115,8 @@ public class AttachmentComposerRuleTests(AspireAppFixture fixture) : AttachmentT
         var status = await AppendWithAttachmentsAsync(threadId, profile.Id, "Autotest over-limit attachments", AsMessageAttachments(drafts));
 
         // A refusal is as good as a trimmed list; what must not happen is an eleven-attachment message in the store.
+        // A server error is neither: it leaves the store empty without the route having decided anything.
+        ((int)status).Should().BeLessThan(500, "the route has to accept or refuse the message, not fail");
         var stored = await StoredUserAttachmentsAsync(threadId);
         var storedCount = stored is { ValueKind: JsonValueKind.Array } list ? list.GetArrayLength() : 0;
         storedCount.Should().BeLessThanOrEqualTo(
@@ -134,6 +136,14 @@ public class AttachmentComposerRuleTests(AspireAppFixture fixture) : AttachmentT
         var drafts = await StageComposerDraftsAsync(files: 6, images: 5, tag: "over-limit-send");
 
         var round = await SendWithAttachmentsAsync(threadId, profile.Id, "Reply with OK and nothing else.", AsMessageAttachments(drafts));
+
+        // As above, a refusal counts and a failure does not: a 5xx or a stream that broke stores nothing either.
+        ((int)round.StatusCode).Should().BeLessThan(500, "the send has to be accepted or refused, not fail");
+
+        if (round.StatusCode == HttpStatusCode.OK)
+        {
+            round.StreamError.Should().BeNull("an accepted send has to run to the end");
+        }
 
         var stored = await StoredUserAttachmentsAsync(threadId);
         var storedCount = stored is { ValueKind: JsonValueKind.Array } list ? list.GetArrayLength() : 0;

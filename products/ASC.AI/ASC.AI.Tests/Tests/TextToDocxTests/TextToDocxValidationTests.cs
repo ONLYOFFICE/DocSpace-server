@@ -96,7 +96,7 @@ public class TextToDocxValidationTests(AspireAppFixture fixture) : TextToDocxPor
         var result = await TryExportAsync(BuildExport(title, "   ", folderId));
 
         // The document, not just the status code, is what this records: a blank .docx used to be produced.
-        await WaitForExportToSettleAsync();
+        await WaitForExportToSettleAsync(result.StatusCode);
         (await ListFolderFilesAsync(folderId)).Select(file => file.Title).Should().NotContain($"{title}.docx");
 
         result.Error.Should().Be(RequiredError);

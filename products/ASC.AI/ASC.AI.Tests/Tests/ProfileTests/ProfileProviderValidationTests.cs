@@ -43,22 +43,24 @@ public class ProfileProviderValidationTests(AspireAppFixture fixture) : ProfileT
 {
     private const string ListProviderModelsPath = $"{ProfilesRoute}/list-provider-models";
 
+    private const string ValidProviderType = "openai";
+    private const string ValidBaseUrl = "https://api.example.invalid/v1";
+    private const string ValidApiKey = "sk-autotest-not-a-real-key";
+
     private static System.Text.Json.Nodes.JsonObject ValidBody() =>
         new()
         {
-            ["providerType"] = "openai",
-            ["baseUrl"] = "https://api.example.invalid/v1",
-            ["apiKey"] = "sk-autotest-not-a-real-key"
+            ["providerType"] = ValidProviderType,
+            ["baseUrl"] = ValidBaseUrl,
+            ["apiKey"] = ValidApiKey
         };
 
     [Theory]
     [InlineData("providerType", "omitted")]
     [InlineData("providerType", "null")]
-    [InlineData("providerType", "empty")]
     [InlineData("baseUrl", "omitted")]
     [InlineData("baseUrl", "null")]
-    [InlineData("baseUrl", "empty")]
-    public async Task ListProviderModels_MissingOrEmptyRequiredField_NamesExactlyThatField(string field, string mode)
+    public async Task ListProviderModels_MissingRequiredField_NamesExactlyThatField(string field, string mode)
     {
         var body = ValidBody();
 
@@ -68,12 +70,30 @@ public class ProfileProviderValidationTests(AspireAppFixture fixture) : ProfileT
         }
         else
         {
-            body[field] = mode == "null" ? null : string.Empty;
+            body[field] = null;
         }
 
         // Raw on purpose: the typed request refuses null for both fields client-side, so it sends nothing.
         var outcome = await RawPostAsync(ListProviderModelsPath, body.ToJsonString());
 
+        ExpectFieldRequired(outcome, field);
+    }
+
+    [Theory]
+    [InlineData("providerType")]
+    [InlineData("baseUrl")]
+    public async Task ListProviderModels_EmptyRequiredField_NamesExactlyThatField(string field)
+    {
+        var outcome = await ProviderModelsOutcomeAsync(
+            field == "providerType" ? string.Empty : ValidProviderType,
+            field == "baseUrl" ? string.Empty : ValidBaseUrl,
+            ValidApiKey);
+
+        ExpectFieldRequired(outcome, field);
+    }
+
+    private static void ExpectFieldRequired(Outcome outcome, string field)
+    {
         outcome.Status.Should().Be(400, outcome.Body);
         using var document = JsonDocument.Parse(outcome.Body);
         document.RootElement.GetProperty("field").GetString().Should().Be(field);

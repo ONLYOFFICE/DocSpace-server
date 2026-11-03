@@ -46,16 +46,25 @@ public class ChatOtherActorTests(AspireAppFixture fixture) : ChatPart3TestBase(f
     {
         // The assignment is the default for new conversations and never a retroactive setting: moving old threads
         // would rewrite history the client already rendered, not applying to new ones would make it look broken.
-        var first = await CreateAssignableProfileAsync();
-        var second = await CreateAssignableProfileAsync();
+        // No call names a profile: each thread gets its model from the Chat binding on its first round, the way a
+        // composer with a hidden picker starts one. Each model has a provider of its own, so the one asked is visible.
+        var firstProvider = NewProvider();
+        var first = await CreateCapableProfileAsync(firstProvider, ChatCapabilities);
+        var secondProvider = NewProvider();
+        var second = await CreateCapableProfileAsync(secondProvider, ChatCapabilities);
 
         await AssignAsync(AiActionType.Chat, first.Id);
-        var before = await CreateThreadAsync("before the rebinding", first.Id);
+        var before = await CreateThreadWithoutModelAsync("before the rebinding");
+        (await SendWithStreamAsync(before.ThreadId, NewQuestion())).ShouldBeHealthy();
 
         await AssignAsync(AiActionType.Chat, second.Id);
         (await GetAllAssignmentsAsync())[nameof(AiActionType.Chat)].Should().Be(second.Id, "the binding really changed");
 
-        var after = await CreateThreadAsync("after the rebinding", second.Id);
+        var after = await CreateThreadWithoutModelAsync("after the rebinding");
+        var newQuestion = NewQuestion();
+        (await SendWithStreamAsync(after.ThreadId, newQuestion)).ShouldBeHealthy();
+        var oldQuestion = NewQuestion();
+        (await SendWithStreamAsync(before.ThreadId, oldQuestion)).ShouldBeHealthy();
 
         // One re-read of the list shows both, each on the model it was started with.
         var listed = (await _aiThreads.AiThreadsListAsync(cancellationToken: TestContext.Current.CancellationToken))
@@ -63,5 +72,14 @@ public class ChatOtherActorTests(AspireAppFixture fixture) : ChatPart3TestBase(f
 
         listed.Should().ContainKey(before.ThreadId).WhoseValue.Should().Be(first.Id);
         listed.Should().ContainKey(after.ThreadId).WhoseValue.Should().Be(second.Id);
+        StreamedRequestsCarrying(secondProvider, newQuestion).Should().NotBeEmpty("the new thread is answered by the new binding");
+        StreamedRequestsCarrying(firstProvider, newQuestion).Should().BeEmpty(firstProvider.Describe());
+        StreamedRequestsCarrying(firstProvider, oldQuestion).Should().NotBeEmpty("the old thread keeps the model it started on");
+        StreamedRequestsCarrying(secondProvider, oldQuestion).Should().BeEmpty(secondProvider.Describe());
     }
+
+    private Task<AiThread> CreateThreadWithoutModelAsync(string title) =>
+        _aiThreads.AiThreadsCreateAsync(new AiThreadsCreateRequest(title: title), TestContext.Current.CancellationToken);
+
+    private static string NewQuestion() => $"rebinding-question-{Guid.NewGuid():N}";
 }

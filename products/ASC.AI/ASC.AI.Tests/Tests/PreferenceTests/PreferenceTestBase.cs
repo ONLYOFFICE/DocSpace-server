@@ -93,9 +93,7 @@ public abstract class PreferenceTestBase(AspireAppFixture fixture) : ChatTests.C
     }
 
     /// <summary>
-    /// Raw request on a preferences route — for the bodies and queries the typed SDK cannot produce. Also the way to
-    /// read a refusal: the typed calls returning a bool or an enum throw NullReferenceException on any non-2xx (an SDK
-    /// defect), not ApiException.
+    /// Raw request on a preferences route — for the bodies and queries the typed SDK cannot produce.
     /// </summary>
     protected Task<(HttpStatusCode Status, string Body)> RawAsync(HttpMethod method, string route, string? json = null) =>
         SendRawAsync(method, PreferencesRoute + route, json);
@@ -125,9 +123,8 @@ public abstract class PreferenceTestBase(AspireAppFixture fixture) : ChatTests.C
     }
 
     /// <summary>
-    /// A valid call of one route, for the cases that only care about the status it ends with. The writes go through
-    /// the typed SDK (an ApiException carries the refusal); the GET routes return a bool or an enum, so they stay raw
-    /// (SDK defect: NullReferenceException instead of ApiException on a non-2xx).
+    /// A valid call of one route through the typed SDK, for the cases that only care about the status it ends with (an
+    /// ApiException carries the refusal).
     /// </summary>
     protected Task<(HttpStatusCode Status, string Body)> CallRouteAsync(string route)
     {
@@ -140,7 +137,11 @@ public abstract class PreferenceTestBase(AspireAppFixture fixture) : ChatTests.C
             "set-tool-permission-mode" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesSetToolPermissionModeAsync(new AiPreferencesSetToolPermissionModeRequest(AiChatToolPermissionMode.Ask, null!), cancellationToken)),
             // The empty string is the SDK's way to name no scope: the bare body "".
             "clear-deep-mode" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesClearDeepModeAsync(string.Empty, cancellationToken)),
-            _ => RawAsync(HttpMethod.Get, route)
+            "get-deep-mode" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesGetDeepModeAsync(cancellationToken: cancellationToken)),
+            "is-deep-mode-set" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesIsDeepModeSetAsync(cancellationToken: cancellationToken)),
+            "get-reasoning-level" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesGetReasoningLevelAsync(cancellationToken: cancellationToken)),
+            "get-tool-permission-mode" => HttpOutcomeOfAsync(() => _aiPreferences.AiPreferencesGetToolPermissionModeAsync(cancellationToken: cancellationToken)),
+            _ => throw new ArgumentOutOfRangeException(nameof(route), route, "not a preferences route")
         };
     }
 

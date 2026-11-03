@@ -432,10 +432,25 @@ namespace {{packageName}}.Client
 
         private async Task<ApiResponse<T>> ToApiResponse<T>(HttpResponseMessage response, object responseData, Uri uri)
         {
-            // DocSpace: a non-2xx answer has no data, and unboxing null into a value-type T (bool, an enum) threw
-            // NullReferenceException before the caller got the status as an ApiException.
-            T result = responseData is T typed ? typed : default;
             string rawContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            // DocSpace: a non-2xx answer has no data, and unboxing null into a value-type T (bool, an enum) threw
+            // NullReferenceException before the caller got the status as an ApiException. A 2xx answer without a value
+            // stays an error: it must not read as default(T), for a bool operation a silent false.
+            T result;
+
+            if (!response.IsSuccessStatusCode || responseData is null && default(T) is null)
+            {
+                result = default;
+            }
+            else if (responseData is T typed)
+            {
+                result = typed;
+            }
+            else
+            {
+                throw new ApiException((int)response.StatusCode, $"The {(int)response.StatusCode} answer carries no {typeof(T).Name} value.", rawContent);
+            }
 
             var transformed = new ApiResponse<T>(response.StatusCode, new Multimap<string, string>({{#caseInsensitiveResponseHeaders}}StringComparer.OrdinalIgnoreCase{{/caseInsensitiveResponseHeaders}}), result, rawContent)
             {

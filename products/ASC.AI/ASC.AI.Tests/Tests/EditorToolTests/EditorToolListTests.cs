@@ -35,7 +35,8 @@ namespace ASC.AI.Tests.Tests.EditorToolTests;
 
 /// <summary>
 /// <c>GET /api/2.0/ai/editor-tools/list</c>: the catalogue the editor's AI panel offers. The checks walk whatever the
-/// catalogue holds, so a tool added later is covered without touching this file.
+/// catalogue holds, so a tool added later is covered without touching this file; they skip when the catalogue lacks
+/// the generators (no <c>automationapi</c> in the quota leaves it empty), where a walk would assert nothing.
 /// </summary>
 [Trait("Category", "Functional")]
 [Trait("Feature", "AI/EditorTools")]
@@ -62,6 +63,7 @@ public class EditorToolListTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task EveryTool_MatchesTheSdkShape()
     {
+        await RequireGeneratorsAsync();
         var reply = await ListAsync();
         reply.Status.Should().Be(200, reply.ToString());
 
@@ -99,6 +101,7 @@ public class EditorToolListTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task ToolNames_AreUnique()
     {
+        await RequireGeneratorsAsync();
         var names = (await ToolsAsync()).Select(t => t.Name).ToList();
 
         names.GroupBy(n => n).Where(g => g.Count() > 1).Select(g => g.Key).Should().BeEmpty();
@@ -107,6 +110,7 @@ public class EditorToolListTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task EveryInputSchema_IsAnObjectSchemaWhoseRequiredArgumentsAreDeclared()
     {
+        await RequireGeneratorsAsync();
         var offenders = new List<string>();
         foreach (var tool in await ToolsAsync())
         {
@@ -160,6 +164,7 @@ public class EditorToolListTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Fact]
     public async Task RequireApproval_IsOffForReadToolsAndOnForTheOnesThatChangeSomething()
     {
+        await RequireGeneratorsAsync();
         var tools = await ToolsAsync();
 
         var wrong = tools
@@ -180,6 +185,7 @@ public class EditorToolListTests(AspireAppFixture fixture) : EditorToolTestBase(
     [Trait("Bug", "84395")]
     public async Task NoToolPublishesAPropertyAsBothRequiredAndDefaulted()
     {
+        await RequireGeneratorsAsync();
         var tools = await ToolsAsync();
 
         var contradictions = tools

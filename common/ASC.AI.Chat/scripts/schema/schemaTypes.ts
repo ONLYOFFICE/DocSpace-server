@@ -155,9 +155,7 @@ export type AiActionArgs = {
   toolInstructions?: Record<string, string>;
   /**
    * Instructions rooms connected as context in the composer, each with the
-   * skills the round may use. The skills of a DocSpace room are re-read on
-   * every round, so the list sent only has to name the rooms; inside an AI
-   * project the project's own linked rooms replace whatever is sent here.
+   * skills the round may use.
    */
   contextRooms?: ContextRoomRef[];
   /**
@@ -179,9 +177,8 @@ export type AiActionArgs = {
    */
   folderContext?: FolderContextRef;
   /**
-   * Read by `POST api/2.0/ai/ai/send-custom` only, which has no top-level
-   * scope: the entry the round is attributed to. A hint, re-resolved against
-   * the caller's own access; ignored by every other operation.
+   * The entry the round is attributed to. A hint, resolved against the
+   * caller's own access.
    */
   entityId?: string;
 };
@@ -463,8 +460,8 @@ export type Req_aiAttachmentsLinkToMessage = {
 export type Res_aiContextGetContextFolders = ContextFolder[];
 export type Res_aiContextGetKnowledgeFolders = ContextFolder[];
 export type Res_aiContextGetRoomSkills = RoomSkill[];
-/** The skill's Markdown body, or null when the room has no such skill. */
-export type Res_aiContextGetRoomSkill = string | null;
+/** The skill's whole Markdown file. */
+export type Res_aiContextGetRoomSkill = string;
 
 /* ---------------------------- Preferences ------------------------------ */
 

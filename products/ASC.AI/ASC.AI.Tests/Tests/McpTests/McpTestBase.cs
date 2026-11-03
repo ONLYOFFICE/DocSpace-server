@@ -221,11 +221,11 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
         result.Success.Should().BeTrue();
     }
 
-    protected Task<bool> IsDisabledAsync(string serverType, string toolName) =>
-        _aiTools.AiToolsIsToolDisabledAsync(serverType, toolName, cancellationToken: TestContext.Current.CancellationToken);
+    protected Task<bool> IsDisabledAsync(string serverType, string toolName, string? entityId = null) =>
+        _aiTools.AiToolsIsToolDisabledAsync(serverType, toolName, entityId, TestContext.Current.CancellationToken);
 
-    protected Task<bool> IsAllowedAsync(string serverType, string toolName) =>
-        _aiTools.AiToolsIsAllowAlwaysAsync(serverType, toolName, cancellationToken: TestContext.Current.CancellationToken);
+    protected Task<bool> IsAllowedAsync(string serverType, string toolName, string? entityId = null) =>
+        _aiTools.AiToolsIsAllowAlwaysAsync(serverType, toolName, entityId, TestContext.Current.CancellationToken);
 
     /// <summary>The allow-always token the public read returns for one tool: <c>{serverType}_{toolName}</c>.</summary>
     protected static string Token(string serverType, string toolName) => $"{serverType}_{toolName}";
@@ -399,9 +399,14 @@ public abstract class McpTestBase(AspireAppFixture fixture) : ChatTests.ChatPart
             case ("GET", "list-system-tools") when !hasBody:
                 return Answer(await _aiTools.AiToolsListSystemToolsAsync(entityFromQuery, ct));
 
-            // is-tool-disabled and is-allow-always stay raw: the SDK types their answer `bool` and unboxes it in
-            // ToApiResponse, so any non-2xx - the refusals these routes are tested for - is a NullReferenceException,
-            // the *WithHttpInfo variants included, instead of an ApiException with the status.
+            // A parameter left out stays raw: the generated client refuses a null required parameter itself, without a
+            // request. A blank one is an ordinary value the server rejects, so it goes typed.
+            case ("GET", "is-tool-disabled") when !hasBody && Param("serverType") is { } serverType && Param("toolName") is { } toolName:
+                return Answer(await _aiTools.AiToolsIsToolDisabledAsync(serverType, toolName, entityFromQuery, ct));
+
+            case ("GET", "is-allow-always") when !hasBody && Param("serverType") is { } serverType && Param("toolName") is { } toolName:
+                return Answer(await _aiTools.AiToolsIsAllowAlwaysAsync(serverType, toolName, entityFromQuery, ct));
+
             default:
                 return null;
         }

@@ -266,10 +266,23 @@ function convertNode(node: Json): Json {
 // The C# generator has no numeric constant: it turns the `const` into a string
 // enum and serializes `"1"`, which the service then rejects. An integer pinned
 // by `minimum`/`maximum` says the same thing in a form every generator maps to
-// an int.
+// an int. A union of integer literals (`version: 1 | 2`) arrives as
+// `{ type: "number", enum: [1, 2] }` and goes the same string way unless it is
+// typed `integer`, which every generator maps to an int enum.
 function integerConst(node: JsonObject): JsonObject {
+  if (node["type"] !== "number") {
+    return node;
+  }
+  const values = node["enum"];
+  if (
+    Array.isArray(values) &&
+    values.length > 0 &&
+    values.every((value) => typeof value === "number" && Number.isInteger(value))
+  ) {
+    return { ...node, type: "integer" };
+  }
   const value = node["const"];
-  if (node["type"] !== "number" || typeof value !== "number" || !Number.isInteger(value)) {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
     return node;
   }
   const out: JsonObject = { ...node, type: "integer", minimum: value, maximum: value };

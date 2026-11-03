@@ -58,6 +58,15 @@ import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../../app/exampleIds
 interface SchemaDoc {
   /** Prose for the schema itself (`schema-description`). */
   description?: string;
+  /**
+   * The one exception to "fill-in only": prose that replaces the library's own
+   * description of the schema. Only for a library text written for the
+   * library's callers - one that names its internal functions and adapters
+   * (`StorageAdapter.getRoomSkill`, `toChatError`) - which a caller of this API
+   * can neither see nor use. Reported as dead when the library has no
+   * description to replace.
+   */
+  replaceDescription?: string;
   /** Prose per property name (`schema-property-description`). */
   properties?: Readonly<Record<string, string>>;
   /**
@@ -139,6 +148,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiActionArgs: {
+    description:
+      "Per-request options of an AI round: extra tools, the depth of reasoning, a system prompt override and the rooms and folder connected as context.",
     examples: {
       tools: [],
       isReasoning: false,
@@ -194,16 +205,20 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiContextRoomRef: {
+    replaceDescription:
+      "One Instructions room a round runs with as context: the account and room ID from `GET api/2.0/ai/context/get-context-folders`, plus the skills of the room the round may use.",
     properties: {
       cloud: "The account the room belongs to; `docspace` for a room of this portal.",
       id: "The room ID.",
       skills:
-        "The skills of the room the round may use. For a room of this portal the list is re-read on every round, so it may be sent empty.",
+        "The skills of the room the round may use, as `GET api/2.0/ai/context/get-room-skills` lists them.",
     },
     examples: { cloud: "docspace", id: EXAMPLE_IDS.room, skills: [] },
   },
 
   AiKnowledgeRoomRef: {
+    replaceDescription:
+      "One Knowledge room a round searches: the account and room ID from `GET api/2.0/ai/context/get-knowledge-folders`.",
     properties: {
       cloud: "The account the room belongs to; `docspace` for a room of this portal.",
       id: "The room ID; anything that is not a positive integer is ignored.",
@@ -212,6 +227,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiFolderContextRef: {
+    replaceDescription:
+      "A folder connected as the round's context - any folder of the portal, not only a room - named by its account and ID.",
     properties: {
       cloud: "The account the folder belongs to; `docspace` for a folder of this portal.",
       id: "The folder ID.",
@@ -220,6 +237,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiRoomSkill: {
+    replaceDescription:
+      "A skill of an Instructions room: the frontmatter of one Markdown skill file. `name` and `description` are what the model is shown; the body is read through `GET api/2.0/ai/context/get-room-skill`.",
     properties: {
       id: "The skill's ID, as `GET api/2.0/ai/context/get-room-skill` takes it.",
       name: "The skill's name, from its frontmatter.",
@@ -233,6 +252,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiContextFolder: {
+    replaceDescription:
+      "The rooms of one account the caller can connect as context, grouped under the account.",
     properties: {
       cloud: "The account the rooms belong to; `docspace` for this portal.",
       rooms: "The rooms of that account the caller can connect.",
@@ -241,6 +262,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiContextRoom: {
+    replaceDescription: "A room the caller can connect to a chat as context.",
     properties: {
       id: "The room ID.",
       name: "The room title.",
@@ -256,6 +278,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiChatErrorPayload: {
+    replaceDescription:
+      "Why a round failed or stopped early, as the message status and the stream report it: a stable `code`, a message safe to show the user, and the cause when there is one.",
     examples: { code: "rate_limit", message: "The provider is rate limiting requests." },
   },
 
@@ -597,7 +621,7 @@ export interface UnusedSchemaDoc {
   schema: string;
   /** The property the entry described, or `undefined` for a type-level entry. */
   property?: string;
-  reason: "no such schema" | "no such property" | "already described";
+  reason: "no such schema" | "no such property" | "already described" | "nothing to replace";
 }
 
 /**
@@ -625,6 +649,14 @@ export function applySchemaDocs(components: Record<string, unknown>): {
         schema["description"] = doc.description;
       } else {
         unused.push({ schema: name, reason: "already described" });
+      }
+    }
+
+    if (doc.replaceDescription !== undefined) {
+      if (schema["description"] === undefined) {
+        unused.push({ schema: name, reason: "nothing to replace" });
+      } else {
+        schema["description"] = doc.replaceDescription;
       }
     }
 

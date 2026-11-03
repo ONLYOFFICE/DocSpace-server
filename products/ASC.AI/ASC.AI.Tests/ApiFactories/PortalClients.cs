@@ -61,6 +61,10 @@ public sealed class PortalClients : PortalClientsBase
     public AiSettingsApi AiSettingsApi { get; }
     public AiContextApi AiContextApi { get; }
     public AiExportApi AiExportApi { get; }
+    public DocSpace.API.SDK.Api.AI.AttachmentsApi AiAttachmentsApi { get; }
+    public DocSpace.API.SDK.Api.AI.EditorToolsApi AiEditorToolsApi { get; }
+    public DocSpace.API.SDK.Api.AI.VectorizationApi AiVectorizationApi { get; }
+    public DocSpace.API.SDK.Api.AI.WebSearchApi AiWebSearchApi { get; }
 
     // Files service
     public FilesApi FilesApi { get; }
@@ -69,6 +73,10 @@ public sealed class PortalClients : PortalClientsBase
     public OperationsApi OperationsApi { get; }
     public SharingApi SharingApi { get; }
     public FilesQuotaApi FilesQuotaApi { get; }
+    public DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+
+    /// <summary>The project routes of a room (<c>files/rooms/{id}/model</c>), on the Files service.</summary>
+    public DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
@@ -97,6 +105,10 @@ public sealed class PortalClients : PortalClientsBase
         AiSettingsApi = new AiSettingsApi(AiChatHttpClient, aiChatConfig);
         AiContextApi = new AiContextApi(AiChatHttpClient, aiChatConfig);
         AiExportApi = new AiExportApi(AiChatHttpClient, aiChatConfig);
+        AiAttachmentsApi = new DocSpace.API.SDK.Api.AI.AttachmentsApi(AiChatHttpClient, aiChatConfig);
+        AiEditorToolsApi = new DocSpace.API.SDK.Api.AI.EditorToolsApi(AiChatHttpClient, aiChatConfig);
+        AiVectorizationApi = new DocSpace.API.SDK.Api.AI.VectorizationApi(AiChatHttpClient, aiChatConfig);
+        AiWebSearchApi = new DocSpace.API.SDK.Api.AI.WebSearchApi(AiChatHttpClient, aiChatConfig);
 
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
@@ -105,6 +117,8 @@ public sealed class PortalClients : PortalClientsBase
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         FilesQuotaApi = new FilesQuotaApi(FilesHttpClient, filesConfig);
+        ThirdPartyIntegrationApi = new DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        RoomsAiApi = new DocSpace.API.SDK.Api.Rooms.AIApi(FilesHttpClient, filesConfig);
 
         ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
 

@@ -229,7 +229,7 @@
         ],
         "operationId": "aiSendCustom",
         "summary": "Send custom",
-        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
+        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. With no thread there is no scope either: the entry the round is attributed to is `actionArgs.entityId`, which only this operation reads. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message, or a newline-delimited stream of chat events when `isStream` was set. Nothing was persisted.",
@@ -2297,6 +2297,16 @@
               }
             }
           },
+          "404": {
+            "description": "The room is not an Instructions room the caller can read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
             "content": {
@@ -2337,15 +2347,12 @@
         "summary": "Get room skill",
         "responses": {
           "200": {
-            "description": "The skill's Markdown body, or a null body when the room has no such skill.",
+            "description": "The skill's whole Markdown file, as a JSON string.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
-                  "description": "The skill's Markdown body, or null when the room has no such skill."
+                  "type": "string",
+                  "description": "The skill's whole Markdown file."
                 }
               }
             }
@@ -2372,6 +2379,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The room is not an Instructions room the caller can read, or `skillId` is not one of its skills.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9138,7 +9155,7 @@
         ],
         "operationId": "aiSettingsGetToolMode",
         "summary": "Get the tool permission mode",
-        "description": "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
+        "description": "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), inside the service's `response` envelope, proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "The calling user's tool permission mode, `{ mode }` under `response`.",
@@ -9188,7 +9205,7 @@
         ],
         "operationId": "aiSettingsSetToolMode",
         "summary": "Set the tool permission mode",
-        "description": "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum. The mode applies to every chat of the user in the portal.",
+        "description": "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum with 400; the answer is the stored mode inside the service's `response` envelope. The mode applies to every chat of the user in the portal.",
         "responses": {
           "200": {
             "description": "The calling user's stored tool permission mode, `{ mode }` under `response`.",
@@ -9196,6 +9213,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiToolPermissionModeWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`mode` is not one of the `ToolPermissionMode` members.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -10713,7 +10740,7 @@
             "items": {
               "$ref": "#/components/schemas/AiContextRoomRef"
             },
-            "description": "Instructions rooms connected as context in the composer, each with the skills the round may use. The skills of a DocSpace room are re-read on every round, so the list sent only has to name the rooms; inside an AI project the project's own linked rooms replace whatever is sent here."
+            "description": "Instructions rooms connected as context in the composer, each with the skills the round may use."
           },
           "knowledgeRooms": {
             "type": "array",
@@ -10733,10 +10760,11 @@
           },
           "entityId": {
             "type": "string",
-            "description": "Read by `POST api/2.0/ai/ai/send-custom` only, which has no top-level scope: the entry the round is attributed to. A hint, re-resolved against the caller's own access; ignored by every other operation."
+            "description": "The entry the round is attributed to. A hint, resolved against the caller's own access."
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Per-request options of an AI round: extra tools, the depth of reasoning, a system prompt override and the rooms and folder connected as context."
       },
       "AiMCPItem": {
         "type": "object",
@@ -10850,7 +10878,7 @@
             "items": {
               "$ref": "#/components/schemas/AiRoomSkill"
             },
-            "description": "The skills of the room the round may use. For a room of this portal the list is re-read on every round, so it may be sent empty.",
+            "description": "The skills of the room the round may use, as `GET api/2.0/ai/context/get-room-skills` lists them.",
             "examples": [
               []
             ]
@@ -10861,7 +10889,7 @@
           "id"
         ],
         "additionalProperties": false,
-        "description": "One room a round runs with as context, as the composer sends them in `ActionArgs.contextRooms`: the cloud and room id from `getContextFolders`, plus the skills the round may use — the frontmatter the clouds store read once through `getRoomSkills` when the room was connected, minus the ones the user switched off. The engine builds the skill index and the `read_skill` tool from this list without another read; only a skill's body is fetched on demand, through `getRoomSkill`."
+        "description": "One Instructions room a round runs with as context: the account and room ID from `GET api/2.0/ai/context/get-context-folders`, plus the skills of the room the round may use."
       },
       "AiRoomSkill": {
         "type": "object",
@@ -10894,7 +10922,7 @@
           "description"
         ],
         "additionalProperties": false,
-        "description": "A skill configured inside a room — an Agent Skills Markdown file the host makes available to the model once the room is connected. This is the file's frontmatter only: `name` and `description` go into the model's skill index, the body is read on demand through `StorageAdapter.getRoomSkill`. `id` is the host's own identifier and is only ever passed back."
+        "description": "A skill of an Instructions room: the frontmatter of one Markdown skill file. `name` and `description` are what the model is shown; the body is read through `GET api/2.0/ai/context/get-room-skill`."
       },
       "AiKnowledgeRoomRef": {
         "type": "object",
@@ -10919,7 +10947,7 @@
           "id"
         ],
         "additionalProperties": false,
-        "description": "One knowledge base a round searches, as the composer sends them in `ActionArgs.knowledgeRooms`: the cloud and room id from `getKnowledgeFolders`. The widget only passes them back; the host scopes its knowledge search to those rooms."
+        "description": "One Knowledge room a round searches: the account and room ID from `GET api/2.0/ai/context/get-knowledge-folders`."
       },
       "AiFolderContextRef": {
         "type": "object",
@@ -10944,7 +10972,7 @@
           "id"
         ],
         "additionalProperties": false,
-        "description": "A folder connected as the round's context — any folder of the cloud, not only a room — as `ActionArgs.folderContext` carries it: the reference only. The host reads it off the request and decides what the folder contributes."
+        "description": "A folder connected as the round's context - any folder of the portal, not only a room - named by its account and ID."
       },
       "AiActionType": {
         "type": "string",
@@ -11218,7 +11246,7 @@
           "code",
           "message"
         ],
-        "description": "Serializable error payload attached to `message-incomplete` events.\n\n`Error` instances are useless on the wire: `message`, `stack`, and `name` are non-enumerable, so `JSON.stringify(err)` collapses to `{}` (or `{ \"cause\": {} }`). The engine normalizes every error through `toChatError` before yielding it so hosts can pipe the NDJSON stream through stock `JSON.stringify` and the UI can render the message without falling back to `[object Object]`."
+        "description": "Why a round failed or stopped early, as the message status and the stream report it: a stable `code`, a message safe to show the user, and the cause when there is one."
       },
       "AiSendStreamBody": {
         "type": "object",
@@ -12161,7 +12189,7 @@
           "rooms"
         ],
         "additionalProperties": false,
-        "description": "One cloud account's rooms, as listed in the composer's settings menu. `cloud` is the account label the host wants shown as the group heading."
+        "description": "The rooms of one account the caller can connect as context, grouped under the account."
       },
       "AiContextRoom": {
         "type": "object",
@@ -12186,7 +12214,7 @@
           "name"
         ],
         "additionalProperties": false,
-        "description": "A room the user can pull into the conversation as context. `id` is the host's own identifier — the widget only passes it back, never parses it."
+        "description": "A room the caller can connect to a chat as context."
       },
       "AiCreateProfileInput": {
         "type": "object",

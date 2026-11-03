@@ -44,7 +44,7 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// only after the profile on that provider exists — the profile create sends a streamed tool probe that would take
 /// the first one. The assignment helpers come from <see cref="AssignmentsStorageTests.AssignmentsTestBase"/>.
 /// </remarks>
-public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsStorageTests.AssignmentsTestBase(fixture), IDisposable
+public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsStorageTests.AssignmentsTestBase(fixture)
 {
     protected const string ChatCompletionsPath = "/v1/chat/completions";
     protected const string ImageGenerationsPath = "/v1/images/generations";
@@ -62,14 +62,14 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
 
     private readonly List<StubModelProvider> _providers = [];
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         foreach (var provider in _providers)
         {
             provider.Dispose();
         }
 
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     /// <summary>A stand-in model of the test's own, disposed with the test.</summary>
@@ -134,7 +134,7 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
     /// <paramref name="text"/> — a chat round, never the title request or the profile's tool probe.
     /// </summary>
     protected static List<string> StreamedRequestsCarrying(StubModelProvider provider, string text) =>
-        provider.CompletionRequestBodies.Where(b => IsStreamed(b) && b.Contains(text, StringComparison.Ordinal)).ToList();
+        provider.CompletionRequestBodies.Where(b => StubModelProvider.IsStreamed(b) && b.Contains(text, StringComparison.Ordinal)).ToList();
 
     /// <summary>
     /// Makes every streamed chat request that <paramref name="when"/> accepts wait <paramref name="delay"/> before
@@ -144,7 +144,7 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
     protected static void AnswerSlowly(StubModelProvider provider, TimeSpan delay, string answer, Func<string, bool>? when = null) =>
         provider.Server
             .Given(Request.Create().WithPath(ChatCompletionsPath).UsingPost()
-                .WithBody((string? body) => body is not null && IsStreamed(body) && (when is null || when(body))))
+                .WithBody((string? body) => body is not null && StubModelProvider.IsStreamed(body) && (when is null || when(body))))
             .AtPriority(0)
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
@@ -399,20 +399,6 @@ public abstract class ChatPart3TestBase(AspireAppFixture fixture) : AssignmentsS
             }
 
             await Task.Delay(1000, TestContext.Current.CancellationToken);
-        }
-    }
-
-    private static bool IsStreamed(string body)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(body);
-
-            return document.RootElement.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True;
-        }
-        catch (JsonException)
-        {
-            return false;
         }
     }
 }

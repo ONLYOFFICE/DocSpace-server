@@ -81,8 +81,14 @@ public class ThreadsLifecycleTests(AspireAppFixture fixture) : ThreadsPortTestBa
         // touch, confirmed by the date and by the history being untouched
         var beforeTouch = await GetThreadAsync(threadId);
         var messagesBeforeTouch = (await ReadAllAsync(threadId)).Select(m => m.ToJson()).ToList();
+
+        // Part of the scenario, not a wait for an asynchronous write: last_edit_date is a whole-second datetime column, so
+        // a touch within the second of the rename would store the same date. More than a second later the stored dates
+        // cannot be equal, whatever the rounding.
+        await Task.Delay(TimeSpan.FromMilliseconds(1100), cancellationToken);
+
         (await _aiThreads.AiThreadsTouchAsync(new AiThreadsTouchRequest(threadId), cancellationToken)).Success.Should().BeTrue();
-        (await GetThreadAsync(threadId)).LastEditDate.Should().BeGreaterThanOrEqualTo(beforeTouch.LastEditDate);
+        (await GetThreadAsync(threadId)).LastEditDate.Should().BeGreaterThan(beforeTouch.LastEditDate, "a touch moves the date forward");
         (await ReadAllAsync(threadId)).Select(m => m.ToJson()).Should().Equal(messagesBeforeTouch);
 
         // delete-message, confirmed by read-messages and open-or-create

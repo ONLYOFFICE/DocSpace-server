@@ -53,7 +53,11 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : ThreadTestBase(fixtur
     {
         var created = await CreateOwnThreadAsync("original");
 
-        await Task.Delay(1100, TestContext.Current.CancellationToken);
+        // Part of the scenario, not a wait for an asynchronous write (there is nothing to poll): last_edit_date is a
+        // whole-second datetime column, so a rename within the second of the create would store the same date. More than
+        // a second later the stored dates cannot be equal, whatever the rounding. Measured from the test's own clock, not
+        // from the stored date, so a clock skew between the test and the service cannot shorten it.
+        await Task.Delay(TimeSpan.FromMilliseconds(1100), TestContext.Current.CancellationToken);
 
         await RenameAsync(created.ThreadId, "renamed");
 

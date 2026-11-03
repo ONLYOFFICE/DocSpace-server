@@ -38,47 +38,50 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 /// message and an unknown thread are in <see cref="MessageCreateTests"/>.
 /// </summary>
 /// <remarks>
-/// The bodies go raw: most of them cannot be expressed by the SDK request (no thread id, a null or role-less
-/// message, an invented role), and the SDK cannot read the success answer either, which is what a still-open bug
-/// would return (see <see cref="MessageTestBase.AppendAsync"/>).
+/// A request the SDK can express goes through it; only the bodies the SDK request cannot carry (no thread id, a null
+/// or role-less message, an invented role, no body at all) go raw.
 /// </remarks>
 [Trait("Category", "Validation")]
 [Trait("Feature", "AI/Messages")]
 public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : MessagesPart3TestBase(fixture)
 {
     [Theory]
-    [InlineData("no threadId", 400)]
     [InlineData("a malformed threadId", 400)]
     [InlineData("a deleted threadId", 404)]
+    public async Task Append_UnusableThreadId_IsRefusedAndStoresNothing(string kind, int expected)
+    {
+        var threadId = await NewThreadAsync("Strict");
+        await AppendAsync(threadId, "control");
+
+        var target = MalformedId;
+        if (kind == "a deleted threadId")
+        {
+            target = await NewThreadAsync("Doomed");
+            (await DeleteThreadAsync(target)).Success.Should().BeTrue();
+        }
+
+        var status = await AppendStatusAsync(target, BuildUserMessage("x"));
+
+        (await ReadTextsAsync(threadId)).Should().Equal(["control"], "nothing was stored");
+        ((int)status).Should().Be(expected, kind);
+    }
+
+    [Theory]
+    [InlineData("no threadId", 400)]
     [InlineData("an empty body", 400)]
     [InlineData("no body at all", 400)]
     public async Task Append_RefusedRequest_StoresNothing(string kind, int expected)
     {
+        // Raw: the SDK request requires both the thread id and the message, so none of these bodies can be built typed.
         var threadId = await NewThreadAsync("Strict");
         await AppendAsync(threadId, "control");
-        var message = UserMessageJson("x");
 
-        string? body;
-        switch (kind)
+        var body = kind switch
         {
-            case "no threadId":
-                body = $$"""{"message":{{message}}}""";
-                break;
-            case "a malformed threadId":
-                body = $$"""{"threadId":"{{MalformedId}}","message":{{message}}}""";
-                break;
-            case "a deleted threadId":
-                var doomed = await NewThreadAsync("Doomed");
-                (await DeleteThreadAsync(doomed)).Success.Should().BeTrue();
-                body = $$"""{"threadId":"{{doomed}}","message":{{message}}}""";
-                break;
-            case "an empty body":
-                body = "{}";
-                break;
-            default:
-                body = null;
-                break;
-        }
+            "no threadId" => $$"""{"message":{{UserMessageJson("x")}}}""",
+            "an empty body" => "{}",
+            _ => null
+        };
 
         var status = await PostAppendRawAsync(body);
 
@@ -100,7 +103,7 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
         var threadId = await NewThreadAsync("No blanks");
         await AppendAsync(threadId, "control");
 
-        var status = await PostAppendRawAsync($$"""{"threadId":"{{threadId}}","message":{{UserMessageJson(text)}}}""");
+        var status = await AppendStatusAsync(threadId, BuildUserMessage(text));
 
         (await ReadTextsAsync(threadId)).Should().Equal(["control"], "nothing blank was stored");
         status.Should().Be(HttpStatusCode.BadRequest);
@@ -119,6 +122,7 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
         var threadId = await NewThreadAsync("Real content only");
         await AppendAsync(threadId, "control");
 
+        // Raw: the SDK request refuses a null message and a message without content client-side.
         var status = await PostAppendRawAsync($$"""{"threadId":"{{threadId}}","message":{{messageJson}}}""");
 
         (await ReadTextsAsync(threadId)).Should().Equal(["control"], "nothing was stored");
@@ -131,13 +135,30 @@ public class ThreadMessagesAppendValidationTests(AspireAppFixture fixture) : Mes
     /// itself. Fixed: anything but a user message is a 400.
     /// </summary>
     [Theory]
-    [InlineData("assistant")]
-    [InlineData("system")]
+    [InlineData(AiThreadMessageLike.RoleEnum.Assistant)]
+    [InlineData(AiThreadMessageLike.RoleEnum.System)]
+    [Trait("Bug", "84410")]
+    public async Task Append_NonUserRole_IsRefused(AiThreadMessageLike.RoleEnum role)
+    {
+        var threadId = await NewThreadAsync("Users only");
+        await AppendAsync(threadId, "control");
+
+        var forged = BuildUserMessage("forged");
+        forged.Role = role;
+        var status = await AppendStatusAsync(threadId, forged);
+
+        var stored = await ReadMessagesAsync(threadId);
+        stored.Select(m => m.Role).Should().Equal([AiThreadMessageLike.RoleEnum.User], "only the control user message is stored");
+        status.Should().Be(HttpStatusCode.BadRequest, $"role {role}");
+    }
+
+    [Theory]
     [InlineData("invented")]
     [InlineData(null)]
     [Trait("Bug", "84410")]
-    public async Task Append_NonUserRole_IsRefused(string? role)
+    public async Task Append_InventedOrMissingRole_IsRefused(string? role)
     {
+        // Raw: the SDK role enum cannot carry an invented value, and the required role cannot be left out.
         var threadId = await NewThreadAsync("Users only");
         await AppendAsync(threadId, "control");
 

@@ -112,23 +112,6 @@ public abstract class ChatPermissionTestBase(AspireAppFixture fixture) : ThreadS
         TextOf(messages[0]).Should().Be(OwnerMessage);
     }
 
-    /// <summary>
-    /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
-    /// code and content otherwise.
-    /// </summary>
-    protected static async Task<(int Status, string Error)> OutcomeOfAsync(Func<Task> call)
-    {
-        try
-        {
-            await call();
-            return (200, string.Empty);
-        }
-        catch (ApiException exception)
-        {
-            return (exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
-        }
-    }
-
     /// <summary>The assistant replies stored on a thread, read as the current caller.</summary>
     protected async Task<List<AiThreadMessageLike>> AssistantMessagesAsync(string threadId) =>
         (await ReadAllAsync(threadId)).Where(m => m.Role == AiThreadMessageLike.RoleEnum.Assistant).ToList();

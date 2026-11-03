@@ -62,9 +62,8 @@ public class MessagesAiDisabledTests(AspireAppFixture fixture) : MessagesPart3Te
         var afterTitle = ExportTitle("Exported after");
         var exception = await ExportRefusedAsAsync(Owner, BuildExport(folderId, afterTitle));
 
-        // 202 is asynchronous, so a refusal is checked for a document too; the one from before the flip is the
+        // The refusal is synchronous, so nothing was queued to land later; the document from before the flip is the
         // positive control that the listing is trustworthy.
-        await WaitForExportToSettleAsync();
         var titles = (await ListFilesAsync(Owner, folderId)).Select(f => f.Title).ToList();
         titles.Should().Contain($"{beforeTitle}.docx");
         titles.Should().NotContain($"{afterTitle}.docx");

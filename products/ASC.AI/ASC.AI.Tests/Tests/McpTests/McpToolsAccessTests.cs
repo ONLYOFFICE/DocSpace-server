@@ -65,26 +65,29 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
     }
 
     /// <summary>The twelve routes other than the catalogue, started together; an entity is named on each when given.</summary>
-    private (string Label, Task<ToolsReply> Call)[] StartEveryRoute(string? entityId)
+    /// <param name="only">When given, only these routes are started; the others are not sent at all.</param>
+    private (string Label, Task<ToolsReply> Call)[] StartEveryRoute(string? entityId, params string[] only)
     {
         var q = entityId is null ? string.Empty : $"?entityId={entityId}";
         var and = entityId is null ? string.Empty : $"&entityId={entityId}";
 
-        return
+        (string Label, Func<Task<ToolsReply>> Start)[] routes =
         [
-            ("list-custom-servers", GetToolsAsync("list-custom-servers", q)),
-            ("get-custom-server", GetToolsAsync("get-custom-server", $"?name=secret-srv{and}")),
-            ("add-custom-server", PostToolsAsync("add-custom-server", Body(entityId, ("name", "outsider"), ("config", UrlConfig())))),
-            ("update-custom-server", PutToolsAsync("update-custom-server", Body(entityId, ("name", "secret-srv"), ("config", UrlConfig())))),
-            ("remove-custom-server", DeleteToolsAsync("remove-custom-server", Body(entityId, ("name", "secret-srv")))),
-            ("replace-all-custom-servers", PutToolsAsync("replace-all-custom-servers", Body(entityId, ("map", new Dictionary<string, object> { ["outsider"] = UrlConfig() })))),
-            ("get-disabled", GetToolsAsync("get-disabled", $"?scope={UserScope}{and}")),
-            ("set-disabled", PutToolsAsync("set-disabled", Body(entityId, ("serverType", WebSearch), ("toolNames", new[] { "x" })))),
-            ("is-tool-disabled", GetToolsAsync("is-tool-disabled", $"?serverType=secret-srv&toolName=owner-disabled{and}")),
-            ("get-allow-always", GetToolsAsync("get-allow-always", q)),
-            ("set-allow-always", PutToolsAsync("set-allow-always", Body(entityId, ("serverType", "secret-srv"), ("toolName", "x"), ("value", true)))),
-            ("is-allow-always", GetToolsAsync("is-allow-always", $"?serverType=secret-srv&toolName=owner-allowed{and}"))
+            ("list-custom-servers", () => GetToolsAsync("list-custom-servers", q)),
+            ("get-custom-server", () => GetToolsAsync("get-custom-server", $"?name=secret-srv{and}")),
+            ("add-custom-server", () => PostToolsAsync("add-custom-server", Body(entityId, ("name", "outsider"), ("config", UrlConfig())))),
+            ("update-custom-server", () => PutToolsAsync("update-custom-server", Body(entityId, ("name", "secret-srv"), ("config", UrlConfig())))),
+            ("remove-custom-server", () => DeleteToolsAsync("remove-custom-server", Body(entityId, ("name", "secret-srv")))),
+            ("replace-all-custom-servers", () => PutToolsAsync("replace-all-custom-servers", Body(entityId, ("map", new Dictionary<string, object> { ["outsider"] = UrlConfig() })))),
+            ("get-disabled", () => GetToolsAsync("get-disabled", $"?scope={UserScope}{and}")),
+            ("set-disabled", () => PutToolsAsync("set-disabled", Body(entityId, ("serverType", WebSearch), ("toolNames", new[] { "x" })))),
+            ("is-tool-disabled", () => GetToolsAsync("is-tool-disabled", $"?serverType=secret-srv&toolName=owner-disabled{and}")),
+            ("get-allow-always", () => GetToolsAsync("get-allow-always", q)),
+            ("set-allow-always", () => PutToolsAsync("set-allow-always", Body(entityId, ("serverType", "secret-srv"), ("toolName", "x"), ("value", true)))),
+            ("is-allow-always", () => GetToolsAsync("is-allow-always", $"?serverType=secret-srv&toolName=owner-allowed{and}"))
         ];
+
+        return [.. routes.Where(r => only.Length == 0 || only.Contains(r.Label)).Select(r => (r.Label, r.Start()))];
     }
 
     private async Task StageOwnersStateAsync()
@@ -183,23 +186,55 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
     }
 
     /// <summary>
-    /// A write that names a room the caller cannot reach is refused on every route, the refusal carries no
-    /// configuration, no endpoint and no server name, and nothing the owner stored moves.
+    /// A tool-settings write that names a room the caller cannot reach is refused, the refusal carries no
+    /// configuration, no endpoint and no server name, and nothing the owner stored moves. A User may write their tool
+    /// settings without a room (the role matrix), so the room is what refuses here.
     /// </summary>
     [Fact]
-    public async Task Write_NamingARoomTheCallerCannotReach_IsA403OnEveryWriteRoute_AndLeaksNothing()
+    public async Task Write_ToolSettingsNamingARoomTheCallerCannotReach_IsA403_AndLeaksNothing()
     {
         var roomId = (await NewRoomIdAsync()).ToString();
+        var outsider = await InviteRoleAsync(McpRole.User);
+
+        await ExpectWritesRefusedAsync(outsider, roomId, "set-disabled", "set-allow-always");
+    }
+
+    /// <summary>
+    /// The same for the registry writes. Those are administrator-only, so a User naming the room would be refused by
+    /// the role and never test the entity: the caller is a DocSpace administrator, who passes the role but cannot open
+    /// the Owner's My documents — an administrator reads every room, not another user's personal folder.
+    /// </summary>
+    [Fact]
+    public async Task Write_RegistryNamingAFolderTheAdministratorCannotReach_IsA403_AndLeaksNothing()
+    {
+        var folderId = await GetMyDocumentsFolderIdAsync();
+        var admin = await InviteRoleAsync(McpRole.DocSpaceAdmin);
+
+        // Premise: the folder really is closed to this administrator.
+        await FilesHttpClient.Authenticate(admin);
+        var premise = await Assert.ThrowsAsync<ApiException>(
+            async () => await FoldersApi.GetFolderInfoAsync(folderId, TestContext.Current.CancellationToken));
+        premise.ErrorCode.Should().Be(403, "the Owner's My documents is not the administrator's to open");
+
+        await ExpectWritesRefusedAsync(admin, folderId.ToString(), "add-custom-server", "update-custom-server", "remove-custom-server", "replace-all-custom-servers");
+    }
+
+    /// <summary>
+    /// Stages the Owner's state, sends the given writes naming <paramref name="entityId"/> as <paramref name="caller"/>,
+    /// and checks every one is a 403 that leaks nothing and moved nothing.
+    /// </summary>
+    private async Task ExpectWritesRefusedAsync(User caller, string entityId, params string[] routes)
+    {
         await StageOwnersStateAsync();
         var before = await SnapshotAsync();
-        var outsider = await InviteRoleAsync(McpRole.User);
-        await ActAsAsync(outsider);
+        await ActAsAsync(caller);
 
-        var writes = StartEveryRoute(roomId).Where(c => c.Label is "add-custom-server" or "update-custom-server" or "remove-custom-server" or "replace-all-custom-servers" or "set-disabled" or "set-allow-always").ToArray();
+        var writes = StartEveryRoute(entityId, routes);
         var settled = await Task.WhenAll(writes.Select(c => c.Call));
         await ActAsAsync(Owner);
 
-        (await SnapshotAsync()).Should().Be(before, "the outsider changed nothing");
+        writes.Select(c => c.Label).Should().BeEquivalentTo(routes);
+        (await SnapshotAsync()).Should().Be(before, "the refused writes changed nothing");
         for (var i = 0; i < writes.Length; i++)
         {
             settled[i].Code.Should().Be(403, writes[i].Label + ": " + settled[i]);

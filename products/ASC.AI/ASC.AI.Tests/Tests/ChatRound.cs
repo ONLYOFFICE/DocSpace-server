@@ -90,9 +90,12 @@ public sealed record ChatRound(HttpStatusCode StatusCode, string Raw, IReadOnlyL
             .LastOrDefault(t => t is not null);
 
     /// <summary>The text of one frame's message: a plain string, or its text blocks joined.</summary>
-    public static string? TextOfFrame(JsonElement frame)
+    public static string? TextOfFrame(JsonElement frame) => TextOfFrame(frame, "message");
+
+    /// <summary>The text of the message a frame carries under <paramref name="property"/> (<c>responseMessage</c>, say).</summary>
+    public static string? TextOfFrame(JsonElement frame, string property)
     {
-        if (!frame.TryGetProperty("message", out var message) || !message.TryGetProperty("content", out var content))
+        if (!frame.TryGetProperty(property, out var message) || !message.TryGetProperty("content", out var content))
         {
             return null;
         }

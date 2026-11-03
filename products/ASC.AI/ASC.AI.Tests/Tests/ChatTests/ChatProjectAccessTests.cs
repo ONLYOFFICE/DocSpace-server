@@ -99,7 +99,15 @@ public class ChatProjectAccessTests(AspireAppFixture fixture) : ChatProjectTestB
         StreamedRequestsCarrying(provider, question).Should().BeEmpty(provider.Describe());
     }
 
+    /// <summary>
+    /// Inside a project a missing model is the project's own refusal, 409 (<c>assertThreadCreatable</c>,
+    /// threadsController.ts). Measured on 2026-11-03: 404 "no AI profile is available for this thread", the answer for a
+    /// thread outside any project - the service did not recognise the room as a project on this path, which would also
+    /// explain why an administrator outside the project creates threads in it (the test above). The cause is not
+    /// investigated.
+    /// </summary>
     [Fact]
+    [Trait("Category", "Bug")]
     public async Task Create_ProjectOnAPortalWithNoModelAnywhere_IsRefusedForWantOfAModel()
     {
         // Arrange: no profile on the portal, so neither the project nor the Chat binding names a model.
@@ -109,8 +117,9 @@ public class ChatProjectAccessTests(AspireAppFixture fixture) : ChatProjectTestB
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateProjectThreadAsync(projectId));
 
         // Assert
-        // aiProjectChatContext.ts answers 409 projectModelUnavailable; the measured answer on a portal with no profile is 404
-        // ("no AI profile is available"), so either status is the "no model" refusal, never a thread.
-        exception.ErrorCode.Should().BeOneOf([404, 409], "the portal has no model to run the project on");
+        // The owner may chat in the project, so assertThreadCreatable (threadsController.ts) reaches the project's model:
+        // with neither its own nor a portal Chat binding there is none, which is the project's 409, not the generic 404 of
+        // a thread outside any project.
+        exception.ErrorCode.Should().Be(409, $"the portal has no model to run the project on: {exception.ErrorContent}");
     }
 }

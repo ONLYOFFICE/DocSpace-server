@@ -49,6 +49,12 @@ public static class ResourceNames
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
 
+    /// <summary>
+    /// The AI worker: it writes the files a text-to-docx export produces and runs the vectorization. Without it an
+    /// export is accepted (202) and never lands.
+    /// </summary>
+    public const string AiWorker = "onlyoffice-ai-worker";
+
     /// <summary>The Node chat service (common/ASC.AI.Chat) that serves <c>/api/2.0/ai</c> and talks to the model.</summary>
     public const string AiChat = "onlyoffice-aiChat";
     public const string Backup = "onlyoffice-data-backup";

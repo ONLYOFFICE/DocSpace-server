@@ -73,7 +73,7 @@ public class TextToDocxQuotaTests(AspireAppFixture fixture) : TextToDocxPortTest
         var result = await TryExportAsync(BuildExport(title, "The assistant said hello.", roomId));
 
         // The quota does hold — nothing is written past it. This half stays true after the fix.
-        await WaitForExportToSettleAsync();
+        await WaitForExportToSettleAsync(result.StatusCode);
         (await ListFolderFilesAsync(roomId)).Select(file => file.Title).Should().NotContain(
             $"{title}.docx",
             "a room that is out of quota must not gain a document");

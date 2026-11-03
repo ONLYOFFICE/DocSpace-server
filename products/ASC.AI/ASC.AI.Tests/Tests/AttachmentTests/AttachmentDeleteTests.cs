@@ -99,6 +99,17 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
         file.Response.Id.Should().Be(fileId, "the source file after its draft is gone");
     }
 
+    [Fact]
+    public async Task Delete_MalformedId_IsRejectedAndNothingIsDeleted()
+    {
+        var id = await SaveDraftAsync(Owner, "Autotest survivor.docx");
+
+        var refused = await DeleteAsync("not-a-uuid");
+
+        refused.Status.Should().Be(400);
+        await ExpectStoredAsync(id, "the draft after a rejected delete");
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("""{"id":"not-a-uuid"}""")]
@@ -193,11 +204,25 @@ public class AttachmentDeleteTests(AspireAppFixture fixture) : AttachmentTestBas
         }
     }
 
+    [Fact]
+    public async Task DeleteMany_EmptyList_ReportsSuccess()
+    {
+        var outcome = await DeleteManyAsync();
+
+        outcome.Status.Should().Be(200, outcome.Error);
+    }
+
+    [Fact]
+    public async Task DeleteMany_MalformedId_IsRejected()
+    {
+        var refused = await DeleteManyAsync("not-a-uuid");
+
+        refused.Status.Should().Be(400);
+    }
+
     [Theory]
-    [InlineData("[]", 200)]
     [InlineData("null", 200)]
     [InlineData("""{"ids":["3fa85f64-5717-4562-b3fc-2c963f66afa6"]}""", 200)]
-    [InlineData("""["not-a-uuid"]""", 400)]
     [InlineData("""{"ids":["not-a-uuid"]}""", 400)]
     [InlineData("\"not-a-uuid\"", 400)]
     public async Task DeleteMany_AcceptsSeveralBodyShapes_AndRejectsOnlyUnusableIds(string body, int expectedStatus)

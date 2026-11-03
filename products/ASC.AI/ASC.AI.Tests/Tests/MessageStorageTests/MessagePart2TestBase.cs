@@ -186,15 +186,15 @@ public abstract class MessagePart2TestBase(AspireAppFixture fixture) : MessageTe
 
     private static bool Asks(string body, string question, bool streamedOnly)
     {
+        if (streamedOnly && !StubModelProvider.IsStreamed(body))
+        {
+            return false;
+        }
+
         try
         {
             using var document = JsonDocument.Parse(body);
             var root = document.RootElement;
-
-            if (streamedOnly && !(root.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True))
-            {
-                return false;
-            }
 
             if (!root.TryGetProperty("messages", out var messages) || messages.ValueKind != JsonValueKind.Array)
             {
@@ -306,23 +306,7 @@ public abstract class MessagePart2TestBase(AspireAppFixture fixture) : MessageTe
         string.Join("\n", messages.Select(m => $"  {m.Role} {m.Id} [{m.Status?.Type}] {TextOf(m)}"));
 
     /// <summary>The text of an ndjson frame's <c>message</c> (or <c>responseMessage</c>): a string, or its text parts joined.</summary>
-    /// <remarks>The same reading as <see cref="ChatRound.AssistantText"/>, whose frame reader is private.</remarks>
-    protected static string? FrameText(JsonElement frame, string property = "message")
-    {
-        if (!frame.TryGetProperty(property, out var message) || !message.TryGetProperty("content", out var content))
-        {
-            return null;
-        }
-
-        return content.ValueKind switch
-        {
-            JsonValueKind.String => content.GetString(),
-            JsonValueKind.Array => string.Concat(content.EnumerateArray()
-                .Where(b => b.TryGetProperty("type", out var t) && t.GetString() == "text")
-                .Select(b => b.TryGetProperty("text", out var x) ? x.GetString() : null)),
-            _ => null
-        };
-    }
+    protected static string? FrameText(JsonElement frame, string property = "message") => ChatRound.TextOfFrame(frame, property);
 
     /// <summary>
     /// Stores <paramref name="payload"/> as a user message and reads it back everywhere a client reads it from — by id,

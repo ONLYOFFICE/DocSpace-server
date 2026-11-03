@@ -43,7 +43,7 @@ namespace ASC.AI.Tests.Tests.ChatTests;
 /// stand-in model of its own — through <see cref="GetOwnProfileAsync"/>; answers are queued only after that profile
 /// exists, because the profile create sends a streamed tool probe that would take the first one.
 /// </remarks>
-public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fixture), IDisposable
+public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
     /// <summary>What the chat service names every thread a first message opens, until the generated title lands.</summary>
     protected const string DefaultThreadTitle = "New chat";
@@ -57,10 +57,10 @@ public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fix
     /// <summary>The test's own stand-in model, started on first use.</summary>
     protected StubModelProvider Provider => _provider ??= new StubModelProvider();
 
-    public void Dispose()
+    public override async ValueTask DisposeAsync()
     {
         _provider?.Dispose();
-        GC.SuppressFinalize(this);
+        await base.DisposeAsync();
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fix
     /// <summary>The bodies of the streamed chat requests <see cref="Provider"/> received that carry <paramref name="text"/>.</summary>
     /// <remarks>A title request is not streamed and the profile's tool probe carries no user text, so neither is here.</remarks>
     protected List<string> ChatRequestsCarrying(string text) =>
-        Provider.CompletionRequestBodies.Where(b => IsStreamed(b) && b.Contains(text, StringComparison.Ordinal)).ToList();
+        Provider.CompletionRequestBodies.Where(b => StubModelProvider.IsStreamed(b) && b.Contains(text, StringComparison.Ordinal)).ToList();
 
     /// <summary>
     /// Reads the thread until its title satisfies <paramref name="until"/> or the deadline passes; returns the last
@@ -152,11 +152,11 @@ public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fix
     /// </summary>
     protected static ScriptedAnswer TextInPieces(params string[] pieces)
     {
-        var chunks = new List<object> { Chunk(new { role = "assistant", content = "" }, null) };
-        chunks.AddRange(pieces.Select(p => Chunk(new { content = p }, null)));
-        chunks.Add(Chunk(new { }, "stop"));
+        var chunks = new List<object> { StubModelProvider.Chunk(new { role = "assistant", content = "" }) };
+        chunks.AddRange(pieces.Select(p => StubModelProvider.Chunk(new { content = p })));
+        chunks.Add(StubModelProvider.Chunk(new { }, "stop"));
 
-        return new ScriptedAnswer(200, string.Concat(chunks.Select(c => $"data: {JsonSerializer.Serialize(c)}\n\n")) + "data: [DONE]\n\n");
+        return new ScriptedAnswer(200, StubModelProvider.Sse([.. chunks]));
     }
 
     protected static string? FrameType(JsonElement frame) => FrameString(frame, "type");
@@ -165,47 +165,9 @@ public abstract class ChatPart1TestBase(AspireAppFixture fixture) : BaseTest(fix
         frame.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
 
     /// <summary>The text of the message a frame carries, "" when it carries none.</summary>
-    protected static string FrameText(JsonElement frame)
-    {
-        if (!frame.TryGetProperty("message", out var message) || !message.TryGetProperty("content", out var content))
-        {
-            return "";
-        }
-
-        return content.ValueKind switch
-        {
-            JsonValueKind.String => content.GetString() ?? "",
-            JsonValueKind.Array => string.Concat(content.EnumerateArray()
-                .Where(b => b.TryGetProperty("type", out var t) && t.GetString() == "text")
-                .Select(b => b.TryGetProperty("text", out var x) ? x.GetString() : null)),
-            _ => ""
-        };
-    }
+    protected static string FrameText(JsonElement frame) => ChatRound.TextOfFrame(frame) ?? "";
 
     /// <summary>The id of the message a frame carries in <c>message.id</c>, or null.</summary>
     protected static string? FrameMessageId(JsonElement frame) =>
         frame.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.Object ? FrameString(message, "id") : null;
-
-    private static bool IsStreamed(string body)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(body);
-
-            return document.RootElement.TryGetProperty("stream", out var stream) && stream.ValueKind == JsonValueKind.True;
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
-    }
-
-    private static object Chunk(object delta, string? finishReason) => new
-    {
-        id = "chatcmpl-stub",
-        @object = "chat.completion.chunk",
-        created = 0,
-        model = StubModelProvider.ModelId,
-        choices = new[] { new { index = 0, delta, finish_reason = finishReason } }
-    };
 }

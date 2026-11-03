@@ -56,7 +56,7 @@ public class ChatRoomGoneTests(AspireAppFixture fixture) : ChatPart2TestBase(fix
             roomId,
             new ArchiveRoomRequest(deleteAfter: false),
             TestContext.Current.CancellationToken)).Response;
-        (await WaitForOperationAsync(archive.Id)).Should().OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
+        (await WaitForOperationAsync(archive.Id)).Should().NotBeEmpty().And.OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
         (await RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response.RootFolderType
             .Should().Be(DocSpace.API.SDK.Model.FolderType.Archive, "the room is in Archive");
 
@@ -76,7 +76,7 @@ public class ChatRoomGoneTests(AspireAppFixture fixture) : ChatPart2TestBase(fix
             roomId,
             new ArchiveRoomRequest(deleteAfter: false),
             TestContext.Current.CancellationToken)).Response;
-        (await WaitForOperationAsync(unarchive.Id)).Should().OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
+        (await WaitForOperationAsync(unarchive.Id)).Should().NotBeEmpty().And.OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
 
         (await ListThreadIdsAsync(entityId)).Should().Contain(thread.ThreadId);
         (await ReadMessagesAsync(thread.ThreadId)).Should().HaveCount(read.Count + 2);
@@ -96,7 +96,7 @@ public class ChatRoomGoneTests(AspireAppFixture fixture) : ChatPart2TestBase(fix
             roomId,
             new DeleteRoomRequest(deleteAfter: false),
             TestContext.Current.CancellationToken)).Response;
-        (await WaitForOperationAsync(deletion.Id)).Should().OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
+        (await WaitForOperationAsync(deletion.Id)).Should().NotBeEmpty().And.OnlyContain(s => s.Finished && string.IsNullOrEmpty(s.Error));
 
         var roomInfo = await Assert.ThrowsAsync<ApiException>(
             async () => await RoomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken));
