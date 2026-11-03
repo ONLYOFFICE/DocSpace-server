@@ -193,10 +193,10 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, roomUniqId, [user], [EMailSenderName]);
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)
     {
         var saasDocSpaceInviteNotifyAction = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
-        saasDocSpaceInviteNotifyAction.Init(confirmationUrl, culture);
+        saasDocSpaceInviteNotifyAction.Init(confirmationUrl, inviteType, culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(saasDocSpaceInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
 

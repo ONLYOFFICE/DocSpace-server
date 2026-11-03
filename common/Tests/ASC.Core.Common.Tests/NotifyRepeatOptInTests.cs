@@ -104,6 +104,19 @@ public class NotifyRepeatOptInTests
         action.SuppressRepeats.Should().BeFalse();
     }
 
+    [Theory]
+    // the invitation link carries the account type the invitee joins with, so a re-invite with another type has to
+    // deliver the new link
+    [InlineData("saas_docspace_invite")]
+    [InlineData("saas_room_invite")]
+    [InlineData("saas_agent_invite")]
+    public void InvitationLetter_TellsApartTheAccountTypeOfItsLink(string id)
+    {
+        var action = Actions().Single(a => a.ID == id);
+
+        action.DeduplicationTags.Should().Contain("InviteType");
+    }
+
     private static IEnumerable<INotifyAction> Actions()
     {
         Assembly[] assemblies =

@@ -1448,6 +1448,9 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
     // a caller can repeat PUT people/invite at will
     public override bool SuppressRepeats => true;
 
+    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1456,7 +1459,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         ];
     }
 
-    public void Init(string confirmationUrl, string culture = "")
+    public void Init(string confirmationUrl, EmployeeType inviteType, string culture = "")
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1466,6 +1469,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         Tags = [
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
