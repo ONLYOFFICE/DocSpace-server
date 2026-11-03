@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Chi phí nhà cung cấp</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook đang bị vô hiệu hóa. Hãy bật nó trước khi thử gửi lại các lượt gửi</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Sự kiện đang được gửi. Hãy thử lại sau khi lần thử hiện tại hoàn tất</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Lượt gửi này được ghi lại theo định dạng webhook cũ hơn và không thể gửi lại</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Đích của webhook không phải là người dùng hoặc nhóm hiện có</value>
+  </data>
 </root>

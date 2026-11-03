@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Palveluntarjoajan hinta</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook on poistettu käytöstä. Ota se käyttöön ennen sen toimitusten uudelleenyritystä</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Tapahtumaa lähetetään parhaillaan. Yritä uudelleen, kun yritys on päättynyt</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Toimitus tallennettiin aiemmassa webhook-muodossa, eikä sitä voi lähettää uudelleen</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhookin kohde ei ole olemassa oleva käyttäjä tai ryhmä</value>
+  </data>
 </root>
