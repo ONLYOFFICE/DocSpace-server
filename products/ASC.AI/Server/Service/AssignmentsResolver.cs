@@ -45,6 +45,7 @@ public record AssignmentPolicy
 public class AssignmentsResolver(
     AiGateway gateway,
     PortalModelsService portalModelsService,
+    TenantManager tenantManager,
     AiConfiguration aiConfiguration,
     ILogger<AssignmentsResolver> logger)
 {
@@ -158,7 +159,7 @@ public class AssignmentsResolver(
     {
         try
         {
-            return await portalModelsService.ReadAsync();
+            return await portalModelsService.ReadAsync(tenantManager.GetCurrentTenantId());
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
         {

@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Неможливо використати цю папку для зберігання кімнати</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Невірна URL-адреса підключення</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Невірний заголовок</value>
   </data>
@@ -610,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Виходи чату</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Кімната вже містить папку .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Сховище не може бути відключено, поки кімната його використовує. Натомість видаліть кімнату</value>
   </data>
@@ -621,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Пошук у метаданих папки</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>До ШІ-проєкту можна прив'язати не більше {0} кімнат з інструкціями</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>До ШІ-проєкту можна прив'язати не більше {0} кімнат знань</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Ці кімнати не можна прив'язати до ШІ-проєкту: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>До кімнати з інструкціями можна додавати лише файли Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>У кімнаті з інструкціями може бути не більше {0} навичок</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Опис навички має містити від 1 до 1024 символів і не повинен містити XML-тегів</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Файл навички має починатися з блоку YAML frontmatter між двома рядками --- з полями name і description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Ім'я навички має містити від 1 до 64 символів, лише малі літери, цифри та поодинокі дефіси, і не повинно починатися або закінчуватися дефісом</value>
   </data>
 </root>

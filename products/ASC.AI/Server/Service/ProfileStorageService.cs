@@ -40,22 +40,17 @@ public class ProfileStorageService(
     TenantManager tenantManager,
     ProfileStorage storage,
     ByokKeyStorage byokKeyStorage,
-    PortalModelsService portalModelsService,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway aiGateway,
-    BaseCommonLinkUtility linkUtility,
+    ProfileReader profileReader,
     MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
     private readonly AiGateway _aiGateway = aiGateway;
 
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
-
-    private const string ImageModality = "image";
-    private const string ToolsCapability = "tools";
-    private const string ReasoningCapability = "reasoning";
 
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
@@ -161,7 +156,7 @@ public class ProfileStorageService(
         return
         [
             .. models
-                .Where(m => IsNotEmbedding(m) && !overridden.Contains(m.RevisionId))
+                .Where(m => ProfileReader.IsNotEmbedding(m) && !overridden.Contains(m.RevisionId))
                 .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
                 .GroupBy(x => x.Provider.Id)
                 .Select(g => new ByokProviderInfo
@@ -178,13 +173,7 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (_aiGateway.Configured)
-        {
-            var profiles = await ReadAllVerifiedAsync();
-            return profiles.Find(p => p.Id == id) ?? throw new ItemNotFoundException();
-        }
-
-        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
+        var profile = await profileReader.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
         return profile ?? throw new ItemNotFoundException();
     }
@@ -230,12 +219,7 @@ public class ProfileStorageService(
 
     internal async Task<List<Profile>> ReadAllVerifiedAsync(List<Model>? models = null)
     {
-        if (!_aiGateway.Configured)
-        {
-            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        }
-
-        return await MapGatewayProfilesAsync(models ?? await portalModelsService.ReadAsync());
+        return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
     }
 
     internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
@@ -258,102 +242,6 @@ public class ProfileStorageService(
     {
         var models = (await _aiGateway.GetAllModelsAsync()).Data;
 
-        return models.FirstOrDefault(m => m.RevisionId == id && IsNotEmbedding(m));
-    }
-
-    private async Task<List<Profile>> MapGatewayProfilesAsync(List<Model> models)
-    {
-        var byokProviders = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).ToDictionary(k => k.Id, k => k.Provider);
-
-        return
-        [
-            .. models
-                .Where(IsNotEmbedding)
-                .Select(m => MapGatewayProfile(m, byokProviders.GetValueOrDefault(m.RevisionId)))
-        ];
-    }
-
-    private Profile MapGatewayProfile(Model model, string? byokProvider)
-    {
-        return new Profile
-        {
-            Id = model.RevisionId,
-            Name = model.Alias,
-            ProviderType = "onlyoffice",
-            BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-            ModelId = model.Id,
-            Reasoning = MapReasoning(model),
-            CanUseTool = HasCapability(model, ToolsCapability),
-            Capabilities = MapCapabilities(model),
-            UseResponsesApi = false,
-            Key = "onlyoffice",
-            ByokProvider = byokProvider
-        };
-    }
-
-    private static bool IsNotEmbedding(Model model)
-    {
-        return !string.Equals(model.Type, "embedding", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static ReasoningConfig MapReasoning(Model model)
-    {
-        var reasoning = model.Reasoning;
-
-        return new ReasoningConfig
-        {
-            Thinks = reasoning is not null || HasCapability(model, ReasoningCapability),
-            CanDisable = reasoning is null || !reasoning.Mandatory,
-            Depths = reasoning?.SupportedEfforts?.Select(ParseDepth).OfType<ReasoningDepth>().ToArray() ?? [],
-            DefaultDepth = reasoning is null
-                ? null
-                : reasoning.DefaultEnabled ? ParseDepth(reasoning.DefaultEffort) : ReasoningDepth.None
-        };
-    }
-
-    private static ReasoningDepth? ParseDepth(string? value)
-    {
-        return ReasoningDepthExtensions.TryParse(value, true, out var depth) ? depth : null;
-    }
-
-    private static Capabilities MapCapabilities(Model model)
-    {
-        var capabilities = Capabilities.None;
-
-        if (string.Equals(model.Type, "chat", StringComparison.OrdinalIgnoreCase))
-        {
-            capabilities |= Capabilities.Chat;
-        }
-        else if (string.Equals(model.Type, "image", StringComparison.OrdinalIgnoreCase))
-        {
-            capabilities |= Capabilities.Image;
-        }
-
-        if (HasModality(model.InputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Vision;
-        }
-
-        if (HasModality(model.OutputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Image;
-        }
-
-        if (HasCapability(model, ToolsCapability))
-        {
-            capabilities |= Capabilities.Tools;
-        }
-
-        return capabilities;
-    }
-
-    private static bool HasCapability(Model model, string capability)
-    {
-        return model.Capabilities?.Contains(capability, StringComparer.OrdinalIgnoreCase) == true;
-    }
-
-    private static bool HasModality(IEnumerable<string> modalities, string modality)
-    {
-        return modalities.Contains(modality, StringComparer.OrdinalIgnoreCase);
+        return models.FirstOrDefault(m => m.RevisionId == id && ProfileReader.IsNotEmbedding(m));
     }
 }

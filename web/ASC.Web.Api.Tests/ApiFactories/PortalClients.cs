@@ -51,6 +51,22 @@ public sealed class PortalClients : PortalClientsBase
     public ProfilesApi ProfilesApi { get; }
     public ApiKeysApi ApiKeysApi { get; }
 
+    // People service — the user and group events the webhook payload tests publish, and the type change
+    // (a background task) the webhook publish-access tests demote a member with
+    public UserStatusApi UserStatusApi { get; }
+    public GroupApi GroupApi { get; }
+    public UserTypeApi UserTypeApi { get; }
+
+    // Files service — the file, folder, room and agent events the webhook payload tests publish
+    public HttpClient FilesHttpClient { get; }
+    public RoomsApi RoomsApi { get; }
+    public FilesApi FilesApi { get; }
+    public FoldersApi FoldersApi { get; }
+    public OperationsApi OperationsApi { get; }
+
+    // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
+    public HttpClient WebhookReceiverHttpClient { get; }
+
     // WebApi service
     public AuthenticationApi AuthenticationApi { get; }
     public CapabilitiesApi CapabilitiesApi { get; }
@@ -99,6 +115,19 @@ public sealed class PortalClients : PortalClientsBase
         // is served by the People service — so it rides the People client, not WebApi.
         PortalGuestsApi = new PortalGuestsApi(PeopleHttpClient, peopleConfig);
         ApiKeysApi = new ApiKeysApi(PeopleHttpClient, peopleConfig);
+        UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
+        GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+        UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
+
+        FilesHttpClient = CreateClient(ResourceNames.Files);
+
+        var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
+        RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        FilesApi = new FilesApi(FilesHttpClient, filesConfig);
+        FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
+        OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
+
+        WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 
         IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 

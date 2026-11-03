@@ -90,24 +90,17 @@ public abstract class RoomsFolderTestBase(
         }
     }
 
-    /// <summary>A room as it comes back from a raw GET /files/rooms read.</summary>
-    protected sealed record RawRoomFolder(int Id, string Title, RoomType? RoomType);
+    /// <summary>A room of a GET /files/rooms listing.</summary>
+    protected sealed record ListedRoom(int Id, string Title, RoomType? RoomType);
 
-    /// <summary>The parsed body of a raw GET /files/rooms read.</summary>
-    protected sealed record RawRoomsFolderResult(List<RawRoomFolder> Folders, int Total, int StartIndex, int Count);
+    /// <summary>A GET /files/rooms listing, with the rooms as their concrete <c>FolderDto</c>.</summary>
+    protected sealed record ListedRooms(List<ListedRoom> Folders, int Total, int StartIndex, int Count);
 
     /// <summary>
-    /// Reads GET /files/rooms straight from JSON, with the same query parameters as
-    /// <c>RoomsApi.GetRoomsFolderAsync</c>.
-    ///
-    /// <c>FolderContentDto.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
-    /// carries <c>Title</c> but neither <c>Id</c> nor <c>RoomType</c> — those two are only on the
-    /// concrete room DTO the endpoint actually returns. That is an SDK/OpenAPI defect, not a
-    /// preference, and this helper exists solely to work around it: every test that only needs
-    /// title/total/count/startIndex should keep calling <c>_roomsApi.GetRoomsFolderAsync</c>
-    /// directly instead.
+    /// GET /files/rooms through <c>RoomsApi.GetRoomsFolderAsync</c>, with the rooms read as the <c>FolderDto</c>
+    /// the <c>entryKind</c> discriminator makes of them, so the <c>Id</c> and <c>RoomType</c> are at hand.
     /// </summary>
-    protected async Task<RawRoomsFolderResult> GetRoomsFolderRawAsync(
+    protected async Task<ListedRooms> ListRoomsAsync(
         List<RoomType>? type = null,
         Guid? subjectId = null,
         Guid? subjectOwnerId = null,
@@ -121,98 +114,25 @@ public abstract class RoomsFolderTestBase(
         SortOrder? sortOrder = null,
         string? filterValue = null)
     {
-        var query = HttpUtility.ParseQueryString(string.Empty);
+        var content = (await _roomsApi.GetRoomsFolderAsync(
+            type: type,
+            subjectId: subjectId,
+            subjectOwnerId: subjectOwnerId,
+            searchArea: searchArea,
+            withoutTags: withoutTags,
+            tags: tags,
+            excludeSubject: excludeSubject,
+            count: count,
+            startIndex: startIndex,
+            sortBy: sortBy,
+            sortOrder: sortOrder,
+            filterValue: filterValue,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        if (type is not null)
-        {
-            foreach (var t in type)
-            {
-                query.Add("type", ((int)t).ToString());
-            }
-        }
-
-        if (subjectId is not null)
-        {
-            query["subjectId"] = subjectId.Value.ToString();
-        }
-
-        if (subjectOwnerId is not null)
-        {
-            query["subjectOwnerId"] = subjectOwnerId.Value.ToString();
-        }
-
-        if (searchArea is not null)
-        {
-            query["searchArea"] = ((int)searchArea.Value).ToString();
-        }
-
-        if (withoutTags is not null)
-        {
-            query["withoutTags"] = withoutTags.Value.ToString();
-        }
-
-        if (tags is not null)
-        {
-            query["tags"] = tags;
-        }
-
-        if (excludeSubject is not null)
-        {
-            query["excludeSubject"] = excludeSubject.Value.ToString();
-        }
-
-        if (count is not null)
-        {
-            query["count"] = count.Value.ToString();
-        }
-
-        if (startIndex is not null)
-        {
-            query["startIndex"] = startIndex.Value.ToString();
-        }
-
-        if (sortBy is not null)
-        {
-            query["sortBy"] = sortBy;
-        }
-
-        if (sortOrder is not null)
-        {
-            query["sortOrder"] = ((int)sortOrder.Value).ToString();
-        }
-
-        if (filterValue is not null)
-        {
-            query["filterValue"] = filterValue;
-        }
-
-        var queryString = query.ToString();
-        var path = string.IsNullOrEmpty(queryString) ? "api/2.0/files/rooms" : $"api/2.0/files/rooms?{queryString}";
-
-        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to read {path} ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var responseElement = json.RootElement.GetProperty("response");
-
-        var folders = responseElement.GetProperty("folders").EnumerateArray()
-            .Select(f => new RawRoomFolder(
-                f.GetProperty("id").GetInt32(),
-                f.GetProperty("title").GetString() ?? string.Empty,
-                f.TryGetProperty("roomType", out var rt) && rt.ValueKind == JsonValueKind.Number
-                    ? (RoomType)rt.GetInt32()
-                    : null))
+        var folders = (content.Folders ?? []).OfType<FolderDto>()
+            .Select(f => new ListedRoom(f.Id, f.Title ?? string.Empty, f.RoomType))
             .ToList();
 
-        return new RawRoomsFolderResult(
-            folders,
-            responseElement.GetProperty("total").GetInt32(),
-            responseElement.GetProperty("startIndex").GetInt32(),
-            responseElement.GetProperty("count").GetInt32());
+        return new ListedRooms(folders, content.Total, content.StartIndex, content.Count);
     }
 }

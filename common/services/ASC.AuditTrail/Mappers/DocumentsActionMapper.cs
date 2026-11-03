@@ -190,7 +190,10 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomDenyDownloadDisabled,
                             MessageAction.RoomWatermarkSet,
                             MessageAction.RoomWatermarkDisabled,
-                            MessageAction.RoomInviteResend
+                            MessageAction.RoomInviteResend,
+                            MessageAction.RoomsLinkedToAiProject,
+                            MessageAction.RoomsUnlinkedFromAiProject,
+                            MessageAction.AiProjectProfileAssigned
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },

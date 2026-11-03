@@ -42,12 +42,15 @@ public class CreateWebhookTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    // every subscription it creates is probed at the webhook receiver
+    protected override bool NeedsLazyResources => true;
+
     [Fact]
     public async Task CreateWebhook_Owner_ReturnsCreatedWebhook()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(enabled: true);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: true);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -63,19 +66,89 @@ public class CreateWebhookTests(
     }
 
     [Fact]
-    public async Task CreateWebhook_Owner_WithTriggersAndSsl_ReturnsCreatedWebhook()
+    public async Task CreateWebhook_Owner_WithTriggers_ReturnsThem()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(ssl: true, triggers: WebhookTrigger.FileCreated);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.FileCreated);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         created.StatusCode.Should().Be(200);
-        created.Response.Ssl.Should().BeTrue();
         created.Response.Triggers.Should().Be(WebhookTrigger.FileCreated);
+    }
+
+    /// <summary>
+    /// <c>ssl</c> demands an https target with a valid certificate. The positive case needs a public https host,
+    /// which this suite does not depend on, so only the refusal of a plain http target is covered here.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_SslWithHttpTarget_ThrowsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        dto.Ssl = true;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    /// <summary>
+    /// Both columns default to true in the database, and EF used to leave a false bool out of the INSERT,
+    /// so the default won: a subscription created without SSL to an http target was then disabled by its
+    /// first delivery ("HTTPS is required"). Read back from the list, not from the create response.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_Owner_WithSslAndEnabledOff_StoresBothOff()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: false);
+
+        // Act
+        var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
+
+        // Assert
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+        var stored = list.Response.Should().ContainSingle(w => w.Configs.Id == created.Response.Id).Subject.Configs;
+
+        stored.Ssl.Should().BeFalse();
+        stored.Enabled.Should().BeFalse();
+    }
+
+    /// <summary>
+    /// A request that leaves <c>ssl</c> out gets the check for the target's scheme: off for an http one, which it would
+    /// otherwise refuse. Sent raw, because the SDK model's <c>Ssl</c> is a non-nullable bool written with
+    /// <c>EmitDefaultValue = true</c>, so the generated client always sends <c>"ssl": false</c> and cannot leave the
+    /// field out (tests.md, raw carve-outs). The https half (on by default) needs an https target with a valid
+    /// certificate, which this suite does not have: against the plain-http receiver both settings fail alike.
+    /// </summary>
+    [Fact]
+    public async Task CreateWebhook_WithoutSslForAnHttpTarget_StoresSslOff()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+
+        // Act
+        using var response = await _webApi.PostAsync(
+            "api/2.0/settings/webhook",
+            new { name = dto.Name, uri = dto.Uri, secretKey = dto.SecretKey, enabled = false },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        var created = await _webApi.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        var id = created.GetProperty("id").GetInt32();
+
+        var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
+        list.Response.Should().ContainSingle(w => w.Configs.Id == id).Which.Configs.Ssl.Should().BeFalse();
     }
 
     [Fact]
@@ -83,7 +156,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(null);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -101,7 +174,7 @@ public class CreateWebhookTests(
         // Arrange
         var member = await InviteContact(employeeType);
         await _webApiClient.Authenticate(member);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -117,7 +190,7 @@ public class CreateWebhookTests(
         // Arrange
         var guest = await InviteGuest();
         await _webApiClient.Authenticate(guest);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

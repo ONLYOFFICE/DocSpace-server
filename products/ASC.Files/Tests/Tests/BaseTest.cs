@@ -184,16 +184,6 @@ public class BaseTest(
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
-    /// <summary>
-    /// Reads the <c>total</c> of a share list (<c>api/2.0/files/file/{id}/share</c>,
-    /// <c>api/2.0/files/rooms/{id}/share?...</c>) from the raw envelope: <c>FileShareArrayWrapper</c>
-    /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
-    /// </summary>
-    protected Task<long?> ReadShareTotal(string path)
-    {
-        return new RawApiClient(_filesClient).GetTotalAsync(path, TestContext.Current.CancellationToken);
-    }
-
     protected async Task<int> GetShareFolderIdAsync(User user)
     {
         return await GetFolderIdAsync(FolderType.SHARE, user);
@@ -293,19 +283,13 @@ public class BaseTest(
     }
 
     /// <summary>
-    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
-    /// neither <c>id</c> nor <c>type</c>.
+    /// The id of the AI room's knowledge folder, found among its subfolders by <c>FolderType.Knowledge</c>.
     /// </summary>
     protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
     {
-        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+        var folders = (await _foldersApi.GetFoldersAsync(aiRoomId, TestContext.Current.CancellationToken)).Response;
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-
-        return payload.RootElement.GetProperty("response").EnumerateArray()
-            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
-            .Select(f => f.GetProperty("id").GetInt32())
-            .First();
+        return folders.OfType<FolderDto>().First(f => f.Type == FolderType.Knowledge).Id;
     }
 
     /// <summary>

@@ -286,6 +286,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI model of AI project {0} changed to {1}.
+        /// </summary>
+        public static string AiProjectProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProjectProfileAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI provider created: {0}.
         /// </summary>
         public static string AIProviderCreated {
@@ -338,7 +347,25 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("ApiKeyUpdated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to App disabled: {0}.
+        /// </summary>
+        public static string AppDisabled {
+            get {
+                return ResourceManager.GetString("AppDisabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to App enabled: {0}.
+        /// </summary>
+        public static string AppEnabled {
+            get {
+                return ResourceManager.GetString("AppEnabled", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Attach.
         /// </summary>
@@ -2761,6 +2788,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms linked to AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsLinkedToAiProject {
+            get {
+                return ResourceManager.GetString("RoomsLinkedToAiProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Logo created.
         /// </summary>
         public static string RoomLogoCreated {
@@ -2811,6 +2847,15 @@ namespace ASC.AuditTrail {
         public static string RoomUnarchived {
             get {
                 return ResourceManager.GetString("RoomUnarchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms unlinked from AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsUnlinkedFromAiProject {
+            get {
+                return ResourceManager.GetString("RoomsUnlinkedFromAiProject", resourceCulture);
             }
         }
         
@@ -3597,6 +3642,15 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook delivery retried: {0}.
+        /// </summary>
+        public static string WebhookRetried {
+            get {
+                return ResourceManager.GetString("WebhookRetried", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Webhook updated: {0}.
         /// </summary>

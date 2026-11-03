@@ -427,6 +427,99 @@ public class FormFillingReportCreator(
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
 
+        return await IndexSubmissionAsync(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, data, DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// Indexes a completed form missing from the search index, with the forms data read from the file; false when the
+    /// index refused it. Nothing is refreshed: the caller refreshes the indexes once for all the forms it recovers. The
+    /// description of the version is written only when asked, for a version that has none: the one the editor wrote on
+    /// submission is kept.
+    /// </summary>
+    public async Task<bool> IndexRecoveredSubmissionAsync(
+        File<int> formsDataFile,
+        int originalFormId,
+        int originalFormVersion,
+        int roomId,
+        int resultFormNumber,
+        string formsDataJson,
+        DateTime filledOn,
+        bool indexMetadata)
+    {
+        var submission = CreateSubmissionDocuments(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataJson, filledOn);
+
+        // The description goes first, so that a response is never indexed without the columns of its version.
+        return (!indexMetadata || await factoryIndexerFormMetadata.Index(submission.Metadata, false))
+            && await factoryIndexerForm.Index(submission.Item, false);
+    }
+
+    /// <summary>
+    /// The keys of the fields indexed for the form version; null when the version has no indexed description.
+    /// </summary>
+    public async Task<HashSet<string>> TryGetIndexedFieldKeysAsync(int originalFormId, int originalFormVersion)
+    {
+        var keys = GetExportableKeys(await GetVersionMetadataAsync(originalFormId, originalFormVersion));
+
+        return keys.Count > 0 ? keys : null;
+    }
+
+    // Empty when the version has no description or the index cannot be read.
+    private async Task<IEnumerable<FormMetadata>> GetVersionMetadataAsync(int originalFormId, int originalFormVersion)
+    {
+        await factoryIndexerFormMetadata.RefreshAsync();
+        var (success, result) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        return success ? result.FirstOrDefault()?.Metadata ?? [] : [];
+    }
+
+    /// <summary>
+    /// The keys of the fields in forms data JSON, as the report lays out its columns.
+    /// </summary>
+    public HashSet<string> GetFieldKeys(string formsDataJson)
+    {
+        return GetExportableKeys(ParseSubmitAndMetadata(formsDataJson).MetaData);
+    }
+
+    private static HashSet<string> GetExportableKeys(IEnumerable<FormMetadata> metadata)
+    {
+        return metadata
+            .Where(m => !string.IsNullOrEmpty(m.Key) && IsExportableType(m.Type))
+            .Select(m => m.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> IndexSubmissionAsync<T>(
+        File<T> formsDataFile,
+        int originalFormId,
+        int originalFormVersion,
+        int roomId,
+        int resultFormNumber,
+        string data,
+        DateTime createOn)
+    {
+        var submission = CreateSubmissionDocuments(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, data, createOn);
+
+        if (submission.Item != null)
+        {
+            await factoryIndexerForm.IndexAsync(submission.Item);
+            await factoryIndexerFormMetadata.IndexAsync(submission.Metadata);
+        }
+
+        return (submission.Data, submission.MetaData);
+    }
+
+    // The documents are null for a file of a third-party storage.
+    private (DbFormsItemDataSearch Item, DbFormsMetadataSearch Metadata, SubmitFormsData Data, List<FormMetadata> MetaData) CreateSubmissionDocuments<T>(
+        File<T> formsDataFile,
+        int originalFormId,
+        int originalFormVersion,
+        int roomId,
+        int resultFormNumber,
+        string data,
+        DateTime createOn)
+    {
         var formNumber = new List<FormsItemData>
         {
             new()
@@ -445,36 +538,36 @@ public class FormFillingReportCreator(
             .Where(f => f.Type != "picture" && f.Type != "signature")
             .ToList();
 
-        var now = DateTime.UtcNow;
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
+        if (formsDataFile.Id is not int id || formsDataFile.ParentId is not int parentId)
         {
-            var searchItems = new DbFormsItemDataSearch
-            {
-                Id = id,
-                TenantId = tenantId,
-                ParentId = parentId,
-                OriginalFormId = originalFormId,
-                OriginalFormVersion = originalFormVersion,
-                RoomId = roomId,
-                CreateOn = now,
-                FormsData = formNumber.Concat(fromData.FormsData)
-            };
-
-            await factoryIndexerForm.IndexAsync(searchItems);
-            await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
-            {
-                Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
-                TenantId = tenantId,
-                OriginalFormId = originalFormId,
-                OriginalFormVersion = originalFormVersion,
-                RoomId = roomId,
-                Metadata = fromMetaData
-            });
+            return (null, null, fromData, fromMetaData);
         }
 
-        return (fromData, fromMetaData: fromMetaData);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var item = new DbFormsItemDataSearch
+        {
+            Id = id,
+            TenantId = tenantId,
+            ParentId = parentId,
+            OriginalFormId = originalFormId,
+            OriginalFormVersion = originalFormVersion,
+            RoomId = roomId,
+            CreateOn = createOn,
+            FormsData = formNumber.Concat(fromData.FormsData)
+        };
+
+        var metadata = new DbFormsMetadataSearch
+        {
+            Id = DbFormsMetadataSearch.ComputeId(originalFormId, originalFormVersion),
+            TenantId = tenantId,
+            OriginalFormId = originalFormId,
+            OriginalFormVersion = originalFormVersion,
+            RoomId = roomId,
+            Metadata = fromMetaData
+        };
+
+        return (item, metadata, fromData, fromMetaData);
     }
 
     private (SubmitFormsData Data, List<FormMetadata> MetaData)ParseSubmitAndMetadata(string json)
@@ -594,6 +687,8 @@ public class FormFillingReportCreator(
     }
 
     private static bool IsExportableField(FormsItemData f) => f.Type != "picture" && f.Type != "signature";
+
+    private static bool IsExportableType(string type) => type != "picture" && type != "signature";
 
     private static bool HasTimeComponent(string format) =>
         !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));

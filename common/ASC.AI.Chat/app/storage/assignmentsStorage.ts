@@ -31,23 +31,23 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
-import { resolveAgentEntityId } from "./docspaceFilesApi.js";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
 import type { AssignmentsStorage, ActionType } from "@onlyoffice/ai-chat/core";
 import {
-  chatContextScope,
   invalidateChatContext,
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 
+// The action -> profile bindings are one map per portal. The `entityId` the
+// library passes with every call (the folder the chat is opened from) is
+// accepted for the interface's sake and ignored. An AI project's own model
+// is served by the Files API (`files/rooms/{id}/model`) and bound to the
+// round by `applyAiProjectChatContext`. A request without
+// an `entityId` is the portal-wide map on the C# side.
 const PATH = "/assignments";
-
-function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
-  return entityId ? { entityId } : undefined;
-}
 
 // Case-insensitive `ActionType` lookup: the aggregate serializes the C# enum
 // names (`Chat`, `ImageGeneration`, …), which match the library's values, but
@@ -70,46 +70,39 @@ function lookupAssignment(
 }
 
 export class HttpAssignmentsStorage implements AssignmentsStorage {
-  async create(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
-    await aiService.post(PATH, { actionType, profileId, entityId });
+  async create(actionType: ActionType, profileId: string, _entityId?: string): Promise<void> {
+    await aiService.post(PATH, { actionType, profileId });
     invalidateChatContext("assignments");
   }
 
-  async readByType(actionType: ActionType, entityId?: string): Promise<string | null> {
-    // The aggregate's per-scope map went through the same resolver as the
-    // per-type endpoint (`Default` substitution for the global scope only),
-    // so a key lookup is equivalent to `GET assignments/{type}`.
+  async readByType(actionType: ActionType, _entityId?: string): Promise<string | null> {
+    // The aggregate's global map went through the same resolver as the
+    // per-type endpoint (`Default` substitution included), so a key lookup
+    // is equivalent to `GET assignments/{type}`.
     const snapshot = readChatContext("assignments");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      const profileId = lookupAssignment(scope.assignments, actionType);
+    if (snapshot) {
+      const profileId = lookupAssignment(snapshot.global.assignments, actionType);
       logger.info(
-        `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"}` +
-          `${scope.entityId ? ` scoped=${scope.entityId}` : ""} via chat-context -> profileId=${profileId ?? "NONE"}`,
+        `HttpAssignmentsStorage.readByType(${actionType}) via chat-context -> profileId=${profileId ?? "NONE"}`,
       );
       return profileId;
     }
-    reportChatContextMiss(`assignments.readByType(${actionType}, ${entityId ?? "-"})`);
+    reportChatContextMiss(`assignments.readByType(${actionType})`);
     try {
-      const scopedEntityId = await resolveAgentEntityId(entityId);
-      const raw = await aiService.get(
-        `${PATH}/${encodeURIComponent(actionType)}`,
-        scopedEntityId ? { query: entityIdQuery(scopedEntityId) } : undefined,
-      );
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(actionType)}`);
       const profileId = typeof raw === "string" ? raw : null;
       // The action -> profile routing. `image_generation` is the one the
       // built-in `generate_image` tool resolves: no assignment here and the
       // tool answers "Image generation provider is not configured." without
       // ever calling a provider.
       logger.info(
-        `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"}` +
-          `${scopedEntityId ? ` scoped=${scopedEntityId}` : ""} -> profileId=${profileId ?? "NONE"}`,
+        `HttpAssignmentsStorage.readByType(${actionType}) -> profileId=${profileId ?? "NONE"}`,
       );
       return profileId;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         logger.info(
-          `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"} -> 404 NO ASSIGNMENT`,
+          `HttpAssignmentsStorage.readByType(${actionType}) -> 404 NO ASSIGNMENT`,
         );
         return null;
       }
@@ -117,18 +110,13 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     }
   }
 
-  async readAll(entityId?: string): Promise<Partial<Record<ActionType, string>>> {
+  async readAll(_entityId?: string): Promise<Partial<Record<ActionType, string>>> {
     const snapshot = readChatContext("assignments");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      return { ...scope.assignments } as Partial<Record<ActionType, string>>;
+    if (snapshot) {
+      return { ...snapshot.global.assignments } as Partial<Record<ActionType, string>>;
     }
-    reportChatContextMiss(`assignments.readAll(${entityId ?? "-"})`);
-    const scopedEntityId = await resolveAgentEntityId(entityId);
-    const raw = await aiService.get(
-      PATH,
-      scopedEntityId ? { query: entityIdQuery(scopedEntityId) } : undefined,
-    );
+    reportChatContextMiss("assignments.readAll");
+    const raw = await aiService.get(PATH);
     if (!isObject(raw)) {
       return {};
     }
@@ -141,14 +129,14 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     return result;
   }
 
-  async update(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
-    await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId, entityId });
+  async update(actionType: ActionType, profileId: string, _entityId?: string): Promise<void> {
+    await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId });
     invalidateChatContext("assignments");
   }
 
   async upsertMany(
     assignments: Partial<Record<ActionType, string>>,
-    entityId?: string,
+    _entityId?: string,
   ): Promise<void> {
     const payload: Record<string, string> = {};
     for (const [k, v] of Object.entries(assignments)) {
@@ -156,16 +144,14 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
         payload[k] = v;
       }
     }
-    await aiService.put(PATH, { assignments: payload, entityId });
+    await aiService.put(PATH, { assignments: payload });
     invalidateChatContext("assignments");
   }
 
-  async delete(actionType: ActionType, entityId?: string): Promise<void> {
+  async delete(actionType: ActionType, _entityId?: string): Promise<void> {
     invalidateChatContext("assignments");
     try {
-      await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`, {
-        query: entityIdQuery(entityId),
-      });
+      await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;
@@ -174,14 +160,11 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
     }
   }
 
-  async deleteMany(actionTypes: ActionType[], entityId?: string): Promise<void> {
+  async deleteMany(actionTypes: ActionType[], _entityId?: string): Promise<void> {
     if (actionTypes.length === 0) {
       return;
     }
-    await aiService.delete(PATH, {
-      body: { actionTypes },
-      query: entityIdQuery(entityId),
-    });
+    await aiService.delete(PATH, { body: { actionTypes } });
     invalidateChatContext("assignments");
   }
 }

@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Es ist nicht möglich, diesen Ordner zum Speichern des Raums zu verwenden</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Ungültige URL-Adresse der Verbindung</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>ungültiger Titel</value>
   </data>
@@ -613,13 +616,34 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Der Speicher kann nicht getrennt werden, solange ein Raum ihn verwendet. Löschen Sie stattdessen den Raum</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Der Raum enthält bereits den Ordner .ai</value>
-  </data>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>In Datei-Metadaten suchen</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>In Ordner-Metadaten suchen</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Ein KI-Projekt kann mit höchstens {0} Anweisungsräumen verknüpft werden</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Ein KI-Projekt kann mit höchstens {0} Wissensräumen verknüpft werden</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Diese Räume können nicht mit dem KI-Projekt verknüpft werden: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Zu einem Anweisungsraum können nur Markdown-Dateien (.md) hinzugefügt werden</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ein Anweisungsraum kann höchstens {0} Skills enthalten</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Die Beschreibung des Skills muss 1 bis 1024 Zeichen lang sein und darf keine XML-Tags enthalten</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Die Skill-Datei muss mit einem YAML-Frontmatter-Block zwischen zwei Zeilen mit --- beginnen, der die Felder name und description enthält</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Der Name des Skills muss 1 bis 64 Zeichen lang sein, darf nur Kleinbuchstaben, Ziffern und einzelne Bindestriche enthalten und darf nicht mit einem Bindestrich beginnen oder enden</value>
   </data>
 </root>

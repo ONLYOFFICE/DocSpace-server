@@ -37,15 +37,19 @@ import { asyncHandler } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 // The widget's `context` engine: the rooms a host offers as chat context and
-// the skills inside them. The client connects the room the user is in when
-// the chat opens; the picker lists every other room with a `.ai` folder the
-// caller can read. All three reads are backed by the DocSpace Files API
+// the skills inside them. The client connects the Instructions room the user
+// is in when the chat opens; the picker lists every other Instructions room
+// the caller can read. All three reads are backed by the DocSpace Files API
 // (see `storage/roomSkills.ts`).
 const engine = new ContextEngine({ storage });
 
 export const contextController = {
   getContextFolders: asyncHandler(async (_req, res) => {
     res.json(await engine.getContextFolders());
+  }),
+
+  getKnowledgeFolders: asyncHandler(async (_req, res) => {
+    res.json(await engine.getKnowledgeFolders());
   }),
 
   getRoomSkills: asyncHandler(async (req, res) => {

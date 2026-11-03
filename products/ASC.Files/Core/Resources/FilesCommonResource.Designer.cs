@@ -430,20 +430,38 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An AI project can link no more than {0} Instructions rooms.
+        /// </summary>
+        public static string ErrorMessage_AiProjectInstructionsRoomsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectInstructionsRoomsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An AI project can link no more than {0} Knowledge rooms.
+        /// </summary>
+        public static string ErrorMessage_AiProjectKnowledgeRoomsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectKnowledgeRoomsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to These rooms cannot be linked to the AI project: {0}.
+        /// </summary>
+        public static string ErrorMessage_AiProjectRoomsNotLinkable {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AiProjectRoomsNotLinkable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI services are disabled for the current portal.
         /// </summary>
         public static string ErrorMessage_AiServicesDisabled {
             get {
                 return ResourceManager.GetString("ErrorMessage_AiServicesDisabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The room already contains the .ai folder.
-        /// </summary>
-        public static string ErrorMessage_AppsFolderExists {
-            get {
-                return ResourceManager.GetString("ErrorMessage_AppsFolderExists", resourceCulture);
             }
         }
         
@@ -601,6 +619,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only Markdown files (.md) can be added to an instructions room.
+        /// </summary>
+        public static string ErrorMessage_InstructionsRoomMarkdownOnly {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InstructionsRoomMarkdownOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An instructions room can contain at most {0} skills.
+        /// </summary>
+        public static string ErrorMessage_InstructionsRoomSkillsLimit {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InstructionsRoomSkillsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid folder ID.
         /// </summary>
         public static string ErrorMessage_InvalidFolderId {
@@ -624,6 +660,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_InvalidThirdPartyFolder {
             get {
                 return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid connection URL.
+        /// </summary>
+        public static string ErrorMessage_InvalidThirdPartyUrl {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidThirdPartyUrl", resourceCulture);
             }
         }
         
@@ -1011,6 +1056,33 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_SharpBoxException {
             get {
                 return ResourceManager.GetString("ErrorMessage_SharpBoxException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill description must be 1 to 1024 characters long and must not contain XML tags.
+        /// </summary>
+        public static string ErrorMessage_SkillDescriptionInvalid {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillDescriptionInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill file must start with a YAML frontmatter block between two --- lines, with the name and description fields.
+        /// </summary>
+        public static string ErrorMessage_SkillFrontmatterMissing {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillFrontmatterMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The skill name must be 1 to 64 characters long, contain only lowercase letters, digits and single hyphens, and must not start or end with a hyphen.
+        /// </summary>
+        public static string ErrorMessage_SkillNameInvalid {
+            get {
+                return ResourceManager.GetString("ErrorMessage_SkillNameInvalid", resourceCulture);
             }
         }
         

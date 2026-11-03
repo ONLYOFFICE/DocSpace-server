@@ -243,4 +243,23 @@ public class FolderHistoryReportPermissionsTests(
         // Assert
         exception.ErrorCode.Should().Be(401);
     }
+
+    [Fact]
+    public async Task GetAndTerminateReport_Anonymous_Unauthorized()
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Autotest Report Anon");
+
+        await _filesClient.Authenticate(null);
+
+        // Act
+        var getException = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.GetReportFolderHistoryAsync(room.Id, TestContext.Current.CancellationToken));
+        var terminateException = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.TerminateReportFolderHistoryAsync(room.Id, TestContext.Current.CancellationToken));
+
+        // Assert
+        getException.ErrorCode.Should().Be(401);
+        terminateException.ErrorCode.Should().Be(401);
+    }
 }

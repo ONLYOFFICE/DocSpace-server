@@ -69,6 +69,7 @@ switch (launchProfile)
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddNextcloud()
+            .AddWebhookReceiver()
             .AllowPortalRegistration();
 
         configurator
@@ -145,6 +146,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat();
 
         break;
@@ -181,6 +183,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat()
             .AddWebDav()
             .AddIdentity();

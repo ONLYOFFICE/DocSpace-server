@@ -82,6 +82,7 @@ internal class FolderDao(
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
     private const string AiAgents = "aiagents";
+    private const string AiHub = "aihub";
     private const string Forms = "forms";
     private const string DefaultTemplates = "defaulttemplates";
 
@@ -622,7 +623,6 @@ internal class FolderDao(
 
         if (transaction == null)
         {
-            await using var aiFolderLock = await AcquireAiFolderLockAsync(_tenantManager.GetCurrentTenantId(), folder.ParentId, Global.ReplaceInvalidCharsAndTruncate(folder.Title));
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -681,40 +681,14 @@ internal class FolderDao(
         }
     }
 
-    private static async ValueTask<FolderType> ResolveFolderTypeAsync(FilesDbContext filesDbContext, int tenantId, int folderId, int parentId, string title, FolderType folderType)
+    /// <summary>
+    /// The skills of the AI chat are the Markdown files of an Instructions room, so no ordinary folder carries a
+    /// special type any more: a folder that was typed as the former <c>.ai</c> skills folder becomes a plain one
+    /// the next time it is saved, moved or renamed.
+    /// </summary>
+    private static ValueTask<FolderType> ResolveFolderTypeAsync(FilesDbContext filesDbContext, int tenantId, int folderId, int parentId, string title, FolderType folderType)
     {
-        if (folderType is not (FolderType.DEFAULT or FolderType.Ai))
-        {
-            return folderType;
-        }
-
-        if (!string.Equals(title, FileConstant.AiFolderTitle, StringComparison.Ordinal))
-        {
-            return FolderType.DEFAULT;
-        }
-
-        var parentFolderType = await filesDbContext.FolderTypeByIdAsync(tenantId, parentId);
-        if (parentFolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.VirtualDataRoom or FolderType.EditingRoom))
-        {
-            return FolderType.DEFAULT;
-        }
-
-        if (await filesDbContext.AiFolderExistsAsync(tenantId, parentId, folderId))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_AppsFolderExists);
-        }
-
-        return FolderType.Ai;
-    }
-
-    private async ValueTask<IDistributedLockHandle> AcquireAiFolderLockAsync(int tenantId, int parentId, string title)
-    {
-        if (!string.Equals(title, FileConstant.AiFolderTitle, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        return await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetAiFolderCheckKey(tenantId, parentId));
+        return ValueTask.FromResult(folderType is FolderType.Ai ? FolderType.DEFAULT : folderType);
     }
 
     private async Task<(int Id, bool MetadataInherited)> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
@@ -1046,7 +1020,7 @@ internal class FolderDao(
                 Location.Room =>
                     query.Where(x => x.Tag == documentsTagType &&
                          filesDbContext.Folders
-                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
+                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom || f.FolderType == FolderType.InstructionsRoom || f.FolderType == FolderType.KnowledgeRoom))
                          .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>
@@ -1155,6 +1129,16 @@ internal class FolderDao(
             await filesDbContext.DeleteMetadataLinksByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
             await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
 
+            switch (folderToDelete.Find(f => f.Id == folderId)?.FolderType)
+            {
+                case FolderType.AiProjectRoom:
+                    await filesDbContext.DeleteAiProjectRoomsByProjectAsync(tenantId, folderId);
+                    break;
+                case FolderType.InstructionsRoom or FolderType.KnowledgeRoom:
+                    await filesDbContext.DeleteAiProjectRoomsByRoomAsync(tenantId, folderId);
+                    break;
+            }
+
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
@@ -1210,7 +1194,6 @@ internal class FolderDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
             var folder = await GetFolderAsync(folderId);
-            await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, toFolderId, title ?? folder.Title);
             var oldParentId = folder.ParentId;
             movedFolderHasContent = folder.FoldersCount > 0 || folder.FilesCount > 0;
 
@@ -1245,6 +1228,12 @@ internal class FolderDao(
             var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folderId, toFolderId, title ?? folder.Title, folder.FolderType);
 
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount, title);
+
+            if (folder.FolderType is FolderType.InstructionsRoom or FolderType.KnowledgeRoom)
+            {
+                await context.DeleteAiProjectRoomsByRoomAsync(tenantId, folderId);
+            }
+
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
@@ -1658,7 +1647,6 @@ internal class FolderDao(
 
         var title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
 
-        await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, folder.ParentId, title);
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
 
@@ -1961,6 +1949,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.AiAgents;
                         folder.Title = AiAgents;
                         break;
+                    case AiHub:
+                        folder.FolderType = FolderType.AiHub;
+                        folder.Title = AiHub;
+                        break;
                     case Forms:
                         folder.FolderType = FolderType.Forms;
                         folder.Title = Forms;
@@ -2103,6 +2095,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.AiAgents;
                     folder.Title = AiAgents;
                     break;
+                case AiHub:
+                    folder.FolderType = FolderType.AiHub;
+                    folder.Title = AiHub;
+                    break;
                 case Forms:
                     folder.FolderType = FolderType.Forms;
                     folder.Title = Forms;
@@ -2226,6 +2222,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDAiAgentsAsync(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiAgents, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDAiHubAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, AiHub, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDFormsAsync(bool createIfNotExists)
@@ -2403,7 +2404,7 @@ internal class FolderDao(
         var rootFolderType = entry.RootFolderType;
 
         if (rootFolderType != FolderType.VirtualRooms && rootFolderType != FolderType.RoomTemplates
-            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents)
+            && rootFolderType != FolderType.Archive && rootFolderType != FolderType.AiAgents && rootFolderType != FolderType.AiHub)
         {
             return Task.FromResult((-1, "", rootFolderType));
         }
@@ -2420,7 +2421,11 @@ internal class FolderDao(
 
         if (rootFolderId == folderId)
         {
-            return Task.FromResult((entryId, entry.Title, rootFolderType));
+            // The entry is the room itself: report its own type, as the lookup below does for
+            // nested entries, so a file saved straight into a knowledge room is recognized.
+            var roomType = entry is Folder<int> room ? room.FolderType : rootFolderType;
+
+            return Task.FromResult((entryId, entry.Title, roomType));
         }
 
         return ParentRoomInfoFromFileEntryFromDbAsync(folderId);
@@ -2496,11 +2501,8 @@ internal class FolderDao(
 
         if (withAiFolder)
         {
-            query = query.Where(f => filesDbContext.Folders.Any(a =>
-                a.TenantId == f.TenantId &&
-                a.ParentId == f.Id &&
-                a.Title == FileConstant.AiFolderTitle &&
-                a.FolderType == FolderType.Ai));
+            // The rooms that provide skills to the AI chat: Instructions rooms, whose Markdown files are the skills.
+            query = query.Where(f => f.FolderType == FolderType.InstructionsRoom);
         }
 
         if (withoutTags)

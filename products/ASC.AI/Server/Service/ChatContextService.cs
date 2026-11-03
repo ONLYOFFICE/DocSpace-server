@@ -53,6 +53,7 @@ public class ChatContextService(
     AiGateway gateway,
     AiSettingsService aiSettingsService,
     PortalModelsService portalModelsService,
+    TenantManager tenantManager,
     ProfileStorageService profileStorageService,
     AssignmentsStorageService assignmentsStorageService,
     PreferencesStorageService preferencesStorageService,
@@ -118,7 +119,7 @@ public class ChatContextService(
             return null;
         }
 
-        return await portalModelsService.ReadAsync();
+        return await portalModelsService.ReadAsync(tenantManager.GetCurrentTenantId());
     }
 
     private async Task<AiSettingsDto> ReadConfigAsync()

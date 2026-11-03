@@ -1323,4 +1323,19 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Файл открыт скриптом Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Приложение включено: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Приложение отключено: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Комнаты привязаны к ИИ-проекту {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Комнаты отвязаны от ИИ-проекта {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>ИИ-модель ИИ-проекта {0} изменена на {1}</value>
+  </data>
 </root>

@@ -43,7 +43,7 @@ import { isObject } from "./narrow.js";
 // of that surface as a static spec, this builder derives the OpenAPI 3.0
 // document from the very same maps at startup, so a route added to the
 // engine package appears in the spec automatically. Custom routes that are
-// not backed by an engine (agents, text-to-docx) are described alongside
+// not backed by an engine (text-to-docx, metadata, settings, ...) are described alongside
 // their registration via `CustomRouteDoc` entries.
 
 // A minimal structural subset of the OpenAPI object graph — just enough to
@@ -68,7 +68,7 @@ export interface EngineDoc {
 // the two stay in sync.
 export interface CustomRouteDoc {
   readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  /** Path relative to the API prefix, e.g. `/agents/{id}` (OpenAPI style). */
+  /** Path relative to the API prefix, e.g. `/prompts/{id}` (OpenAPI style). */
   readonly path: string;
   readonly tag: string;
   readonly summary: string;
@@ -157,6 +157,7 @@ function tag(name: string): string {
 // engine apply its own default. A name means the same thing wherever it
 // appears, as with `PARAM_DOCS` - none of the six is guarded in any operation.
 const OPTIONAL_QUERY_PARAMS = new Set([
+  "expand",
   "limit",
   "startIndex",
   "count",
@@ -189,7 +190,9 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
   direction:
     'The order the message page is read in. Only "desc" turns the read around and pages back from the newest message; omit for the forward read.',
   entityId:
-    "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+    "The DocSpace folder the request names. For a chat it is the AI project the chat runs in, and is omitted outside a project; the settings operations accept it for the room the client is in, which has to be one the caller can open, but their data is kept per user and portal, not per room.",
+  expand:
+    'Set to "profile" to answer the assigned profiles themselves instead of their IDs: `{ assignments, profilesTotal, chatProfilesTotal }`. Omit for the plain ID map.',
   folderId: "The prompt folder identifier. Omit to list the prompts that sit outside any folder.",
   limit: "The maximum number of items to return.",
   messageId: "The globally unique chat message identifier.",
@@ -205,9 +208,8 @@ const PARAM_DOCS: Readonly<Record<string, string>> = {
 // Per-operation overrides, keyed by `operationId` then parameter name. Needed
 // for `id`, which the engines reuse for four different entities.
 const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  aiAgentsGet: { id: "The agent identifier." },
-  aiAgentsUpdate: { id: "The agent identifier." },
-  aiAgentsDelete: { id: "The agent identifier." },
+  aiProjectsGetModel: { id: "The AI project (room) identifier." },
+  aiProjectsSetModel: { id: "The AI project (room) identifier." },
   aiProfilesGetById: { id: "The AI provider profile identifier." },
   aiPromptsGetById: { id: "The saved prompt identifier." },
   aiPromptsGetFolderById: { id: "The prompt folder identifier." },
@@ -215,7 +217,7 @@ const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, stri
 
 // One realistic value per parameter name, keyed the same way as `PARAM_DOCS`.
 // A placeholder teaches nothing and assistants generate parsing code from these,
-// so the values here are shaped like the real ones: an agent ID is the integer
+// so the values here are shaped like the real ones: an entity ID is the integer
 // DocSpace uses for a room, a profile ID is a UUID, and the cursor is the
 // JSON-encoded sort key the previous page ended on rather than an opaque token.
 const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
@@ -224,6 +226,7 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
   cursor: `{"id":"${EXAMPLE_IDS.thread}","lastEditDate":${EXAMPLE_AT_MS}}`,
   direction: "desc",
   entityId: EXAMPLE_IDS.room,
+  expand: "profile",
   folderId: EXAMPLE_IDS.promptFolder,
   limit: 20,
   messageId: EXAMPLE_IDS.message,
@@ -237,11 +240,10 @@ const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
 };
 
 // Per-operation examples for `id`, which the engines reuse for four entities,
-// and for the agent routes, whose `id` is an integer room ID rather than a UUID.
+// and for the project routes, whose `id` is an integer room ID rather than a UUID.
 const OPERATION_PARAM_EXAMPLES: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
-  aiAgentsGet: { id: EXAMPLE_IDS.room },
-  aiAgentsUpdate: { id: EXAMPLE_IDS.room },
-  aiAgentsDelete: { id: EXAMPLE_IDS.room },
+  aiProjectsGetModel: { id: EXAMPLE_IDS.project },
+  aiProjectsSetModel: { id: EXAMPLE_IDS.project },
   aiProfilesGetById: { id: EXAMPLE_IDS.profile },
   aiPromptsGetById: { id: EXAMPLE_IDS.prompt },
   aiPromptsGetFolderById: { id: EXAMPLE_IDS.promptFolder },
@@ -279,11 +281,11 @@ function paramExample(operationId: string, name: string): Json {
 const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // AI - chat rounds and tool-call resumption.
   aiSend:
-    "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
+    "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `contextEntityId` is the folder or room the caller is in and sets the location of the round; `entityId` is the AI project the chat runs in, and is omitted outside a project. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
   aiSendCustom:
     "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
   aiSendWithStream:
-    "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId` names a room the caller can open and that a profile resolves for it; the user message and the reply are persisted either way, and a new thread also gets a generated title. The model is settled in a fixed order - an agent's assignment in scope overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
+    "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId`, when sent, names an AI project the caller can chat in, and that a profile resolves; the user message and the reply are persisted either way, and a new thread also gets a generated title. `contextEntityId` is the folder or room the caller is in: it is the location the prompt describes and the folder a generated file is saved into (My documents when there is none); inside a project it is omitted and the project's folder context takes its place. The model is settled in a fixed order - the project's model inside a project overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
   aiSendWithStreamOpenAI:
     'The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the profile pre-flight are identical, and a tool call ends the stream with `finish_reason: "tool_calls"` instead of a pause event - resume it through the same approve and deny operations. Unlike `send-with-stream` it does not reject an empty user message and does not enforce the per-kind attachment cap, so validate both before calling. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one.',
   aiRegenerateStream:
@@ -293,23 +295,12 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiDenyToolCall:
     'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
 
-  // Agents - delegated to the .NET AI service, with the profile binding kept here.
-  aiAgentsList:
-    "Lists the portal's AI agent rooms. The query is forwarded unchanged to the DocSpace AI service, so it takes the same paging, sorting and filtering parameters as an ordinary room listing, and the answer is that service's folder-content payload rather than a shape of this API's own. Array and object query values are dropped rather than guessed at, so send flat strings. The profile bound to each agent is not included here - read one agent with `GET api/2.0/ai/agents/{id}` for that.",
-  aiAgentsCreate:
-    "Creates an AI agent room and binds a model to it, in that order. `profileId` is required, has to be a UUID, has to name an existing profile, and that profile has to support chat - an image-only model is refused here rather than failing on every later request. `prompt` is required and is stored on the room as its standing instruction with any markup stripped, so it cannot round-trip HTML into another user's reply. The two steps are not atomic: when the room is created but the model binding fails, the call reports an error and the room is left behind, so re-bind it with `PUT api/2.0/ai/agents/{id}` rather than creating a second one.",
-  aiAgentsNews:
-    "Lists the unread items across the caller's AI agent rooms, so a badge can be rendered without walking each room. It takes no parameters and is scoped to the caller by the DocSpace AI service. The answer is that service's new-items payload. This is a read-only operation and does not mark anything as seen.",
-  aiAgentsGet:
-    "Returns one AI agent room, enriched with the `profileId` currently bound to it so an edit form can prefill its model selector. The ID is the room's integer identifier, and a non-integer value is refused rather than passed on to fail opaquely upstream. The binding lives in an assignment rather than on the room, so it is looked up separately: a missing or unreadable assignment simply leaves `profileId` out of the answer instead of failing the call. The standing instruction comes back on the room as `chatSettings.prompt`.",
-  aiAgentsUpdate:
-    "Changes an AI agent room - its title, tags or standing instruction - and optionally rebinds its model. The ID has to be the room's integer identifier. `profileId` is not part of the room contract: it is taken out of the forwarded body and applied afterwards as the agent's assignment, and it has to be a UUID naming an existing chat-capable profile. An instruction sent as `chatSettings.prompt` has its markup stripped, as on create; note that when `chatSettings` is present the upstream service still requires the rest of that object to be valid, so send it whole.",
-  aiAgentsDelete:
-    "Deletes an AI agent room. The ID has to be the room's integer identifier, and the body is forwarded to the DocSpace AI service unchanged, so it accepts the same options as deleting an ordinary room - `deleteAfter` among them. Deletion is asynchronous there: the answer is a file-operation payload to poll, not a completed result. The agent's model binding is deliberately left behind, because the upstream assignment API has no per-entry delete, so an orphaned assignment row survives the room.",
-  aiAgentsUpdateQuota:
-    "Sets the storage quota of the listed AI agent rooms in one call, forwarding `roomIds` and `quota` to the DocSpace AI service unchanged. The answer is that service's payload, one updated room per entry. A quota applies to the room's stored files, not to the model usage of its chats. Use `PUT api/2.0/ai/agents/resetquota` to return rooms to the portal default instead of naming a number.",
-  aiAgentsResetQuota:
-    "Returns the listed AI agent rooms to the portal's default storage quota, forwarding `roomIds` to the DocSpace AI service unchanged. The answer is that service's payload, one updated room per entry. This is the counterpart of `PUT api/2.0/ai/agents/agentquota` and takes no quota value of its own. Rooms already on the default are unaffected.",
+  // Projects - the model of an AI project, a room of type 12 managed through
+  // the Files API; stored as the project-scoped Chat assignment.
+  aiProjectsGetModel:
+    "Returns the model of an AI project: `profile` is the chat profile stored for the project (`id`, `name`, `provider`, and `available`, false when the profile is gone or cannot chat), or `null` when the project runs on the portal's `Chat` assignment. The project is read with the caller's credentials first, so a room the caller cannot read answers 403 and a room that is not an AI project 404. A member who is not the owner, a project manager or a content creator cannot read the stored model yet and gets `null`.",
+  aiProjectsSetModel:
+    "Sets the model of an AI project. `profileId` is the UUID of an existing profile that can chat, or `null` for the portal default. Owner and project managers only (the room's `security.EditRoom`). There is no scoped delete on the server, so `null` on a project that has a model of its own pins the portal's current `Chat` profile to it; a later change of the portal default does not reach the project until its model is set again. Answers the model as `GET` does.",
 
   // Assignments - which profile serves which AI action.
   aiAssignmentsResolveForAction:
@@ -317,7 +308,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiAssignmentsTryResolveForAction:
     "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room the caller can open - an unknown one answers 404 here as well. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
   aiAssignmentsAssign:
-    "Binds a profile to one AI action portal-wide, creating the assignment or replacing it in place, and returns the result. Both `actionType` and `profileId` are required. The profile's declared capabilities are checked against the action, so a model that cannot generate images cannot be bound to `ImageGeneration` - the `Default` slot is exempt, because it stands in for every action. There is no room-scoped form of this write: a room's own binding is created by the agent that owns it, while reads accept an `entityId`.",
+    "Binds a profile to one AI action portal-wide, creating the assignment or replacing it in place, and returns the result. Both `actionType` and `profileId` are required. The profile's declared capabilities are checked against the action, so a model that cannot generate images cannot be bound to `ImageGeneration` - the `Default` slot is exempt, because it stands in for every action. There is no room-scoped form of this write; the reads accept an `entityId` for compatibility and answer the same portal-wide bindings.",
   aiAssignmentsUnassign:
     "Clears the portal-wide binding of one AI action, after which the action falls back to the `Default` slot. `actionType` is required and may be sent in the body or as a query parameter. An action whose slot is already empty is not reported as an error - the call answers success either way, so it is safe to repeat. Clearing `Default` itself leaves the actions that relied on it unresolvable.",
   aiAssignmentsBulkAssign:
@@ -325,7 +316,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiAssignmentsGetAssignment:
     "Returns the profile bound to one AI action, without applying the `Default` fallback - an empty answer means this action has no profile of its own, not that nothing is configured. `actionType` is required and is read from the query. Use `GET api/2.0/ai/assignments/resolve-for-action` to learn which profile would actually serve the action. This reads the portal-wide binding and accepts no `entityId`.",
   aiAssignmentsGetAllAssignments:
-    "Returns every action-to-profile binding of a scope as one map, which is what a settings screen loads. `entityId` narrows it to a room and has to name one the caller can open; a room that is not an agent room degrades to the portal-wide set rather than answering empty, and omitting the parameter reads the portal-wide set directly. Actions with no binding are simply absent from the map. The `Default` slot is reported as an entry of its own rather than being folded into the others.",
+    "Returns every action-to-profile binding of a scope as one map, which is what a settings screen loads. `entityId`, when sent, has to name a room the caller can open; the bindings are portal-wide, so the answer is the same set with or without it. Actions with no binding are simply absent from the map. The `Default` slot is reported as an entry of its own rather than being folded into the others. With `expand=profile` the answer is `{ assignments, profilesTotal, chatProfilesTotal }`: the assigned profiles themselves (as `GET api/2.0/ai/profiles/list` describes them) keyed by action, a binding whose profile no longer exists left out, plus how many profiles the portal has and how many of them can chat; this is the one read a chat needs to start.",
   aiAssignmentsCascadeProfileDelete:
     "Detaches a profile from every assignment that points at it, which is the cleanup step before the profile itself is removed. The `Default` slot is promoted to the first remaining profile, or dropped when none is left, and every other slot holding the profile is cleared. `profileId` is required and may be sent in the body or as a query parameter. `DELETE api/2.0/ai/profiles/delete` already does this, so call it directly only when the profile is being removed by some other means.",
 
@@ -353,7 +344,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Export.
   aiExportTextToDocx:
-    "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
+    "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder, so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
   // Metadata.
   aiMetaGenerate:
@@ -391,7 +382,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiProfilesCreate:
     'Creates an AI provider profile - the endpoint, credentials and model that a chat round runs on - and returns it. The name has to be unique, the credentials are probed against the live provider before anything is stored, and the portal\'s first profile also takes the `Default` assignment slot. Two inputs are refused outright: a `baseUrl` pointing at a private network address, and `providerType: "external"`, which delegates transport to the host application and therefore cannot work for a profile the server manages. On a portal running the AI gateway, profiles are managed centrally and this operation answers 403.',
   aiProfilesUpdate:
-    'Replaces a stored AI provider profile and returns it, re-checking name uniqueness and probing the credentials against the live provider again. The same two inputs are refused as on create - a private-network `baseUrl` and `providerType: "external"` - and the whole profile is overwritten by the one supplied rather than merged. On a portal running the AI gateway this answers 403, because profiles are managed centrally there. A profile that is bound to an action or an agent keeps those bindings.',
+    'Replaces a stored AI provider profile and returns it, re-checking name uniqueness and probing the credentials against the live provider again. The same two inputs are refused as on create - a private-network `baseUrl` and `providerType: "external"` - and the whole profile is overwritten by the one supplied rather than merged. On a portal running the AI gateway this answers 403, because profiles are managed centrally there. A profile that is bound to an action keeps that binding.',
   aiProfilesDelete:
     "Deletes an AI provider profile and cleans up every assignment pointing at it: the `Default` slot moves to the first remaining profile and the other slots are left unbound. The ID is required and may be sent in the body or as a query parameter. An unknown ID is not reported - the call answers success without deleting anything. Threads already bound to the profile keep the stored reference, so a round on such a thread falls back to whatever the scope resolves to.",
   aiProfilesGetById:
@@ -451,9 +442,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
-    "Creates a chat thread with a title supplied by the caller and returns it. A scoped thread requires that `entityId` names a room the caller can open, and a model has to resolve for the scope - an explicit `profileId`, or the room's `Chat` assignment - otherwise there is nothing to run the thread against and the call answers 404. In an agent room the agent's own assignment overrides any `profileId` sent with the request, so a thread there always starts on the agent's model. Use `POST api/2.0/ai/threads/open-or-create` instead when the title should be generated from the first user message.",
+    "Creates a chat thread with a title supplied by the caller and returns it. `entityId`, when sent, is the AI project the chat runs in and has to name one the caller can chat in; threads themselves are one list per user. A model has to resolve - an explicit `profileId`, the project's model, or the `Chat` assignment - otherwise there is nothing to run the thread against and the call answers 404. Use `POST api/2.0/ai/threads/open-or-create` instead when the title should be generated from the first user message.",
   aiThreadsOpenOrCreate:
-    "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; anything that is not an agent room folds to the global scope instead of being rejected.",
+    "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; threads are one list per user whatever it names.",
   aiThreadsAppendUserMessage:
     "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
   aiThreadsTouch:
@@ -481,7 +472,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Tools - custom MCP servers and per-tool preferences.
   aiToolsAddCustomServer:
-    "Registers a custom MCP server under the given name so the model may call its tools. The name becomes a URL path segment, so it may not be `.`, `..`, or contain a path separator or a control character. `config` may be omitted in two cases: a name matching a host-configured system server pins the entry to that server's canonical settings as a whitelist marker, and a name already registered portal-wide copies the portal-level configuration into this scope; anything else without a config is rejected. `entityId` scopes the registration and has to name a room the caller can open - a room that is not an agent room folds to the portal-wide scope, while an unreachable one is refused so it cannot silently rewrite the portal's own registry.",
+    "Registers a custom MCP server under the given name so the model may call its tools. The name becomes a URL path segment, so it may not be `.`, `..`, or contain a path separator or a control character. `config` may be omitted in two cases: a name matching a host-configured system server pins the entry to that server's canonical settings, and a name already registered keeps its stored configuration; anything else without a config is rejected. The registry is one map per portal: `entityId`, when sent, has to name a room the caller can open, and an unreachable one is refused so it cannot silently rewrite the registry.",
   aiToolsUpdateCustomServer:
     "Replaces the stored configuration of a registered custom MCP server, under the same name and scope rules as the add operation. The name is re-validated as a routable path segment, and an omitted `config` resolves the same way - to a system server's canonical settings, or to the portal-level entry of that name. `entityId` has to name a room the caller can open. The answer carries the stored registry entry.",
   aiToolsRemoveCustomServer:
@@ -493,7 +484,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiToolsReplaceAllCustomServers:
     'Replaces the whole custom MCP server registry of the scope with the supplied map in one write, which makes it the operation a settings screen saves with. `map` is required: without it the registry would be emptied, so a missing or non-object value is rejected rather than treated as "none". Every name in the map is validated as a routable path segment and every configuration is resolved before anything is written, so a map with one bad entry changes nothing. `entityId` has to name a room the caller can open - this is the operation where an unreachable one would otherwise have wiped the portal-wide registry.',
   aiToolsListSystemTools:
-    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers; for an agent room those are the servers enabled for that agent alone, never the portal-wide registry - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
+    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the portal's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
     "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
   aiToolsGetDisabled:
@@ -576,8 +567,8 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
 //     only appears when a passthrough operation relays a provider's answer.
 //   - 403 is rarely raised locally; the one local case is a room named by
 //     `entityId` that the caller cannot open, which the Files API answers
-//     with 403 and every operation relays as such (`assertEntityAccessible`,
-//     `resolveAgentEntityId`). 404 is reserved for an id that resolves to
+//     with 403 and every operation relays as such (`assertEntityAccessible`).
+//     404 is reserved for an id that resolves to
 //     nothing.
 const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "400": "The request body or query is malformed, or a required value is missing.",
@@ -626,20 +617,18 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "402": true,
   },
 
-  // Agents - the room ID is an integer on the .NET side and a non-integer one
-  // is refused here; the create and update pair also validate the profile.
-  aiAgentsCreate: {
-    "400":
-      "`profileId` is missing, is not a UUID, names no existing profile, or names one that " +
-      "does not support chat; or `prompt` is missing.",
+  aiProjectsGetModel: {
+    "400": "The project id is not a positive integer.",
+    "403": "The caller cannot read the project.",
+    "404": "The project does not exist or is not an AI project.",
   },
-  aiAgentsGet: { "400": "The agent ID is not a positive integer." },
-  aiAgentsUpdate: {
+  aiProjectsSetModel: {
     "400":
-      "The agent ID is not a positive integer, or `profileId` is not a UUID, names no " +
-      "existing profile, or names one that does not support chat.",
+      "The project id is not a positive integer, or `profileId` is missing, not a UUID, names no " +
+      "profile, or names a profile that cannot chat.",
+    "403": "The caller cannot read the project, or is neither its owner nor a project manager.",
+    "404": "The project does not exist or is not an AI project.",
   },
-  aiAgentsDelete: { "400": "The agent ID is not a positive integer." },
 
   // Assignments - every write validates its action type first; reading all
   // assignments of a room resolves the room.
@@ -1240,8 +1229,8 @@ function jsonBody(schema: Json = JSON_OBJECT_SCHEMA, operationId?: string): Json
 }
 
 // Concrete request/response schemas (from `ts-json-schema-generator`) are
-// inlined per operation. Operations without a generated schema (`.NET`-
-// forwarded agent listings, dual-mode `sendCustom`) fall back to the generic
+// inlined per operation. Operations without a generated schema (dual-mode
+// `sendCustom`) fall back to the generic
 // object.
 type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
 
@@ -1287,15 +1276,8 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
     "`isStream` was set. Nothing was persisted.",
 
-  aiAgentsList: "The agent rooms, in the DocSpace AI service's folder-content envelope.",
-  aiAgentsCreate: "The created agent room, with the model already bound to it.",
-  aiAgentsNews: "The unread items of the caller's agent rooms.",
-  aiAgentsGet: "The agent room, with `profileId` added when a model is bound to it.",
-  aiAgentsUpdate: "The updated agent room.",
-  aiAgentsDelete:
-    "The queued file operation. Deletion runs asynchronously, so poll DocSpace for its outcome.",
-  aiAgentsUpdateQuota: "The updated agent rooms, one entry each.",
-  aiAgentsResetQuota: "The updated agent rooms, one entry each.",
+  aiProjectsGetModel: "The project's model, or `null` for the portal default.",
+  aiProjectsSetModel: "The project's model after the change.",
 
   aiAssignmentsResolveForAction: "The profile that will serve the action.",
   aiAssignmentsTryResolveForAction:
@@ -1308,7 +1290,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiAssignmentsGetAssignment:
     "The profile bound to the action, or an empty result when it has none of its own.",
   aiAssignmentsGetAllAssignments:
-    "The scope's bindings as a map of action type to profile ID. An action with no binding is absent.",
+    "The scope's bindings as a map of action type to profile ID, or with `expand=profile` the envelope of the assigned profiles and the catalogue's counts. An action with no binding is absent.",
   aiAssignmentsCascadeProfileDelete: "Confirms no assignment points at the profile any more.",
 
   aiAttachmentsSaveFile: "The stored draft, whose ID links it to a message later.",
@@ -1586,33 +1568,6 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
     },
     required: ["result"],
     additionalProperties: false,
-  },
-
-  // The controller resolves the agent's profile assignment and writes `profileId`
-  // onto the room before answering. It is absent when the agent has no assignment
-  // or the lookup failed, so it is documented as an addition, not a promise.
-  aiAgentsGet: {
-    allOf: [
-      { $ref: "#/components/schemas/AiFolderWrapper" },
-      {
-        type: "object",
-        properties: {
-          response: {
-            type: "object",
-            properties: {
-              profileId: {
-                type: "string",
-                description:
-                  "The AI profile bound to this agent, added by this service on top of " +
-                  "what the internal service returns. Absent when the agent has no " +
-                  "profile assigned.",
-                examples: [EXAMPLE_IDS.profile],
-              },
-            },
-          },
-        },
-      },
-    ],
   },
 
   // Relayed from the .NET service with `raw: true`, so the DocSpace envelope is passed
@@ -1995,91 +1950,9 @@ function engineOperation(
 // Query parameters of a custom route. Engine routes get theirs from
 // `RouteSpec.params`, but a custom route has no such list, so a route that reads
 // the query says so here. These carry their own types and prose because they are
-// richer than the bare-name mechanism above: the agents listing forwards every
-// string query parameter it receives straight to the internal service, and these
-// are the ones that service reads (GetAgentListRequestDto).
-const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
-  aiAgentsList: [
-    {
-      name: "subjectId",
-      in: "query",
-      description: "Show only the agent rooms this user takes part in.",
-      required: false,
-      schema: { type: "string", examples: [EXAMPLE_IDS.profile] },
-    },
-    {
-      name: "subjectOwnerId",
-      in: "query",
-      description: "Show only the agent rooms owned by this user.",
-      required: false,
-      schema: { type: "string", examples: [EXAMPLE_IDS.profile] },
-    },
-    {
-      name: "excludeSubject",
-      in: "query",
-      description:
-        "Invert the user filter: leave out what `subjectId` selects instead of " + "keeping it.",
-      required: false,
-      schema: { type: "boolean", examples: [false] },
-    },
-    {
-      name: "tags",
-      in: "query",
-      description: "Show only the agent rooms carrying these tags, comma-separated.",
-      required: false,
-      schema: { type: "string", examples: ["ai,assistant"] },
-    },
-    {
-      name: "withoutTags",
-      in: "query",
-      description: "Show only the agent rooms that carry no tags at all.",
-      required: false,
-      schema: { type: "boolean", examples: [false] },
-    },
-    {
-      name: "quotaFilter",
-      in: "query",
-      description: "Filter by quota kind: 0 for all, 1 for the default quota, 2 for a custom one.",
-      required: false,
-      schema: { type: "integer", examples: [0] },
-    },
-    {
-      name: "filterValue",
-      in: "query",
-      description: "Show only the agent rooms whose title matches this text.",
-      required: false,
-      schema: { type: "string", examples: ["assistant"] },
-    },
-    {
-      name: "sortBy",
-      in: "query",
-      description: "Field to sort by, for example `DateAndTime`.",
-      required: false,
-      schema: { type: "string", examples: ["DateAndTime"] },
-    },
-    {
-      name: "sortOrder",
-      in: "query",
-      description: "Sort direction, `ascending` or `descending`.",
-      required: false,
-      schema: { type: "string", examples: ["descending"] },
-    },
-    {
-      name: "startIndex",
-      in: "query",
-      description: "Index of the first entry to return; 0 starts at the beginning.",
-      required: false,
-      schema: { type: "integer", examples: [0] },
-    },
-    {
-      name: "count",
-      in: "query",
-      description: "How many entries to return. The internal service applies its own default.",
-      required: false,
-      schema: { type: "integer", examples: [25] },
-    },
-  ],
-};
+// richer than the bare-name mechanism above. No custom route reads its query
+// at the moment.
+const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {};
 
 function customOperation(
   route: CustomRouteDoc,
@@ -2197,7 +2070,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   // call is used here so the order is the rule's own, not an approximation of it. The locale is pinned:
   // with no second argument `localeCompare` uses the environment's default collation (OS-derived, so it
   // differs between developer machines and CI), which would make the emitted tag order machine-dependent.
-  // `en` matches the language the document is written in. Note this puts `AI / Agents` before `AI / AI`,
+  // `en` matches the language the document is written in. Note this puts `AI / AI` before `AI / Assignments`,
   // where a code-unit comparison would not. Sorting here rather than at the two sources keeps engine and
   // custom tags interleaved, and `x-tagGroups` below inherits the order.
   const tags: Json[] = [

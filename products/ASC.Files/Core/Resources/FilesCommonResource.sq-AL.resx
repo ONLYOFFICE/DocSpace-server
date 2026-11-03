@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Nuk është e mundur të përdoret kjo dosje për të ruajtur dhomën</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Adresë URL e pavlefshme e lidhjes</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Titulli i pasaktë</value>
   </data>
@@ -610,9 +613,6 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Rezultatet e bisedës</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Dhoma përmban tashmë dosjen .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Ruajtja nuk mund të shkëputet ndërsa një dhomë e përdor atë. Fshini dhomën në vend të kësaj</value>
   </data>
@@ -621,5 +621,29 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Kërko në meta të dhënat e dosjes</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Një projekt IA mund të lidhë jo më shumë se {0} dhoma udhëzimesh</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Një projekt IA mund të lidhë jo më shumë se {0} dhoma njohurish</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Këto dhoma nuk mund të lidhen me projektin e IA-së: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Në një dhomë udhëzimesh mund të shtohen vetëm skedarë Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Një dhomë udhëzimesh mund të përmbajë jo më shumë se {0} aftësi</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Përshkrimi i aftësisë duhet të ketë nga 1 deri në 1024 karaktere dhe nuk duhet të përmbajë etiketa XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Skedari i aftësisë duhet të fillojë me një bllok YAML frontmatter midis dy rreshtave ---, me fushat name dhe description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Emri i aftësisë duhet të ketë nga 1 deri në 64 karaktere, të përmbajë vetëm shkronja të vogla, shifra dhe viza të vetme, dhe nuk duhet të fillojë ose të mbarojë me vizë</value>
   </data>
 </root>

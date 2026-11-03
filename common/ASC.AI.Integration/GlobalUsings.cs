@@ -44,6 +44,8 @@ global using ASC.AI.Integration.Profiles;
 
 global using ASC.Common;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Core.Common;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;

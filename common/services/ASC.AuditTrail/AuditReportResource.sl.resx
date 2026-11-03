@@ -1323,4 +1323,19 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Datoteko je odprla skripta Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplikacija omogočena: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplikacija onemogočena: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Sobe, povezane s projektom UI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Sobe, odklopljene od projekta UI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Model AI projekta UI {0} je bil spremenjen v {1}</value>
+  </data>
 </root>

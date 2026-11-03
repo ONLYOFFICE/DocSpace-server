@@ -80,7 +80,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         await base.RunJob(cancellationToken);
 
-        if (!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        // a cancelled download hands out no archive, even when the cancel came before any entry reported it
+        if (cancellationToken.IsCancellationRequested || !string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
         {
             await PublishChanges();
             return;
@@ -269,6 +270,9 @@ internal class FileDownloadOperation<T> : FileOperation<FileDownloadOperationDat
 
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
         var webhookManager = serviceScope.ServiceProvider.GetRequiredService<WebhookManager>();
+
+        // the lock and custom-filter tags of the payloads, one query for all the files instead of one per file
+        await webhookManager.PrefetchAsync(WebhookTrigger.FileDownloaded, filesForSend.OfType<File<T>>().ToList());
 
         foreach (var file in filesForSend)
         {

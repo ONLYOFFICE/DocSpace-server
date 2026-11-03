@@ -41,22 +41,16 @@ public abstract class CheckDestFolderTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    /// <summary>Calls checkMoveOrCopyDestFolder for the given source files/folders and destination.</summary>
     /// <summary>A checked file as the tests see it: only the title survives the response model.</summary>
     protected sealed record CheckedFile(string Title);
 
     /// <summary>The parsed response of <c>GET /files/fileops/checkdestfolder</c>.</summary>
     protected sealed record DestFolderCheck(CheckDestFolderResult Result, List<CheckedFile> Files);
 
-    /// <remarks>
-    /// Sent over raw HTTP, not through the generated client: the endpoint is bound by
-    /// <c>BatchModelBinder</c> (<c>products/ASC.Files/Core/ApiModels/Binders.cs:215</c>), which reads
-    /// flat query parameters (<c>fileIds</c>, <c>destFolderId</c>, ...), while the generated
-    /// <c>OperationsApi.CheckMoveOrCopyDestFolderAsync</c> sends the whole DTO under a single
-    /// <c>inDto</c> query key. The binder then never sees <c>destFolderId</c> and the controller dies
-    /// calling <c>GetString()</c> on an undefined <c>JsonElement</c>. An SDK/OpenAPI generation
-    /// defect — the same one <c>CheckMoveCopy</c> works around — not a preference.
-    /// </remarks>
+    /// <summary>
+    /// Calls checkMoveOrCopyDestFolder for the given source files/folders and destination. A failure surfaces as the
+    /// <see cref="ApiException"/> of the typed client.
+    /// </summary>
     protected async Task<DestFolderCheck> CheckDestFolder(
         int[]? fileIds = null,
         int[]? folderIds = null,
@@ -64,46 +58,26 @@ public abstract class CheckDestFolderTestBase(
         FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip,
         bool deleteAfter = true)
     {
-        var query = new List<string>();
+        var payload = (await _filesOperationsApi.CheckMoveOrCopyDestFolderAsync(
+            fileIds: AsQueryIds(fileIds),
+            folderIds: AsQueryIds(folderIds),
+            destFolderId: destFolderId?.ToString(CultureInfo.InvariantCulture),
+            conflictResolveType: conflictResolveType,
+            deleteAfter: deleteAfter,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        if (destFolderId != null)
-        {
-            query.Add($"destFolderId={destFolderId.Value}");
-        }
+        return new DestFolderCheck(
+            payload.Result ?? CheckDestFolderResult.AllAllowed,
+            [.. (payload.Files ?? []).Select(f => new CheckedFile(f.Title ?? ""))]);
+    }
 
-        query.AddRange((fileIds ?? []).Select(id => $"fileIds={id}"));
-        query.AddRange((folderIds ?? []).Select(id => $"folderIds={id}"));
-        query.Add($"conflictResolveType={conflictResolveType}");
-        query.Add($"deleteAfter={(deleteAfter ? "true" : "false")}");
-
-        var path = "api/2.0/files/fileops/checkdestfolder?" + string.Join("&", query);
-
-        using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new ApiException((int)response.StatusCode, $"Error calling CheckMoveOrCopyDestFolder: {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-        var payload = json.RootElement.GetProperty("response");
-
-        var result = payload.TryGetProperty("result", out var resultElement)
-            ? resultElement.ValueKind == JsonValueKind.Number
-                ? (CheckDestFolderResult)resultElement.GetInt32()
-                : Enum.Parse<CheckDestFolderResult>(resultElement.GetString()!, ignoreCase: true)
-            : CheckDestFolderResult.AllAllowed;
-
-        var files = new List<CheckedFile>();
-
-        if (payload.TryGetProperty("files", out var filesElement) && filesElement.ValueKind == JsonValueKind.Array)
-        {
-            files.AddRange(filesElement.EnumerateArray()
-                .Select(f => new CheckedFile(f.TryGetProperty("title", out var t) ? t.GetString() ?? "" : "")));
-        }
-
-        return new DestFolderCheck(result, files);
+    /// <summary>
+    /// Ids as the preflight endpoints take them on the query: as text, which the server reads back as a number when
+    /// it is numeric. <c>null</c> leaves the parameter out.
+    /// </summary>
+    protected static List<string>? AsQueryIds(IEnumerable<int>? ids)
+    {
+        return ids?.Select(id => id.ToString(CultureInfo.InvariantCulture)).ToList();
     }
 
     /// <summary>

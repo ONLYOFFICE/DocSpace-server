@@ -84,12 +84,10 @@ public class RoomLogoUploadContractTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        using var response = await UploadRoomLogoRaw(
-            HttpMethod.Post,
-            [(CreateTestImageBytes(), "logo.png", "application/octet-stream")]);
+        var tmpFile = await UploadLogo(CreateTestImageBytes(), contentType: "application/octet-stream");
 
-        // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        // Assert - a non-2xx answer would have thrown ApiException
+        tmpFile.Should().NotBeNullOrEmpty();
     }
 
     [Fact]

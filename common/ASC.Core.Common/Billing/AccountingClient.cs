@@ -131,6 +131,25 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return accountingApi.GetCustomerServiceUsagePages(portalId, filter);
     }
 
+    public async Task<DepositReport> GetCustomerDepositsAsync(string portalId, DepositFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerDepositsAsync(portalId, filter);
+    }
+
+    /// <summary>
+    /// Every balance top-up matching the filter, paged as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="PagedFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<DepositReport, Deposit> GetCustomerDepositPages(string portalId, DepositFilter filter)
+    {
+        EnsureConfigured();
+        EnsureNoOffset(filter);
+
+        return accountingApi.GetCustomerDepositPages(portalId, filter);
+    }
+
     // The page offset travels in a query parameter of its own, so a filter offset would put a second "offset"
     // into every request and leave it to the accounting service which one wins.
     private static void EnsureNoOffset(PagedFilter filter)
@@ -547,6 +566,17 @@ public class UsageFilter : PagedFilter
     /// Metadata key-value pairs to filter by.
     /// </summary>
     public Dictionary<string, string> Metadata { get; init; }
+}
+
+/// <summary>
+/// The filter for customer balance top-ups.
+/// </summary>
+public class DepositFilter : PagedFilter
+{
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    public OperationStatus? Status { get; init; }
 }
 
 /// <summary>
@@ -1057,6 +1087,70 @@ public class UsageReport : BaseReport<CustomerServiceUsage>
 /// </summary>
 public class ServiceReport : BaseReport<ServiceInfo>
 {
+}
+
+/// <summary>
+/// Represents a paged report of customer balance top-ups.
+/// </summary>
+public class DepositReport : BaseReport<Deposit>
+{
+}
+
+/// <summary>
+/// Represents a customer balance top-up with the reference of the payment behind it.
+/// </summary>
+public class Deposit
+{
+    /// <summary>
+    /// The operation ID.
+    /// </summary>
+    public long Id { get; init; }
+
+    /// <summary>
+    /// The date of the top-up.
+    /// </summary>
+    public DateTime Date { get; init; }
+
+    /// <summary>
+    /// The top-up amount.
+    /// </summary>
+    public decimal Sum { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the amount.
+    /// </summary>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The operation status.
+    /// </summary>
+    public OperationStatus Status { get; init; }
+
+    /// <summary>
+    /// The name of the bank (payment system) that received the payment.
+    /// </summary>
+    public string BankName { get; init; }
+
+    /// <summary>
+    /// The external payment reference passed with the top-up.
+    /// </summary>
+    /// <remarks>A Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>) has an invoice behind it.</remarks>
+    public string PaymentRef { get; init; }
+
+    /// <summary>
+    /// The additional metadata of the top-up.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
+
+    /// <summary>
+    /// Whether the billing service can give an invoice link for the payment behind the top-up.
+    /// </summary>
+    [JsonIgnore]
+    public bool HasInvoice
+    {
+        get => PaymentRef != null &&
+               (PaymentRef.StartsWith("pi_", StringComparison.Ordinal) || PaymentRef.StartsWith("in_", StringComparison.Ordinal));
+    }
 }
 
 /// <summary>
