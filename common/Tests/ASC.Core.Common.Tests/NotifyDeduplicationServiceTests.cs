@@ -245,6 +245,51 @@ public class NotifyDeduplicationServiceTests
         afterVisitWindow.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task LetterTheChannelFailedToDeliver_DoesNotHoldBackTheRepeat()
+    {
+        var service = CreateService();
+        var action = new TestAction("portal_deactivate");
+
+        var failed = Request(action, null);
+        await service.IsDuplicateAsync(failed);
+        await service.ReleaseAsync(failed);
+        var repeat = await service.IsDuplicateAsync(Request(action, null));
+
+        repeat.Should().BeFalse("nobody got the first letter, so the repeat is the only one that can reach the recipient");
+    }
+
+    [Fact]
+    public async Task SuppressedRepeat_ReleasesNothing()
+    {
+        var service = CreateService();
+        var action = new TestAction("portal_deactivate");
+
+        await service.IsDuplicateAsync(Request(action, null));
+        var suppressed = Request(action, null);
+        await service.IsDuplicateAsync(suppressed);
+        await service.ReleaseAsync(suppressed);
+        var third = await service.IsDuplicateAsync(Request(action, null));
+
+        third.Should().BeTrue("only the request that set the mark may take it back");
+    }
+
+    [Fact]
+    public async Task FailedSendReportedToTheRequest_ReachesTheRepeatCheck()
+    {
+        var service = CreateService();
+        var interceptor = new DuplicateMessageInterceptor(service);
+        var action = new TestAction("portal_deactivate");
+
+        var failed = Request(action, null);
+        failed._interceptors.Add(interceptor);
+        await interceptor.PreventSend(failed, InterceptorPlace.MessageSend, null!);
+        await failed.SendFailedAsync(null!);
+        var repeat = await interceptor.PreventSend(Request(action, null), InterceptorPlace.MessageSend, null!);
+
+        repeat.Should().BeFalse();
+    }
+
     private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null)
     {
         var configuration = new ConfigurationBuilder()

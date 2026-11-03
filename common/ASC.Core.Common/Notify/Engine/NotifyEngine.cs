@@ -273,7 +273,21 @@ public class NotifyEngine(Context context,
             return preventresponse;
         }
 
-        await channel.SendAsync(noticeMessage, serviceScope);
+        SendResponse sendResponse;
+        try
+        {
+            sendResponse = await channel.SendAsync(noticeMessage, serviceScope);
+        }
+        catch
+        {
+            await request.SendFailedAsync(serviceScope);
+            throw;
+        }
+
+        if (sendResponse is { Result: not SendResult.OK })
+        {
+            await request.SendFailedAsync(serviceScope);
+        }
 
         return new SendResponse(noticeMessage, channel.SenderName, SendResult.Inprogress);
     }

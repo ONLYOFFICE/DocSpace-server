@@ -39,4 +39,9 @@ public interface ISendInterceptor
     InterceptorPlace PreventPlace { get; }
     InterceptorLifetime Lifetime { get; }
     Task<bool> PreventSend(NotifyRequest request, InterceptorPlace place, IServiceScope serviceScope);
+
+    /// <summary>
+    /// Called when the channel did not deliver a message this interceptor let through at <see cref="InterceptorPlace.MessageSend"/>.
+    /// </summary>
+    Task SendFailedAsync(NotifyRequest request, IServiceScope serviceScope) => Task.CompletedTask;
 }

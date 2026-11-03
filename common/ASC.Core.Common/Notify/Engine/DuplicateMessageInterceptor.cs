@@ -43,4 +43,9 @@ internal class DuplicateMessageInterceptor(NotifyDeduplicationService notifyDedu
     {
         return notifyDeduplicationService.IsDuplicateAsync(request);
     }
+
+    public Task SendFailedAsync(NotifyRequest request, IServiceScope serviceScope)
+    {
+        return notifyDeduplicationService.ReleaseAsync(request);
+    }
 }

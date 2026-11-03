@@ -94,7 +94,30 @@ public class NotifyDeduplicationService(
             await hybridCache.SetAsync(key, true, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
         }
 
+        request.Properties[GetMarkProperty(request.CurrentSender)] = key;
+
         return false;
+    }
+
+    /// <summary>
+    /// Takes back the mark this request set, once its channel failed to deliver the letter, so that the next repeat
+    /// goes out instead of being dropped for a letter nobody got. A request that was itself suppressed set no mark and
+    /// releases nothing.
+    /// </summary>
+    public async Task ReleaseAsync(NotifyRequest request)
+    {
+        var property = GetMarkProperty(request.CurrentSender);
+        if (request.Properties[property] is not string key)
+        {
+            return;
+        }
+
+        request.Properties.Remove(property);
+
+        // with the backplane notification: another node may hold the mark in memory since a repeat it checked
+        await hybridCache.RemoveAsync(key);
+
+        logger.DebugMarkReleased(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
     }
 
     public static string GetCacheKey(int tenantId, string actionId, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
@@ -103,6 +126,11 @@ public class NotifyDeduplicationService(
         var hash = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(identity)));
 
         return tenantId + "notifydedup" + hash;
+    }
+
+    private static string GetMarkProperty(string sender)
+    {
+        return "notifydedup:" + sender;
     }
 
     private static IEnumerable<string> GetDiscriminators(NotifyRequest request)

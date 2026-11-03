@@ -37,4 +37,7 @@ public static partial class NotifyDeduplicationLogger
 {
     [LoggerMessage(LogLevel.Debug, "Notification {action} via {sender} in tenant {tenantId} suppressed as a repeat")]
     public static partial void DebugDuplicateSuppressed(this ILogger<NotifyDeduplicationService> logger, string action, string sender, int tenantId);
+
+    [LoggerMessage(LogLevel.Debug, "Notification {action} via {sender} in tenant {tenantId} was not delivered, a repeat may go out")]
+    public static partial void DebugMarkReleased(this ILogger<NotifyDeduplicationService> logger, string action, string sender, int tenantId);
 }
