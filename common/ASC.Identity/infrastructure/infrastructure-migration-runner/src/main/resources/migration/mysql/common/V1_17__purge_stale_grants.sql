@@ -4,7 +4,8 @@ ALTER TABLE identity_authorizations
     ADD INDEX idx_identity_authorizations_modified_at (modified_at), ALGORITHM=INPLACE, LOCK=NONE;
 
 ALTER TABLE identity_consents
-    ADD INDEX idx_identity_consents_modified_at (modified_at), ALGORITHM=INPLACE, LOCK=NONE;
+    ADD INDEX idx_identity_consents_modified_at (modified_at),
+    ADD INDEX idx_identity_consents_registered_client_id (registered_client_id), ALGORITHM=INPLACE, LOCK=NONE;
 
 SET SESSION lock_wait_timeout = DEFAULT;
 
