@@ -134,7 +134,8 @@ public class GoogleWorkspaceMigrator : Migrator
                             {
                                 Directory.CreateDirectory(dir);
                             }
-                            await entry.ExtractToFileAsync(destPath, _cancellationToken);
+                            await using var entryStream = await entry.OpenAsync(_cancellationToken);
+                            await ExtractEntryAsync(entryStream, destPath, _cancellationToken);
                         }
                         if (_cancellationToken.IsCancellationRequested && reportProgress)
                         {
@@ -202,7 +203,7 @@ public class GoogleWorkspaceMigrator : Migrator
                     lastUser = user;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not LargeBackupException)
             {
                 MigrationInfo.FailedArchives.Add(key);
                 Log(MigrationResource.CanNotParseArchives, ex);
@@ -285,9 +286,10 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private string GetLocalizedFolderPath(string parentFolder, string folderName)
     {
-        if (_folderNameMappings.TryGetValue(folderName.ToLowerInvariant(), out var localizedFolderName))
+        // the localized name is read from the takeout's own html: a rooted or ".." value must not lead outside the backup
+        if (_folderNameMappings.TryGetValue(folderName.ToLowerInvariant(), out var localizedFolderName)
+            && TryGetSafeExtractPath(parentFolder, localizedFolderName, out var localizedPath))
         {
-            var localizedPath = Path.Combine(parentFolder, localizedFolderName);
             if (Directory.Exists(localizedPath))
             {
                 return localizedPath;

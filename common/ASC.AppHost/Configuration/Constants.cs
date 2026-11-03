@@ -104,6 +104,11 @@ public static class Constants
     public const int WebhookReceiverPort = 18089;
     public const string WebhookReceiverHost = "127.0.0.2";
 
+    // The most bytes an uploaded migration backup may unpack to under the integration-test profile
+    // (migration:maxExtractedSize, set in ProjectConfigurator). The test portals run on an unlimited quota, which sets
+    // no limit of its own, so without it MigrationSizeLimitTests would have to unpack gigabytes to reach one.
+    public const long MigrationTestMaxExtractedSize = 64L * 1024 * 1024;
+
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
     // four attempts in all, instead of the production schedule of minutes to hours, and an attempt that gives up on a
