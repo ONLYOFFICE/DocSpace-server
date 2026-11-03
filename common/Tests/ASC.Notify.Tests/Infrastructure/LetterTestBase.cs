@@ -206,7 +206,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
                 $"{typeof(TAction).Name}.Init has to fill '{keyTag}', which the repeat check keys on");
         }
 
-        var pattern =action.Patterns.Find(p => p.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
+        var pattern = action.Patterns.Find(p => p.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
             ?? throw new InvalidOperationException(
                 $"Action '{action.ID}' carries no email pattern, so there is no letter to render.");
 
