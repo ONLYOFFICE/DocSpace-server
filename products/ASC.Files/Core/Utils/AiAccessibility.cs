@@ -46,12 +46,18 @@ public class AiAccessibility(
     ProfileStorage profileStorage,
     SettingsManager settingsManager)
 {
+    public async Task<bool> IsAccessEnabledAsync()
+    {
+        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantManager.GetCurrentTenantId());
+
+        return aiAccessSettings.Enabled;
+    }
+
     public async Task<AiStatus> GetStatusAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var aiAccessSettings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantId);
-        if (!aiAccessSettings.Enabled)
+        if (!await IsAccessEnabledAsync())
         {
             return new AiStatus { Enabled = false, GatewayEnabled = false };
         }

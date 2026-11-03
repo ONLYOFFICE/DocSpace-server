@@ -159,7 +159,7 @@ public class FileSharingAceHelper(
             if (file != null)
             {
                 if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.ReadWrite or FileShare.None) && !fileUtility.CanWebView(entry.Title))
-                    || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms && entry.RootFolderType != FolderType.AiAgents))
+                    || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms && entry.RootFolderType != FolderType.AiAgents && entry.RootFolderType != FolderType.AiHub))
                 {
                     continue;
                 }
@@ -268,6 +268,14 @@ public class FileSharingAceHelper(
                 if (room.FolderType == FolderType.AiRoom &&
                     currentUserType == EmployeeType.Guest &&
                     w.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                }
+
+                if (room.FolderType == FolderType.AiProjectRoom &&
+                    w.SubjectType == SubjectType.User &&
+                    w.Access != FileShare.None &&
+                    (emailInvite ? await userManager.GetUserTypeAsync(await userManager.GetUserByEmailAsync(w.Email)) : currentUserType) == EmployeeType.Guest)
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -1006,7 +1014,7 @@ public class FileSharing(
     public async Task<List<AceShortDto>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
-        var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
+        var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive;
         var inAgent = file.RootFolderType == FolderType.AiRoom;
 
         return

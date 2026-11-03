@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Ответы чата</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>В комнате уже есть папка .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Невозможно отключить хранилище, пока его использует комната. Вместо этого удалите комнату</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Поиск в метаданных папок</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>К ИИ-проекту можно привязать не более {0} комнат с инструкциями</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>К ИИ-проекту можно привязать не более {0} комнат знаний</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Эти комнаты нельзя привязать к ИИ-проекту: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>В комнату с инструкциями можно добавлять только файлы Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>В комнате с инструкциями может быть не более {0} навыков</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Описание навыка должно содержать от 1 до 1024 символов и не должно содержать XML-тегов</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Файл навыка должен начинаться с блока YAML frontmatter между двумя строками --- с полями name и description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Имя навыка должно содержать от 1 до 64 символов, только строчные буквы, цифры и одиночные дефисы, и не должно начинаться или заканчиваться дефисом</value>
   </data>
 </root>

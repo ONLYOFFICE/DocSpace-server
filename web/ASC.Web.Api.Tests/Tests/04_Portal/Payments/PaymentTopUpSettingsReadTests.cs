@@ -40,15 +40,6 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <c>POST topupsettings</c>, which does demand a configured tariff and a billing customer, so
 /// only the read side and its access control are covered here.
 /// </summary>
-/// <remarks>
-/// SDK gap: the generated <see cref="TenantWalletSettingsWrapper"/> exposes a <c>Settings</c>
-/// property, but the OpenAPI schema for this GET response was mislabelled from the
-/// <c>POST topupsettings</c> request body — every action wraps its payload as
-/// <c>{"response": ...}</c> (see <c>SuccessApiResponse</c>), never <c>{"settings": ...}</c>, so
-/// <c>Settings</c> is always null here. The positive cases below go through raw JSON instead; the
-/// negative (permission) cases are unaffected, since <c>ApiException</c> is raised from the status
-/// code alone.
-/// </remarks>
 [Trait("Category", "Portal")]
 public class PaymentTopUpSettingsReadTests(
     AspireAppFixture fixture)
@@ -61,13 +52,10 @@ public class PaymentTopUpSettingsReadTests(
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.GetAsync("api/2.0/portal/payment/topupsettings", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _paymentApi.GetTenantWalletSettingsAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        json.RootElement.TryGetProperty("response", out _).Should().BeTrue();
+        result.Response.Should().NotBeNull();
     }
 
     [Fact]
@@ -78,13 +66,10 @@ public class PaymentTopUpSettingsReadTests(
         await _webApiClient.Authenticate(admin);
 
         // Act
-        using var response = await _webApi.GetAsync("api/2.0/portal/payment/topupsettings", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _paymentApi.GetTenantWalletSettingsAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        json.RootElement.TryGetProperty("response", out _).Should().BeTrue();
+        result.Response.Should().NotBeNull();
     }
 
     [Fact]

@@ -98,9 +98,20 @@ public abstract class UserDataTestBase(AspireAppFixture fixture) : BaseTest(fixt
     /// </summary>
     protected async Task<FileEntryBaseDto> FindRoomByTitleAsync(string roomTitle)
     {
-        var content = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // filterValue is answered from the search index, which takes the new room in asynchronously: poll on a deadline
+        var deadline = DateTime.UtcNow.AddSeconds(30);
 
-        return content.Folders.Single(f => f.Title == roomTitle);
+        while (true)
+        {
+            var content = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            if (content.Folders.Any(f => f.Title == roomTitle) || DateTime.UtcNow >= deadline)
+            {
+                return content.Folders.Single(f => f.Title == roomTitle);
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
     /// <summary>

@@ -35,7 +35,6 @@ import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
 import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
-import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 import { getSystemServerConfig } from "./systemTools.js";
 import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { setCustomServerNames } from "../requestContext.js";
@@ -44,17 +43,16 @@ import logger from "../log.js";
 
 /**
  * Custom MCP servers registered through the `tools/*` routes, resolved per
- * round: the agent's own map when the round runs in an agent room, the
- * portal-wide map everywhere else (Bug 84383: the two used to be merged, so
- * every agent reached every portal server). Until the registry was wired
- * here it was pure configuration — nothing connected it to the chat round,
- * so a registered server's tools never reached the model
+ * round from the portal-wide map (the registry is one map per portal; the
+ * `entityId` the tools source passes is ignored). Until the registry was
+ * wired here it was pure configuration — nothing connected it to the chat
+ * round, so a registered server's tools never reached the model
  * (Bugs 82989 / 82990).
  *
  * Filtered out here:
  * - the portal MCP server (built-in, always wired via systemTools);
- * - whitelist markers named after a configured system server (they only
- *   toggle the system group on for an agent — see agentServerWhitelist);
+ * - entries named after a configured system server (the system group is
+ *   wired by systemTools itself — see getSystemServerConfig);
  * - entries without an HTTP `url` (a browser-only transport cannot run
  *   server-side).
  *
@@ -63,7 +61,7 @@ import logger from "../log.js";
  * tools approval-required, same as the host-configured system servers.
  */
 export async function resolveCustomServers(
-  entityId?: string,
+  _entityId?: string,
   options?: { strict?: boolean },
 ): Promise<Record<string, McpHttpServerConfig>> {
   // A failed read is tolerated so a round still runs with whatever servers
@@ -81,17 +79,11 @@ export async function resolveCustomServers(
     );
     return {};
   };
-  // An agent reaches only the servers registered in its own map — the agent
-  // dialog copies the portal entry into that map when a server is enabled
-  // for the agent, so the map is the whitelist. Merging the portal map on
-  // top handed every agent every portal server (Bug 84383). Any other scope
-  // folds to the portal map in the storage already, so one read is enough.
-  const agentId = await resolveAgentEntityId(entityId);
-  const merged = agentId
-    ? await storage.mcpServers.readAll(agentId).catch(tolerate(`agent server map for ${agentId}`))
-    : await storage.mcpServers.readAll(undefined).catch(tolerate("portal-wide server map"));
+  const servers = await storage.mcpServers
+    .readAll(undefined)
+    .catch(tolerate("portal-wide server map"));
   const out: Record<string, McpHttpServerConfig> = {};
-  for (const [name, config] of Object.entries(merged)) {
+  for (const [name, config] of Object.entries(servers)) {
     if (name === PORTAL_MCP_SERVER_NAME) continue;
     if (getSystemServerConfig(name)) continue;
     if (!isObject(config) || typeof config.url !== "string" || config.url.length === 0) {
@@ -104,12 +96,12 @@ export async function resolveCustomServers(
 }
 
 /**
- * Prime the request context with the custom server names for the round's
- * scope. Called by the send handlers before the engine runs, because the
- * engine reads `systemServerTypes` (sync) before the tools adapter fires.
+ * Prime the request context with the registered custom server names.
+ * Called by the send handlers before the engine runs, because the engine
+ * reads `systemServerTypes` (sync) before the tools adapter fires.
  */
-export async function primeCustomServers(entityId?: string): Promise<void> {
-  await resolveCustomServers(entityId);
+export async function primeCustomServers(): Promise<void> {
+  await resolveCustomServers();
 }
 
 /**

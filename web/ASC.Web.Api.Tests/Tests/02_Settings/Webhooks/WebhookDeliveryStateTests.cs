@@ -76,7 +76,7 @@ public class WebhookDeliveryStateTests(
 
         while (true)
         {
-            var after = (await GetDeliveryRecordsAsync(subscription.Id)).Single(r => r.Id == record.Id);
+            var after = (await GetLogAsync(subscription.Id)).Single(r => r.Id == record.Id);
 
             after.Status.Should().Be(0, "the outcome belongs to an attempt that no longer holds the record");
             after.Delivery.Should().BeNull();

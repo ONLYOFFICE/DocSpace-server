@@ -37,9 +37,11 @@ extern alias ASCWebApi;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.Http.Json;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
@@ -84,4 +86,5 @@ global using SecurityBannersVisibilityApi = DocSpace.API.SDK.Api.Security.Banner
 global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
 global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
+global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;

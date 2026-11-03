@@ -71,6 +71,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesMetadataField> MetadataFields { get; set; }
     public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
     public DbSet<DbFilesMetadataValue> MetadataValues { get; set; }
+    public DbSet<DbFilesAiProjectRoom> AiProjectRooms { get; set; }
+    public DbSet<DbFilesSkill> Skills { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -111,6 +113,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesMetadataField()
             .AddDbFilesMetadataLink()
             .AddDbFilesMetadataValue()
+            .AddDbFilesAiProjectRoom()
+            .AddDbFilesSkill()
             .AddDbFunctions();
     }
 }

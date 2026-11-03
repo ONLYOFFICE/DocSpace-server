@@ -613,9 +613,6 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Chatin tulosteet</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Huone sisältää jo .ai-kansion</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Tallennustilaa ei voi irrottaa, kun huone käyttää sitä. Poista huone sen sijaan</value>
   </data>
@@ -624,5 +621,29 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hae kansion metatiedoista</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Tekoälyprojektiin voi linkittää enintään {0} ohjehuonetta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Tekoälyprojektiin voi linkittää enintään {0} tietohuonetta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Näitä huoneita ei voi linkittää tekoälyprojektiin: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Ohjehuoneeseen voi lisätä vain Markdown-tiedostoja (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ohjehuoneessa voi olla enintään {0} taitoa</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Taidon kuvauksen on oltava 1–1024 merkkiä pitkä, eikä se saa sisältää XML-tageja</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Taitotiedoston on alettava YAML frontmatter -lohkolla, joka on kahden rivin --- välissä ja sisältää kentät name ja description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Taidon nimen on oltava 1–64 merkkiä pitkä, se saa sisältää vain pieniä kirjaimia, numeroita ja yksittäisiä yhdysmerkkejä, eikä se saa alkaa tai päättyä yhdysmerkkiin</value>
   </data>
 </root>

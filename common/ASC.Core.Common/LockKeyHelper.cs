@@ -65,8 +65,9 @@ public static class LockKeyHelper
         return $"aiagents_count_check_{tenantId}";
     }
 
-    public static string GetAiFolderCheckKey<T>(int tenantId, T parentId)
+    public static string GetAiProjectRoomsKey(int tenantId, int projectId)
     {
-        return $"ai_folder_check_{tenantId}_{parentId}";
+        return $"ai_project_rooms_{tenantId}_{projectId}";
     }
+
 }

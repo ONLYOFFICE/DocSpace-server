@@ -129,4 +129,5 @@ global using Swashbuckle.AspNetCore.Annotations;
 global using ZiggyCreatures.Caching.Fusion;
 
 global using FileShare = ASC.Files.Core.Security.FileShare;
+global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using SecurityContext = ASC.Core.SecurityContext;

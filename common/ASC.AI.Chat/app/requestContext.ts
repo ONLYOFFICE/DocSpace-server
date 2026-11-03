@@ -162,6 +162,32 @@ export function getAnalyzeEntryIds(): string[] {
   return als.getStore()?.analyzeEntryIds ?? [];
 }
 
+// The profile the current chat round runs on (see RequestContext.roundProfileId).
+// Set by the send handlers once the effective profileId is known; read by the
+// document agent tool, which runs the agent on the same model as the chat.
+export function setRoundProfileId(profileId: string | undefined): void {
+  const store = als.getStore();
+  if (store && typeof profileId === "string" && profileId.length > 0) {
+    store.roundProfileId = profileId;
+  }
+}
+
+export function getRoundProfileId(): string | undefined {
+  return als.getStore()?.roundProfileId;
+}
+
+// Attachment ref ids of the current user message (see RequestContext.roundAttachmentIds).
+export function setRoundAttachmentIds(ids: string[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.roundAttachmentIds = ids;
+  }
+}
+
+export function getRoundAttachmentIds(): string[] {
+  return als.getStore()?.roundAttachmentIds ?? [];
+}
+
 // Names of the custom MCP servers resolved for the current round's scope.
 // Set by the custom-tools resolver (app/tools/customTools.ts) whenever it
 // runs; read by the engine's `systemServerTypes` callback, which is
@@ -177,6 +203,20 @@ export function setCustomServerNames(names: string[]): void {
 
 export function getCustomServerNames(): string[] {
   return als.getStore()?.customServerNames ?? [];
+}
+
+// The knowledge rooms the round searches (see RequestContext.knowledgeRoomIds).
+// Taken off `actionArgs.knowledgeRooms` when the request comes in, read when
+// the tool context for `tools/list` and `tools/call` is built.
+export function setKnowledgeRoomIds(roomIds: number[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.knowledgeRoomIds = roomIds;
+  }
+}
+
+export function getKnowledgeRoomIds(): number[] {
+  return als.getStore()?.knowledgeRoomIds ?? [];
 }
 
 // Per-request folder-info memoization store (see RequestContext). Undefined

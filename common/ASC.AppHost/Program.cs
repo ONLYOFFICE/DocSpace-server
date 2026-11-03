@@ -146,6 +146,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat();
 
         break;
@@ -182,6 +183,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat()
             .AddWebDav()
             .AddIdentity();

@@ -706,18 +706,13 @@ public class SettingsController(
     [HttpPost("settings/defaulttemplate")]
     // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller would see a
     // reset instead of a reason. The form limit below takes over: the multipart reader rejects the
-    // oversized section while it streams in, and the caller gets a readable 400.
+    // oversized section while it streams in, and [FormLimitError] turns that into a readable 400.
     [DisableRequestSizeLimit]
     [RequestFormLimits(MultipartBodyLengthLimit = MaxDefaultTemplateSize)]
+    [FormLimitError]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        if (inDto.File.Length > MaxDefaultTemplateSize)
-        {
-            throw new ArgumentException(FileSizeComment.GetFileSizeExceptionString(MaxDefaultTemplateSize));
-        }
-
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto.File.OpenReadStream());
         return await defaultTemplateSettingsConverter.ConvertToDtoAsync(settings);
     }

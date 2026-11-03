@@ -308,6 +308,10 @@ public class FileConverter(
             return false;
         }
 
+        // the lists below hold extensions with the dot, while the API takes `outputType` without one ("pdf"): such a
+        // value never matched, and the conversion silently fell back to the internal format
+        toExtension = "." + toExtension.Trim('.').ToLowerInvariant();
+
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
@@ -332,7 +336,7 @@ public class FileConverter(
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false, ThumbnailData thumbnail = null, SpreadsheetLayout spreadsheetLayout = null)
     {
         Options options = null;
-        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);

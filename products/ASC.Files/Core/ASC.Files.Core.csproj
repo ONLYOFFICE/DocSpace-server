@@ -33,6 +33,7 @@
     <PackageReference Include="Microsoft.SharePoint.Client" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="WebDav.Client" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.AI.Integration\ASC.AI.Integration.csproj" />

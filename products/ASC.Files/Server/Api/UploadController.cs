@@ -96,14 +96,15 @@ public abstract class UploadController<T>(
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller needs the right to add content to the
     /// target folder, which room managers and content creators have and readers, editors and guests do not: they get
     /// 403, as does a section root such as Rooms or Archive, while an unknown folder is answered as missing. A
-    /// payload above the portal limit for chunked uploads is refused before the session exists.
+    /// payload above the portal limit for chunked uploads is refused before the session exists, and a negative
+    /// `fileSize` is rejected as an invalid request.
     /// </remarks>
     /// <summary>Chunked upload</summary>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `fileName`")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, or `fileSize` is negative")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
     [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format")]
     [SwaggerResponse(404, "No folder with the specified ID")]
@@ -131,14 +132,14 @@ public abstract class UploadController<T>(
     /// `POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the file appears only after
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller must be allowed to add content to the
     /// folder, so readers, editors and guests are refused, a section root is refused as well, and an unknown folder
-    /// is answered as missing. Nothing is written until the parts arrive, and an abandoned session disappears twelve
-    /// hours later.
+    /// is answered as missing, and a negative `fileSize` is rejected as an invalid request. Nothing is written until
+    /// the parts arrive, and an abandoned session disappears twelve hours later.
     /// </remarks>
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `fileName`")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, or `fileSize` is negative")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
     [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format")]
     [SwaggerResponse(404, "No folder with the specified ID")]
@@ -200,12 +201,19 @@ public abstract class UploadController<T>(
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "on the request that completes the upload, without `file.created`")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The progress of the session, or the stored file once the last part has arrived", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(400, "The request has no `File` part")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
-    [SwaggerResponse(500, "The request has no `File` part, or a file that is not a PDF is stored in a form-filling room")]
+    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
+        // a multipart request without the part used to fail with a NullReferenceException, answered as 500
+        if (inDto.File == null)
+        {
+            throw new ArgumentException("The request has no file part", nameof(inDto.File));
+        }
+
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(),  inDto.File.Length);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
 
@@ -273,8 +281,8 @@ public abstract class UploadController<T>(
     /// <remarks>
     /// Stores one part of a file under the number given in `chunkNumber`, which is what the ordinary chunked flow
     /// uses: parts are kept by their number rather than by arrival, so a part that failed can be resent under the
-    /// same number without restarting the session. Numbering starts at 1, and leaving the number out makes the server
-    /// count the parts itself. The answer is always the session, never the file, and this call never completes the
+    /// same number without restarting the session. Numbering starts at 1, so 0 and a negative number are rejected as
+    /// an invalid request, and leaving the number out makes the server count the parts itself. The answer is always the session, never the file, and this call never completes the
     /// upload: the file appears only after `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Use
     /// `POST api/2.0/files/{folderId}/session/{sessionId}` instead when the parts go strictly in order and the upload
     /// should complete by itself. A part bigger than `chunkUploadSize` from `GET api/2.0/files/settings` is refused,
@@ -286,12 +294,19 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
+    [SwaggerResponse(400, "The request has no `File` part, or `chunkNumber` is 0 or negative")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file")]
     [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
-    [SwaggerResponse(500, "The request has no `File` part, or a session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
+    [SwaggerResponse(500, "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
     public async Task<ChunkedUploadSessionDto<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
+        // a multipart request without the part used to fail with a NullReferenceException, answered as 500
+        if (inDto.File == null)
+        {
+            throw new ArgumentException("The request has no file part", nameof(inDto.File));
+        }
+
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
         return await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession);
@@ -380,13 +395,15 @@ public abstract class UploadController<T>(
     /// Unlike an upload into a folder, the finished content does not become a new version: it overwrites the current
     /// one, and the file loses its encrypted flag and its stored conversion result in the process. The caller must be
     /// allowed to edit the file, as the owner, a room manager and a member invited with editing rights are; a reader
-    /// and a guest get 403. A file that does not exist is answered as missing, and a payload above the portal limit
-    /// for chunked uploads is refused before the session is created.
+    /// and a guest get 403. A file that does not exist is answered as missing, a payload above the portal limit for
+    /// chunked uploads is refused before the session is created. A `fileSize` of -1 means the size is not known in
+    /// advance, as for a WebDAV body sent without Content-Length; a smaller value is rejected as an invalid request.
     /// </remarks>
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
+    [SwaggerResponse(400, "`fileSize` is below -1")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads")]
     [SwaggerResponse(403, "The caller cannot edit this file, or the file is locked, open in the editor, in the trash or encrypted")]
     [SwaggerResponse(404, "No file with the specified ID")]

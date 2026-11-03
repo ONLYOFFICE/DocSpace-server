@@ -35,7 +35,7 @@ import nconf from "nconf";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import type { AppConfig, McpServerSetting, RootConfig } from "../app/types.js";
+import type { AppConfig, DocumentAgentSetting, McpServerSetting, RootConfig } from "../app/types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -137,6 +137,106 @@ export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
 // @onlyoffice/ai-chat core). Used to validate tool-pref serverTypes.
 export const WEB_SEARCH_TYPE = "web-search";
 export const IMAGE_GENERATION_TYPE = "image-generation";
+
+// Group key of the document agent's single delegating tool
+// (`document_agent`). Listed in `systemServerTypes`, so the engine asks the
+// user before a task that may run for many minutes is started.
+export const DOCUMENT_AGENT_TYPE = "document-agent";
+
+export interface DocumentAgentConfig {
+    url: string;
+    token: string;
+    /** The whole task, sandbox start to final answer; the agent's own ceiling still applies. */
+    taskTimeoutSeconds: number;
+    /** Tool calls the agent may make for one task; undefined leaves the agent's default. */
+    maxToolCalls: number | undefined;
+    /**
+     * Whether the host-configured MCP servers of `ai.mcp` other than the portal's own are handed
+     * to the agent with the caller's session. The portal's own server always goes: it is how the
+     * agent reads the workspace. Their endpoints must be reachable from the agent: it refuses a
+     * task whose server it cannot connect to.
+     */
+    shareSystemServers: boolean;
+    /**
+     * Where the agent reaches the portal API for the portal's own model provider (`onlyoffice`
+     * profiles): the gateway proxy lives under it at `/api/2.0/ai/gateway`. Undefined means the
+     * address this service itself uses, the AI service's own, which an agent on the same network
+     * reaches; an agent elsewhere needs the public portal address here.
+     */
+    portalUrl: string | undefined;
+    /**
+     * Where the agent reaches this service, for the file-link MCP server handed to it (see
+     * `documentAgentFiles.ts`). `http://localhost:<port>` by default, which an agent on the same
+     * host reaches; an agent elsewhere needs this service's address on their shared network.
+     */
+    filesUrl: string;
+}
+
+const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
+
+// The document agent from the shared `appsettings.json` (`ai.documentAgent`),
+// each field overridable from the environment in the same `__` form as the
+// MCP endpoints (`AI__DOCUMENT_AGENT__URL`, `AI__DOCUMENT_AGENT__TOKEN`,
+// `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS`, `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`,
+// `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`,
+// `AI__DOCUMENT_AGENT__FILES_URL`).
+// Undefined without a URL and a token: the tool is then simply not offered.
+// An environment variable that is set wins even when empty, so the Docker
+// install's empty DOCUMENT_AGENT_URL / DOCUMENT_AGENT_TOKEN switch the agent
+// off whatever the appsettings name.
+export function getDocumentAgent(): DocumentAgentConfig | undefined {
+    const ai: RootConfig["ai"] = nconf.get("ai");
+    const setting: DocumentAgentSetting | undefined =
+        ai?.documentAgent && typeof ai.documentAgent === "object" ? ai.documentAgent : undefined;
+    const url = envOrSetting("AI__DOCUMENT_AGENT__URL", setting?.url);
+    const token = envOrSetting("AI__DOCUMENT_AGENT__TOKEN", setting?.token);
+    if (!url || !token) {
+        return undefined;
+    }
+    const timeout =
+        positiveInt(process.env["AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS"]) ??
+        positiveInt(setting?.taskTimeoutSeconds) ??
+        DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS;
+    const maxToolCalls =
+        positiveInt(process.env["AI__DOCUMENT_AGENT__MAX_TOOL_CALLS"]) ??
+        positiveInt(setting?.maxToolCalls);
+    const share = process.env["AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS"];
+    const shareSystemServers =
+        share !== undefined && share !== "" ? share === "true" || share === "1" : setting?.shareSystemServers === true;
+    const portalUrl = firstText(process.env["AI__DOCUMENT_AGENT__PORTAL_URL"], setting?.portalUrl);
+    const filesUrl = firstText(process.env["AI__DOCUMENT_AGENT__FILES_URL"], setting?.filesUrl);
+    return {
+        url: url.replace(/\/+$/, ""),
+        token,
+        taskTimeoutSeconds: timeout,
+        maxToolCalls,
+        shareSystemServers,
+        portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
+        filesUrl: (filesUrl === "" ? `http://localhost:${getAppConfig().port}` : filesUrl).replace(/\/+$/, ""),
+    };
+}
+
+/** The first value that is a non-blank string, trimmed; "" when there is none. */
+function firstText(...values: unknown[]): string {
+    for (const value of values) {
+        if (typeof value === "string" && value.trim() !== "") {
+            return value.trim();
+        }
+    }
+    return "";
+}
+
+/** The environment variable when it is set at all (even empty), else the setting; trimmed. */
+function envOrSetting(name: string, setting: unknown): string {
+    const env = process.env[name];
+    const value = env !== undefined ? env : setting;
+    return typeof value === "string" ? value.trim() : "";
+}
+
+function positiveInt(value: unknown): number | undefined {
+    const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+    return Number.isInteger(n) && n > 0 ? n : undefined;
+}
 
 // Group key for the form-analysis sub-agent's single delegating tool
 // (`analyze_form`). Kept out of `systemServerTypes` so the tool runs silently.

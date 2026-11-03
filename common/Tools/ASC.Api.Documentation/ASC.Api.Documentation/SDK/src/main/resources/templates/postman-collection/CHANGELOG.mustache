@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.1.0
+
+### Added
+
+- Added the `Rooms / AI` folder (`/api/2.0/files/rooms`): get and set the chat model of an AI project (`{id}/model`), get, link and unlink the rooms of a project (`{id}/sources`), the skills of an Instructions room (`{id}/skills`) and the skills catalog (`skills`)
+- Added `AI / Context / Get knowledge folders` (`/api/2.0/ai/context/get-knowledge-folders`)
+- `AI / Assignments / Get all assignments` takes `expand=profile` to answer the assigned profiles themselves
+
+### Removed
+
+- Removed the `AI / Agents` folder: the server no longer serves `/api/2.0/ai/agents`; an AI project takes the place of an agent
+
 ## 4.0.0
 
 ### Added
