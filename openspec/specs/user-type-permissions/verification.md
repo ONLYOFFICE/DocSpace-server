@@ -13,9 +13,10 @@ or live evidence was found — flagged).
 Conventions that apply to every row: a refusal is asserted as an `ApiException` with the status code, the
 message only where the row says so; "Guest" and "User" are the user types (`EmployeeType` Guest / User),
 "Room admin" is `EmployeeType.RoomAdmin`. The message "The role is not available for this user type" is the
-resource `FilesCommonResource.resx:331` and is thrown by `products/ASC.Files/Core/Utils/FileSharing.cs:169,
-180-188, 203, 258-271`; no test asserts the text, only the 403. The user-type → room-role table is
-`products/ASC.Files/Core/Core/Security/FileSecurity.cs:237-252` (`AvailableUserAccesses`: User and Guest
+resource `FilesCommonResource.resx:331` and is thrown by `products/ASC.Files/Core/Utils/FileSharing.cs:170,
+181-189, 206, 266-289`; the AI-project guest tests assert the text (`03_Rooms/AiHub/AiProjectGuestInviteTests.cs:57, 78`),
+every other row only the 403. The user-type → room-role table is
+`products/ASC.Files/Core/Core/Security/FileSecurity.cs:265-281` (`AvailableUserAccesses`: User and Guest
 without Room manager).
 
 Revision 2026-10-25: first verification; the spec was reshaped at the same time (matrices moved into a
@@ -25,6 +26,14 @@ scenarios "Inviting needs the Room manager role", "Section matrix by user type",
 "Invitation matrix by inviter type", "Type change matrix by caller type", "Disable and delete matrix by
 target type", "Accounts matrix by user type", "Sharing matrix by user type" are new containers for text
 that already existed).
+
+Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): no type right changed. The range adds the AI
+rooms section, whose rooms a User cannot create either (`03_Rooms/AiHub/AiProjectRoomTests.cs:62-74`) and
+whose AI projects refuse Guests (`03_Rooms/AiHub/AiProjectGuestInviteTests.cs`, stated in
+`room-role-permissions`); the People and Settings controllers changed only in their webhook declarations.
+Line references refreshed: `FileSecurity.cs` role tables `:159-263` / `:265-281`, the `FileSharing.cs`
+throws after line 272 moved by +8 (`:283-289` for the user-type check). D3, D4, D7, D9, D10, R1, R2 and R3
+are unchanged (verdicts below).
 
 ## Requirement rows
 
@@ -49,7 +58,7 @@ that already existed).
 | Same rules in the Archive section | no per-type archive listing test; same listing operation | CODE-ONLY |
 | Private room hidden from a non-member Owner / DocSpace admin | `08_Private/PrivateRoomVisibilityTests.cs:53-92` (bug 82956 — the tests assert the spec, their remarks say the bug is still open, so they are expected red); `deviations.md`, matrix table row "Owner and DocSpace admin see all rooms / Not private rooms" | LIVE-CONFIRMED (see R1) |
 | **Room creation and management in the Rooms section** | | |
-| Create rooms: Owner, DocSpace admin, Room admin succeed; User, Guest → 403 ("You don't have enough permission to create") | `03_Rooms/Permissions/RoomCreatePermissionsTests.cs:41-107, 182-236` | TEST-CONFIRMED |
+| Create rooms: Owner, DocSpace admin, Room admin succeed; User, Guest → 403 ("You don't have enough permission to create"); a User → 403 for an AI project too | `03_Rooms/Permissions/RoomCreatePermissionsTests.cs:41-107, 182-236`; `03_Rooms/AiHub/AiProjectRoomTests.cs:62-74` | TEST-CONFIRMED |
 | Pin: every invited member of every type pins; non-member User / Guest → 403 | `RoomPinPermissionsTests.cs:50-71, 90-109`; `RoomPinInvitedMemberPermissionsTests.cs:41-59` | TEST-CONFIRMED |
 | View member list: Owner, invited Room admin, invited User; non-members 403 | `RoomShareReadPermissionsTests.cs:46-152` (bugs 81787, 81788); invited Guest / DocSpace admin not asserted separately | TEST-CONFIRMED |
 | View room history: Owner, DocSpace admin, Room admin (Room manager), User (Read); non-members 403 | `02_Folders/History/FolderHistoryPermissionsTests.cs:48-144` | TEST-CONFIRMED |
@@ -61,11 +70,11 @@ that already existed).
 | Change roles / remove members: Owner; Room admin owner removes a guest | `03_Rooms/Sharing/RoomShareSetTests.cs:68-85, 108-144`; `04_Security/RoomShareTests.cs:1099-1149` (bug 80124) | TEST-CONFIRMED |
 | Archive own room: Owner, DocSpace admin | `RoomArchivePermissionsTests.cs:66-81`; `03_Rooms/Archive/RoomArchiveTests.cs:47-77`; Room admin own room not asserted (`archiveRoom` 30627 demands the room's owner or a portal admin) | TEST-CONFIRMED |
 | Copy own room: Owner | `RoomDeleteFileOpsTests.cs:46-65`; `yaml` `duplicateBatchItems` (22577) | TEST-CONFIRMED |
-| Inviting / role changes / removal need the Room manager role, which a User or Guest cannot hold | `RoomSharePermissionsTests.cs:248-270`; `FileSecurity.cs:237-252`; `deviations.md` matrix row "Users and Guests may invite to a room … 403" | TEST-CONFIRMED |
+| Inviting / role changes / removal need the Room manager role, which a User or Guest cannot hold | `RoomSharePermissionsTests.cs:248-270`; `FileSecurity.cs:265-281`; `deviations.md` matrix row "Users and Guests may invite to a room … 403" | TEST-CONFIRMED |
 | User / Guest who are members cannot invite, member list unchanged | the 403 is asserted for non-members only (`RoomSharePermissionsTests.cs:104-145`); the check is role-based (`FileSharing.cs:101`), a member with any non-manager role fails it; live run `deviations.md` row above | LIVE-CONFIRMED |
 | Room admin makes another Room admin a Room manager, who then invites | `04_Security/RoomShareTests.cs:1099-1126` | TEST-CONFIRMED |
-| Room manager role refused for a User / Guest, by the Owner too → 403, member absent | `RoomSharePermissionsTests.cs:248-270`; `RoomShareAccessLevelTests.cs:56-59`; message `FileSharing.cs:265-271` | TEST-CONFIRMED |
-| Room admin hands out any role but Room manager to a User / Guest | `FileSecurity.cs:237-252` (the check is on the target's type only); no test has a Room admin as the granting actor | CODE-ONLY |
+| Room manager role refused for a User / Guest, by the Owner too → 403, member absent | `RoomSharePermissionsTests.cs:248-270`; `RoomShareAccessLevelTests.cs:56-59`; message `FileSharing.cs:283-289` | TEST-CONFIRMED |
+| Room admin hands out any role but Room manager to a User / Guest; a Guest gets no role in an AI project (403, message) | `FileSecurity.cs:265-281` (the check is on the target's type only); no test has a Room admin as the granting actor; AI project: `03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79`, `FileSharing.cs:275-281` | CODE-ONLY (Room admin as actor) / TEST-CONFIRMED (AI project guest) |
 | **Actions on rooms owned by someone else** | | |
 | Non-member DocSpace admin: view member list, history, info | `RoomShareReadTests.cs:208-221`; `FolderHistoryPermissionsTests.cs:62-76`; `RoomReadPermissionsTests.cs:43-63` | TEST-CONFIRMED |
 | Non-member DocSpace admin pins a foreign room | `RoomPinPermissionsTests.cs:73-88` | TEST-CONFIRMED |
@@ -125,10 +134,11 @@ that already existed).
 | Room admin sharing with a foreign guest, even a member of the Room admin's room: 200, guest absent | `FileShareTests.cs:1228-1244`; `SetSecurityInfoTests.cs:189-207`; `deviations.md` matrix row "A Room admin shares files with own guests and guests of own rooms / Only guests the Room admin invited" | TEST-CONFIRMED |
 | User sharing with a guest: 200, guest absent | `FileShareTests.cs:1287-1309` | TEST-CONFIRMED |
 | Skipped guest cannot open the file | the share row is absent, so no right exists; not asserted directly | CODE-ONLY |
-| Quick share for forms (filling link) in My documents by a User | `FileSecurity.cs:158-161` (My documents links take the default file access set, filling included); no test creates a filling link on a file in My documents | CODE-ONLY |
+| Quick share for forms (filling link) in My documents by a User | `FileSecurity.cs:96-100` (My documents links take the default file access set, filling included); no test creates a filling link on a file in My documents | CODE-ONLY |
 | Filling link refused on a form in a Custom / Public / Collaboration room → 403 "The role is not available for this user type" | `FileSharing.cs:159-170`; `deviations.md` matrix row "Forms in rooms other than FFR/VDR are shared 'for editing only' / Editing, comment and read links are offered; filling is refused" | LIVE-CONFIRMED |
 
-Counts: 78 rows — TEST-CONFIRMED 56, CODE-ONLY 17, LIVE-CONFIRMED 3, MATRIX-ONLY 1 (the copy of an archived
+Counts: 78 rows — TEST-CONFIRMED 56, CODE-ONLY 17, LIVE-CONFIRMED 3, MATRIX-ONLY 1 (unchanged by revision
+2026-11-04, which widened two rows instead of adding any; the copy of an archived
 room, contradicted by `room-types` — kept in the table as the matrix states it, flagged below), plus 1
 cross-reference. Spec: 12 requirements, 57 scenarios (before the reshaping: 12 requirements, 46 scenarios;
 the 11 new scenarios are the matrix containers and the split prose, no fact added or dropped).
@@ -176,11 +186,11 @@ D-numbers are the ones of `openspec/deviations.md` ("Suspected defects"); R-numb
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D3 | Changing a user's type | A Room admin promotes a foreign guest to User through the queued job endpoint (200, job completes, type changes), while the synchronous endpoint refuses the same guest (403). | `deviations.md` D3 (live run) | OPEN |
-| D4 | Room membership | A Room admin cannot add a foreign guest to their room by id (200, nobody added) but can by e-mail: the guest joins the room and the Room admin's guest list. | `deviations.md` D4 (live run); `FileSharing.cs:273-300` (the e-mail branch adds a user relation before any guest-list check) | OPEN |
-| D7 | My documents | `POST files/@my/file` as a Guest answers 500 (null reference); `@my/text` and `@my/html` answer 404. | `deviations.md` D7 (live run); the 404 of text / html: `TextFileCreatePermissionsTests.cs:102-113`, `HtmlFileCreatePermissionsTests.cs` | OPEN |
-| D9 | Inviting users by type | `GET portal/users/invite/{type}` never refuses: a disallowed pair answers 200 with an empty string, and for the Guest type it returns a real link to the Owner, a DocSpace admin and a Room admin. | `deviations.md` D9 (live run); `04_Portal/Users/InvitationLinkGetDeprecatedTests.cs` | OPEN |
-| D10 | Disabling and deleting | `PUT people/delete` by a DocSpace admin on a disabled DocSpace admin answers 200 with the account echoed and deletes nothing; `DELETE people/{id}` answers 403. | `deviations.md` D10 (live run) | OPEN |
-| R1 | Room visibility | A private (end-to-end encrypted) room is listed to a non-member Owner and DocSpace admin, against the spec and the matrix note. | `08_Private/PrivateRoomVisibilityTests.cs:44-92` (bug 82956, remarks say still open, tests red) | OPEN |
-| R2 | Disabling users | A DocSpace admin can deactivate another DocSpace admin and the Owner; the spec, the matrix and the tests say 403. | `03_UserStatus/UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900, comment says the product allows it, tests red) | OPEN |
-| R3 | Inviting users by type | The invitation-link endpoint refuses the Guest type with 400 ("EmployeeType"), the people endpoints with 403 "Access denied": the same rule, two status codes. | `InvitationLinkCreateTests.cs:116-135`; `InviteUsersTests.cs:74-98` | OPEN |
+| D3 | Changing a user's type | A Room admin promotes a foreign guest to User through the queued job endpoint (200, job completes, type changes), while the synchronous endpoint refuses the same guest (403). | `deviations.md` D3 (live run); `products/ASC.People/Server/Api/UserController.cs:2662-2700` (`startUserTypeUpdate`) | STILL OPEN (2026-11-04: the type-change actions changed only in their webhook declarations) |
+| D4 | Room membership | A Room admin cannot add a foreign guest to their room by id (200, nobody added) but can by e-mail: the guest joins the room and the Room admin's guest list. | `deviations.md` D4 (live run); `FileSharing.cs:291-318` (the e-mail branch adds a user relation before any guest-list check) | STILL OPEN (2026-11-04: the e-mail branch is untouched; the range only inserted the AI-project guest check before it) |
+| D7 | My documents | `POST files/@my/file` as a Guest answers 500 (null reference); `@my/text` and `@my/html` answer 404. | `deviations.md` D7 (live run); the 404 of text / html: `TextFileCreatePermissionsTests.cs:102-113`, `HtmlFileCreatePermissionsTests.cs`; `products/ASC.Files/Server/Api/FilesController.cs:1325-1340` | STILL OPEN (2026-11-04: the action changed only in its webhook declaration) |
+| D9 | Inviting users by type | `GET portal/users/invite/{type}` never refuses: a disallowed pair answers 200 with an empty string, and for the Guest type it returns a real link to the Owner, a DocSpace admin and a Room admin. | `deviations.md` D9 (live run); `04_Portal/Users/InvitationLinkGetDeprecatedTests.cs`; `web/ASC.Web.Api/Api/PortalController.cs:196-215` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |
+| D10 | Disabling and deleting | `PUT people/delete` by a DocSpace admin on a disabled DocSpace admin answers 200 with the account echoed and deletes nothing; `DELETE people/{id}` answers 403. | `deviations.md` D10 (live run); `UserController.cs:1563-1630` (`removeUsers`: the skipped account is still returned) | STILL OPEN (2026-11-04: the action was rewrapped for the `user.deleted` webhook, the skip is as before) |
+| R1 | Room visibility | A private (end-to-end encrypted) room is listed to a non-member Owner and DocSpace admin, against the spec and the matrix note. | `08_Private/PrivateRoomVisibilityTests.cs:44-92` (bug 82956, remarks say still open, tests red) | STILL OPEN (2026-11-04: the room listing of `FileSecurity.cs` changed only for the AI rooms section; the test keeps its "expected to fail" remark) |
+| R2 | Disabling users | A DocSpace admin can deactivate another DocSpace admin and the Owner; the spec, the matrix and the tests say 403. | `03_UserStatus/UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900, comment says the product allows it, tests red) | STILL OPEN (2026-11-04: `updateUserStatus` changed only in its webhook declaration; the commit "fix Bug 79900" of 2026-02 predates the previous revision and the test still asserts against the product) |
+| R3 | Inviting users by type | The invitation-link endpoint refuses the Guest type with 400 ("EmployeeType"), the people endpoints with 403 "Access denied": the same rule, two status codes. | `InvitationLinkCreateTests.cs:116-135`; `InviteUsersTests.cs:74-98`; `PortalController.cs:253-256` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |

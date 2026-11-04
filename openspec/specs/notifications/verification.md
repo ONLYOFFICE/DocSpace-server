@@ -48,12 +48,15 @@ schedule and `PortalRetentionJobTests.cs` the job's decisions with a recording n
 | Anonymous 401 on both | `NotificationsPermissionsTests.cs:61-86` | TEST-CONFIRMED |
 | **What each kind silences** | | |
 | Rooms-activity subscription gates sharing letters, mentions, room pushes (invite, role, archive, new document/upload/folder) and the hourly digest | `NotifyClient.cs:118-121, 220-223, 334-337, 489-512 (GetNotifiableUsersAsync → CanNotifyRoom)`; `StudioWhatsNewNotify.cs` (`CheckSubscriptionAsync`) | CODE-ONLY |
-| Muted room skips mention, room pushes and the room-deleted letter (see N1) | `NotifyClient.cs:225-228, 339-342, 556-566` | CODE-ONLY |
+| Muted room skips mention, room pushes and the room-deleted letter (see N1); since release/v4.1.0 the mention check also covers a room of the AI rooms section | `NotifyClient.cs:225-228` (`FolderType.VirtualRooms or FolderType.AiHub`), `339-342, 556-566` | CODE-ONLY |
 | Daily feed subscription gates the daily digest | `StudioWhatsNewNotify.cs` (`CheckSubscriptionAsync`, `SendWhatsNewNotifyAction`) | CODE-ONLY |
 | Useful tips gate only the seven marketing periodic letters; billing and retention letters ignore it (the retention letters even drop the footer link to the settings) | `common/Tests/ASC.Notify.Tests/Periodic/PeriodicLetterScheduleTests.cs:430-467` (`OnlyTheMarketingLettersHonourTheUnsubscribe`); `Actions.cs:2489, 2627, 2668, 2708, 2751, 2792, 2832, 2878`; `Actions.cs:1725, 2491-2541` (`OffersUnsubscribe`); `Periodic/Retention/PortalRetentionLetterTestBase.cs:84-87` | TEST-CONFIRMED |
 | Badges off hides `new` counters | yaml `setNotificationSettings` description; `BadgesSettingsHelper` read by the Files DTO helpers | CODE-ONLY |
 | **Telegram link of a profile** | | |
-| Link reused while a token is outstanding, else a fresh one; empty when no bot name; status 0/1/2 with username only when linked; unlink deletes the row and answers true | `web/ASC.Web.Api/Api/Settings/TelegramController.cs:36-62`; `common/ASC.Core.Common/Notify/Telegram/TelegramHelper.cs` (`RegisterUserAsync`, `GetTelegramUserStatus`, `CurrentRegistrationLink`, `DisconnectAsync`, `GetLink`); yaml `linkTelegram`, `checkTelegram`, `unlinkTelegram` | CODE-ONLY |
+| Link reused while a token is outstanding, else a fresh one; empty when no bot name; status 0/1/2 with username only when linked; unlink deletes the row and answers true | `web/ASC.Web.Api/Api/Settings/TelegramController.cs:62-69, 89-96, 114-118`; `common/ASC.Core.Common/Notify/Telegram/TelegramHelper.cs:43-51, 71-83, 115-121` (`RegisterUserAsync`, `GetTelegramUserStatus`, `CurrentRegistrationLink`, `DisconnectAsync`, `GetLink`); yaml `linkTelegram`, `checkTelegram`, `unlinkTelegram` | CODE-ONLY (the reuse of a valid token: the second call is asserted only as 200, `TelegramLinkTests.cs:62-71`) |
+| No bot on the test stack: `checkTelegram` → status 0 (`unlinked`), empty `username`; `linkTelegram` → 200 with an empty link; `unlinkTelegram` twice → `true` both times | `web/ASC.Web.Api.Tests/Tests/02_Settings/Telegram/TelegramLinkTests.cs:41-60, 88-98` (release/v4.1.0) | TEST-CONFIRMED |
+| After `linkTelegram` without a bot the status stays 0 — asserted by the test with bug trait 84692, but the server answers 2 (see N10) | `TelegramLinkTests.cs:75-86`; `TelegramHelper.cs:43-51` (a token is cached and published before the bot name is looked at), `71-77` (`linking` while a token exists) | CODE-ONLY (the test asserts the opposite) |
+| User and Guest read their own status (200); anonymous 401 on check, link and unlink; POST/PUT on the check and link routes → 405 | `TelegramPermissionsTests.cs:157-212`; `TelegramLinkTests.cs:101-115` | TEST-CONFIRMED |
 | Token lifetime 20 min by default | `../buildtools/config/autofac.consumers.json` (`telegramAuthTokenLifespan` 20); yaml `linkTelegram` | CODE-ONLY |
 | Telegram keys offered on every tariff (v3.6 "Telegram on Startup") | `autofac.consumers.json` telegram consumer `"paid": false`; release notes v3.6 lines 20, 50 | CODE-ONLY |
 | **Push device registration** | | |
@@ -212,6 +215,12 @@ Re-checked against the merge of hotfix/v4.0.1 (`34df477e4e..183da52625`): none o
 merge are the retention letters only), so every one of them is still open; N7's `Actions.cs` lines moved with the
 retention insert.
 
+Re-checked again against the merge of release/v4.1.0 (`d58816bece..3533ad8a89`): of the notify sources only
+`NotifyClient.cs:225` changed (the mention mute check now also covers the AI rooms root), `common/ASC.Core.Common/Notify`,
+`web/ASC.Web.Core/Notify`, `common/services/ASC.Notify`, the notification, SMTP and message tests and the letter suite
+did not change, so N1–N9 are all STILL OPEN. The range added the Telegram tests (`02_Settings/Telegram`), which
+produced N10.
+
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
 | N1 | Room deleted letter | The subscription and the mute list are checked for `userId` — the member who deleted the room — instead of each recipient, so a manager who switched room activity off or muted the room still gets the letter, and nobody gets it when the deleter is unsubscribed. | `NotifyClient.cs:334-342` (`IsSubscribedToNotifyAsync(userId, …)`, `CheckMuteForRoomAsync(folderId, userId)`) | STILL OPEN |
@@ -223,3 +232,4 @@ retention insert.
 | N7 | Telegram patterns | Several studio actions declare a Telegram text that no call site ever sends (`portal_deactivate`, `portal_delete`, `user_has_join`, `self_profile_updated`, `backup_failed`), while the sharing letters' `subject_*_tg` keys in the Files resx are referenced by nothing; dead translations that every culture still has to maintain. | `Actions.cs:46, 76, 719, 3839-3850`; `StudioNotifyService.cs:532-552`; `FilesPatternResource.resx` `subject_ShareDocument_tg` | STILL OPEN |
 | N8 | Form submitted push | The push goes to the filler and the creator as direct recipients regardless of their device subscription setting for room activity and even when the creator is the actor's own account in a different role; consistent with nothing else in the push catalogue. | `NotifyClient.cs:298-307` | STILL OPEN |
 | N9 | Daily feed on hosted portals | The not-paid skip uses `TariffState.NotPaid <= state`, so a portal inside its grace period (`Delay`) still gets digests while a lapsed one does not — intended — but the hourly digest and the at-once letters have no such check, so a lapsed portal keeps sending room letters. | `StudioWhatsNewNotify.cs` (`SendMsgWhatsNewAsync`, tariff check) | STILL OPEN |
+| N10 | `linkTelegram` without a bot (bug 84692) | The operation caches and publishes a registration token before it looks at the bot name, then answers an empty link because there is no bot; `checkTelegram` finds the token and reports status 2 ("waiting for the link to be opened") for 20 minutes although no link was ever handed out and none can be completed. The test `LinkTelegram_NoBotConfigured_StatusStaysUnlinked` expects status 0. | `TelegramHelper.cs:43-51, 71-77, 115-121`; `TelegramController.cs:89-96`; `TelegramLinkTests.cs:75-86` | NEW (2026-11-04), STILL OPEN |

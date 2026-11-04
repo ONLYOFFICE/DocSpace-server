@@ -19,11 +19,11 @@ themselves are stated in the first scenario of each requirement.
 
 ### Requirement: Entities that accept a shared link
 
-The system SHALL allow creating shared links on an entity according to the section or room type that
-contains it: a Public or Custom room and the entries of a Public room carry a primary link plus additional
-links; a Form filling room and its entries carry a primary link only; a Collaboration room and a Virtual
-Data Room accept no link to the room itself, while their files and folders — like those of My documents
-and a Custom room — accept additional links.
+The system SHALL allow shared links on an entity according to the section or room type holding it: a
+Public or Custom room and the entries of a Public room carry a primary link plus additional links; a Form
+filling room and its entries a primary link only; a Collaboration room and a Virtual Data Room accept no
+link to the room itself, their files and folders, like those of My documents and a Custom room, additional
+links; a room of the AI rooms section (v4.1) and its entries none.
 
 #### Scenario: Link availability matrix by location
 
@@ -38,6 +38,12 @@ and a Custom room — accept additional links.
 | Collaboration room  | not allowed | up to 6 additional | up to 6 additional |
 | Virtual Data Room   | not allowed | up to 6 additional | up to 6 additional |
 | Custom room         | 1 primary + up to 5 additional | up to 6 additional | up to 6 additional |
+| AI rooms section (Instructions, Knowledge, AI project) | not allowed | not allowed | not allowed |
+
+#### Scenario: Link to a room of the AI rooms section
+
+- **WHEN** an external link is requested on an Instructions, Knowledge or AI project room, or on a file or folder inside one
+- **THEN** the system rejects the request (403, "The role is not available for this user type"); the invitation link of such a room is covered by `invitations`
 
 #### Scenario: Link to a Collaboration room itself
 

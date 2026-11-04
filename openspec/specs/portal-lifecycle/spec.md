@@ -23,7 +23,8 @@ registers one portal per test through the system API, the retention suite of
 `common/Tests/ASC.Notify.Tests` (`Periodic/Retention`), the OpenAPI contracts
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations named by `operationId`) and the system API
 document, the product code of the portal, owner, wizard and system-API controllers, the registration
-and removal services and the retention job, and the release notes (v1.1, v3.0, v3.1, v3.1.1, v3.7).
+and removal services and the retention job, and the release notes (v1.1, v3.0, v3.1, v3.1.1, v3.7; v4.1 has
+none, and the release changed nothing in this capability beyond the regenerated contract).
 Where the notes or the OpenAPI documents and the server disagree this specification follows the
 server; the evidence per scenario, the differences and the suspected defects are in `verification.md`
 next to this file.

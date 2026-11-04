@@ -11,7 +11,8 @@ syslog collector, and the suspicious-login check that runs after every sign-in.
 Sources: the integration tests of `products/ASC.Files/Tests` (`01_Files/History`, `01_Files/Log`,
 `02_Folders/History`) and `web/ASC.Web.Api.Tests` (`05_Security/AuditTrail`, `LoginHistory`,
 `ActiveConnections`), the OpenAPI document `sdk/docspace-api-spec/docspace-backend.yaml`, the product
-code where the tests stop (cited in `verification.md`) and the release notes v2.6 – v4.0 (October 2026). Where the notes and the server disagree, this specification follows the server; the
+code where the tests stop (cited in `verification.md`) and the release notes v2.6 – v4.0 (October 2026),
+revised after the merge of release/v4.1.0. Where the notes and the server disagree, this specification follows the server; the
 differences and the suspected defects are listed in `verification.md`. The "view history" right of a
 user type or a room role is defined in `user-type-permissions` and `room-role-permissions`; form-filling
 events are defined in `form-filling-workflow` and only cross-referenced here.
@@ -204,9 +205,31 @@ caller is joined instead of duplicated.
 - **WHEN** a CSV report is started for a room that contains a created file and polled until `isCompleted`
 - **THEN** `error` is empty, `resultFileId` points at a file whose rows are unique, number more than one and mention the file name
 
+#### Scenario: Completed report is in My documents
+
+- **WHEN** a CSV report is started and polled until it has stopped
+- **THEN** the task is Completed with `percentage` 100, no `error`, a `resultFileName`, a `resultFileUrl` and a `resultFileId` whose file carries that title, is listed in the caller's My documents and downloads with content
+- **AND** a second report of the same folder completes with a result file of its own
+
+#### Scenario: Status without a report
+
+- **WHEN** the status of a folder nobody has reported yet is read
+- **THEN** the system answers 200 with an empty response, not an error; the task of a report that was started is reported under the same `id` with `percentage` between 0 and 100
+
+#### Scenario: Report is bound to its folder
+
+- **WHEN** a report of room A has completed and the status of room B is read
+- **THEN** room B reports nothing until its own report is started, and room A still reports its task afterwards
+
+#### Scenario: Stopping a report
+
+- **WHEN** the report is stopped right after it was started
+- **THEN** the task ends either Canceled — `isCompleted` true, no result file, name or link — or Completed with a downloadable file, depending on which came first
+- **AND** stopping a completed report keeps its result file unchanged, and stopping a folder with no report is accepted, also repeatedly, and leaves no task
+
 #### Scenario: Unknown folder
 
-- **WHEN** a report is started for folder id 0, -1 or an id that does not exist
+- **WHEN** a report is started, read or stopped for folder id 0, -1 or an id that does not exist
 - **THEN** the system answers 404
 
 ### Requirement: Who may export a folder history
@@ -229,7 +252,7 @@ hidden (402).
 
 - **WHEN** a User who is not a member starts the report
 - **THEN** the system answers 403
-- **AND** an unauthenticated caller is answered with 401
+- **AND** an unauthenticated caller is answered with 401 on starting, reading and stopping a report
 
 ### Requirement: Version list and editing revisions of a file
 
@@ -394,7 +417,7 @@ the default period of the reports. The endpoints outlived the UI settings block 
 #### Scenario: Read and update
 
 - **WHEN** the owner or a DocSpace admin reads the settings and then posts `loginHistoryLifeTime: 180, auditTrailLifeTime: 180`
-- **THEN** the read answers 200 with both values greater than 0 and a `lastModified` field, and the update answers 200 echoing 180 and 180
+- **THEN** the read answers 200 with both values greater than 0, and the update answers 200 echoing 180 and 180; both answers carry `lastModified`
 - **AND** saving writes an `AuditSettingsUpdated` audit event
 
 #### Scenario: Value outside the range

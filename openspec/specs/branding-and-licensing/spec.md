@@ -21,7 +21,7 @@ Sources: the integration tests of `web/ASC.Web.Api.Tests` (`02_Settings/Rebrandi
 from (`settings/rebranding`, `settings/greeting`, `settings/common`), the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations named by `operationId`), the product code where the
 tests stop, the runtime configuration of the installation, and the release notes (v2.6, v3.0, v3.0.1, v3.1.1,
-v3.2.1, v3.3, v3.7, v4.0). Where the notes or the OpenAPI document and the server disagree this specification
+v3.2.1, v3.3, v3.7, v4.0; v4.1 has none, so its changes come from the code and the tests alone). Where the notes or the OpenAPI document and the server disagree this specification
 follows the server; the evidence per scenario, the differences and the suspected defects are in
 `verification.md` next to this file. HTTP status codes are stated where the tests assert them.
 
@@ -273,6 +273,12 @@ and answer the built-in details.
 - **WHEN** the owner of a self-hosted installation whose quota lacks `customization` calls `saveCompanyWhiteLabelSettings` with `companyName`, `site`, `address` and `phone` but no `email`
 - **THEN** the system answers 402, not 400: the gate is checked before the body
 
+#### Scenario: User and anonymous on the writes
+
+- **WHEN** a User calls `saveCompanyWhiteLabelSettings`, `deleteCompanyWhiteLabelSettings`, `saveAdditionalWhiteLabelSettings` or `deleteAdditionalWhiteLabelSettings`
+- **THEN** the system answers 403 before the installation check
+- **AND** an anonymous caller gets 401 from every save, restore and delete of the branding, before any gate
+
 #### Scenario: Hiding the About page needs the branding flag
 
 - **WHEN** a self-hosted owner with customization saves `hideAbout` true while the quota has no `branding`
@@ -293,8 +299,8 @@ defaults and answer them.
 
 #### Scenario: Defaults on a configured installation
 
-- **WHEN** the owner reads `getAdditionalWhiteLabelSettings` on an installation with every link configured
-- **THEN** all six flags are true and `isDefault` is true: a link flag defaults to true exactly when the installation has an address for it
+- **WHEN** the owner reads `getAdditionalWhiteLabelSettings` on an installation that never changed them
+- **THEN** `helpCenterEnabled`, `feedbackAndSupportEnabled`, `userForumEnabled`, `videoGuidesEnabled` and `licenseAgreementsEnabled` are true: a link flag defaults to true exactly when the installation has an address for it, and `startDocsEnabled` follows the same rule
 
 #### Scenario: Hosted owner
 
@@ -328,6 +334,11 @@ version) and be cached immutably for a year.
 
 - **WHEN** the header logo is saved twice with different images
 - **THEN** the two `path.light` URLs differ in their hash query, so a browser that cached the first one fetches the second
+
+#### Scenario: Letter logo that cannot be fetched
+
+- **WHEN** a report letter needs the letter logo as embedded data and the portal's own address does not answer within ten seconds
+- **THEN** the letter carries the logo's address instead, and the failure is remembered for a few minutes so the next letters do not wait again; a fetched logo is kept for a day
 
 ### Requirement: Reading the colour themes
 
@@ -552,7 +563,7 @@ answer true.
 For a self-hosted installation the tariff SHALL be one for all portals: `state` Paid while the license end date lies
 ahead, Delay for the configured grace period after it (reported as `delayDueDate`), then NotPaid; a `lifetime` quota
 SHALL never leave Paid and a trial quota SHALL report Trial. While NotPaid and the tariff page is enabled, every
-operation not marked as allowed without payment SHALL answer 402 unless the request carries `Payment-Info: false`.
+operation not marked as allowed without payment SHALL answer 402, whatever headers the request carries.
 
 #### Scenario: Grace period
 

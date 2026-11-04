@@ -7,12 +7,21 @@ OpenAPI document (`sdk/docspace-api-spec/docspace-backend.yaml`, cited by `opera
 pins the exact wording. Test references name the file and the test method; code references name the file and
 the method (line of the method head as of 2026-10-14). Paths are relative to the repo root.
 
-The integration host (`integration-test` launch profile) provisions no document server, so every behaviour
-that starts in the editors — a submitted copy landing in "Complete", the results spreadsheet, the external
-database export, a VDR step being submitted, the `form.submit`/`form.filled.out` webhooks, the anonymous
-submit-only session — has no test and is CODE-ONLY here. The `FormsTestBase` remark records that
-`SaveFileAsPdf` and `CopyFileAs` with `toForm` were ruled out for the same reason, and that a genuine form is
-obtained by uploading the embedded `new.pdf` asset.
+Until release/v4.1.0 the integration host (`integration-test` launch profile) could not reach a document server.
+The merge `3533ad8a89` (previous state `d58816bece`) pinned the service ports of the test host so that the editors
+and the document builder reach them (`common/ASC.AppHost/Configuration/ProjectConfigurator.cs:94-97`): the
+conversions (`CopyFileAs` with `toForm`, `SaveFileAsPdf`) and the results report (`FormXlsxTests.cs`, formerly
+skipped) now run. Every behaviour that starts with a real editor submission — a submitted copy landing in
+"Complete", the external database export, a VDR step being submitted, the `form.submit`/`form.filled.out`
+webhooks, the anonymous submit-only session — still has no test and is CODE-ONLY here. The `FormsTestBase`
+remark records that a genuine form is still obtained by uploading the embedded `new.pdf` asset, and that the
+forms the document server writes are checked once, in `IsFormPdfTests`. In that range the product code of this
+capability changed in `FileSecurity.cs:1303-1307` (bug 84849, `0fa0ac3f4c`), in the report builder
+(`FormFillingReportCreator.cs`, `ExportToXLSX.cs:49`, the new `FormRecoveryService.cs`, `FormRecoveryTask.cs`,
+`FormRecoveryTaskManager.cs`, `FormFieldsExtractor.cs`: the recovery of responses missing from the search index,
+commits `cdf59c1bf7` … `90dff55cf5`) and in `FileStorageService.cs:6327, 6404` (`recover: true`); `ManageFormFilling`,
+`StartFillingAsync`, `CheckFillFormDraftAsync`, `EntryManager`'s form methods, `DocumentServiceHelper`'s form setups,
+`FileMoveCopyOperation`'s PDF blocks and `FileDao`'s form-room rule did not change.
 
 | Claim | Source | Status |
 |---|---|---|
@@ -20,10 +29,12 @@ obtained by uploading the embedded `new.pdf` asset.
 | Uploaded ONLYOFFICE form answers `true` | `01_Files/Forms/IsFormPdfTests.cs` `IsFormPDF_UploadedOnlyofficeForm_ReturnsTrue` | TEST-CONFIRMED |
 | Blank PDF created on the portal is a form (`true`) | `01_Files/FormFilling/FormFilesTests.cs` `IsFormPDF_RegularPdf_ReturnsFalse` (asserts `true`); `FormFillingTestBase.CreateFormInRoom` remark | TEST-CONFIRMED |
 | Ordinary PDF, DOCX, DOCXF answer `false` | `IsFormPdfTests.cs` `IsFormPDF_NonOnlyofficePdfFile_ReturnsFalse`, `IsFormPDF_RegularDocxFile_ReturnsFalse`, `IsFormPDF_DocxfFormTemplate_ReturnsFalse` | TEST-CONFIRMED |
+| Forms and PDFs written by the document server: docx → docxf → pdf through `copyas` with `toForm` answers `true`; `saveaspdf` of a docx answers `false` | `IsFormPdfTests.cs:132-145` `IsFormPDF_FormConvertedFromDocx_ReturnsTrue`, `151-169` `IsFormPDF_PdfSavedFromDocx_ReturnsFalse`; `FormsTestBase.cs:73-95` `ConvertToOoFormAsync` (release/v4.1.0) | TEST-CONFIRMED |
 | Access to the check: 403 non-member, 401 anonymous, 404 unknown, read-only member allowed, admin allowed | `01_Files/Forms/IsFormPdfPermissionsTests.cs` (all five tests); `IsFormPdfTests.cs` `IsFormPDF_NonExistentFile_Returns404` | TEST-CONFIRMED |
 | `filterType=PdfForm` / `filterType=Pdf` split in Shared with me | `01_Files/Forms/SharedWithMePdfFilterTests.cs` `GetSharedWithMe_PdfFormFilter_ReturnsOnlyPdfForms`, `GetSharedWithMe_PdfFilter_ReturnsOnlyPlainPdfs` (bug 81919, fixed) | TEST-CONFIRMED |
 | **Filling state** — `startFilling` on the properties and the file; `formFillingStatus` `None` outside a VDR | `products/ASC.Files/Core/Core/Entries/EntryProperties.cs` `FormFillingProperties`; yaml `FileDto.startFilling`, `FileDto.formFillingStatus` | CODE-ONLY |
-| Not-started form hidden from form fillers, visible after Start | `products/ASC.Files/Core/Core/Security/FileSecurity.cs` `FilterEntryAsync` (from 1168), FFR `FillForms` share branch reading `FormFilling.StartFilling`; the listing/404 assertions are in `openspec/specs/form-filling-room-roles` ("Form Filler does not see a form that is not started") | CODE-ONLY (listing confirmed by the roles spec's live run) |
+| Not-started form hidden from form fillers (403 by id), visible after Start | `products/ASC.Files/Core/Core/Security/FileSecurity.cs` `FilterEntryAsync` (from 1232), FFR `FillForms` share branch at 1305-1318 reading `FormFilling.StartFilling`; `FileStorageService.GetFileAsync` (1848) answers the refused read with `InvalidOperationException` → 403; `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:119-137` `GetFileInfo_FormFillerMember_UnstartedFormIsHidden` (asserts 403); the listing assertion is in `openspec/specs/form-filling-room-roles` ("Form Filler does not see a form that is not started"), whose live run recorded 404 for the by-id read — the test and the code say 403 | TEST-CONFIRMED (403 by id) / CODE-ONLY (listing, live-run confirmed in the roles spec) |
+| Room owner keeps every right on a not-started form: via the room's link token (owner, Room-admin owner) and as a member of a group invited with FillForms, `security.Delete` is true (bug 84849, fixed by `0fa0ac3f4c`: the share record found can be a link's or a group's, so the branch is skipped for full access) | `FileSecurity.cs:1303-1307` (`!await HasFullAccessAsync(...)`); `FormFillingRoomOwnerAccessTests.cs:54-68, 74-93, 99-114` | TEST-CONFIRMED |
 | State read from the file | yaml `FileDto.startFilling`; `FileDto.formFillingStatus` description ("worked out only inside a virtual data room") | CODE-ONLY |
 | **Form filling actions** — endpoint, action values, 200 without body | `products/ASC.Files/Server/Api/FilesController.cs` `ManageFormFilling` (1176); `products/ASC.Files/Core/Core/FileStorageService.cs` `ManageFormFilling` (5719); yaml `manageFormFilling`, `FormFillingManageAction`; `01_Files/FormFilling/ManageFormFillingTests.cs` remark ("returns no body") | TEST-CONFIRMED (shape), CODE-ONLY (per-action effects) |
 | Start: `startFilling` true, `startedByUserId`, history "FormStartedToFill", socket create for form fillers, draft links dropped when version changed | `FileStorageService.ManageFormFilling` case `Start` | CODE-ONLY |
@@ -61,10 +72,12 @@ obtained by uploading the embedded `new.pdf` asset.
 | `saveediting` 401 / 403 / 404 without exception leak (bug 81416) | `01_Files/FormFilling/SaveEditingFileFromFormPermissionsTests.cs` (four tests); `SaveEditingFileFromFormTests.cs` `SaveEditingFileFromForm_NonExistentFileId_ReturnsNotFoundWithoutLeakingException` | TEST-CONFIRMED |
 | Submission numbering 1, 2, 3 | `EntryManager.SubmitFillingRoomFormAsync`: `ResultFormNumber++` then the title format | CODE-ONLY |
 | **Results spreadsheet** — `saveFormAsXLSX`, `{title}.xlsx` in the Complete subfolder, created on first submission or first report, rewritten in place, CSV replaced | `EntryManager.SubmitFillingRoomFormAsync` (`room.SettingsSaveFormAsXLSX` branches), `CreateFillResultsFile`, `EnsureFormFillingOutputAsync`; `products/ASC.Files/Core/Helpers/FormFillingReportCreator.cs` `UpdateFormFillingReport` (54); `products/ASC.Files/Core/Utils/ExportToXLSX.cs` `UpdateXlsxReport`; yaml `saveFormAsXLSX` (room create/update DTOs) | CODE-ONLY |
-| `POST file/{id}/xlsx` accepts form id or xlsx/csv result id; conditions; answer shape; `GET` reports the caller's own run or nothing; folder variant; `GET submissions` | `FileStorageService.GenerateXlsxAsync` (6085), `GenerateXlsxByFolderAsync` (6186), `GetSubmissionsByFormId`; `EditorController.GenerateXlsx` (531); `FoldersController.GenerateXlsxByFolder` (268); yaml `generateXlsx`, `generateXlsxByFolder`, `getFormSubmissions`, `XlsxReportResponseDto` | CODE-ONLY |
-| Report for a not-started form / copy / non-FFR room → 403 | `GenerateXlsxAsync`: `StartFilling != true || OriginalFormId != form.Id → InvalidOperationException`; `room.FolderType != FillingFormsRoom → InvalidOperationException`; yaml `generateXlsx` 403 text | CODE-ONLY |
-| Report addressed through the results file | `GenerateXlsxAsync` `.xlsx`/`.csv` branch (parent must be `FormFillingFolderDone`, `OriginalFormId` resolved) | CODE-ONLY |
-| Status before any run → 200 empty | yaml `GET …/xlsx` description ("Nothing at all comes back when no run is on record") | CODE-ONLY |
+| `POST file/{id}/xlsx` accepts form id or xlsx/csv result id; conditions; answer shape; `GET` reports the caller's own run or nothing; folder variant; `GET submissions` | `FileStorageService.GenerateXlsxAsync` (6232), `GenerateXlsxByFolderAsync` (6333), `GetSubmissionsByFormId`; `EditorController.GenerateXlsx` (536); `FoldersController.GenerateXlsxByFolder` (268); yaml `generateXlsx`, `generateXlsxByFolder`, `getFormSubmissions`, `XlsxReportResponseDto` | CODE-ONLY (folder variant, submissions) / TEST-CONFIRMED (form id, result id, `GET` run — rows below) |
+| Report produced: `isNewFile` true, `form.id`, `form.resultsFolderId`, `task.id`; the run completes with percentage 100, empty error, an `.xlsx` `resultFileName` and a result file in the results folder; a second call answers `isNewFile` false and the folder still holds one `.xlsx` | `01_Files/FormFilling/FormXlsxTests.cs:51-96` `GenerateXlsx_StartedForm_ProducesReportThatGetXlsxReportsAsCompleted`, `GenerateXlsx_SecondCall_ReusesTheReportInsteadOfCreatingAnother` (un-skipped in release/v4.1.0; polled through `FormResultsTestBase.WaitForXlsxCompleted`, 60 s) | TEST-CONFIRMED |
+| Before the rebuild the responses missing from the search index are read back from the submitted PDFs through the document builder (best effort, one recovery per user and form, later ones wait) | `FileStorageService.cs:6327, 6404` (`recover: true`); `ExportToXLSX.cs:49, 65-67`; `FormRecoveryService.cs:38-100`; `FormRecoveryTaskManager.cs:36-96`; `FormFillingReportCreator.cs:433-466` (`IndexRecoveredSubmissionAsync`) | CODE-ONLY |
+| Report for a not-started form / copy / non-FFR room → 403 | `GenerateXlsxAsync`: `StartFilling != true || OriginalFormId != form.Id → InvalidOperationException`; `room.FolderType != FillingFormsRoom → InvalidOperationException`; yaml `generateXlsx` 403 text; `FormXlsxTests.cs:115-128` `GenerateXlsx_RegularDocxFile_Returns403`, `130-143` `GenerateXlsx_FormThatIsNotStarted_Returns403` | TEST-CONFIRMED (docx, not started) / CODE-ONLY (copy, non-FFR room) |
+| Report addressed through the results file resolves the original form and answers `isNewFile` false | `GenerateXlsxAsync` `.xlsx`/`.csv` branch (parent must be `FormFillingFolderDone`, `OriginalFormId` resolved); `FormXlsxTests.cs:98-113` `GenerateXlsx_ResultFileId_ResolvesToTheOriginalForm` | TEST-CONFIRMED |
+| Status before any run → 200 empty; a recorded run reports completion, progress, error and the produced file | yaml `GET …/xlsx` description ("Nothing at all comes back when no run is on record"); the recorded run: `FormXlsxTests.cs:67-78` | CODE-ONLY (empty) / TEST-CONFIRMED (recorded run) |
 | Release notes v3.7 "Update XLSX data" | `nct2__Изменения к выпуску v3.7.0.md` line 155 | NOTES-ONLY (name of the feature) |
 | **External database export** — `sendFormToExternalDB`, per-submission push, table name stored, no-op without the setting or a configured client, sync endpoints, one job per room, per-form outcomes, 400 without a database, spreadsheet generation re-syncs | `FormFillingReportCreator.UpdateFormFillingReport`, `SyncExternalDbAsync` (69), `PublishExternalDbSubmissionAsync` (75), `ExportToExternalDbAsync` (87), `SetExternalDbTableNameAsync`; `FileStorageService.StartExternalDbSyncAsync` (6268), `GetExternalDbSyncTaskAsync`; `GenerateXlsxAsync` calls `SyncExternalDbAsync`; yaml `startExternalDbSync`, `getExternalDbSyncStatus`, `ExternalDbSyncTaskDto`, `ExternalDbSyncFormResultDto`, `sendFormToExternalDB` | CODE-ONLY |
 | Sync for a Custom room → 403 | `StartExternalDbSyncAsync`: `room.FolderType != FillingFormsRoom → InvalidOperationException` | CODE-ONLY |
@@ -105,7 +118,7 @@ obtained by uploading the embedded `new.pdf` asset.
 
 ### Scenarios added in the 2026-10-25 clean-up, and the code names moved out of the spec text
 
-The spec now has 21 requirements and 82 scenarios: "Results spreadsheet" was split into "Results spreadsheet"
+The spec now has 21 requirements and 85 scenarios (82 before release/v4.1.0): "Results spreadsheet" was split into "Results spreadsheet"
 and "Results report generation", and "Role-based filling in a Virtual Data Room" into that requirement, "Form
 roles listing" and "Step submission and interruption in a Virtual Data Room"; the existing scenarios kept their
 names and rows. The rows below cover the scenarios that are new; the claims themselves were already in the
@@ -155,6 +168,22 @@ rows above, which stay the primary evidence.
   by-id read of a hidden form by a Form Filler, the copy-out of a hidden form, and the extension-only PDF check
   are defects, not requirements. The spec words the `Edit`/`Resume` effects without asserting a permission
   check, and the "Only PDFs enter the room" rule is referenced to `form-filling-room-roles`, which carries D13.
+- **The recovery of form responses from the PDFs** beyond the one sentence in "Results report generation": its
+  queue, locks, heartbeat, attempt limits and the report's "skipped or cut short" notes are implementation of a
+  best-effort repair; no API operation exposes it.
+- **The editor's AI switch for anonymous visitors** (bug 84465, `8ca7e563e6`: an external-link visitor always gets
+  the AI tools disabled in the editor configuration): not form-specific; `shared-links` territory.
+
+## Suspected defects, re-checked against release/v4.1.0 (`d58816bece..3533ad8a89`)
+
+| # | Where | Verdict | Reason |
+|---|-------|---------|--------|
+| D1 | `manageformfilling` Resume/Edit without a permission check | STILL OPEN | `FileStorageService.ManageFormFilling` did not change in the range (no hunk of the `FileStorageService.cs` diff touches it). |
+| D5 | Form Filler without a role reads a hidden VDR form by id | STILL OPEN | The only change to the PDF branch of `FileSecurity.FilterEntryAsync` is the owner exemption of bug 84849 (`FileSecurity.cs:1303-1307`); the VDR role branch is untouched. |
+| D6 | Form Filler copies a hidden form out through `fileops/copy` | STILL OPEN | `FileMoveCopyOperation.cs` changed only for the AI rooms and the duplicate-title rule; `CopyPermissionsCheck.cs` changed only for the AI rooms. |
+| D13 | Only-PDF rule by extension; an ordinary PDF enters and is auto-started | STILL OPEN | `FileDao.cs:774-779` and `CopyPermissionsCheck.cs` unchanged for form rooms. A new red test extends it: `01_Files/Create/FormsRoomNonPdfCreateTests.cs:257-285` (bug 84840) demands a 4xx for `create` of a `.docx`, a text and an HTML file in a Form filling room, while `FileStorageService.CreateNewFileAsync` (1899-1927) checks only the folder type, not the file type, and `FileDao.SaveFileAsync` (768-779) writes any non-PDF without a check — F1 below. |
+| F1 | Non-PDF created in a Form filling room (bug 84840) | NEW, STILL OPEN | `POST files/{folderId}/file`, `…/text` and `…/html` answer 200 and create a `.docx`, `.txt` or `.html` in a Form filling room; the test asserts a 4xx. Evidence: `FileStorageService.CreateNewFileAsync` (1899-1927), `FileDao.cs:774-779` (only a PDF or a results file gets the form treatment; nothing refuses the rest), `FormsRoomNonPdfCreateTests.cs:257-285`. |
+| F2 | By-id read of a hidden form: 403, the roles spec says 404 | NEW (documentation) | `FileStorageService.GetFileAsync` (1848-1864) throws `InvalidOperationException` (403) when `CanReadAsync` is false, and `FormFillingRoomOwnerAccessTests.cs:119-137` asserts 403; `form-filling-room-roles` "Form Filler does not see a form that is not started" and D6 record 404 from a live run. One of the two is stale; this spec follows the test and the code. |
 - **Role matrices** (who may start, stop, collect, configure, see what): `form-filling-room-roles` and
   `vdr-room-roles`, referenced rather than restated; the permission tests under `01_Files/FormFilling/*Permissions*`
   and `01_Files/Forms/*Permissions*` are cited here only for the status codes of the lifecycle endpoints.

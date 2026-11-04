@@ -309,6 +309,11 @@ entries of the named subjects.
 - **WHEN** a Guest is invited to an AI agent room as Room manager or Content creator
 - **THEN** the system rejects the request (403, role not available)
 
+#### Scenario: Guest invited to an AI project
+
+- **WHEN** a Guest is invited to an AI project (v4.1) by account id with any access, or an email entry names an address that belongs to a Guest
+- **THEN** the system rejects the whole request (403, "The role is not available for this user type") and the guest is not a member; an AI project accepts Room manager and Read only
+
 #### Scenario: Group as subject
 
 - **WHEN** an entry names a group id that is not an existing share of the room
@@ -451,6 +456,7 @@ SHALL carry the access level that a person joining through it receives.
 
 - **WHEN** an invitation link is created, updated and deleted in a Custom, Public, Collaboration or Virtual data room
 - **THEN** every step succeeds
+- **AND** the invitation link of an AI project is created with the Room manager access, the only access its link offers
 
 #### Scenario: Form filling room accepts only its own roles
 
@@ -517,6 +523,12 @@ the registration is completed, which SHALL set the type the link grants, ignorin
 - **WHEN** a Guest follows a link into an AI agent room that grants Room manager or Content creator
 - **THEN** the guest is added with Viewer access
 
+#### Scenario: Joining an AI project through its link
+
+- **WHEN** a signed-in User who is not a member follows the invitation link of an AI project, which grants Room manager
+- **THEN** `result` is `UserExisted` and the User is a member with the Read access, the highest free role of a project
+- **AND** a signed-in Guest following the same link gets `QuotaFailed` and is not added
+
 #### Scenario: Individual email link already accepted
 
 - **WHEN** the person behind an individual email invitation already has a password, or the account is disabled or gone
@@ -553,7 +565,12 @@ while the switch for their type is off.
 #### Scenario: Only portal-settings holders may change them
 
 - **WHEN** a caller without the portal-settings right updates the settings
-- **THEN** the system denies the request (403)
+- **THEN** the system denies the request (403); a User gets 403, an unauthenticated caller 401, a DocSpace admin and the Owner 200 and the read reflects the saved values
+
+#### Scenario: Omitted switch is stored as off
+
+- **WHEN** the update body carries only one of the two switches
+- **THEN** the system answers 200 and the omitted switch is stored as off, not left as it was
 
 #### Scenario: Member invitations off
 

@@ -121,6 +121,11 @@ both marked `test.fail`.
 
 ## Suspected defects
 
+Re-checked against the merge of release/v4.1.0 (`d58816bece..3533ad8a89`): nothing of this capability changed in that
+range — `Manager`, `Controller`, `ConfigSettings`, `RequestDto`, `WebPluginDto`, `PluginsDto`, `CspSettingsHelper.cs`,
+`Tests/` and the yaml are byte-identical before and after the merge — so every line reference above still holds and
+P1–P7 are all STILL OPEN; no new row.
+
 | # | Where | What the server does | Evidence |
 |---|-------|----------------------|----------|
 | P1 | Stored state of a plugin | The manifest is deserialised into the same object that carries the portal state, so a `config.json` declaring `"enabled": true` (or `"settings"`) is reported as on for every portal that has no stored row, and switching such a plugin off without settings *removes* the row (`enabled || settings` is false), after which the manifest value is back on the next read: the plugin cannot be switched off. On upload the manifest is re-serialised with the uploader's `createBy`/`createOn` but the `enabled` value it carried is kept. A shipped manifest may also set `createBy`/`createOn` to any value. | `Manager:395-404, 657-671, 510-531, 289-315` |

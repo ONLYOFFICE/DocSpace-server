@@ -18,10 +18,11 @@ v3.7.1, v4.0) and the product code where the tests stop (the file service, the f
 manager, the editor configuration builder, the editor controller, the move/copy operation and the results
 report builder; the files are named per row in `verification.md`). Where the release notes and the server
 disagree, this specification follows the server; the behaviours listed as suspected defects D1, D5, D6 and D13
-in `openspec/deviations.md` are deliberately not written here as requirements. The integration host runs
-without a document server, so nothing that needs a real editor submission (a filled copy produced by the
-editors, a results spreadsheet, a database export, a VDR step submission) is covered by tests; those
-requirements rest on the code and the API document, as recorded in `verification.md`.
+in `openspec/deviations.md` are deliberately not written here as requirements. Since release/v4.1.0 the
+integration host reaches a document server, so conversions and the results report are covered by tests;
+nothing that needs a real editor submission (a filled copy produced by the editors, a database export, a VDR
+step submission) is, and those requirements rest on the code and the API document, as recorded in
+`verification.md`.
 
 ## Requirements
 
@@ -48,6 +49,11 @@ boolean, needs read access to the file, and says nothing about the filling state
 - **WHEN** `isformpdf` is requested for a PDF without the form signature, for a `.docx` file or for a `.docxf` template
 - **THEN** the answer is `false`
 
+#### Scenario: Forms and PDFs written by the document server
+
+- **WHEN** a `.docx` is turned into a `.docxf` template and then into a `.pdf` form through `copyas` with `toForm`, or saved as a plain PDF through `saveaspdf`
+- **THEN** `isformpdf` answers `true` for the converted form and `false` for the saved PDF
+
 #### Scenario: Access to the check
 
 - **WHEN** `isformpdf` is requested by a caller without read access to the file, by an anonymous caller, or for a file that does not exist
@@ -70,8 +76,13 @@ only through the actions below; `formFillingStatus` on the file SHALL stay `None
 #### Scenario: Not-started form is hidden from form fillers
 
 - **WHEN** a member whose room right is form filling lists a Form filling room holding a form whose filling has not been started
-- **THEN** that form is absent from the listing and answered 404 by id
+- **THEN** that form is absent from the listing and refused by id (403)
 - **AND** it appears once filling has been started
+
+#### Scenario: Room owner keeps every right on a not-started form
+
+- **WHEN** the room owner (the owner of the portal, or the Room admin who created the room) reads a not-started form by id while the request carries the room's external link token, or while the owner belongs to a group invited with the form-filling right
+- **THEN** the form is answered with `security.Delete` true: a link or a group record never hides the form from the owner (bug 84849)
 
 #### Scenario: State is read from the file
 
@@ -337,11 +348,17 @@ SHALL be kept only as the filled copies.
 
 ### Requirement: Results report generation
 
-`POST /api/2.0/files/file/{fileId}/xlsx` (`generateXlsx`) SHALL queue a rebuild of a form's results file and
-answer the queued task, the original form and `isNewFile`; it takes the id of the original form or of an XLSX
-or CSV results file in its "Complete" subfolder. `GET …/file/{fileId}/xlsx` reports the caller's run, if any.
-`POST /api/2.0/files/folder/{folderId}/xlsx` (`generateXlsxByFolder`) does the same by folder;
+`POST /api/2.0/files/file/{fileId}/xlsx` (`generateXlsx`) SHALL queue a rebuild of a form's results file,
+answering the task, the original form and `isNewFile`; it takes the id of the original form or of an XLSX or
+CSV results file in its "Complete" subfolder, after reading back the copies the search index lacks.
+`GET …/file/{fileId}/xlsx` reports the caller's run. `generateXlsxByFolder` does the same by folder;
 `GET …/file/{fileId}/submissions` (`getFormSubmissions`) lists them.
+
+#### Scenario: Report produced
+
+- **WHEN** the owner calls `POST …/xlsx` for a started form of a Form filling room and polls `GET …/xlsx`
+- **THEN** the first answer carries `isNewFile` true, the form with its `resultsFolderId` and a task `id`; the run ends completed with percentage 100, an empty error and an `.xlsx` result file lying in the form's "Complete" subfolder
+- **AND** a second `POST …/xlsx` answers `isNewFile` false and the subfolder still holds one `.xlsx`
 
 #### Scenario: Report for a form that is not started
 
@@ -351,7 +368,7 @@ or CSV results file in its "Complete" subfolder. `GET …/file/{fileId}/xlsx` re
 #### Scenario: Report addressed through the results file
 
 - **WHEN** `POST …/xlsx` is called with the id of the `.xlsx` results file in a "Complete" subfolder
-- **THEN** the server resolves the original form behind it and queues the rebuild for that form
+- **THEN** the server resolves the original form behind it and queues the rebuild for that form, answering the original form and `isNewFile` false
 - **AND** a CSV results file is replaced by a new XLSX
 
 #### Scenario: Status before any run

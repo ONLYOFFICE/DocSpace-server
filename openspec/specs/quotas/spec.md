@@ -17,8 +17,8 @@ on the AI services").
 
 Sources: the integration tests of `products/ASC.Files/Tests/Tests/07_Settings/Quota`, `02_Folders/UsedSpace`,
 `03_Rooms/FormFilling/FormFillingRoomUsedSpaceTests.cs`, `products/ASC.People/Tests/Tests/07_Quota`,
-`web/ASC.Web.Api.Tests/Tests/02_Settings/Quota`, `04_Portal/Quota`, `04_Portal/Users` and the quota parts of
-`04_Portal/Payments`; the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations are
+`web/ASC.Web.Api.Tests/Tests/02_Settings/Quota`, `02_Settings/Statistics`, `04_Portal/Quota`, `04_Portal/Users`
+and the quota parts of `04_Portal/Payments`; the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations are
 named by their `operationId`); the product code where the tests stop (the quota-row controller of the
 storage layer, the file DAO, the editor configuration builder, the quota DTO helper and the feature
 checkers); and the product release notes (v1.1 to v4.0), which say what was shipped and when. Where the
@@ -310,6 +310,28 @@ signed-in caller but grade its answer by role.
 - **WHEN** the owner or a DocSpace admin calls `getPortalTariff`
 - **THEN** the system answers 200 with `state` Paid, `id` of 0 or more and a non-empty `quotas` — a caller with the portal-settings right gets `id`, `customerId`, `licenseDate`, the edition flags and `quotas`
 - **AND** every member gets `state`, a Room admin or DocSpace admin also `dueDate` and `delayDueDate`; a Room admin, a User or a Guest gets 200 with `id` 0 and `state` Paid, an anonymous caller 401
+
+### Requirement: Space usage of a module
+
+`getSpaceUsageStatistics` SHALL report, for one module named by its `id`, the space each of its data
+categories takes, with a display size and whether the category is disabled, to a caller with the
+portal-settings right (403 for a User, 401 for anonymous). A module that does not exist or reports no space
+usage SHALL answer 200 with an empty list; an `id` that is not a GUID SHALL answer 404. The list is not paged.
+
+#### Scenario: Owner and DocSpace admin read the Documents module
+
+- **WHEN** the owner or a DocSpace admin calls `getSpaceUsageStatistics` with the id of the Documents module
+- **THEN** the system answers 200 with a list
+
+#### Scenario: Unknown or malformed module id
+
+- **WHEN** the owner passes an id no module has, or a value that is not a GUID
+- **THEN** the first answers 200 with an empty list and the second 404
+
+#### Scenario: Other callers
+
+- **WHEN** a User or an anonymous caller calls `getSpaceUsageStatistics`
+- **THEN** the system answers 403 for the User and 401 for the anonymous caller
 
 ### Requirement: Payment quota information trimmed by user type
 
