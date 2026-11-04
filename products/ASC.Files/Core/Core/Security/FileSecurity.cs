@@ -1703,6 +1703,8 @@ public class FileSecurity(
             return false;
         }
 
+        var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
+
         switch (e.RootFolderType)
         {
             case FolderType.DEFAULT:
@@ -1770,8 +1772,6 @@ public class FileSecurity(
                 // cannot read anything in one and must not be handed access to it by role alone. This
                 // skips the bypass rather than denying outright: an administrator who *was* invited
                 // falls through to the ordinary share-based checks and keeps their access.
-                var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
-
                 if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
@@ -2069,7 +2069,15 @@ public class FileSecurity(
                     return false;
                 }
 
-                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
+                // Archiving does not lift what protects an end-to-end encrypted room while it is active:
+                // its content never leaves it as a copy, and only membership gives access to it, so the
+                // administrator bypass below is skipped here too.
+                if (inPrivateRoom && action == FilesSecurityActions.Copy)
+                {
+                    return false;
+                }
+
+                if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {

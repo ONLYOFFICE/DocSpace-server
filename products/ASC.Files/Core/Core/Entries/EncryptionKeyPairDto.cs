@@ -296,6 +296,60 @@ public class EncryptionKeyPairDtoHelper(
     }
 
     /// <summary>
+    /// Reads the public keys of the people about to be invited to a private room, so that a client can
+    /// encrypt the file keys for them before it grants the access. Only somebody who may change the
+    /// room's access gets an answer. A user who could not become a member is left out: the key rows
+    /// are not partitioned by tenant, so an id of another portal's user must not reach them.
+    /// </summary>
+    public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomCandidatesAsync<T>(T roomId, IEnumerable<Guid> userIds)
+    {
+        var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        if (!room.IsRoom || !DocSpaceHelper.LocatedInPrivateRoom(room))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnly);
+        }
+
+        if (!await fileSharing.CanSetAccessAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var keys = new List<EncryptionKeyDto>();
+
+        foreach (var userId in userIds.Distinct())
+        {
+            var user = await userManager.GetUsersAsync(userId);
+            if (!userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated || await userManager.IsGuestAsync(user))
+            {
+                continue;
+            }
+
+            var userKeys = await encryptionLoginProvider.GetKeysAsync(userId);
+            if (string.IsNullOrEmpty(userKeys))
+            {
+                continue;
+            }
+
+            keys.AddRange(ParseKeys(userKeys, userId).Where(r => !string.IsNullOrEmpty(r.PublicKey)));
+        }
+
+        // Unlike the room's own key set, this answer never carries a private half, not even the caller's.
+        keys.ForEach(r => r.PrivateKeyEnc = null);
+
+        return keys;
+    }
+
+    /// <summary>
     /// Prepares somebody else's keys for the current user: an entry without a public key is of no
     /// use to the caller and must not be reported as access at all, and the encrypted private half
     /// never leaves its owner — only the caller's own entry keeps it.

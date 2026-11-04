@@ -993,7 +993,7 @@
           "Files / Files"
         ],
         "summary": "Get the editor configuration",
-        "description": "Builds everything an editor client needs to open the file: the document descriptor with its download address,\r\ntitle, type and document key, the editor configuration with the mode, the caller's permissions, the user and\r\nthe customization, the callback the editors report back to, and the signature token the document service\r\nvalidates. `version` opens one entry of the file history and requires access to that history; left out, the\r\ncurrent revision is opened. `view`, `edit` and `fill` say what the client intends to do, and `editorType`\r\npicks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the\r\nrequest: a form-filling room, a virtual data room, a public room and a user folder each produce their own\r\nmode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as\r\nembedded. When the portal is over its storage quota the configuration comes back read-only with the exceeded\r\nscope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is\r\nnot required and an anonymous caller opens through an external link.\n\nRaises the `form.stopped` webhook when a PDF form whose filling had started in a form-filling room is opened with `edit` true.",
+        "description": "Builds everything an editor client needs to open the file: the document descriptor with its download address,\r\ntitle, type and document key, the editor configuration with the mode, the caller's permissions, the user and\r\nthe customization, the callback the editors report back to, and the signature token the document service\r\nvalidates. `version` opens one entry of the file history and requires access to that history; left out, the\r\ncurrent revision is opened. `view`, `edit` and `fill` say what the client intends to do, and `editorType`\r\npicks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the\r\nrequest: a form-filling room, a virtual data room, a public room and a user folder each produce their own\r\nmode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as\r\nembedded. In a form-filling room `edit=true` takes the form off filling only for a\r\ncaller who may edit it. When the portal is over its storage quota the configuration comes back read-only with the exceeded\r\nscope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is\r\nnot required and an anonymous caller opens through an external link.\n\nRaises the `form.stopped` webhook when a PDF form whose filling had started in a form-filling room is opened with `edit` true.",
         "operationId": "openEditFile",
         "parameters": [
           {
@@ -1044,7 +1044,7 @@
           {
             "name": "edit",
             "in": "query",
-            "description": "Asks for editing rather than viewing. On a form in a form-filling room this also records that the form is\r\nbeing edited; the room may still turn the request into viewing or into filling.",
+            "description": "Asks for editing rather than viewing; the room the file lies in may still turn the request into viewing or\r\ninto filling.",
             "schema": {
               "examples": [
                 false
@@ -6064,7 +6064,7 @@
           "Files / Files"
         ],
         "summary": "Perform form filling action",
-        "description": "Drives the filling of a PDF form through its states, the action deciding which way. Action 2 starts the\r\nfilling: in a form-filling room the form is opened for filling, the members whose rights are limited to\r\nfilling forms are let in, and a form that has been changed since it was last started has the drafts of its\r\nprevious round dropped. Action 0 stops it, which in a virtual data room records who interrupted it and at\r\nwhich role and notifies the people who held the other roles, and in a form-filling room closes the form for\r\nfilling. Action 1 resumes a filling that was stopped, clearing that record. Action 3 puts the form back into\r\nediting, closing it for filling and remembering the version it was edited from. The file has to be a PDF form\r\nlying in a room. Starting needs the right to start the filling, which the room admin and a member with\r\ncontent-creator rights have, while stopping a filling that somebody else started belongs to room managers\r\nalone, so a content creator is refused with 403 there. The call is mutating; the state that resulted is read\r\nwith `GET api/2.0/files/file/{fileId}/formroles`.\n\nRaises the `form.stopped` webhook when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started.",
+        "description": "Drives the filling of a PDF form through its states, the action deciding which way. Action 2 starts the\r\nfilling: in a form-filling room the form is opened for filling, the members whose rights are limited to\r\nfilling forms are let in, and a form that has been changed since it was last started has the drafts of its\r\nprevious round dropped. Action 0 stops it, which in a virtual data room records who interrupted it and at\r\nwhich role and notifies the people who held the other roles, and in a form-filling room closes the form for\r\nfilling. Action 1 resumes a filling that was stopped, clearing that record. Action 3 puts the form back into\r\nediting, closing it for filling and remembering the version it was edited from. The file has to be a PDF form\r\nlying in a room. Starting needs the right to start the filling, which the room admin and a member with\r\ncontent-creator rights have, while stopping a filling that somebody else started belongs to room managers\r\nalone, so a content creator is refused with 403 there. In a form-filling room action 3 needs the right to\r\nedit the form. The call is mutating; the state that resulted is read\r\nwith `GET api/2.0/files/file/{fileId}/formroles`.\n\nRaises the `form.stopped` webhook when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started.",
         "operationId": "manageFormFilling",
         "parameters": [
           {
@@ -6106,7 +6106,7 @@
             "description": "The request body cannot be read or has no `formId`"
           },
           "403": {
-            "description": "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values"
+            "description": "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values"
           },
           "500": {
             "description": "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage"
@@ -35019,6 +35019,144 @@
           },
           "403": {
             "description": "The caller has no read access to the room or holds no encryption key of their own"
+          },
+          "404": {
+            "description": "The room is not found"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access/candidates": {
+      "get": {
+        "tags": [
+          "Rooms / Privacy room"
+        ],
+        "summary": "Get public keys of room invitees",
+        "description": "Returns the public encryption keys of people who are about to be invited to a private room, so that a client can\r\nencrypt the room's file keys for them before it grants the access. `GET api/2.0/privacyroom/{roomId}/access`\r\ncovers members only, which makes this the call that comes first when inviting. The room has to be an active\r\nprivate room: an archived one cannot change its access and is refused, and an unknown one is reported as missing.\r\nThe caller needs the right to change the room's access, which means its owner or a room manager; other members\r\nand a DocSpace administrator who is not a member are refused. The call is read-only and grants nothing, and\r\n`PUT api/2.0/files/rooms/{id}/share` still does the inviting. The answer holds one entry per key, and no entry\r\never carries `privateKeyEnc`, not even the caller's own. A listed user who is absent cannot be invited as they\r\nare: they have no key yet and need to create one with `POST api/2.0/privacyroom/keys`, or they are a guest, a\r\nterminated user, or nobody on this portal. A duplicate id counts once, and no ids answer an empty list. A\r\nmalformed id, a room that is not private, or a folder inside a room is rejected as invalid.",
+        "operationId": "getRoomCandidateKeys",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "The private room the people are invited to. Take it from the `id` of the room returned by\r\n`POST api/2.0/files/rooms` or listed by `GET api/2.0/files/rooms`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1234
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "description": "The people to read the keys of, repeated once per user (`userIds=...&userIds=...`). Take each from the `id` of\r\na user returned by `GET api/2.0/people`.",
+            "schema": {
+              "examples": [
+                [
+                  "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The public encryption keys of the listed users who can be invited",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The room is not a private room, or a user ID is malformed"
+          },
+          "403": {
+            "description": "The caller has no read access to the room or cannot change its access"
           },
           "404": {
             "description": "The room is not found"
