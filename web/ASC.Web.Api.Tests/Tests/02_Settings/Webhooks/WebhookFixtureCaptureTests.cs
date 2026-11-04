@@ -198,9 +198,9 @@ public class WebhookFixtureCaptureTests(
 
     private static async Task WriteFixtureAsync(string fixtures, string name, ReceivedDelivery delivery, string secret)
     {
-        var signature = delivery.Header("x-docspace-signature-256");
+        var signature = delivery.Signature;
 
-        WebhookSignature.Verify(delivery.Body, secret, signature).Should().BeTrue("the fixture of {0} must verify with Fixtures/SECRET", name);
+        delivery.IsSignedWith(secret).Should().BeTrue("the fixture of {0} must verify with Fixtures/SECRET", name);
 
         var utf8 = new UTF8Encoding(false);
 

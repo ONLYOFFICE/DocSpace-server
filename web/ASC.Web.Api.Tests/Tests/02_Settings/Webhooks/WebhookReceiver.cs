@@ -232,9 +232,18 @@ public sealed class WebhookReceiver
 /// <summary>One request the receiver took: the body exactly as sent, and the headers by lower-cased name.</summary>
 public sealed record ReceivedDelivery(string Body, IReadOnlyDictionary<string, string> Headers)
 {
+    /// <summary>The signature header of the delivery.</summary>
+    public string? Signature => Header(WebhookSignature.HeaderName);
+
     public string? Header(string name)
     {
         return Headers.GetValueOrDefault(name.ToLowerInvariant());
+    }
+
+    /// <summary>Whether the signature header matches the body under <paramref name="secret"/>, as a receiver checks it.</summary>
+    public bool IsSignedWith(string secret)
+    {
+        return WebhookSignature.Verify(Body, secret, Signature);
     }
 
     public static ReceivedDelivery From(IRequestMessage request)

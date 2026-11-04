@@ -177,7 +177,7 @@ public class RetryWebhookTests(
 
         deliveries.Should().HaveCount(2);
         deliveries[1].Body.Should().Be(deliveries[0].Body);
-        deliveries[1].Header("x-docspace-signature-256").Should().Be(deliveries[0].Header("x-docspace-signature-256"));
+        deliveries[1].Signature.Should().Be(deliveries[0].Signature);
         deliveries[1].Header("x-docspace-event-id").Should().Be(record.Id.ToString());
     }
 

@@ -158,7 +158,7 @@ public class UpdateWebhookTests(
         await FireEventAsync();
         var delivery = (await receiver.WaitForDeliveriesAsync(1)).Should().NotBeEmpty().And.Subject.First();
 
-        WebhookSignature.Verify(delivery.Body, subscription.SecretKey, delivery.Header(WebhookSignature.HeaderName)).Should().BeTrue();
+        delivery.IsSignedWith(subscription.SecretKey).Should().BeTrue();
     }
 
     [Fact]

@@ -87,7 +87,7 @@ public class WebhookDeliveryTests(
         DateTime.Parse(delivery.Header("x-docspace-event-timestamp")!).ToUniversalTime()
             .Should().Be(eventInfo.CreateOn!.Value.ToUniversalTime());
 
-        WebhookSignature.Verify(delivery.Body, subscription.SecretKey, delivery.Header(WebhookSignature.HeaderName))
+        delivery.IsSignedWith(subscription.SecretKey)
             .Should().BeTrue("the receiver checks the signature of the exact body it got");
     }
 
