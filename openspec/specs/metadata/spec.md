@@ -17,10 +17,10 @@ those rights the metadata follows.
 Sources: the integration and unit tests of `products/ASC.Files/Tests/Tests/10_Metadata`, the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations named by `operationId`), and the product code of the
 metadata service, the filter helper, the cascade worker, the DAOs and the security checks where the tests stop.
-The release notes up to v4.0 do not mention the feature. Where the OpenAPI document and the server disagree this
-specification follows the server; the evidence per scenario, the differences and the suspected defects are in
-`verification.md` next to this file. HTTP status codes are stated where the tests assert them or the code
-produces them.
+The release notes up to v4.0 do not mention the feature; no notes exist for v4.1.0, so the revision after its merge
+rests on the git diff and the tests alone. Where the OpenAPI document and the server disagree this specification
+follows the server; the evidence per scenario, the differences and the suspected defects are in `verification.md`
+next to this file. HTTP status codes are stated where the tests assert them or the code produces them.
 
 ## Requirements
 
@@ -41,18 +41,43 @@ shown or to the hidden templates. The template that holds the custom fields SHAL
 - **WHEN** a room holds a custom field and one template exists on the portal
 - **THEN** `getTemplates` lists exactly that template, and no listed field carries the custom field's name
 
+#### Scenario: Visible filter and creation order
+
+- **WHEN** a visible and a hidden template exist and the list is read with `visible` true, false and without it
+- **THEN** the first list holds the visible one only, the second the hidden one only, the third both, the earlier created template first
+
+#### Scenario: Readable by every member
+
+- **WHEN** a Room admin or a User calls `getTemplates` and `getTemplate`
+- **THEN** both answer 200 with the template
+
 ### Requirement: Creating a metadata template
 
-`createTemplate` (`POST api/2.0/files/metadata/templates`) SHALL be allowed to a DocSpace admin only (others:
-403). `name` SHALL be non-blank, at most 255 characters, unique on the portal without regard to case and never
-the reserved `System` (400); `visible` defaults to true and is stored as sent; the optional `fields` SHALL be
-validated before anything is stored, so an invalid field leaves no template behind. Concurrent creations of one
-name SHALL yield one 200, the rest 400.
+`createTemplate` (`POST api/2.0/files/metadata/templates`) SHALL be allowed to a DocSpace admin only (others,
+a Guest included: 403). `name`: present, non-blank, at most 255 characters, unique on the portal without regard
+to case, never the reserved `System` (400); `visible` defaults to true; `fields`: at least one (400 when missing
+or empty), validated before anything is stored, so a refused request leaves no template behind. Concurrent
+creations of one name SHALL yield one 200, the rest 400.
 
 #### Scenario: Room admin creates a template
 
-- **WHEN** a Room admin or a User calls `createTemplate`
-- **THEN** the system answers 403
+- **WHEN** a Room admin, a User or a Guest calls `createTemplate`
+- **THEN** the system answers 403 and the name is not listed afterwards
+
+#### Scenario: No fields
+
+- **WHEN** the owner creates a template with `fields` empty or left out
+- **THEN** the system answers 400 and `getTemplates` does not list the name
+
+#### Scenario: Blank or missing name
+
+- **WHEN** the `name` is empty, whitespace only or `null`
+- **THEN** the system answers 400 and the number of templates is unchanged
+
+#### Scenario: Names kept as sent
+
+- **WHEN** a template is created with a Cyrillic, a CJK or an `A&B 'q' %20 ;` name, or with a name of exactly 255 characters
+- **THEN** `getTemplate` returns the name unchanged
 
 #### Scenario: Hidden template stays hidden
 
@@ -85,12 +110,29 @@ identifier that does not exist, was deleted, or belongs to the hidden template o
 - **WHEN** a template is deleted and read again by its identifier
 - **THEN** the system answers 404
 
+#### Scenario: Unknown identifier
+
+- **WHEN** `getTemplate` is called with an identifier nobody has, with 0 or with -1
+- **THEN** the system answers 404
+
+### Requirement: Template routes and anonymous callers
+
+Every template and field route — `getTemplates`, `getTemplate`, `createTemplate`, `updateTemplate`,
+`deleteTemplate`, `createField`, `updateField`, `deleteField` — SHALL answer 401 to a caller without a session,
+and SHALL change nothing.
+
+#### Scenario: Anonymous on every route
+
+- **WHEN** an anonymous caller tries each of the eight routes on an existing template and field
+- **THEN** every call answers 401 and the template is unchanged
+
 ### Requirement: Updating a metadata template
 
 `updateTemplate` (`PUT api/2.0/files/metadata/templates/{templateId}`) SHALL be allowed to a DocSpace admin only
-(403, nothing changed) and SHALL change only what the body names: a non-empty `name` (same rules as on creation,
-400 when taken or too long) and `visible`. It SHALL store the change, set `modifiedBy` to the caller, and answer
-200 with the whole template, its fields included. Unknown template: 404.
+(403, nothing changed) and SHALL change only what the body names: a non-empty `name` (rules of the creation, 400
+when taken in any case or too long, old name kept; its own name accepted) and `visible`. It SHALL set `modifiedBy`
+to the caller, keep `createBy` and the entries' assignments and values, and answer 200 with the whole template,
+fields included. Unknown template: 404.
 
 #### Scenario: Rename and hide
 
@@ -104,21 +146,41 @@ identifier that does not exist, was deleted, or belongs to the hidden template o
 
 #### Scenario: Refused rename
 
-- **WHEN** a Room admin or a User renames a template
-- **THEN** the system answers 403 and `getTemplate` shows the old name
+- **WHEN** a Room admin, a User or a Guest renames or hides a template
+- **THEN** the system answers 403 and `getTemplate` shows the old name and visibility
+
+#### Scenario: Own name and a foreign name
+
+- **WHEN** a template is renamed to its own name, then to another template's name in lower case, then to a 256-character name
+- **THEN** the first answers 200, the others 400, and the name is unchanged after them
+
+#### Scenario: Rename keeps the values on the entries
+
+- **WHEN** a template assigned to a folder and a file with values on both is renamed, by another DocSpace admin
+- **THEN** both entries list the template under the new name with their values, `createBy` is still the creator and `modifiedBy` the admin
 
 ### Requirement: Deleting a metadata template
 
 `deleteTemplate` (`DELETE api/2.0/files/metadata/templates/{templateId}`) SHALL be allowed to a DocSpace admin
 only (403, template kept) and SHALL delete the template with its fields, its assignments on every entry and
-every value written for its fields, answering 200 with no body. Afterwards `getTemplate` SHALL answer 404,
-`getTemplates` SHALL not list it, the entries SHALL not report it, and a listing filter naming it SHALL be
-refused with 400 like an unknown template.
+every value of its fields, answering 200 with no body. Afterwards `getTemplate` and a second deletion SHALL
+answer 404, `getTemplates` SHALL not list it, the entries SHALL not report it, and a listing filter naming it
+SHALL be refused with 400 like an unknown template.
 
 #### Scenario: Template deleted while assigned
 
 - **WHEN** a room carries the template with a value and the owner deletes the template
 - **THEN** `getFolderMetadata` of the room no longer lists the template and `searchFolder` with its `metadataTemplateId` answers 400
+
+#### Scenario: Other templates untouched
+
+- **WHEN** a file and a folder carry two templates with values and one of them is deleted
+- **THEN** both entries list the other template alone, its value kept
+
+#### Scenario: Deleted twice
+
+- **WHEN** a deleted template is deleted again, or an unknown identifier is deleted
+- **THEN** the system answers 404
 
 ### Requirement: Field types and their options
 
@@ -137,12 +199,17 @@ other type SHALL carry no options (400 otherwise).
 - **WHEN** the owner creates a single choice field with the options `Draft` and `Signed`
 - **THEN** the answer carries both options with distinct identifiers
 
+#### Scenario: Invalid field adds nothing
+
+- **WHEN** `createField` is sent an empty or whitespace name, a 256-character name, a choice field without options or with `a` twice, options on a number field, or an unknown type
+- **THEN** the system answers 400 and the template still holds its one field
+
 ### Requirement: Adding a field to a template
 
 `createField` (`POST api/2.0/files/metadata/templates/{templateId}/fields`) SHALL be allowed to a DocSpace admin
 only (403) and SHALL add one field with `name` (non-blank, at most 255 characters, unique within the template
-without regard to case: 400), `type`, `options` and an optional `order`, answering 200 with the field and its
-generated option identifiers. Unknown template: 404.
+without regard to case: 400), `type`, `options` and an optional `order`, answering 200 with the field, its
+`templateId` and its generated option identifiers. Unknown template: 404.
 
 #### Scenario: Field added
 
@@ -153,6 +220,16 @@ generated option identifiers. Unknown template: 404.
 
 - **WHEN** the owner adds `CLIENT` to a template holding `Client`
 - **THEN** the system answers 400
+
+#### Scenario: One field of each type
+
+- **WHEN** a string, a date, a number, a single choice and a multiple choice field are added one by one
+- **THEN** each answer carries the requested `type` and the template's identifier, and `getTemplate` lists them after the seed field in the order added
+
+#### Scenario: Unknown template
+
+- **WHEN** a field is added to a template identifier nobody has
+- **THEN** the system answers 404
 
 ### Requirement: Display order of the fields
 
@@ -175,6 +252,12 @@ update with `order` SHALL move the field; one without SHALL leave it where it is
 
 - **WHEN** a file carries a template whose fields are `First` (0), `Second` (1), `Third` (none) and only `Third` has a value
 - **THEN** `getFileMetadata` lists every field as `First`, `Second`, `Third`
+
+#### Scenario: Negative order goes first
+
+- **WHEN** `last` is added without `order` and `top` with `order` -10 to a template holding `first`
+- **THEN** the template lists `top`, `first`, `last`
+- **AND** an update of a field with `order` -5 and a new name moves it to the front with its options intact
 
 ### Requirement: Updating a field
 
@@ -202,21 +285,48 @@ template it does not belong to: 404.
 
 #### Scenario: Field of another template
 
-- **WHEN** the owner updates a field through the route of a template it does not belong to
+- **WHEN** the owner updates a field through the route of a template it does not belong to, or an unknown field through its own
 - **THEN** the system answers 404 and the field is unchanged
+
+#### Scenario: Options updated in place
+
+- **WHEN** a choice field with `a` and `b` is sent `options` naming `a`'s identifier with the value `a renamed`, `b` unchanged and a new `c`
+- **THEN** the answer and `getTemplate` list `a renamed`, `b`, `c`, the first two under their old identifiers and `c` under a new one
+
+#### Scenario: Retype refused once a file holds a value
+
+- **WHEN** a string field valued on a file is sent `type` number
+- **THEN** the system answers 400 and the field keeps the string type
+
+#### Scenario: Sibling name
+
+- **WHEN** field `B` is renamed to `a` while the template holds `A`
+- **THEN** the system answers 400 and both names stay
 
 ### Requirement: Deleting a field
 
 `deleteField` (`DELETE api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}`) SHALL be allowed to a
-DocSpace admin only (403) and SHALL remove the field from its template and every value written for it from
-every entry, answering 200 with no body; the other fields keep their values. A filter condition naming the
-field SHALL then be refused with 400. A field reached through another template: 404.
+DocSpace admin only (403) and SHALL remove the field and every value written for it from every entry, 200 with
+no body; the other fields keep their values. The last field of a template SHALL NOT be deleted on its own (400,
+field kept): the template goes as a whole. A filter condition naming a deleted field: 400. A field reached
+through another template, or deleted twice: 404.
 
 #### Scenario: Field deleted while valued
 
 - **WHEN** a room holds `Client` = `ACME` and `Department` = `Legal` and the owner deletes `Department`
 - **THEN** `getTemplate` lists `Client` alone and `getFolderMetadata` of the room lists one field holding `ACME`
 - **AND** `searchFolder` with a condition on the deleted field answers 400
+- **AND** a file holding values in `a` and `b` keeps `b` = `2` alone after `a` is deleted
+
+#### Scenario: Last field stays
+
+- **WHEN** a template holds `Client` and `Amount`, `Amount` is deleted and then `Client`
+- **THEN** the first deletion answers 200 and the second 400, the template still listing `Client`
+
+#### Scenario: Deleted twice or through another template
+
+- **WHEN** a field is deleted through the route of another template, then through its own, then once more
+- **THEN** the answers are 404, 200 and 404, and the foreign attempt left both templates unchanged
 
 ### Requirement: Last-modified stamp of a template
 
@@ -237,15 +347,25 @@ entry. The stamp has a precision of one second.
 ### Requirement: Reading the metadata of an entry
 
 `getFileMetadata` (`GET api/2.0/files/metadata/file/{fileId}`) and `getFolderMetadata` (`GET
-api/2.0/files/metadata/folder/{folderId}`) SHALL require the right to read the entry (403; unknown 404) and
-answer `templates` — each assigned template with all its fields and their `value` or null, plus `cascade` and
-`conflictResolveType` (null unless the folder cascades it; false and null on a file) — and `customFields` as
-name/value pairs. The template of the custom fields SHALL never appear there.
+api/2.0/files/metadata/folder/{folderId}`) SHALL need the right to read the entry (403; unknown 404) and
+answer `templates` — each assigned template with its fields and their `value` or null, `cascade` and
+`conflictResolveType` (null unless the folder cascades it; false and null on a file) — `customFields` as
+name/value pairs, and `hasMetadataFields`. No metadata: empty lists. The custom-field template never shows.
 
 #### Scenario: Viewer reads a file card
 
 - **WHEN** a room member with the Viewer role reads `getFileMetadata` of a file holding `Client` = `ACME`
 - **THEN** the answer lists the template with the field `Client` whose `value.stringValue` is `ACME`
+
+#### Scenario: Entry without metadata
+
+- **WHEN** a fresh folder or file is read, and then an identifier nobody has
+- **THEN** the first answers empty `templates` and `customFields`, the second 404
+
+#### Scenario: Stranger
+
+- **WHEN** a User who is not a member of the room reads the file, the folder and `getCascadeProgress` of the folder
+- **THEN** every call answers 403
 
 #### Scenario: Cascade state reported
 
@@ -285,30 +405,62 @@ change nothing.
 - **WHEN** the owner assigns a template with cascade to My documents, or a Room admin to the rooms root, or either sets a custom field there
 - **THEN** the system answers 403
 
+#### Scenario: Read member
+
+- **WHEN** a member with the Read role reads the file and the folder, then tries every write on both: assign, unassign, values, custom fields and the cascade switch
+- **THEN** the reads answer 200 and every write 403, the entries keeping their template, no value and no custom field
+
+#### Scenario: Room manager
+
+- **WHEN** a Room manager writes values and custom fields on a file and a folder of the room
+- **THEN** every call answers 200 and the owner reads the written value
+
 ### Requirement: Assigning templates to a file
 
 `assignFileTemplates` (`PUT api/2.0/files/metadata/file/{fileId}/templates`) SHALL take `templateIds` (400 when
-the body cannot be read or has none) and link each listed template to the file, skipping the ones it already
-carries, answering 200 with no body. A template that does not exist, or the hidden template of the custom fields:
-404. The right required is the right to edit the file (403); a file that does not exist: 404.
+the body cannot be read or lacks the member; an empty list changes nothing) and link each listed template to the
+file, keeping the ones it carries: additive and idempotent, 200 with no body. A template that does not exist, or
+the custom-field template: 404 and nothing of the list linked. Needs the right to edit the file (403); an unknown
+file: 404.
 
 #### Scenario: Editor assigns
 
 - **WHEN** an Editor of the room calls `assignFileTemplates` for a file of the room
-- **THEN** the system answers 200 and `getFileMetadata` lists the template with every field empty
+- **THEN** the system answers 200 and `getFileMetadata` lists the template with every field empty, `cascade` false
+
+#### Scenario: Idempotent and additive
+
+- **WHEN** template A is assigned twice, then B, then an empty list
+- **THEN** every call answers 200 and the file carries A and B
+
+#### Scenario: Unknown template in the list
+
+- **WHEN** a known and an unknown template are sent together, or any template to an unknown file
+- **THEN** the system answers 404 and the file carries nothing
+
+#### Scenario: Re-assigned after unassignment
+
+- **WHEN** a template unassigned from a file (its value gone with it) is assigned again
+- **THEN** the file lists the template with the field empty
 
 ### Requirement: Assigning templates to a folder or a room
 
 `assignFolderTemplates` (`PUT api/2.0/files/metadata/folder/{folderId}/templates`) SHALL take `templateIds`,
-`cascade` and `conflictResolveType`, link the templates to the folder (403 without the folder write right; 404
-for a missing folder or template) and answer an operation: completed, with no `id`, progress 100 and no error
-when `cascade` is off or the list is empty (nothing else done); the queued pass with its `id` and `templateIds`
-when `cascade` is on and a template is given.
+`cascade` and `conflictResolveType`, link the templates to the folder additively (403 without the folder write
+right; 404 for a missing folder or template, nothing linked) and answer an operation: completed, no `id`,
+progress 100, no error when `cascade` is off or the list is empty (content untouched); the queued pass with
+`id` and `templateIds` when `cascade` is on.
 
 #### Scenario: No cascade
 
 - **WHEN** the owner assigns a template to a room with `cascade` false
 - **THEN** the answer is `{id: null, progress: 100, isCompleted: true, error: null}` and `getCascadeProgress` of the room reports the same
+- **AND** a file inside the folder carries nothing, while the folder lists the template with `cascade` false and every field
+
+#### Scenario: Additive and atomic
+
+- **WHEN** template A is assigned twice and then B, and another folder is sent A together with an unknown template
+- **THEN** the first folder carries A and B; the second call answers 404 and that folder carries nothing; an unknown folder answers 404
 
 #### Scenario: Empty list with cascade
 
@@ -339,18 +491,49 @@ SHALL become direct assignments keeping their values.
 - **WHEN** a room and a nested folder both cascade one template and the room is unassigned
 - **THEN** a file under the nested folder keeps the nested folder's value and a copy of it carries no template, because its link is still inherited
 
+#### Scenario: Template the file does not carry
+
+- **WHEN** `unassignFileTemplate` names a template the file does not carry, then one that does not exist
+- **THEN** the first answers 200 and changes nothing, the second 404; a missing folder or template on `unassignFolderTemplate` answers 404 too
+
+#### Scenario: Other template kept
+
+- **WHEN** a file carries two templates with a value each and one is unassigned
+- **THEN** the file lists the other template with its value
+
+#### Scenario: Inherited template unassigned, then cascaded again
+
+- **WHEN** a file that inherited a template from a cascading folder has it unassigned, and the folder's cascade is switched on again
+- **THEN** the file carries nothing in between and the template again after the pass
+
 ### Requirement: Setting the values of template fields
 
 `setFileValues` (`PUT api/2.0/files/metadata/file/{fileId}/values`) and `setFolderValues` (`PUT
 api/2.0/files/metadata/folder/{folderId}/values`) SHALL take `values`, one per `fieldId` (null list or a field
-listed twice: 400), each field of a template assigned to the entry and not a custom field (400); an unknown
-field: 404. An empty value SHALL clear the field. The answer SHALL be the whole metadata of the entry as the
-read returns it, every value the entry holds included.
+listed twice: 400), each of a template assigned to the entry and not a custom field (400); unknown field: 404.
+A refused request writes nothing. A value whose member is empty, null or left out clears the field; fields not
+listed stay. The answer is the whole metadata of the entry.
 
 #### Scenario: Answer is the entry, not the request
 
 - **WHEN** a room holds `Client` = `ACME` and a custom field, and the owner writes `Amount` = 7
 - **THEN** the answer lists the template with `Client` = `ACME` and `Amount` = 7, and the custom field
+
+#### Scenario: Every type in one request
+
+- **WHEN** a string, a number, a date, a single and a multiple choice value are written on a file or a folder in one request
+- **THEN** the answer and the later read carry all five, the string with its Cyrillic and CJK characters intact
+
+#### Scenario: One invalid value spoils the batch
+
+- **WHEN** a valid string and a number one beyond the limit, a string on a number field, a field of a template the entry does not carry, a field listed twice or an unknown field are sent together
+- **THEN** the system answers 400 (404 for the unknown field) and the string field keeps its old value
+
+#### Scenario: Member left out clears
+
+- **WHEN** a value carries `fieldId` and no other member, for a field of any type on a file or a folder
+- **THEN** the system answers 200, the field is empty and the sibling field keeps its value
+- **AND** an empty string on a string field, null on a number or date field, and an empty or null `optionIds` on a choice field clear the same way
 
 #### Scenario: Field listed twice
 
@@ -391,19 +574,51 @@ option. Anything else SHALL be refused with 400 and nothing of the request writt
 
 #### Scenario: Two options on a single choice
 
-- **WHEN** a single choice field receives two different options, or any choice field an option it does not have
-- **THEN** the system answers 400
+- **WHEN** a single choice field receives two different options, or any choice field an option it does not have, an option of another field, or a text that is no identifier
+- **THEN** the system answers 400 and the selected option stays
+
+#### Scenario: Member of another type
+
+- **WHEN** a string field receives `numberValue` or `optionIds`, a number field `stringValue` or `optionIds`, a date field `stringValue` or `numberValue`, a choice field `stringValue`
+- **THEN** the system answers 400 and the field keeps its value, on a file and on a folder alike
+
+#### Scenario: Fraction and overflow
+
+- **WHEN** a number field receives `42.5` or `1e30`
+- **THEN** the system answers 400 and the field keeps its value
+
+#### Scenario: Zero, negative and blank
+
+- **WHEN** a number field receives 0 or -7, and a string field three spaces
+- **THEN** each is stored and read back as sent
 
 ### Requirement: Date values and their time zone
 
 A `dateValue` carrying an offset SHALL be stored as that instant in UTC; one without an offset SHALL be read as
-UTC, never shifted by the server time zone, so a day written as a date is found by a filter on the same day.
-The stored date SHALL come back in `value.dateValue` with its UTC time.
+UTC, never shifted by the server time zone, so a day written as a date is found by a filter on the same day; a
+date without a time is its midnight UTC. Any instant of the years 1 to 9999 SHALL be accepted; a year outside,
+a month that does not exist or text that is no date: 400. The stored date SHALL come back in `value.dateValue`
+with its UTC time.
 
 #### Scenario: Midnight without offset
 
 - **WHEN** `2026-01-15T00:00:00` is written and the room is filtered with `from` and `to` both `2026-01-15`
 - **THEN** the stored UTC time is 2026-01-15 00:00 and the room is found
+
+#### Scenario: Written forms
+
+- **WHEN** `2026-03-04`, `2026-03-04T05:06:07` and `2026-03-04T05:06:07+03:00` are written on a file or a folder
+- **THEN** the stored UTC times are 00:00:00, 05:06:07 and 02:06:07 of that day
+
+#### Scenario: Extremes
+
+- **WHEN** `0001-01-01T00:00:00Z`, `9999-12-31T23:59:59Z` or `1970-01-01T00:00:00Z` is written
+- **THEN** each is stored and read back as that instant
+
+#### Scenario: Not a date
+
+- **WHEN** `0000-01-01`, `10000-01-01`, `2026-13-01` or `not a date` is written
+- **THEN** the system answers 400 and the field keeps its value
 
 ### Requirement: Custom fields of an entry
 
@@ -434,6 +649,16 @@ listed stay. The answer is the entry's custom fields.
 - **WHEN** a file receives `Client` = null and `Customer` = `Globex` in one request
 - **THEN** the file holds `Customer` only while the room still holds `Client`
 
+#### Scenario: Never cascaded, never mixed with the template values
+
+- **WHEN** a folder holds custom fields and cascades a template over a file inside, and a file holding a template value receives a custom field
+- **THEN** the file inside the folder has no custom field, and the template value of the other file is unchanged next to its new custom field
+
+#### Scenario: Refused writes change nothing
+
+- **WHEN** an empty list, a blank name, `a` and `A` together, a 256-character name or an 8001-character value is sent to a file or a folder holding `keep` = `me`
+- **THEN** the system answers 400 and the entry still holds `keep` = `me` alone; an unknown file answers 404
+
 ### Requirement: Limits and dictionary of the custom fields
 
 An entry SHALL hold at most 50 custom fields (a request pushing it over: 400, nothing written). The portal-wide
@@ -463,6 +688,16 @@ and copy the folder's filled fields: in skip mode into empty fields only, in ove
 values; an empty folder field never touches an entry. A nested folder cascading the same template is
 left out with its subtree (the nearest cascading ancestor wins). The pass is a snapshot: a later edit of the
 folder changes the folder only until a cascade is requested again.
+
+#### Scenario: Every depth
+
+- **WHEN** a folder holding `from root` cascades in overwrite mode over a sub-folder, a folder two levels down and files in both
+- **THEN** every folder and file below carries the template with `from root`, and the folder reports `cascade` true with the overwrite mode
+
+#### Scenario: Skip then overwrite
+
+- **WHEN** a folder holding `folder` cascades in skip mode over a file holding `file`, an empty file, a sub-folder holding `sub` and an empty sub-folder, and is then switched to overwrite mode
+- **THEN** after the skip pass the four read `file`, `folder`, `sub`, `folder`; after the overwrite pass all four read `folder`
 
 #### Scenario: Nearest cascading folder wins
 
@@ -503,6 +738,16 @@ complete with its message in `error`.
 - **WHEN** a cascade of one template was queued on a room
 - **THEN** the assignment answer and the progress both carry that template in `templateIds`
 
+#### Scenario: Finished pass stays reported
+
+- **WHEN** the pass has completed and the progress is read again
+- **THEN** the same `id` and `templateIds` come back with `isCompleted` true, progress 100 and no error
+
+#### Scenario: Unknown folder
+
+- **WHEN** the progress of a folder identifier nobody has is read
+- **THEN** the system answers 404
+
 ### Requirement: Switching the cascade of an assigned template
 
 `updateFolderTemplate` (`PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`) SHALL take
@@ -524,8 +769,13 @@ completed operation without `id`; off again is a no-op.
 
 #### Scenario: Template not on the folder
 
-- **WHEN** the switch is called for a template the folder does not carry
+- **WHEN** the switch is called for a template the folder does not carry, or for one that does not exist
 - **THEN** the system answers 404
+
+#### Scenario: Switched on from an inherited sub-folder
+
+- **WHEN** a sub-folder that inherited a template from its cascading parent (reporting `cascade` false) is switched on
+- **THEN** the sub-folder reports `cascade` true and the parent still does
 
 ### Requirement: Inheritance when an entry is created or moved
 
@@ -594,12 +844,62 @@ the filter in Trash; a restored entry SHALL keep it and be found where it came b
 - **WHEN** a room carrying a template with a file carrying it is deleted
 - **THEN** both reads answer 404 and the rooms filter no longer returns the room
 
+### Requirement: Whether an entry has fields to fill
+
+Every file and folder of a folder listing, `getFileInfo`, `getFolderInfo`, `getFileMetadata` and
+`getFolderMetadata` SHALL carry `hasMetadataFields`: true when the entry carries a visible template with at
+least one field or a custom field, false otherwise — always present there, false rather than absent on a portal
+without templates. It is a fact about the data, not about the caller's rights, and it says nothing about the
+values. It SHALL follow the visibility of the templates.
+
+#### Scenario: False, not absent
+
+- **WHEN** a portal has no template and a file and a folder of a room are listed and read
+- **THEN** the listing, the info endpoints and the metadata reads all carry `hasMetadataFields` false
+
+#### Scenario: Visible template
+
+- **WHEN** a template with a field is assigned to a file and a folder, a third file untouched
+- **THEN** the two carry true and the third false everywhere
+
+#### Scenario: Hidden template only
+
+- **WHEN** a hidden template is the only one assigned to a file
+- **THEN** the listing reports `hasMetadataFields` false while `assignedMetadataTemplates` still names the template
+
+#### Scenario: Custom field only
+
+- **WHEN** a file and a folder hold a custom field and no template
+- **THEN** both carry true, and the file's listing entry carries no `assignedMetadataTemplates`
+
+#### Scenario: Follows the visibility
+
+- **WHEN** the assigned template is hidden with `updateTemplate` and shown again
+- **THEN** the flag turns false and then true again on the listing, the info and the metadata read
+
+#### Scenario: Filled and read-only
+
+- **WHEN** every field of the file is filled, and a member with the Read role lists the room
+- **THEN** the flag stays true; the Read member sees true next to `security.edit` false
+
+### Requirement: Text of names, options and values
+
+A template name, a field name, an option value, a string value and a custom field name or value SHALL store
+every character of the Basic Multilingual Plane as sent, Cyrillic, CJK and symbols included, and return it
+unchanged from `getTemplate` and the metadata reads.
+
+#### Scenario: Round trip
+
+- **WHEN** `Привет 模板 ™ ✓ é ☃ ❤ ☺` is used in a template name, a field name, an option, a string value and a custom field
+- **THEN** every read returns the text unchanged
+
 ### Requirement: Assigned templates in the listings
 
 Every file and folder returned by a listing, by `getFileInfo` and by `getFolderInfo` SHALL carry
 `assignedMetadataTemplates`, the identifiers of the templates it carries, empty or absent when it carries none;
 the info endpoints and the listing SHALL agree. A portal that gets its first template after a listing SHALL
-report the assignments made afterwards.
+report the assignments made afterwards. The entries of a listing SHALL name their concrete kind in `entryKind`
+(`file`, `folder`, `thirdPartyFile`, `thirdPartyFolder`).
 
 #### Scenario: Info agrees with the listing
 

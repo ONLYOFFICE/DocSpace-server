@@ -16,7 +16,8 @@ Shared by column, v4.0 "Remove from list"), checked against the integration test
 product code (the file security check, the sharing helper, the entry manager, the marker and the tag storage)
 consulted only where tests and document leave a point open; the files are named per row in `verification.md`.
 Where the release notes and the server disagree, this specification follows the server; the differences are
-listed in `verification.md` next to this file. External (shared) links — where a link may be created, its
+listed in `verification.md` next to this file. Re-checked after the v4.1.0 merge, whose changes to the sharing
+code concern the AI rooms only (specified in `ai-agents` and `room-types`, not here). External (shared) links — where a link may be created, its
 settings and limits — are specified in `shared-links`; which user types may share with whom at all is
 specified in `user-type-permissions`. Both are referenced here, not restated.
 
@@ -412,10 +413,10 @@ SHALL clear the listed files from the caller's own history without checking acce
 ### Requirement: The Favorites section
 
 The system SHALL keep a personal Favorites section per account for files and folders. Marking an entry SHALL
-require Read access and nothing more; an unauthenticated caller SHALL be refused (401). `addFavorites` and
-`deleteFavoritesFromBody` SHALL answer `true`, be idempotent and ignore identifiers that match nothing.
-Entries the account can no longer read and entries in the trash drop out of the listing and of its `total`
-although the mark is not cleared; entries in archived rooms stay.
+need Read access only; an unauthenticated caller SHALL be refused (401). `addFavorites` and
+`deleteFavoritesFromBody` SHALL answer `true`, be idempotent and skip identifiers that match nothing or that
+the caller cannot read. Entries the account can no longer read and entries in the trash drop out of the
+listing and of its `total` although the mark is kept; entries in archived rooms stay.
 
 #### Scenario: Entry marked and listed
 
@@ -427,6 +428,12 @@ although the mark is not cleared; entries in archived rooms stay.
 
 - **WHEN** the owner marks a file and another member lists Favorites
 - **THEN** the member's list does not contain the file, and the owner's list does not contain what the member marked
+- **AND** when two members mark the same room file and one removes its mark, twice, the other's mark stays
+
+#### Scenario: Unreadable entry in a batch
+
+- **WHEN** a room member adds a room file, a file in the owner's My documents and an identifier that matches nothing to Favorites in one request, and later removes the same three
+- **THEN** both answers are `true`, only the room file is listed in between, and nothing is listed afterwards
 
 #### Scenario: Lost access
 
@@ -437,6 +444,11 @@ although the mark is not cleared; entries in archived rooms stay.
 
 - **WHEN** a favorite file is moved to the trash, or a file already in the trash is marked
 - **THEN** the file is not listed in Favorites
+
+#### Scenario: Mark survives the Trash
+
+- **WHEN** a favorite file is moved to the Trash and then moved back to My documents
+- **THEN** it is absent from Favorites while in the Trash and listed again after the restore, with its content unchanged
 
 #### Scenario: Listing filters
 
@@ -452,7 +464,7 @@ although the mark is not cleared; entries in archived rooms stay.
 #### Scenario: Removing a mark leaves the source untouched
 
 - **WHEN** a file is removed from Favorites
-- **THEN** it is still listed in its own folder
+- **THEN** it is still listed in its own folder and its content is unchanged
 
 ### Requirement: Default access rights offered in the sharing dialog
 

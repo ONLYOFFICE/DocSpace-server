@@ -27,9 +27,13 @@ it), **CODE-ONLY** (read from the product code, the configuration or the OpenAPI
 403, `TenantQuotaException` 402, anything else 500 (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:55-95`).
 
 The .NET suite for this capability is 6 functional tests (list, status, logs × owner / DocSpace admin) and 12
-permission cases (anonymous, Room admin, User, Guest × the same three reads) — exactly what the TS suite has.
-Both suites say in a comment why init, migrate, finish, cancel and clear are not covered: they need a real
-backup and a worker that has run. Everything about the jobs themselves is therefore CODE-ONLY.
+permission cases (anonymous, Room admin, User, Guest × the same three reads) — exactly what the TS suite has —
+plus, since the merge of `release/v4.1.0` (`3533ad8a89`, previous state `d58816bece`), `Tests/MigrationWriteTests.cs`
+(cancel, clear, finish, migrate and init on a portal without an upload, two of them with bug traits) and
+`Tests/MigrationWritePermissionsTests.cs` (anonymous, Room admin, User, Guest × the five write operations). A parse
+with a real backup, an import and the welcome e-mails still need a backup and a worker run and stay CODE-ONLY. In
+that range the product side changed only in `Controller:228-230` (three `RaisesWebhook` declarations on
+`startMigration`); `common/ASC.Migration` is untouched, so every line reference below still holds.
 
 ## Requirement rows
 
@@ -40,6 +44,7 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 | Owner and DocSpace admin get 200 on list/status, 404 on logs of a fresh portal | `Tests/MigrationTests.cs:54-141`; `TS/migration.spec.ts` | TEST-CONFIRMED |
 | Room admin, User, Guest → 403 "Access denied" on list, status, logs | `Tests/MigrationPermissionsTests.cs:61-78, 94-111, 127-144`; `TS/migration.permissions.spec.ts` | TEST-CONFIRMED |
 | Anonymous → 401 on list, status, logs | `Tests/MigrationPermissionsTests.cs:47-59, 80-92, 113-125` | TEST-CONFIRMED |
+| Room admin, User, Guest → 403 "Access denied" and anonymous → 401 on cancel, clear, finish, migrate, init | `Tests/MigrationWritePermissionsTests.cs:226-264` (`Endpoints` theory data at 224) | TEST-CONFIRMED |
 | No edition/tariff gate | no quota, tariff or standalone check in `Controller`, `Core`, `Worker`, `Operation`; the `migration.enabled` key of `appsettings.json:272-274` is read nowhere in the server (see deviations) | CODE-ONLY |
 | **Listing the import sources** | | |
 | Names from the registered migrators, registration order, case-insensitive match later | `Core:44-49`; `Workspace:59`, `Google:72`, `Nextcloud:63` (the three names) | CODE-ONLY |
@@ -54,8 +59,9 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 | Nextcloud: first `.zip`, else "Archive must be .zip"; needs a `.bak`/`.sql` dump ("*.bak file not found" wrapped as "Couldn't parse <name> archive"); `data/<uid>/files` | `Nextcloud:73-87, 141-146, 225-231, 386-389`; `Resx:138-140` | CODE-ONLY |
 | Google: every `.zip`, name order, root `Takeout` required; per-archive failure listed, all failing → "Couldn't parse archives" | `Google:82-92, 145-150, 205-213`; `Resx:141-143` | CODE-ONLY |
 | **Parsing the uploaded backup** | | |
-| Queue only, 200 empty body; event published to the bus | `Controller:103-108`; `Core:51-57`; yaml `uploadAndInitializeMigration` (45502-45595) | CODE-ONLY |
-| Worker runs the job: migrator resolved by name, "No such migration provider" when unknown | `Handler:46-54`; `Worker:45-48, 55-83`; `Operation:84-121`; `Resx:192-194` | CODE-ONLY |
+| Queue only, 200 empty body; event published to the bus — for a known and an unknown name alike, with nothing uploaded | `Controller:103-108`; `Core:51-57`; yaml `uploadAndInitializeMigration` (45502-45595); `Tests/MigrationWriteTests.cs:106-119` | TEST-CONFIRMED |
+| Worker runs the job: migrator resolved by name; an unknown name ends the job with `isCompleted` true and a non-empty `error` | `Handler:46-54`; `Worker:45-48, 55-83`; `Operation:84-121`; `Tests/MigrationWriteTests.cs:106-119` (asserts `isCompleted` and `error` not empty for `TotallyNotARealMigrator`) — the message is not the documented "No such migration provider", see M11 | TEST-CONFIRMED (outcome) / CODE-ONLY (message) |
+| A parse without an upload ends with `isCompleted` true and a non-empty `error` (the cached folder is null) | `Operation:109-110`; `Nextcloud:66-74` (`Directory.GetFiles(null)` throws after the logger was initialised); `Tests/MigrationWriteTests.cs:106-119` (`Nextcloud`) | TEST-CONFIRMED |
 | `parseResult` fields (`operation` lower-cased, users of the three lists, groups, `files`, `failedArchives`) | `Info:53-69`; `User:44-56`; `ApiInfo`; yaml `MigrationApiInfo` (96575-96711), `MigratingApiUser` (96527-96574) | CODE-ONLY |
 | Progress 100 and `isCompleted` at the end; upload kept after a successful parse, deleted after a failure | `Workspace:119-122`, `Google:222-225`, `Nextcloud:232-235`; `Operation:143-183` (`clearMigrationFolder` only on error or after an import) | CODE-ONLY |
 | **Classifying the users found** | | |
@@ -68,6 +74,8 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 | 200 on a fresh portal (owner, DocSpace admin) | `Tests/MigrationTests.cs:85-107` | TEST-CONFIRMED |
 | **Starting the import** | | |
 | Body required (`ArgumentNullException` → 400); `[EmailAddress]` on `email`; `userType` is a string enum (unknown name → 400); 200 empty body; queued | `Controller:233-266`; `ApiUser:54-55, 83`; `common/ASC.Core.Common/Core/EmployeeType.cs:40`; yaml `startMigration` (45816-45901) | CODE-ONLY |
+| An empty parse result (`{}`) is accepted with 200 on a portal where nothing was parsed | `Tests/MigrationWriteTests.cs:96-104` (no exception); the queued job then resolves no migrator (`migratorName` null, `Core:46-49`) and ends with an error (`Operation:94-101`, see M11) | TEST-CONFIRMED (200) / CODE-ONLY (job outcome) |
+| `startMigration` declares `room.created`, `folder.created` and `room.updated` for the rooms and folders the import creates and hands over | `Controller:228-230` (`RaisesWebhook`); `Migrator:159-185, 346-379` | CODE-ONLY |
 | Only `apiInfo.Users` is read for the selection; `existUsers`/`withoutEmailUsers` of the parse are merged into the pool and matched by `key`; an empty source e-mail takes the request's | `Info:71-98` | CODE-ONLY |
 | Users-only mode = all `import...` flags false (storage `ShouldImport` false → nothing created) | `Info:95-112`; `Migrator:330-333` | CODE-ONLY |
 | **Importing a user as DocSpace admin** | | |
@@ -92,12 +100,17 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 | Semaphore; existing completed job dequeued and replaced; running job kept and only republished | `Worker:55-83` | CODE-ONLY |
 | **Cancelling a parse** | | |
 | Dequeues only jobs with `operation` "parse" for the tenant, then deletes the upload folder; 200 always | `Controller:176-181`; `Core:67-70`; `Worker:85-95`; yaml `cancelMigration` (45676-45745) | CODE-ONLY |
+| Cancel with nothing running, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:47-56` | TEST-CONFIRMED |
 | **Clearing a finished import** | | |
 | Dequeues completed jobs with `operation` "migration"; folder deleted; 200 always | `Controller:202-207`; `Worker:97-107`; yaml `clearMigration` (45746-45815) | CODE-ONLY |
+| Clear with nothing to clear, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:58-67` | TEST-CONFIRMED |
+| A finished *parse* job is not cleared (the filter is `operation == "migration"`); the test with bug trait 84792 demands that a failed parse is removed — see M13 | `Worker:99`; `Tests/MigrationWriteTests.cs:125-140` | CODE-ONLY (the test asserts the opposite) |
 | **Finishing the import** | | |
 | `isSendWelcomeEmail` `required` (400); true → activation mail for each imported, not active user; no job → `Exception` → 500 "No migration is in progress"; then clear | `Controller:331-354`; `FinishDto:46`; `Resx:195-197`; yaml `finishMigration` (45976-46053), `FinishDto` (94990-95004) | CODE-ONLY |
+| Empty body → 400; `isSendWelcomeEmail: false` without a job → 200 | `Tests/MigrationWriteTests.cs:73-94` | TEST-CONFIRMED |
 | **Downloading the log** | | |
 | 404 "No migration is in progress" without a job | `Controller:289-297`; `Tests/MigrationTests.cs:113-141` (bug trait 81653, asserts 404); `TS/migration.spec.ts` ("BUG 81653") | TEST-CONFIRMED |
+| A failed parse that initialised its logger answers 200 with its (near-empty) log; the test with bug trait 84791 demands 404 — see M12 | `Nextcloud:68` (`MigrationLogger.Init()` before the failure); `Operation:160-166` (`LogName` and `SaveLogAsync` in `finally`); `Controller:293-305`; `Tests/MigrationWriteTests.cs:146-160` | CODE-ONLY (the test asserts the opposite) |
 | `text/plain; charset=UTF-8`, attachment `migration.log`, per-job name, lines `yyyy-MM-ddTHH:mm:ss: msg` + exception message; stored in the `migration_log` module | `Controller:298-305`; `Logger:48-100`; `storage.json:134-141`; yaml `getMigrationLogs` (45902-45975) | CODE-ONLY |
 | **Jobs run in the background** | | |
 | Four integration events published by the Web.Api, subscribed by the Web.Studio host; job authenticates as the caller, tenant culture set | `Core:51-75`; `web/ASC.Web.Studio/Extensions/WebStudioServiceExtensions.cs:98-114`; `Operation:105-112` | CODE-ONLY |
@@ -118,6 +131,9 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 | `appsettings.json:272-274` `"migration": { "enabled": "false" }` | No server code reads the key (string search over `common/`, `web/`, `products/`); it gates nothing. |
 | `nginx:618` routes `/api/2.0/migration` to the Web.Api; `nginx:642-644` also has `location ~* /migration` → `$migration_service_url` (port 5034) | The API block at 618 wins for `api/2.0/migration/*`; the 5034 service is not part of this repository and not part of this feature. |
 | Test names `GetMigrationStatus_*_ReturnsStatusWhenNothingIsRunning` | The assertion is only `StatusCode == 200`; the empty body is not read back (the SDK wraps a null response). |
+| yaml / `Controller:98-100` and `Resx:192-194`: an unknown `migratorName` ends the job with "No such migration provider" | Unreachable: `Operation:92-93` assigns `migrator.OnProgressUpdateAsync` before the null check at `Operation:100`, so the job ends with a null-reference message instead (M11). `Tests/MigrationWriteTests.cs:106-119` asserts only that `error` is not empty. The spec says "a non-empty `error`". |
+| Test name `GetMigrationLogs_JobFailedBeforeWritingLog_ThrowsNotFound` (bug 84791) | The job does initialise and save its log (`Nextcloud:68`, `Operation:160-166`), so the server answers 200; the name describes the expected, not the observed, behaviour (M12). |
+| Test name `ClearMigration_FinishedFailedJob_RemovesTheJob` (bug 84792) | `Worker:99` clears only completed jobs whose `operation` is "migration"; a failed parse stays (M13). |
 
 ## Left out of the spec, and why
 
@@ -144,8 +160,16 @@ backup and a worker that has run. Everything about the jobs themselves is theref
 
 ## Suspected defects
 
+Re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`): `common/ASC.Migration` did not change and
+the controller gained only the `RaisesWebhook` declarations, so M1–M10 are all STILL OPEN; M4 is now observed by a test
+(`Tests/MigrationWriteTests.cs:125-140`, bug 84792 — M13 below is its concrete form). Three new rows came out of the new
+tests.
+
 | # | Where | What the server does | Evidence |
 |---|-------|----------------------|----------|
+| M11 | Parsing the uploaded backup | An unknown `migratorName` does not produce the documented "No such migration provider": `migrator.OnProgressUpdateAsync` is assigned before the null check, so the job ends with the null-reference message as `error`, and `parseResult` stays an empty object whose `operation` is null (which also keeps M13 from matching the job). The same happens to `startMigration` with an empty body. | `Operation:92-100`; `Tests/MigrationWriteTests.cs:106-119` (asserts only non-empty) |
+| M12 | Downloading the log | A parse that failed before doing anything (no upload) still answers 200 with its log, because the migrator initialises the logger before touching the folder and the operation saves the log in `finally`; the test with bug trait 84791 expects 404. | `Nextcloud:68-74`; `Operation:160-166`; `Tests/MigrationWriteTests.cs:146-160` |
+| M13 | Clearing a finished import | `clearMigration` removes only completed jobs whose `operation` is "migration", so a failed parse (an unknown migrator, a wrong archive) stays in the queue until a new parse replaces it; `cancelMigration` matches `operation == "parse"` and therefore skips the unknown-migrator job too (its operation is null). The test with bug trait 84792 expects the failed job to be removed. | `Worker:87, 99`; `Operation:91-93`; `Tests/MigrationWriteTests.cs:125-140` |
 | M1 | Uploading the source backup | The handler answers HTTP 200 for every outcome, including "Access denied." and an upload sent without a prior `Init` (the cached folder path is null, so `Path.Combine` throws and the raw exception message is returned as `Message`). No upload size limit exists; the quota check happens only later in the job. A client that checks the HTTP status instead of `Success` sees nothing wrong. | `Upload:51-108` |
 | M2 | Reading the job state | `getMigrationStatus` swallows every exception from the queue (`catch { }`) and returns the empty result, so a cache/queue outage looks exactly like "no job". | `Controller:135-154` |
 | M3 | Finishing the import | With `isSendWelcomeEmail` true after a parse-only job (or an import that failed before the user step) `ImportedUsers` is null and the loop throws `NullReferenceException` → 500 with an internal message instead of the documented "No migration is in progress". | `Controller:335-352`; `Operation:169` (set only when a migrator ran) |

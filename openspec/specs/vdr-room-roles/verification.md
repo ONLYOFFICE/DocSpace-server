@@ -11,7 +11,7 @@ test, code or live evidence found — flagged).
 Nearly every permission suite of the Files tests creates a *Custom* room (`CreateCustomRoom`), so it is
 evidence for `room-role-permissions`, not for this spec; such rows below are marked "(Custom-room analogue)"
 and count as CODE-ONLY: the role check is the same `FileSecurity` path for every room type, the room type
-only selects the role set (`products/ASC.Files/Core/Core/Security/FileSecurity.cs:217-225`, VDR entry of
+only selects the role set (`products/ASC.Files/Core/Core/Security/FileSecurity.cs:219-227`, VDR entry of
 `AvailableRoomAccesses`: Room manager, Content creator, Editor, Viewer, Form Filler). The theory data
 `03_Rooms/RoomAccessData.cs:57-72, 150-152` (VDR access sets) exists but has no consumer. The message
 "The role is not available for this user type" (`FilesCommonResource.resx:331`) is never asserted. Where
@@ -20,6 +20,12 @@ the Custom-room test is cited, its line range is given for the reader who wants 
 Revision 2026-10-25: first verification; the spec was reshaped at the same time (the three matrices moved
 into the scenarios "VDR room management matrix", "VDR file management matrix", "VDR form workflow matrix";
 no requirement or scenario renamed).
+
+Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): no VDR rule changed and no new VDR test
+appeared; the range touches `FileSecurity.cs` only for the AI rooms section (the role tables moved to
+`:159-263` / `:265-281`) and for the Form filling room PDF branch (`:1305-1318`, the owner exemption of bug
+84849, which applies to Form filling rooms only). `manageFormFilling` (`FileStorageService.cs:5861-5960`) is
+untouched, so D1 and D5 stand. Line references below were refreshed; the spec text is unchanged.
 
 ## Requirement rows
 
@@ -89,7 +95,8 @@ analogue, the live run or the code.
   (`03_Rooms/Templates/RoomFromTemplateTests.cs:76-95`); **settings accepted and ignored on third-party
   rooms** (`03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:154-170`); **history entry on a deny-download
   change** (`02_Folders/History/FolderHistoryRoomSettingsTests.cs:314-332`): `room-types`.
-- **`isformpdf` of an uploaded form** (`01_Files/Forms/IsFormPdfTests.cs:115-128`): `form-filling-workflow`.
+- **`isformpdf` of an uploaded or document-server-converted form** (`01_Files/Forms/IsFormPdfTests.cs:112-168`;
+  the conversion cases run since 4.1.0, the integration host has a document server): `form-filling-workflow`.
 - **Start / stop / resume of filling as a lifecycle** (`manageFormFilling`): `form-filling-workflow`; this
   spec states only who may.
 
@@ -99,5 +106,5 @@ D-numbers are the ones of `openspec/deviations.md`; no new ones.
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D1 | PDF form filling (stop / resume) | `manageFormFilling` checks permissions only for Start and Stop; Resume on a stopped form and Edit on a started form answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run) | OPEN |
-| D5 | Form Filler visibility | A Form Filler who holds no role on a form, or in a room where the form is not configured, cannot see it in the listing but reads it by id (`GET files/file/{id}` 200, presigned URI 200, open-edit 200). | `deviations.md` D5 (live run; `FileSecurity` PDF branch) | OPEN |
+| D1 | PDF form filling (stop / resume) | `manageFormFilling` checks permissions only for Start and Stop; Resume on a stopped form and Edit on a started form answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run); `FileStorageService.cs:5861-5960` (Resume and Edit branches still without a permission demand) | STILL OPEN (2026-11-04: the method is untouched in the range) |
+| D5 | Form Filler visibility | A Form Filler who holds no role on a form, or in a room where the form is not configured, cannot see it in the listing but reads it by id (`GET files/file/{id}` 200, presigned URI 200, open-edit 200). | `deviations.md` D5 (live run; `FileSecurity` PDF branch) | STILL OPEN (2026-11-04: the VDR PDF branch is untouched; the range changed only the Form filling room branch `FileSecurity.cs:1305-1318`) |

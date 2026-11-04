@@ -9,18 +9,27 @@ OpenAPI document, no FFR test), **LIVE-CONFIRMED** (only the live run of 2026-10
 test, code or live evidence found — flagged).
 
 The FFR role set is the Form filling room entry of `AvailableRoomAccesses`
-(`products/ASC.Files/Core/Core/Security/FileSecurity.cs:197-207`: Room manager, Content creator, Form
+(`products/ASC.Files/Core/Core/Security/FileSecurity.cs:199-209`: Room manager, Content creator, Form
 Filler for users; filling and read for links). The "only PDF" rule and its message ("The file cannot be
 uploaded to this room. Please try to upload the ONLYOFFICE PDF form.", `FilesCommonResource.resx:433`) are
 in the file DAO and the copy permission check (`deviations.md` D13 evidence); no test asserts the text.
-Tests that produce *results* ("In process" / "Complete") need a filling session through the document
-server, which the integration host does not have, so every result-folder row is CODE-ONLY or
-LIVE-CONFIRMED. Custom-room analogues of a role rule are marked as such and count as CODE-ONLY.
+Tests that produce *results* ("In process" / "Complete") need a filling session through the editor, which
+no integration test drives, so every result-folder row is CODE-ONLY or LIVE-CONFIRMED (the integration host
+has a document server since 4.1.0 — the spreadsheet report and `isformpdf` conversions run — but no test
+fills a form). Custom-room analogues of a role rule are marked as such and count as CODE-ONLY.
 
 Revision 2026-10-25: first verification; the spec was reshaped at the same time (the three matrices moved
 into the scenarios "Form filling room management matrix", "Form filling room file matrix", "Form lifecycle
 matrix"; the prose about editing a started form became the scenario "Content creator edits a started
 form"; no requirement or scenario renamed).
+
+Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): bug 84849 (commit `0fa0ac3f4c`) changed
+the Form filling room PDF branch of `FileSecurity.cs:1305-1318` — the check that hides a not-started form
+from a Form Filler now skips the room's owner, whose access record can be a link's or a group's — and
+brought `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs`; the scenario "Room owner keeps a
+not-started form whatever record decides their access" was added and "Form Filler does not see a form that
+is not started" got the 403-by-id bullet. The spreadsheet report tests are no longer skipped. The role set
+moved from `FileSecurity.cs:197-207` to `:199-209`. D1, D6, D8 and D13 are unchanged.
 
 ## Requirement rows
 
@@ -63,14 +72,16 @@ form"; no requirement or scenario renamed).
 | Content creator cancels own: a form they created and started; a form they started on the owner's upload (bug 81470) | `ManageFormFillingPermissionsTests.cs:88-126` | TEST-CONFIRMED |
 | Room manager cancels the owner's collection | `ManageFormFillingPermissionsTests.cs:57-72` (the manager stops a form the manager started); the owner's form: `yaml` `manageFormFilling` (13046) | CODE-ONLY |
 | Form Filler cannot start or cancel | `yaml` `manageFormFilling` (13046): Content creator and above | CODE-ONLY |
-| Form Filler sees started forms, not not-started ones | submissions read `FormSubmissionsPermissionsTests.cs:47-65`; the VDR analogue `04_Security/RoomShareTests.cs:1058-1066`; `deviations.md` D6 ("hidden from them in the listing and 404 by id") | LIVE-CONFIRMED |
+| Form Filler sees started forms, not not-started ones; `getFileInfo` of a not-started form → 403 for a Form Filler member | `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:120-137` (403 by id); submissions read `FormSubmissionsPermissionsTests.cs:47-65`; the VDR analogue `04_Security/RoomShareTests.cs:1058-1066`; `deviations.md` D6 (listing) | TEST-CONFIRMED (by id) / LIVE-CONFIRMED (listing) |
+| Room owner keeps a not-started form whatever record decides their access (link token on the request; owner in a Form Filler group; a Room admin owner): `security.delete` true | `03_Rooms/FormFilling/FormFillingRoomOwnerAccessTests.cs:55-114` [Bug 84849]; `FileSecurity.cs:1305-1318` (`HasFullAccessAsync` exemption), `:3900-3925` | TEST-CONFIRMED |
 | Results folders: every role sees them; Content creator and Form Filler see and delete only own results | `deviations.md` matrix row "A Form Filler does not … delete 'Complete' forms / deletes own results in both folders (delete: code only)" | LIVE-CONFIRMED |
-| Results folder exists after the first spreadsheet run | `FormXlsxTests.cs:97-98` (`resultsFolderId` > 0) | TEST-CONFIRMED |
+| Results folder exists after the first spreadsheet run; the report completes and `resultFileId` resolves to the form | `FormXlsxTests.cs:52-114` (`resultsFolderId` > 0 at `:64-65`; no longer skipped since the host runs a document server) | TEST-CONFIRMED |
 
-Counts: 35 rows — TEST-CONFIRMED 17 (2 owner-only), CODE-ONLY 9, LIVE-CONFIRMED 8, MATRIX-ONLY 1 (the
+Counts: 36 rows — TEST-CONFIRMED 19 (2 owner-only), CODE-ONLY 9, LIVE-CONFIRMED 7, MATRIX-ONLY 1 (the
 "Form Filler does not see comments" row — editor-side, not observable through the API). Spec: 5
-requirements, 23 scenarios (before the reshaping: 5 requirements, 19 scenarios). Flag: no FFR test refuses a
-Form Filler a start / cancel, a create or a rename; no test produces a result in "In process" / "Complete".
+requirements, 24 scenarios (before the reshaping: 5 requirements, 19 scenarios; 23 before revision
+2026-11-04). Flag: no FFR test refuses a Form Filler a start / cancel, a create or a rename; no test produces
+a result in "In process" / "Complete".
 
 ## Where the server differs from the product matrix (spec follows the server)
 
@@ -104,7 +115,7 @@ D-numbers are the ones of `openspec/deviations.md`; no new ones.
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D1 | Form collection lifecycle | `manageFormFilling` checks permissions only for Start and Stop; Resume and Edit answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run) | OPEN |
-| D6 | PDF forms by role | A Form Filler copies a not-started form, hidden from them in the listing and 404 by id, to My documents through the copy operation (200, copied). | `deviations.md` D6 (live run) | OPEN |
-| D8 | Only PDF files enter | A docx uploaded or created in an FFR answers 500 with the "cannot be uploaded to this room" message; the copy of the same docx answers 403. | `deviations.md` D8 (live run); the 403 of copy / move `FileCopyTests.cs:219-245`, `FileMoveRoomTypeTests.cs:113-136` | OPEN |
-| D13 | Only PDF files enter | The rule is enforced by extension only, so an ordinary PDF enters the room and is auto-started on move; the form-signature check exists only in the advisory destination check. | `deviations.md` D13 (live run) | OPEN |
+| D1 | Form collection lifecycle | `manageFormFilling` checks permissions only for Start and Stop; Resume and Edit answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run); `FileStorageService.cs:5861-5960` | STILL OPEN (2026-11-04: the method is untouched in the range) |
+| D6 | PDF forms by role | A Form Filler copies a not-started form, hidden from them in the listing and 403/404 by id, to My documents through the copy operation (200, copied). | `deviations.md` D6 (live run); the by-id refusal is now asserted as 403 (`FormFillingRoomOwnerAccessTests.cs:120-137`) | STILL OPEN (2026-11-04: the copy path `CopyPermissionsCheck.cs` changed only for the AI rooms section) |
+| D8 | Only PDF files enter | A docx uploaded or created in an FFR answers 500 with the "cannot be uploaded to this room" message; the copy of the same docx answers 403. | `deviations.md` D8 (live run); the 403 of copy / move `FileCopyTests.cs:219-245`, `FileMoveRoomTypeTests.cs:113-136`; `products/ASC.Files/Server/Api/UploadController.cs` still documents the 500 ("a file that is not a PDF is stored in a form-filling room"); `FileDao.cs:774-814` throws a plain exception | STILL OPEN (2026-11-04: the upload fix of the range covers a multipart request without the file part, not this) |
+| D13 | Only PDF files enter | The rule is enforced by extension only, so an ordinary PDF enters the room and is auto-started on move; the form-signature check exists only in the advisory destination check. | `deviations.md` D13 (live run); `FileDao.cs:774-814` (`file.IsPdf`) | STILL OPEN (2026-11-04: untouched in the range) |

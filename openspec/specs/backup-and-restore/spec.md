@@ -18,7 +18,8 @@ the restore itself, on a standalone test stack where no tariff limit applies), t
 restore), the wallet tests of `web/ASC.Web.Api.Tests/Tests/04_Portal/Payments`, the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations are named by their `operationId`), the
 product code of the backup service and its worker, and the product release notes (v2.5, v3.5, v3.6,
-v3.7, v4.0). The hosted-only rules (402 refusals, the free allowance, the paid service, the restore
+v3.7, v4.0); revised after the merge of release/v4.1.0, which changed only the restore of the
+webhook journal, the application settings and the AI room tables. The hosted-only rules (402 refusals, the free allowance, the paid service, the restore
 itself) are confirmed from the code; the evidence for every scenario, the places where the release
 notes or the OpenAPI document and the server disagree, and the suspected defects are listed in
 `verification.md` next to this file. HTTP status codes are stated as the code produces them.
@@ -321,15 +322,26 @@ portal from the queue, running or finished, and answer true, or false when the q
 ### Requirement: Contents of a portal archive
 
 A portal archive SHALL hold the rows of the portal from every table declared by a backup module
-(tenants, audit, files, web studio settings, core users and groups, identity, AI) and the files of
-the allowed storage modules (documents, logos, white label, room logos, web plugins, MCP icons).
-It SHALL leave out thumbnails, earlier archives stored in Documents, and tables tied to the source
-installation or transient (short links, account links, tariff rows, notify and event queues).
+(tenants, audit, files, portal and application settings, webhooks and their journal, core users
+and groups, identity, AI) and the files of the allowed storage modules (documents, logos, white
+label, room logos, web plugins, MCP icons). It SHALL leave out thumbnails, earlier archives stored
+in Documents, and tables tied to the source installation or transient (short links, account links,
+tariff rows, notify and event queues).
 
 #### Scenario: Every tenant table is accounted for
 
 - **WHEN** the tables with a tenant column of the schema are compared with the declared ones
 - **THEN** each is either declared, intentionally skipped with a reason, or listed as a known gap
+
+#### Scenario: Application settings are restored
+
+- **WHEN** the portal had switched an application (for example the AI rooms) off and saved its settings document
+- **THEN** the restored portal carries the same application id, switch state, settings and last-modified time under its new tenant (bug 84721)
+
+#### Scenario: AI room links and skills follow their folders and files
+
+- **WHEN** an Instructions or Knowledge room linked to an AI project, or a skill file of an Instructions room, is restored
+- **THEN** the link points at the new ids of the project and the room, and the skill row at the new id of its file, its name and description copied as they were
 
 #### Scenario: Earlier backups are not backed up again
 
@@ -733,6 +745,42 @@ on failure the original portal is active again.
 
 - **WHEN** an archive of a whole server is restored on a hosted portal, or a portal archive is restored with `dump: true`
 - **THEN** the job fails with the invalid-backup message
+
+### Requirement: Webhook journal after a restore
+
+A restore SHALL bring the webhook subscriptions and their delivery journal back under their new ids,
+dates untouched, and SHALL NOT send a delivery again: a record waiting for an attempt loses its
+schedule, a never-attempted one notes that the portal was restored, an attempted one keeps the
+receiver's last answer. A retry whose original was not restored and the records of a subscription
+whose creator cannot be mapped are dropped; a record caused by a removed member is kept without the
+member.
+
+#### Scenario: Event waiting for its first attempt when the backup was taken
+
+- **WHEN** the archive holds a delivery record with no attempt and a next attempt scheduled
+- **THEN** the restored record has no next attempt, no sender lease and the "Not sent" note as its response
+- **AND** a record with attempts and no answer, or a failed attempt waiting for its retry, loses the schedule and keeps its last answer or none
+
+#### Scenario: Retry record without its original
+
+- **WHEN** a manual retry record points at an original record that is not in the archive
+- **THEN** the retry is dropped, while a retry whose original was restored points at the original's new id
+- **AND** originals are loaded before their retries whatever order the archive holds them in
+
+#### Scenario: Subscription of a removed member
+
+- **WHEN** the member who created a subscription no longer exists on the restored portal
+- **THEN** the subscription and its delivery records are dropped; a subscription last edited by a removed member is kept with the editor blanked, and a delivery caused by a removed member is kept with the empty user
+
+#### Scenario: Server-wide dump
+
+- **WHEN** a server-wide archive is restored
+- **THEN** the journal is loaded statement by statement, each committed together with the clearing of its schedule, so that no restored delivery is ever picked up by a running sender; an archive of a version without a delivery schedule loads as it is
+
+#### Scenario: Portal moved to another region
+
+- **WHEN** a portal is transferred rather than restored
+- **THEN** a delivery waiting for its next attempt keeps its schedule and resumes on the target, while one a sender was delivering at the moment of the move is not sent again and notes "Not sent again: the event was being delivered when the portal was moved to another region, and may have arrived"
 
 ### Requirement: Download link of a backup
 

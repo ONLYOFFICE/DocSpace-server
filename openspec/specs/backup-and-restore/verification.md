@@ -20,6 +20,16 @@ integration suite `common/Tests/ASC.Data.Backup.Tests` (74 test files; `ASC.Test
 its worker in the `integration-test` profile of `common/ASC.AppHost/Program.cs:86-89`) and fixed bugs 84509, 84510,
 84511, 84512, 84513 and 80605, the archive naming of back-to-back backups and the concurrency of `deleteBackup`.
 
+Revised again after the merge of `release/v4.1.0` (`3533ad8a89`, previous state `183da52625`). That range left the
+backup service, its controller, the worker services, the storages, the scheduler and cleaner, the upload handler and
+the integration suite untouched (`git diff --stat d58816bece..3533ad8a89 -- common/services/ASC.Data.Backup
+common/Tests/ASC.Data.Backup.Tests` is empty); it changed only the restore side of `common/ASC.Data.Backup.Core/Tasks`:
+the webhook journal (`WebStudioModuleSpecifics.cs`, `RestoreDbModuleTask.cs`, `RestorePortalTask.cs`, `ColumnMapper.cs`,
+commits `7f34874ca4` and the `feature/webhook-sdk` series), the `app_settings` table (bug 84721, `9e696831d5`) and the
+two AI-room tables (`FilesModuleSpecifics.cs`), with three new unit-test classes in `common/Tests/ASC.Data.Backup.Core.Tests`
+(`WebStudioModuleSpecificsTests.cs`, `RestoreDbModuleTaskParentsFirstTests.cs`, `RestorePortalTaskDumpStatementsTests.cs`).
+The yaml was not regenerated in this range either.
+
 What the suite can and cannot show: it runs on the Aspire `integration-test` profile, which is a **standalone**
 installation (`APP_HOSTING_STANDALONE=true` in `common/ASC.AppHost/Properties/launchSettings.json`), so the free
 allowance, the 402 refusals, the paid service and the `restore` tariff feature are never exercised; those rows stay
@@ -82,9 +92,21 @@ cases skip without `NEXTCLOUD_*` / `S3_*` in the environment (`Tests/Start/Start
 | Cancel before the worker registered the job: true while the job runs to the end, or false with the job completing | `Tests/Cancel/CancelBackupValuesTests.cs:97-131, 176-223`; `Tests/Start/StartBackupLifecycleValuesTests.cs:186-225`; `Tests/BackupTestBase.cs:182-236` (measured: 107/107 effective when seen Running, 2/16 when seen Created) | TEST-CONFIRMED (as an allowed race) |
 | **Contents of a portal archive** | | |
 | Declared modules: Tenants, Audit, AiProviders, Files, Files2, WebStudio, Core, Identity, Ai, AiIntegration; storage modules allowed list (files, logo, whitelabel, customnavigation, room_logos, webplugins, mcp_icons and legacy names) | `common/ASC.Data.Backup.Core/Tasks/Modules/ModuleProvider.cs:39-51`; `common/ASC.Data.Backup.Core/Tasks/PortalTaskBase.cs:121-151`; `.claude/rules/backup-tables.md` | CODE-ONLY |
+| WebStudio module declares `app_settings` (with `last_modified` as a date column, bug 84721), `webhooks_config` (`created_by`, `modified_by` user columns) and `webhooks_logs` (`retried_by`, `uid`; relations `config_id` → config and the self relation `retry_of` → logs) | `common/ASC.Data.Backup.Core/Tasks/Modules/WebStudioModuleSpecifics.cs:49-61`; `common/Tests/ASC.Data.Backup.Core.Tests/WebStudioModuleSpecificsTests.cs:393-429` (`app_settings` row keeps id, state, settings and time, tenant remapped), `361-373` (both webhook tables declare no date columns) | TEST-CONFIRMED |
+| Files module declares `files_ai_project_room` (`project_id`, `room_id` → folders) and `files_skill` (`file_id` → files) | `common/ASC.Data.Backup.Core/Tasks/Modules/FilesModuleSpecifics.cs:77-78, 153-156`; `common/Tests/ASC.Data.Backup.Core.Tests/FilesModuleSpecificsTests.cs:278-331` | TEST-CONFIRMED |
 | Thumbnails and earlier Documents archives excluded; stored quota rows corrected by their size | `BackupPortalTask.cs:534-545, 684-757` | CODE-ONLY |
-| Every tenant table is declared, intentionally skipped (short_links, account_links, backup_backup, tariff rows, notify/event queues, instance registration, …) or a known gap | `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:65-167` | TEST-CONFIRMED |
-| Rows are remapped to the new tenant, folder, user and provider ids on restore (files_security, files_group, files_roomgroup, files_order, metadata tables) | `common/Tests/ASC.Data.Backup.Core.Tests/FilesModuleSpecificsTests.cs:93-369` | TEST-CONFIRMED |
+| Every tenant table is declared, intentionally skipped (short_links, account_links, backup_backup, tariff rows, notify/event queues, instance registration, …) or a known gap (`app_settings` left the skipped list in this range) | `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:65-166` | TEST-CONFIRMED |
+| Rows are remapped to the new tenant, folder, user and provider ids on restore (files_security, files_group, files_roomgroup, files_order, metadata tables) | `common/Tests/ASC.Data.Backup.Core.Tests/FilesModuleSpecificsTests.cs:93-425` | TEST-CONFIRMED |
+| **Webhook journal after a restore** | | |
+| Config and log rows remapped (tenant, config, `retry_of`, `retried_by`); an original record with empty retry columns kept | `WebStudioModuleSpecifics.cs:268-291` (`TryPrepareValue` for `config_id`/`retry_of`); `WebStudioModuleSpecificsTests.cs:74-120` | TEST-CONFIRMED |
+| Retry of an unmapped original dropped; records of an unmapped subscription dropped | `WebStudioModuleSpecifics.cs:268-291`; `WebStudioModuleSpecificsTests.cs:122-160` | TEST-CONFIRMED |
+| Restore: `next_attempt_on` and `lease_id` cleared; never-attempted row gets `RestoredFromBackupNote` ("Not sent: the portal was restored from a backup taken before the event was delivered"); attempted rows keep their answer or none | `WebStudioModuleSpecifics.cs:82-116`; `common/ASC.Webhooks.Core/DbWorker.cs:859-860`; `WebStudioModuleSpecificsTests.cs:216-264` | TEST-CONFIRMED |
+| Transfer: a pending, unleased retry keeps its schedule; a leased (in-flight) row is unscheduled with `MovedInFlightNote`, an in-flight retry keeps the last answer | `ColumnMapper.cs:42-46` (`PortalTransfer`); `TransferPortalTask.cs:74`; `WebStudioModuleSpecifics.cs:91-105`; `DbWorker.cs:866-867`; `WebStudioModuleSpecificsTests.cs:162-214` | TEST-CONFIRMED |
+| Removed users: `modified_by` of a config and `retried_by`/`uid` of a log are blanked (`uid` to the empty user) instead of dropping the row; a config whose `created_by` is unmapped is dropped; the empty user passes | `WebStudioModuleSpecifics.cs:209-241` (`_auditUserColumns`, `TryPrepareValue`); `WebStudioModuleSpecificsTests.cs:282-359` | TEST-CONFIRMED |
+| Archive of the previous version (no `attempts` column): unsent rows get `PreviousVersionNote` | `WebStudioModuleSpecifics.cs:109-115`; `DbWorker.cs:820-821` | CODE-ONLY |
+| Rows of a self-referencing table are inserted parents first, streamed; a row whose parent is absent or whose archive lacks the column is a root | `RestoreDbModuleTask.cs:256-304` (`ParentsFirst`); `common/Tests/ASC.Data.Backup.Core.Tests/RestoreDbModuleTaskParentsFirstTests.cs:63-174` | TEST-CONFIRMED |
+| Dump restore: `webhooks_logs` data loaded one statement per transaction together with the schedule-clearing update (retried up to 5 times on a lock), a final pass clears leases; a dump without the schedule columns is loaded as it is | `RestorePortalTask.cs:213-215, 232-413`; statement splitting: `common/Tests/ASC.Data.Backup.Core.Tests/RestorePortalTaskDumpStatementsTests.cs:232-261` | TEST-CONFIRMED (splitting) / CODE-ONLY (the transaction per statement) |
+| An empty date of an archive stays empty instead of being mapped to now | `ColumnMapper.cs:62-68` | CODE-ONLY |
 | **Backup history** | | |
 | Lists records whose archive exists; prunes records whose archive is gone; unreachable storage neither listed nor pruned | `BackupService.cs:208-233`; `common/ASC.Data.Backup.Core/Storage/BackupStorageFactory.cs:45-59` | CODE-ONLY |
 | Fields: `id` = taskId, `fileName` non-empty, `storageType`, `createdOn` UTC without a zone designator and recent, `expiresOn` after `createdOn` for DataStore; empty list with `count` 0 on a fresh portal; one more record per backup; order unspecified | `BackupProgressItem.cs:237-253`; `common/services/ASC.Data.Backup/ApiModels/BackupHistoryRecordDto.cs`; `Tests/History/BackupHistoryTests.cs:44-95`; `Tests/History/GetBackupHistoryValuesTests.cs:44-77` | TEST-CONFIRMED |
@@ -160,11 +182,12 @@ cases skip without `NEXTCLOUD_*` / `S3_*` in the environment (`Tests/Start/Start
 | Wallet service `backup` is priced and listed | `web/ASC.Web.Api.Tests/Tests/04_Portal/Payments/PaymentWalletServiceTests.cs:67-82`; `PaymentWalletServicesTests.cs:63-79` | TEST-CONFIRMED |
 | Features marked for DocSpace admins are dropped for a User | `quotas` spec, `04_Portal/Payments/PaymentQuotaInformationTests.cs:86-156` | TEST-CONFIRMED |
 
-Counts: 92 rows, classified by the leading status of the cell — TEST-CONFIRMED 52 (five of them keep a CODE-ONLY
-branch named in the status), CODE-ONLY 38 (two of them with a TEST-CONFIRMED standalone branch, one with the
+Counts: 103 rows, classified by the leading status of the cell — TEST-CONFIRMED 61 (six of them keep a CODE-ONLY
+branch named in the status), CODE-ONLY 40 (two of them with a TEST-CONFIRMED standalone branch, one with the
 NOTES-ONLY "which plan has `restore`" branch), NOTES-ONLY 2 (the per-plan values of `countFreeBackup` and the
-Business-only third-party targets). Before the merge: 57 rows — TEST-CONFIRMED 4, CODE-ONLY 50, NOTES-ONLY 3. Spec:
-29 requirements, 99 scenarios (was 24 / 64).
+Business-only third-party targets). After the hotfix/v4.0.1 merge: 92 rows — TEST-CONFIRMED 52, CODE-ONLY 38,
+NOTES-ONLY 2; before it: 57 rows — TEST-CONFIRMED 4, CODE-ONLY 50, NOTES-ONLY 3. Spec: 30 requirements, 106 scenarios
+(was 29 / 99, before that 24 / 64).
 
 ## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
 
@@ -213,7 +236,11 @@ Business-only third-party targets). Before the merge: 57 rows — TEST-CONFIRMED
 
 ## Suspected defects
 
-Re-checked against `183da52625`. Verdict per row: **FIXED** (commit), **STILL OPEN**, **REFUTED**.
+Re-checked against `183da52625`, and again against `3533ad8a89` (release/v4.1.0): none of the files behind B1–B16
+changed in that range (`BackupService.cs`, `BackupController.cs`, `BackupRepository.cs`, `BackupWorker.cs`,
+`BackupProgressItem.cs`, `BackupSchedulerService.cs`, `BackupFileUploadHandler.cs`, `CountFreeBackupFeature.cs`,
+`TenantStatusFilter.cs`, the integration tests), so every verdict below stands as written; B1 is still FIXED and
+the yaml still says 500 for it. Verdict per row: **FIXED** (commit), **STILL OPEN**, **REFUTED**.
 
 | # | Where | What the server does | Evidence | Verdict |
 |---|-------|----------------------|----------|---------|
@@ -232,4 +259,6 @@ Re-checked against `183da52625`. Verdict per row: **FIXED** (commit), **STILL OP
 | B13 | `startBackup` vs `createBackupSchedule` | The schedule now refuses a storage no backup can be written to (`storageType` outside the known values, `CustomCloud`, `ThirdPartyConsumer` without a known `module`) with 400, but `startBackup` still accepts the same bodies with 200 and lets the job fail in the worker; the caller learns of the mistake only through `getBackupProgress.error`, and the failed job occupies the portal's single queue slot until the next start or cancel. | `BackupService.cs:602-624` (schedule only); `BackupController.cs:313-346`; `Tests/Start/StartBackupJobFailsValidationTests.cs:46-76` | NEW |
 | B14 | `cancelBackup` right after `startBackup` | A cancel that arrives before the worker has registered the job answers true (the queue still holds the Created job) while the job then runs to the end and is archived; `true` therefore does not mean the backup was stopped. The tests document it as a race the API allows (effective in 2 of 16 attempts on a Created job, 107 of 107 on a Running one). | `BackupWorker.cs:172-184`; `Tests/BackupTestBase.cs:182-236`; `Tests/Start/StartBackupLifecycleValuesTests.cs:198-222`; `Tests/Cancel/CancelBackupValuesTests.cs:176-223` | NEW |
 | B15 | `cancelBackup` after the job finished | A finished job stays in the queue, so a later `cancelBackup` answers true and only drops the finished entry; a client that treats true as "a running backup was stopped" is misled, and the only way to tell is a `getBackupProgress` before the cancel. | `Tests/Cancel/CancelBackupValuesTests.cs:66-95`; `BackupController.cs:389-397` describes it as "drops the job … which cancels it if it is still running" | NEW (documented behaviour, surprising contract) |
-| B16 | `getBackupProgress` | For a moment a poll can show `isCompleted` true with `status` still Running and `progress` 100: the two fields are published separately, so a client polling `isCompleted` alone can read the job as done before its final status (and, for a failed job, before `error`) is visible. | `BackupProgressItem.cs:255-272` (`Percentage`, `IsCompleted`, then `PublishChanges`); `Tests/Progress/GetBackupProgressValuesTests.cs:113-127` (noted as a transient observation); `Tests/BackupTestBase.cs:52-60` works around it | NEW |
+| B16 | `getBackupProgress` | For a moment a poll can show `isCompleted` true with `status` still Running and `progress` 100: the two fields are published separately, so a client polling `isCompleted` alone can read the job as done before its final status (and, for a failed job, before `error`) is visible. | `BackupProgressItem.cs:255-272` (`Percentage`, `IsCompleted`, then `PublishChanges`); `Tests/Progress/GetBackupProgressValuesTests.cs:113-127` (noted as a transient observation); `Tests/BackupTestBase.cs:52-60` works around it | STILL OPEN (was NEW) |
+| B17 | Webhook journal of a portal restore | A delivery record with attempts but no answer (every attempt timed out) is restored unscheduled with an empty response, so the journal shows neither a result nor a reason why the retries stopped; only a never-attempted row gets the "Not sent" note, and the dump path writes the note only for `attempts = 0` as well. A reader of the restored journal cannot tell such a row from one whose receiver answered with an empty body. | `WebStudioModuleSpecifics.cs:100-106` (`WasAttempted` guard); `RestorePortalTask.cs:376-379` (`attempts = 0`); `WebStudioModuleSpecificsTests.cs:233-247` pins it | NEW (2026-11-04) |
+| B18 | Dump restore of the webhook journal | A statement that keeps failing after five attempts is skipped with a log line and the restore goes on, so a dump restore can silently lose part of the journal while reporting success; the per-table skip of `RunMysqlFile` is cited as the precedent. | `RestorePortalTask.cs:314-327` | NEW (2026-11-04) |

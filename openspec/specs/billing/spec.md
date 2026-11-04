@@ -8,7 +8,8 @@ once the payment has lapsed, the payment settings and catalogue a client needs t
 (`settings/payment`, `portal/payment/prices`, `currencies`, `quotas`, `walletservices`), the purchase and
 change of a subscription through the hosted checkout (`portal/payment/url`, `update`, `account`,
 `checkoutsetupurl`, `customerinfo`), the sales request, the portal wallet of a hosted portal (balance,
-top-up, automatic top-up, low balance, movements, usage and reports), the wallet services switched on per
+top-up, automatic top-up, low balance, movements, the top-up history with its invoices, usage and
+reports), the wallet services switched on per
 portal and bought from the wallet (storage, backup, AI tools, AI search, administrators, Docs Connect), the
 spending limits on the AI services, the AI prices and model restrictions, and who may see or change any of
 it. The storage and count limits of a tariff and the refusals they cause are in `quotas` and only referred
@@ -19,10 +20,11 @@ portals.
 
 Sources: the integration tests of `web/ASC.Web.Api.Tests` (`04_Portal/Payments`, `04_Portal/Quota`,
 `02_Settings/Common`) and the TypeScript suite they were ported from, the unit tests of
-`common/Tests/ASC.Core.Common.Tests` (prices, service limits), the OpenAPI contract
+`common/Tests/ASC.Core.Common.Tests` (prices, service limits, top-ups, invoice links), the OpenAPI contract
 `sdk/docspace-api-spec/docspace-backend.yaml` (operations named by `operationId`), the product code of the
 payment controller, the tariff service, the accounting client and the wallet job where the tests stop, the
-runtime configuration, and the release notes (v1.1, v3.1, v3.2, v3.5, v3.6, v3.7, v4.0). The integration
+runtime configuration, and the release notes (v1.1, v3.1, v3.2, v3.5, v3.6, v3.7, v4.0; v4.1 has none, so its
+changes come from the code and the tests alone). The integration
 host has no billing service, so every operation that needs one answers 403 there and only its
 authentication guard and request validation are test-confirmed; the evidence per scenario, the differences
 and the suspected defects are in `verification.md` next to this file.
@@ -137,6 +139,11 @@ installation with a licence path. During the grace period no gate applies.
 
 - **WHEN** a portal is in the grace period and the owner creates a room
 - **THEN** the system answers 402 "Your pricing plan does not support this option" (the count limits of `quotas`), while every other call is answered
+
+#### Scenario: No request header opens the gate
+
+- **WHEN** a request to a NotPaid portal carries a `Payment-Info` header, whatever its value
+- **THEN** the gate answers 402 as for any other request; only the operations allowed without payment pass
 
 ### Requirement: Payment settings
 
@@ -481,9 +488,10 @@ has a money threshold (`amountValue`, 0 to 10000) and/or a count threshold (`qua
 ### Requirement: Managing the AI spending limits
 
 The operations under `portal/payment/servicelimit` SHALL need the billing service (403), a DocSpace admin
-and a billing customer (404). Reads: one limit by `id`, the portal limit with its spending, the global
-limit, a page of the limits in force per user; a missing portal or global limit answers 200 empty. Writes also need the portal-settings right: create (409 when the scope or user has one), update,
-set one personal limit for up to 1000 `userIds`, disable all personal limits, delete.
+and a billing customer (404; a write also when the accounting service does not know the portal). Reads:
+one limit by `id`, the portal limit with its spending, the global limit, a page per user; a missing
+limit answers empty. Writes also need the portal-settings right: create (`scope` required; 409 for a
+duplicate), update, set one personal limit for up to 1000 `userIds`, disable all, delete.
 
 #### Scenario: Create a personal limit
 
@@ -494,6 +502,16 @@ set one personal limit for up to 1000 `userIds`, disable all personal limits, de
 
 - **WHEN** neither `amountValue` nor `quantityValue` is given, scope `Custom` lacks `userId`, another scope carries one, or `userId` is a system or unknown account
 - **THEN** the system answers 400 for the body faults and 404 for the account
+
+#### Scenario: Scope left out
+
+- **WHEN** the body of the create call has `amountValue` and `period` but no `scope`
+- **THEN** the system answers 400 naming `Scope` before the configuration check, instead of treating the limit as a portal-wide one
+
+#### Scenario: Wallet never topped up
+
+- **WHEN** a DocSpace admin of a billing customer whose wallet the accounting service does not know yet creates a limit, sets personal limits or disables them
+- **THEN** the system answers 404 "Customer could not be found", as for a portal without billing, while the reads answer as if no limit existed
 
 #### Scenario: Limit of another portal
 
@@ -541,6 +559,11 @@ name not sold), `startDate`/`endDate` in the portal time zone, `participantName`
 - **WHEN** `participantName` names nobody
 - **THEN** the system answers 200 with an empty `collection`
 
+#### Scenario: Period without a start
+
+- **WHEN** `getCustomerOperations`, `getCustomerServiceUsage`, `getCustomerMonthlyUsage` or `getCustomerDeposits` is called without `startDate`
+- **THEN** the period starts at the portal's creation moment taken as UTC, not shifted by the portal time zone, and ends now
+
 #### Scenario: Usage per service
 
 - **WHEN** the owner calls `getCustomerServiceUsage`, or a DocSpace admin with `serviceName` `ai-search`
@@ -551,6 +574,35 @@ name not sold), `startDate`/`endDate` in the portal time zone, `participantName`
 - **WHEN** the owner or a DocSpace admin calls `createCustomerOperationsReport` for `ai-tools`, `backup` or `disk-storage-1-hour` and polls `getCustomerOperationsReport`
 - **THEN** the task id starts with `DocumentBuilderTask_`, `isCompleted` turns true with `percentage` 100, an empty `error`, a `resultFileId` and a `resultFileUrl` of a document in My documents
 - **AND** a Room admin, a User and a Guest get 403 "Access denied" on create, get and terminate, an anonymous caller 401
+
+### Requirement: Wallet top-ups and their invoices
+
+`getCustomerDeposits` SHALL page the payments into the wallet for a DocSpace admin (403 otherwise and
+without billing, 401 anonymous), filtered by `startDate`/`endDate` and `status`, with `offset` of 0 or more
+and `limit` 1–100 (400 otherwise) echoed with the totals; each entry has `id`, `date`, `amount`, `currency`,
+`status`, `hasInvoice`. A portal without a customer or a readable wallet gets an empty result.
+`getDepositInvoice` SHALL answer the invoice page address of one top-up by `id`.
+
+#### Scenario: Portal that never topped up
+
+- **WHEN** the owner of a portal that is a billing customer but never paid into the wallet calls `getCustomerDeposits`
+- **THEN** the system answers 200 with an empty result
+
+#### Scenario: Invoice of a card payment
+
+- **WHEN** a DocSpace admin calls `getDepositInvoice` with the `id` of a top-up listed with `hasInvoice` true
+- **THEN** the system answers 200 with the absolute address of the billing provider's invoice page, asked for anew on every call
+
+#### Scenario: Top-up without an invoice
+
+- **WHEN** the `id` names a top-up listed with `hasInvoice` false, a top-up of another portal, or the portal is not a customer
+- **THEN** the system answers 404; when the accounting or billing service fails or does not answer, 402, so the client can retry
+
+#### Scenario: Paging window of the top-up list
+
+- **WHEN** `offset` is negative or `limit` is 0 or above 100
+- **THEN** the system answers 400 naming the field, even on an installation without a billing service
+- **AND** a period in which nothing was paid answers the requested `offset` and `limit` with an empty `collection`
 
 ### Requirement: Accounting price list of a wallet service
 

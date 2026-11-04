@@ -15,7 +15,7 @@ unblocking and removal of a portal behind the retention letters are other capabi
 `portal-lifecycle`) and are referenced only.
 
 Sources: the integration tests of `web/ASC.Web.Api.Tests` (`02_Settings/Notifications`,
-`02_Settings/Messages`, `05_Security/Smtp`), `products/ASC.Files/Tests` (`03_Rooms/NewItems`),
+`02_Settings/Messages`, `02_Settings/Telegram`, `05_Security/Smtp`), `products/ASC.Files/Tests` (`03_Rooms/NewItems`),
 the letter suite `common/Tests/ASC.Notify.Tests` (subjects, wording, schedule predicates,
 recipients), the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations named
 by `operationId`), the product code of the notify sources and the notify service, and the release
@@ -111,8 +111,8 @@ Badges off SHALL hide the new-item counters of the Files responses. Room activit
 stop the hourly room digest and the letters and pushes a room or a document sends at once
 (sharing, mention, room invitation, role change, archive, new document, upload, folder, room
 deleted). Daily feed off SHALL stop the daily digest. Useful tips off SHALL stop only the
-after-registration marketing letters. A muted room SHALL be left out of the at-once letters,
-pushes and mentions for that member.
+after-registration marketing letters. A muted room (an AI room as well) SHALL be left out of the
+at-once letters, pushes and mentions for that member.
 
 #### Scenario: Room activity switched off
 
@@ -146,11 +146,18 @@ nothing was linked. The bot keys are offered to the admin on every tariff, the f
 
 - **WHEN** a member calls `linkTelegram` on a portal whose Telegram keys are empty
 - **THEN** the system answers 200 with an empty link and `checkTelegram` never reaches status 1
+- **AND** before any link request `checkTelegram` answers status 0 with an empty `username`
 
 #### Scenario: Unlink without a link
 
-- **WHEN** a member who never linked Telegram calls `unlinkTelegram`
-- **THEN** the system answers 200 with `true`
+- **WHEN** a member who never linked Telegram calls `unlinkTelegram`, once or twice
+- **THEN** every call answers 200 with `true`
+
+#### Scenario: Who may use the Telegram operations
+
+- **WHEN** a User or a Guest calls `checkTelegram`
+- **THEN** the system answers 200 with their own status
+- **AND** an anonymous caller gets 401 on `checkTelegram`, `linkTelegram` and `unlinkTelegram`, and a POST or PUT to the check and link routes is refused with 405
 
 ### Requirement: Push device registration
 

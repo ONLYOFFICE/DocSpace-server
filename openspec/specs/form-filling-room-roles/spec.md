@@ -215,6 +215,12 @@ deletes its own results.
 
 - **WHEN** a Form Filler lists the contents of a Form filling room
 - **THEN** the list includes started forms and excludes forms that are not started
+- **AND** `getFileInfo` of a not-started form answers 403 to a Form Filler member
+
+#### Scenario: Room owner keeps a not-started form whatever record decides their access
+
+- **WHEN** the room's owner (the portal Owner or a Room admin) reads a not-started form with `getFileInfo` while the request carries the room's external link token, or while the owner belongs to a group invited as Form Filler
+- **THEN** the form is returned with `security.delete` true: the form-filling record of the link or group never hides a form from the owner
 
 #### Scenario: Form Filler deletes own results
 

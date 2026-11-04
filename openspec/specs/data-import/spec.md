@@ -14,8 +14,9 @@ types, the storage quota and the paid-user quota are handled, and the way the jo
 background. The wizard screens of the client and the LDAP import are out of scope.
 
 Sources: the integration tests of `web/ASC.Web.Api.Tests` (`07_Migration`) and the TypeScript suite
-they were ported from (only the list, status and log operations on a portal without a job, plus the
-access matrix), the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations named
+they were ported from (the list, status and log operations on a portal without a job, the access
+matrix of every operation, and since release/v4.1.0 the write operations without an upload: a parse
+that fails, cancel, clear and finish on an empty portal), the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations named
 by `operationId`), the product code of the migration controller, the upload handler, the worker and
 the three migrators where the tests stop, the storage and proxy configuration, and the release notes
 (v2.5, v3.0, v3.6). Where the notes or the OpenAPI document and the server disagree this specification
@@ -45,6 +46,11 @@ limits are the portal's storage quota and its user quotas, applied while the job
 
 - **WHEN** an anonymous caller calls `listMigrations`, `getMigrationStatus` or `getMigrationLogs`
 - **THEN** the system answers 401
+
+#### Scenario: Write operations by members without the right
+
+- **WHEN** a Room admin, a User or a Guest calls `cancelMigration`, `clearMigration`, `finishMigration`, `startMigration` or `uploadAndInitializeMigration`
+- **THEN** the system answers 403 "Access denied"; an anonymous caller gets 401 on every one of them
 
 ### Requirement: Listing the import sources
 
@@ -107,10 +113,11 @@ extension SHALL fail the job and list the uploaded files in `failedArchives`.
 ### Requirement: Parsing the uploaded backup
 
 `uploadAndInitializeMigration` SHALL only queue a parse job with the migrator named in the route and
-answer 200 with no body. The job SHALL read the backup without changing the portal and report, through
-`getMigrationStatus`, `parseResult` with `operation` `parse`, then `progress` 100 and `isCompleted`
-true. An unknown name SHALL end the job with `error` "No such migration provider". A successful parse
-keeps the uploaded files; a failed one deletes them.
+answer 200 with no body, whatever the name and whether anything was uploaded. The job SHALL read the
+backup without changing the portal and report, through `getMigrationStatus`, `parseResult` with
+`operation` `parse`, then `progress` 100 and `isCompleted` true. An unknown name, or a parse started
+before any upload, SHALL end the job with `isCompleted` true and a non-empty `error`. A successful
+parse keeps the uploaded files; a failed one deletes them.
 
 #### Scenario: Parse queued
 
@@ -120,7 +127,12 @@ keeps the uploaded files; a failed one deletes them.
 #### Scenario: Unknown migrator
 
 - **WHEN** the owner calls `uploadAndInitializeMigration` with `migratorName` `Dropbox`
-- **THEN** the system answers 200 and the job ends with `isCompleted` true and `error` "No such migration provider"
+- **THEN** the system answers 200 and the job ends with `isCompleted` true and a non-empty `error`
+
+#### Scenario: Parse without an upload
+
+- **WHEN** the owner calls `uploadAndInitializeMigration` with `migratorName` `Nextcloud` on a portal where nothing was uploaded
+- **THEN** the system answers 200 and the job ends with `isCompleted` true and a non-empty `error`
 
 #### Scenario: Parse finished
 
@@ -201,6 +213,11 @@ project files and for groups — queue the import and answer 200 with no body. A
 
 - **WHEN** a user in the body carries `email` `not-an-address`
 - **THEN** the system answers 400 and nothing is queued
+
+#### Scenario: Empty parse result
+
+- **WHEN** the owner posts an empty parse result (`{}`) on a portal where nothing was parsed
+- **THEN** the system answers 200; the queued job has no migrator to run and can only end with an error
 
 #### Scenario: User without e-mail given one
 
@@ -327,6 +344,11 @@ be deleted, so a new import needs a new upload and parse.
 - **WHEN** the import ends
 - **THEN** `isCompleted` is true, `progress` 100, `error` empty, `successedUsers` and `failedUsers` filled, and the upload folder is gone
 
+#### Scenario: Webhooks raised by the import
+
+- **WHEN** the queued import creates a room or a folder, or hands an imported room over to its original owner
+- **THEN** the `room.created`, `folder.created` and `room.updated` webhooks are published for them, as `startMigration` declares
+
 ### Requirement: One job per portal
 
 A portal SHALL hold at most one job. `uploadAndInitializeMigration` or `startMigration` called while a
@@ -356,8 +378,8 @@ already imported is undone.
 
 #### Scenario: Nothing running
 
-- **WHEN** the owner calls `cancelMigration` on a portal without a job
-- **THEN** the system answers 200
+- **WHEN** the owner calls `cancelMigration` on a portal without a job, once or twice in a row
+- **THEN** every call answers 200 and `getMigrationStatus` still returns an empty result
 
 ### Requirement: Clearing a finished import
 
@@ -369,6 +391,11 @@ Afterwards `getMigrationStatus` SHALL return an empty result and `getMigrationLo
 
 - **WHEN** the owner calls `clearMigration` after the import reported `isCompleted`
 - **THEN** the system answers 200, `getMigrationStatus` returns an empty result and the imported users and files stay
+
+#### Scenario: Nothing to clear
+
+- **WHEN** the owner calls `clearMigration` on a portal without a job, once or twice in a row
+- **THEN** every call answers 200 and `getMigrationStatus` still returns an empty result
 
 ### Requirement: Finishing the import
 
@@ -384,8 +411,13 @@ and SHALL answer 500 "No migration is in progress" when the portal holds no job.
 
 #### Scenario: Quiet finish
 
-- **WHEN** the owner calls `finishMigration` with `isSendWelcomeEmail` false
-- **THEN** no e-mail is sent, the job is removed and the system answers 200
+- **WHEN** the owner calls `finishMigration` with `isSendWelcomeEmail` false, with or without a job on the portal
+- **THEN** no e-mail is sent, the job (if any) is removed and the system answers 200
+
+#### Scenario: Body missing
+
+- **WHEN** `finishMigration` is posted with an empty body
+- **THEN** the system answers 400
 
 #### Scenario: No job
 

@@ -7,16 +7,25 @@ test; **NOTES-ONLY** — taken from the release notes without server evidence.
 Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `products/`, `common/` or
 `sdk/`. `[Bug N]` marks a test carrying `[Trait("Bug", "N")]`; it is a regression link, not an open bug.
 
+Revision 2026-11-04 (release/v4.1.0 merged, `d58816bece..3533ad8a89`): the AI rooms section (Instructions,
+Knowledge and AI project rooms, `FolderType.AiHub` 41, `SearchArea.AiHub`) is new, with the `03_Rooms/AiHub`
+suite; the integration host now runs a document server, so the index export completes (its test is no longer
+skipped); the listing tests read rooms as `FolderDto` through the `entryKind` discriminator instead of raw
+JSON, which moved lines but changed no assertion; `updateRoomTag` validation got a test. The AI-chat side of
+the new rooms (`getProjectSources`, `linkProjectSources`, `unlinkProjectSources`, `getRoomSkills`,
+`getRoomsSkills`, `getProjectModel`, `setProjectModel`, `getRoomAiFolder` now serving an Instructions room)
+is left to `ai-agents`, whose "`.ai` skills folder" requirement predates this change and is stale.
+
 ## Requirements and scenarios
 
 | Requirement / scenario | Source | Status |
 |---|---|---|
-| **Room types offered by the API** — enum values 1, 2, 5, 6, 8, 9; no Private type; `roomType` immutable | yaml `RoomType` schema (`x-enum-varnames`: 1 `FillingFormsRoom`, 2 `EditingRoom`, 5 `CustomRoom`, 6 `PublicRoom`, 8 `VirtualDataRoom`, 9 `AiRoom`), `CreateRoomRequestDto.roomType` ("cannot be changed once the room exists"), `UpdateRoomRequest` has no `roomType`; `private` is a boolean of `CreateRoomRequestDto` | CODE-ONLY |
+| **Room types offered by the API** — enum values 1, 2, 5, 6, 8, 9, 10, 11, 12; no Private type; `roomType` immutable | yaml `RoomType` schema (`x-enum-varnames`: 1 `FillingFormsRoom`, 2 `EditingRoom`, 5 `CustomRoom`, 6 `PublicRoom`, 8 `VirtualDataRoom`, 9 `AiRoom`, 10 `InstructionsRoom`, 11 `KnowledgeRoom`, 12 `AiProjectRoom`; `products/ASC.Files/Core/ApiModels/RequestDto/CreateRoomRequestDto.cs:43-67`), `CreateRoomRequestDto.roomType` ("cannot be changed once the room exists"), `UpdateRoomRequest` has no `roomType`; `private` is a boolean of `CreateRoomRequestDto` | CODE-ONLY |
 | Every type is created with its own value | 03_Rooms/Create/RoomCreateTests.cs:44-66; 03_Rooms/Read/RoomInfoTests.cs:45-65 | TEST-CONFIRMED |
 | Unknown or missing room type is rejected (400) | 03_Rooms/Create/RoomCreateValidationTests.cs:100-130 | TEST-CONFIRMED |
 | AI room carries chat settings, other types refuse them (400) | 03_Rooms/Chat/RoomChatSettingsTests.cs:53-92 [Bug 82798]; yaml `CreateRoomRequestDto.chatSettings` | TEST-CONFIRMED |
 | Room info exposes only the flags that were set | 03_Rooms/Read/RoomInfoFieldsTests.cs:114-194 | TEST-CONFIRMED |
-| Section and primary link per type (Forms / Active / AiAgents; primary link for Form filling and Public rooms) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-164; yaml `SearchArea` enum, `getRoomsFolder.searchArea`; roots `FolderType.Forms` (36) and `FolderType.VirtualRooms` (14); primary link on creation: `shared-links` spec, 03_Rooms/Links/RoomLinkPrimaryTests.cs | TEST-CONFIRMED (Forms/Active, primary link), CODE-ONLY (AiAgents) |
+| Section and primary link per type (Forms / Active / AiAgents / AiHub; primary link for Form filling and Public rooms) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-164; 03_Rooms/AiHub/AiHubRootTests.cs:47-81 and AiProjectRoomTests.cs:45-60 (AiHub root, not in Active); yaml `SearchArea` enum, `getRoomsFolder.searchArea`; roots `FolderType.Forms` (36), `FolderType.VirtualRooms` (14), `FolderType.AiHub` (41); primary link on creation: `shared-links` spec, 03_Rooms/Links/RoomLinkPrimaryTests.cs; no link for AiHub rooms: `products/ASC.Files/Core/Core/Security/FileSecurity.cs:237-263` (no link subject) | TEST-CONFIRMED (Forms/Active/AiHub, primary link), CODE-ONLY (AiAgents, no AiHub link) |
 | **Who may create a room** | yaml `createRoom` 403 text | CODE-ONLY |
 | Owner and DocSpace admin create a room | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:42-72; Room admin: 03_Rooms/RoomsApiTests.cs:245-246, 03_Rooms/Listing/RoomsFolderVisibilityTests.cs:45-58 | TEST-CONFIRMED |
 | User and Guest cannot create a room (403, message) | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:75-106, 198-235 | TEST-CONFIRMED |
@@ -32,6 +41,7 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Tags given on creation; dedup; 50 tags; null | 03_Rooms/Create/RoomCreateOptionalFieldsTests.cs:133-179; 03_Rooms/Create/RoomCreateEdgeCaseTests.cs:77-90; 03_Rooms/Create/RoomCreateValidationTests.cs:225-234 | TEST-CONFIRMED |
 | Update replaces the tag set | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:47-105 | TEST-CONFIRMED |
 | Tag name limits (over-long tag 400; forbidden chars stored verbatim) | 03_Rooms/Update/RoomUpdateTagsColorCoverTests.cs:47-105; yaml `addRoomTags`, `deleteRoomTags` | TEST-CONFIRMED |
+| Renaming a tag of the catalogue (`updateRoomTag`: catalogue and rooms follow; blank / missing / same / taken name 400, old tag kept; unknown 404) | 03_Rooms/Tags/RoomTagUpdateTests.cs:52-150 (rename, catalogue, rooms), 153-290 (404; same, taken, empty new, empty old, malformed, missing, null → 400); blank entries of a batch: 03_Rooms/Permissions/RoomCustomTagValidationPermissionsTests.cs:106-142 [Bug 81689] | TEST-CONFIRMED |
 | Tag filter must be JSON (400); any-match; `withoutTags` | 03_Rooms/Listing/RoomsFolderFilterTests.cs:220-327 [Bug 81808] | TEST-CONFIRMED |
 | Single-use tag disappears with its room; shared tag stays | 03_Rooms/Deletion/RoomDeleteTests.cs:160-200 | TEST-CONFIRMED |
 | **Room colour, cover and logo** | yaml `CreateRoomRequestDto.color` (pattern), `.cover` (maxLength 50), `.logo`; `createRoomLogo`, `getRoomCovers` | CODE-ONLY |
@@ -57,7 +67,13 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Owner or DocSpace admin starts the export; re-export after unarchive | 03_Rooms/Permissions/RoomIndexExportStartPermissionsTests.cs:47-69; 03_Rooms/Archive/RoomUnarchiveTests.cs:364-382 | TEST-CONFIRMED |
 | Members without manager rights cannot export | 03_Rooms/Permissions/RoomIndexExportStartPermissionsTests.cs:75-128 | TEST-CONFIRMED |
 | Archived (403) or unknown room (404) | 03_Rooms/IndexExport/RoomIndexExportValidationTests.cs:50-87 [Bug 82368, 82369] | TEST-CONFIRMED |
-| Export completes with `resultFileId` | 03_Rooms/IndexExport/RoomIndexExportTests.cs:54-84 is `Skip`ped (document server unreachable in the integration-test profile); release note v3.0 ("generation of a summary report") | NOTES-ONLY |
+| Export completes with a result file (`isCompleted`, no error, `resultFileId`; indexing turned on after creation) | 03_Rooms/IndexExport/RoomIndexExportTests.cs:56-79 [Bug 81110] — no longer skipped: the integration host runs a document server since 4.1.0 (`FormsTestBase.cs:37-50`); release note v3.0 ("generation of a summary report") | TEST-CONFIRMED |
+| **Rooms of the AI rooms section** — types 10-12 under the AiHub root, own section, settings subset, never archived, no templates, deleted outright, 403 while AI is off | `products/ASC.Files/Core/Core/FileStorageService.cs:671-696` (settings refused with 400 for `IsAiHubRoom`; created under `GetFolderAiHubAsync`; the room count check runs for the Rooms root only), `:839` and `:1001` (no template from or of such a room), `:1190-1198` (nothing but such a room lands in the root); `products/ASC.Files/Server/Api/VirtualRoomsController.cs:658-661` (archive → 403); `products/ASC.Files/Core/Services/WCFService/FileOperations/CopyPermissionsCheck.cs:456-480` (never archived, never leaves its root); `FileSecurity.cs:1249-1252` (AI off → every access refused); `products/ASC.Files/Core/Helpers/DocSpaceHelper.cs:63-70` (`IsAiHubRoom`); yaml `createRoom`, `getRoomsFolder` (`SearchArea` `AiHub`) | CODE-ONLY |
+| Created under the AI rooms root (rootFolderType 41, parentId = root, type / colour / tags echoed; listed in AiHub, filtered by `type=12`, not in Active; User 403; no title 400) | 03_Rooms/AiHub/AiHubRootTests.cs:47-81; 03_Rooms/AiHub/AiProjectRoomTests.cs:45-113 | TEST-CONFIRMED |
+| Settings that do not apply are refused (project: quota, denyDownload; Instructions: indexing, denyDownload → 400, nothing created; title and colour applied) | 03_Rooms/AiHub/AiHubRoomSettingsTests.cs:46-118; `FileStorageService.cs:671-676, 1513-1517` | TEST-CONFIRMED |
+| Never archived, no templates, no folder in the root (403) | 03_Rooms/AiHub/AiHubRootTests.cs:83-126; 03_Rooms/AiHub/AiProjectRoomTests.cs:195-222 | TEST-CONFIRMED |
+| Deleted outright (404 afterwards, gone from the section); non-member User 403 on read, update, delete | 03_Rooms/AiHub/AiHubRootTests.cs:128-145; 03_Rooms/AiHub/AiProjectRoomTests.cs:115-193 | TEST-CONFIRMED |
+| Refused while AI is off (create, read, update, delete, section listing, folder content, upload, file read and presigned URI → 403; back after AI is on) | 03_Rooms/AiHub/AiHubAiAccessTests.cs:44-191 (`setTenantAiAccessSettings`) | TEST-CONFIRMED |
 | **Form filling rooms live in the Forms section** | release note v4.0 ("Forms are a separate root section"); yaml `FolderType` 36 Forms / 14 VirtualRooms, `SearchArea` Forms/FormTemplates | — |
 | Form filling room is listed only in Forms (even with type filter) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:52-181 | TEST-CONFIRMED |
 | Forms root folder (type 36, same id, lists form rooms only) | 03_Rooms/FormFilling/FormFillingRoomSectionTests.cs:185-267 | TEST-CONFIRMED |
@@ -111,7 +127,7 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Folder with content; file and folder together; suffix naming | 06_Operations/Duplicate/DuplicateBatchItemsTests.cs:48-130, 223-280; yaml `duplicateBatchItems` | TEST-CONFIRMED |
 | **Pinning rooms** — personal, limit 10, AI limit, ordering, archive | yaml `pinRoom` description; release note v2.6 ("limit of pinned rooms = 10") | CODE-ONLY |
 | Pin limit of ten; unpin frees a slot; no reset of all pins | 03_Rooms/Pin/RoomPinLimitTests.cs:127-155; 03_Rooms/Pin/RoomUnpinLimitTests.cs:47-105 [Bug 80757] | TEST-CONFIRMED |
-| AI rooms have their own limit | 03_Rooms/Pin/RoomPinLimitTests.cs:157-204 [Bug 81852] | TEST-CONFIRMED |
+| AI rooms have their own limit | 03_Rooms/Pin/RoomPinLimitTests.cs:157-204 [Bug 81852]; the third, separate count for the rooms of the AI rooms section: `FileStorageService.cs:5089-5096` (`aiHubTagsCount` against `MaxPinnedRooms`), no test | TEST-CONFIRMED (agents) / CODE-ONLY (AI rooms section) |
 | Pinned rooms stay on top (sort, filter, paging, stable order) | 03_Rooms/Pin/RoomPinOrderingTests.cs:47-222; 03_Rooms/RoomPinOrderTests.cs:47-75 | TEST-CONFIRMED |
 | Pin is personal; does not survive archiving; idempotent; concurrent safe | 03_Rooms/Pin/RoomPinTests.cs:50-211; 03_Rooms/Pin/RoomPinValidationTests.cs:126-142; 03_Rooms/Pin/RoomPinLimitTests.cs:47-123 | TEST-CONFIRMED |
 | Pin on archived (403), deleted (404), foreign room (403), unknown id (404, "The required folder was not found") | 03_Rooms/Pin/RoomPinValidationTests.cs:57-122 [Bug 81850]; 03_Rooms/Pin/RoomUnpinValidationTests.cs:52-111 [Bug 82366] | TEST-CONFIRMED |
@@ -150,6 +166,7 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
 | Keys required (403 without keys) | yaml `createRoom` 403 text only — no test creates a private room without keys | CODE-ONLY |
 | **Listing rooms and reading a room** | yaml `getRoomsFolder` parameters, `getRoomInfo` | CODE-ONLY |
 | Supported filters and paging (`type`, `filterValue`, `tags`/`withoutTags`, `subjectId`, `subjectOwnerId`+`excludeSubject`, `groupId`, `count`/`startIndex`, sorting) | yaml `getRoomsFolder` parameters; 03_Rooms/Listing/RoomsFolderFilterTests.cs | CODE-ONLY (full set), TEST-CONFIRMED (type/title/tags/subject/group) |
+| Every listed room arrives as a folder with id, `roomType`, `pinned`, tags, logo (`entryKind` discriminator `folder`) | `products/ASC.Files/Core/ApiModels/ResponseDto/FileEntryDto.cs:64-73`; 03_Rooms/Listing/RoomsFolderTestBase.cs:103-137 (`ListRoomsAsync`); 03_Rooms/Pin/RoomPinTestsBase.cs:55-75; 03_Rooms/Tags/RoomTagDetachIntegrationTests.cs:256-276; 03_Rooms/Logos/RoomLogoDeleteTests.cs:303-314 | TEST-CONFIRMED |
 | Type filter | 03_Rooms/Listing/RoomsFolderFilterTests.cs:87-132; 03_Rooms/RoomsApiTests.cs:206-224 | TEST-CONFIRMED |
 | Title filter | 03_Rooms/Listing/RoomsFolderFilterTests.cs:136-209 | TEST-CONFIRMED |
 | Subject filters | 03_Rooms/Listing/RoomsFolderFilterTests.cs:331-390; 03_Rooms/RoomsApiTests.cs:229-275 | TEST-CONFIRMED |
@@ -179,9 +196,21 @@ Paths are relative to `products/ASC.Files/Tests/Tests/` unless they start with `
   in `shared-links`.
 - **Member roles, invitation, leaving, groups as members (v2.5), Room manager rename (v3.0)**: in
   `room-role-permissions`.
-- **Room history / log report (v3.5 `folder/{id}/log/report`), AI chat inside rooms (v4.0), `.ai` folder
-  and skills (v4.0)**: separate capabilities; the AI room appears here only as a `RoomType` value with its
-  chat settings and its own pin limit.
+- **Room history / log report (v3.5 `folder/{id}/log/report`), AI chat inside rooms (v4.0), skills (v4.0,
+  since 4.1.0 the Markdown files of an Instructions room: `getRoomAiFolder`, `getRoomSkills`,
+  `getRoomsSkills`, 03_Rooms/AiHub/AiRoomSkillsTests.cs, RoomsSkillsTests.cs, RoomsSkillsLifecycleTests.cs,
+  03_Rooms/Instructions/*), the sources and the model of an AI project (`getProjectSources`,
+  `linkProjectSources`, `unlinkProjectSources`, `getProjectModel`, `setProjectModel`,
+  03_Rooms/AiHub/AiProjectSources*Tests.cs, AiProjectModelTests.cs), the read access of a project member to
+  the linked rooms (03_Rooms/AiHub/AiProjectMemberAccessTests.cs — stated in `room-role-permissions`)**:
+  separate capabilities (`ai-agents`); the AI room and the AI rooms section appear here only as `RoomType`
+  values with their settings, section and pin limits.
+- **Third-party storage connection rules** (kDrive needs `url`, 03_Rooms/ThirdParty/ThirdPartyKDriveConnectBugTests.cs,
+  bug 84672): the connection, not the room; `file-operations`.
+- **"New" marks of a room** (03_Rooms/NewItems/*; bug 84797: listing a folder clears a file's mark, test red):
+  `notifications` / `file-operations`.
+- **`fields` projection of the member list** (03_Rooms/Sharing/RoomShareFieldsTests.cs, bug 84766): the API
+  envelope, not a room-type rule.
 - **Room tariff limit (402 on creation when the plan's room count is reached)**: stated by the yaml for
   `createRoom`/`createRoomThirdParty`, mentioned in v2.6.1 notes, not exercised by a test; omitted rather
   than written as NOTES-ONLY because the portal of the test fixture has no reachable limit.

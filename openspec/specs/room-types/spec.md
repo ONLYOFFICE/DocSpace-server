@@ -3,15 +3,17 @@
 ## Purpose
 
 Defines the room types a portal offers — Custom, Collaboration, Public, Virtual Data Room,
-Form filling and AI room — and what each type adds beyond the access matrix: the parameters a room is created
+Form filling, AI room and, since v4.1, the Instructions, Knowledge and AI project rooms of the AI rooms
+section — and what each type adds beyond the access matrix: the parameters a room is created
 and updated with (title, tags, logo, cover, colour, quota, indexing, file lifetime, deny download, watermark,
 the private flag, third-party storage backing), the Virtual Data Room features (manual order with reorder and
 index export, file lifetime, deny download, watermark), room templates, room groups, duplication, pinning,
 archiving, deletion, ownership transfer, the per-room storage quota and the placement of Form filling rooms in
 the Forms section. Member roles, who may hold them and what they allow are specified in
 `room-role-permissions`, `vdr-room-roles` and `form-filling-room-roles`; links and their rules in
-`shared-links`. This specification does not restate those rules and refers to them where a room type depends
-on them.
+`shared-links`. What an AI project links, its skills and its model are AI chat features (`ai-agents`
+territory) and are not covered here. This specification does not restate those rules and refers to them
+where a room type depends on them.
 
 Sources: the integration tests of `products/ASC.Files/Tests/Tests/03_Rooms`, `06_Operations/Duplicate` and
 `07_Settings/Quota`, the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations are named
@@ -25,16 +27,16 @@ where the tests assert them.
 ### Requirement: Room types offered by the API
 
 The system SHALL expose the room type as the required `roomType` field of `createRoom`: Form filling room
-(1), Collaboration room (2), Custom room (5), Public room (6), Virtual Data Room (8) and AI room (9). There is
-no separate "Private" room type: end-to-end encryption is the boolean `private` flag of a room of any of these
-types. `roomType` MUST be one of the listed values and cannot be changed after the room exists (`updateRoom`
-has no `roomType` property).
+(1), Collaboration room (2), Custom room (5), Public room (6), Virtual Data Room (8), AI room (9),
+Instructions room (10), Knowledge room (11) and AI project room (12). There is no separate "Private" room
+type: end-to-end encryption is the boolean `private` flag of a room. `roomType` MUST be one of the listed
+values and cannot be changed after the room exists (`updateRoom` has no `roomType` property).
 
 #### Scenario: Section and primary link per type
 
 - **WHEN** a room of each type is created
 - **THEN** a Form filling room and a Public room get a primary external link on creation, while a Collaboration, Custom, Virtual Data and AI room do not
-- **AND** a Form filling room lives in the Forms section (`searchArea=Forms`, the Forms root), an AI room in the AI Agents section (`searchArea=AiAgents`) and the other types in the Rooms section (`searchArea=Active`, the Virtual Rooms root)
+- **AND** a Form filling room lives in the Forms section (`searchArea=Forms`, the Forms root), an AI room in the AI Agents section (`searchArea=AiAgents`), an Instructions, Knowledge or AI project room in the AI rooms section (`searchArea=AiHub`, the AI rooms root, see "Rooms of the AI rooms section") and the other types in the Rooms section (`searchArea=Active`, the Virtual Rooms root)
 
 #### Scenario: Every type is created with its own value
 
@@ -133,6 +135,12 @@ also attached and detached with `addRoomTags` and `deleteRoomTags`, and rooms ar
 - **WHEN** a tag name over 255 characters is given on creation or update
 - **THEN** the system rejects the request (400)
 - **AND** characters that a title cannot hold (`"`, `<`, `>`, `/`, `\`) are stored verbatim in a tag
+
+#### Scenario: Renaming a tag of the catalogue
+
+- **WHEN** `updateRoomTag` renames a tag with a new name
+- **THEN** the catalogue and every room carrying the tag show the new name
+- **AND** a blank or missing old or new name, the same name, or a name another tag already has is rejected (400) and the old tag is kept; a name no tag has answers 404
 
 #### Scenario: Tags given on creation
 
@@ -290,6 +298,45 @@ answer 404 for id 0, -1 or a missing room.
 
 - **WHEN** `startRoomIndexExport` is called on an archived VDR or with id 0 or -1
 - **THEN** the system answers 403 for the archived room and 404 for the ids
+
+#### Scenario: Export completes with a result file
+
+- **WHEN** `indexing` is turned on after the room was created and the export is started
+- **THEN** polling `getRoomIndexExport` ends with `isCompleted` true, no `error` and a `resultFileId`
+
+### Requirement: Rooms of the AI rooms section
+
+Instructions rooms (`roomType` 10), Knowledge rooms (11) and AI projects (12) SHALL be created with
+`createRoom` under the AI rooms root and listed with `getRoomsFolder` `searchArea=AiHub` only, filterable by
+`type`. They take a title, colour, cover, tags, logo and, except an AI project, a quota; any other room
+setting is refused (400). They are never archived, have no templates and are deleted outright with
+`deleteRoom`. While AI is off on the portal every access to them answers 403.
+
+#### Scenario: Created under the AI rooms root
+
+- **WHEN** the Owner creates an Instructions room or an AI project with a title, colour and tags
+- **THEN** the room reports the AI rooms root as `rootFolderType`, the root's id as `parentId`, the given type, colour and tags, and is listed under `searchArea=AiHub` (filtered by `type=12` for projects) and not under `Active`
+- **AND** a User gets 403 and a missing title 400
+
+#### Scenario: Settings that do not apply are refused
+
+- **WHEN** an AI project is created or updated with `quota` or `denyDownload`, or an Instructions room with `indexing` or `denyDownload`
+- **THEN** the system rejects the request (400) and no room is created, while a title and `color` are applied
+
+#### Scenario: Never archived, no templates
+
+- **WHEN** `archiveRoom` or `createRoomTemplate` is called on an Instructions room or an AI project, or a folder is created in the AI rooms root
+- **THEN** the system rejects each request (403)
+
+#### Scenario: Deleted outright
+
+- **WHEN** the Owner deletes an Instructions room or an AI project
+- **THEN** the operation finishes, `getRoomInfo` answers 404 and the room is gone from the section; a User who is not a member gets 403 on reading, updating or deleting it
+
+#### Scenario: Refused while AI is off
+
+- **WHEN** AI is turned off on the portal and a room of the section is created, read, updated or deleted, the section is listed, a file is uploaded into or read from an Instructions room
+- **THEN** the system answers 403; after AI is turned on again the room and its files are readable
 
 ### Requirement: Form filling rooms live in the Forms section
 
@@ -586,8 +633,8 @@ item in that folder needs — inside a room, Room manager or Content creator; an
 ### Requirement: Pinning rooms
 
 `pinRoom`/`unpinRoom` SHALL pin a room to the top of the calling account's room list and return the room with
-the `pinned` flag. Pinning is personal, idempotent and limited to 10 pinned rooms per account (v2.6), with a
-separate limit of 10 for AI rooms. Pinned rooms SHALL stay above unpinned ones whatever the sort, filter or
+the `pinned` flag. Pinning is personal, idempotent and limited to 10 pinned rooms per account (v2.6), with
+separate limits of 10 for AI rooms (agents) and for the rooms of the AI rooms section. Pinned rooms SHALL stay above unpinned ones whatever the sort, filter or
 page. A pin SHALL NOT survive archive and unarchive. Anybody who can read the room may pin it.
 
 #### Scenario: Pin limit of ten
@@ -816,6 +863,7 @@ Anonymous and terminated callers get 401 on both.
 
 - **WHEN** `getRoomsFolder` is called with filters
 - **THEN** it accepts `type` (one or more room types, OR), `filterValue` (case-insensitive substring of the title), `tags` / `withoutTags`, `subjectId` (member), `subjectOwnerId` (creator) with `excludeSubject`, `groupId`, paging (`count`, `startIndex`) and sorting
+- **AND** every listed room arrives as a folder with its id, `roomType`, `pinned` flag, tags and logo
 
 #### Scenario: Type filter
 
