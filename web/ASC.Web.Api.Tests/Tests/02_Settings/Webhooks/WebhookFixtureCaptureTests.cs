@@ -93,11 +93,8 @@ public class WebhookFixtureCaptureTests(
         var retries = await retryReceiver.WaitForDeliveriesAsync(3);
         var retry = retries.Should().Contain(d => RetryCountOf(d.Body) == 1, "the receiver failed one attempt").Which;
 
-        using (var retryBody = JsonDocument.Parse(retry.Body))
-        {
-            retryBody.RootElement.GetProperty("webhook").TryGetProperty("lastSuccessOn", out _)
-                .Should().BeTrue("the first file was delivered before the retry");
-        }
+        WebhookParser.Parse(retry.Body).Webhook!.LastSuccessOn
+            .Should().NotBeNull("the first file was delivered before the retry");
 
         foreach (var (trigger, delivery) in captured)
         {
@@ -203,7 +200,7 @@ public class WebhookFixtureCaptureTests(
     {
         var signature = delivery.Header("x-docspace-signature-256");
 
-        signature.Should().BeEquivalentTo($"sha256={Sign(secret, delivery.Body)}", "the fixture of {0} must verify with Fixtures/SECRET", name);
+        WebhookSignature.Verify(delivery.Body, secret, signature).Should().BeTrue("the fixture of {0} must verify with Fixtures/SECRET", name);
 
         var utf8 = new UTF8Encoding(false);
 
@@ -232,22 +229,11 @@ public class WebhookFixtureCaptureTests(
 
     private static string TriggerOf(string body)
     {
-        using var document = JsonDocument.Parse(body);
-
-        return document.RootElement.GetProperty("event").GetProperty("trigger").GetString()!;
+        return WebhookParser.Parse(body).Trigger;
     }
 
     private static int StatusOf(string body)
     {
-        using var document = JsonDocument.Parse(body);
-
-        return document.RootElement.GetProperty("payload").GetProperty("status").GetInt32();
-    }
-
-    private static int RetryCountOf(string body)
-    {
-        using var document = JsonDocument.Parse(body);
-
-        return document.RootElement.GetProperty("webhook").TryGetProperty("retryCount", out var retryCount) ? retryCount.GetInt32() : 0;
+        return WebhookParser.Parse(body).PayloadAs<UserPayload>()!.Status!.Value;
     }
 }

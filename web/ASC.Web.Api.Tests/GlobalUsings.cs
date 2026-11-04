@@ -57,6 +57,8 @@ global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
+global using DocSpace.Webhooks.SDK;
+global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
 

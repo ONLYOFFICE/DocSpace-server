@@ -14,6 +14,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="DocSpace.API.SDK" />
+        <PackageReference Include="DocSpace.Webhooks.SDK" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Aspire.Hosting.Testing" />

@@ -63,7 +63,7 @@ public class WebhookPublishAccessTests(
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class WebhookPublishAccessTests(
         await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), TestContext.Current.CancellationToken);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FolderPayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class WebhookPublishAccessTests(
             new CreateRoomRequestDto(title: title, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<RoomPayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class WebhookPublishAccessTests(
         var group = await CreateGroupAsync();
 
         // Assert
-        (await WaitForPayloadAsync(subscription.Id, p => IdIs(p, group))).Should().NotBeNull();
+        (await WaitForPayloadAsync<GroupPayload>(subscription.Id, p => p.Id == group)).Should().NotBeNull();
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class WebhookPublishAccessTests(
         var group = await CreateGroupAsync();
 
         // Assert: the subscription was saved by a RoomAdmin, but the event goes by who its creator is now
-        await ShouldReachOnlyTheControlAsync(subject, control, p => IdIs(p, group));
+        await ShouldReachOnlyTheControlAsync<GroupPayload>(subject, control, p => p.Id == group);
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class WebhookPublishAccessTests(
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -166,10 +166,11 @@ public class WebhookPublishAccessTests(
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert: the member may no longer use the developer tools, so their subscription receives nothing either
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
-    private async Task ShouldReachOnlyTheControlAsync(WebhookSubscription subject, WebhookSubscription control, Func<JsonElement, bool> match)
+    private async Task ShouldReachOnlyTheControlAsync<T>(WebhookSubscription subject, WebhookSubscription control, Func<T, bool> match)
+        where T : class
     {
         (await WaitForPayloadAsync(control.Id, match)).Should().NotBeNull("the owner's control subscription gets the event");
 
@@ -186,13 +187,5 @@ public class WebhookPublishAccessTests(
         return group.Response.Id;
     }
 
-    private static bool TitleIs(JsonElement payload, string title)
-    {
-        return payload.TryGetProperty("title", out var value) && value.GetString() == title;
-    }
 
-    private static bool IdIs(JsonElement payload, Guid id)
-    {
-        return payload.TryGetProperty("id", out var value) && value.ValueKind == JsonValueKind.String && value.GetGuid() == id;
-    }
 }

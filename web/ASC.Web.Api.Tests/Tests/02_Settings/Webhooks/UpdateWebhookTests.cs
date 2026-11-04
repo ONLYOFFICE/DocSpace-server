@@ -158,7 +158,7 @@ public class UpdateWebhookTests(
         await FireEventAsync();
         var delivery = (await receiver.WaitForDeliveriesAsync(1)).Should().NotBeEmpty().And.Subject.First();
 
-        delivery.Header("x-docspace-signature-256").Should().BeEquivalentTo($"sha256={Sign(subscription.SecretKey, delivery.Body)}");
+        WebhookSignature.Verify(delivery.Body, subscription.SecretKey, delivery.Header(WebhookSignature.HeaderName)).Should().BeTrue();
     }
 
     [Fact]

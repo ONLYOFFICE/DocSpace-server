@@ -68,35 +68,33 @@ public class WebhookEntryPayloadTests(
         var file = (await _filesApi.CreateFileAsync(roomId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("id").GetInt32().Should().Be(file.Id);
-        p.GetProperty("parentId").GetInt32().Should().Be(roomId);
-        p.GetProperty("fileEntryType").GetInt32().Should().Be(FileEntryTypeFile);
-        p.GetProperty("fileExst").GetString().Should().Be(".docx");
-        p.GetProperty("fileType").GetInt32().Should().Be(FileTypeDocument);
-        p.GetProperty("version").GetInt32().Should().Be(1);
-        p.GetProperty("versionGroup").GetInt32().Should().Be(1);
-        p.TryGetProperty("isForm", out _).Should().BeFalse("a document is not a form, and false is left out of the body");
+        p.Id.GetInt().Should().Be(file.Id);
+        p.ParentId.GetInt().Should().Be(roomId);
+        p.FileEntryType.Should().Be(FileEntryTypeFile);
+        p.FileExst.Should().Be(".docx");
+        p.FileType.Should().Be(FileTypeDocument);
+        p.VarVersion.Should().Be(1);
+        p.VersionGroup.Should().Be(1);
+        p.IsForm.Should().BeNull("a document is not a form, and false is left out of the body");
 
-        foreach (var link in new[] { "viewUrl", "webUrl" })
+        foreach (var url in new[] { p.ViewUrl, p.WebUrl })
         {
-            var url = p.GetProperty(link).GetString();
-
-            ShouldBeAbsoluteUrl(url, $"{link} must be usable by a receiver outside the portal");
+            ShouldBeAbsoluteUrl(url, "a link must be usable by a receiver outside the portal");
             url.Should().Contain(file.Id.ToString(CultureInfo.InvariantCulture));
-            url.Should().NotContainAny(["share=", "key="], "{0} carries no share token", link);
+            url.Should().NotContainAny(["share=", "key="], "a link carries no share token");
         }
 
-        var createdBy = p.GetProperty("createdBy");
-        createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        ShouldBeAbsoluteUrl(createdBy.GetProperty("avatar").GetString(), "the avatar of the author must be usable outside the portal");
-        p.GetProperty("created").GetString().Should().EndWith("Z", "entry dates are UTC");
+        var createdBy = p.CreatedBy;
+        createdBy.Id.Should().Be(Owner.Id);
+        ShouldBeAbsoluteUrl(createdBy.Avatar, "the avatar of the author must be usable outside the portal");
+        payload.Json.GetProperty("created").GetString().Should().EndWith("Z", "entry dates are UTC");
 
-        ShouldCarryNoCallerRelativeState(p);
+        ShouldCarryNoCallerRelativeState(payload.Json);
     }
 
     [Fact]
@@ -112,20 +110,20 @@ public class WebhookEntryPayloadTests(
         var folder = (await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<FolderPayload>(subscription.Id, "folder.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("id").GetInt32().Should().Be(folder.Id);
-        p.GetProperty("parentId").GetInt32().Should().Be(roomId);
-        p.GetProperty("fileEntryType").GetInt32().Should().Be(FileEntryTypeFolder);
-        p.GetProperty("rootFolderType").GetInt32().Should().Be(FolderTypeVirtualRooms);
-        p.GetProperty("createdBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        p.TryGetProperty("roomType", out _).Should().BeFalse("a plain folder gets the folder payload, not the room one");
-        p.TryGetProperty("fileExst", out _).Should().BeFalse("file fields belong to the file payload");
+        p.Id.GetInt().Should().Be(folder.Id);
+        p.ParentId.GetInt().Should().Be(roomId);
+        p.FileEntryType.Should().Be(FileEntryTypeFolder);
+        p.RootFolderType.Should().Be(FolderTypeVirtualRooms);
+        p.CreatedBy.Id.Should().Be(Owner.Id);
+        payload.Json.TryGetProperty("roomType", out _).Should().BeFalse("a plain folder gets the folder payload, not the room one");
+        payload.Json.TryGetProperty("fileExst", out _).Should().BeFalse("file fields belong to the file payload");
 
-        ShouldCarryNoCallerRelativeState(p);
+        ShouldCarryNoCallerRelativeState(payload.Json);
     }
 
     [Fact]
@@ -142,21 +140,21 @@ public class WebhookEntryPayloadTests(
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "room.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("id").GetInt32().Should().Be(room.Id);
-        p.GetProperty("fileEntryType").GetInt32().Should().Be(FileEntryTypeFolder);
-        p.GetProperty("roomType").GetInt32().Should().Be((int)RoomType.CustomRoom);
-        p.GetProperty("type").GetInt32().Should().Be(FolderTypeCustomRoom);
-        p.GetProperty("indexing").GetBoolean().Should().BeTrue();
-        p.GetProperty("denyDownload").GetBoolean().Should().BeTrue();
-        p.GetProperty("createdBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        p.TryGetProperty("logo", out _).Should().BeFalse("the logo needs per-request URL building and is left to the REST API");
+        p.Id.GetInt().Should().Be(room.Id);
+        p.FileEntryType.Should().Be(FileEntryTypeFolder);
+        p.RoomType.Should().Be((int)RoomType.CustomRoom);
+        p.Type.Should().Be(FolderTypeCustomRoom);
+        p.Indexing.Should().BeTrue();
+        p.DenyDownload.Should().BeTrue();
+        p.CreatedBy.Id.Should().Be(Owner.Id);
+        payload.Json.TryGetProperty("logo", out _).Should().BeFalse("the logo needs per-request URL building and is left to the REST API");
 
-        ShouldCarryNoCallerRelativeState(p);
+        ShouldCarryNoCallerRelativeState(payload.Json);
     }
 
     [Fact]
@@ -172,16 +170,16 @@ public class WebhookEntryPayloadTests(
             new CreateRoomRequestDto(title: title, roomType: RoomType.AiRoom), TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "agent.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "agent.created", p => p.Title == title);
 
         payload.Should().NotBeNull("an AI room is published as agent.created");
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("id").GetInt32().Should().Be(agent.Id);
-        p.GetProperty("roomType").GetInt32().Should().Be((int)RoomType.AiRoom);
-        p.GetProperty("type").GetInt32().Should().Be(FolderTypeAiRoom);
-        p.GetProperty("createdBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        p.TryGetProperty("chatSettings", out _).Should().BeFalse("the chat settings are left to the REST API");
+        p.Id.GetInt().Should().Be(agent.Id);
+        p.RoomType.Should().Be((int)RoomType.AiRoom);
+        p.Type.Should().Be(FolderTypeAiRoom);
+        p.CreatedBy.Id.Should().Be(Owner.Id);
+        payload.Json.TryGetProperty("chatSettings", out _).Should().BeFalse("the chat settings are left to the REST API");
 
         // a room created after the agent is the control: once its room.created is recorded, a room.created of the agent
         // published on any path would have been recorded before it
@@ -189,10 +187,10 @@ public class WebhookEntryPayloadTests(
         await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(title: controlTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken);
 
-        (await WaitForEventPayloadAsync(subscription.Id, "room.created", r => r.GetProperty("title").GetString() == controlTitle))
+        (await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.created", r => r.Title == controlTitle))
             .Should().NotBeNull("the control room is announced as a room");
 
-        (await WaitForEventPayloadAsync(subscription.Id, "room.created", r => r.GetProperty("title").GetString() == title, timeoutSeconds: 0))
+        (await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.created", r => r.Title == title, timeoutSeconds: 0))
             .Should().BeNull("an agent is not also announced as a room");
     }
 

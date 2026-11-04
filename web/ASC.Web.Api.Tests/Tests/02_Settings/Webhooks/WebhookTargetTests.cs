@@ -60,11 +60,12 @@ public class WebhookTargetTests(
         // Assert
         var records = await WaitForRecordsAsync(subscription.Id);
         records.Should().ContainSingle("the target's own change is delivered and the change of another user is not");
-        PayloadOf(records[0].RequestPayload).GetProperty("id").GetGuid().Should().Be(target.Id);
 
-        var webhookTarget = WebhookOf(records[0].RequestPayload).GetProperty("target");
-        webhookTarget.GetProperty("id").GetString().Should().Be(target.Id.ToString());
-        webhookTarget.GetProperty("type").GetString().Should().Be("user");
+        var webhook = WebhookParser.Parse(records[0].RequestPayload);
+
+        webhook.PayloadAs<UserPayload>()!.Id.Should().Be(target.Id);
+        webhook.Webhook!.Target.Id.GetString().Should().Be(target.Id.ToString());
+        webhook.Webhook.Target.Type.Should().Be("user");
     }
 
     [Fact]
@@ -82,11 +83,12 @@ public class WebhookTargetTests(
         // Assert
         var records = await WaitForRecordsAsync(subscription.Id);
         records.Should().ContainSingle("the target group's change is delivered and the change of another group is not");
-        PayloadOf(records[0].RequestPayload).GetProperty("id").GetGuid().Should().Be(target);
 
-        var webhookTarget = WebhookOf(records[0].RequestPayload).GetProperty("target");
-        webhookTarget.GetProperty("id").GetString().Should().Be(target.ToString());
-        webhookTarget.GetProperty("type").GetString().Should().Be("group");
+        var webhook = WebhookParser.Parse(records[0].RequestPayload);
+
+        webhook.PayloadAs<GroupPayload>()!.Id.Should().Be(target);
+        webhook.Webhook!.Target.Id.GetString().Should().Be(target.ToString());
+        webhook.Webhook.Target.Type.Should().Be("group");
     }
 
     [Fact]
@@ -102,7 +104,7 @@ public class WebhookTargetTests(
         // Assert
         var records = await WaitForRecordsAsync(subscription.Id);
         records.Should().NotBeEmpty();
-        WebhookOf(records[0].RequestPayload).TryGetProperty("target", out _).Should().BeFalse();
+        WebhookParser.Parse(records[0].RequestPayload).Webhook!.Target.Should().BeNull();
     }
 
     [Theory]
@@ -303,10 +305,4 @@ public class WebhookTargetTests(
     }
 
     /// <summary>The <c>webhook</c> block of a delivery body: the subscription and, when narrowed, its target.</summary>
-    private static JsonElement WebhookOf(string body)
-    {
-        using var document = JsonDocument.Parse(body);
-
-        return document.RootElement.GetProperty("webhook").Clone();
-    }
 }

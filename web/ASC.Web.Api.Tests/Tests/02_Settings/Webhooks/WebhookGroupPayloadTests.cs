@@ -58,20 +58,20 @@ public class WebhookGroupPayloadTests(
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "group.created", p => p.GetProperty("id").GetGuid() == group.Id);
+        var payload = await WaitForEventPayloadAsync<GroupPayload>(subscription.Id, "group.created", p => p.Id == group.Id);
 
         payload.Should().NotBeNull();
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("name").GetString().Should().Be(groupName);
-        p.GetProperty("membersCount").GetInt32().Should().BeGreaterThan(0);
-        p.TryGetProperty("members", out _).Should().BeFalse("the member list is read through the REST API, not carried");
+        p.Name.Should().Be(groupName);
+        p.MembersCount.Should().BeGreaterThan(0);
+        payload.Json.TryGetProperty("members", out _).Should().BeFalse("the member list is read through the REST API, not carried");
 
-        var manager = p.GetProperty("manager");
-        manager.GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        manager.TryGetProperty("email", out _).Should().BeFalse("a summary of another user never carries their email");
-        manager.TryGetProperty("profileUrl", out _).Should().BeTrue("the owner may see the contacts of every member");
-        ShouldBeAbsoluteUrl(manager.GetProperty("avatar").GetString(), "the avatar of the manager must be usable outside the portal");
+        var manager = p.Manager;
+        manager.Id.Should().Be(Owner.Id);
+        payload.Json.GetProperty("manager").TryGetProperty("email", out _).Should().BeFalse("a summary of another user never carries their email");
+        manager.ProfileUrl.Should().NotBeNull("the owner may see the contacts of every member");
+        ShouldBeAbsoluteUrl(manager.Avatar, "the avatar of the manager must be usable outside the portal");
     }
 
     [Fact]
@@ -88,9 +88,9 @@ public class WebhookGroupPayloadTests(
             new GroupRequestDto(groupName: $"group-{Guid.NewGuid():N}", groupManager: Owner.Id, members: [member.Id]),
             TestContext.Current.CancellationToken)).Response;
 
-        var created = await WaitForEventPayloadAsync(subscription.Id, "group.created", p => p.GetProperty("id").GetGuid() == group.Id);
+        var created = await WaitForEventPayloadAsync<GroupPayload>(subscription.Id, "group.created", p => p.Id == group.Id);
         created.Should().NotBeNull();
-        var countBefore = created!.Value.GetProperty("membersCount").GetInt32();
+        var countBefore = created!.Model.MembersCount;
 
         var newName = $"renamed-{Guid.NewGuid():N}";
 
@@ -101,14 +101,14 @@ public class WebhookGroupPayloadTests(
             TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "group.updated", p => p.GetProperty("name").GetString() == newName);
+        var payload = await WaitForEventPayloadAsync<GroupPayload>(subscription.Id, "group.updated", p => p.Name == newName);
 
         payload.Should().NotBeNull();
-        var updated = payload!.Value;
+        var updated = payload!.Model;
 
-        updated.GetProperty("id").GetGuid().Should().Be(group.Id);
-        updated.GetProperty("membersCount").GetInt32().Should().Be(countBefore + 1, "the member added by the update is counted");
-        updated.GetProperty("manager").GetProperty("id").GetGuid().Should().Be(Owner.Id);
+        updated.Id.Should().Be(group.Id);
+        updated.MembersCount.Should().Be(countBefore + 1, "the member added by the update is counted");
+        updated.Manager.Id.Should().Be(Owner.Id);
     }
 
     /// <summary>
@@ -134,12 +134,12 @@ public class WebhookGroupPayloadTests(
         await _groupApi.UpdateGroupAsync(group.Id, new UpdateGroupRequest(groupManager: Owner.Id, groupName: newName), cancellationToken);
 
         // Assert: the event of the rename is there, and it is the only one; both calls publish before they answer
-        var renamed = await WaitForEventPayloadAsync(subscription.Id, "group.updated", p => p.GetProperty("name").GetString() == newName);
+        var renamed = await WaitForEventPayloadAsync<GroupPayload>(subscription.Id, "group.updated", p => p.Name == newName);
         renamed.Should().NotBeNull("the rename is a change");
 
         var events = (await GetLogAsync(subscription.Id))
-            .Select(r => JsonDocument.Parse(r.RequestPayload).RootElement)
-            .Where(r => r.GetProperty("payload").GetProperty("id").GetGuid() == group.Id)
+            .Select(r => WebhookParser.Parse(r.RequestPayload).PayloadAs<GroupPayload>())
+            .Where(p => p?.Id == group.Id)
             .ToList();
 
         events.Should().ContainSingle("the update that repeated the current values changed nothing");

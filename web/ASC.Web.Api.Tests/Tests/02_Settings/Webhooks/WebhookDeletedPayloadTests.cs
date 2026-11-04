@@ -62,13 +62,13 @@ public class WebhookDeletedPayloadTests(
         await _profilesApi.DeleteMemberAsync(subject.Id.ToString(), TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForPayloadAsync(subscription.Id, p => p.TryGetProperty("id", out var id) && id.GetGuid() == subject.Id);
+        var payload = await WaitForPayloadAsync<UserPayload>(subscription.Id, p => p.Id == subject.Id);
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("email").GetString().Should().Be(subject.Email);
-        payload.Value.GetProperty("displayName").GetString().Should().NotBeNullOrEmpty();
-        payload.Value.GetProperty("groups").EnumerateArray()
-            .Select(g => g.GetProperty("name").GetString())
+        payload!.Model.Email.Should().Be(subject.Email);
+        payload.Model.DisplayName.Should().NotBeNullOrEmpty();
+        payload.Model.Groups
+            .Select(g => g.Name)
             .Should().Contain(groupName, "the membership the delete removes is part of the user it removes");
     }
 
@@ -88,11 +88,11 @@ public class WebhookDeletedPayloadTests(
         await _groupApi.DeleteGroupAsync(group.Response.Id, TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForPayloadAsync(subscription.Id, p => p.TryGetProperty("id", out var id) && id.GetGuid() == group.Response.Id);
+        var payload = await WaitForPayloadAsync<GroupPayload>(subscription.Id, p => p.Id == group.Response.Id);
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("name").GetString().Should().Be(groupName);
-        payload.Value.GetProperty("manager").GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        payload.Value.GetProperty("membersCount").GetInt32().Should().BeGreaterThan(0, "the members are counted before the delete removes them");
+        payload!.Model.Name.Should().Be(groupName);
+        payload.Model.Manager.Id.Should().Be(Owner.Id);
+        payload.Model.MembersCount.Should().BeGreaterThan(0, "the members are counted before the delete removes them");
     }
 }

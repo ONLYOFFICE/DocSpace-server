@@ -282,6 +282,12 @@ WireMock.Net server in the test process, started on first use on the loopback al
 the server cannot bind. The rest of the suite still runs, but every test that creates a
 subscription fails on starting it — an environment problem, not a product regression.
 
+Those tests read what the receiver and the delivery log got through `DocSpace.Webhooks.SDK` (`.nuget/packages`): a
+payload that stops matching the contract fails the parse. An optional value of a model is nullable, so a field left
+out reads as `null`, not as 0 (`Model.QuotaLimit.Should().BeNull()`). `DeliveredPayload<T>.Json` is the same payload as
+it went out, for the two things a model cannot say: that a field no model declares is not there, and the format of a
+value on the wire. Use it for those only.
+
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
 belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command line.

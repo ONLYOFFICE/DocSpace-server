@@ -79,17 +79,16 @@ public class WebhookDeliveryTests(
         var delivery = (await receiver.WaitForDeliveriesAsync(1)).Should().ContainSingle().Subject;
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
 
-        using var body = JsonDocument.Parse(delivery.Body);
-        var eventInfo = body.RootElement.GetProperty("event");
+        var eventInfo = WebhookParser.Parse(delivery.Body).Event!;
 
-        eventInfo.GetProperty("id").GetInt32().Should().Be(record.Id);
+        eventInfo.Id.Should().Be(record.Id);
         delivery.Header("x-docspace-event-id").Should().Be(record.Id.ToString());
 
         DateTime.Parse(delivery.Header("x-docspace-event-timestamp")!).ToUniversalTime()
-            .Should().Be(eventInfo.GetProperty("createOn").GetDateTime().ToUniversalTime());
+            .Should().Be(eventInfo.CreateOn!.Value.ToUniversalTime());
 
-        delivery.Header("x-docspace-signature-256").Should()
-            .BeEquivalentTo($"sha256={Sign(subscription.SecretKey, delivery.Body)}", "the receiver checks the signature of the exact body it got");
+        WebhookSignature.Verify(delivery.Body, subscription.SecretKey, delivery.Header(WebhookSignature.HeaderName))
+            .Should().BeTrue("the receiver checks the signature of the exact body it got");
     }
 
     [Fact]
@@ -222,25 +221,14 @@ public class WebhookDeliveryTests(
 
         deliveries.Should().HaveCount(3);
 
+        RetryCountOf(deliveries[2].Body).Should().Be(1);
+
+        // a date-time without an offset is rejected by the Java, Kotlin and Go SDKs, which drops the whole delivery; the
+        // format on the wire is what counts here, and a parsed DateTime no longer shows it
         using var retry = JsonDocument.Parse(deliveries[2].Body);
-        var webhook = retry.RootElement.GetProperty("webhook");
-
-        webhook.GetProperty("retryCount").GetInt32().Should().Be(1);
-
-        // a date-time without an offset is rejected by the Java, Kotlin and Go SDKs, which drops the whole delivery
-        var lastSuccessOn = webhook.GetProperty("lastSuccessOn").GetString();
+        var lastSuccessOn = retry.RootElement.GetProperty("webhook").GetProperty("lastSuccessOn").GetString();
         lastSuccessOn.Should().MatchRegex(@"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", "every timestamp goes out in UTC, in whole seconds");
         DateTimeOffset.Parse(lastSuccessOn!, CultureInfo.InvariantCulture).Should()
             .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(5), "it is the time of the first delivery, in UTC");
-    }
-
-    private static int RetryCountOf(string body)
-    {
-        using var document = JsonDocument.Parse(body);
-
-        // zero is left out of the body, as every default value is
-        return document.RootElement.GetProperty("webhook").TryGetProperty("retryCount", out var retryCount)
-            ? retryCount.GetInt32()
-            : 0;
     }
 }
