@@ -113,11 +113,10 @@ extension SHALL fail the job and list the uploaded files in `failedArchives`.
 ### Requirement: Parsing the uploaded backup
 
 `uploadAndInitializeMigration` SHALL only queue a parse job with the migrator named in the route and
-answer 200 with no body, whatever the name and whether anything was uploaded. The job SHALL read the
-backup without changing the portal and report, through `getMigrationStatus`, `parseResult` with
-`operation` `parse`, then `progress` 100 and `isCompleted` true. An unknown name, or a parse started
-before any upload, SHALL end the job with `isCompleted` true and a non-empty `error`. A successful
-parse keeps the uploaded files; a failed one deletes them.
+answer 200 with no body. The job SHALL read the backup without changing the portal and report, through
+`getMigrationStatus`, `parseResult` with `operation` `parse`, then `progress` 100 and `isCompleted`
+true. An unknown name or a parse without an upload SHALL end the job with a non-empty `error`. A
+successful parse keeps the uploaded files; a failed one deletes them.
 
 #### Scenario: Parse queued
 

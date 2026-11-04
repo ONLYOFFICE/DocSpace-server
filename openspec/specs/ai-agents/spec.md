@@ -30,10 +30,10 @@ the evidence, the differences and the suspected defects are in `verification.md`
 
 The portal SHALL carry one AI switch, on by default, read by any signed-in member through
 `getTenantAiAccessSettings` (anonymous 401) and changed through `setTenantAiAccessSettings` by the owner or
-a DocSpace admin only (others 403, anonymous 401, the switch unchanged). While it is off every AI route this
-specification does not name as ungated SHALL answer 403 before the target of the call is looked up, and the
-AI rooms section, its rooms and their files SHALL answer 403 on every Files route; switching it back on SHALL
-restore every stored setting and every room. The change is audited and pushed to clients.
+a DocSpace admin only (others 403, anonymous 401). While it is off every AI route this specification does
+not name as ungated SHALL answer 403 before the target is looked up, and the AI rooms section with its rooms
+and files SHALL answer 403 on every Files route; switching it back on restores every setting and room. The
+change is audited and pushed to clients.
 
 #### Scenario: DocSpace admin turns AI off for everyone
 
@@ -54,9 +54,9 @@ restore every stored setting and every room. The change is audited and pushed to
 
 `aiSettingsGet` SHALL be readable by every signed-in member, Guests included, with AI on or off (anonymous
 401), and report the same `aiReady`, `systemAiEnabled`, `vectorizationEnabled`, `vectorizationNeedReset`,
-`embeddingModel`, `toolPermissionMode` and nullable `recommendedModelForForms` to every role. On a hosted
-portal the first three SHALL be true only while the switch is on and the AI Tools wallet service is paid for;
-on a self-hosted installation `aiReady` SHALL be true while the switch is on and a profile exists.
+`embeddingModel`, `toolPermissionMode` and nullable `recommendedModelForForms` to every role. Hosted, the
+first three SHALL be true only while the switch is on and the AI Tools wallet service is paid for;
+self-hosted, `aiReady` SHALL be true while the switch is on and a profile exists.
 
 #### Scenario: Unpaid hosted portal
 
@@ -102,10 +102,9 @@ cached together.
 
 `aiSettingsGetUser` and `aiSettingsSetUser` SHALL read and store the caller's own
 `chatRecommendedModelVisible` (true for a new user), usable by every member and while AI is off, never
-touching another user's value or the portal settings. The body SHALL carry `chatRecommendedModelVisible`
-under exactly that name as a boolean; a non-boolean, an empty object, a missing body or a body that is not
-an object SHALL be refused (400) and change nothing; an unknown field next to a valid value is ignored; a
-200 SHALL always mean the value was stored.
+touching another user's value or the portal settings. The body SHALL carry that exact name as a boolean; a
+non-boolean, an empty object, a missing body or a non-object body SHALL be refused (400) and change nothing;
+an unknown field next to a valid value is ignored; a 200 SHALL always mean the value was stored.
 
 #### Scenario: One user's preference is private
 
@@ -119,12 +118,12 @@ an object SHALL be refused (400) and change nothing; an unknown field next to a 
 
 ### Requirement: Tool permission mode of a user
 
-The caller's tool permission mode — `ask` (every host tool call waits for approval unless pre-approved),
-`auto` (the default: a tool that opts out of approval runs at once, one without the flag asks) or `allow`
-(nothing waits) — SHALL be one value per user for every chat of the portal, written through
-`aiSettingsSetToolMode` or `aiPreferencesSetToolPermissionMode` and read through `aiSettingsGetToolMode`,
+The caller's tool permission mode — `ask` (every host tool call waits unless pre-approved), `auto` (the
+default: a tool that opts out of approval runs at once, one without the flag asks) or `allow` (nothing
+waits) — SHALL be one value per user for every chat, written through `aiSettingsSetToolMode` or
+`aiPreferencesSetToolPermissionMode` and read through `aiSettingsGetToolMode`,
 `aiPreferencesGetToolPermissionMode` and `aiSettingsGet`. A value outside the three SHALL be refused (400)
-and leave the mode alone; another user's write leaves it alone; a new mode applies to the next tool call.
+leaving the mode; a new mode applies to the next tool call.
 
 #### Scenario: Modes round-trip
 
@@ -135,6 +134,11 @@ and leave the mode alone; another user's write leaves it alone; a new mode appli
 
 - **WHEN** the mode is `allow` and the model calls a tool that requires approval
 - **THEN** the tool runs without a pending tool call; in `ask` every host tool pauses for approval whatever its own flag says
+
+#### Scenario: Modes are per user
+
+- **WHEN** the owner sets `allow` and a User reads their own mode
+- **THEN** the User still reads `auto`
 
 ### Requirement: Gates on the tool permission mode routes
 
@@ -150,11 +154,10 @@ the stored mode survives the off period.
 ### Requirement: Profile catalogue
 
 `aiProfilesList` and `aiProfilesGetById` SHALL describe every profile identically (id, name, provider type,
-base URL, model id, capabilities, reasoning support, no generation tuning fields) to DocSpace admins, Room
-admins and Users; Guests 403, anonymous 401; malformed or empty id 400, unknown id 404 with a message.
-`aiProfilesGetById` SHALL carry neither the key nor the headers; `aiProfilesList` SHALL carry the key to a
-DocSpace admin. On a hosted portal the catalogue SHALL be the gateway's model list without embedding models
-and without the models restricted for the portal, served whole inside an AI project too.
+base URL, model id, capabilities, reasoning support) to DocSpace admins, Room admins and Users; Guests 403,
+anonymous 401; malformed or empty id 400, unknown id 404. `aiProfilesGetById` SHALL carry neither the key
+nor the headers; the list carries the key to a DocSpace admin. Hosted, the catalogue SHALL be the gateway's
+model list without embedding and restricted models, served whole inside an AI project too.
 
 #### Scenario: Guest cannot read the catalogue
 
@@ -169,7 +172,7 @@ and without the models restricted for the portal, served whole inside an AI proj
 #### Scenario: Unknown id
 
 - **WHEN** a member calls `aiProfilesGetById` with a well-formed id no profile carries
-- **THEN** the system answers 404
+- **THEN** the system answers 404 with a message
 
 ### Requirement: Models offered by a stored profile's provider
 
@@ -187,11 +190,9 @@ caller while the AI switch is off, SHALL be refused (403) before the provider is
 
 `aiProfilesCreate`, `aiProfilesUpdate` and `aiProfilesDelete` SHALL be allowed to DocSpace admins only
 (403 for Room admins, Users and Guests, 401 anonymous, authentication before validation; AI off 403 before
-the body is read). On a hosted portal — the AI gateway configured — the catalogue is read-only and every
-write SHALL answer 403, the owner's included. Self-hosted: an unknown or `external` provider type, a base
-URL on a loopback, private or unresolvable host and a key that cannot travel in an HTTP header SHALL be
-refused (400) before any connection and store nothing; base URL at most 2048 characters, key at most 4096;
-each write is audited.
+the body is read). Hosted — the AI gateway configured — every write SHALL answer 403, the owner's included.
+Self-hosted, the base URL is at most 2048 characters and the key at most 4096, an unusable provider type,
+host or key is refused before any connection, and each write is audited.
 
 #### Scenario: Owner on a hosted portal cannot add a profile
 
@@ -208,19 +209,22 @@ each write is audited.
 - **WHEN** a Room admin calls `aiProfilesDelete`
 - **THEN** the system answers 403 and the catalogue is untouched
 
+#### Scenario: Unusable profile refused before any connection
+
+- **WHEN** a DocSpace admin creates a profile with an unknown or `external` provider type, a loopback base URL or a key that cannot be an HTTP header
+- **THEN** the system answers 400, nothing is stored and no socket is opened
+
 ### Requirement: Provider discovery
 
 `aiProfilesListProviderModels` SHALL require `providerType` and `baseUrl` (400 naming exactly the missing
-or empty field), refuse an unknown provider type, a malformed or non-http base URL, a loopback, private,
-link-local, metadata or unresolvable host and a key that cannot be an HTTP header with 400 before any
-connection, report a key the provider rejects as 400 against the key, answer 502 for a provider that does
-not answer, never return a model list from a host that is not the provider, and never echo the key or store
-a profile. Local provider types need no key and never refuse over it; every model is named; Guests 403, AI
-off 403.
+field), refuse an unknown provider type, a malformed base URL, a forbidden host and a key that cannot be an
+HTTP header with 400 before any connection, report a key the provider rejects as 400 against the key, answer
+502 for a provider that does not answer, and never echo the key or store a profile. Local provider types
+need no key and never refuse over it; every model is named; Guests 403, AI off 403.
 
 #### Scenario: Private address refused before dialling
 
-- **WHEN** a member calls `aiProfilesListProviderModels` with a base URL on a loopback or link-local address
+- **WHEN** a member calls `aiProfilesListProviderModels` with a base URL on a loopback, link-local or metadata address, or with a non-http scheme
 - **THEN** the system answers 400 and no socket is opened
 
 #### Scenario: Wrong key
@@ -261,11 +265,10 @@ AI Tools on (403) and a `models` list without null entries (400 before the actio
 ### Requirement: Tasks and the scope of the assignments
 
 Each task — Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision,
-FormAnalysis, GenerateMeta — SHALL hold at most one profile, portal-wide. An `entityId` sent to any
+FormAnalysis, GenerateMeta — SHALL hold at most one profile, portal-wide. An `entityId` sent to an
 assignment route SHALL only be checked: one naming no folder 404, one the caller cannot open 403, any
-accessible folder the portal map (a binding written with it lands portal-wide). An unknown task SHALL answer
-400 on every route. The chat model of an AI project is its own and is set through `setProjectModel`, not
-through the assignments.
+accessible folder the portal map. An unknown task SHALL answer 400 on every route. The chat model of an AI
+project is set through `setProjectModel`, not here.
 
 #### Scenario: Unknown scope
 
@@ -300,8 +303,7 @@ A task SHALL resolve to its own binding, else to Default, which the first profil
 Chat binding never overrides FormAnalysis. `aiAssignmentsResolveForAction` SHALL answer 404, never 500,
 when nothing is bound or the only candidate cannot serve the task (Chat is never handed a profile that
 cannot chat); `aiAssignmentsTryResolveForAction` answers 200 with a null body. `expand` `profile` on
-`aiAssignmentsGetAllAssignments` SHALL answer the profiles themselves with `profilesTotal` and
-`chatProfilesTotal`. A hosted portal carries Default, ImageGeneration and FormAnalysis chosen from the gateway.
+`aiAssignmentsGetAllAssignments` SHALL answer the profiles with `profilesTotal` and `chatProfilesTotal`.
 
 #### Scenario: Unassigned task falls back to Default
 
@@ -313,14 +315,19 @@ cannot chat); `aiAssignmentsTryResolveForAction` answers 200 with a null body. `
 - **WHEN** Default is an image-only profile, Chat is unbound and the owner resolves Chat
 - **THEN** the system answers 404 and `aiAssignmentsTryResolveForAction` answers 200 with null
 
+#### Scenario: Hosted defaults
+
+- **WHEN** a hosted portal is fresh
+- **THEN** Default, ImageGeneration and FormAnalysis are bound to models of the gateway catalogue
+
 ### Requirement: Writing assignments
 
 `aiAssignmentsAssign` SHALL check the profile's capabilities against the task (Default exempt) and refuse,
 leaving the binding, a profile the catalogue does not hold or one that cannot serve the task; a missing or
 unknown field is 400. `aiAssignmentsBulkAssign` SHALL apply a flat task-to-profile map all or nothing
 (unknown key, null value or malformed id 400, an empty map accepted). `aiAssignmentsUnassign` removes one
-binding (repeat accepted, unknown task 400); `aiAssignmentsCascadeProfileDelete` drops every binding of one
-profile sent as an object field. Writes are audited.
+binding (repeat accepted); `aiAssignmentsCascadeProfileDelete` drops every binding of one profile. Writes
+are audited.
 
 #### Scenario: Bulk assignment is all or nothing
 
@@ -336,14 +343,13 @@ profile sent as an object field. Writes are audited.
 
 Instructions rooms, Knowledge rooms and AI projects SHALL be rooms created through `createRoom` with their
 `roomType`, by the owner, a DocSpace admin or a Room admin (User, Guest 403), landing in the AI rooms section
-and never in Rooms; a Knowledge room needs vectorization enabled (403). They take a title, color, cover, tags
-and logo; `private`, `indexing`, `lifetime`, `denyDownload`, `watermark`, `chatSettings`, the form settings
-and — for a project — `quota` SHALL be refused on create and update (400). They are never archived (403), make
-no template (403), take no folder in the section root (403) and are deleted outright.
+and never in Rooms; a Knowledge room needs vectorization enabled (403). Settings that do not apply to the
+type SHALL be refused on create and update (400). They are never archived (403), make no template (403),
+take no folder in the section root (403) and are deleted outright.
 
-#### Scenario: Project with a quota
+#### Scenario: Settings that do not apply
 
-- **WHEN** the owner creates a project with `quota`, or sets `denyDownload` on an Instructions room
+- **WHEN** the owner creates a project with `quota`, sets `denyDownload` on an Instructions room or `indexing`, `lifetime`, `watermark`, `chatSettings` or a form setting on any of the three
 - **THEN** the system answers 400 and nothing is created or changed
 
 #### Scenario: Section listing
@@ -360,14 +366,13 @@ no template (403), take no folder in the section root (403) and are deleted outr
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
 the same without Editor, an AI project only Project manager (Room manager) and Member (Read). A Guest SHALL
-NOT hold any role in a project: a direct invite, an email invite and an invitation link answer 403 and add
-nobody; a User joins through a link as Member. Every project member reads the project; only a manager edits
-it; a non-member of any role, a DocSpace admin included, SHALL NOT read a project's model, sources or skills
-(403).
+NOT hold any role in a project (403, nobody added) while a User joins through a link as Member. Every member
+reads the project; only a manager edits it; a non-member of any role, a DocSpace admin included, SHALL NOT
+read its model, sources or skills (403).
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Member by id or by email
+- **WHEN** the owner invites a Guest to a project as Member by id, by email or through an invitation link
 - **THEN** the system answers 403 and the Guest is not a member
 
 #### Scenario: Member reads, manager writes
@@ -378,11 +383,10 @@ it; a non-member of any role, a DocSpace admin included, SHALL NOT read a projec
 ### Requirement: The model of an AI project
 
 `getProjectModel` SHALL answer the project's own chat model as a profile id, null while none is selected or
-the selected profile is gone (then the portal-wide Chat binding answers the chat); `setProjectModel` SHALL
-need a project manager (403), a `profileId` naming a catalogue profile that can chat (missing, unknown or
-image-only 400, the project keeping its model), replace the previous choice, be audited and pushed to the
-project's clients; the selection is never cleared. An Instructions room or an unknown id on either route
-SHALL answer 404. Changing the model SHALL leave existing threads on their model.
+the profile is gone (the portal's Chat binding then answers); `setProjectModel` SHALL need a project
+manager (403) and a `profileId` naming a catalogue profile that can chat (missing, unknown or image-only
+400, the project keeping its model), replace the previous choice, be audited and pushed to clients; the
+selection is never cleared. An Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
@@ -394,23 +398,28 @@ SHALL answer 404. Changing the model SHALL leave existing threads on their model
 - **WHEN** a Member reads the model of a project bound to profile A while the portal's Chat binding is B
 - **THEN** A is returned and the Member's round in the project runs on A
 
+#### Scenario: Model moved
+
+- **WHEN** a manager sets another chat profile on a project with an open thread
+- **THEN** new rounds run on the new profile and the existing thread keeps its model
+
 ### Requirement: Sources of an AI project
 
 `getProjectSources` SHALL list the Instructions and Knowledge rooms linked to a project, sorted by title;
-`linkProjectSources` SHALL link active rooms of those two types that the caller manages (already linked ones
-skipped, duplicates collapsed; an unknown, deleted, foreign-type room, a project or a room the caller cannot
-edit 400 linking nothing; `roomIds` empty or over 40 ids 400; over 20 rooms of one kind 400 keeping the
-links); `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both
-writes need a project manager (403), are audited and pushed to clients; a deleted room loses its link.
+`linkProjectSources` SHALL link active rooms of those two types that the caller manages, skipping linked
+ones and duplicates, and refuse the whole call (400, linking nothing) for any other room id, an empty list,
+over 40 ids or more than 20 rooms of one kind; `unlinkProjectSources` SHALL remove the listed links without
+checking rights on the rooms. Both writes need a project manager (403), are audited and pushed to clients;
+a deleted room loses its link.
 
 #### Scenario: Over the limit
 
 - **WHEN** a manager links a 21st Knowledge room
 - **THEN** the system answers 400 and the existing links stay
 
-#### Scenario: Viewer of the room
+#### Scenario: Room not linkable
 
-- **WHEN** a project manager who is only a Viewer of an Instructions room links it
+- **WHEN** a manager links an unknown room, a deleted one, a Custom room, another project or an Instructions room where they are only a Viewer
 - **THEN** the system answers 400 and nothing is linked
 
 ### Requirement: Access through a project
@@ -429,31 +438,29 @@ the skills of its linked Instructions rooms to any member.
 ### Requirement: Skills of an Instructions room
 
 A skill SHALL be a Markdown file in the root of an Instructions room whose YAML front matter carries `name`
-(1–64 characters, lowercase letters, digits and single inner hyphens) and `description` (1–1024 characters,
-no XML tag); an upload, chunked upload, new version, copy or move of a file without that front matter, with
-an invalid one or not Markdown SHALL be refused (400 on upload, the previous version kept; a move leaves the
-file where it was). The room takes no folder (403). A skill follows its file: a new version replaces it,
-moving it out or to the trash removes it from the catalogue, restoring brings it back.
+(1–64 characters: lowercase letters, digits, single inner hyphens) and `description` (1–1024 characters, no
+XML tag). A file without that front matter, with an invalid one or not Markdown SHALL NOT enter the room:
+an upload, chunked upload or new version answers 400 keeping the previous version, a copy lands nowhere, a
+move leaves the file where it was. The room takes no folder (403).
 
 #### Scenario: Invalid name
 
 - **WHEN** the owner uploads a skill whose `name` carries an upper-case letter or a double hyphen
 - **THEN** the system answers 400 and the room stays empty
 
-#### Scenario: Skill moved to the trash
+#### Scenario: Skill follows its file
 
-- **WHEN** the owner moves a skill file to the trash and restores it
-- **THEN** the room's catalogue loses it and gets it back
+- **WHEN** the owner uploads a new version of a skill, moves it to another Instructions room, then to the trash, and restores it
+- **THEN** the catalogue shows the new version, then the other room, loses the skill in the trash and gets it back
 
 ### Requirement: Listing the skills
 
 `getRoomSkills` SHALL answer the skills of an Instructions room (sorted by file title) or of a project's
-linked Instructions rooms (rooms sorted by title) to a reader of the room (403 others; an unknown id or a
-room of another type 404; a project without linked rooms an empty list). `getRoomsSkills` SHALL take 1–20
-room ids (400 otherwise) and answer one entry per readable Instructions room, leaving out unknown rooms,
-rooms of another type and rooms the caller cannot read. `getRoomAiFolder` SHALL page the root of an
-Instructions room (empty while it holds no skill, 403 for a non-reader, 404 for another room type);
-`getRoomsFolder` with `withAiFolder` SHALL list the Instructions rooms.
+linked Instructions rooms (rooms sorted by title) to a reader (403 others; unknown id or other room type
+404). `getRoomsSkills` SHALL take 1–20 room ids (400 otherwise) and answer one entry per readable
+Instructions room, leaving the rest out. `getRoomAiFolder` SHALL page the root of an Instructions room
+(empty without a skill, 403 non-reader, 404 other type); `getRoomsFolder` with `withAiFolder` SHALL list
+the Instructions rooms.
 
 #### Scenario: Room without a skill
 
@@ -462,17 +469,16 @@ Instructions room (empty while it holds no skill, 403 for a non-reader, 404 for 
 
 #### Scenario: Unreadable room left out
 
-- **WHEN** a User calls `getRoomsSkills` with an Instructions room they are not in next to one they read
-- **THEN** only the readable room is answered
+- **WHEN** a User calls `getRoomsSkills` with an Instructions room they are not in, an unknown id and a Custom room next to a room they read
+- **THEN** only the readable Instructions room is answered
 
 ### Requirement: Using the skills in a chat
 
 The skills of the Instructions rooms connected to a round (`actionArgs.contextRooms`, or the linked rooms of
 a project) SHALL be re-read from the room for every round and offered to the model as an index with a
-`read_skill` tool that returns the body of one skill by id; a body is never sent unless the model asks. The
-tool SHALL serve a member of any role of the room and refuse an outsider whatever catalogue the client
-spoofs, a Guest (403) and a member whose invitation was revoked; anonymous 401. `aiContextGetContextFolders`
-and `aiContextGetRoomSkills` list the readable Instructions rooms and their skills.
+`read_skill` tool that returns one skill's body by id; a body is never sent unless the model asks. The tool
+SHALL serve a member of any role and refuse an outsider whatever catalogue the client spoofs, a Guest (403)
+and a member whose invitation was revoked; anonymous 401.
 
 #### Scenario: Model reads one skill
 
@@ -484,14 +490,18 @@ and `aiContextGetRoomSkills` list the readable Instructions rooms and their skil
 - **WHEN** a User who is not in the Instructions room sends the room's skill in `contextRooms`
 - **THEN** the skill body never reaches the model
 
+#### Scenario: Composer lists the rooms
+
+- **WHEN** a member calls `aiContextGetContextFolders` and `aiContextGetRoomSkills` for a room they read
+- **THEN** the readable Instructions rooms and that room's current skills are answered
+
 ### Requirement: An AI agent as a room: the deltas
 
-An AI agent (`createRoom` with the AI room type, created in the Rooms section) SHALL offer only the Room
-manager, Content creator and Viewer roles; a Guest SHALL be accepted as Viewer only (403 above it). Its root
-SHALL hold no files: an upload to the root answers 403, a Viewer's upload into Chat outputs 403, while Knowledge
-and Chat outputs take files from a Content creator or Room manager. Knowledge SHALL accept only indexable
-formats (403) and no subfolders. The agent SHALL impose no model: a thread in it keeps its own model and
-`chatSettings.prompt`, though stored, reaches no model. An agent SHALL NOT become a room template.
+An AI agent (`createRoom` with the AI room type, in the Rooms section) SHALL offer only the Room manager,
+Content creator and Viewer roles; a Guest SHALL be accepted as Viewer only (403 above it). Its root SHALL
+hold no files: an upload to the root answers 403, a Viewer's upload into Chat outputs 403, while Knowledge
+and Chat outputs take files from a Content creator up. Knowledge SHALL accept only indexable formats (403)
+and no subfolders. The agent imposes no model and its stored `chatSettings.prompt` reaches no model.
 
 #### Scenario: Guest as Content creator
 
@@ -508,14 +518,18 @@ formats (403) and no subfolders. The agent SHALL impose no model: a thread in it
 - **WHEN** a thread is started in an agent on profile A while the portal's Chat binding is B
 - **THEN** a send without `profileId` runs on A and the thread still reports A
 
+#### Scenario: No template from an agent
+
+- **WHEN** the owner makes a room template from an agent
+- **THEN** the system refuses the call
+
 ### Requirement: Starting a chat thread
 
 `aiThreadsCreate` SHALL start a thread for the caller — a DocSpace admin, a Room admin or a User; Guests
 403, anonymous 401, AI off 403 — with a required non-blank `title` of at most 255 characters stored verbatim
 (missing, null, blank, over-long or no body 400) and an optional `profileId` that must be well formed (400)
 and name a catalogue profile (404); without one the thread has no model until a send brings one. The thread
-SHALL belong to its creator alone and SHALL be listed empty until a message is appended; parallel creates
-SHALL all succeed with distinct ids.
+belongs to its creator alone and is listed empty until a message is appended.
 
 #### Scenario: Blank title
 
@@ -527,17 +541,21 @@ SHALL all succeed with distinct ids.
 - **WHEN** the owner sends a 255-character title and then a 256-character one
 - **THEN** the first is stored whole and the second answers 400
 
+#### Scenario: Parallel creates
+
+- **WHEN** the owner creates ten threads at once
+- **THEN** all ten succeed with distinct ids
+
 ### Requirement: Where a thread may be started
 
 `entityId` of `aiThreadsCreate` SHALL be checked, never used as a partition: omitted, null, empty or 0 is
 the ordinary case; a value naming no folder, a malformed one included, 404; a folder the caller cannot open
-403 (a room they are not in, another user's folder, a room they were removed from); any accessible folder —
-a room where they hold Read, their own folder — is accepted. An AI project SHALL take a thread from its
+403; any accessible folder is accepted, Read in a room sufficing. An AI project SHALL take a thread from its
 members only (403 for an outsider of any role) and only while a model is available (409 otherwise).
 
 #### Scenario: Non-member of a room
 
-- **WHEN** a Room admin or a User who is not in an ordinary room starts a thread with it as `entityId`
+- **WHEN** a Room admin or a User who is not in an ordinary room, or a member removed from it, starts a thread with it as `entityId`
 - **THEN** the system answers 403 and no thread is left behind
 
 #### Scenario: Read-level member
@@ -555,9 +573,8 @@ members only (403 for an outsider of any role) and only while a model is availab
 A thread SHALL be visible to its creator only: `aiThreadsGetById`, `aiThreadsReadMessages`,
 `aiThreadsRename`, `aiThreadsDelete`, `aiThreadsClearMessages`, `aiThreadsTouch`,
 `aiThreadsOpenOrCreate`, every message route, a tool-call decision and a send or regeneration into it
-SHALL answer 403 to any other member, a DocSpace admin or a member of the same room included (the reply
-kept, the model not reached). A member removed from a room SHALL still read, rename, clear and delete the
-thread they wrote there, but SHALL be refused a send into it (403).
+SHALL answer 403 to any other member, a DocSpace admin or a member of the same room included. A member
+removed from a room SHALL still manage the thread they wrote there but is refused a send into it (403).
 
 #### Scenario: Two members of one room
 
@@ -568,6 +585,11 @@ thread they wrote there, but SHALL be refused a send into it (403).
 
 - **WHEN** a member who wrote in a room is removed from it
 - **THEN** creating for that room and sending into the thread answer 403, while the thread is still read and renamed by its creator
+
+#### Scenario: Regeneration by a fellow member
+
+- **WHEN** a member of the same room regenerates the owner's thread
+- **THEN** the system answers 403, the reply is kept and the model is not reached
 
 ### Requirement: One thread list per user
 
@@ -606,12 +628,11 @@ list; a touch SHALL move the thread to the top, move only that thread and never 
 
 ### Requirement: Renaming, deleting and clearing a thread
 
-`aiThreadsRename` SHALL store the new title verbatim (missing, null, blank, numeric, object or over 255
+`aiThreadsRename` SHALL store the new title verbatim (missing, null, blank, non-string or over 255
 characters 400 keeping the name; unknown thread 404); `aiThreadsDelete` SHALL remove the thread with its
 messages and attachments and no other thread (unknown or already deleted 404, missing id 400);
-`aiThreadsClearMessages` SHALL empty the thread everywhere and keep its identity (empty thread or repeat
-200, unknown 404). A malformed id SHALL answer 400 on every route; after a delete every route treats the
-thread as gone (404). Each of the three is available to the member who owns the thread.
+`aiThreadsClearMessages` SHALL empty the thread and keep its identity (empty thread or repeat 200, unknown
+404). A malformed id SHALL answer 400 on every route.
 
 #### Scenario: Cleared thread carries on
 
@@ -623,13 +644,17 @@ thread as gone (404). Each of the three is available to the member who owns the 
 - **WHEN** the owner renames a thread while its reply is still streaming
 - **THEN** the rename survives the reply
 
+#### Scenario: Deleted thread is gone everywhere
+
+- **WHEN** the owner deletes a thread and then reads, renames, clears, touches or sends into it
+- **THEN** every route answers 404
+
 ### Requirement: Touching and reopening a thread
 
 `aiThreadsTouch` SHALL bump `lastEditDate` and change nothing else (bad or missing id 400);
 `aiThreadsOpenOrCreate` with a `threadId` SHALL replay the thread's history whole and in order, writing
-nothing, and leave its model alone whatever `profile` the request carries (a body without the profile object
-404); without a `threadId` it SHALL create a thread titled from `firstMessage`, storing the message itself
-not being its job; a deleted thread SHALL be unreachable on every route (404).
+nothing, and leave its model alone whatever `profile` the request carries (no profile object 404); without
+a `threadId` it SHALL create a thread titled from `firstMessage`, storing the message not being its job.
 
 #### Scenario: Reopened with another profile
 
@@ -660,13 +685,12 @@ accept a repeat. It SHALL be refused for another user's thread (403) and while A
 
 ### Requirement: Messages of a thread
 
-`aiThreadsAppendUserMessage` SHALL store a user message verbatim (markdown, links, Unicode, inline
-attachment records) without drawing an answer, in order even in parallel, and refuse an empty or whitespace
-text, a null message, a message without content, a role other than `user` and an unusable thread id (400,
-nothing stored); `aiThreadsGetMessageById` SHALL answer the message (deleted, cleared or unknown 404,
-malformed or missing 400); `aiThreadsUpdateMessage` SHALL rewrite the content in place keeping the position,
-the role and the standing answer (empty text 400, unknown 404); `aiThreadsDeleteMessage` SHALL be idempotent
-(200 unknown, 400 malformed). Another user's message SHALL answer 403 on every route.
+`aiThreadsAppendUserMessage` SHALL store a user message verbatim without drawing an answer, in order even
+in parallel, and refuse an empty text, a null message, one without content, a role other than `user` or an
+unusable thread id (400); `aiThreadsGetMessageById` SHALL answer the message (deleted, cleared or unknown
+404, malformed or missing 400); `aiThreadsUpdateMessage` SHALL rewrite the content in place keeping
+position, role and the standing answer (empty text 400, unknown 404); `aiThreadsDeleteMessage` SHALL be
+idempotent (200 unknown, 400 malformed). Another user's message 403.
 
 #### Scenario: Edited question stays in place
 
@@ -682,9 +706,9 @@ the role and the standing answer (empty text 400, unknown 404); `aiThreadsDelete
 
 `aiThreadsReadMessages` SHALL page the thread oldest first with `count` of at least 1 (0 or less 400) and
 a keyset cursor built from a message's timestamp and id that returns every message once and ends on an empty
-page; `direction` `desc` SHALL page back from the newest; a cursor that is a bare id reads the first page.
-A missing `threadId` 400, an unknown or deleted one 404. The assistant text SHALL be served as raw markdown,
-identical to the streamed text; the streamed snapshots only ever grow.
+page; `direction` `desc` SHALL page back from the newest; a bare id as cursor reads the first page. A
+missing `threadId` 400, an unknown or deleted one 404. The assistant text SHALL be served as raw markdown,
+identical to the streamed text, whose snapshots only ever grow.
 
 #### Scenario: Paging back
 
@@ -700,10 +724,9 @@ identical to the streamed text; the streamed snapshots only ever grow.
 
 `aiSendWithStream` SHALL store the user message, run the thread's model and stream the reply as
 newline-delimited chat events ending on the stored assistant text; without `threadId` it SHALL open a new
-thread titled "New chat" and rename it from the first question after the stream. The thread history, and
-not another thread's, SHALL reach the model; two threads answered at once each get their own reply. A
-provider refusal SHALL fail the turn with the provider's words, keep the question and leave the thread
-usable on another model; a client hang-up SHALL stop the generation and the thread accepts the next message.
+thread titled "New chat" and rename it from the first question after the stream. Only the thread's own
+history reaches the model. A provider refusal SHALL fail the turn with the provider's words and keep the
+question; a client hang-up SHALL stop the generation.
 
 #### Scenario: First send opens the thread
 
@@ -720,13 +743,18 @@ usable on another model; a client hang-up SHALL stop the generation and the thre
 - **WHEN** the client closes the connection mid-stream
 - **THEN** the generation stops and the thread accepts the next message
 
+#### Scenario: Provider refuses
+
+- **WHEN** the model refuses the round and the owner sends again on another model in the same thread
+- **THEN** the first turn is stored as failed with the question kept and the second is answered
+
 ### Requirement: Refusals of a send
 
 `aiSendWithStream` SHALL refuse before the stream opens: an empty message 400, an unknown thread 404, a
 malformed or unknown `profileId` 400 outside a project (the thread keeping its model), another user's thread
-403, a Guest 403, a non-member of the room or project named as `entityId` 403, AI off 403 (before the model
-is resolved), the AI Tools service unpaid on a hosted portal 402, a body over the request size limit 413
-without touching the thread. A refused send SHALL store neither the question nor an answer.
+403, a Guest 403, a non-member of the room or project named as `entityId` 403, AI off 403, the AI Tools
+service unpaid on a hosted portal 402, a body over the request size limit 413. A refused send SHALL store
+neither the question nor an answer.
 
 #### Scenario: Unknown profile
 
@@ -741,11 +769,10 @@ without touching the thread. A refused send SHALL store neither the question nor
 ### Requirement: The model of a chat
 
 A round whose `entityId` is an AI project SHALL run on the project's model — its own, else the portal's Chat
-binding — whatever `profileId` it carries (blank or unknown included), and SHALL NOT move the thread onto
-another model; a thread created in a project on another profile is not stored with it. Outside a project a
-send with no `profileId` SHALL run on the thread's own model when it has one, else on Chat, else on Default;
-a `profileId` sent becomes the thread's model and the earlier turns follow it; rebinding Chat moves no
-existing thread. An image-only profile as chat model fails the reply and keeps the question.
+binding — whatever `profileId` it carries (blank or unknown included), never moving the thread; a thread
+created in a project on another profile is not stored with it. Outside a project a send with no `profileId`
+runs on the thread's own model, else on Chat, else on Default; a `profileId` sent becomes the thread's model;
+rebinding Chat moves no thread. An image-only chat model fails the reply and keeps the question.
 
 #### Scenario: Project answers on its model
 
@@ -762,8 +789,8 @@ existing thread. An image-only profile as chat model fails the reply and keeps t
 `aiSend` and `aiSendCustom` SHALL run the model once for a DocSpace admin, a Room admin or a User (Guest
 403) and persist nothing: no thread is created and two calls share no history. An empty message or a
 malformed body SHALL be refused (400, never 500); a task type without its own binding resolves through
-Default; a nonexistent `entityId` falls back to the portal, an accessible one is used and an inaccessible one
-answers 403. `aiSendCustom` SHALL require `systemPrompt` (400) and take a boolean `isStream` (a string 400).
+Default; a nonexistent `entityId` falls back to the portal, an inaccessible one answers 403. `aiSendCustom`
+SHALL require `systemPrompt` (400) and a boolean `isStream` (a string 400).
 
 #### Scenario: Two one-shot calls
 
@@ -773,11 +800,10 @@ answers 403. `aiSendCustom` SHALL require `systemPrompt` (400) and take a boolea
 ### Requirement: OpenAI-shaped send
 
 `aiSendWithStreamOpenAI` SHALL persist like `aiSendWithStream` — a new thread when `threadId` is missing,
-the thread's model kept without `profileId`, an explicit profile moving it outside a project, the thread's
-context carried forward — and stream OpenAI `chat.completion.chunk` events as server-sent events ended by
-`[DONE]`, surfacing a tool call as `tool_calls` with the matching finish reason and no internal frame type,
-and a model failure inside the stream with 200. A prompt override applies to one request; a hang-up SHALL
-cancel the generation and leave the thread usable.
+the thread's model kept without `profileId`, an explicit profile moving it outside a project — and stream
+OpenAI `chat.completion.chunk` events as server-sent events ended by `[DONE]`, surfacing a tool call as
+`tool_calls` with the matching finish reason and no internal frame type, and a model failure inside the
+stream with 200. A hang-up SHALL cancel the generation and leave the thread usable.
 
 #### Scenario: OpenAI stream
 
@@ -786,25 +812,28 @@ cancel the generation and leave the thread usable.
 
 ### Requirement: Regenerating a reply
 
-`aiRegenerateStream` SHALL delete the last assistant reply of the thread, keep the question and every
-earlier turn, and stream a new reply on the thread's own model (the project's inside a project); a tool chain
-of the old reply SHALL be replaced whole and an abandoned reply replaced. A thread with nothing to regenerate
-or an unanswered last question SHALL answer 200 generating nothing, an unknown thread 404 before any stream,
-another user's thread 403 keeping the reply (a member of the same room included), AI off 403.
+`aiRegenerateStream` SHALL delete the last assistant reply, keep the question and every earlier turn, and
+stream a new reply on the thread's own model (the project's inside a project); a tool chain of the old reply
+SHALL be replaced whole. A thread with nothing to regenerate SHALL answer 200 generating nothing, an unknown
+thread 404 before any stream, another user's thread 403 keeping the reply, AI off 403.
 
 #### Scenario: Multi-turn thread
 
 - **WHEN** the owner regenerates a thread of three exchanges
 - **THEN** only the last reply changes and the three questions stay
 
+#### Scenario: Abandoned reply
+
+- **WHEN** the client hangs up mid-reply and the owner then regenerates
+- **THEN** the abandoned reply is replaced by a whole one
+
 ### Requirement: Tool calls and the approval pause
 
 A tool the model wants to run SHALL pause the stream with a pending tool call that carries the model's
 announcement (never duplicated as chat text, kept after the approval); `aiApproveToolCall` (with a string or
 structured `result`, optionally `allowAlways`) and `aiDenyToolCall` SHALL resume it, the refusal going to the
-model. A tool that opted out of approval SHALL run unasked; a pre-approved tool SHALL run unasked; a client
-tool sent with `enabled` false is not offered; a tool that answers "unavailable", was withdrawn or whose
-server left the registry SHALL finish the reply instead of stalling; a two-hop chain lands in one message.
+model. A tool that opted out of approval or is pre-approved runs unasked; a tool that answers "unavailable",
+was withdrawn or whose server left the registry SHALL finish the reply; a two-hop chain lands in one message.
 
 #### Scenario: Two-hop chain
 
@@ -816,14 +845,18 @@ server left the registry SHALL finish the reply instead of stalling; a two-hop c
 - **WHEN** the owner denies a pending document generator call
 - **THEN** no file is written and the reply finishes
 
+#### Scenario: Client tool switched off
+
+- **WHEN** the client sends a tool with `enabled` false
+- **THEN** the tool is not offered to the model
+
 ### Requirement: Decisions on a tool call
 
 `aiApproveToolCall` and `aiDenyToolCall` SHALL identify the call by `threadId`, `messageId` and `idx`; a
-`message` snapshot in the body SHALL be accepted and ignored. A message without a pending tool call, an
-unknown message id or an index out of range SHALL answer 409 inventing nothing; a second decision on a
-decided call SHALL NOT overwrite the first result or regenerate the follow-up, and a stale decision never
-reopens a superseded message. Both routes SHALL answer 401 anonymous, 403 to a non-member of the thread and
-403 while AI is off; inside a project the project's model and rooms apply again on resume.
+`message` snapshot in the body is accepted and ignored. No pending tool call, an unknown message id or an
+index out of range SHALL answer 409 inventing nothing; a second decision on a decided call SHALL NOT
+overwrite the first result or regenerate the follow-up, and a stale one never reopens a superseded message.
+Both routes answer 401 anonymous, 403 to a non-member of the thread and 403 while AI is off.
 
 #### Scenario: Nothing to decide
 
@@ -840,10 +873,8 @@ reopens a superseded message. Both routes SHALL answer 401 anonymous, 403 to a n
 `aiPreferencesSetDeepMode`, `aiPreferencesGetDeepMode`, `aiPreferencesIsDeepModeSet`,
 `aiPreferencesClearDeepMode`, `aiPreferencesSetReasoningLevel` and `aiPreferencesGetReasoningLevel` SHALL
 keep one value per user — whether extended thinking is on and its depth (`none`, `minimal`, `low`, `medium`,
-`high`) — off and unset by default, invisible to other users and surviving their writes. Switching on after
-off, or without a chosen depth, lands on `medium`; on keeps a stored depth; off replaces it; clearing returns
-the user to unset and is accepted again. With deep mode on the reasoning reaches the client as a part of its
-own.
+`high`) — off and unset by default, invisible to other users. On after off, or without a chosen depth, lands
+on `medium`; on keeps a stored depth; off replaces it; clearing returns the user to unset.
 
 #### Scenario: One user's value
 
@@ -855,14 +886,18 @@ own.
 - **WHEN** a member chooses `high`, switches deep mode off and on again
 - **THEN** the level reads `medium`
 
+#### Scenario: Reasoning reaches the client
+
+- **WHEN** deep mode is on and the model answers with reasoning
+- **THEN** the reasoning reaches the client as a part of its own and the answer is healthy
+
 ### Requirement: Scope and refusals of the preferences
 
 The preferences have no scope: an `entityId` on any route SHALL be a positive integer or empty (a malformed
-value, a thread id or 0 as a string 400 on reads and writes, writing nowhere) and is otherwise not used — a
-room, a folder, an AI room, an unknown id or a room the caller cannot open all read and write the caller's one
-value, and clearing with any of them answers success. A non-boolean switch value, an empty body or a depth
-outside the five SHALL answer 400 and change nothing. Guests SHALL be refused (403), anonymous 401, and every
-route SHALL answer 403 while AI is off.
+value, a thread id or 0 as a string 400, writing nowhere) and is otherwise not used — a room, a folder, an
+AI room, an unknown id or a room the caller cannot open all read and write the caller's one value. A
+non-boolean switch value, an empty body or a depth outside the five SHALL answer 400 and change nothing.
+Guests 403, anonymous 401, every route 403 while AI is off.
 
 #### Scenario: Room is no scope
 
@@ -879,10 +914,9 @@ route SHALL answer 403 while AI is off.
 `aiToolsAddCustomServer`, `aiToolsUpdateCustomServer`, `aiToolsRemoveCustomServer` and
 `aiToolsReplaceAllCustomServers` SHALL be allowed to DocSpace admins only (others 403; anonymous 401);
 `aiToolsGetCustomServer` and `aiToolsListCustomServers` SHALL be readable by DocSpace admins, Room admins
-and Users (Guest 403). Registration SHALL NOT dial the server; a config of any shape comes back verbatim
-(`disabled` switches nothing off) and is replaced whole on update, so a re-save without headers drops them;
-a read of an unregistered name answers null; each change is audited; every route but the catalogue 403
-while AI is off, nothing stored lost.
+and Users (Guest 403). Registration SHALL NOT dial the server; a config of any shape comes back verbatim and
+is replaced whole on update; an unregistered name reads as null; each change is audited; every route but
+the catalogue answers 403 while AI is off, nothing stored lost.
 
 #### Scenario: Round trip
 
@@ -893,6 +927,11 @@ while AI is off, nothing stored lost.
 
 - **WHEN** a Room admin or a User registers or removes a server
 - **THEN** the system answers 403 and the registry is unchanged
+
+#### Scenario: A flag in the config switches nothing
+
+- **WHEN** the owner registers a config carrying `disabled` true
+- **THEN** it is stored verbatim and the server's tools are not switched off
 
 ### Requirement: One registry per portal
 
@@ -915,11 +954,10 @@ that name (a duplicate) and answer 400 naming the portal server otherwise.
 ### Requirement: Server names
 
 A server name SHALL be a non-empty string of at most 128 characters (129 a hard 400), matched
-case-insensitively while keeping its spelling, surrounding whitespace included; the two Unicode spellings of
-one name are two servers and emoji round-trip. `.`, `..`, a path separator or a control character SHALL be
-a hard refusal (400) on add, update and replace-all; an underscore SHALL be refused on add and reported per
-entry on replace-all; a duplicate name or an unknown name on update SHALL be soft refusals keeping the
-original; removing an unknown name is a no-op and another casing removes the server.
+case-insensitively while keeping its spelling, surrounding whitespace included. `.`, `..`, a path separator
+or a control character SHALL be a hard refusal (400) on add, update and replace-all; an underscore SHALL be
+refused on add and reported per entry on replace-all; a duplicate name or an unknown name on update are soft
+refusals keeping the original; removing an unknown name is a no-op and another casing removes the server.
 
 #### Scenario: Underscore in the name
 
@@ -931,14 +969,18 @@ original; removing an unknown name is a no-op and another casing removes the ser
 - **WHEN** the owner adds a name of 128 characters and then one of 129
 - **THEN** the first is stored and the second answers 400
 
+#### Scenario: Unicode names
+
+- **WHEN** the owner adds `café` spelled as one code point and as a letter plus a combining accent, and a name with an emoji
+- **THEN** the first two are two servers and the third round-trips
+
 ### Requirement: Server configurations and replace-all
 
-A config SHALL be stdio or HTTP, never both — a config carrying both `url` and `command`, or a `url` or
-`command` of the wrong type, SHALL be refused and store nothing; a missing or null config is a hard 400
-and an empty object or a number counts as no config. `aiToolsReplaceAllCustomServers` SHALL require a `map`
-object (missing, null, scalar or array 400, the registry surviving), leave the registry as exactly the map
-sent, apply nothing when one entry is invalid, reporting every bad entry in `errors`, refuse two names
-differing only in case, and clear the registry on an empty map; 120 servers land whole.
+A config SHALL be stdio or HTTP, never both — both `url` and `command`, or either of the wrong type, SHALL
+be refused storing nothing; a missing or null config is a hard 400, an empty object or a number counts as no
+config. `aiToolsReplaceAllCustomServers` SHALL require a `map` object (missing, null, scalar or array 400,
+the registry surviving), leave the registry as exactly the map sent, apply nothing when one entry is invalid
+while reporting every bad entry in `errors`, and clear the registry on an empty map.
 
 #### Scenario: Both url and command
 
@@ -950,14 +992,19 @@ differing only in case, and clear the registry on an empty map; 120 servers land
 - **WHEN** the owner replaces the map with two valid servers and one invalid config
 - **THEN** the registry keeps its previous servers and `errors` names the bad one
 
+#### Scenario: Two names differing in case
+
+- **WHEN** the owner replaces the map with `Server` and `server`
+- **THEN** the call is refused like a duplicate on add and the registry survives
+
 ### Requirement: Switching tools off
 
 `aiToolsSetDisabled`, `aiToolsGetDisabled` and `aiToolsIsToolDisabled` SHALL keep, per user and
 portal-wide, the tools switched off for a `serverType` that is a built-in group or a registered server (400
 naming the valid values otherwise; missing, null or string `toolNames` 400 leaving the list), the list being
-a full replacement — duplicates collapse, unknown names are kept, an empty list switches everything back on.
-One user's list SHALL be invisible to another; a server removed or dropped by replace-all takes its entries
-with it. A Guest, and any caller while AI is off, SHALL get 403 before the server type is checked.
+a full replacement — an empty list switches everything back on. One user's list SHALL be invisible to
+another; a removed or replaced-away server takes its entries with it. A Guest, and any caller while AI is
+off, SHALL get 403 before the server type is checked.
 
 #### Scenario: Disable and re-enable
 
@@ -973,10 +1020,9 @@ with it. A Guest, and any caller while AI is off, SHALL get 403 before the serve
 
 `aiToolsSetAllowAlways`, `aiToolsGetAllowAlways` and `aiToolsIsAllowAlways` SHALL keep, per user, the flat
 `serverType_toolName` pre-approvals: setting is idempotent, revoking one entry touches no other, a falsy,
-missing or string value grants nothing (400, never 500), an invented server type is stored as given, and a
-grant for one server type never answers for another (a host `delete_file` does not cover the DocSpace one).
-The list SHALL be independent of the disabled list; `allowAlways` on an approval lands in the same list under
-the server-prefixed key, and the read finds what the dialog wrote.
+missing or string value grants nothing (400, never 500), and a grant for one server type never answers for
+another. The list SHALL be independent of the disabled list; `allowAlways` on an approval lands in the same
+list under the server-prefixed key, where the read finds it.
 
 #### Scenario: One user's approval
 
@@ -987,6 +1033,11 @@ the server-prefixed key, and the read finds what the dialog wrote.
 
 - **WHEN** the owner approves a pending call with `allowAlways` true and the model calls the same tool again
 - **THEN** the second call runs without a pause and `aiToolsIsAllowAlways` answers true for it
+
+#### Scenario: Same name on another server
+
+- **WHEN** the owner pre-approves a host tool `delete_file`
+- **THEN** the DocSpace `delete_file` still pauses for approval
 
 ### Requirement: Tools catalogue
 
@@ -1006,9 +1057,8 @@ a registered server's tools reach the model in every chat.
 `aiWebSearchConfigure` SHALL probe the provider and store the configuration (a wrong key or unreachable
 provider 400 storing nothing; a malformed body or a config that fails a rule 400, never 200 with success
 false); `aiWebSearchSetActiveConfig` SHALL store a well-formed configuration, the second replacing the first
-(malformed 400 naming the field; unresolvable `entityId` 404). Both SHALL be DocSpace-admin only (403 others,
-storing nothing), refuse a Guest and an AI-off portal (403) before the body is validated, and be audited.
-A stored configuration is reported for the portal and every scope.
+(malformed 400 naming the field; unresolvable `entityId` 404). Both are DocSpace-admin only (403 others,
+storing nothing), refuse a Guest and an AI-off portal (403) before the body is validated, and are audited.
 
 #### Scenario: Probe stores nothing
 
@@ -1023,11 +1073,10 @@ A stored configuration is reported for the portal and every scope.
 ### Requirement: Clearing and the hosted add-on
 
 `aiWebSearchClear` of a stored configuration SHALL be DocSpace-admin only (403 others, the configuration
-surviving) and audited; clearing an unconfigured portal is accepted by every reading role any number of times,
-with any entity body. On a hosted portal the provider SHALL come from the AI search add-on of the wallet
-(bought by the owner or a DocSpace admin, needing the AI Tools service and the switch): enabling it configures
-every scope and gives the model a web-search tool with sources; while it owns the provider the three write
-routes answer 403 to everyone.
+surviving) and audited; clearing an unconfigured portal is accepted by every reading role, with any entity
+body. Hosted, the provider SHALL come from the AI search add-on of the wallet (bought by the owner or a
+DocSpace admin, needing the AI Tools service and the switch): enabling it configures every scope and gives
+the model a web-search tool with sources; while it owns the provider the three write routes answer 403.
 
 #### Scenario: Room admin cannot clear
 
@@ -1044,9 +1093,8 @@ routes answer 403 to everyone.
 `aiWebSearchIsConfigured` and `aiWebSearchGetActiveConfig` SHALL be readable by DocSpace admins, Room admins
 and Users (Guest 403, anonymous 401, AI off 403 with the configuration kept); an empty `entityId` is the
 portal, one that does not resolve 404, a room the caller cannot open 403. `aiWebSearchTestConnection` SHALL
-probe a configuration taken from the request for every non-guest role (Guest or AI off 403 dialling nothing)
-and store nothing. A private, loopback, unresolvable or malformed base URL, a non-http scheme or credentials
-in the URL SHALL be refused (400) on every write and probe before any connection.
+probe a configuration from the request for every non-guest role (Guest or AI off 403 dialling nothing) and
+store nothing. A forbidden base URL SHALL be refused (400) on every write and probe before any connection.
 
 #### Scenario: Private base URL
 
@@ -1065,12 +1113,16 @@ the query and the stored key sent to the provider's own path, to DocSpace admins
 (Guest 403, anonymous 401, AI off 403), answer 404 while no provider is configured, refuse a body of the
 wrong shape with 400 naming the field before anything is dialled, relay a provider 4xx with its status and
 body, and answer a provider 5xx or an unreachable provider as a fixed 502 without the provider's body or URL.
-Each search is attributed to a named document the caller can open, else to nothing.
 
 #### Scenario: No provider
 
 - **WHEN** the portal has no provider and the owner searches
 - **THEN** the system answers 404; after a configuration is stored a search answers 200 with results and no secret
+
+#### Scenario: Attributed to a document
+
+- **WHEN** the owner searches naming a document they can open, and then one they cannot
+- **THEN** the first search is attributed to the document and the second to nothing
 
 ### Requirement: OpenAI-compatible passthrough
 
@@ -1105,11 +1157,11 @@ getting it without the document generators. Anonymous 401; AI off 403.
 ### Requirement: Calling an editor tool
 
 `aiEditorToolsCall` SHALL run one tool by its trimmed exact name within the caller's own rights (a Guest may
-call none, 403 by role before the name is read), report a failing tool in `result` with 200, answer 400 for
-an unknown or empty name and a missing, null or mistyped required argument (non-object arguments count as
-empty), scope a generator into the room named by `entityId` only for a caller who may create files there
-(400 and nothing created anywhere otherwise), fall back to the caller's My documents without `entityId` or
-with one naming nothing, and refuse every tool with 403 while AI is off after the body is validated.
+call none, 403 before the name is read), report a failing tool in `result` with 200, answer 400 for an
+unknown or empty name and a missing, null or mistyped required argument, scope a generator into the room
+named by `entityId` only for a caller who may create files there (400 and nothing created otherwise), fall
+back to the caller's My documents without `entityId`, and refuse every tool with 403 while AI is off after
+the body is validated.
 
 #### Scenario: Tool never exceeds the member
 
@@ -1126,15 +1178,19 @@ with one naming nothing, and refuse every tool with 403 while AI is off after th
 - **WHEN** a member who may not create files in a room names it for a generator
 - **THEN** the system answers 400 and no document lands in the room or in any My documents
 
+#### Scenario: Entity that names nothing
+
+- **WHEN** the owner names a nonexistent or non-string `entityId` for a generator
+- **THEN** the document lands in the owner's My documents
+
 ### Requirement: Creating chat attachments
 
 `aiAttachmentsSaveFile` and `aiAttachmentsSaveFilesMany` SHALL turn a DocSpace file the caller can read
 (`path` is the file id as a string; empty or numeric 400, no such file 404, unreadable 403, an archive by
-name or by bytes, an empty document or a file without text 400) into a draft the caller owns, titled after
-the file: a picture an image draft with the file's bytes, anything else a text draft with the extracted text,
-whatever the request body limit; `type`, `title` and `entityId` are stored as sent and never checked. A batch
-SHALL be all or nothing (one bad element 400 naming it, one unreadable file 403), collapse repeated paths and
-keep its order. Guests 403; anonymous 401; AI off 403.
+name or bytes, an empty document or a file without text 400) into a draft the caller owns, titled after the
+file: a picture an image draft with the file's bytes, anything else a text draft with the extracted text,
+whatever the request body limit. A batch is all or nothing, collapses repeated paths and keeps its order.
+Guests 403; anonymous 401; AI off 403.
 
 #### Scenario: Attach by id
 
@@ -1146,14 +1202,24 @@ keep its order. Guests 403; anonymous 401; AI off 403.
 - **WHEN** a Guest attaches a file shared with them
 - **THEN** the system answers 403
 
+#### Scenario: Batch with one bad element
+
+- **WHEN** the owner sends a batch with one element without `content`, and a User a batch holding a file they cannot read
+- **THEN** the first answers 400 naming the element and the second 403, neither storing a draft
+
+#### Scenario: Fields stored as sent
+
+- **WHEN** the owner attaches a document with a `type` of another kind, a blank `title` and an `entityId`
+- **THEN** `type` is echoed as sent, the title comes from the file and the `entityId` is never echoed
+
 ### Requirement: Reading and deleting attachments
 
 `aiAttachmentsGet`, `aiAttachmentsGetMany`, `aiAttachmentsDelete` and `aiAttachmentsDeleteMany` SHALL see
 the caller's drafts only: another user's draft reads as null in place and is not deleted; an unknown id
 reads as null and deletes with success, in a batch without stopping the real ones; a malformed id, an empty
-list or a missing body 400. A draft is readable right after it is saved and gone right after it is deleted.
-Deleting a draft SHALL leave the DocSpace file it was made from. The lifecycle SHALL work without a paid AI
-Tools service; a draft reaches the model when it is passed by id or inline.
+list or a missing body 400. A draft is readable right after it is saved and gone right after it is deleted;
+deleting it SHALL leave the DocSpace file it was made from. The lifecycle works without a paid AI Tools
+service.
 
 #### Scenario: Another user's draft
 
@@ -1164,6 +1230,11 @@ Tools service; a draft reaches the model when it is passed by id or inline.
 
 - **WHEN** a User deletes their own draft and the owner's in one `aiAttachmentsDeleteMany`
 - **THEN** only the User's draft is gone
+
+#### Scenario: Draft reaches the model
+
+- **WHEN** the owner sends a message carrying a draft by id only, and then one carrying the whole record inline
+- **THEN** the draft's text reaches the model both times
 
 ### Requirement: Linking attachments to a message
 
@@ -1194,10 +1265,10 @@ or malformed id 400; anonymous 401; AI off 403.
 
 `aiExportTextToDocx` SHALL queue the export of `content` under `title` into `folderId` as `format` `Docx`
 (default), `Pdf` or `Md` and answer 202 with no file id; the file appears in the folder later with every
-markdown construct rendered. It SHALL require `title`, non-blank `content` (whitespace 400) and `folderId`
-(missing or null 400; a string is a third-party id and a numeric one 404), refuse an unknown or deleted folder
-or a file id (404), a body over 15 MiB counted in bytes (413), an unknown `format` (400), and run validation
-before the AI switch (400 before 403). It works without a paid AI Tools service.
+markdown construct rendered. It SHALL require `title`, non-blank `content` and `folderId` (400), refuse an
+unknown or deleted folder, a file id or a numeric string (404), a body over 15 MiB in bytes (413), an
+unknown `format` (400), and validate before the AI switch (400 before 403). It works without a paid AI
+Tools service.
 
 #### Scenario: Export into Chat outputs
 
@@ -1209,13 +1280,18 @@ before the AI switch (400 before 403). It works without a paid AI Tools service.
 - **WHEN** the owner sends `format` `Rtf`
 - **THEN** the system answers 400
 
+#### Scenario: Whitespace content
+
+- **WHEN** the owner sends a title with whitespace-only content
+- **THEN** the system answers 400 and no document is built
+
 ### Requirement: Where an export may land
 
 The caller SHALL be the author of the exported document and SHALL need the right to create in the target:
-a Viewer, a non-member, a Guest (a Content creator Guest included), another user's My documents (the
-owner's included), an archived room and Trash are refused (403), a Content creator exports into someone
-else's room. A repeated title SHALL get `(1)`, `(2)`; an over-long title SHALL be truncated; a cleared
-thread exports nothing; simultaneous exports with different titles each land in their folder.
+a Viewer, a non-member, a Guest (a Content creator Guest included), another user's My documents, an archived
+room and Trash are refused (403), a Content creator exports into someone else's room. A repeated title SHALL
+get `(1)`, `(2)`; an over-long title SHALL be truncated; a cleared thread exports nothing; simultaneous
+exports with different titles each land in their folder.
 
 #### Scenario: Member without the right
 
@@ -1233,8 +1309,8 @@ thread exports nothing; simultaneous exports with different titles each land in 
 otherwise) and answer 200 with no job handle: a missing file fails the whole request (404), a file outside an
 agent's Knowledge folder or a Knowledge room is refused even for its owner (403), a Guest 403, anonymous 401,
 AI off 403. Repeats and duplicates are accepted; an indexed file is skipped. `vectorizationStatus` and a
-socket update report progress; a Knowledge room's files are limited to read, download, copy, delete and
-vectorization, and the whole room is the knowledge base.
+socket update report progress; a Knowledge room's files allow read, download, copy, delete and vectorization
+only.
 
 #### Scenario: File in My documents
 
@@ -1264,9 +1340,8 @@ found through another. `aiContextGetKnowledgeFolders` lists the Knowledge rooms 
 `aiSettingsGetVectorization` and `aiSettingsSetVectorization` SHALL be refused on a hosted portal (403 for
 every role, AI on or off, paid or not — the gateway manages them) and allowed to DocSpace admins of a
 self-hosted installation only (403 others whatever the body, 401 anonymous). Setting an embedding provider
-SHALL verify the key against it (400 "invalid key"), a provider of none SHALL reset the settings and read
-back as such, and each change is audited. A body that is not an object SHALL answer 400 without side
-effect.
+SHALL verify the key against it (400 "invalid key"), a provider of none SHALL reset the settings, and each
+change is audited. A body that is not an object answers 400 without side effect.
 
 #### Scenario: Hosted portal
 
@@ -1283,9 +1358,9 @@ effect.
 Each member (DocSpace admin, Room admin, User; Guests 403, anonymous 401, AI off 403) SHALL own a prompt
 library served by the `aiPrompts*` operations: create, update, move, delete, get-by-id and list for
 prompts; create-folder, rename-folder, delete-folder, get-folder-by-id and list-folders; export and
-import-bundle. Another user's prompts and folders SHALL be invisible and untouchable: a foreign prompt reads
-as null, cannot be edited or moved (404), a foreign folder cannot be renamed or deleted (404), and a prompt
-cannot be put into or pulled out of one; deleting a folder deletes its prompts (unknown or repeated 404).
+import-bundle. Another user's prompts and folders SHALL be invisible and untouchable (a foreign prompt reads
+as null, a foreign prompt or folder cannot be edited, moved, renamed or deleted); deleting a folder deletes
+its prompts (unknown 404).
 
 #### Scenario: Libraries are private
 
@@ -1297,14 +1372,19 @@ cannot be put into or pulled out of one; deleting a folder deletes its prompts (
 - **WHEN** the owner calls `aiPromptsGetFolderById` with a malformed id, then with a well-formed unknown one
 - **THEN** the first answers 400 and the second 200 with a null body
 
+#### Scenario: Foreign folder
+
+- **WHEN** a User renames or deletes the owner's folder, or moves a prompt into it
+- **THEN** every call answers 404 and the owner's library is untouched
+
 ### Requirement: Prompt names, texts and bundles
 
 A prompt or folder name SHALL be a string of 1–255 characters (256 → 400, a rename never truncated), not
 trimmed, unique case-insensitively within its folder on create, rename, move and update (a taken name 400
-or 409, never 200 with success false); a prompt text SHALL be a non-blank string (400) and unlimited; a name
-used in another folder is allowed. `aiPromptsImportBundle` with mode `merge` SHALL keep the existing prompts
-byte-identical and refuse the bundle whole (400) on a name collision, an invalid entry or a twin inside the
-bundle, with `replace` drop the library and write the bundle; either mode writes nothing when refused.
+or 409, never 200 with success false); a prompt text SHALL be a non-blank string (400) and unlimited.
+`aiPromptsImportBundle` with mode `merge` SHALL keep the existing prompts byte-identical and refuse the
+bundle whole (400) on a collision, an invalid entry or a twin inside it, with `replace` drop the library
+and write the bundle; either mode writes nothing when refused.
 
 #### Scenario: Name limit
 
@@ -1315,6 +1395,11 @@ bundle, with `replace` drop the library and write the bundle; either mode writes
 
 - **WHEN** a member imports an exported bundle with mode `merge` and then with mode `replace`
 - **THEN** merge keeps the existing prompts byte-identical and refuses the bundle whole on a name collision; replace drops the library and writes the bundle
+
+#### Scenario: Same name in another folder
+
+- **WHEN** a member creates a prompt named like one in another folder, and like a folder
+- **THEN** both are accepted
 
 ### Requirement: Metadata fields proposed for a file
 
@@ -1368,12 +1453,10 @@ Switching the AI Tools service off SHALL stop the spend (402 on the next send).
 ### Requirement: Spending limits on the AI services
 
 A DocSpace admin with the portal-settings right SHALL set money limits on the AI services (tools and search
-together) through `createServiceLimit`, `updateServiceLimit`, `deleteServiceLimit`, `getServiceLimit`,
-`getTotalServiceLimit`, `getGlobalServiceLimit`, `getParticipantServiceLimits`,
-`setParticipantServiceLimits` and `disableParticipantServiceLimits`: one for the portal (`Total`), one for
-every user (`Global`) and personal ones (`Custom`, per `userId`, bulk up to 1000 users); a personal limit
-replaces the global one for its user and the portal limit is checked on top. A missing `scope` 400, no
-billing service 403, no billing customer 404, a second limit of one scope 409. Each write is audited.
+together) through the `*ServiceLimit*` operations under `api/2.0/portal/payment/servicelimit`: one for the
+portal (`Total`), one for every user (`Global`) and personal ones (`Custom`, per `userId`, bulk up to 1000);
+a personal limit replaces the global one and the portal limit is checked on top. A missing `scope` 400, no
+billing service 403, no customer 404, a second limit of one scope 409. Writes are audited.
 
 #### Scenario: Portal limit reached
 
@@ -1382,17 +1465,17 @@ billing service 403, no billing customer 404, a second limit of one scope 409. E
 
 #### Scenario: Scope left out
 
-- **WHEN** the owner creates a limit without `scope`
+- **WHEN** the owner calls `createServiceLimit` without `scope`
 - **THEN** the system answers 400 and no limit is created
 
 ### Requirement: Audit trail and real-time events of AI changes
 
 The audit trail SHALL record: AI access enabled/disabled, profile created/updated/deleted, profile
-assigned/unassigned, MCP server created/updated/deleted, vectorization settings set/reset, web-search
-settings set/reset, a user's AI settings update, the model assigned to a project, rooms linked to and unlinked
-from a project and the custom quota per agent changed/disabled/reset; reads record nothing. Clients SHALL be
-told when the AI switch changes, a project's model or sources change, a file's vectorization status changes
-or a form's starter questions are ready.
+assigned/unassigned, MCP server created/updated/deleted, vectorization and web-search settings set/reset, a
+user's AI settings update, the model assigned to a project, rooms linked to and unlinked from a project and
+the custom quota per agent changed/disabled/reset; reads record nothing. Clients SHALL be told when the AI
+switch changes, a project's model or sources change, a file's vectorization status changes or a form's
+starter questions are ready.
 
 #### Scenario: Switch audited
 

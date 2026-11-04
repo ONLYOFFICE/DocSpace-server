@@ -111,8 +111,8 @@ Badges off SHALL hide the new-item counters of the Files responses. Room activit
 stop the hourly room digest and the letters and pushes a room or a document sends at once
 (sharing, mention, room invitation, role change, archive, new document, upload, folder, room
 deleted). Daily feed off SHALL stop the daily digest. Useful tips off SHALL stop only the
-after-registration marketing letters. A muted room (an AI room as well) SHALL be left out of the
-at-once letters, pushes and mentions for that member.
+after-registration marketing letters. A muted room, AI rooms included, SHALL be left out of its
+at-once letters, pushes and mentions.
 
 #### Scenario: Room activity switched off
 

@@ -347,10 +347,10 @@ entry. The stamp has a precision of one second.
 ### Requirement: Reading the metadata of an entry
 
 `getFileMetadata` (`GET api/2.0/files/metadata/file/{fileId}`) and `getFolderMetadata` (`GET
-api/2.0/files/metadata/folder/{folderId}`) SHALL need the right to read the entry (403; unknown 404) and
+api/2.0/files/metadata/folder/{folderId}`) SHALL need the read right (403; unknown 404) and
 answer `templates` — each assigned template with its fields and their `value` or null, `cascade` and
 `conflictResolveType` (null unless the folder cascades it; false and null on a file) — `customFields` as
-name/value pairs, and `hasMetadataFields`. No metadata: empty lists. The custom-field template never shows.
+name/value pairs, and `hasMetadataFields`. No metadata: empty lists. The custom-field template stays out.
 
 #### Scenario: Viewer reads a file card
 

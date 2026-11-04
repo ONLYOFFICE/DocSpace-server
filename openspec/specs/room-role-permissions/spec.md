@@ -20,12 +20,11 @@ matrices themselves are stated in the first scenario of each requirement.
 
 ### Requirement: Roles available in each room type
 
-The system SHALL accept a member role only when the room type offers it: a Custom room every role but Form
-Filler, a Public room only Room manager and Content creator, a Collaboration room Room manager, Content
-creator, Editor and Viewer, a Virtual Data Room those four plus Form Filler, a Form filling room Room
-manager, Content creator and Form Filler; of the AI rooms section (v4.1) an Instructions room Room manager,
-Content creator, Editor and Viewer, a Knowledge room those without Editor, an AI project Room manager and
-Viewer only, and never a Guest. The Room Owner is the room's creator, not an assignable role.
+The system SHALL accept a member role only when the room type offers it, as the matrix scenario states: in
+short, a Custom room every role but Form Filler, a Public room only Room manager and Content creator, a
+Form filling room Room manager, Content creator and Form Filler, and of the AI rooms section (v4.1) an AI
+project Room manager and Viewer only, never for a Guest. The Room Owner is the room's creator, not an
+assignable role.
 
 #### Scenario: Role availability matrix by room type
 

@@ -322,11 +322,10 @@ portal from the queue, running or finished, and answer true, or false when the q
 ### Requirement: Contents of a portal archive
 
 A portal archive SHALL hold the rows of the portal from every table declared by a backup module
-(tenants, audit, files, portal and application settings, webhooks and their journal, core users
-and groups, identity, AI) and the files of the allowed storage modules (documents, logos, white
-label, room logos, web plugins, MCP icons). It SHALL leave out thumbnails, earlier archives stored
-in Documents, and tables tied to the source installation or transient (short links, account links,
-tariff rows, notify and event queues).
+(tenants, audit, files, settings, webhooks and their journal, core users and groups, identity, AI)
+and the files of the allowed storage modules (documents, logos, white label, room logos, web
+plugins, MCP icons). It SHALL leave out thumbnails, earlier archives stored in Documents, and tables
+tied to the source installation or transient (short links, account links, tariff rows, queues).
 
 #### Scenario: Every tenant table is accounted for
 

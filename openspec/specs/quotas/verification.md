@@ -3,7 +3,7 @@
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix, People test paths the
 `products/ASC.People/Tests/Tests/` prefix and Web.Api test paths the `web/ASC.Web.Api.Tests/Tests/` prefix.
-`yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (submodule `a0fc3a2`, 2026-10-20). Status:
+`yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (submodule `5ea4dc6`, 2026-11-04). Status:
 **TEST-CONFIRMED** (an integration test asserts it), **CODE-ONLY** (read from the product code or the OpenAPI
 document, no test), **NOTES-ONLY** (only the release notes say it — nothing of that kind was written into
 the spec; such items are listed at the end as left out).
@@ -16,12 +16,20 @@ yaml submodule); `SettingsController.cs`, `TenantQuotaController.cs`, `FileStora
 2689), `EntryManager.cs`, `DocumentServiceHelper.cs`, `Resource.resx` and the Files/People quota tests are
 unchanged at the lines cited.
 
+Revision 2026-11-04: re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`). No quota code
+changed in the range; `FileStorageService.cs` (AI rooms refused while AI is off), `UserController.cs`,
+`PaymentsController.cs` and `SettingsController.cs` only shifted, and their line references were refreshed. The
+range added `02_Settings/Statistics/SpaceUsageStatisticsTests.cs` (`c957208af5`), from which the requirement "Space
+usage of a module" was written, and moved `PortalTariffPermissionsTests` and `QuotaTestBase` to typed SDK calls
+(`632c2fc262`). The yaml was regenerated (`5ea4dc6`): the `getQuotaPaymentInformation` text now states the
+trimming by user type; the `getPortalQuota` and `saveRoomQuotaSettings` texts behind Q6 and the 403 row are unchanged.
+
 ## Requirement rows
 
 | Claim | Source | Status |
 |---|---|---|
 | **Portal storage allowance and what is charged against it** | | |
-| `maxTotalSize` of the tariff is the allowance; `total_size` feature | `web/ASC.Web.Api/Api/PortalController.cs:714-727`; `common/ASC.Core.Common/Quota/Features/MaxTotalSizeFeature.cs:36-38`; yaml `getPortalQuota` (50936), `getQuotaPaymentInformation` (48118) | CODE-ONLY |
+| `maxTotalSize` of the tariff is the allowance; `total_size` feature | `web/ASC.Web.Api/Api/PortalController.cs:714-727`; `common/ASC.Core.Common/Quota/Features/MaxTotalSizeFeature.cs:36-38`; yaml `getPortalQuota` (53274), `getQuotaPaymentInformation` (49458) | CODE-ONLY |
 | Per-owner quota rows (`tenants_quotarow`), total = sum of rows with a product tag | `common/ASC.Data.Storage/TenantQuotaController.cs:101-108, 256-267`; `web/ASC.Web.Core/Quota/MaxTotalSizeFeature.cs:47-57`; `PortalController.cs:535-543` | CODE-ONLY |
 | Creating a file grows the portal total by `pureContentLength`; ten concurrent files by the sum | `02_Folders/UsedSpace/QuotaUsedSpaceTests.cs:64-130` | TEST-CONFIRMED |
 | Trash keeps the total; delete from Trash / empty Trash / batch delete releases it | `QuotaUsedSpaceTests.cs:132-456` | TEST-CONFIRMED |
@@ -45,7 +53,7 @@ unchanged at the lines cited.
 | Owner sets 100 MB on self and on admin / Room admin / User; reset gives 500 MB default, order kept; answer rows carry `quotaLimit` / `usedSpace` / `isCustomQuota` | `07_Quota/UpdateUserQuotaTests.cs:41-77`; `07_Quota/ResetUserQuotaTests.cs:42-86` | TEST-CONFIRMED |
 | DocSpace admin changes and resets the owner's quota | `UpdateUserQuotaTests.cs:79-103`; `ResetUserQuotaTests.cs:88-116` | TEST-CONFIRMED |
 | Room admin / User / Guest 403 "Access denied" on self and others; anonymous 401 (update and reset) | `07_Quota/QuotaPermissionsTests.cs:43-245` | TEST-CONFIRMED |
-| Quota above the total storage → 400 with the exact message (bug 80301), reproduced via `setTenantQuotaSettings` cap | `QuotaPermissionsTests.cs:255-273`; `QuotaTestBase.cs:89-98` | TEST-CONFIRMED |
+| Quota above the total storage → 400 with the exact message (bug 80301), reproduced via `setTenantQuotaSettings` cap | `QuotaPermissionsTests.cs:255-273`; `QuotaTestBase.cs:78-88` | TEST-CONFIRMED |
 | Negative value removes the personal limit; system accounts dropped; `resetUsersQuota` 402 without `statistic` on SaaS; a limit below the usage frees nothing | `products/ASC.People/Server/Api/UserController.cs:2830-2886, 2912-2938`; yaml `updateUserQuota`, `resetUsersQuota` | CODE-ONLY |
 | **Behaviour when the user quota is exceeded** | | |
 | Limit = custom or portal default, `-1` no limit; used = own quota rows; soft overrun once below 2× with socket + audit, else 402 "User space quota exceeded (<limit>)" | `FileDao.cs:532-587`; `FileSizeComment.cs:54-58, 70-73`; `Resource.resx:1348`; `common/ASC.Core.Common/Users/UserQuotaSettings.cs:36-50` | CODE-ONLY |
@@ -57,9 +65,9 @@ unchanged at the lines cited.
 | Room admin / User / Guest 403, anonymous 401 (both settings) | `RoomQuotaSettingsTests.cs:116-150`; `AiAgentQuotaSettingsTests.cs:116-150` | TEST-CONFIRMED |
 | Settings are `TenantRoomQuotaSettings` / `TenantAiAgentQuotaSettings`; validation: > `maxTotalSize` / > Standalone quota → plain `Exception` (500); 402 without `statistic`; ≤ 0 stored as 0; `enableQuota:false` keeps the size; applied to rooms created afterwards; audit | `SettingsController.cs:415-460, 482-525, 1547-1556`; `FileDao.cs:545-551`; yaml `saveRoomQuotaSettings`, `saveAiAgentQuotaSettings` | CODE-ONLY |
 | Custom quota on a room/agent refused while the feature is off (`InvalidOperationException` → 403) | `products/ASC.Files/Core/Core/FileStorageService.cs:935-947, 1367-1423`; `07_Settings/Quota/RoomQuotaPermissionsTests.cs`, `RoomQuotaResetTests.cs` (asserted in `room-types`) | TEST-CONFIRMED |
-| `aiAgentsUpdateQuota` / `aiAgentsResetQuota` relay to the AI service | yaml l. 5895-5990 | CODE-ONLY |
+| `aiAgentsUpdateQuota` / `aiAgentsResetQuota` relay to the AI service | yaml `aiAgentsUpdateQuota`, `aiAgentsResetQuota` | CODE-ONLY |
 | **Portal-wide quota of a Standalone installation** | | |
-| Owner caps the test portal at 1 MB → 200, then 100 MB per-user quota → 400 | `07_Quota/QuotaTestBase.cs:89-98`; `QuotaPermissionsTests.cs:255-273` | TEST-CONFIRMED |
+| Owner caps the test portal at 1 MB → 200, then 100 MB per-user quota → 400 | `07_Quota/QuotaTestBase.cs:78-88` (the tenant id now read through `getPortalInformation`, `632c2fc262`); `QuotaPermissionsTests.cs:255-273` | TEST-CONFIRMED |
 | Negative removes; non-admin or SaaS → `NotSupportedException` (415); 402 without `statistic`; `change-user-quota-used-value` to admins; audit; caps the defaults set afterwards | `SettingsController.cs:605-644`, `322-340`, `421-439`, `488-505`; yaml `setTenantQuotaSettings` | CODE-ONLY |
 | Enforcement: 402 "The used storage size should not exceed <quota>" when already above or above 2×; soft overrun below 2× | `TenantQuotaController.cs:211-230`; `Resource.resx:1279` | CODE-ONLY |
 | **Used space by section** | | |
@@ -75,9 +83,12 @@ unchanged at the lines cited.
 | `getPortalUsedSpace` ≥ 0 for owner and DocSpace admin; GB rounded to 2 decimals | `04_Portal/Quota/PortalUsedSpaceTests.cs:46-73`; `PortalController.cs:535-543` | TEST-CONFIRMED |
 | `getPortalUsersCount` = 5 with one of every role; active state only | `04_Portal/Users/PortalUsersCountTests.cs:52-81`; `PortalController.cs:565-569` | TEST-CONFIRMED |
 | 403 "Access denied" for Room admin / User / Guest, 401 anonymous on quota, quota/right, usedspace, userscount | `04_Portal/Quota/PortalQuotaPermissionsTests.cs:45-77` (bug 81340); `PortalRightQuotaPermissionsTests.cs:45-76`; `PortalUsedSpacePermissionsTests.cs:45-76`; `PortalUsersCountTests.cs:83-114` | TEST-CONFIRMED |
-| `getPortalQuota` shape: `maxTotalSize`, `maxFileSize`, `countRoom`, `countUser`, `countPaidUser`, `countRoomAdmin`, feature flags | `PortalController.cs:714-727`; yaml `getPortalQuota` (50936) and `TenantQuotaDto` | CODE-ONLY |
+| `getPortalQuota` shape: `maxTotalSize`, `maxFileSize`, `countRoom`, `countUser`, `countPaidUser`, `countRoomAdmin`, feature flags | `PortalController.cs:714-727`; yaml `getPortalQuota` (53274) and `TenantQuotaDto` (106275) | CODE-ONLY |
 | `getRightQuota`: cheapest monthly quota above user count and used space, empty body when none | `PortalController.cs:749-761`; yaml `getRightQuota`; `04_Portal/Quota/PortalRightQuotaTests.cs:52-54` (commented out: returns null on this host) | CODE-ONLY |
-| `getPortalTariff` graded by role: owner / DocSpace admin full (`state` Paid, `id` ≥ 0, `quotas` non-empty); Room admin / User / Guest `id` 0; anonymous 401 | `04_Portal/Quota/PortalTariffTests.cs:53-93`; `PortalTariffPermissionsTests.cs:47-84`; `PortalController.cs:592-623` | TEST-CONFIRMED |
+| `getPortalTariff` graded by role: owner / DocSpace admin full (`state` Paid, `id` ≥ 0, `quotas` non-empty); Room admin / User / Guest `id` 0; anonymous 401 | `04_Portal/Quota/PortalTariffTests.cs:53-93`; `PortalTariffPermissionsTests.cs:47-77` (typed SDK call since `632c2fc262`); `PortalController.cs:592-623` | TEST-CONFIRMED |
+| **Space usage of a module** | | |
+| Portal-settings right; module found by id among the registered items with a space-usage manager; missing or non-reporting module → empty list; `{id:guid}` route constraint → 404 for a non-GUID; sizes formatted; not paged | `web/ASC.Web.Api/Api/Settings/SettingsController.cs:1140-1180`; yaml `getSpaceUsageStatistics` (66189) | CODE-ONLY |
+| Owner and DocSpace admin → 200 with a list for the Documents module id; unknown id → empty list; `not-a-guid` → 404; User 403; anonymous 401 | `02_Settings/Statistics/SpaceUsageStatisticsTests.cs:25-33, 36-44, 48-56, 59-70, 73-83, 86-97` (the real id is only asserted to succeed: whether the host registers the module is not grounded in the repo) | TEST-CONFIRMED |
 | **Payment quota information trimmed by user type** | | |
 | `getQuotaPaymentInformation`: Guest 403, anonymous 401; only the Guest check is in the action | `04_Portal/Payments/PaymentQuotaInformationTests.cs:87-100, 195-207`; `web/ASC.Web.Api/Api/PaymentsController.cs:734-746` | TEST-CONFIRMED |
 | Room admin: features exactly `manager`, `total_size`, `room`, `statistic`; `price` value / currency / ISO currency null; `dueDate` null; `usersQuota` / `roomsQuota` / `aiAgentsQuota` / `tenantCustomQuota` equal to the owner's (bug 81534: `ca104886f0`, test `5db334ab5e`, `8074ce5b54`) | `PaymentQuotaInformationTests.cs:102-150`; `web/ASC.Web.Api/Core/QuotaHelper.cs:124-148, 169-192`; `common/ASC.Core.Common/Tenants/TenantQuota.cs:540-562` (`manager` / `room` / `statistic` = RoomAdmin, `total_size` = User); `common/ASC.Core.Common/Quota/TenantQuotaFeature.cs:45-47` (default DocSpaceAdmin); `common/ASC.Core.Common/Core/EmployeeType.cs:60-80` (`EmployeeTypeComparer`: DocSpaceAdmin 4, RoomAdmin 3, User 2, Guest 1, All 0) | TEST-CONFIRMED |
@@ -99,11 +110,11 @@ unchanged at the lines cited.
 | **Quota changes are announced on the socket** | | |
 | `change-quota-used-value` on every counter change; `change-user-quota-used-value` per account and to admins on settings; `quota_exceeded` with scope | `common/ASC.Data.Storage/BaseStorage.cs:383-413`; `QuotaSocketManager.cs:47-66, 170-200`; `SettingsController.cs:355, 632`; `UserController.cs:2870`; `FileMoveCopyOperation.cs:533-534`; `FileDao.cs:1363` | CODE-ONLY |
 
-Counts: 64 rows — TEST-CONFIRMED 31, CODE-ONLY 32, cross-reference 1, NOTES-ONLY 0 (nothing was written into
+Counts: 66 rows — TEST-CONFIRMED 32, CODE-ONLY 33, cross-reference 1, NOTES-ONLY 0 (nothing was written into
 the spec on the strength of the release notes alone; the v1.1, v2.0, v3.6, v3.7 and v4.0 items are each
-backed by code). Spec: 14 requirements, 52 scenarios. Previous revision: 59 rows (28 / 31 / 0), 13
-requirements, 37 scenarios; the growth is the requirement texts being brought under 500 characters, with
-their detail moved into scenarios, plus the new requirement for `getQuotaPaymentInformation`.
+backed by code). Spec: 15 requirements, 55 scenarios. Previous revision (2026-10-24): 64 rows (31 / 32 / 1),
+14 requirements, 52 scenarios; the growth is the requirement "Space usage of a module" with its two rows and
+three scenarios.
 
 ## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
 
@@ -116,7 +127,7 @@ their detail moved into scenarios, plus the new requirement for `getQuotaPayment
 | yaml `saveRoomQuotaSettings` / `saveAiAgentQuotaSettings` list 403 for "`defaultQuota` is not a JSON number" and 500 for a value above the total storage | The code throws a plain `Exception` in both cases, which the middleware maps to 500; the 403 wording comes from the JSON reader, not from the action. The spec states 500 for the over-limit case and leaves the body-shape errors out. |
 | yaml `updateUserQuota` says 400 for a value "larger than the portal-wide quota on a standalone installation" | Matches the code (`ArgumentException`); the test (bug 80301) reproduces it through the Standalone cap because the integration host has no tariff ceiling. |
 | yaml `getPortalQuota` (and the controller remarks, `PortalController.cs:698-699`): "`maxTotalSize` comes back as 0 when the calling account's own role is user" | Dead branch: a User is refused by `DemandPermissionsAsync(EditPortalSettings)` two lines earlier (`PortalController.cs:716-724`), so no caller ever sees the 0. Left out of the spec. |
-| yaml `getQuotaPaymentInformation` 200: "The quota the portal is on, with its price, features, limits and current usage"; `TenantQuotaFeatureDto.used` (yaml l. 103601): "a guest is shown none of these figures and a plain member only the total size" | Since `8074ce5b54` the answer is trimmed by user type (`QuotaHelper.cs:124-148, 169-192`): a Room admin gets four features, a User one, both an empty `price` and no `dueDate`; `used` is written for every feature a caller is shown; a Guest is refused (403) before any figure is computed. The yaml predates the change (submodule `a0fc3a2`, 2026-10-20). |
+| yaml `getQuotaPaymentInformation` 200 before `5ea4dc6`: "The quota the portal is on, with its price, features, limits and current usage" | Resolved: the regenerated description (49440-49458) states the trimming by user type that `QuotaHelper.cs:124-148, 169-192` does since `8074ce5b54` — a Room admin gets four features, a User one, both an empty `price` and no `dueDate`, a Guest 403. |
 | Previous revision of this spec (and the test comment it followed, `PaymentQuotaInformationTests.cs` before `5db334ab5e`): "features marked for DocSpace admins are dropped for other roles, and the `used` figures are withheld from a User except `total_size`" | Replaced in the range: each feature carries the lowest user type that is shown it (`TenantQuotaFeature.EmployeeType`, default DocSpaceAdmin), so a Room admin gets `manager`, `total_size`, `room`, `statistic` and a User gets `total_size` only — the `used` figure is no longer withheld separately, the feature itself is. |
 | `PortalQuotaTests`, `PortalRightQuotaTests`, `PaymentQuotaInformationTests` (startup-plan assertions) | Commented out in the suite: the integration host runs the single "default" quota without a tariff catalogue, so `getPortalQuota` values and `getRightQuota` (null) cannot be asserted there; the spec states only the role rules and the shape. |
 | Test name `GetQuotaPaymentInformation_User_ReturnsTotalSizeOnly` | The assertion is `ContainSingle` on `total_size` with `Used != null`, plus empty price, no due date and the owner's quota settings — the name understates it. |
@@ -155,13 +166,14 @@ their detail moved into scenarios, plus the new requirement for `getQuotaPayment
 
 ## Suspected defects
 
-Re-checked 2026-10-24 against `34df477e4e..HEAD`: none of the six was touched by the range; all STILL OPEN.
+Re-checked 2026-10-24 against `34df477e4e..HEAD` and 2026-11-04 against `d58816bece..3533ad8a89`: none of the six
+was touched by either range (the 4.1.0 range only shifted the cited lines); all STILL OPEN.
 
-| # | Where | What the server does | Evidence | 2026-10-24 |
-|---|-------|----------------------|----------|------------|
-| Q1 | Default room / AI agent quota | `saveRoomQuotaSettings` and `saveAiAgentQuotaSettings` refuse a `defaultQuota` above the total storage (and a non-integer JSON number) with a plain `Exception`, which the middleware reports as 500 "Internal Server Error"; the sibling `SaveUserQuotaSettings` and `updateUserQuota` throw `ArgumentException` (400) for the same condition. | `SettingsController.cs:421, 430, 439, 488, 497, 505` vs `322, 331, 340`; `UnhandledExceptionMiddleware.cs:71-95`; yaml documents the 500 | STILL OPEN |
-| Q2 | Move between owners | Moving a file from one account's My documents to another's silently raises the receiver's custom quota by the file size instead of refusing or asking; a Room admin moving a large file into a shared folder of another account can grow that account's limit without the portal-settings right. | `FileDao.cs:1348-1367` | STILL OPEN |
-| Q3 | Standalone portal quota | `setTenantQuotaSettings` reports a caller who is not a DocSpace admin, and a hosted portal, with `NotSupportedException`, which the middleware maps to 415 Unsupported Media Type; a permission refusal is expected to be 403. | `SettingsController.cs:609-612`; yaml `setTenantQuotaSettings` 415 | STILL OPEN |
-| Q4 | Per-room quota change | `FolderQuotaChangeAsync` refuses a quota above `maxTotalSize` twice: first with the "greater than the total storage" message, then (unreachably) with the "folder not found" message; both are `InvalidOperationException` (403), so a caller cannot tell the over-limit case from a missing room by status. | `FileStorageService.cs:1374-1377, 1413-1416` | STILL OPEN |
-| Q5 | Portal allowance refusal message | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting the remaining space as if it were a per-file limit; the room and user cases say "space quota exceeded". A client cannot distinguish the portal allowance from `maxFileSize` by the message. | `FileDao.cs:442-455`; `SetupInfo.cs:156-166`; `Resource.resx:958` | STILL OPEN |
-| Q6 | `getPortalQuota` | The `maxTotalSize = 0` branch for a User is unreachable behind the portal-settings demand, while the OpenAPI document — and the action's own `<remarks>` — describe it as behaviour. | `PortalController.cs:698-699, 716-724`; yaml `getPortalQuota` (50905-50932) | STILL OPEN |
+| # | Where | What the server does | Evidence | 2026-10-24 | 2026-11-04 |
+|---|-------|----------------------|----------|------------|------------|
+| Q1 | Default room / AI agent quota | `saveRoomQuotaSettings` and `saveAiAgentQuotaSettings` refuse a `defaultQuota` above the total storage (and a non-integer JSON number) with a plain `Exception`, which the middleware reports as 500 "Internal Server Error"; the sibling `SaveUserQuotaSettings` and `updateUserQuota` throw `ArgumentException` (400) for the same condition. | `SettingsController.cs:421, 430, 439, 488, 497, 505` vs `322, 331, 340`; `UnhandledExceptionMiddleware.cs:71-95`; yaml documents the 500 | STILL OPEN | STILL OPEN |
+| Q2 | Move between owners | Moving a file from one account's My documents to another's silently raises the receiver's custom quota by the file size instead of refusing or asking; a Room admin moving a large file into a shared folder of another account can grow that account's limit without the portal-settings right. | `FileDao.cs:1348-1367` | STILL OPEN | STILL OPEN |
+| Q3 | Standalone portal quota | `setTenantQuotaSettings` reports a caller who is not a DocSpace admin, and a hosted portal, with `NotSupportedException`, which the middleware maps to 415 Unsupported Media Type; a permission refusal is expected to be 403. | `SettingsController.cs:609-612`; yaml `setTenantQuotaSettings` 415 | STILL OPEN | STILL OPEN |
+| Q4 | Per-room quota change | `FolderQuotaChangeAsync` refuses a quota above `maxTotalSize` twice: first with the "greater than the total storage" message, then (unreachably) with the "folder not found" message; both are `InvalidOperationException` (403), so a caller cannot tell the over-limit case from a missing room by status. | `FileStorageService.cs:1374-1377, 1413-1416` | STILL OPEN | STILL OPEN |
+| Q5 | Portal allowance refusal message | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting the remaining space as if it were a per-file limit; the room and user cases say "space quota exceeded". A client cannot distinguish the portal allowance from `maxFileSize` by the message. | `FileDao.cs:442-455`; `SetupInfo.cs:156-166`; `Resource.resx:958` | STILL OPEN | STILL OPEN |
+| Q6 | `getPortalQuota` | The `maxTotalSize = 0` branch for a User is unreachable behind the portal-settings demand, while the OpenAPI document — and the action's own `<remarks>` — describe it as behaviour. | `PortalController.cs:698-699, 716-724`; yaml `getPortalQuota` (53255-53263, unchanged in `5ea4dc6`) | STILL OPEN | STILL OPEN |

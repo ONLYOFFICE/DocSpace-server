@@ -186,7 +186,7 @@ Counts: 103 rows, classified by the leading status of the cell — TEST-CONFIRME
 branch named in the status), CODE-ONLY 40 (two of them with a TEST-CONFIRMED standalone branch, one with the
 NOTES-ONLY "which plan has `restore`" branch), NOTES-ONLY 2 (the per-plan values of `countFreeBackup` and the
 Business-only third-party targets). After the hotfix/v4.0.1 merge: 92 rows — TEST-CONFIRMED 52, CODE-ONLY 38,
-NOTES-ONLY 2; before it: 57 rows — TEST-CONFIRMED 4, CODE-ONLY 50, NOTES-ONLY 3. Spec: 30 requirements, 106 scenarios
+NOTES-ONLY 2; before it: 57 rows — TEST-CONFIRMED 4, CODE-ONLY 50, NOTES-ONLY 3. Spec: 30 requirements, 111 scenarios
 (was 29 / 99, before that 24 / 64).
 
 ## Where the server differs from the release notes or the OpenAPI document (spec follows the server)

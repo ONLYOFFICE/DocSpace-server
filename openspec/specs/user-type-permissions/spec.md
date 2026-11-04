@@ -130,7 +130,7 @@ Actions on a room additionally require a room role that grants them (see `room-r
 
 #### Scenario: User cannot create a room
 
-- **WHEN** a User or a Guest attempts to create a room
+- **WHEN** a User or a Guest attempts to create a room, of any type including an AI project of the AI rooms section
 - **THEN** the system rejects the request (403)
 
 #### Scenario: User and Guest cannot invite
@@ -147,7 +147,7 @@ Actions on a room additionally require a room role that grants them (see `room-r
 
 - **WHEN** anyone, the DocSpace Owner included, assigns the Room manager role to a member whose user type is User or Guest
 - **THEN** the system rejects the request (403, "The role is not available for this user type")
-- **AND** a Room admin can therefore hand out any role except Room manager to a User or a Guest
+- **AND** a Room admin can therefore hand out any role except Room manager to a User or a Guest; a Guest is refused any role in an AI project (see `room-role-permissions`)
 
 ### Requirement: Actions on rooms owned by someone else
 

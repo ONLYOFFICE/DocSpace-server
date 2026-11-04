@@ -28,9 +28,9 @@ where the tests assert them.
 
 The system SHALL expose the room type as the required `roomType` field of `createRoom`: Form filling room
 (1), Collaboration room (2), Custom room (5), Public room (6), Virtual Data Room (8), AI room (9),
-Instructions room (10), Knowledge room (11) and AI project room (12). There is no separate "Private" room
-type: end-to-end encryption is the boolean `private` flag of a room. `roomType` MUST be one of the listed
-values and cannot be changed after the room exists (`updateRoom` has no `roomType` property).
+Instructions room (10), Knowledge room (11) and AI project room (12). "Private" is not a type but the
+`private` flag of a room. `roomType` MUST be one of the listed values and cannot be changed after the room
+exists (`updateRoom` has no `roomType` property).
 
 #### Scenario: Section and primary link per type
 

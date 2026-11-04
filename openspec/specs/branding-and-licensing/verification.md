@@ -31,7 +31,9 @@ notes say it — nothing of that kind was written into the spec). Exception → 
 
 The .NET suite covers the greeting reads and permissions, the colour themes, the portal logo, the payment settings,
 the tariff grading and — since hotfix v4.0.1 (commit `fafe467580`) — the rebranding reads, permissions, the two
-restores and the gates in front of the saves (`T/02_Settings/Rebranding/`, five files). That suite runs on a
+restores and the gates in front of the saves (`T/02_Settings/Rebranding/`, seven files since release/v4.1.0:
+`RebrandingAnonymousTests.cs` and the User cases of the saves and deletes in `RebrandingPermissionsTests.cs`,
+`632c2fc262`). That suite runs on a
 **standalone** integration host (`APP_HOSTING_STANDALONE=true`) whose default quota has no `customization`, so the
 installation gate of the company/additional saves is open and the plan gate (402) is what the owner hits; the TS suite
 ran on a hosted portal and hit the installation gate (403) instead. Both are recorded. The two deletes of the company
@@ -40,26 +42,35 @@ shared by every portal (`T/02_Settings/Rebranding/RebrandingSaveTests.cs:42-49`)
 test (the TS licence file states that licence management cannot be automated on the hosted test environment,
 `TS/license/license.spec.ts:1-10`). The greeting save/restore tests exist but are commented out (see L10).
 
+Revision 2026-11-04: re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`). Of the files behind
+this specification only `TenantLogoManager.cs` (the letter-logo fetch got a ten-second timeout and a five-minute
+failure memory, `559b4c1309`), `PaymentFilter.cs` (the `Payment-Info` bypass of the payment gate is gone,
+`dbb446ada2`) and `SettingsController.cs` (two lines of AI remarks) changed; `WL`, `TWLS`, `Lic`, `Reader`, `Greet`,
+`Company`, `Additional`, `Themes` and the DTOs did not. Line references of `LogoMgr`, `TariffSvc`, `Settings` and
+`PayFilter` were refreshed. The yaml was regenerated (`5ea4dc6`); its line references were refreshed, and it still has
+no `settings/license/trial` path (L12).
+
 ## Requirement rows
 
 | Claim | Source | Status |
 |---|---|---|
 | **Editions of the installation** | | |
 | Hosted = base domain configured; self-hosted = base domain `localhost`; Enterprise = self-hosted + license path; Developer = Enterprise + license type `developer`; open source = self-hosted without license path | `Core:48-63`; `TariffSvc:36-46`; `Reader:43-57` (`license:file:path`, `license:type`); `appsettings:13, 74-78`; `../buildtools/config/appsettings.enterprise.json:7-8`, `appsettings.developer.json:7-8` | CODE-ONLY |
-| `getSettings.standalone`; `getPortalTariff` fills `openSource`/`enterprise`/`developer` only for the portal-settings right | `Settings:119`; `Portal:593-623`; yaml `TariffDto` (100715-100750) | CODE-ONLY |
-| Members without the right get `id` 0, `state` Paid, 200 | `T/04_Portal/Quota/PortalTariffPermissionsTests.cs:61-84`; owner/admin full tariff `T/04_Portal/Quota/PortalTariffTests.cs:53-93` (edition flags not asserted) | TEST-CONFIRMED (grading), CODE-ONLY (flags) |
+| `getSettings.standalone`; `getPortalTariff` fills `openSource`/`enterprise`/`developer` only for the portal-settings right | `Settings:119`; `Portal:593-623`; yaml `TariffDto` (105412) | CODE-ONLY |
+| Members without the right get `id` 0, `state` Paid, 200 | `T/04_Portal/Quota/PortalTariffPermissionsTests.cs:61-77` (typed SDK call since `632c2fc262`); owner/admin full tariff `T/04_Portal/Quota/PortalTariffTests.cs:53-93` (edition flags not asserted) | TEST-CONFIRMED (grading), CODE-ONLY (flags) |
 | **Whether branding may be changed** | | |
-| Gate = branding section not in `web:hide-settings` AND quota `customization`; `getEnableWhitelabel` needs the portal-settings right | `LogoMgr:56-63, 305-313`; `WL:945-950`; `appsettings:181-189` (WhiteLabel not listed → enabled); yaml `getEnableWhitelabel` (61535-61615) | CODE-ONLY |
+| Gate = branding section not in `web:hide-settings` AND quota `customization`; `getEnableWhitelabel` needs the portal-settings right | `LogoMgr:56-63, 305-313`; `WL:945-950`; `appsettings:181-189` (WhiteLabel not listed → enabled); yaml `getEnableWhitelabel` (64857) | CODE-ONLY |
 | Saves answer 402 "Your pricing plan does not support this option" after the permission check | `LogoMgr:315-321` (`BillingException`), `WL:83-96, 164-182, 455-470`; `Resource:861-863` | CODE-ONLY |
 | Owner: `getEnableWhitelabel` false, `saveWhiteLabelLogoText` 402, `saveWhiteLabelSettings` 402; User 403 before the plan (`saveWhiteLabelLogoText`, `getEnableWhitelabel`); DocSpace admin 200 on `getEnableWhitelabel`; restores 200 true | `T/02_Settings/Rebranding/RebrandingReadTests.cs:49-58`; `RebrandingSaveTests.cs:53-77`; `RebrandingPermissionsTests.cs:138-163, 221-235`; `RebrandingRestoreTests.cs:43-63`; `TS/rebranding/rebranding.spec.ts:17-28, 151-203`; `TS/rebranding/rebranding.permissions.spec.ts:79-103, 148-176` | TEST-CONFIRMED |
-| The same gate closes `saveCompanyWhiteLabelSettings` and `saveAdditionalWhiteLabelSettings` (402) once the installation check passed | `WL:655-657, 778-780, 952-965` (`DemandRebrandingPermissionAsync` → `DemandWhiteLabelPermissionAsync`); `T/02_Settings/Rebranding/RebrandingSaveTests.cs:91-129` (standalone owner) | TEST-CONFIRMED |
+| The same gate closes `saveCompanyWhiteLabelSettings` and `saveAdditionalWhiteLabelSettings` (402) once the installation check passed | `WL:655-657, 778-780, 952-965` (`DemandRebrandingPermissionAsync` → `DemandWhiteLabelPermissionAsync`); `T/02_Settings/Rebranding/RebrandingSaveTests.cs:91-113` (standalone owner) | TEST-CONFIRMED |
 | **Logo slots and their public listing** | | |
-| Sixteen slots; listing skips `Notification`; `[AllowAnonymous, AllowNotPayment, AllowSuspended, AllowBlocked]`; `isDark` fills one theme; `dark` null when equal to `light` | `LogoType:44-93`; `WL:253-322`; yaml `getWhiteLabelLogos` (60232-60327), `WhiteLabelItemDto` (104227-104260) | CODE-ONLY |
+| Sixteen slots; listing skips `Notification`; `[AllowAnonymous, AllowNotPayment, AllowSuspended, AllowBlocked]`; `isDark` fills one theme; `dark` null when equal to `light` | `LogoType:44-93`; `WL:253-322`; yaml `getWhiteLabelLogos` (63579), `WhiteLabelItemDto` (109156) | CODE-ONLY |
 | Anonymous gets 200 with 15 entries, none `Notification` | `T/02_Settings/Rebranding/RebrandingReadTests.cs:104-117`; `RebrandingPermissionsTests.cs:125-136`; `TS/rebranding/rebranding.spec.ts:92-106`; `TS/rebranding/rebranding.permissions.spec.ts:68-77` | TEST-CONFIRMED |
 | Sizes 422x48, 772x88, 32x32, 172x40 (all editors), 56x56, 442x48, letter 386x44 | `TWLS:167-206` | CODE-ONLY |
 | **Saving logos from image data** | | |
-| Portal-settings right, gate, `logo` key/value list, `key` parsed as int, light/dark data URI (`image/jpeg`, `image/png`, `image/svg+xml`) or temp file name; slot omitted keeps image; dark only for slots that can be dark; login-page save rebuilds `Notification`; `[StringLength(40)]` on `logoText`, not stored; audit; letter-logo cache dropped | `WL:81-140`; `TWLS:671-760, 975-992` (`CanBeDark`); `web/ASC.Web.Api/ApiModels/RequestsDto/WhiteLabelRequestsDto.cs:45-84`; `LogoMgr:371-381`; yaml `saveWhiteLabelSettings` (60012-60124) | CODE-ONLY |
+| Portal-settings right, gate, `logo` key/value list, `key` parsed as int, light/dark data URI (`image/jpeg`, `image/png`, `image/svg+xml`) or temp file name; slot omitted keeps image; dark only for slots that can be dark; login-page save rebuilds `Notification`; `[StringLength(40)]` on `logoText`, not stored; audit; letter-logo cache dropped | `WL:81-140`; `TWLS:671-760, 975-992` (`CanBeDark`); `web/ASC.Web.Api/ApiModels/RequestsDto/WhiteLabelRequestsDto.cs:45-84`; `LogoMgr:371-381`; yaml `saveWhiteLabelSettings` (63365) | CODE-ONLY |
 | Dark image ignored for favicon/editor slots, slot still marked customised | `TWLS:702-708` | CODE-ONLY |
+| User 403 on `saveWhiteLabelSettings` and `saveWhiteLabelSettingsFromFiles` before the plan check; anonymous 401 on every save, restore and delete of the branding (nine operations) before any gate | `T/02_Settings/Rebranding/RebrandingPermissionsTests.cs:251-280`; `RebrandingAnonymousTests.cs:44-64` | TEST-CONFIRMED |
 | **Saving logos from uploaded files** | | |
 | No file → `InvalidOperationException("No input files")` → 403 before the gate; name `<slot>.<ext>`, `dark` in the name → dark variant | `WL:162-235`; `TWLS:762-778`; `T/02_Settings/Rebranding/RebrandingSaveTests.cs:79-89` (owner, no multipart body → 403); `TS/rebranding/rebranding.spec.ts:205-215` | TEST-CONFIRMED (no-file), CODE-ONLY (rest) |
 | Staging upload `/logoUploader.ashx`: portal-settings right + gate, `logotype`/`width`/`height` form fields, extensions `.bmp .jpg .jpeg .ico .png .svg`, size ≤ slot size, returns the temp file name | `Uploader:384-473`; `TWLS:40`; `nginx:702`; the temp name is consumed by `TWLS:735-748` | CODE-ONLY |
@@ -82,15 +93,17 @@ test (the TS licence file states that licence management cannot be automated on 
 | Any signed-in member; `[AllowNotPayment]`; 304; `isDefault` via field comparison; `getLicensorData` appends the built-in when replaced and not licensor | `WL:617-631, 712-717`; `Company:537-577`; `web/ASC.Web.Api/ApiModels/ResponseDto/CompanyWhiteLabelSettingsDto.cs:39-111` | CODE-ONLY |
 | Built-in vendor "Ascensio System SIA", `site` `https://www.onlyoffice.com`, `isLicensor` true, `isDefault` true; single-item licensor list; User 200, anonymous 401 on both reads | `T/02_Settings/Rebranding/RebrandingReadTests.cs:60-72, 91-102`; `RebrandingPermissionsTests.cs:44-69, 98-123`; `TS/rebranding/rebranding.spec.ts:30-48, 73-90`; `TS/rebranding/rebranding.permissions.spec.ts:4-25, 51-66` | TEST-CONFIRMED |
 | **Changing and resetting the company details** | | |
-| Portal-settings right, installation check (403), gate (402); `settings`/`email`/`site` null → `ArgumentNullException` 400, puny-code → 400, DTO `[Url]`/`[EmailAddress]`/`[Phone]`/`[StringLength(255)]`; `IsLicensor` false; `HideAbout = quota.Branding && input`; saved for tenant −1; delete without gate returns defaults | `WL:653-691, 737-750`; `web/ASC.Web.Api/ApiModels/RequestsDto/WhiteLabelSettingsRequestDto.cs:39-109`; yaml `saveCompanyWhiteLabelSettings` (61038-61106) | CODE-ONLY |
+| Portal-settings right, installation check (403), gate (402); `settings`/`email`/`site` null → `ArgumentNullException` 400, puny-code → 400, DTO `[Url]`/`[EmailAddress]`/`[Phone]`/`[StringLength(255)]`; `IsLicensor` false; `HideAbout = quota.Branding && input`; saved for tenant −1; delete without gate returns defaults | `WL:653-691, 737-750`; `web/ASC.Web.Api/ApiModels/RequestsDto/WhiteLabelSettingsRequestDto.cs:39-109`; yaml `saveCompanyWhiteLabelSettings` (64385) | CODE-ONLY |
 | Hosted owner: save 403, delete 403 | `TS/rebranding/rebranding.spec.ts:217-237, 262-272` | TEST-CONFIRMED (TS) |
-| Self-hosted owner on a quota without `customization`: save 402 — the gate fires before the body is validated (the test sends no `email`, which would otherwise be 400) | `WL:655-660`; `T/02_Settings/Rebranding/RebrandingSaveTests.cs:91-108` | TEST-CONFIRMED |
+| Self-hosted owner on a quota without `customization`: save 402 — the gate fires before the body is validated (the test sends no `email`, which would otherwise be 400) | `WL:655-660`; `T/02_Settings/Rebranding/RebrandingSaveTests.cs:91-101` | TEST-CONFIRMED |
+| User 403 on the company and additional save and delete, from the portal-settings demand before the installation check (the owner deletes stay unported) | `WL:655, 739, 778, 838`; `T/02_Settings/Rebranding/RebrandingPermissionsTests.cs:282-310, 315-341` | TEST-CONFIRMED |
 | **Help and community links of the installation** | | |
 | Flags + `isDefault`; defaults true when the regional address exists; save replaces the set (`RequiredMappingStrategy.Source` mapper, bools default false); delete returns defaults | `WL:776-849`; `Additional:617-687`; `web/ASC.Web.Api/ApiModels/ResponseDto/AdditionalWhiteLabelSettingsDto.cs:39-114`; `web/ASC.Web.Api/ApiModels/RequestsDto/WhiteLabelSettingsRequestDto.cs:114-176` | CODE-ONLY |
-| All six flags true and `isDefault` true on the test installation; hosted owner save/delete 403; User 200, anonymous 401 | `T/02_Settings/Rebranding/RebrandingReadTests.cs:74-89`; `RebrandingPermissionsTests.cs:71-96`; `TS/rebranding/rebranding.spec.ts:50-71, 239-260, 274-284`; `TS/rebranding/rebranding.permissions.spec.ts:27-49` | TEST-CONFIRMED |
-| Self-hosted owner on a quota without `customization`: save (all six flags true) 402 | `WL:778-782`; `T/02_Settings/Rebranding/RebrandingSaveTests.cs:110-129` | TEST-CONFIRMED |
+| Five flags true on the test installation (`helpCenter`, `feedbackAndSupport`, `userForum`, `videoGuides`, `licenseAgreements`); the `startDocsEnabled` and `isDefault` assertions were commented out in `bbba22fbf1` (the host now runs a Document Server), so those two are CODE-ONLY; hosted owner save/delete 403; User 200, anonymous 401 | `T/02_Settings/Rebranding/RebrandingReadTests.cs:74-89`; `RebrandingPermissionsTests.cs:71-96`; `TS/rebranding/rebranding.spec.ts:50-71, 239-260, 274-284`; `TS/rebranding/rebranding.permissions.spec.ts:27-49` | TEST-CONFIRMED |
+| Self-hosted owner on a quota without `customization`: save (all six flags true) 402 | `WL:778-782`; `T/02_Settings/Rebranding/RebrandingSaveTests.cs:103-113` | TEST-CONFIRMED |
 | **Where the branding appears and how it is served** | | |
 | Editor logo by file type and embed mode; letter logo = uploaded `Notification` → installation default → embedded `logo.png`; letter logo cached one day per culture; `displayAbout` formula | `LogoMgr:233-270, 326-369, 416-429`; `LogoType:95-108`; `Settings:128, 134`; `openspec/specs/notifications/spec.md:594-611` | CODE-ONLY |
+| Letter logo as embedded data for the reports: fetched from the portal's own address once per logo path under a 10 s deadline, kept a day; a failed or timed-out fetch is remembered as empty for 5 min and the caller falls back to the logo URL (`559b4c1309`) | `LogoMgr:51-55, 160-212` | CODE-ONLY |
 | Logo URLs with `?hash`, built-in with `?hash=<version:number>`; proxy `immutable, max-age=31536000` on `storage/whitelabel/root/*?hash*` and `static_partnerdata`; `whitelabel` module served as attachment (v2.6 notes) | `TWLS:805-847`; `nginx:61`; `storage.json:92-98`; release notes v2.6 (technical) line 33 | CODE-ONLY |
 | **Reading the colour themes** | | |
 | `[AllowAnonymous, AllowNotPayment, AllowSuspended, AllowBlocked]`; 304; six defaults, `Selected` = min id; `limit` from `core:themelimit` (9 in the dev config, 0 = unlimited) | `Settings:875-886`; `Themes:250-354`; `appsettings:59` | CODE-ONLY |
@@ -129,7 +142,7 @@ test (the TS licence file states that licence management cannot be automated on 
 | `[ApiExplorerSettings(IgnoreApi = true)]`; not standalone → 415; not DocSpace admin → 403; false when quota tenant ≠ −1, already trial, or due date not max; quota `-1000` "apirequest" trial, 30 days; audit | `Lic:156-215` | CODE-ONLY |
 | **Tariff state of a licensed installation and the payment gate** | | |
 | Standalone → tenant −1; `Paid`; `Delay` + `DelayDueDate = DueDate + core:payment:delay` (10) when past and not lifetime/trial; `NotPaid` after the delay; lifetime stays `Paid`; trial → `Trial` | `TariffSvc:100-106, 1160-1238`; `appsettings:19-20`; `common/ASC.Core.Common/Billing/TariffState.cs:39-52` | CODE-ONLY |
-| `PaymentFilter`: 402 unless `[AllowNotPayment]` or `Payment-Info: false`; `IsNotPaidAsync` = tariff settings enabled AND state ≥ NotPaid (the Enterprise clause is subsumed) | `PayFilter:37-60`; `Extra:96-106` | CODE-ONLY |
+| `PaymentFilter`: 402 unless `[AllowNotPayment]` — no request header opens the gate since `dbb446ada2`; `IsNotPaidAsync` = tariff settings enabled AND state ≥ NotPaid (the Enterprise clause is subsumed) | `PayFilter:37-56`; `Extra:96-106` | CODE-ONLY |
 | Grace period blocks adding rooms/users, after it the portal is blocked (v3.7) | release notes v3.7 lines 59-62; the 402 of the count checks is `openspec/specs/quotas/spec.md` "Count limits of the tariff" | NOTES-ONLY (blocking), CODE-ONLY (402) |
 | **Payment settings** | | |
 | Portal-settings right; `[AllowNotPayment]`; `buyUrl` = site entry `buy<license:type or enterprise>`; `max` = `core:payment:max-quantity` or 999 | `Settings:1360-1385`; `web/ASC.Web.Api/ApiModels/ResponseDto/PaymentSettingsDto.cs:48-110` | CODE-ONLY |
@@ -154,6 +167,7 @@ test (the TS licence file states that licence management cannot be automated on 
 | yaml `WhiteLabelRequestDto.logoText` on `saveWhiteLabelSettings`: validated, not stored | Agrees (`WL:77`, the DTO attribute fires for both save operations). |
 | TS comment `rebranding.spec.ts:4-15`: two distinct gates | Agrees with `WL:952-965` and `LogoMgr:315-321`. |
 | .NET test names `GetPortalTariff_Member_ReturnsLimitedTariff`, `DeletePortalColorTheme_DocSpaceAdmin_ThemeIsRemoved` | Assertions match the names. |
+| .NET test name `GetAdditionalWhiteLabelSettings_Owner_ReturnsAllResourcesEnabled` | Since `bbba22fbf1` the assertion covers five of the six flags and not `isDefault`; the name overstates it. |
 
 ## Left out of the spec, and why
 
@@ -175,7 +189,7 @@ test (the TS licence file states that licence management cannot be automated on 
 - **The client-side rebranding through translations and the v4.0 product rename** (v2.6, v4.0 notes): client texts.
 - **`LicenseExpiredException` / `LicenseQuotaException` / `LicensePortalException` catch blocks** (`Lic:315-329`): nothing
   in the reader throws them; the messages "The license is not valid for this portal version" etc. are unreachable.
-- **The `Payment-Info` header and the rate-limit rows** of the yaml: generic policy.
+- **The rate-limit rows** of the yaml: generic policy. (The `Payment-Info` header no longer exists in the gate.)
 
 ## Suspected defects
 
@@ -184,6 +198,11 @@ Re-checked 2026-10-24 against the hotfix v4.0.1 commits (`183da52625..HEAD`): no
 twelve are **STILL OPEN**. The range touched only `common/ASC.Core.Common/Billing` (accounting service limits —
 the `billing` specification) and added the `02_Settings/Rebranding` tests, which confirm the two gates but exercise
 none of the defective paths (no logo is ever saved; the company/additional deletes are not ported).
+
+Re-checked 2026-11-04 against `d58816bece..3533ad8a89`: still none of the files behind L1–L12 changed (the only
+branding file in the range, `TenantLogoManager.cs`, touched the letter-logo fetch, not the defective paths), the
+`PaymentSettingsDto` still never fills `feedbackAndSupportUrl` (L7), and the regenerated yaml (`5ea4dc6`) still has no
+`settings/license/trial` path (L12). All twelve are **STILL OPEN**; the new tests of the range exercise none of them.
 
 | # | Where | What the server does | Evidence |
 |---|-------|----------------------|----------|
