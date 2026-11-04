@@ -309,7 +309,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
-    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it")]
+    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
     [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]

@@ -209,7 +209,7 @@ public class EncryptionKeyPairDtoHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        var locatedInPrivateRoom = file.RootFolderType == FolderType.VirtualRooms
+        var locatedInPrivateRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive
             && await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
 
         if (file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)

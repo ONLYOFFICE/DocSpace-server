@@ -836,7 +836,7 @@ public class FileStorageService //: IFileStorageService
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (room.FolderType.IsAiHubRoom())
+        if (room.FolderType.IsAiHubRoom() || room.SettingsPrivate)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1200,6 +1200,13 @@ public class FileStorageService //: IFileStorageService
         if (isRoom && privacy)
         {
             await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+
+            // Indexing and a watermark need the content in the clear, which the server does not have,
+            // and a lifetime would have it delete encrypted files on its own.
+            if (indexing == true || lifetime is { Enabled: not false } || watermark is { Enabled: not false })
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
+            }
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -1513,6 +1520,13 @@ public class FileStorageService //: IFileStorageService
         if (folder.FolderType.IsAiHubRoom() && (updateData.Indexing.HasValue || updateData.DenyDownload.HasValue || updateData.Lifetime != null || updateData.Watermark != null ||
                                                  updateData.SendFormToExternalDB.HasValue || updateData.SaveFormAsXLSX.HasValue ||
                                                  (updateData.Quota.HasValue && folder.FolderType == FolderType.AiProjectRoom)))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
+        }
+
+        // The same settings the creation of a private room refuses. Turning them off stays possible.
+        if (folder.SettingsPrivate &&
+            ((updateData.Indexing == true && !folder.SettingsIndexing) || updateData.Lifetime is { Enabled: not false } || updateData.Watermark is { Enabled: not false }))
         {
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
         }

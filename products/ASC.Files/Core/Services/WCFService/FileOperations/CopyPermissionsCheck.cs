@@ -481,7 +481,9 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
+        // Only a room carries the private flag, so a folder is judged by the rooms around it: it stays
+        // inside its private room, and an open folder does not enter one.
+        if (!isRoom && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)

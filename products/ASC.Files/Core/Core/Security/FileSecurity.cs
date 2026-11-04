@@ -1705,6 +1705,18 @@ public class FileSecurity(
 
         var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
 
+        // The content of an end-to-end encrypted room never leaves it as a copy, whether the room is
+        // active or archived, and the server has no clear text to build an index or a vector from.
+        if (inPrivateRoom && action is
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.Duplicate or
+                FilesSecurityActions.IndexExport or
+                FilesSecurityActions.UseChat or
+                FilesSecurityActions.Vectorization)
+        {
+            return false;
+        }
+
         switch (e.RootFolderType)
         {
             case FolderType.DEFAULT:
@@ -2070,13 +2082,7 @@ public class FileSecurity(
                 }
 
                 // Archiving does not lift what protects an end-to-end encrypted room while it is active:
-                // its content never leaves it as a copy, and only membership gives access to it, so the
-                // administrator bypass below is skipped here too.
-                if (inPrivateRoom && action == FilesSecurityActions.Copy)
-                {
-                    return false;
-                }
-
+                // only membership gives access to it, so the administrator bypass is skipped here too.
                 if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)

@@ -103,6 +103,14 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        // Somebody who enters through a link holds no key, so a link cannot give access to end-to-end
+        // encrypted content. Revoking a link that already exists stays possible.
+        if (aceWrappers.Exists(r => r.IsLink && r.Access != FileShare.None) &&
+            (room is { SettingsPrivate: true } || (room == null && await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, cachedFolderDao))))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
 
 
