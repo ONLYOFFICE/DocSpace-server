@@ -1,0 +1,16 @@
+# coding: utf-8
+
+# flake8: noqa
+
+{{>partial_header}}
+
+
+__version__ = "{{packageVersion}}"
+
+# Models only. A webhook receiver makes no requests, so the generator's
+# ApiClient, Configuration and exception classes are not part of this package.
+__all__ = [
+{{#models}}{{#model}}    "{{classname}}",
+{{/model}}{{/models}}]
+
+{{>exports_model}}

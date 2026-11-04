@@ -45,6 +45,7 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         return TranslateCore<QueryContainer>(
             filter.Body,
             createMatch: (field, value) => new MatchQuery { Field = field, Query = value?.ToString() },
+            createTerms: (field, values) => new TermsQuery { Field = field, Terms = values },
             createAnd: (left, right) => new BoolQuery { Must = [left, right] },
             createOr: (left, right) => new BoolQuery { Should = [left, right] });
     }
@@ -52,6 +53,7 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
     private TResult TranslateCore<TResult>(
         Expression node,
         Func<string, object?, TResult> createMatch,
+        Func<string, IEnumerable<object?>, TResult> createTerms,
         Func<TResult, TResult, TResult> createAnd,
         Func<TResult, TResult, TResult> createOr)
     {
@@ -59,16 +61,44 @@ internal sealed class OpenSearchFilterTranslator<T>(Inferrer inferrer)
         {
             BinaryExpression { NodeType: ExpressionType.Equal } equal =>
                 TranslateCoreEqual(equal.Left, equal.Right, createMatch),
+            MethodCallExpression { Method.Name: nameof(Enumerable.Contains) } contains =>
+                TranslateCoreContains(contains, createTerms),
             BinaryExpression { NodeType: ExpressionType.AndAlso } andAlso =>
                 createAnd(
-                    TranslateCore(andAlso.Left, createMatch, createAnd, createOr),
-                    TranslateCore(andAlso.Right, createMatch, createAnd, createOr)),
+                    TranslateCore(andAlso.Left, createMatch, createTerms, createAnd, createOr),
+                    TranslateCore(andAlso.Right, createMatch, createTerms, createAnd, createOr)),
             BinaryExpression { NodeType: ExpressionType.OrElse } orElse =>
                 createOr(
-                    TranslateCore(orElse.Left, createMatch, createAnd, createOr),
-                    TranslateCore(orElse.Right, createMatch, createAnd, createOr)),
+                    TranslateCore(orElse.Left, createMatch, createTerms, createAnd, createOr),
+                    TranslateCore(orElse.Right, createMatch, createTerms, createAnd, createOr)),
             _ => throw new NotSupportedException($"Unsupported expression: {node.NodeType}")
         };
+    }
+
+    private TResult TranslateCoreContains<TResult>(
+        MethodCallExpression contains,
+        Func<string, IEnumerable<object?>, TResult> createTerms)
+    {
+        var (source, item) = contains switch
+        {
+            { Object: not null, Arguments: [var instanceItem] } => (contains.Object, instanceItem),
+            { Object: null, Arguments: [var staticSource, var staticItem] } => (staticSource, staticItem),
+            _ => throw new NotSupportedException("Invalid contains expression")
+        };
+
+        if (source is MethodCallExpression { Method.Name: "op_Implicit", Arguments: [var spanSource] })
+        {
+            source = spanSource;
+        }
+
+        if (TryGetPropertyInfo(item, out var propertyInfo) &&
+            TryGetValue(source, out var values) &&
+            values is IEnumerable enumerable and not string)
+        {
+            return createTerms(inferrer.Field(propertyInfo), enumerable.Cast<object?>().ToList());
+        }
+
+        throw new NotSupportedException("Invalid contains expression");
     }
 
     private TResult TranslateCoreEqual<TResult>(

@@ -42,19 +42,20 @@ public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreateProfileAsync();
 
-        using var deleteResponse = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var result = await _aiProfiles.AiProfilesDeleteAsync(created.Id, TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue();
 
-        using var getResponse = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken));
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
-    public async Task Delete_NonExisting_ReturnsNoContent()
+    public async Task Delete_NonExisting_ReturnsSuccess()
     {
-        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        var result = await _aiProfiles.AiProfilesDeleteAsync(Guid.NewGuid().ToString(), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
     }
 
     [Fact]
@@ -63,21 +64,29 @@ public class ProfileDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         var created = await CreateProfileAsync();
 
         var regularUser = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-        await _aiClient.Authenticate(regularUser);
+        await _aiChatClient.Authenticate(regularUser);
 
-        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiProfiles.AiProfilesDeleteAsync(created.Id, TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        exception.ErrorCode.Should().Be(403);
+
+        await _aiChatClient.Authenticate(Owner);
+        (await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken)).Id.Should().Be(created.Id);
     }
 
     [Fact]
     public async Task Delete_Unauthorized_Returns401()
     {
         var created = await CreateProfileAsync();
-        await _aiClient.Authenticate(null);
+        await _aiChatClient.Authenticate(null);
 
-        using var response = await _ai.DeleteAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiProfiles.AiProfilesDeleteAsync(created.Id, TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        exception.ErrorCode.Should().Be(401);
+
+        await _aiChatClient.Authenticate(Owner);
+        (await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken)).Id.Should().Be(created.Id);
     }
 }

@@ -228,4 +228,34 @@ public class RoomLinkPrimaryTests(
         replacement.SharedLink.LinkType.Should().Be(LinkType.External);
         replacement.SharedLink.Id.Should().NotBe(original.SharedLink.Id);
     }
+
+    /// <remarks>
+    /// BUG 84873: the UI's "delete link" action revokes a custom room's primary link with a body that has no
+    /// <c>primary</c> field (the request below sends the same fields; the SDK's <c>RoomLinkRequest</c> has none),
+    /// and the room's primary link then answers 404 for good. The TypeScript suite found that revoking with
+    /// <c>primary: true</c> lets the link be recreated, so the outcome hinges on that field. That differs from the
+    /// unconditional "a revoked primary link stays revoked" rule of the 81807 fix for folders.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "84873")]
+    public async Task RevokePrimaryLink_CustomRoomTheWayTheUiDoes_LinkCanBeReadAgain()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Primary Link Revoke Recreate");
+
+        var original = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        await _roomsApi.SetRoomLinkAsync(
+            room.Id,
+            new RoomLinkRequest(linkId: original.SharedLink.Id, access: FileShare.None, title: "Shared link", linkType: LinkType.External, @internal: false, denyDownload: false),
+            TestContext.Current.CancellationToken);
+
+        // Act
+        var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        link.SharedLink.Primary.Should().BeTrue();
+        link.SharedLink.LinkType.Should().Be(LinkType.External);
+    }
 }

@@ -46,7 +46,6 @@ import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS, CUSTOM_TAG_DOCS } from "./a
 const openApiSchemas = createRequire(import.meta.url)(
   "./generated/openapi-schemas.json",
 ) as OpenApiSchemaBundle;
-import { agentsController } from "./controllers/agentsController.js";
 import { textToDocxController } from "./controllers/textToDocxController.js";
 import { metaController } from "./controllers/metaController.js";
 import { aiController } from "./controllers/aiController.js";
@@ -64,6 +63,7 @@ import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
 import { webSearchController } from "./controllers/webSearchController.js";
 import { webSearchPassthroughController } from "./controllers/webSearchPassthroughController.js";
+import { registerDocumentAgentFiles } from "./tools/documentAgentFiles.js";
 
 export { API_PREFIX };
 
@@ -186,11 +186,7 @@ export default function registerRoutes(app: Application): void {
     next();
   });
 
-  // Custom routes not backed by an @onlyoffice/ai-chat engine. Agent
-  // operations are delegated to the .NET AI service (see agentsController).
-  // Literal sub-paths (`news`, `agentquota`, `resetquota`) are registered
-  // before the parameterized `/agents/:id` so Express does not capture them
-  // as an id.
+  // Custom routes not backed by an @onlyoffice/ai-chat engine.
   // Async markdown → docx export via the .NET AI Worker (see
   // textToDocxController); completion is signalled by the files socket
   // create event, not by this response.
@@ -203,15 +199,6 @@ export default function registerRoutes(app: Application): void {
   // Metadata filling: reads one entry's fields and the content behind it and
   // writes the values the text supports through the Files metadata API.
   router.post("/meta/fill", metaController.fill);
-
-  router.get("/agents", agentsController.getAgents);
-  router.get("/agents/news", agentsController.getAgentsNews);
-  router.get("/agents/:id", agentsController.getAgentInfo);
-  router.post("/agents", agentsController.createAgent);
-  router.put("/agents/agentquota", agentsController.updateAgentsQuota);
-  router.put("/agents/resetquota", agentsController.resetAgentsQuota);
-  router.put("/agents/:id", agentsController.updateAgent);
-  router.delete("/agents/:id", agentsController.deleteAgent);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);
@@ -245,14 +232,8 @@ export default function registerRoutes(app: Application): void {
   // Web-search passthrough for the editor AI plugin: the plugin holds a
   // placeholder config, the portal's active provider and key are resolved
   // here (see webSearchPassthroughController).
-  router.post(
-    "/websearch/v1/search",
-    webSearchPassthroughController.search,
-  );
-  router.post(
-    "/websearch/v1/contents",
-    webSearchPassthroughController.contents,
-  );
+  router.post("/websearch/v1/search", webSearchPassthroughController.search);
+  router.post("/websearch/v1/contents", webSearchPassthroughController.contents);
 
   let total = 0;
   for (const binding of ENGINE_DOCS) {
@@ -262,6 +243,10 @@ export default function registerRoutes(app: Application): void {
   logger.info(
     `Registered ${total} engine routes across ${ENGINE_DOCS.length} engines under ${API_PREFIX}`,
   );
+
+  // The document agent's file-link server, outside the API prefix and its
+  // catalog: a machine endpoint with its own token, not a route of the chat.
+  registerDocumentAgentFiles(app);
 
   app.use(API_PREFIX, router);
 

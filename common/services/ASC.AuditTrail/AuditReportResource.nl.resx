@@ -1317,4 +1317,19 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Bestand geopend door Document Builder-script: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>App ingeschakeld: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>App uitgeschakeld: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Ruimtes gekoppeld aan AI-project {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Ruimtes ontkoppeld van AI-project {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI-model van AI-project {0} gewijzigd in {1}</value>
+  </data>
 </root>

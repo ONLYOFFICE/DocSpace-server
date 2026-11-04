@@ -37,6 +37,7 @@ namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 [Trait("Feature", "AI/Profiles")]
 public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    // Internal contract: the profile batch create has no public route (no chat-service route calls HttpProfilesStorage.createMany).
     [Fact]
     public async Task CreateMany_Owner_ReturnsAllCreated()
     {
@@ -58,6 +59,7 @@ public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture
         created.Should().OnlyContain(p => p.Id != Guid.Empty);
     }
 
+    // Internal contract: the profile batch create has no public route (no chat-service route calls HttpProfilesStorage.createMany).
     [Fact]
     public async Task CreateMany_EmptyList_ReturnsEmpty()
     {
@@ -68,5 +70,4 @@ public class ProfileCreateManyTests(AspireAppFixture fixture) : BaseTest(fixture
 
         created.Should().BeEmpty();
     }
-
 }

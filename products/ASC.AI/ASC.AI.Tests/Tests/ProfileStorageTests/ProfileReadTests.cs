@@ -37,50 +37,55 @@ namespace ASC.AI.Tests.Tests.ProfileStorageTests;
 [Trait("Feature", "AI/Profiles")]
 public class ProfileReadTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    /// <summary>
+    /// Open: the create answer carries a <c>createdAt</c> no later read reproduces. The ASC.AI storage returns the
+    /// in-memory timestamp (milliseconds) from the insert but stores it without them, so the same profile reads
+    /// back with <c>createdAt</c> truncated to the second.
+    /// </summary>
     [Fact]
+    [Trait("Bug", "public-api")]
     public async Task ReadById_Existing_ReturnsProfile()
     {
         var created = await CreateProfileAsync();
 
-        using var response = await _ai.GetAsync($"{ProfilesPath}/{created.Id}", TestContext.Current.CancellationToken);
-        var profile = await _ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
+        var profile = await _aiProfiles.AiProfilesGetByIdAsync(created.Id, TestContext.Current.CancellationToken);
 
+        // The public single read carries no key and no headers (Bug 82821): its model has no such fields.
         profile.Id.Should().Be(created.Id);
         profile.Name.Should().Be(created.Name);
-        profile.ProviderType.Should().Be(created.ProviderType);
+        profile.ProviderType.GetString().Should().Be(created.ProviderType.GetString());
         profile.BaseUrl.Should().Be(created.BaseUrl);
         profile.ModelId.Should().Be(created.ModelId);
-        profile.Key.Should().Be(created.Key);
+        profile.CreatedAt.Should().Be(created.CreatedAt);
     }
 
     [Fact]
     public async Task ReadById_NonExisting_Returns404()
     {
-        using var response = await _ai.GetAsync($"{ProfilesPath}/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiProfiles.AiProfilesGetByIdAsync(Guid.NewGuid().ToString(), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
     public async Task ReadAll_Owner_ReturnsAllCreated()
     {
-        var first = await CreateProfileAsync(BuildCreateDto("a"));
-        var second = await CreateProfileAsync(BuildCreateDto("b"));
+        var first = await CreateProfileAsync("a");
+        var second = await CreateProfileAsync("b");
 
-        using var response = await _ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
-        var all = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        var all = await _aiProfiles.AiProfilesListAsync(TestContext.Current.CancellationToken);
 
         all.Should().HaveCount(2);
         all.Select(p => p.Id).Should().BeEquivalentTo([first.Id, second.Id]);
+        all.Should().OnlyContain(p => p.Key == StubModelProvider.Key, "the owner is an administrator, whose list carries the keys");
     }
 
     [Fact]
     public async Task ReadAll_Empty_ReturnsEmpty()
     {
-        using var response = await _ai.GetAsync(ProfilesPath, TestContext.Current.CancellationToken);
-        var all = await _ai.ReadAsync<List<ProfileDto>>(response, TestContext.Current.CancellationToken);
+        var all = await _aiProfiles.AiProfilesListAsync(TestContext.Current.CancellationToken);
 
         all.Should().BeEmpty();
     }
-
 }

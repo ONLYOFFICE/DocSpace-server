@@ -35,62 +35,64 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadReadTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task ReadById_Existing_ReturnsThread()
     {
-        var created = await CreateThreadAsync("my-thread");
+        var created = await CreateOwnThreadAsync("my-thread");
 
-        var stored = await ReadThreadAsync(created.Id);
+        var stored = await GetThreadAsync(created.ThreadId);
 
-        stored.Id.Should().Be(created.Id);
+        stored.ThreadId.Should().Be(created.ThreadId);
         stored.Title.Should().Be("my-thread");
     }
 
     [Fact]
     public async Task ReadById_NonExisting_Returns404()
     {
-        using var response = await _ai.GetAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetThreadAsync(Guid.NewGuid().ToString()));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
     public async Task ReadAll_Owner_ReturnsAllCreated()
     {
-        var first = await CreateThreadAsync("first");
-        var second = await CreateThreadAsync("second");
+        var first = await CreateOwnThreadAsync("first");
+        var second = await CreateOwnThreadAsync("second");
 
-        var all = await ReadAllThreadsAsync();
+        var all = await ListThreadsAsync();
 
-        all.Should().Contain(t => t.Id == first.Id);
-        all.Should().Contain(t => t.Id == second.Id);
+        all.Should().Contain(t => t.ThreadId == first.ThreadId);
+        all.Should().Contain(t => t.ThreadId == second.ThreadId);
     }
 
     [Fact]
     public async Task ReadAll_Empty_ReturnsEmpty()
     {
-        var all = await ReadAllThreadsAsync();
+        var all = await ListThreadsAsync();
 
         all.Should().BeEmpty();
     }
 
+    // Internal contract: entityId scoping of the thread list has no public route (the chat service stores every
+    // thread under entityId null and ignores the entityId of the list, by design - Bug 82719).
     [Fact]
     public async Task ReadAll_WithEntityId_ReturnsOnlyScopedThreads()
     {
         var roomId = await CreateRoomAsync();
-        var globalThread = await CreateThreadAsync("global");
-        var scopedThread = await CreateThreadAsync("scoped", entityId: roomId.ToString());
+        var globalThread = await CreateThreadInternalAsync("global");
+        var scopedThread = await CreateThreadInternalAsync("scoped", entityId: roomId.ToString());
 
-        var scoped = await ReadAllThreadsAsync(roomId.ToString());
+        var scoped = await ReadAllThreadsInternalAsync(roomId.ToString());
 
         scoped.Should().ContainSingle(t => t.Id == scopedThread.Id);
         scoped.Should().NotContain(t => t.Id == globalThread.Id);
     }
 
+    // Internal contract: the required count of the storage page has no public route (the chat service always sends
+    // one; a public list without count walks every page instead - see ReadAll_WithoutCount_ReturnsEveryThread).
     [Fact]
     public async Task ReadAll_WithoutCount_Returns400()
     {
@@ -100,79 +102,115 @@ public class ThreadReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task ReadAll_WithCount_ReturnsBoundedResultsAndCursor()
+    public async Task ReadAll_WithoutCount_ReturnsEveryThread()
     {
-        await CreateThreadAsync("first");
-        await CreateThreadAsync("second");
-        await CreateThreadAsync("third");
+        var created = new List<string>();
+        for (var i = 0; i < 3; i++)
+        {
+            created.Add((await CreateOwnThreadAsync($"thread-{i}")).ThreadId);
+        }
 
-        var page = await ReadThreadsPageAsync(2);
+        var all = await ListThreadsAsync();
 
-        page.Items.Should().HaveCount(2);
-        page.Cursor.Should().NotBeNull();
-        page.Cursor!.Id.Should().Be(page.Items[^1].Id);
-        page.Cursor.LastEditDate.Should().Be(page.Items[^1].LastEditDate);
+        all.Select(t => t.ThreadId).Should().BeEquivalentTo(created);
     }
 
     [Fact]
-    public async Task ReadAll_LastPage_HasNoCursor()
+    public async Task ReadAll_WithCount_ReturnsBoundedNewestFirstPage()
     {
-        await CreateThreadAsync("first");
-        await CreateThreadAsync("second");
+        var created = new List<string>();
+        foreach (var title in new[] { "first", "second", "third" })
+        {
+            created.Add((await CreateOwnThreadAsync(title)).ThreadId);
+        }
 
-        var page = await ReadThreadsPageAsync(2);
+        var page = await ListThreadsAsync(2);
 
-        page.Items.Should().HaveCount(2);
-        page.Cursor.Should().BeNull();
+        page.Should().HaveCount(2);
+        page.Select(t => t.LastEditDate).Should().BeInDescendingOrder();
+
+        var rest = await ListThreadsAsync(2, after: page[^1]);
+
+        rest.Should().ContainSingle();
+        page.Concat(rest).Select(t => t.ThreadId).Should().BeEquivalentTo(created);
+    }
+
+    [Fact]
+    public async Task ReadAll_AfterLastPage_ReturnsEmpty()
+    {
+        await CreateOwnThreadAsync("first");
+        await CreateOwnThreadAsync("second");
+
+        var page = await ListThreadsAsync(2);
+
+        page.Should().HaveCount(2);
+        (await ListThreadsAsync(2, after: page[^1])).Should().BeEmpty();
     }
 
     [Fact]
     public async Task ReadAll_PagingByOne_WalksEveryThreadWithoutGaps()
     {
-        var created = new List<Guid>();
+        var created = new List<string>();
         for (var i = 0; i < 5; i++)
         {
-            var thread = await CreateThreadAsync($"thread-{i}");
-            created.Add(thread.Id);
+            var thread = await CreateOwnThreadAsync($"thread-{i}");
+            created.Add(thread.ThreadId);
         }
 
-        var expected = await ReadAllThreadsAsync();
-        expected.Select(t => t.Id).Should().BeEquivalentTo(created);
+        var expected = await ListThreadsAsync();
+        expected.Select(t => t.ThreadId).Should().BeEquivalentTo(created);
 
-        var walked = new List<Guid>();
-        long? cursorLastEditDate = null;
-        Guid? cursorId = null;
+        var walked = new List<string>();
+        AiThread? last = null;
 
-        while (true)
+        for (var guard = 0; guard <= created.Count; guard++)
         {
-            var page = await ReadThreadsPageAsync(1, cursorLastEditDate: cursorLastEditDate, cursorId: cursorId);
-            walked.AddRange(page.Items.Select(t => t.Id));
-
-            if (page.Cursor is null)
+            var page = await ListThreadsAsync(1, after: last);
+            if (page.Count == 0)
             {
                 break;
             }
 
-            cursorLastEditDate = page.Cursor.LastEditDate;
-            cursorId = page.Cursor.Id;
+            page.Should().ContainSingle();
+            walked.Add(page[0].ThreadId);
+            last = page[0];
         }
 
-        walked.Should().Equal(expected.Select(t => t.Id));
+        walked.Should().Equal(expected.Select(t => t.ThreadId));
     }
 
+    [Fact]
+    public async Task ReadAll_MalformedCursor_StartsFromTheFirstPage()
+    {
+        await CreateOwnThreadAsync("first");
+        await CreateOwnThreadAsync("second");
+
+        var firstPage = await ListThreadsAsync(1);
+
+        // A cursor that is not JSON is ignored rather than rejected (parseThreadsCursor in threadsController.ts).
+        var page = await _aiThreads.AiThreadsListAsync(
+            count: 1,
+            cursor: "not-json",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        page.Select(t => t.ThreadId).Should().Equal(firstPage.Select(t => t.ThreadId));
+    }
+
+    // Internal contract: entityId scoping of the thread list has no public route (the chat service stores every
+    // thread under entityId null and ignores the entityId of the list, by design - Bug 82719).
     [Fact]
     public async Task ReadAll_WithCursor_ScopedByEntity()
     {
         var roomId = await CreateRoomAsync();
-        await CreateThreadAsync("scoped-first", entityId: roomId.ToString());
-        await CreateThreadAsync("scoped-second", entityId: roomId.ToString());
-        await CreateThreadAsync("global");
+        await CreateThreadInternalAsync("scoped-first", entityId: roomId.ToString());
+        await CreateThreadInternalAsync("scoped-second", entityId: roomId.ToString());
+        await CreateThreadInternalAsync("global");
 
-        var firstPage = await ReadThreadsPageAsync(1, roomId.ToString());
+        var firstPage = await ReadThreadsPageInternalAsync(1, roomId.ToString());
         firstPage.Items.Should().ContainSingle();
         firstPage.Cursor.Should().NotBeNull();
 
-        var secondPage = await ReadThreadsPageAsync(
+        var secondPage = await ReadThreadsPageInternalAsync(
             1,
             roomId.ToString(),
             firstPage.Cursor!.LastEditDate,

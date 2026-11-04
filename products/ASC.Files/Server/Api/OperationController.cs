@@ -64,6 +64,8 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FolderDownloaded, When = "for every listed folder, rooms included, once the queued operation starts packing it; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FileDownloaded, When = "for every listed file, once the queued operation packs it; the files inside listed folders raise none")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The download operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read, or an item of `fileConvertIds` has no `key` or `value`")]
@@ -102,6 +104,9 @@ public class OperationController(
     /// <summary>Copy files and folders</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every copied folder, the folders inside it included")]
+    [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room copied into its own section, an AI agent included")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, the files inside copied folders included, once the queued operation processes it")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot read one of the listed items, the destination is a listed folder or lies inside one, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
@@ -135,6 +140,12 @@ public class OperationController(
     /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "for every listed folder moved to the trash; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead for a listed folder deleted at once")]
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "for every listed room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead for a listed AI agent")]
+    [RaisesWebhook(WebhookTrigger.FileTrashed, When = "for every listed file the queued operation moves to the trash; the files inside listed folders raise none")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead for a listed file that is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items, one of them is locked by another user or open for editing, or a room is sent to Trash without `immediately`")]
@@ -167,6 +178,7 @@ public class OperationController(
     /// <summary>Delete file versions</summary>
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "once for every removed version")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileId` or `versions`")]
@@ -197,6 +209,8 @@ public class OperationController(
     /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "for every folder lying directly in the trash")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "for every file lying directly in the trash; the files inside trashed folders raise none")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "`folderType` holds a value that is not a folder type")]
@@ -334,6 +348,12 @@ public class OperationController(
     /// <summary>Move files and folders</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderMoved, When = "for every listed folder; the folders inside it raise none unless it is merged into a folder of the same name")]
+    [RaisesWebhook(WebhookTrigger.FolderRestored, When = "instead for a folder moved out of the trash")]
+    [RaisesWebhook(WebhookTrigger.RoomArchived, When = "for every listed room moved to the archive")]
+    [RaisesWebhook(WebhookTrigger.RoomRestored, When = "for every listed room moved out of the archive")]
+    [RaisesWebhook(WebhookTrigger.FileMoved, When = "for every moved file once the queued operation processes it; the files inside a moved folder raise none unless it is merged into a folder of the same name")]
+    [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
@@ -366,6 +386,9 @@ public class OperationController(
     /// <summary>Duplicate files and folders</summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every duplicated folder, the folders inside it included")]
+    [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room, an AI agent included")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every duplicated file, the files inside duplicated folders and rooms included, once the queued operation processes it")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The duplicate operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items, or cannot copy that item")]
@@ -389,10 +412,12 @@ public class OperationController(
     /// only some of them or none, and `files` names the ones that are. The check is about what the destination allows
     /// to be stored in it rather than about name clashes — everywhere except a form-filling room every file is
     /// accepted, while a form-filling room accepts only PDF forms, so a text document offered to one comes back as
-    /// none accepted. The caller needs create access to the destination, so a room the caller cannot write to and an
-    /// archived room are refused with 403, a destination that does not exist is answered as missing, and a request
-    /// without `destFolderId` is rejected as an invalid request. Folder ids and the copying options of the request
-    /// play no part here. The call changes nothing; for same-named entries at the destination use
+    /// none accepted. A file listed twice is counted once, as the operation moves it once. The caller needs create
+    /// access to the destination, so a room the caller cannot write to and an archived room are refused with 403, as
+    /// are the Rooms, Forms and AI agents section roots, which hold rooms only; a destination that does not exist is
+    /// answered as missing, and a request without `destFolderId` is rejected as an invalid request. Folder ids and
+    /// the copying options of the request play no part here. The call changes nothing; for same-named entries at the
+    /// destination use
     /// `GET api/2.0/files/fileops/move`.
     /// </remarks>
     /// <summary>Check the destination folder</summary>
@@ -400,7 +425,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Whether the destination accepts all of the listed files, some of them or none, and which ones it accepts", typeof(CheckDestFolderDto))]
     [SwaggerResponse(400, "`destFolderId` is not given")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is the Rooms, Forms or AI agents section root, which holds rooms only")]
     [SwaggerResponse(404, "The destination folder does not exist")]
     [SwaggerResponse(500, "A listed file is on a third-party account and the destination accepts it, or a listed file does not exist while the destination is a form-filling room")]
     [HttpGet("checkdestfolder")]
@@ -427,7 +452,11 @@ public class OperationController(
 
         var filesTask = GetFilesDto(entries).ToListAsync();
 
-        var result = inDto.FileIds.Count - entries.Count != 0 ?
+        // a file listed twice is queued once by the operation, so the verdict counts the distinct ids
+        var (requestedIntIds, requestedStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
+        var requestedCount = requestedIntIds.Distinct().Count() + requestedStringIds.Distinct().Count();
+
+        var result = requestedCount - entries.Count != 0 ?
                      entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed : CheckDestFolderResult.AllAllowed;
 
         return new CheckDestFolderDto
@@ -449,11 +478,15 @@ public class OperationController(
     /// Reports which of the requested files and folders already have a same-named entry in `destFolderId`, so that
     /// the clash can be settled before the move or the copy is started. Nothing is moved, copied or changed by the
     /// call, although the address is shared with `PUT api/2.0/files/fileops/move`: the answer is the part of the
-    /// request that clashes, and an empty array means the batch would go through without one. The
-    /// `conflictResolveType` of the request is not taken into account — clashing items are reported whatever it says
-    /// — and encrypted files are left out of the report. A source id that resolves to nothing is not an error and is
-    /// passed over. The caller needs create access to the destination: an archived room and a room the caller cannot
-    /// write to are refused with 403, a destination that does not exist is answered as missing, and a request without
+    /// request that clashes, and an empty array means the batch would go through without one. With `content` true the
+    /// listed folders are replaced by what they directly contain, as the operation does, so the clashes are looked for
+    /// among their files and sub-folders. The `conflictResolveType` of the request is not taken into account —
+    /// clashing items are reported whatever it says — and encrypted files are left out of the report. A source id
+    /// that resolves to nothing is not an error and is passed over. The caller needs create access to the
+    /// destination: an archived room and a room the caller cannot write to are refused with 403, and so is a file,
+    /// or a folder that is not a room, offered to the Rooms, Forms or AI agents section root (a knowledge folder and
+    /// the archive refuse such folders too), and a room offered anywhere but the Rooms root or the archive; only the
+    /// listed folders the caller can read are considered. A destination that does not exist is answered as missing, and a request without
     /// `destFolderId` is rejected as an invalid request. To learn whether the destination accepts the files at all
     /// use `GET api/2.0/files/fileops/checkdestfolder`.
     /// </remarks>
@@ -463,7 +496,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The listed items that already have a same-named entry in the destination folder", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(400, "`destFolderId` is not given")]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is a listed folder or lies inside one")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder, the destination is a listed folder or lies inside one, a file or a folder that is not a room is offered to the Rooms, Forms or AI agents section root, or a room is offered anywhere but the Rooms root or the archive")]
     [SwaggerResponse(404, "The destination folder does not exist")]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryBaseDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
@@ -478,11 +511,11 @@ public class OperationController(
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetInt32(), inDto.Content);
         }
         else
         {
-            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString());
+            (checkedFiles, checkedFolders) = await fileStorageService.MoveOrCopyFilesCheckAsync(inDto.FileIds.ToList(), inDto.FolderIds.ToList(), inDto.DestFolderId.GetString(), inDto.Content);
         }
 
         var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>().Select(Convert.ToInt32), checkedFolders.OfType<int>().Select(Convert.ToInt32), FilterType.None, false);
@@ -500,8 +533,9 @@ public class OperationController(
     /// out stops every operation the caller has running, of every kind. Cancelling stops the job where it stands and
     /// does not undo it: what has already been copied, moved or deleted stays that way, so a cancelled batch can
     /// leave part of itself at the destination and part of it at the source, and the result has to be read back
-    /// rather than assumed. The cancelled record is dropped from `GET api/2.0/files/fileops` at once, which is why
-    /// the answer here is usually empty. An id that is not among the caller's operations cancels nothing and is not
+    /// rather than assumed. The cancelled record leaves the answer of this call, which is why it is usually empty, and
+    /// comes back once the job has actually stopped: the next `GET api/2.0/files/fileops` lists it a single time,
+    /// finished, with the status Canceled and the cancellation in `error`. An id that is not among the caller's operations cancels nothing and is not
     /// an error. Operations are private to the account that started them, an anonymous caller being scoped to the
     /// session of the external link, so the call can never reach an operation of anyone else.
     /// </remarks>

@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Odayı saklamak için bu klasörü kullanmak mümkün değil</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Geçersiz bağlantı URL adresi</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Gecersiz Baslik</value>
   </data>
@@ -607,9 +610,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Sohbet çıktıları</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Oda zaten .ai klasörünü içeriyor</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Bir oda kullanırken depolama alanının bağlantısı kesilemez. Bunun yerine odayı silin</value>
   </data>
@@ -621,5 +621,29 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Klasör meta verilerinde ara</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Bir yapay zeka projesine en fazla {0} talimat odası bağlanabilir</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Bir yapay zeka projesine en fazla {0} bilgi odası bağlanabilir</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Bu odalar yapay zeka projesine bağlanamaz: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Bir talimat odasına yalnızca Markdown (.md) dosyaları eklenebilir</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Bir talimat odası en fazla {0} beceri içerebilir</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Beceri açıklaması 1 ile 1024 karakter arasında olmalı ve XML etiketleri içermemelidir</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Beceri dosyası, name ve description alanlarını içeren, iki --- satırı arasındaki bir YAML frontmatter bloğuyla başlamalıdır</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Beceri adı 1 ile 64 karakter arasında olmalı, yalnızca küçük harfler, rakamlar ve tek kısa çizgiler içermeli ve kısa çizgiyle başlamamalı veya bitmemelidir</value>
   </data>
 </root>

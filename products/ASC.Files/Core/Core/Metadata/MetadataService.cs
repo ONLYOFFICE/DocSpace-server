@@ -96,6 +96,8 @@ public class MetadataService(
 
         var fieldsList = fields?.ToList() ?? [];
 
+        DemandAtLeastOneField(fieldsList.Count);
+
         // the whole batch is validated before anything is persisted, and the template is saved together with its fields
         // in one transaction, otherwise an invalid field or a failed write would leave an orphan template behind
         foreach (var field in fieldsList)
@@ -145,6 +147,8 @@ public class MetadataService(
             }
         }
 
+        var visibilityChanged = visible.HasValue && visible.Value != template.Visible;
+
         template.Name = string.IsNullOrEmpty(name) ? template.Name : name;
         template.Visible = visible ?? template.Visible;
 
@@ -162,6 +166,16 @@ public class MetadataService(
         saved.Fields = template.Fields;
 
         filesMessageService.Send(MessageAction.MetadataTemplateUpdated, saved.Name);
+
+        if (visibilityChanged)
+        {
+            // hiding or showing a template flips hasMetadataFields on every entry it is assigned to, and the clients
+            // showing those entries learn it the way they learn any metadata change: by re-reading the entry. The
+            // search index needs nothing, it checks the visibility at query time.
+            var affectedLinks = await metadataDao.GetLinksByTemplateAsync(templateId);
+
+            await metadataEntryNotifier.NotifyUpdatedAsync(affectedLinks.Select(l => ((int)l.EntryId, l.EntryType)));
+        }
 
         return saved;
     }
@@ -292,8 +306,13 @@ public class MetadataService(
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
-        var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
+        // the template comes with its fields: the field is found among them instead of being read once more, and a
+        // field of another template is unknown here the way GetTemplateFieldAsync answers it
+        var template = await GetUserTemplateAsync(metadataDao, templateId, withFields: true);
+        var field = template.Fields.FirstOrDefault(f => f.Id == fieldId) ?? throw new ItemNotFoundException();
+
+        // the field being deleted is one of the loaded ones, so the count after the deletion is the count less one
+        DemandAtLeastOneField(template.Fields.Count - 1);
 
         await DeleteFieldInternalAsync(metadataDao, field);
     }
@@ -477,6 +496,10 @@ public class MetadataService(
                 CascadeConflict = link.CascadeConflict
             });
         }
+
+        // the one rule of "something to fill", shared with the listing flag (IMetadataDao.GetEntriesWithFieldsAsync) and
+        // relied on by the AI filling instead of a copy of its own
+        result.HasMetadataFields = result.Templates.Any(t => t.Template.Visible && t.Template.Fields.Count > 0) || result.CustomFields.Count > 0;
 
         return result;
     }
@@ -1036,6 +1059,19 @@ public class MetadataService(
         if (userType != EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
+
+    /// <summary>
+    /// A template is a set of fields an entry is described by, so one without fields is nothing to assign or to fill in:
+    /// it is neither created empty nor emptied by deleting its last field. The last field goes with the template, through
+    /// <see cref="DeleteTemplateAsync"/>.
+    /// </summary>
+    private static void DemandAtLeastOneField(int fieldCount)
+    {
+        if (fieldCount < 1)
+        {
+            throw new ArgumentException(@"A template must have at least one field", "fields");
         }
     }
 

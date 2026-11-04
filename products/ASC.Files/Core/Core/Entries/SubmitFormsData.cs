@@ -209,6 +209,14 @@ public class FactoryIndexerFormMetadata(
     IServiceProvider serviceProvider)
     : FactoryIndexer<DbFormsMetadataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider)
 {
+    /// <summary>
+    /// Creates the missing index: the periodic indexing does it only on its first run.
+    /// </summary>
+    public void CreateIfNotExist()
+    {
+        _indexer.CreateIfNotExist(new DbFormsMetadataSearch());
+    }
+
     public override async Task IndexAllAsync()
     {
         try
@@ -268,6 +276,14 @@ public class FactoryIndexerForm(
     IServiceProvider serviceProvider)
     : FactoryIndexer<DbFormsItemDataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider)
 {
+    /// <summary>
+    /// Creates the missing index: the periodic indexing does it only on its first run.
+    /// </summary>
+    public void CreateIfNotExist()
+    {
+        _indexer.CreateIfNotExist(new DbFormsItemDataSearch());
+    }
+
     public override async Task IndexAllAsync()
     {
         try

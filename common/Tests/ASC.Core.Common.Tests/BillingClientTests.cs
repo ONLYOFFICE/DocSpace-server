@@ -360,7 +360,7 @@ public class BillingClientTests
         handler.CallCount.Should().Be(0);
     }
 
-    private static (BillingClient client, CapturingHandler handler) CreateClient(
+    internal static (BillingClient client, CapturingHandler handler) CreateClient(
         Func<HttpRequestMessage, HttpResponseMessage> responder, string? baseUrl = BaseUrl, bool test = false)
     {
         var settings = new Dictionary<string, string?>
@@ -397,7 +397,7 @@ public class BillingClientTests
         return (provider.GetRequiredService<BillingClient>(), handler);
     }
 
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
+    internal static HttpResponseMessage Json(HttpStatusCode status, string json)
     {
         return new HttpResponseMessage(status)
         {
@@ -413,7 +413,7 @@ public class BillingClientTests
         return $"ASC {key}:{timestamp}:{hash}";
     }
 
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
+    internal sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
         public int CallCount { get; private set; }
         public Uri? LastUri { get; private set; }

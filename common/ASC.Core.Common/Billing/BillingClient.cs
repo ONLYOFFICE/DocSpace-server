@@ -73,6 +73,20 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         return link;
     }
 
+    public async Task<string> GetInvoiceLinkAsync(string portalId, string paymentRef)
+    {
+        EnsureConfigured();
+
+        var result = await billingApi.GetInvoiceLinkAsync(new GetInvoiceLinkRequestDto
+        {
+            PortalId = [portalId],
+            PaymentRef = [paymentRef]
+        });
+
+        var link = JsonSerializer.Deserialize<string>(result);
+        return link;
+    }
+
     public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
     {
         EnsureConfigured();
@@ -375,6 +389,13 @@ public class BillingProductRequestDto : BillingPortalRequestDto
 public class GetAccountLinkRequestDto : BillingPortalRequestDto
 {
     public List<string> BackRef { get; set; }
+}
+
+/// <summary>Request for the hosted page of the invoice behind a payment.</summary>
+public class GetInvoiceLinkRequestDto : BillingPortalRequestDto
+{
+    /// <summary>The payment reference of the top-up: a Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>).</summary>
+    public List<string> PaymentRef { get; set; }
 }
 
 /// <summary>Request for a single Stripe payment (checkout) URL.</summary>

@@ -35,30 +35,28 @@ namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
-public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class McpServerReadTests(AspireAppFixture fixture) : PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task ReadByName_Existing_ReturnsServer()
     {
-        var config = BuildMcpConfig();
-        await CreateMcpServerAsync("server-1", config);
+        await AddCustomServerAsync("server-1");
 
-        var stored = await ReadMcpServerAsync("server-1");
+        var stored = await GetCustomServerAsync("server-1");
 
-        stored.Name.Should().Be("server-1");
-        JsonEquals(stored.Config, config).Should().BeTrue();
+        ConfigEquals(stored).Should().BeTrue();
     }
 
+    // The public read answers an unregistered name with a null body and status 200, not 404 (documented on the route).
     [Fact]
-    public async Task ReadByName_NonExisting_Returns404()
+    public async Task ReadByName_NonExisting_ReturnsNull()
     {
-        using var response = await _ai.GetAsync(
-            $"{McpServersPath}/missing",
-            TestContext.Current.CancellationToken);
+        var stored = await GetCustomServerAsync("missing");
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        stored.Should().BeNull();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task ReadByName_WithEntityId_ReturnsScopedValue()
     {
@@ -66,21 +64,22 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         var globalConfig = BuildMcpConfig("https://example.com/global");
         var scopedConfig = BuildMcpConfig("https://example.com/scoped");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
-        await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", scopedConfig, roomId.ToString());
 
-        var global = await ReadMcpServerAsync("server-1");
-        var scoped = await ReadMcpServerAsync("server-1", roomId.ToString());
+        var global = await ReadMcpServerInternalAsync("server-1");
+        var scoped = await ReadMcpServerInternalAsync("server-1", roomId.ToString());
 
         JsonEquals(global.Config, globalConfig).Should().BeTrue();
         JsonEquals(scoped.Config, scopedConfig).Should().BeTrue();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task ReadByName_GlobalNotVisibleFromEntityScope()
     {
         var roomId = await CreateRoomAsync();
-        await CreateMcpServerAsync("server-1");
+        await CreateMcpServerInternalAsync("server-1");
 
         using var response = await _ai.GetAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
@@ -89,6 +88,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // Internal contract: the 404 for an unknown entityId on a read is the AI service's; the public reads ignore entityId (Bug 82863) and check it on writes only.
     [Fact]
     public async Task ReadByName_NonExistentEntityId_Returns404()
     {
@@ -102,34 +102,35 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadAll_Owner_ReturnsAllCreated()
     {
-        await CreateMcpServerAsync("server-1");
-        await CreateMcpServerAsync("server-2");
+        await AddCustomServerAsync("server-1", "https://example.com/first");
+        await AddCustomServerAsync("server-2", "https://example.com/second");
 
-        var all = await ReadAllMcpServersAsync();
+        var all = await ListCustomServersAsync();
 
         all.Should().HaveCount(2);
-        all.Should().Contain(s => s.Name == "server-1");
-        all.Should().Contain(s => s.Name == "server-2");
+        ConfigEquals(all["server-1"], "https://example.com/first").Should().BeTrue();
+        ConfigEquals(all["server-2"], "https://example.com/second").Should().BeTrue();
     }
 
     [Fact]
     public async Task ReadAll_Empty_ReturnsEmpty()
     {
-        var all = await ReadAllMcpServersAsync();
+        var all = await ListCustomServersAsync();
 
         all.Should().BeEmpty();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task ReadAll_WithEntityId_ReturnsOnlyScopedServers()
     {
         var roomId = await CreateRoomAsync();
 
-        await CreateMcpServerAsync("global-server");
-        await CreateMcpServerAsync("scoped-server", entityId: roomId.ToString());
+        await CreateMcpServerInternalAsync("global-server");
+        await CreateMcpServerInternalAsync("scoped-server", entityId: roomId.ToString());
 
-        var global = await ReadAllMcpServersAsync();
-        var scoped = await ReadAllMcpServersAsync(roomId.ToString());
+        var global = await ReadAllMcpServersInternalAsync();
+        var scoped = await ReadAllMcpServersInternalAsync(roomId.ToString());
 
         global.Should().ContainSingle(s => s.Name == "global-server");
         global.Should().NotContain(s => s.Name == "scoped-server");
@@ -138,6 +139,7 @@ public class McpServerReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         scoped.Should().NotContain(s => s.Name == "global-server");
     }
 
+    // Internal contract: the 404 for an unknown entityId on a read is the AI service's; the public reads ignore entityId (Bug 82863) and check it on writes only.
     [Fact]
     public async Task ReadAll_NonExistentEntityId_Returns404()
     {

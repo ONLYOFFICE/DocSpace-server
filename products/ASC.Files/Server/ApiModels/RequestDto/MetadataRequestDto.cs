@@ -143,7 +143,7 @@ public class CreateMetadataTemplateRequestDto
     public bool Visible { get; set; } = true;
 
     /// <summary>
-    /// The template metadata fields.
+    /// The template metadata fields. At least one field is required: a template without fields is not created.
     /// </summary>
     /// <example>[{"name": "Contract number", "type": 0}, {"name": "Signed on", "type": 1}]</example>
     public List<MetadataFieldRequest> Fields { get; set; }

@@ -257,7 +257,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
@@ -611,7 +611,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return result;
         }
 
-        if (edit)
+        if (edit && await fileSecurity.CanEditAsync(file))
         {
             result.CanEdit = true;
             result.EditorType = editorType;

@@ -44,15 +44,11 @@ public class PromptFolderNameLengthTests(AspireAppFixture fixture) : BaseTest(fi
     {
         var name = new string('a', MaxNameLength);
 
-        using var response = await _ai.PostAsync(
-            PromptFoldersPath,
-            new { name },
-            TestContext.Current.CancellationToken);
+        var result = await _aiPrompts.AiPromptsCreateFolderAsync(name, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var created = await _ai.ReadAsync<PromptFolderDto>(response, TestContext.Current.CancellationToken);
-        created.Name.Should().Be(name);
+        result.Success.Should().BeTrue($"prompts/create-folder rejected the folder: {result.Error}");
+        result.Folder.Name.Should().Be(name);
+        (await _aiPrompts.AiPromptsGetFolderByIdAsync(result.Folder.Id, TestContext.Current.CancellationToken)).Name.Should().Be(name);
     }
 
     [Theory]
@@ -64,27 +60,26 @@ public class PromptFolderNameLengthTests(AspireAppFixture fixture) : BaseTest(fi
     [InlineData(5000)]
     public async Task Create_NameOverLimit_Returns400(int length)
     {
-        using var response = await _ai.PostAsync(
-            PromptFoldersPath,
-            new { name = new string('a', length) },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiPrompts.AiPromptsCreateFolderAsync(new string('a', length), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
+        (await _aiPrompts.AiPromptsListFoldersAsync(TestContext.Current.CancellationToken)).Should().BeEmpty();
     }
 
     [Fact]
     public async Task Rename_NameAtLimit_PersistsFullName()
     {
-        var created = await CreatePromptFolderAsync("original");
+        var created = await CreateFolderAsync("original");
         var name = new string('a', MaxNameLength);
 
-        using var response = await _ai.PutAsync(
-            $"{PromptFoldersPath}/{created.Id}",
-            new { name },
+        var result = await _aiPrompts.AiPromptsRenameFolderAsync(
+            new AiPromptsRenameFolderRequest(id: created.Id, name: name),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadPromptFolderAsync(created.Id)).Name.Should().Be(name);
+        result.Success.Should().BeTrue($"prompts/rename-folder rejected the folder: {result.Error}");
+        result.Folder.Name.Should().Be(name);
+        (await _aiPrompts.AiPromptsGetFolderByIdAsync(created.Id, TestContext.Current.CancellationToken)).Name.Should().Be(name);
     }
 
     [Theory]
@@ -96,14 +91,13 @@ public class PromptFolderNameLengthTests(AspireAppFixture fixture) : BaseTest(fi
     [InlineData(5000)]
     public async Task Rename_NameOverLimit_Returns400(int length)
     {
-        var created = await CreatePromptFolderAsync("original");
+        var created = await CreateFolderAsync("original");
 
-        using var response = await _ai.PutAsync(
-            $"{PromptFoldersPath}/{created.Id}",
-            new { name = new string('a', length) },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiPrompts.AiPromptsRenameFolderAsync(
+            new AiPromptsRenameFolderRequest(id: created.Id, name: new string('a', length)),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     /// <summary>
@@ -114,14 +108,21 @@ public class PromptFolderNameLengthTests(AspireAppFixture fixture) : BaseTest(fi
     [Fact]
     public async Task Rename_NameOverLimit_LeavesStoredNameUntouched()
     {
-        var created = await CreatePromptFolderAsync("original");
+        var created = await CreateFolderAsync("original");
 
-        using var response = await _ai.PutAsync(
-            $"{PromptFoldersPath}/{created.Id}",
-            new { name = new string('a', 5000) },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiPrompts.AiPromptsRenameFolderAsync(
+            new AiPromptsRenameFolderRequest(id: created.Id, name: new string('a', 5000)),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadPromptFolderAsync(created.Id)).Name.Should().Be("original");
+        exception.ErrorCode.Should().Be(400);
+        (await _aiPrompts.AiPromptsGetFolderByIdAsync(created.Id, TestContext.Current.CancellationToken)).Name.Should().Be("original");
+    }
+
+    private async Task<AiPromptFolder> CreateFolderAsync(string name)
+    {
+        var result = await _aiPrompts.AiPromptsCreateFolderAsync(name, TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue($"prompts/create-folder rejected the folder: {result.Error}");
+
+        return result.Folder;
     }
 }

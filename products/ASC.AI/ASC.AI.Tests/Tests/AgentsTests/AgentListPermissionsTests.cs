@@ -39,6 +39,7 @@ public class AgentListPermissionsTests(AspireAppFixture fixture) : BaseTest(fixt
 {
     private const string AgentsPath = "/internal/ai/agents";
 
+    // Internal contract: the AI agents listing has no public route (the chat service dropped its /agents* routes in ecf76402b3; the SDK's AgentsApi still lists them).
     /// <summary>
     /// The root of the AI agents section used to report the stored counters of the whole portal, so a member who
     /// could see none of the agents still learned how many there were. The section root now reports 0, like the

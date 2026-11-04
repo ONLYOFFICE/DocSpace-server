@@ -37,7 +37,16 @@ public record GenerateKeysRequestDto(string Email);
 public record GenerateKeysResponseDto(string EmailKey, string LinkKey);
 
 public record ValideteKeysRequestDto(string EmailKey, string LinkKey, string Page);
-public record ValideteKeysResponseDto(string Email, bool Valid);
+public record ValideteKeysResponseDto(string Email, bool Valid, KeyValidationResult? Reason);
+
+[JsonConverter(typeof(JsonStringEnumConverter<KeyValidationResult>))]
+public enum KeyValidationResult
+{
+    Ok,
+    Invalid,
+    Expired,
+    AlreadyUsed
+}
 
 public record GenerateUnsubscribeIdRequestDto(string Email);
 public record GenerateUnsubscribeIdResponseDto(string UnsubscribeId);
