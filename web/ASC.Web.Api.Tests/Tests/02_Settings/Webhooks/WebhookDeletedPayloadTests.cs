@@ -52,7 +52,7 @@ public class WebhookDeletedPayloadTests(
         await _groupApi.AddGroupAsync(
             new GroupRequestDto(groupName: groupName, groupManager: Owner.Id, members: [subject.Id]),
             TestContext.Current.CancellationToken);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserDeleted);
 
         await _peopleClient.Authenticate(Owner);
         await _userStatusApi.UpdateUserStatusAsync(
@@ -81,7 +81,7 @@ public class WebhookDeletedPayloadTests(
         var group = await _groupApi.AddGroupAsync(
             new GroupRequestDto(groupName: groupName, groupManager: Owner.Id, members: [member.Id]),
             TestContext.Current.CancellationToken);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupDeleted);
 
         // Act
         await _peopleClient.Authenticate(Owner);

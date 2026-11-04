@@ -50,7 +50,7 @@ public class WebhookFileOperationPayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileDeleted);
 
         // Act
         await _filesClient.Authenticate(Owner);
@@ -70,7 +70,7 @@ public class WebhookFileOperationPayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileTrashed);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed);
 
         // Act
         await TrashAsync(file.Id);
@@ -89,7 +89,7 @@ public class WebhookFileOperationPayloadTests(
         var sourceRoomId = await CreateRoomAsync();
         var targetRoomId = await CreateRoomAsync();
         var file = await CreateFileAsync(sourceRoomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCopied);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCopied);
 
         // Act
         await RunBatchAsync(copy: true, file.Id, targetRoomId);
@@ -109,7 +109,7 @@ public class WebhookFileOperationPayloadTests(
         var sourceRoomId = await CreateRoomAsync();
         var targetRoomId = await CreateRoomAsync();
         var file = await CreateFileAsync(sourceRoomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileMoved);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileMoved);
 
         // Act
         await RunBatchAsync(copy: false, file.Id, targetRoomId);
@@ -127,7 +127,7 @@ public class WebhookFileOperationPayloadTests(
         // Arrange: a file in the trash. A catch-all subscription gets both events, told apart by event.trigger
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         await TrashAsync(file.Id);
         (await WaitForEventPayloadAsync(subscription.Id, "file.trashed", p => IdIs(p, file.Id))).Should().NotBeNull();
 

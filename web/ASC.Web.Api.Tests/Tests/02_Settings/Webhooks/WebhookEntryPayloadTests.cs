@@ -60,7 +60,7 @@ public class WebhookEntryPayloadTests(
     {
         // Arrange
         var roomId = await CreateRoomAsync(RoomType.CustomRoom);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var title = $"file-{Guid.NewGuid():N}.docx";
 
         // Act
@@ -104,7 +104,7 @@ public class WebhookEntryPayloadTests(
     {
         // Arrange
         var roomId = await CreateRoomAsync(RoomType.CustomRoom);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated);
         var title = $"folder-{Guid.NewGuid():N}";
 
         // Act
@@ -132,7 +132,7 @@ public class WebhookEntryPayloadTests(
     public async Task RoomCreated_Payload_CarriesTheRoomSettings()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated);
         var title = $"room-{Guid.NewGuid():N}";
 
         // Act
@@ -163,7 +163,7 @@ public class WebhookEntryPayloadTests(
     public async Task AgentCreated_Payload_IsTheRoomShapeOfAnAiRoom()
     {
         // Arrange: the pinned SDK enum has no agent.* bits, so a catch-all subscription stands in for agent.created
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var title = $"agent-{Guid.NewGuid():N}";
 
         // Act

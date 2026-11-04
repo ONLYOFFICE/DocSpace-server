@@ -69,9 +69,9 @@ public class WebhookFixtureCaptureTests(
 
         // a catch-all subscription for one delivery of every family, and a file.created one whose receiver accepts the
         // first file, fails the second once and accepts its retry, so the retry carries lastSuccessOn as well
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
-        var retryReceiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 200, 500, 200);
+        var retryReceiver = WebhookReceiver.CreateSequence(200, 500, 200);
         var retrySubscription = await CreateSubscriptionAsync(retryReceiver, WebhookTrigger.FileCreated);
 
         foreach (var id in new[] { subscription.Id, retrySubscription.Id })
@@ -124,7 +124,7 @@ public class WebhookFixtureCaptureTests(
         var member = await InviteContact(EmployeeType.User);
 
         await _webApiClient.Authenticate(Owner);
-        var targetReceiver = await CreateReceiverAsync();
+        var targetReceiver = CreateReceiver();
         var targeted = WebhooksTestData.CreateWebhookDto(enabled: true, triggers: WebhookTrigger.UserUpdated);
         targeted.Uri = targetReceiver.TargetUri;
         targeted.TargetId = member.Id.ToString();
@@ -178,7 +178,7 @@ public class WebhookFixtureCaptureTests(
         {
             var byTrigger = new Dictionary<string, ReceivedDelivery>();
 
-            foreach (var delivery in await receiver.GetDeliveriesAsync())
+            foreach (var delivery in receiver.GetDeliveries())
             {
                 var trigger = TriggerOf(delivery.Body);
 

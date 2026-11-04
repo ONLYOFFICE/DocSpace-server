@@ -78,7 +78,7 @@ public class RetryWebhookTests(
     {
         // Arrange: a first attempt that failed, with an automatic retry scheduled. It is planted on a delivered
         // record and held a day ahead: a real retry comes half a second later and could be in flight (409)
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -109,7 +109,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_RetryOfARetry_SendsTheOriginalEventId()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -163,7 +163,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DeliveredRecord_ResendsTheSameBodyAndSignature()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -185,7 +185,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DeliveryBeingSent_ThrowsConflict()
     {
         // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -205,7 +205,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DisabledSubscription_ThrowsConflict()
     {
         // Arrange: a delivered event, then the subscription is switched off
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -233,7 +233,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_RecordOfThePreviousDeliveryFormat_ThrowsConflict()
     {
         // Arrange: a record as the sender before the attempt counter left it, sent but with no attempt counted
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -255,7 +255,7 @@ public class RetryWebhookTests(
     {
         // Arrange: a record as Web.Studio leaves one that a publisher of the previous version wrote during a rolling
         // update: never attempted, off the schedule, with the note in place of a response
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);

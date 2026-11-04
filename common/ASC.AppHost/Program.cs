@@ -69,7 +69,7 @@ switch (launchProfile)
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddNextcloud()
-            .AddWebhookReceiver()
+            .UseWebhookTestSettings()
             .AllowPortalRegistration();
 
         configurator

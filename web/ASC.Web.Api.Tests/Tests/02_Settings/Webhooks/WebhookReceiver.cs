@@ -34,61 +34,99 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 
 /// <summary>
-/// One subscriber endpoint on the WireMock receiver: a path of its own, so parallel tests never see each
-/// other's stubs or requests. The answers are stubbed through the WireMock admin API, and what the portal
-/// sent is read back from its request journal.
+/// One subscriber endpoint on the run-wide WireMock server: a path of its own, so parallel tests never see each
+/// other's stubs or requests. The server runs in the test process and starts on first use, and the deliveries are
+/// recorded here rather than read from its log: WireMock.Net writes a log entry only after the answer has gone out, so
+/// a test that has just seen the sender's record could still miss the delivery behind it.
 /// </summary>
 public sealed class WebhookReceiver
 {
-    private readonly HttpClient _admin;
-    private readonly string _path;
+    /// <summary>
+    /// The portal reaches the receiver on its own loopback alias, the one address the integration-test blacklist
+    /// leaves open (<c>Constants.WebhookTestBlacklist</c>), so <c>localhost</c> stays refused as in production.
+    /// </summary>
+    private static readonly string _baseUri =
+        $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}";
 
-    private WebhookReceiver(HttpClient admin, string path)
+    private static readonly Lazy<WireMockServer> _server = new(() => WireMockServer.Start(new WireMockServerSettings { Urls = [_baseUri] }));
+
+    private readonly ConcurrentQueue<ReceivedDelivery> _deliveries = new();
+    private readonly string _path = $"/hooks/{Guid.NewGuid():N}";
+    private int _deliveryCount;
+    private int _redirectedCount;
+
+    /// <summary>The HEAD the portal sends when a subscription is created or changed always gets 200.</summary>
+    private WebhookReceiver()
     {
-        _admin = admin;
-        _path = path;
+        _server.Value
+            .Given(Request.Create().WithPath(_path).UsingHead())
+            .RespondWith(Response.Create().WithStatusCode(200));
+    }
+
+    /// <summary>The address a subscription points at.</summary>
+    public string TargetUri => _baseUri + _path;
+
+    /// <summary>An address on the server that nothing is stubbed for: it answers 404 to any request.</summary>
+    public static string UnstubbedUri(string name)
+    {
+        _ = _server.Value;
+
+        return $"{_baseUri}/hooks/{name}";
+    }
+
+    /// <summary>Stops the server of the run, if a test started it.</summary>
+    public static void StopServer()
+    {
+        if (_server.IsValueCreated)
+        {
+            _server.Value.Stop();
+            _server.Value.Dispose();
+        }
     }
 
     /// <summary>
-    /// The address a subscription points at. The portal reaches the receiver on its own loopback alias,
-    /// the one address the integration-test blacklist leaves open (see
-    /// <c>ConnectionStringManager.AddBaseConfig</c>), so <c>localhost</c> stays refused as in production.
-    /// </summary>
-    public string TargetUri => $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}{_path}";
-
-    /// <summary>
     /// A new endpoint that answers every delivery with <paramref name="status"/> and <paramref name="body"/>
-    /// (<c>ok</c> by default), after <paramref name="delayMilliseconds"/>. The HEAD the portal sends when a
-    /// subscription is created or changed always gets 200, whatever the deliveries are stubbed to answer.
+    /// (<c>ok</c> by default), after <paramref name="delayMilliseconds"/>.
     /// </summary>
-    public static async Task<WebhookReceiver> CreateAsync(HttpClient admin, int status = 200, int delayMilliseconds = 0, string? body = null)
+    public static WebhookReceiver Create(int status = 200, int delayMilliseconds = 0, string? body = null)
     {
-        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
+        var receiver = new WebhookReceiver();
 
-        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
-        await receiver.StubAsync(new { method = "POST", urlPath = receiver._path }, new { status, body = body ?? "ok", fixedDelayMilliseconds = delayMilliseconds });
+        receiver.AnswerDeliveries(async _ =>
+        {
+            await Task.Delay(delayMilliseconds);
+
+            return Answer(status, body ?? "ok");
+        });
 
         return receiver;
     }
 
     /// <summary>
     /// A new endpoint that answers every delivery with <paramref name="status"/> at once, then sends
-    /// <paramref name="body"/> in <paramref name="chunks"/> pieces spread over <paramref name="bodyDuration"/>
-    /// (WireMock's <c>chunkedDribbleDelay</c>): the status line and headers arrive first, the body only slowly.
+    /// <paramref name="body"/> in <paramref name="chunks"/> pieces spread over <paramref name="bodyDuration"/>: the
+    /// status line and headers arrive first, the body only slowly.
     /// </summary>
-    public static async Task<WebhookReceiver> CreateSlowBodyAsync(HttpClient admin, int status, string body, int chunks, TimeSpan bodyDuration)
+    public static WebhookReceiver CreateSlowBody(int status, string body, int chunks, TimeSpan bodyDuration)
     {
-        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
+        var receiver = new WebhookReceiver();
+        var pieces = body.Chunk(Math.Max(1, body.Length / chunks)).Select(piece => new string(piece)).ToList();
 
-        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
-        await receiver.StubAsync(
-            new { method = "POST", urlPath = receiver._path },
-            new
+        _server.Value
+            .Given(Request.Create().WithPath(receiver._path).UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(status).WithSseBody(async (request, queue) =>
             {
-                status,
-                body,
-                chunkedDribbleDelay = new { numberOfChunks = chunks, totalDuration = (int)bodyDuration.TotalMilliseconds }
-            });
+                receiver._deliveries.Enqueue(ReceivedDelivery.From(request));
+
+                foreach (var piece in pieces)
+                {
+                    queue.Write(piece);
+
+                    await Task.Delay(bodyDuration / pieces.Count);
+                }
+
+                queue.Close();
+            }));
 
         return receiver;
     }
@@ -97,30 +135,11 @@ public sealed class WebhookReceiver
     /// A new endpoint that answers the deliveries in turn with <paramref name="statuses"/>, the last one for
     /// every delivery after that.
     /// </summary>
-    public static async Task<WebhookReceiver> CreateSequenceAsync(HttpClient admin, params int[] statuses)
+    public static WebhookReceiver CreateSequence(params int[] statuses)
     {
-        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
-        var scenario = receiver._path;
+        var receiver = new WebhookReceiver();
 
-        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
-
-        for (var i = 0; i < statuses.Length; i++)
-        {
-            var mapping = new Dictionary<string, object>
-            {
-                ["scenarioName"] = scenario,
-                ["requiredScenarioState"] = i == 0 ? "Started" : $"answer-{i}",
-                ["request"] = new { method = "POST", urlPath = receiver._path },
-                ["response"] = new { status = statuses[i], body = "ok" }
-            };
-
-            if (i < statuses.Length - 1)
-            {
-                mapping["newScenarioState"] = $"answer-{i + 1}";
-            }
-
-            await receiver.PostMappingAsync(mapping);
-        }
+        receiver.AnswerDeliveries(number => Task.FromResult(Answer(statuses[Math.Min(number, statuses.Length - 1)], "ok")));
 
         return receiver;
     }
@@ -130,69 +149,35 @@ public sealed class WebhookReceiver
     /// receiver that answers 200 to any method, and every later delivery with 200. A sender that followed the
     /// redirect would leave a request there.
     /// </summary>
-    public static async Task<WebhookReceiver> CreateRedirectAsync(HttpClient admin)
+    public static WebhookReceiver CreateRedirect()
     {
-        var receiver = new WebhookReceiver(admin, $"/hooks/{Guid.NewGuid():N}");
-        var scenario = receiver._path;
+        var receiver = new WebhookReceiver();
 
-        await receiver.StubAsync(new { method = "HEAD", urlPath = receiver._path }, new { status = 200 });
-        await receiver.StubAsync(new { method = "ANY", urlPath = receiver.RedirectPath }, new { status = 200, body = "redirected" });
+        _server.Value
+            .Given(Request.Create().WithPath(receiver.RedirectPath).UsingAnyMethod())
+            .RespondWith(Response.Create().WithCallback(_ =>
+            {
+                Interlocked.Increment(ref receiver._redirectedCount);
 
-        await receiver.PostMappingAsync(new Dictionary<string, object>
-        {
-            ["scenarioName"] = scenario,
-            ["requiredScenarioState"] = "Started",
-            ["newScenarioState"] = "answer-1",
-            ["request"] = new { method = "POST", urlPath = receiver._path },
-            ["response"] = new { status = 302, headers = new Dictionary<string, string> { ["Location"] = receiver.RedirectPath } }
-        });
+                return Answer(200, "redirected");
+            }));
 
-        await receiver.PostMappingAsync(new Dictionary<string, object>
-        {
-            ["scenarioName"] = scenario,
-            ["requiredScenarioState"] = "answer-1",
-            ["request"] = new { method = "POST", urlPath = receiver._path },
-            ["response"] = new { status = 200, body = "ok" }
-        });
+        receiver.AnswerDeliveries(number => Task.FromResult(number == 0 ? Answer(302, string.Empty, receiver.RedirectPath) : Answer(200, "ok")));
 
         return receiver;
     }
 
-    /// <summary>Where the endpoint of <see cref="CreateRedirectAsync"/> redirects its first delivery to.</summary>
+    /// <summary>Where the endpoint of <see cref="CreateRedirect"/> redirects its first delivery to.</summary>
     public string RedirectPath => $"{_path}/moved";
 
     /// <summary>The requests of any method that reached <see cref="RedirectPath"/>.</summary>
-    public async Task<int> CountRedirectedRequestsAsync()
-    {
-        using var content = new StringContent(JsonSerializer.Serialize(new { url = RedirectPath }), Encoding.UTF8, "application/json");
-        using var response = await _admin.PostAsync("__admin/requests/count", content, TestContext.Current.CancellationToken);
-
-        response.EnsureSuccessStatusCode();
-
-        using var result = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-
-        return result.RootElement.GetProperty("count").GetInt32();
-    }
+    public int CountRedirectedRequests() => Volatile.Read(ref _redirectedCount);
 
     /// <summary>The deliveries received so far, oldest first.</summary>
-    public async Task<List<ReceivedDelivery>> GetDeliveriesAsync()
-    {
-        using var content = new StringContent(JsonSerializer.Serialize(new { method = "POST", url = _path }), Encoding.UTF8, "application/json");
-        using var response = await _admin.PostAsync("__admin/requests/find", content, TestContext.Current.CancellationToken);
-
-        response.EnsureSuccessStatusCode();
-
-        using var journal = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-
-        return journal.RootElement.GetProperty("requests")
-            .EnumerateArray()
-            .Select(ReceivedDelivery.Parse)
-            .OrderBy(r => r.LoggedDate)
-            .ToList();
-    }
+    public List<ReceivedDelivery> GetDeliveries() => [.. _deliveries];
 
     /// <summary>
-    /// Polls the journal until it holds at least <paramref name="count"/> deliveries, and returns the last
+    /// Polls the deliveries until there are at least <paramref name="count"/> of them, and returns the last
     /// observed list either way.
     /// </summary>
     public async Task<List<ReceivedDelivery>> WaitForDeliveriesAsync(int count, int timeoutSeconds = 90)
@@ -201,7 +186,7 @@ public sealed class WebhookReceiver
 
         while (true)
         {
-            var deliveries = await GetDeliveriesAsync();
+            var deliveries = GetDeliveries();
 
             if (deliveries.Count >= count || DateTime.UtcNow >= deadline)
             {
@@ -212,43 +197,50 @@ public sealed class WebhookReceiver
         }
     }
 
-    private Task StubAsync(object request, object response)
+    /// <summary>Records each delivery as it arrives, then answers it; <paramref name="answer"/> gets its number from 0.</summary>
+    private void AnswerDeliveries(Func<int, Task<IResponseMessage>> answer)
     {
-        return PostMappingAsync(new { request, response });
+        Func<IRequestMessage, Task<IResponseMessage>> callback = request =>
+        {
+            _deliveries.Enqueue(ReceivedDelivery.From(request));
+
+            return answer(Interlocked.Increment(ref _deliveryCount) - 1);
+        };
+
+        _server.Value
+            .Given(Request.Create().WithPath(_path).UsingPost())
+            .RespondWith(Response.Create().WithCallback(callback));
     }
 
-    private async Task PostMappingAsync(object mapping)
+    private static IResponseMessage Answer(int status, string body, string? location = null)
     {
-        using var content = new StringContent(JsonSerializer.Serialize(mapping), Encoding.UTF8, "application/json");
-        using var response = await _admin.PostAsync("__admin/mappings", content, TestContext.Current.CancellationToken);
+        var message = new ResponseMessage
+        {
+            StatusCode = status,
+            BodyData = new BodyData { BodyAsString = body, DetectedBodyType = BodyType.String }
+        };
 
-        response.EnsureSuccessStatusCode();
+        if (location is not null)
+        {
+            message.AddHeader("Location", location);
+        }
+
+        return message;
     }
 }
 
-/// <summary>One request the receiver logged: the body exactly as sent, and the headers by lower-cased name.</summary>
-public sealed record ReceivedDelivery(string Body, IReadOnlyDictionary<string, string> Headers, long LoggedDate)
+/// <summary>One request the receiver took: the body exactly as sent, and the headers by lower-cased name.</summary>
+public sealed record ReceivedDelivery(string Body, IReadOnlyDictionary<string, string> Headers)
 {
     public string? Header(string name)
     {
         return Headers.GetValueOrDefault(name.ToLowerInvariant());
     }
 
-    public static ReceivedDelivery Parse(JsonElement request)
+    public static ReceivedDelivery From(IRequestMessage request)
     {
-        var headers = new Dictionary<string, string>();
-
-        foreach (var header in request.GetProperty("headers").EnumerateObject())
-        {
-            // WireMock writes a header sent once as a string and a repeated one as an array
-            headers[header.Name.ToLowerInvariant()] = header.Value.ValueKind == JsonValueKind.Array
-                ? string.Join(",", header.Value.EnumerateArray().Select(v => v.GetString()))
-                : header.Value.GetString()!;
-        }
-
         return new ReceivedDelivery(
-            request.GetProperty("body").GetString()!,
-            headers,
-            request.GetProperty("loggedDate").GetInt64());
+            Encoding.UTF8.GetString(request.BodyAsBytes ?? []),
+            request.Headers!.ToDictionary(header => header.Key.ToLowerInvariant(), header => string.Join(",", header.Value)));
     }
 }

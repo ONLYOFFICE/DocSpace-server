@@ -48,8 +48,8 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_Owner_NameAndUriAreUpdated()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
-        var updated = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
+        var updated = WebhooksTestData.CreateAcceptedWebhookDto();
 
         // Act
         var result = await _webhooksApi.UpdateWebhookAsync(
@@ -67,7 +67,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_Owner_TriggersAndTargetAreReplaced()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var update = UpdateOf(subscription);
         update.Triggers = WebhookTrigger.FileUpdated | WebhookTrigger.FolderCreated;
         update.TargetId = "12345";
@@ -88,7 +88,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_SslWithHttpTarget_ThrowsBadRequest()
     {
         // Arrange: the receiver speaks plain http, which ssl does not accept
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var update = UpdateOf(subscription);
         update.Ssl = true;
 
@@ -112,7 +112,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_WithoutSsl_KeepsTheStoredSslOn()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         await ExecuteSqlAsync("UPDATE webhooks_config SET `ssl` = 1 WHERE id = @id", ("@id", subscription.Id));
 
         // Act
@@ -130,7 +130,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_WithoutSsl_KeepsTheStoredSslOff()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
 
         // Act
         await _webApiClient.Authenticate(Owner);
@@ -146,7 +146,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_EmptySecret_KeepsTheStoredSecret()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act: a new name, and an empty secret
@@ -165,7 +165,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_UnknownId_ThrowsNotFound()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var update = UpdateOf(subscription);
         update.Id = int.MaxValue;
 
@@ -181,7 +181,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_UnknownIdWithAnInvalidBody_ThrowsNotFound()
     {
         // Arrange: the address would fail validation, but there is nothing to validate it for
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var update = UpdateOf(subscription, uri: "not an address");
         update.Id = int.MaxValue;
 
@@ -199,7 +199,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_AnotherMembersSubscription_ThrowsAccessDenied(EmployeeType employeeType)
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var member = await InviteContact(employeeType);
 
         // Act
@@ -216,7 +216,7 @@ public class UpdateWebhookTests(
     public async Task UpdateWebhook_AnotherMembersSubscriptionWithAnInvalidBody_ThrowsAccessDenied()
     {
         // Arrange: the body would fail validation, which must not be what tells a stranger the subscription exists
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         var member = await InviteContact(EmployeeType.User);
 
         // Act
@@ -233,7 +233,7 @@ public class UpdateWebhookTests(
     {
         // Arrange: a User's subscription; user.created is for admins and room admins only
         var member = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
 
         var update = UpdateOf(subscription);
         update.Triggers = WebhookTrigger.FileCreated | WebhookTrigger.UserCreated;
@@ -253,7 +253,7 @@ public class UpdateWebhookTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
 
         var update = UpdateOf(subscription);
         update.Triggers = WebhookTrigger.FileCreated | WebhookTrigger.FileUpdated;

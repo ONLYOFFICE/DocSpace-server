@@ -57,7 +57,7 @@ public class WebhookEntryContextTests(
     {
         // Arrange
         var roomId = await CreateRoomAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
 
         // Act
         var (_, title) = await CreateFileAsync(roomId);
@@ -79,7 +79,7 @@ public class WebhookEntryContextTests(
         await _filesClient.Authenticate(Owner);
         var outer = (await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest($"outer-{Guid.NewGuid():N}"), cancellationToken)).Response;
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated);
         var title = $"inner-{Guid.NewGuid():N}";
 
         // Act
@@ -98,7 +98,7 @@ public class WebhookEntryContextTests(
     public async Task RoomCreated_Payload_HasNoParentRoomType()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated);
         var title = $"room-{Guid.NewGuid():N}";
 
         // Act
@@ -124,12 +124,12 @@ public class WebhookEntryContextTests(
         var cancellationToken = TestContext.Current.CancellationToken;
         var roomId = await CreateRoomAsync();
         await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
 
         // Act
         await _filesClient.Authenticate(Owner);
         await _operationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(folderIds: [new DownloadRequestDtoAllOfFolderIds(roomId)]), cancellationToken);
+            new DownloadRequestDto(folderIds: [new DownloadRequestDtoAllOfFolderIds(roomId)], fileIds: [], fileConvertIds: []), cancellationToken);
 
         // Assert
         var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.downloaded", p => p.GetProperty("id").GetInt32() == roomId, 60);
@@ -154,7 +154,7 @@ public class WebhookEntryContextTests(
         // Arrange: a room with a quota of its own
         var cancellationToken = TestContext.Current.CancellationToken;
         var roomId = await CreateRoomWithQuotaAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomArchived);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomArchived);
 
         // Act
         await _filesClient.Authenticate(Owner);
@@ -185,7 +185,7 @@ public class WebhookEntryContextTests(
             new RoomInvitationRequest(invitations: [new RoomInvitation(editor.Id, DocSpace.API.SDK.Model.FileShare.Editing)], notify: false),
             cancellationToken);
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, editor);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, editor);
 
         // Act
         var title = $"room-{Guid.NewGuid():N}";

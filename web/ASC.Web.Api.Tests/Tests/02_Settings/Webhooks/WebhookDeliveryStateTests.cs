@@ -52,7 +52,7 @@ public class WebhookDeliveryStateTests(
         // 3 seconds before the attempt would give up on the target, which leaves 9 seconds for the wait, the read and
         // the SQL below even on a busy machine: a shorter delay let the attempt finish first under parallel load
         var answerDelay = ProfileRequestTimeout - TimeSpan.FromSeconds(3);
-        var receiver = await CreateReceiverAsync(delayMilliseconds: (int)answerDelay.TotalMilliseconds);
+        var receiver = CreateReceiver(delayMilliseconds: (int)answerDelay.TotalMilliseconds);
         var subscription = await CreateSubscriptionAsync(receiver, WebhookTrigger.UserCreated);
         await FireEventAsync();
         await receiver.WaitForDeliveriesAsync(1);
@@ -99,7 +99,7 @@ public class WebhookDeliveryStateTests(
     public async Task Attempt_LeaseOfADeadSender_IsTakenOverByTheNextPoll()
     {
         // Arrange: a record as a sender that died mid-send leaves it: leased, unanswered, the lease already expired
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -116,14 +116,14 @@ public class WebhookDeliveryStateTests(
         redelivered.Status.Should().Be(200);
         redelivered.Attempts.Should().Be(1);
         redelivered.NextAttemptOn.Should().BeNull();
-        (await receiver.GetDeliveriesAsync()).Should().HaveCount(2, "the dead sender's attempt and the one that took over");
+        receiver.GetDeliveries().Should().HaveCount(2, "the dead sender's attempt and the one that took over");
     }
 
     [Fact]
     public async Task Attempt_SubscriptionEditedWhileSending_KeepsTheEdit()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync(delayMilliseconds: 8_000);
+        var receiver = CreateReceiver(delayMilliseconds: 8_000);
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         await receiver.WaitForDeliveriesAsync(1);
@@ -160,7 +160,7 @@ public class WebhookDeliveryStateTests(
     public async Task Attempt_RetriesRunOutOnASubscriptionWithoutSuccessForDays_DisablesIt()
     {
         // Arrange: the subscription was created four days ago and has never been delivered to
-        var receiver = await CreateReceiverAsync(500);
+        var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
         await ExecuteSqlAsync(
             "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
@@ -185,7 +185,7 @@ public class WebhookDeliveryStateTests(
     {
         // Arrange: a subscription that heard nothing for days, as one with rare events does, whose receiver
         // fails once and then answers
-        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 500, 200);
+        var receiver = WebhookReceiver.CreateSequence(500, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
         await ExecuteSqlAsync(
             "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY WHERE id = @id",
@@ -208,7 +208,7 @@ public class WebhookDeliveryStateTests(
     public async Task Attempt_RetriesRunOutOnAnOldSubscriptionWithARecentSuccess_KeepsItEnabled()
     {
         // Arrange: four days old, but delivered to an hour ago
-        var receiver = await CreateReceiverAsync(500);
+        var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
         await ExecuteSqlAsync(
             "UPDATE webhooks_config SET created_on = UTC_TIMESTAMP() - INTERVAL 4 DAY, last_success_on = UTC_TIMESTAMP() - INTERVAL 1 HOUR WHERE id = @id",

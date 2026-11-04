@@ -274,14 +274,13 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-class`,
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
-The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to a WireMock
-receiver that the `integration-test` profile publishes on the loopback alias `127.0.0.2:18089`
+The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to `WebhookReceiver`, a
+WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2:18089`
 (`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
 `127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
 `127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
-the receiver container cannot bind. The receiver is a lazy resource, so the rest of the suite
-still runs, but every class that creates a subscription (`NeedsLazyResources`) fails on waiting
-for it — an environment problem, not a product regression.
+the server cannot bind. The rest of the suite still runs, but every test that creates a
+subscription fails on starting it — an environment problem, not a product regression.
 
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both

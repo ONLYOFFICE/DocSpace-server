@@ -50,7 +50,7 @@ public class WebhookDeliveryTests(
     public async Task Delivery_TargetAnswers200_IsRecordedAsDeliveredOnTheFirstAttempt()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -69,7 +69,7 @@ public class WebhookDeliveryTests(
     public async Task Delivery_TargetAnswers200_CarriesEventIdTimestampAndSignature()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -96,7 +96,7 @@ public class WebhookDeliveryTests(
     public async Task Delivery_TargetFailsTwiceThenAnswers200_IsRetriedUnderTheSameEventId()
     {
         // Arrange
-        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 500, 500, 200);
+        var receiver = WebhookReceiver.CreateSequence(500, 500, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -109,7 +109,7 @@ public class WebhookDeliveryTests(
         record.Attempts.Should().Be(3);
         record.NextAttemptOn.Should().BeNull();
 
-        var deliveries = await receiver.GetDeliveriesAsync();
+        var deliveries = receiver.GetDeliveries();
 
         deliveries.Should().HaveCount(3);
         deliveries.Should().AllSatisfy(d => d.Header("x-docspace-event-id").Should().Be(record.Id.ToString()));
@@ -120,7 +120,7 @@ public class WebhookDeliveryTests(
     public async Task Delivery_TargetAlwaysFails_IsGivenUpAfterTheLastRetry()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync(500);
+        var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -134,7 +134,7 @@ public class WebhookDeliveryTests(
         record.Delivery.Should().BeNull();
         record.Status.Should().Be(500);
 
-        (await receiver.GetDeliveriesAsync()).Should().HaveCount(AttemptsInAll);
+        receiver.GetDeliveries().Should().HaveCount(AttemptsInAll);
 
         await AssertSubscriptionStaysAsync(subscription.Id, c => c.Enabled, "a subscription is only disabled once it has gone days without a success");
     }
@@ -143,7 +143,7 @@ public class WebhookDeliveryTests(
     public async Task Delivery_TargetAnswers410_RemovesTheSubscription()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync(410);
+        var receiver = CreateReceiver(410);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -161,7 +161,7 @@ public class WebhookDeliveryTests(
         }
 
         config.Should().BeNull("410 Gone tells the portal the subscriber is gone for good");
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("a removed subscription is not retried");
+        receiver.GetDeliveries().Should().ContainSingle("a removed subscription is not retried");
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class WebhookDeliveryTests(
     {
         // Arrange: a delivery whose first attempt failed, with its retry held a day ahead. It is planted on a
         // delivered record: a real failure would be retried half a second later, before the test could step in
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var failed = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -199,16 +199,16 @@ public class WebhookDeliveryTests(
         record.ResponsePayload.Should().Be(failed.ResponsePayload, "the target's last answer is not overwritten by the reason the retry stopped");
         record.ResponsePayload.Should().NotBe(ASC.Webhooks.Core.DbWorker.SubscriptionDisabledNote);
 
-        // WireMock journals a request as it arrives, before the sender writes its outcome, and a record without a
+        // The receiver records a request as it arrives, before the sender writes its outcome, and a record without a
         // next attempt is never claimed again: no pause is needed to know that nothing more will come
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the attempt before the switch-off went out");
+        receiver.GetDeliveries().Should().ContainSingle("only the attempt before the switch-off went out");
     }
 
     [Fact]
     public async Task Delivery_RetryAfterAnEarlierSuccess_CarriesLastSuccessOnInUtc()
     {
         // Arrange: the first event is delivered at once, which records the success on the subscription
-        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 200, 500, 200);
+        var receiver = WebhookReceiver.CreateSequence(200, 500, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         await FireEventAsync();

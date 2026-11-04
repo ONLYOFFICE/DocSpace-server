@@ -58,8 +58,8 @@ public class WebhookFilePayloadTests(
         // Arrange
         var member = await InviteContact(EmployeeType.User);
         var roomId = await CreateRoomAsync(member);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
 
         // Act
         var (_, title) = await CreateFileAsync(roomId);
@@ -94,8 +94,8 @@ public class WebhookFilePayloadTests(
 
         var member = await InviteContact(EmployeeType.User);
         var roomId = await CreateRoomAsync(member);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated);
 
         // Act: a quota of the room's own, set together with a new title, which publishes room.updated
         var title = $"room-{Guid.NewGuid():N}";
@@ -126,7 +126,7 @@ public class WebhookFilePayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var (fileId, _) = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileUpdated);
 
         // Act
         await _filesClient.Authenticate(Owner);
@@ -161,7 +161,7 @@ public class WebhookFilePayloadTests(
         await CreateFileAsync(folder.Id);
         await CreateFileAsync(folder.Id);
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderDeleted);
 
         // Act: deleted at once, not moved to the trash
         await _filesClient.Authenticate(Owner);

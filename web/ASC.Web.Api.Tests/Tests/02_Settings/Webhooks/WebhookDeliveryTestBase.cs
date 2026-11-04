@@ -43,7 +43,7 @@ public abstract class WebhookDeliveryTestBase(
 {
     private readonly AspireAppFixture _fixture = fixture;
 
-    // the receiver takes the deliveries, Web.Studio sends them, and Files publishes the file events
+    // Web.Studio sends the deliveries, and Files publishes the file events
     protected override bool NeedsLazyResources => true;
 
     /// <summary>
@@ -80,9 +80,9 @@ public abstract class WebhookDeliveryTestBase(
     /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/> and
     /// <paramref name="body"/> (<c>ok</c> by default).
     /// </summary>
-    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0, string? body = null)
+    protected static WebhookReceiver CreateReceiver(int status = 200, int delayMilliseconds = 0, string? body = null)
     {
-        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds, body);
+        return WebhookReceiver.Create(status, delayMilliseconds, body);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public abstract class WebhookDeliveryTestBase(
     /// </summary>
     protected async Task<int> CreateSubscriptionAsync()
     {
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
 
         return (await CreateSubscriptionAsync(receiver)).Id;
     }

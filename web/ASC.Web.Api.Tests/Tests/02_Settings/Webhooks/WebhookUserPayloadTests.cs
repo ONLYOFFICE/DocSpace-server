@@ -50,7 +50,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await CreateMemberInGroupAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -73,7 +73,7 @@ public class WebhookUserPayloadTests(
         // Arrange
         var subject = await CreateMemberInGroupAsync();
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, roomAdmin);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, roomAdmin);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -94,7 +94,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await CreateMemberInGroupAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, subject);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, subject);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -114,8 +114,8 @@ public class WebhookUserPayloadTests(
         // Arrange
         var subject = await InviteContact(EmployeeType.User);
         var member = await InviteContact(EmployeeType.User);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -132,7 +132,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -156,7 +156,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange: a member whose registration date is read back from the database for the update
         var subject = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -176,7 +176,7 @@ public class WebhookUserPayloadTests(
     public async Task UserInvited_Payload_DescribesThePendingMember()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserInvited);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserInvited);
         var email = Initializer.FakerMember.Generate().Email;
 
         // Act

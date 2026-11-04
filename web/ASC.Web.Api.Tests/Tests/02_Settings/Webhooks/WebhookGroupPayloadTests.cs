@@ -48,7 +48,7 @@ public class WebhookGroupPayloadTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated);
         var groupName = $"group-{Guid.NewGuid():N}";
 
         // Act
@@ -81,7 +81,7 @@ public class WebhookGroupPayloadTests(
         var member = await InviteContact(EmployeeType.User);
         var newMember = await InviteContact(EmployeeType.User);
         // a catch-all subscription gets both events; the payloads are told apart by event.trigger
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
 
         await _peopleClient.Authenticate(Owner);
         var group = (await _groupApi.AddGroupAsync(
@@ -120,7 +120,7 @@ public class WebhookGroupPayloadTests(
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupUpdated);
         var groupName = $"group-{Guid.NewGuid():N}";
 
         await _peopleClient.Authenticate(Owner);

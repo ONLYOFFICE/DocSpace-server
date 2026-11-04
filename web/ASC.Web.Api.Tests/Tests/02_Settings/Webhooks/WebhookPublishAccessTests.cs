@@ -55,8 +55,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync();
 
         // Act
@@ -71,8 +71,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated);
         var roomId = await CreateRoomAsync();
         var title = $"folder-{Guid.NewGuid():N}";
 
@@ -89,8 +89,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a RoomAdmin may subscribe to room.created, but sees only the rooms they are in
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated, roomAdmin);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated, roomAdmin);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated);
         var title = $"room-{Guid.NewGuid():N}";
 
         // Act
@@ -107,7 +107,7 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: the counterpart of the demotion below - a RoomAdmin is entitled to group.* and may read groups
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated, roomAdmin);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated, roomAdmin);
 
         // Act
         var group = await CreateGroupAsync();
@@ -121,8 +121,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: group.* is not available to a User, who may not read groups either
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated, roomAdmin);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated, roomAdmin);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated);
         await ChangeTypeAsync(roomAdmin, EmployeeType.User);
 
         // Act
@@ -137,8 +137,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a member who could read the room and subscribed while active
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync(member);
         await TerminateAsync(member);
 
@@ -154,8 +154,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a member who can read the room, then the owner limits the developer tools to admins
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync(member);
 
         await _webApiClient.Authenticate(Owner);

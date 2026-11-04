@@ -64,7 +64,7 @@ public class WebhookDevToolsRestrictionTests(
         // Arrange: the member's own subscription and a delivery record of it exist before the restriction is switched
         // on, so that the record endpoints would accept the member without it
         var member = await InviteContact(EmployeeType.User);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
         var recordId = await CreateRecordAsync(member, memberSubscription);
 
         await RestrictDevToolsAsync();
@@ -101,7 +101,7 @@ public class WebhookDevToolsRestrictionTests(
         await RestrictDevToolsAsync();
 
         // Act
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), creator: admin);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), creator: admin);
         await _webApiClient.Authenticate(admin);
         var list = await _webhooksApi.GetTenantWebhooksAsync(TestContext.Current.CancellationToken);
         var logs = await _webhooksApi.GetWebhooksLogsAsync(cancellationToken: TestContext.Current.CancellationToken);
@@ -164,7 +164,7 @@ public class WebhookDevToolsRestrictionTests(
                 await _webhooksApi.GetTenantWebhooksAsync(cancellationToken);
                 break;
             case "create":
-                await _webhooksApi.CreateWebhookAsync(await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient), cancellationToken);
+                await _webhooksApi.CreateWebhookAsync(WebhooksTestData.CreateAcceptedWebhookDto(), cancellationToken);
                 break;
             case "update":
                 await _webhooksApi.UpdateWebhookAsync(update, cancellationToken);

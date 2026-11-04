@@ -94,7 +94,7 @@ public class WebhookTargetTests(
     {
         // Arrange
         var subject = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         await RenameAsync(subject);
@@ -114,7 +114,7 @@ public class WebhookTargetTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: trigger, targetId: Resolve(targetId));
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(triggers: trigger, targetId: Resolve(targetId));
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -129,7 +129,7 @@ public class WebhookTargetTests(
     {
         // Arrange: an existing id, but of the wrong kind of entity
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.GroupUpdated, targetId: Owner.Id.ToString());
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.GroupUpdated, targetId: Owner.Id.ToString());
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -145,7 +145,7 @@ public class WebhookTargetTests(
         // Arrange
         var target = await InviteContact(EmployeeType.User);
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.UserUpdated, targetId: target.Id.ToString());
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.UserUpdated, targetId: target.Id.ToString());
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -159,7 +159,7 @@ public class WebhookTargetTests(
     {
         // Arrange: the file family is checked by read access on every event, not when the subscription is saved
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.FileCreated, targetId: "987654321");
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.FileCreated, targetId: "987654321");
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -174,8 +174,8 @@ public class WebhookTargetTests(
         // Arrange: a subscription that mixes families may be narrowed to an entry, as before the target was checked;
         // the user events then never match it
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(
-            _webhookReceiverClient, triggers: WebhookTrigger.UserUpdated | WebhookTrigger.FileCreated, targetId: "987654321");
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(
+            triggers: WebhookTrigger.UserUpdated | WebhookTrigger.FileCreated, targetId: "987654321");
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -190,8 +190,8 @@ public class WebhookTargetTests(
         // Arrange: a User sees no other member, so the owner is hidden from them
         var member = await InviteContact(EmployeeType.User);
         await _webApiClient.Authenticate(member);
-        var hidden = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.UserUpdated, targetId: Owner.Id.ToString());
-        var unknown = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.UserUpdated, targetId: Guid.NewGuid().ToString());
+        var hidden = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.UserUpdated, targetId: Owner.Id.ToString());
+        var unknown = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.UserUpdated, targetId: Guid.NewGuid().ToString());
 
         // Act
         var hiddenException = await Assert.ThrowsAsync<ApiException>(
@@ -209,7 +209,7 @@ public class WebhookTargetTests(
     public async Task UpdateWebhook_UserTriggerWithATargetThatIsNotThere_ThrowsBadRequest()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         var update = new UpdateWebhooksConfigRequestDto(subscription.Id)
         {
@@ -268,7 +268,7 @@ public class WebhookTargetTests(
 
     private async Task<WebhookSubscription> CreateTargetedSubscriptionAsync(WebhookTrigger trigger, string targetId)
     {
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
 
         await _webApiClient.Authenticate(Owner);
 
