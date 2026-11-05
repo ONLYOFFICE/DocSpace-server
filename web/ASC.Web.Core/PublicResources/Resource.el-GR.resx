@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Κόστος παρόχου</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Το webhook είναι απενεργοποιημένο. Ενεργοποιήστε το πριν επαναλάβετε τις παραδόσεις του</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Το συμβάν αποστέλλεται αυτή τη στιγμή. Δοκιμάστε ξανά μόλις ολοκληρωθεί η προσπάθεια</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Η παράδοση καταγράφηκε σε προηγούμενη μορφή webhook και δεν μπορεί να σταλεί ξανά</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Ο προορισμός του webhook δεν είναι υπάρχων χρήστης ή ομάδα</value>
+  </data>
 </root>

@@ -58,6 +58,9 @@ internal static partial class DocumentServiceTrackerLogger
     [LoggerMessage(LogLevel.Error, "DocService drop failed for users {users}")]
     public static partial void ErrorDocServiceDropFailed(this ILogger<DocumentServiceTrackerHelper> logger, List<string> users);
 
+    [LoggerMessage(LogLevel.Error, "DocService save of the private room file {fileId} by {userId} refused")]
+    public static partial void ErrorDocServiceSavingPrivateFile(this ILogger<DocumentServiceTrackerHelper> logger, string fileId, Guid userId);
+
     [LoggerMessage(LogLevel.Error, "DocService saving file {fileId} ({docKey}) with key {fileData}")]
     public static partial void ErrorDocServiceSavingFile(this ILogger<DocumentServiceTrackerHelper> logger, string fileId, string docKey, string fileData);
 

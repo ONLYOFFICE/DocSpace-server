@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>AI プロジェクト {0} の AI モデルが {1} に変更されました</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook の配信を再試行しました: {0}</value>
+  </data>
 </root>

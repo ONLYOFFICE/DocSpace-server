@@ -238,7 +238,7 @@ public sealed class FormSubmittedNotifyAction(TenantManager tenantManager, Displ
             new TagValue(NotifyConstants.TagMessage, originalForm.Title),
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
             new TagValue(CommonTags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(CommonTags.ToUserLink, managerUrl),
@@ -252,7 +252,7 @@ public sealed class FormSubmittedNotifyAction(TenantManager tenantManager, Displ
         Tags =
         [
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
@@ -279,7 +279,7 @@ public sealed class FormReceivedNotifyAction(TenantManager tenantManager) : Noti
             new TagValue(NotifyConstants.TagMessage, originalForm.Title),
             new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
             new TagValue(CommonTags.FromUserName, userName),
             new TagValue(CommonTags.FromUserLink, userUrl),
@@ -303,7 +303,7 @@ public sealed class RoomMovedArchiveNotifyAction(TenantManager tenantManager, Di
     {
         Tags =
         [
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(CommonTags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
@@ -332,7 +332,7 @@ public class InvitedToRoomNotifyAction(TenantManager tenantManager) : NotifyActi
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(NotifyConstants.RoomTitle, room.Title)
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room))
         ];
     }
 }
@@ -368,7 +368,7 @@ public class RoomUpdateAccessForUserNotifyAction(TenantManager tenantManager) : 
         Tags =
         [
             new TagValue(CommonTags.AccessLevel, access.ToStringFast()),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
@@ -402,7 +402,7 @@ public sealed class DocumentCreatedInRoomNotifyAction(TenantManager tenantManage
     {
         Tags =
         [
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
             new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
@@ -429,7 +429,7 @@ public sealed class DocumentUploadedToRoomNotifyAction(TenantManager tenantManag
             new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
             new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
         ];
@@ -453,7 +453,7 @@ public sealed class DocumentsUploadedToRoomNotifyAction(TenantManager tenantMana
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(CommonTags.Count, count)
         ];
     }
@@ -473,7 +473,7 @@ public sealed class FolderCreatedInRoomNotifyAction(TenantManager tenantManager)
     {
         Tags =
         [
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.FolderTitle, folder.Title),
             new TagValue(NotifyConstants.TagFolderID, folder.Id),
             new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
@@ -499,7 +499,7 @@ public class FormStartedFillingNotifyAction(TenantManager tenantManager, BaseCom
         [
             new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
             new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
             new TagValue(CommonTags.FromUserName, userName),
             new TagValue(CommonTags.FromUserLink, userUrl)
@@ -545,6 +545,12 @@ public sealed class StoppedFormFillingNotifyAction(TenantManager tenantManager, 
 
 public static class NotifyConstants
 {
+    /// <summary>The name of a room as a letter may print it: the title of a private room stays between its members.</summary>
+    public static string GetRoomTitle<T>(FileEntry<T> room)
+    {
+        return room is Folder<T> { SettingsPrivate: true } ? FilesPatternResource.PrivateRoomTitle : room.Title;
+    }
+
     public static readonly string TagFolderID = "FolderID";
     public static readonly string TagFolderParentId = "FolderParentId";
     public static readonly string TagFolderRootFolderType = "FolderRootFolderType";

@@ -43,15 +43,12 @@ public class GetTenantWebhooksTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // every subscription it creates is probed at the webhook receiver
-    protected override bool NeedsLazyResources => true;
-
     [Fact]
     public async Task GetTenantWebhooks_Owner_ContainsCreatedWebhook()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         // Act
@@ -142,7 +139,7 @@ public class GetTenantWebhooksTests(
         await _webApiClient.Authenticate(creator);
 
         var created = await _webhooksApi.CreateWebhookAsync(
-            await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient), TestContext.Current.CancellationToken);
+            WebhooksTestData.CreateAcceptedWebhookDto(), TestContext.Current.CancellationToken);
 
         return created.Response.Id;
     }

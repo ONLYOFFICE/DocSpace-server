@@ -195,6 +195,12 @@ public class NotifyClient(
                     return;
                 }
                 folderUrl = pathProvider.GetRoomsUrl(roomIdInt, false);
+
+                if (await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>()))
+                {
+                    folderTitle = FilesPatternResource.PrivateRoomTitle;
+                }
+
                 break;
             case FolderType.USER:
                 var shareFolderId = await globalFolder.GetFolderShareAsync<T>(daoFactory);
@@ -349,7 +355,7 @@ public class NotifyClient(
             }
             
             var action = folder.FolderType == FolderType.AiRoom ? serviceProvider.GetService<AgentRemovedNotifyAction>()  : serviceProvider.GetService<RoomRemovedNotifyAction>();
-            action.Init(folder.Title, roomUrl);
+            action.Init(NotifyConstants.GetRoomTitle(folder), roomUrl);
             
             await client.SendNoticeToAsync(
                 action,

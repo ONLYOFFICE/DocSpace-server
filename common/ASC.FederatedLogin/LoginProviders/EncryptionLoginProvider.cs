@@ -66,7 +66,7 @@ public class EncryptionLoginProvider(
             throw new ArgumentException("The encryption keys are too large to be stored");
         }
 
-        await accountLinker.RemoveProviderAsync(userId);
+        await accountLinker.RemoveProviderAsync(userId, ProviderConstants.Encryption);
         await accountLinker.AddLinkAsync(userId, loginProfile);
     }
 

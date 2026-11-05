@@ -15,8 +15,8 @@ add webhook commands to that tool as a side effect.
 The skill does three things:
 
 1. **Check the contract** against the code it describes — always — and **regenerate it** when the user says so.
-2. **Generate and verify** the requested languages, step by step, with no shell script, and pack
-   the TypeScript package — stage A.
+2. **Generate and verify** the requested languages, step by step, with no shell script, pack the
+   TypeScript package and copy the C# one to `.nuget/packages` — stage A.
 3. **Report** what changed and how each language verified; on request, **check the packages** —
    stage B.
 
@@ -578,6 +578,45 @@ Keep the `./` in the first argument (see Stage B). A non-zero exit is **PACK FAI
 from `<root>/package.json`; it is committed in the TypeScript SDK repository together with the
 regenerated `<root>`, like the API SDK's archive next to it.
 
+### A7. Copy the C# package to `.nuget/packages`
+
+The counterpart of `CopyPackages` in the `CSharp` command of `ASC.Api.Documentation`
+(`GenerateCSharpSdkCommand`), which leaves `DocSpace.API.SDK.<ver>.nupkg` in `.nuget/packages`. The webhook
+package goes next to it: `ASC.Web.Api.Tests` reads the deliveries through it, pinned in
+`Directory.Packages.props`. Run this step whenever `csharp` was generated and A4 built it; skip it when the build
+failed or verification was skipped, and say so in the report.
+
+`DocSpace.Webhooks.SDK.csproj` sets `GeneratePackageOnBuild`, so the build of A4 has already left the package in
+`bin/Debug`. `<ver>` is the `<Version>` of that csproj. Copy that one file, not `*.nupkg`: `bin/` keeps the packages
+of earlier versions. Remove the copies of earlier versions first, so that a version bump does not leave the old one
+behind.
+
+```bash
+# POSIX shell
+rm -f .nuget/packages/DocSpace.Webhooks.SDK.*.nupkg
+cp <root>/src/DocSpace.Webhooks.SDK/bin/Debug/DocSpace.Webhooks.SDK.<ver>.nupkg .nuget/packages/
+```
+
+```powershell
+# PowerShell
+Remove-Item .nuget/packages/DocSpace.Webhooks.SDK.*.nupkg -Force -ErrorAction SilentlyContinue
+Copy-Item <root>/src/DocSpace.Webhooks.SDK/bin/Debug/DocSpace.Webhooks.SDK.<ver>.nupkg .nuget/packages/
+```
+
+A missing source file is **COPY FAILED**. When `<ver>` differs from the `DocSpace.Webhooks.SDK` entry of
+`Directory.Packages.props`, update that entry too, or the restore fails on the version it can no longer find.
+
+The copy rewrites a tracked binary of this repository under the same version number, and NuGet, seeing a version it
+already has, never re-extracts it: the tests keep compiling against the stale copy, with no error. So when the
+models changed and the version did not, drop the cache entry and rebuild the consumer, as for the API SDK
+(`generate-sdk`, "Consumers keep building against the old SDK"):
+
+```bash
+rm -rf ~/.nuget/packages/docspace.webhooks.sdk/<ver>
+dotnet restore web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj
+dotnet build web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj
+```
+
 ## Stage B — package check (on request)
 
 Stage A proves the models compile and parse. It does not prove the package a user installs
@@ -628,6 +667,8 @@ SDK would compile `webhooks/` as well.
 - The `NOT VERIFIED` list, verbatim.
 - For TypeScript, the path of the packed `onlyoffice-docspace-webhooks-sdk-<version>.tgz` (A6), or
   why it was not packed; `git -C sdk/docspace-api-sdk-typescript status --short` shows it.
+- For C#, the path of the copied `.nuget/packages/DocSpace.Webhooks.SDK.<ver>.nupkg` (A7), or why it was not
+  copied; `git status --short .nuget/packages` shows it, and it is committed in this repository.
 - `git -C <root> status --short .` for every generated language, and
   `git -C sdk/docspace-api-spec status --short webhooks` -- the generated diff, which belongs in the
   commit. Every `<root>` and the published contract are committed in **their** repositories (the API

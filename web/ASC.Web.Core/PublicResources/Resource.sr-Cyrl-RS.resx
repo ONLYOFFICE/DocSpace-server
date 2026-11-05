@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Трошак провајдера</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook је онемогућен. Омогућите га пре поновног покушаја његових испорука</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Догађај се управо шаље. Покушајте поново када се покушај заврши</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Испорука је забележена у ранијем формату webhook-а и не може се поново послати</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Циљ webhook-а није постојећи корисник или група</value>
+  </data>
 </root>

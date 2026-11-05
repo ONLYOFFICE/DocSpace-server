@@ -42,15 +42,12 @@ public class CreateWebhookTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // every subscription it creates is probed at the webhook receiver
-    protected override bool NeedsLazyResources => true;
-
     [Fact]
     public async Task CreateWebhook_Owner_ReturnsCreatedWebhook()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: true);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(enabled: true);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -70,7 +67,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, triggers: WebhookTrigger.FileCreated);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(triggers: WebhookTrigger.FileCreated);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -89,7 +86,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
         dto.Ssl = true;
 
         // Act
@@ -110,7 +107,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient, enabled: false);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(enabled: false);
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -135,7 +132,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
 
         // Act
         using var response = await _webApi.PostAsync(
@@ -156,7 +153,7 @@ public class CreateWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(null);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -174,7 +171,7 @@ public class CreateWebhookTests(
         // Arrange
         var member = await InviteContact(employeeType);
         await _webApiClient.Authenticate(member);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
 
         // Act
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
@@ -190,7 +187,7 @@ public class CreateWebhookTests(
         // Arrange
         var guest = await InviteGuest();
         await _webApiClient.Authenticate(guest);
-        var dto = await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
