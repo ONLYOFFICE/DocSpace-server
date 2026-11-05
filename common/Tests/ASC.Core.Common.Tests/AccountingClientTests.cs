@@ -185,6 +185,18 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task UnreadableAnswer_IsMappedToAccountingException()
+    {
+        // An answer that is not the JSON the call expects must stay inside the hierarchy the callers catch.
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
+
+        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .WithInnerException<JsonException>();
+    }
+
+    [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
         var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "[]"));
@@ -277,6 +289,20 @@ public class AccountingClientTests
         var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
 
         await act.Should().ThrowAsync<AccountingException>();
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetRequest_IsNotRetried_OnTransportFailure()
+    {
+        // Only a non-success answer is retried; a request that got no answer at all fails at once, so a caller that
+        // counts failures (the retention job) sees each one as a single request.
+        var (client, handler) = CreateAccountingClient(_ => TransportFault());
+
+        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .WithInnerException<HttpRequestException>();
         handler.CallCount.Should().Be(1);
     }
 

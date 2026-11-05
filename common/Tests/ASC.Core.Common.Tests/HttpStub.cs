@@ -57,9 +57,9 @@ public sealed class HttpStub
 {
     private static readonly Lazy<WireMockServer> _server = new(StartServer);
 
-    // Bound but never listened on, for as long as the run lasts: a port only found free and released could be taken by
-    // a server a parallel test starts, and the "unreachable" service would then answer.
-    private static readonly ConcurrentBag<Socket> _closedPorts = [];
+    // A loopback port bound but never listened on, for as long as the run lasts: a port only found free and released
+    // could be taken by a server a parallel test starts, and the "unreachable" service would then answer.
+    private static readonly Lazy<(Socket Socket, string Url)> _refusing = new(BindRefusingPort);
 
     private readonly string _prefix = $"/t/{Guid.NewGuid():N}";
     private readonly ConcurrentQueue<StubRequest> _requests = new();
@@ -114,11 +114,15 @@ public sealed class HttpStub
     /// </summary>
     public static HttpStub Unreachable()
     {
+        return new HttpStub(_refusing.Value.Url);
+    }
+
+    private static (Socket, string) BindRefusingPort()
+    {
         var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        _closedPorts.Add(socket);
         socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
 
-        return new HttpStub($"http://127.0.0.1:{((IPEndPoint)socket.LocalEndPoint!).Port}");
+        return (socket, $"http://127.0.0.1:{((IPEndPoint)socket.LocalEndPoint!).Port}");
     }
 
     // The first request through Kestrel and WireMock's pipeline pays for a JIT pass that, on a busy machine, outlasts the
@@ -150,23 +154,27 @@ public sealed class HttpStub
             await Task.Delay(answer.Delay);
         }
 
+        if (answer.Fault)
+        {
+            // WireMock cannot drop a connection: its faults still answer (EMPTY_RESPONSE is a 200 with no body,
+            // MALFORMED_RESPONSE_CHUNK a 200 with garbage), and it writes Content-Length itself. A redirect to the
+            // refusing port fails this one request inside the client's own send - the HttpRequestException a service
+            // that went away gives - while the stub has still counted it.
+            var redirect = new ResponseMessage { StatusCode = (int)HttpStatusCode.TemporaryRedirect };
+            redirect.AddHeader("Location", _refusing.Value.Url + request.Path);
+            redirect.AddHeader("Connection", "close");
+
+            return redirect;
+        }
+
         var response = new ResponseMessage
         {
             StatusCode = (int)answer.Status,
-            BodyData = new BodyData { BodyAsString = answer.Fault ? "{" : answer.Body, DetectedBodyType = BodyType.String, Encoding = Encoding.UTF8 }
+            BodyData = new BodyData { BodyAsString = answer.Body, DetectedBodyType = BodyType.String, Encoding = Encoding.UTF8 }
         };
 
         response.AddHeader("Content-Type", "application/json; charset=utf-8");
         response.AddHeader("Connection", "close");
-
-        if (answer.Fault)
-        {
-            // WireMock's own faults still answer (EMPTY_RESPONSE is a 200 with no body). Promising more body than is
-            // written makes Kestrel abort the connection once the short body has gone out, so the client reads a
-            // response that ends prematurely - the HttpRequestException a connection dropped mid-answer gives. A
-            // connection refused before any answer is Unreachable().
-            response.AddHeader("Content-Length", "1024");
-        }
 
         return response;
     }
@@ -201,7 +209,7 @@ public sealed record StubRequest(HttpMethod Method, Uri Uri, string? Body, strin
     }
 }
 
-/// <summary>What <see cref="HttpStub"/> answers: a JSON body with a status, after an optional delay, or a dropped connection.</summary>
+/// <summary>What <see cref="HttpStub"/> answers: a JSON body with a status, after an optional delay, or a transport failure.</summary>
 public sealed record StubResponse(HttpStatusCode Status, string Body = "", TimeSpan Delay = default, bool Fault = false)
 {
     public static StubResponse Json(HttpStatusCode status, string json)
@@ -210,8 +218,9 @@ public sealed record StubResponse(HttpStatusCode Status, string Body = "", TimeS
     }
 
     /// <summary>
-    /// The connection drops in the middle of the answer, which the client sees as an <see cref="HttpRequestException"/>
-    /// while reading the body. For a service that refuses the connection outright use <see cref="HttpStub.Unreachable"/>.
+    /// This one request fails in transport: the client is redirected to a port that refuses the connection and sees an
+    /// <see cref="HttpRequestException"/> from its send. The stub counts the request; for a service that never accepts
+    /// one at all use <see cref="HttpStub.Unreachable"/>.
     /// </summary>
     public static StubResponse TransportFault()
     {

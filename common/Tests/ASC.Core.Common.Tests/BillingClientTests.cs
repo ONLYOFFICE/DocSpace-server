@@ -283,6 +283,19 @@ public class BillingClientTests
     }
 
     [Fact]
+    public async Task UnreadableAnswer_IsMappedToBillingException()
+    {
+        // An answer that is not the JSON the call expects - an HTML page from a proxy, a changed contract - is a billing
+        // failure like any other, and must stay inside the hierarchy the callers catch rather than leak Refit's own.
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
+
+        var act = async () => await client.GetPaymentsAsync("portal-1");
+
+        (await act.Should().ThrowExactlyAsync<BillingException>())
+            .WithInnerException<JsonException>();
+    }
+
+    [Fact]
     public async Task EmptyResponseBody_ThrowsBillingNotConfiguredException()
     {
         var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, ""));

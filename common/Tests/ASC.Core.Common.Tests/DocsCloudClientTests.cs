@@ -188,6 +188,18 @@ public class DocsCloudClientTests
             .WithInnerException<HttpRequestException>();
     }
 
+    [Fact]
+    public async Task UnreadableAnswer_IsMappedToDocsCloudException()
+    {
+        // An answer that is not the JSON the call expects must stay inside the hierarchy the callers catch.
+        var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
+
+        var act = async () => await client.GetTenantConfigAsync(PortalId);
+
+        (await act.Should().ThrowExactlyAsync<DocsCloudException>())
+            .WithInnerException<JsonException>();
+    }
+
     /// <summary>
     /// DocsCloud signs its requests like billing and accounting, but with the standard Base64 alphabet: the hash of
     /// <c>"{timestamp}\n{key}"</c> keyed by the secret, padding and all.
