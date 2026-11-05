@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>プロバイダーのコスト</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook が無効になっています。配信を再試行する前に有効にしてください</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>イベントは現在送信中です。試行が完了してから再試行してください</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>この配信は以前の Webhook 形式で記録されているため、再送信できません</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook のターゲットが既存のユーザーまたはグループではありません</value>
+  </data>
 </root>

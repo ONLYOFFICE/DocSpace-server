@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>Đã thay đổi mô hình AI của dự án AI {0} thành {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Đã thử gửi lại webhook: {0}</value>
+  </data>
 </root>

@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Kostoja e ofruesit</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook-u është çaktivizuar. Aktivizojeni përpara se të riprovoni dërgimet e tij</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Ngjarja po dërgohet tani. Riprovojeni pasi të ketë përfunduar tentativa</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Dërgimi u regjistrua në një format më të vjetër webhook-u dhe nuk mund të dërgohet përsëri</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Objektivi i webhook-ut nuk është një përdorues ose grup ekzistues</value>
+  </data>
 </root>

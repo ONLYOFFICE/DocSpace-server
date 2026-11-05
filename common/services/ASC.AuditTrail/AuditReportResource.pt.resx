@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>Modelo de IA do projeto de IA {0} alterado para {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Entrega do webhook repetida: {0}</value>
+  </data>
 </root>
