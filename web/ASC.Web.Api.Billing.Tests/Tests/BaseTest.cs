@@ -89,9 +89,17 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return ValueTask.CompletedTask;
     }
 
-    /// <summary>Adds a member of <paramref name="employeeType"/> to the portal, as its owner, and returns it signed out.</summary>
+    /// <summary>
+    /// Adds a member of <paramref name="employeeType"/> to the portal, as its owner, and returns it signed out. A guest
+    /// cannot be invited as a member, so it is created active with a known password instead.
+    /// </summary>
     protected async Task<User> InviteMember(EmployeeType employeeType)
     {
+        if (employeeType == EmployeeType.Guest)
+        {
+            return await InviteGuest();
+        }
+
         await _peopleClient.Authenticate(Owner);
 
         var fakeMember = Initializer.FakerMember.Generate();
@@ -108,5 +116,38 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         }, TestContext.Current.CancellationToken);
 
         return new User(fakeMember.Email, fakeMember.Password) { Id = member.Response.Id };
+    }
+
+    // POST /api/2.0/people/active is not in the SDK; it is the one way to a guest with a known password.
+    private async Task<User> InviteGuest()
+    {
+        await _peopleClient.Authenticate(Owner);
+
+        var fakeGuest = Initializer.FakerMember.Generate();
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            firstName = fakeGuest.FirstName,
+            lastName = fakeGuest.LastName,
+            email = fakeGuest.Email,
+            password = fakeGuest.Password,
+            type = nameof(EmployeeType.Guest),
+            cultureName = "en-US",
+            spam = false
+        });
+
+        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+        using var response = await _peopleClient.PostAsync("api/2.0/people/active", content, TestContext.Current.CancellationToken);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unable to create a guest ({(int)response.StatusCode}): {body}");
+        }
+
+        using var json = JsonDocument.Parse(body);
+
+        return new User(fakeGuest.Email, fakeGuest.Password) { Id = json.RootElement.GetProperty("response").GetProperty("id").GetGuid() };
     }
 }
