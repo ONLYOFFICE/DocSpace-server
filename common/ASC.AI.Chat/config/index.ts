@@ -35,7 +35,13 @@ import nconf from "nconf";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import type { AppConfig, DocumentAgentSetting, McpServerSetting, RootConfig } from "../app/types.js";
+import type {
+    AppConfig,
+    CompactionSetting,
+    DocumentAgentSetting,
+    McpServerSetting,
+    RootConfig,
+} from "../app/types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -236,6 +242,60 @@ function envOrSetting(name: string, setting: unknown): string {
 function positiveInt(value: unknown): number | undefined {
     const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
     return Number.isInteger(n) && n > 0 ? n : undefined;
+}
+
+/** The library's `CompactionOptions`, as the host resolves them. */
+export interface CompactionConfig {
+    enabled: boolean;
+    threshold?: number;
+    keepRecent?: number;
+    defaultContextWindow?: number;
+}
+
+// Automatic history compaction from the shared `appsettings.json`
+// (`ai.compaction`), each field overridable from the environment
+// (`AI__COMPACTION__ENABLED`, `AI__COMPACTION__THRESHOLD`,
+// `AI__COMPACTION__KEEP_RECENT`, `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW`).
+// On unless switched off (`false` / `0`); a knob that is absent or
+// malformed leaves the library's own default. Read at request time so a changed setting needs
+// no restart of the engine object.
+export function getCompaction(): CompactionConfig {
+    const ai: RootConfig["ai"] = nconf.get("ai");
+    const setting: CompactionSetting | undefined =
+        ai?.compaction && typeof ai.compaction === "object" ? ai.compaction : undefined;
+    const enabled = flag(process.env["AI__COMPACTION__ENABLED"]) ?? setting?.enabled !== false;
+    const threshold =
+        unitFraction(process.env["AI__COMPACTION__THRESHOLD"]) ?? unitFraction(setting?.threshold);
+    const keepRecent =
+        nonNegativeInt(process.env["AI__COMPACTION__KEEP_RECENT"]) ?? nonNegativeInt(setting?.keepRecent);
+    const defaultContextWindow =
+        positiveInt(process.env["AI__COMPACTION__DEFAULT_CONTEXT_WINDOW"]) ??
+        positiveInt(setting?.defaultContextWindow);
+    return {
+        enabled,
+        ...(threshold !== undefined ? { threshold } : {}),
+        ...(keepRecent !== undefined ? { keepRecent } : {}),
+        ...(defaultContextWindow !== undefined ? { defaultContextWindow } : {}),
+    };
+}
+
+/** `true` / `1` or `false` / `0`, any case; anything else is not a setting. */
+function flag(value: string | undefined): boolean | undefined {
+    const v = value?.trim().toLowerCase();
+    if (v === "true" || v === "1") return true;
+    if (v === "false" || v === "0") return false;
+    return undefined;
+}
+
+/** A number in (0, 1], from a number or a numeric string. */
+function unitFraction(value: unknown): number | undefined {
+    const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+    return Number.isFinite(n) && n > 0 && n <= 1 ? n : undefined;
+}
+
+function nonNegativeInt(value: unknown): number | undefined {
+    const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+    return Number.isInteger(n) && n >= 0 ? n : undefined;
 }
 
 // Group key for the form-analysis sub-agent's single delegating tool

@@ -70,7 +70,7 @@ import {
 import { systemToolsSource } from "../tools/systemTools.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
-import { DOCUMENT_AGENT_TYPE } from "../../config/index.js";
+import { DOCUMENT_AGENT_TYPE, getCompaction } from "../../config/index.js";
 import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -450,6 +450,12 @@ const engine = new AIEngine({
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
     DOCUMENT_AGENT_TYPE,
   ],
+  // Fold a thread that nears its model's context window into a summary
+  // message before the round. The summary is stored through the ordinary
+  // messages route (`contents` keeps the whole message, marker included),
+  // so the C# side needs nothing new. On unless `ai.compaction.enabled`
+  // / `AI__COMPACTION__ENABLED` is false; resolved per round.
+  compaction: () => getCompaction(),
 });
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
