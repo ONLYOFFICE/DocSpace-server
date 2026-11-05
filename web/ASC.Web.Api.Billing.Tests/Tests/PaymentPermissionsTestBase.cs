@@ -41,11 +41,41 @@ namespace ASC.Web.Api.Billing.Tests.Tests;
 /// </summary>
 public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    /// <summary>The roles below a DocSpace administrator, refused by the operations for administrators.</summary>
-    protected static EmployeeType[] NonAdministrators => [EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest];
-
     /// <summary>Every role but the owner, who is the payer: refused by the operations for the payer.</summary>
     protected static EmployeeType[] NotThePayer => [EmployeeType.DocSpaceAdmin, .. NonAdministrators];
+
+    /// <summary>The spending of the wallet: the usage by service and by month, and the operations report.</summary>
+    protected static string[] UsageOperations =>
+    [
+        "GET payment/customer/usage",
+        "GET payment/customer/usage/monthly",
+        "POST payment/customer/operationsreport",
+        "GET payment/customer/operationsreport",
+        "DELETE payment/customer/operationsreport"
+    ];
+
+    /// <summary>The usage reports: built, followed and stopped.</summary>
+    protected static string[] UsageReportOperations =>
+    [
+        "POST payment/customer/usage/report",
+        "GET payment/customer/usage/report",
+        "DELETE payment/customer/usage/report",
+        "POST payment/customer/usage/monthly/report",
+        "GET payment/customer/usage/monthly/report",
+        "DELETE payment/customer/usage/monthly/report"
+    ];
+
+    /// <summary>The wallet services: buying them, the price of buying them, switching them on and off.</summary>
+    protected static string[] WalletAdministratorOperations =>
+    [
+        "PUT payment/updatewallet",
+        "PUT payment/calculatewallet",
+        "POST payment/servicestate",
+        "GET payment/servicessettings"
+    ];
+
+    /// <summary>Every operation for administrators - any DocSpace administrator, not only the owner.</summary>
+    protected static string[] AdministratorOperations => [.. UsageOperations, .. UsageReportOperations, .. WalletAdministratorOperations];
 
     // One valid request per operation, as the owner would send it; the TypeScript suite's requests where it has them.
     private static readonly Dictionary<string, Func<PaymentApi, CancellationToken, Task>> _requests = new()
@@ -114,13 +144,34 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     {
         Payments.Customer(Owner.Email).Balance(100m);
 
+        await AssertNotRefusedAsync(operation, $"the owner pays for the portal and may call {operation}");
+    }
+
+    /// <summary>
+    /// A DocSpace administrator who is not the owner sends <paramref name="operation"/> and is not refused for who it
+    /// is. Next to the refusal of the roles below, this pins the guard at the administrator: a guard narrowed to the
+    /// owner would leave every refusal test green.
+    /// </summary>
+    protected async Task AssertAdministratorNotRefusedAsync(string operation)
+    {
+        Payments.Customer(Owner.Email).Balance(100m);
+
+        var administrator = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await _webApiClient.Authenticate(administrator);
+
+        await AssertNotRefusedAsync(operation, $"every DocSpace administrator may call {operation}, not only the owner");
+    }
+
+    // Whatever else the answer says, it is neither 401 nor 403.
+    private async Task AssertNotRefusedAsync(string operation, string because)
+    {
         try
         {
             await _requests[operation](_paymentApi, TestContext.Current.CancellationToken);
         }
         catch (ApiException exception)
         {
-            exception.ErrorCode.Should().NotBe(401).And.NotBe(403, $"the owner pays for the portal and may call {operation}");
+            exception.ErrorCode.Should().NotBe(401).And.NotBe(403, because);
         }
     }
 

@@ -40,7 +40,9 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <c>DemandCustomerPayerAsync</c>/<c>EnsureCustomerAndAdminRightsAsync</c>) before it checks who
 /// is calling, so only the authentication guard is left to verify: anonymous is refused with 401
 /// regardless of the (deliberately minimal, since it is never reached) request body. The per-role
-/// checks run in ASC.Web.Api.Billing.Tests, whose stack has payment services.
+/// checks run in ASC.Web.Api.Billing.Tests, whose stack has payment services - except for
+/// <c>SetRestrictedAiModels</c>, which also needs the AI gateway that stack does not configure and is not
+/// role-checked anywhere yet.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentMutatingEndpointsAnonymousAccessTests(

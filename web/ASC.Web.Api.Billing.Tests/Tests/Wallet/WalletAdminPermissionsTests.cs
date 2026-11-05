@@ -39,14 +39,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
 /// </summary>
 public class WalletAdminPermissionsTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string, EmployeeType> Cases => Matrix(
-        [
-            "PUT payment/updatewallet",
-            "PUT payment/calculatewallet",
-            "POST payment/servicestate",
-            "GET payment/servicessettings"
-        ],
-        NonAdministrators);
+    public static TheoryData<string, EmployeeType> Cases => Matrix(WalletAdministratorOperations, NonAdministrators);
 
     [Theory]
     [MemberData(nameof(Cases))]

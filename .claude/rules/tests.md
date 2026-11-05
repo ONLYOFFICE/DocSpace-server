@@ -321,5 +321,11 @@ Everything past that check lives in `web/ASC.Web.Api.Billing.Tests`, on the `int
   own (`PortalPayments.AccountNumber`), payments are numbered across the run (the stack stores a paid tariff under
   that number), and spending limits live in one store with ids across the run (`ServiceLimitStore`) - a limit on
   another account (`PaymentServiceStub.AddServiceLimit`) is answered as missing, as in production.
+- **Assert on what the stack did, not on the stub.** `PaymentCalls` holds only the requests that name the portal:
+  a route by id (`DELETE /serviceLimit/{id}`) names none, so a `NotContain` over it can never fail - check the
+  store instead (`PaymentServiceStub.HasServiceLimit`). A value the test scripted proves nothing once read back
+  from the stub; read it through the API. A billing request body is a multimap of string lists: compare its
+  fields (`BaseTest.BillingValue`), never search it for substrings. A refusal with a status the action returns on
+  more than one path also checks `ErrorContent`.
 - Cached reads (tariff, customer, balance) are re-read with `refresh=true`, as the TypeScript suite's
   `setupPayment()` does after a payment.

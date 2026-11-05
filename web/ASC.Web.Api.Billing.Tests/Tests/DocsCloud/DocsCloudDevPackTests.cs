@@ -41,16 +41,12 @@ namespace ASC.Web.Api.Billing.Tests.Tests.DocsCloud;
 /// </summary>
 public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // The DocsCloud wallet services of the SaaS catalogue: DocsCloud (quota -15) and its developer pack (quota -16).
-    private const int DocsCloudProductId = 1014;
-    private const string DevPackProductId = "1015";
-
     [Fact]
     public async Task CalculateDevPack_DocsCloudSubscriber_ReturnsTheSwitchBillingCalculates()
     {
         // Arrange
         Payments.Customer(Owner.Email)
-            .Paid(DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
+            .Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
             .On(PaymentService.Billing, "POST", "/billing/CalculateSwitchSubscription",
                 """{"OperationId":77,"Amount":42.5,"Currency":"USD","Quantity":12}""");
 
@@ -66,7 +62,9 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
         calculation.Quantity.Should().Be(12);
 
         var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/CalculateSwitchSubscription").Subject;
-        request.Body.Should().Contain(DocsCloudProductId.ToString(CultureInfo.InvariantCulture)).And.Contain(DevPackProductId);
+        BillingValue(request, "FromProductId").Should().Be(Plans.DocsCloudProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(request, "ToProductId").Should().Be(Plans.DocsCloudDevPackProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(request, "ProductQty").Should().Be("12");
     }
 
     [Fact]
@@ -81,13 +79,14 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("DocsCloud subscription is not active");
     }
 
     [Fact]
     public async Task CalculateDevPack_FewerSeatsThanTheMinimum_ThrowsBadRequest()
     {
         // Arrange
-        Payments.Customer(Owner.Email).Paid(DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
+        Payments.Customer(Owner.Email).Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
         await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
 
         // Act
@@ -96,17 +95,17 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("Invalid quantity");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/CalculateSwitchSubscription");
     }
 
     // On the stack without payment services these were refused as "not configured" before the role was looked at.
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task CalculateDevPack_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
     {
         // Arrange
-        Payments.Customer(Owner.Email).Paid(DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
+        Payments.Customer(Owner.Email).Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
 
@@ -119,12 +118,11 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task SwitchToDevPack_NotAnAdministrator_ThrowsForbiddenWithoutCharging(EmployeeType employeeType)
     {
         // Arrange
-        Payments.Customer(Owner.Email).Paid(DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
+        Payments.Customer(Owner.Email).Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1));
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
 

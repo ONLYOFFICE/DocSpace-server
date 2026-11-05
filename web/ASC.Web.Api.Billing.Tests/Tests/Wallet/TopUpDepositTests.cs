@@ -46,22 +46,24 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m);
 
+        // The balance before the top-up, read without refresh, so it is what the stack has cached.
+        var before = (await _paymentApi.GetCustomerBalanceAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        before.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(10);
+
         // Act
         var result = await _paymentApi.TopUpDepositAsync(new TopUpDepositRequestDto(100, "USD"), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeTrue();
-        Payments.WalletAmount.Should().Be(110m);
 
         var deposit = PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/Deposit").Subject;
-        using var body = JsonDocument.Parse(deposit.Body!);
-        body.RootElement.GetProperty("Amount")[0].GetString().Should().Be("100");
-        body.RootElement.GetProperty("Currency")[0].GetString().Should().Be("USD");
-        body.RootElement.GetProperty("CustomerParticipantName")[0].GetString().Should().Be(Owner.Id.ToString());
+        BillingValue(deposit, "Amount").Should().Be("100");
+        BillingValue(deposit, "Currency").Should().Be("USD");
+        BillingValue(deposit, "CustomerParticipantName").Should().Be(Owner.Id.ToString());
 
-        // The stack has already read the new balance back from accounting.
-        var balance = (await _paymentApi.GetCustomerBalanceAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        balance.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(110);
+        // Read without refresh again: the top-up does not leave the balance cached before it in place.
+        var after = (await _paymentApi.GetCustomerBalanceAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        after.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(110);
     }
 
     [Fact]
@@ -76,7 +78,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         result.Response.Should().BeFalse();
-        Payments.WalletAmount.Should().Be(10m);
+        PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/Deposit", "a declined charge is reported, not tried again");
     }
 
     [Fact]
@@ -91,6 +93,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent?.ToString().Should().Contain("payment method is not set");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/Deposit");
     }
 
@@ -106,6 +109,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent?.ToString().Should().Contain("Access denied");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/Deposit");
     }
 
@@ -115,12 +119,13 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m);
 
-        // Act
+        // Act: XXX is the ISO code for "no currency", which no accounting configuration lists.
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.TopUpDepositAsync(new TopUpDepositRequestDto(100, "EUR"), TestContext.Current.CancellationToken));
+            async () => await _paymentApi.TopUpDepositAsync(new TopUpDepositRequestDto(100, "XXX"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("Unsupported currency");
     }
 
     [Fact]
@@ -132,5 +137,6 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(404);
+        exception.ErrorContent?.ToString().Should().Contain("Customer could not be found");
     }
 }

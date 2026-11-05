@@ -64,6 +64,28 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>The requests the payment services got about this test's portal, in the order they arrived.</summary>
     protected IReadOnlyList<PaymentServiceCall> PaymentCalls => fixture.Payments.CallsFor(TenantId);
 
+    /// <summary>The roles below a DocSpace administrator, refused by the operations for administrators.</summary>
+    protected static EmployeeType[] NonAdministrators => [EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest];
+
+    /// <summary>
+    /// <see cref="NonAdministrators"/> for a theory of one role, so every class that checks an administrator guard
+    /// sends every role below it, the guest included.
+    /// </summary>
+    public static TheoryData<EmployeeType> NonAdministratorRoles => [.. NonAdministrators];
+
+    /// <summary>
+    /// The first value of <paramref name="key"/> in the body of a billing request, a multimap of string lists
+    /// (<c>{"Amount":["100"],"Currency":["USD"]}</c>), or null when the body has no such key.
+    /// </summary>
+    protected static string? BillingValue(PaymentServiceCall call, string key)
+    {
+        using var body = JsonDocument.Parse(call.Body!);
+
+        return body.RootElement.TryGetProperty(key, out var values) && values.GetArrayLength() > 0
+            ? values[0].GetString()
+            : null;
+    }
+
     public async ValueTask InitializeAsync()
     {
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);

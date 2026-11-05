@@ -40,13 +40,6 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Tariff;
 /// </summary>
 public class PortalTariffTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // The paid quota of these cases: "admin", one manager per unit (ProductId 1006 of the SaaS quota catalogue).
-    private const int AdminQuotaId = -9;
-    private const int AdminProductId = 1006;
-
-    // The free quota a portal without payments gets (Constants.PaymentStubDefaultQuota).
-    private const int StartupQuotaId = -3;
-
     [Fact]
     public async Task GetPortalTariff_PortalWithoutPayments_IsTheFreeStartupQuota()
     {
@@ -55,7 +48,7 @@ public class PortalTariffTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
-        tariff.Quotas.Should().ContainSingle().Which.Id.Should().Be(StartupQuotaId);
+        tariff.Quotas.Should().ContainSingle().Which.Id.Should().Be(Plans.StartupQuotaId);
         PaymentCalls.Should().Contain(call => call.Service == PaymentService.Billing && call.Route == "/billing/GetActiveResources",
             "the portal is asked about under a payment key of its own");
     }
@@ -65,14 +58,14 @@ public class PortalTariffTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         var endDate = DateTime.UtcNow.Date.AddYears(1);
-        Payments.Paid(AdminProductId, quantity: 10, endDate);
+        Payments.Paid(Plans.AdminProductId, quantity: 10, endDate);
 
         // Act
         var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
-        var quota = tariff.Quotas.Should().ContainSingle(q => q.Id == AdminQuotaId).Subject;
+        var quota = tariff.Quotas.Should().ContainSingle(q => q.Id == Plans.AdminQuotaId).Subject;
         quota.Quantity.Should().Be(10);
     }
 }

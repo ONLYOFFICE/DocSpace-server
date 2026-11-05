@@ -96,6 +96,12 @@ internal sealed class ServiceLimitStore
         return null;
     }
 
+    /// <summary>Whether the limit <paramref name="id"/> exists, on whatever account.</summary>
+    public bool Contains(int id)
+    {
+        return _limits.ContainsKey(id);
+    }
+
     /// <summary>Puts a limit on the account <paramref name="accountNumber"/> as if another portal had created it.</summary>
     public int Add(int accountNumber, string scope, decimal amountValue, string period = "Day", string? participant = null)
     {

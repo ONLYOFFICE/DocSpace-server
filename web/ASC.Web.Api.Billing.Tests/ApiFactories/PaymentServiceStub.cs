@@ -121,6 +121,15 @@ public sealed class PaymentServiceStub : IDisposable
         return _serviceLimits.Add(accountNumber, scope, amountValue);
     }
 
+    /// <summary>
+    /// Whether accounting still holds the spending limit <paramref name="id"/>. The requests by id name no portal and
+    /// are missing from <see cref="CallsFor"/>, so this is how a test sees that a limit was or was not deleted.
+    /// </summary>
+    public bool HasServiceLimit(int id)
+    {
+        return _serviceLimits.Contains(id);
+    }
+
     public void Dispose()
     {
         _server.Stop();
@@ -335,18 +344,6 @@ public sealed class PortalPayments(string portalId)
             lock (_walletLock)
             {
                 return _wallet is null ? null : AccountNumber;
-            }
-        }
-    }
-
-    /// <summary>What the portal's wallet holds now, as accounting reports it; null while it has none.</summary>
-    public decimal? WalletAmount
-    {
-        get
-        {
-            lock (_walletLock)
-            {
-                return _wallet?.Amount;
             }
         }
     }

@@ -66,8 +66,7 @@ public class AccountingServicePricesTests(AspireAppFixture fixture) : BaseTest(f
     }
 
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task GetAccountingServicePrices_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
     {
         // Arrange

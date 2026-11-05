@@ -40,10 +40,6 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 /// </summary>
 public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // The monthly plan on sale (quota -9, "admin").
-    private const string PlanName = "admin";
-    private const string PlanProductId = "1006";
-
     private const string BackUrl = "https://portal.example.com/back";
     private const string SuccessUrl = "https://portal.example.com/success";
 
@@ -52,14 +48,14 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Act
         var url = (await _paymentApi.GetPaymentUrlAsync(
-            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [PlanName] = 3 }),
+            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
         url.Should().StartWith(PaymentServiceStub.CheckoutUrl + "?");
 
         var query = HttpUtility.ParseQueryString(new Uri(url).Query);
-        query["products"].Should().Be(PlanProductId);
+        query["products"].Should().Be(Plans.AdminProductId.ToString(CultureInfo.InvariantCulture));
         query["portal"].Should().Be(Payments.PortalId);
         query["quantity"].Should().Be("3");
         // The back address is where a cancelled checkout returns, the success one where a paid one lands.
@@ -71,11 +67,14 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task GetPaymentUrl_PortalAlreadyACustomerOnAPaidTariff_ReturnsNothing()
     {
         // Arrange
-        Payments.Customer(Owner.Email);
+        Payments.Customer(Owner.Email).Paid(Plans.AdminProductId, quantity: 3, DateTime.UtcNow.Date.AddMonths(1));
+
+        // The checkout reads the cached tariff, so it is re-read once the plan is paid, as a client does.
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
 
         // Act
         var url = (await _paymentApi.GetPaymentUrlAsync(
-            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [PlanName] = 3 }),
+            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -93,11 +92,11 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent?.ToString().Should().Contain("Only monthly product");
     }
 
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task GetPaymentUrl_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
     {
         // Arrange
@@ -107,7 +106,7 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.GetPaymentUrlAsync(
-                new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [PlanName] = 3 }),
+                new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }),
                 TestContext.Current.CancellationToken));
 
         // Assert

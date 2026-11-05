@@ -39,16 +39,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Customer;
 /// </summary>
 public class UsageReportPermissionsTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string, EmployeeType> Cases => Matrix(
-        [
-            "POST payment/customer/usage/report",
-            "GET payment/customer/usage/report",
-            "DELETE payment/customer/usage/report",
-            "POST payment/customer/usage/monthly/report",
-            "GET payment/customer/usage/monthly/report",
-            "DELETE payment/customer/usage/monthly/report"
-        ],
-        NonAdministrators);
+    public static TheoryData<string, EmployeeType> Cases => Matrix(UsageReportOperations, NonAdministrators);
 
     [Theory]
     [MemberData(nameof(Cases))]

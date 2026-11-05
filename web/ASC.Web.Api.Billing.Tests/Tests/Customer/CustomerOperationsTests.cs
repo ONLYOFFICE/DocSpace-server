@@ -92,8 +92,7 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     }
 
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task GetCustomerOperations_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
     {
         // Arrange

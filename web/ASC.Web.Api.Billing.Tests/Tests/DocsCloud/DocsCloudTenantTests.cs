@@ -40,9 +40,6 @@ namespace ASC.Web.Api.Billing.Tests.Tests.DocsCloud;
 /// </summary>
 public class DocsCloudTenantTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // The wallet service of DocsCloud in the SaaS catalogue (quota -15).
-    private const int DocsCloudProductId = 1014;
-
     private const string TrialInfo =
         """{"license":{"valid":"2027-01-01T00:00:00Z","trial":true,"buildDate":"2026-10-01T00:00:00Z"},"server":{"version":"9.1.0","packageType":"Developer"},"usersLimit":{"edit":20,"view":40}}""";
 
@@ -93,7 +90,7 @@ public class DocsCloudTenantTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task GetTenantInfo_TrialLicenseOfAPortalPayingForDocsCloud_IsNotShownAsTrial()
     {
         // Arrange
-        Payments.Paid(DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
+        Payments.Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
             .On(PaymentService.DocsCloud, "GET", "/tenant/info", TrialInfo);
         await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
 

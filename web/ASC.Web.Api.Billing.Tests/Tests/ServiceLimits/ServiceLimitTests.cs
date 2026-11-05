@@ -140,7 +140,7 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         read.ErrorCode.Should().Be(404);
         delete.ErrorCode.Should().Be(404);
-        PaymentCalls.Should().NotContain(call => call.Method == "DELETE", "a limit of another customer is never deleted");
+        PaymentServices.HasServiceLimit(foreignId).Should().BeTrue("a limit of another customer is never deleted");
     }
 
     [Fact]
@@ -157,8 +157,7 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
+    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
     public async Task CreateServiceLimit_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
     {
         // Arrange

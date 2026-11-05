@@ -32,17 +32,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
-namespace ASC.Web.Api.Billing.Tests.Tests.Quota;
+namespace ASC.Web.Api.Billing.Tests.Tests;
 
 /// <summary>
-/// The quotas of the SaaS catalogue the payment tests of this folder pay for or expect.
+/// The other side of the administrator guards of the payment operations: a DocSpace administrator who is not the owner
+/// is let through every one of them, so the guard sits at the administrator and not at the owner. The refusals of the
+/// roles below are in the permission classes of each feature folder.
 /// </summary>
-internal static class Plans
+public class PaymentAdministratorControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    // The free plan a portal without payments is on (Constants.PaymentStubDefaultQuota).
-    public const int StartupQuotaId = -3;
+    public static TheoryData<string> Operations => [.. AdministratorOperations];
 
-    // The monthly plan on sale: "admin", one administrator per unit (ProductId 1006).
-    public const int AdminQuotaId = -9;
-    public const int AdminProductId = 1006;
+    [Theory]
+    [MemberData(nameof(Operations))]
+    public async Task AdministratorOperation_DocSpaceAdministratorWhoIsNotTheOwner_IsNotRefused(string operation)
+    {
+        await AssertAdministratorNotRefusedAsync(operation);
+    }
 }
