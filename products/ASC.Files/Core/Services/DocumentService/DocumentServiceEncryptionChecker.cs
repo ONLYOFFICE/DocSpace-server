@@ -42,13 +42,32 @@ public class DocumentServiceEncryptionChecker(
     IFusionCacheProvider cacheProvider,
     IHttpClientFactory clientFactory,
     FilesLinkUtility filesLinkUtility,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IConfiguration configuration)
 {
     private const string CryptoLibraryPath = "sdkjs/common/crypto/onlyoffice-crypto.js";
+
+    /// <summary>
+    /// For tests and local development that need private rooms but no real editor. It only makes the server stop asking:
+    /// it does not add the library, so with true and no library encrypted files are accepted and then fail in the browser.
+    /// Not for production. False turns the feature off whatever the document server can do.
+    /// </summary>
+    private const string AssumeSupportedSetting = "files:docservice:encryption-assume-supported";
+
     private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _answerDuration = TimeSpan.FromMinutes(10);
+
+    // A document server that does not answer may be restarting, and rooms and files are refused on this answer,
+    // so it is asked again soon. A clear answer does not change until the server is replaced.
+    private static readonly TimeSpan _noAnswerDuration = TimeSpan.FromSeconds(30);
 
     public async Task<bool> IsSupportedAsync()
     {
+        if (bool.TryParse(configuration[AssumeSupportedSetting], out var assumed))
+        {
+            return assumed;
+        }
+
         var serviceUrl = filesLinkUtility.GetDocServiceUrlInternal();
         if (string.IsNullOrEmpty(serviceUrl))
         {
@@ -59,11 +78,21 @@ public class DocumentServiceEncryptionChecker(
 
         return await cacheProvider.GetMemoryCache().GetOrSetAsync<bool>(
             $"{tenantManager.GetCurrentTenantId()}docservice-encryption-{url}",
-            async (_, token) => await ProbeAsync(url, token),
-            TimeSpan.FromMinutes(10));
+            async (context, token) =>
+            {
+                var answer = await ProbeAsync(url, token);
+
+                if (answer is null)
+                {
+                    context.Options.Duration = _noAnswerDuration;
+                }
+
+                return answer == true;
+            },
+            _answerDuration);
     }
 
-    private async Task<bool> ProbeAsync(string url, CancellationToken cancellationToken)
+    private async Task<bool?> ProbeAsync(string url, CancellationToken cancellationToken)
     {
         var sslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync();
         var client = sslVerification ? clientFactory.CreateClient() : clientFactory.CreateClient("customHttpClientSslIgnore");
@@ -79,7 +108,7 @@ public class DocumentServiceEncryptionChecker(
         }
         catch (Exception e) when (e is HttpRequestException or OperationCanceledException)
         {
-            return false;
+            return null;
         }
     }
 }

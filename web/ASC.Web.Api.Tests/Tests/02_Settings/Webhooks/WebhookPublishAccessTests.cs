@@ -103,6 +103,25 @@ public class WebhookPublishAccessTests(
     }
 
     [Fact]
+    public async Task FolderCreated_RoomAdminWalkedAfterAMember_GetsNothing()
+    {
+        // Arrange: the member goes first, so a share record kept from their check would answer for the other creator
+        var member = await InviteContact(EmployeeType.RoomAdmin);
+        var outsider = await InviteContact(EmployeeType.RoomAdmin);
+        var roomId = await CreateRoomAsync(member);
+        var inside = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, member);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, outsider);
+        var title = $"folder-{Guid.NewGuid():N}";
+
+        // Act
+        await _filesClient.Authenticate(Owner);
+        await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), TestContext.Current.CancellationToken);
+
+        // Assert
+        await ShouldReachOnlyTheControlAsync<FolderPayload>(subject, inside, p => p.Title == title);
+    }
+
+    [Fact]
     public async Task GroupCreated_RoomAdminCreator_GetsTheEvent()
     {
         // Arrange: the counterpart of the demotion below - a RoomAdmin is entitled to group.* and may read groups

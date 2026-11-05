@@ -530,6 +530,12 @@ public interface IFileDao<T>
     /// <summary>The ones of <paramref name="fileIds"/> that hold a key for <paramref name="userId"/>.</summary>
     IAsyncEnumerable<T> GetFileIdsWithKeyAsync(IEnumerable<T> fileIds, Guid userId);
 
+    /// <summary>Removes the keys of <paramref name="fileIds"/> held for <paramref name="userIds"/>.</summary>
+    Task DeleteFileKeysAsync(IEnumerable<T> fileIds, IEnumerable<Guid> userIds);
+
+    /// <summary>Removes every file key held for <paramref name="userId"/> on the portal.</summary>
+    Task DeleteFileKeysAsync(Guid userId);
+
     #endregion
 }
 public interface ICacheFileDao<T> : IFileDao<T>;

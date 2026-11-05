@@ -118,7 +118,7 @@ public class AgentsController(
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("agents")]

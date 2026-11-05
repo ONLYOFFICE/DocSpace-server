@@ -138,6 +138,19 @@ export interface DocumentAgentSetting {
   filesUrl?: string;
 }
 
+// Automatic history compaction (`ai.compaction` in the shared
+// `appsettings.json`): the library folds a thread that nears its model's
+// context window into a summary message before the round. On by default.
+export interface CompactionSetting {
+  enabled?: boolean;
+  /** Share of the context window at which to compact, 0..1; the library's 0.8 by default. */
+  threshold?: number;
+  /** Newest messages kept verbatim behind the summary; the library's 4 by default. */
+  keepRecent?: number;
+  /** The window assumed for a model the catalogue and the library's table do not know; 128000 by default. */
+  defaultContextWindow?: number;
+}
+
 export interface RootConfig {
   app: AppConfig;
   aws?: { cloudWatch?: AwsCloudWatchConfig };
@@ -145,7 +158,11 @@ export interface RootConfig {
   logPath?: string;
   logLevel?: string;
   // Merged from the shared DocSpace `appsettings.json` `ai` section.
-  ai?: { mcp?: McpServerSetting[]; documentAgent?: DocumentAgentSetting };
+  ai?: {
+    mcp?: McpServerSetting[];
+    documentAgent?: DocumentAgentSetting;
+    compaction?: CompactionSetting;
+  };
 }
 
 export interface ThreadDto {

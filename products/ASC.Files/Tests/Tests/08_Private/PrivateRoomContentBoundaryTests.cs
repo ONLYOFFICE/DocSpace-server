@@ -193,7 +193,7 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
     public async Task CopyAs_OutOfTheRoom_IsRefused(string destTitle)
     {
         var room = await CreateRoomAsOwner();
-        var file = await CreateFile("Encrypted.docx", room.Id);
+        var file = await UploadEncryptedFileInfo(room.Id, "Encrypted.docx");
         var outside = await CreateFolder(await GetUserFolderIdAsync(Owner), "Outside");
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CopyFileAsAsync(
@@ -242,7 +242,7 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
         await _filesClient.Authenticate(Owner);
         var ownerKey = await SetFakeKeys(publicKeyPrefix: "owner");
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
-        var file = await CreateFile("Encrypted.docx", room.Id);
+        var file = await UploadEncryptedFileInfo(room.Id, "Encrypted.docx");
         await ArchiveRoom(room.Id);
 
         var keys = (await _sharingApi.GetEncryptionAccessAsync(file.Id, TestContext.Current.CancellationToken)).Response;

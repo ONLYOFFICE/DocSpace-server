@@ -86,6 +86,27 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         return last;
     }
 
+    protected async Task<User> InviteWithKeys(EmployeeType type)
+    {
+        var user = await InviteContact(type);
+        await _filesClient.Authenticate(user);
+        await SetFakeKeys(publicKeyPrefix: "user");
+
+        return user;
+    }
+
+    protected async Task<List<Guid>> WriteKeys(int fileId, params Guid[] userIds)
+    {
+        List<AccessRequestKeyDto> keys = [.. userIds.Select(id => new AccessRequestKeyDto(id, Guid.Empty, "wrapped"))];
+
+        return (await _filesApi.SetEncryptionInfoAsync(fileId, keys, TestContext.Current.CancellationToken)).Response.SkippedUserIds;
+    }
+
+    protected async Task<List<RoomMissingFileKeysDto>> GetMissing(int roomId, params Guid[] userIds)
+    {
+        return (await _privacyRoomApi.GetRoomMissingFileKeysAsync(roomId, [.. userIds], TestContext.Current.CancellationToken)).Response;
+    }
+
     /// <summary>Uploads a file the way a private-room client does: chunked, with the encrypted flag. The bytes do not matter here.</summary>
     protected async Task<int> UploadEncryptedFile(int folderId, string title)
     {
@@ -93,7 +114,7 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
 
         var session = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
             folderId,
-            new SessionRequest(title, content.Length, encrypted: true),
+            new SessionRequest(Guid.NewGuid() + Path.GetExtension(title), content.Length, encrypted: true),
             TestContext.Current.CancellationToken)).Response;
 
         await _filesOperationsApi.UploadAsyncSessionAsync(folderId, session.Id, 1, new FileParameter(new MemoryStream(content)), TestContext.Current.CancellationToken);
@@ -101,6 +122,25 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         var file = (await _filesOperationsApi.FinalizeSessionAsync(folderId, session.Id, TestContext.Current.CancellationToken)).Response;
 
         return file.Id;
+    }
+
+    protected async Task<FileDto> UploadEncryptedFileInfo(int folderId, string title)
+    {
+        var fileId = await UploadEncryptedFile(folderId, title);
+
+        return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>Turns a file into one stored before private rooms refused open content: nothing can create it through the API any more.</summary>
+    protected async Task MakeFileOpen(int fileId)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE files_file SET encrypted = 0 WHERE id = @id;";
+        command.Parameters.AddWithValue("@id", fileId);
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>
