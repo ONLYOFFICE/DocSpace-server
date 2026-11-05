@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
@@ -76,6 +77,7 @@ global using ASC.Notify.Textile;
 global using ASC.Security.Cryptography;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
+global using ASC.Tests.Http;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Core.Users;

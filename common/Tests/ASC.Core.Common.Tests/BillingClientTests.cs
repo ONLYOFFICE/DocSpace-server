@@ -49,7 +49,7 @@ public class BillingClientTests
         var payments = await client.GetCurrentPaymentsAsync("portal-1", false);
 
         handler.LastMethod.Should().Be(HttpMethod.Post);
-        handler.LastUri!.AbsolutePath.Should().Be("/billing/GetActiveResources");
+        handler.LastUri!.PathAndQuery.Should().Be("/billing/GetActiveResources");
         handler.LastContentType.Should().Be("application/json; charset=utf-8");
 
         var body = JsonDocument.Parse(handler.LastRequestBody!);
@@ -68,7 +68,19 @@ public class BillingClientTests
 
         await client.GetPaymentsAsync("portal-1");
 
-        handler.LastUri!.AbsolutePath.Should().Be("/sub/billing/GetPayments");
+        handler.LastUri!.PathAndQuery.Should().Be("/sub/billing/GetPayments");
+    }
+
+    [Fact]
+    public async Task RootBaseUrl_ProducesSingleSlashPath()
+    {
+        // A stub of its own: the shared one puts every stub under a path, which would make this a sub-path case.
+        using var stub = HttpStub.AtRoot(_ => Reply(HttpStatusCode.OK, "[]"));
+        var (client, handler) = CreateBillingClient(stub);
+
+        await client.GetPaymentsAsync("portal-1");
+
+        handler.LastUri!.PathAndQuery.Should().Be("/billing/GetPayments");
     }
 
     [Fact]

@@ -31,13 +31,17 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Core.Common.Tests;
+namespace ASC.Tests.Http;
 
 /// <summary>
 /// One external HTTP service (billing, accounting, docscloud) as a test scripts it: a path of its own on a WireMock
 /// server shared by the whole run, answering every request with what the test's responder returns.
 /// </summary>
 /// <remarks>
+/// <para>
+/// The source lives in ASC.Core.Common.Tests and is compiled into ASC.Notify.Tests as a linked file, so both suites
+/// fake a service the same way without the unit tests taking on the Aspire harness of ASC.Tests.Common.
+/// </para>
 /// <para>
 /// The client under test is pointed at <see cref="Url"/> and talks to it over a real socket, so the request crosses
 /// the whole handler chain - authorization, resilience, transport - exactly as it does in production.
@@ -52,16 +56,21 @@ namespace ASC.Core.Common.Tests;
 /// Every answer closes its connection. A client that reuses a pooled connection the server then drops silently
 /// sends the request once more, which a test counting requests would see as a retry the code never made.
 /// </para>
+/// <para>
+/// Only a stub made by <see cref="AtRoot"/> owns a server and has to be disposed; disposing any other does nothing.
+/// </para>
 /// </remarks>
-public sealed class HttpStub
+public sealed class HttpStub : IDisposable
 {
     private static readonly Lazy<WireMockServer> _server = new(StartServer);
 
-    // A loopback port bound but never listened on, for as long as the run lasts: a port only found free and released
-    // could be taken by a server a parallel test starts, and the "unreachable" service would then answer.
-    private static readonly Lazy<(Socket Socket, string Url)> _refusing = new(BindRefusingPort);
+    // A loopback listener that resets every connection it accepts, for as long as the run lasts. A port that is bound
+    // but never listened on refuses the connection too, but Windows retries a refused connect for about two seconds
+    // before it gives up, where Linux fails at once; a reset fails at once on both.
+    private static readonly Lazy<string> _dropping = new(StartDroppingListener);
 
-    private readonly string _prefix = $"/t/{Guid.NewGuid():N}";
+    private readonly string _prefix;
+    private readonly WireMockServer? _ownServer;
     private readonly ConcurrentQueue<StubRequest> _requests = new();
     private readonly Func<StubRequest, Task<StubResponse>> _respond = _ => throw new InvalidOperationException("An unreachable service never answers");
     private readonly string? _closedUrl;
@@ -72,21 +81,31 @@ public sealed class HttpStub
     }
 
     public HttpStub(Func<StubRequest, Task<StubResponse>> respond)
+        : this(respond, ownServer: null)
+    {
+    }
+
+    private HttpStub(Func<StubRequest, Task<StubResponse>> respond, WireMockServer? ownServer)
     {
         _respond = respond;
+        _ownServer = ownServer;
+        _prefix = ownServer is null ? $"/t/{Guid.NewGuid():N}" : string.Empty;
 
-        _server.Value
+        Server
             .Given(Request.Create().WithPath(new WildcardMatcher($"{_prefix}/*")).UsingAnyMethod())
             .RespondWith(Response.Create().WithCallback(HandleAsync));
     }
 
     private HttpStub(string closedUrl)
     {
+        _prefix = string.Empty;
         _closedUrl = closedUrl;
     }
 
     /// <summary>The address to configure as the service's base URL; append a sub-path to test how it is joined.</summary>
-    public string Url => _closedUrl ?? _server.Value.Url + _prefix;
+    public string Url => _closedUrl ?? Server.Url + _prefix;
+
+    private WireMockServer Server => _ownServer ?? _server.Value;
 
     /// <summary>How many requests have arrived so far, answered or not.</summary>
     public int CallCount => _requests.Count;
@@ -110,19 +129,49 @@ public sealed class HttpStub
     public string? LastContentType => Last?.ContentType;
 
     /// <summary>
-    /// A service nothing listens for: the connection is refused before any answer, as when the service is down.
+    /// A service that is gone: every connection is dropped before any answer, and the client's send fails with the
+    /// <see cref="HttpRequestException"/> a service that is down gives.
     /// </summary>
     public static HttpStub Unreachable()
     {
-        return new HttpStub(_refusing.Value.Url);
+        return new HttpStub(_dropping.Value);
     }
 
-    private static (Socket, string) BindRefusingPort()
+    /// <summary>
+    /// A stub that is a whole server of its own, so its <see cref="Url"/> has no path: for how a client joins its routes
+    /// to a base URL that is only a host. Dispose it at the end of the test.
+    /// </summary>
+    public static HttpStub AtRoot(Func<StubRequest, StubResponse> respond)
     {
-        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+        return new HttpStub(request => Task.FromResult(respond(request)), WireMockServer.Start());
+    }
 
-        return (socket, $"http://127.0.0.1:{((IPEndPoint)socket.LocalEndPoint!).Port}");
+    public void Dispose()
+    {
+        _ownServer?.Stop();
+        _ownServer?.Dispose();
+    }
+
+    private static string StartDroppingListener()
+    {
+        var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+        listener.Listen();
+
+        // Accepts for the life of the test process, like the shared server; the listener is never closed.
+        _ = Task.Run(async () =>
+        {
+            while (true)
+            {
+                using var connection = await listener.AcceptAsync();
+
+                // A zero linger timeout turns the close into a reset, so the client fails at once instead of waiting
+                // for an answer that never comes.
+                connection.LingerState = new LingerOption(true, 0);
+            }
+        });
+
+        return $"http://127.0.0.1:{((IPEndPoint)listener.LocalEndPoint!).Port}";
     }
 
     // The first request through Kestrel and WireMock's pipeline pays for a JIT pass that, on a busy machine, outlasts the
@@ -158,10 +207,10 @@ public sealed class HttpStub
         {
             // WireMock cannot drop a connection: its faults still answer (EMPTY_RESPONSE is a 200 with no body,
             // MALFORMED_RESPONSE_CHUNK a 200 with garbage), and it writes Content-Length itself. A redirect to the
-            // refusing port fails this one request inside the client's own send - the HttpRequestException a service
-            // that went away gives - while the stub has still counted it.
+            // dropping listener fails this one request inside the client's own send - the HttpRequestException a
+            // service that went away gives - while the stub has still counted it.
             var redirect = new ResponseMessage { StatusCode = (int)HttpStatusCode.TemporaryRedirect };
-            redirect.AddHeader("Location", _refusing.Value.Url + request.Path);
+            redirect.AddHeader("Location", _dropping.Value + request.Path);
             redirect.AddHeader("Connection", "close");
 
             return redirect;
@@ -218,8 +267,8 @@ public sealed record StubResponse(HttpStatusCode Status, string Body = "", TimeS
     }
 
     /// <summary>
-    /// This one request fails in transport: the client is redirected to a port that refuses the connection and sees an
-    /// <see cref="HttpRequestException"/> from its send. The stub counts the request; for a service that never accepts
+    /// This one request fails in transport: the client is redirected to a listener that drops the connection and sees
+    /// an <see cref="HttpRequestException"/> from its send. The stub counts the request; for a service that never accepts
     /// one at all use <see cref="HttpStub.Unreachable"/>.
     /// </summary>
     public static StubResponse TransportFault()

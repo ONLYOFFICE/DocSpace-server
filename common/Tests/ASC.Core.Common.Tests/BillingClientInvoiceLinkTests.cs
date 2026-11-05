@@ -50,7 +50,7 @@ public class BillingClientInvoiceLinkTests
         link.Should().Be("https://invoice.stripe.com/i/acct_1L1C3n/test_YWNj");
 
         handler.LastMethod.Should().Be(HttpMethod.Post);
-        handler.LastUri!.AbsolutePath.Should().Be("/billing/GetInvoiceLink");
+        handler.LastUri!.PathAndQuery.Should().Be("/billing/GetInvoiceLink");
 
         var body = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
         body.GetProperty("PortalId").EnumerateArray().Select(e => e.GetString()).Should().Equal("portal-1");

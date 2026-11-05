@@ -103,63 +103,31 @@ public class PortalRetentionJobTests
     }
 
     /// <summary>
-    /// An accounting service on loopback (WireMock) that answers the balance requests as the case scripts them.
-    /// <see cref="Asked"/> counts a request the moment it arrives, before it is answered.
+    /// An accounting service that answers the balance requests as the case scripts them, on the same
+    /// <see cref="HttpStub"/> the payment client tests use. <see cref="Asked"/> counts a request the moment it arrives,
+    /// before it is answered; a request the case does not answer fails in transport, as when the service is down.
     /// </summary>
-    /// <remarks>
-    /// WireMock cannot drop a connection - its faults still answer - so an unreachable service is a redirect to a
-    /// loopback port that is bound but never listened on: the client's own send fails with the refused connection,
-    /// as it does when the service is down, and the request has still been counted here. Every answer closes its
-    /// connection, so the client never resends a request over a pooled connection that went away.
-    /// </remarks>
     private sealed class AccountingStub : IDisposable
     {
         private const string EmptyBalance = """{"accountNumber":1,"accountCurrency":"USD","subAccounts":[]}""";
 
-        private readonly WireMockServer _server = WireMockServer.Start();
-        private readonly Socket _refusing = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private readonly CancellationTokenSource _released = new();
-        private int _asked;
+        private readonly HttpStub _stub;
+        private int _answering;
 
         private AccountingStub(Func<int, CancellationToken, Task<bool>> answer)
         {
-            _refusing.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-            var refusingUrl = $"http://127.0.0.1:{((IPEndPoint)_refusing.LocalEndPoint!).Port}";
-
-            _server
-                .Given(Request.Create().WithPath(new WildcardMatcher("/api/*")).UsingAnyMethod())
-                .RespondWith(Response.Create().WithCallback(async _ =>
-                {
-                    var answered = await answer(Interlocked.Increment(ref _asked) - 1, _released.Token);
-
-                    var message = answered
-                        ? new ResponseMessage
-                        {
-                            StatusCode = (int)HttpStatusCode.OK,
-                            BodyData = new BodyData { BodyAsString = EmptyBalance, DetectedBodyType = BodyType.String }
-                        }
-                        : new ResponseMessage { StatusCode = (int)HttpStatusCode.TemporaryRedirect };
-
-                    if (answered)
-                    {
-                        message.AddHeader("Content-Type", "application/json");
-                    }
-                    else
-                    {
-                        message.AddHeader("Location", refusingUrl + "/api/unreachable");
-                    }
-
-                    message.AddHeader("Connection", "close");
-
-                    return message;
-                }));
+            _stub = new HttpStub(async _ =>
+                await answer(Interlocked.Increment(ref _answering) - 1, _released.Token)
+                    ? StubResponse.Json(HttpStatusCode.OK, EmptyBalance)
+                    : StubResponse.TransportFault());
         }
 
-        public string Url => _server.Url + "/api";
+        public string Url => _stub.Url + "/api";
 
-        public int Asked => Volatile.Read(ref _asked);
+        public int Asked => _stub.CallCount;
 
-        /// <summary>The n-th request gets an empty balance when <paramref name="answers"/>[n] is true, a refused connection otherwise.</summary>
+    /// <summary>The n-th request gets an empty balance when <paramref name="answers"/>[n] is true, a dropped connection otherwise.</summary>
         public static AccountingStub Answering(params bool[] answers)
         {
             return new AccountingStub((n, _) => Task.FromResult(n < answers.Length && answers[n]));
@@ -187,9 +155,7 @@ public class PortalRetentionJobTests
         public void Dispose()
         {
             _released.Cancel();
-            _server.Stop();
-            _server.Dispose();
-            _refusing.Dispose();
+            _stub.Dispose();
             _released.Dispose();
         }
     }
@@ -788,7 +754,7 @@ public class PortalRetentionJobTests
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger<PortalRetentionJob>();
 
-        // Unreachable twice, answers once - which starts the count again - then unreachable for good. A refused
+        // Unreachable twice, answers once - which starts the count again - then unreachable for good. A dropped
         // connection is not retried by the client, so every failure is one request.
         bool[] answers = [false, false, true, false, false, false, false];
         using var stub = AccountingStub.Answering(answers);

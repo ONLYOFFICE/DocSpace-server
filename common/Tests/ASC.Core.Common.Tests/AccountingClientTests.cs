@@ -163,11 +163,13 @@ public class AccountingClientTests
     [Fact]
     public async Task RootBaseUrlWithoutSubPath_ProducesSingleSlashPath()
     {
-        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "{}"), path: "");
+        // A stub of its own: the shared one puts every stub under a path, which would make this a sub-path case.
+        using var stub = HttpStub.AtRoot(_ => Reply(HttpStatusCode.OK, "{}"));
+        var (client, handler) = CreateAccountingClient(stub, path: "");
 
         await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
 
-        handler.LastUri!.AbsolutePath.Should().Be("/customer/portal-1/balance");
+        handler.LastUri!.PathAndQuery.Should().Be("/customer/portal-1/balance");
     }
 
     [Fact]
