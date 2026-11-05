@@ -57,16 +57,16 @@ public class WebhookEntryContextTests(
     {
         // Arrange
         var roomId = await CreateRoomAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
 
         // Act
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("parentRoomType").GetInt32().Should().Be(FolderTypeCustomRoom, "the file is in a custom room");
+        payload!.Model.ParentRoomType.Should().Be(FolderTypeCustomRoom, "the file is in a custom room");
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class WebhookEntryContextTests(
         await _filesClient.Authenticate(Owner);
         var outer = (await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest($"outer-{Guid.NewGuid():N}"), cancellationToken)).Response;
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated);
         var title = $"inner-{Guid.NewGuid():N}";
 
         // Act
@@ -87,18 +87,18 @@ public class WebhookEntryContextTests(
         await _foldersApi.CreateFolderAsync(outer.Id, new CreateFolderRequest(title), cancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<FolderPayload>(subscription.Id, "folder.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("parentRoomType").GetInt32().Should().Be(FolderTypeCustomRoom);
-        payload.Value.TryGetProperty("isShareable", out _).Should().BeFalse("whether the caller may share a folder is caller-relative state");
+        payload!.Model.ParentRoomType.Should().Be(FolderTypeCustomRoom);
+        payload.Json.TryGetProperty("isShareable", out _).Should().BeFalse("whether the caller may share a folder is caller-relative state");
     }
 
     [Fact]
     public async Task RoomCreated_Payload_HasNoParentRoomType()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated);
         var title = $"room-{Guid.NewGuid():N}";
 
         // Act
@@ -106,10 +106,10 @@ public class WebhookEntryContextTests(
         await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(title: title, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "room.created", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.created", p => p.Title == title);
 
         payload.Should().NotBeNull();
-        payload!.Value.TryGetProperty("parentRoomType", out _).Should().BeFalse("a room is not inside a room");
+        payload!.Model.ParentRoomType.Should().BeNull("a room is not inside a room");
     }
 
     /// <summary>
@@ -124,23 +124,23 @@ public class WebhookEntryContextTests(
         var cancellationToken = TestContext.Current.CancellationToken;
         var roomId = await CreateRoomAsync();
         await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
 
         // Act
         await _filesClient.Authenticate(Owner);
         await _operationsApi.BulkDownloadAsync(
-            new DownloadRequestDto(folderIds: [new DownloadRequestDtoAllOfFolderIds(roomId)]), cancellationToken);
+            new DownloadRequestDto(folderIds: [new DownloadRequestDtoAllOfFolderIds(roomId)], fileIds: [], fileConvertIds: []), cancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.downloaded", p => p.GetProperty("id").GetInt32() == roomId, 60);
+        var payload = await WaitForEventPayloadAsync<FolderPayload>(subscription.Id, "folder.downloaded", p => p.Id.GetInt() == roomId, 60);
 
         payload.Should().NotBeNull("downloading a room publishes folder.downloaded for it");
-        var p = payload!.Value;
+        var p = payload!.Model;
 
-        p.GetProperty("fileEntryType").GetInt32().Should().Be(FileEntryTypeFolder);
-        p.GetProperty("type").GetInt32().Should().Be(FolderTypeCustomRoom, "the folder payload tells a room by its folder type");
-        p.TryGetProperty("roomType", out _).Should().BeFalse("room fields belong to the room.* payload, not to folder.*");
-        p.TryGetProperty("indexing", out _).Should().BeFalse();
+        p.FileEntryType.Should().Be(FileEntryTypeFolder);
+        p.Type.Should().Be(FolderTypeCustomRoom, "the folder payload tells a room by its folder type");
+        payload.Json.TryGetProperty("roomType", out _).Should().BeFalse("room fields belong to the room.* payload, not to folder.*");
+        payload.Json.TryGetProperty("indexing", out _).Should().BeFalse();
     }
 
     /// <summary>
@@ -154,17 +154,17 @@ public class WebhookEntryContextTests(
         // Arrange: a room with a quota of its own
         var cancellationToken = TestContext.Current.CancellationToken;
         var roomId = await CreateRoomWithQuotaAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomArchived);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomArchived);
 
         // Act
         await _filesClient.Authenticate(Owner);
         await _roomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(deleteAfter: false), cancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "room.archived", p => p.GetProperty("id").GetInt32() == roomId, 60);
+        var payload = await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.archived", p => p.Id.GetInt() == roomId, 60);
 
         payload.Should().NotBeNull("archiving the room publishes room.archived once the operation has moved it");
-        payload!.Value.GetProperty("quotaLimit").GetInt64().Should().Be(RoomQuota, "the owner may delete the archived room");
+        payload!.Model.QuotaLimit.Should().Be(RoomQuota, "the owner may delete the archived room");
     }
 
     /// <summary>
@@ -185,7 +185,7 @@ public class WebhookEntryContextTests(
             new RoomInvitationRequest(invitations: [new RoomInvitation(editor.Id, DocSpace.API.SDK.Model.FileShare.Editing)], notify: false),
             cancellationToken);
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, editor);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, editor);
 
         // Act
         var title = $"room-{Guid.NewGuid():N}";
@@ -194,10 +194,10 @@ public class WebhookEntryContextTests(
         await _roomsApi.UpdateRoomAsync(roomId, new UpdateRoomRequest(title: title), cancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "room.updated", p => p.GetProperty("title").GetString() == title);
+        var payload = await WaitForEventPayloadAsync<RoomPayload>(subscription.Id, "room.updated", p => p.Title == title);
 
         payload.Should().NotBeNull("the editor may read the room");
-        payload!.Value.GetProperty("quotaLimit").GetInt64().Should().Be(RoomQuota, "the REST API shows the quota to an editor of the room");
+        payload!.Model.QuotaLimit.Should().Be(RoomQuota, "the REST API shows the quota to an editor of the room");
     }
 
     /// <summary>A custom room of the owner with a quota of its own; room quotas are turned on for it.</summary>

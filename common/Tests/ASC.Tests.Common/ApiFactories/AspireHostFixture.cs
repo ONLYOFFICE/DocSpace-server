@@ -191,7 +191,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
 
-        if (resources.Contains(ResourceNames.Nextcloud))
+        // A lazy Nextcloud counts too: its address is known once the stack runs, and the tests that use it wait for
+        // it themselves before they read these settings.
+        if (resources.Union(LazyResources).Contains(ResourceNames.Nextcloud))
         {
             PublishNextcloudSettings();
         }
@@ -437,6 +439,13 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Whether the suite's launch profile starts the resource at all - the environment signal for a feature whose
+    /// container only some profiles include (<see cref="ResourceNames.DocSpaceMcp"/>).
+    /// </summary>
+    public bool HasResource(string resourceName) =>
+        _app.Services.GetRequiredService<DistributedApplicationModel>().Resources.Any(resource => resource.Name == resourceName);
+
+    /// <summary>
     /// A value of the AppHost configuration. The services read the same <c>buildtools/config</c>
     /// files, so a setting such as <c>core:machinekey</c> read here is the one they work with.
     /// </summary>
@@ -492,6 +501,100 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         lock (_lazyResourcesLock)
         {
             return _lazyResourcesHealthy ??= WaitForHealthyAsync(LazyResources.ToList());
+        }
+    }
+
+    private readonly Lock _documentServerLock = new();
+    private Task? _documentServerReady;
+
+    /// <summary>
+    /// Waits until the document server has finished starting. Its container has no health check of its own, so the
+    /// services start as soon as it runs, and its start has two halves: a first docservice and converter answer within
+    /// a second, the fonts and caches are regenerated (~70 s, 2026-11-03), and then supervisor restarts both. A
+    /// conversion in flight at that restart hangs and fails with the router's HTML error page, while the test that
+    /// asked for it waits out its whole timeout for a file that never comes. The health check already answers in the
+    /// first half, so the wait is on the line the restart logs; the health check after it only confirms the router
+    /// reaches the new instance. The first caller starts the wait and the others share it, so it costs the run once.
+    /// </summary>
+    public Task WaitForDocumentServerAsync()
+    {
+        lock (_documentServerLock)
+        {
+            return _documentServerReady ??= WaitForDocumentServerStartAsync();
+        }
+    }
+
+    /// <summary>What supervisor logs once the converter is back after the fonts were regenerated.</summary>
+    private const string DocumentServerRestartedLine = "ds:converter: started";
+
+    /// <summary>
+    /// How long the restart line is waited for. An image that stops logging it must not stall the suite for the whole
+    /// start-up budget: past this the health check alone decides.
+    /// </summary>
+    private static readonly TimeSpan _documentServerRestartBudget = TimeSpan.FromMinutes(4);
+
+    private async Task WaitForDocumentServerStartAsync()
+    {
+        await WaitForDocumentServerRestartAsync();
+        await PollDocumentServerAsync();
+    }
+
+    private async Task WaitForDocumentServerRestartAsync()
+    {
+        using var restart = new CancellationTokenSource(_documentServerRestartBudget);
+        var editors = _app.Services.GetRequiredService<DistributedApplicationModel>().Resources
+            .Single(resource => resource.Name == ResourceNames.Editors);
+
+        try
+        {
+            // The watch replays the lines logged before it started, so a server that is long up is seen at once.
+            await foreach (var batch in _app.Services.GetRequiredService<ResourceLoggerService>().WatchAsync(editors).WithCancellation(restart.Token))
+            {
+                if (batch.Any(line => line.Content.Contains(DocumentServerRestartedLine, StringComparison.Ordinal)))
+                {
+                    return;
+                }
+            }
+        }
+        catch (OperationCanceledException) when (restart.IsCancellationRequested)
+        {
+            // Not logged within the budget: fall through to the health check.
+        }
+    }
+
+    private async Task PollDocumentServerAsync()
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+        using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
+        // The router port the services reach the document server through.
+        var healthCheck = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/ds-vpath/healthcheck");
+
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    using var response = await client.GetAsync(healthCheck, startUp.Token);
+
+                    if (response.IsSuccessStatusCode && (await response.Content.ReadAsStringAsync(startUp.Token)).Trim() == "true")
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the router answers 502 or the connection is refused until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(2), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The document server did not answer {healthCheck} within {_startUpBudget.TotalMinutes} minutes. "
+                + "The editors container's log is the one to read.");
         }
     }
 

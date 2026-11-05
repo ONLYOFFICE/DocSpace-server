@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>{0} yapay zeka projesinin AI modeli {1} olarak değiştirildi</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook teslimatı yeniden denendi: {0}</value>
+  </data>
 </root>

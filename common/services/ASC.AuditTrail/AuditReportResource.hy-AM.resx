@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>{0} ԱԲ նախագծի ԱԲ մոդելը փոխվել է՝ {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-ի առաքումը կրկին փորձարկվել է՝ {0}</value>
+  </data>
 </root>

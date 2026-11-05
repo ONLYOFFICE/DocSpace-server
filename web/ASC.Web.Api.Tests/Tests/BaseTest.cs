@@ -55,7 +55,6 @@ public class BaseTest(
     protected UserStatusApi _userStatusApi = null!;
     protected GroupApi _groupApi = null!;
     protected UserTypeApi _userTypeApi = null!;
-    protected HttpClient _webhookReceiverClient = null!;
     protected HttpClient _filesClient = null!;
     protected RoomsApi _roomsApi = null!;
     protected FilesApi _filesApi = null!;
@@ -131,7 +130,6 @@ public class BaseTest(
         _userStatusApi = _clients.UserStatusApi;
         _groupApi = _clients.GroupApi;
         _userTypeApi = _clients.UserTypeApi;
-        _webhookReceiverClient = _clients.WebhookReceiverHttpClient;
         _filesClient = _clients.FilesHttpClient;
         _roomsApi = _clients.RoomsApi;
         _filesApi = _clients.FilesApi;

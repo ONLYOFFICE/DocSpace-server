@@ -46,20 +46,46 @@ import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../../app/exampleIds
 // `OPERATION_DOCS` in `app/openapi.ts`, whose engine entries are likewise
 // distilled from the library's own JSDoc. Two rules keep the table honest:
 //
-//   - Fill-in only, never override. A description the library declares always
-//     wins, so a future release that documents a type turns the entry here
-//     dead rather than putting the two in conflict.
-//   - A dead entry is reported rather than silently ignored, because the same
-//     silence would also swallow a typo. See `applySchemaDocs`.
+//   - Fill-in by default. A description the library declares wins over
+//     `description`/`properties`, so a future release that documents a type
+//     turns the entry here dead rather than putting the two in conflict. The
+//     one exception is `replaceDescription`/`replaceProperties`, for a library
+//     text that names the library's internals; each is pinned to the start of
+//     the text it replaces, so a rewritten library text is caught.
+//   - A dead entry fails the generation rather than being ignored, because the
+//     same silence would also swallow a typo. See `applySchemaDocs`.
 //
 // Keys are the final, namespaced component names - exactly what the lint
 // report cites (`components.schemas.AiChatEvent.properties.idx`).
 
+/**
+ * Prose that replaces a library description, pinned to the text it was
+ * written against: `replacing` is the start of the library's description. A
+ * library release that rewrites the text no longer starts with it, and the
+ * entry is reported instead of silently covering the new text - which may
+ * already have fixed what the replacement was for.
+ */
+interface Replacement {
+  replacing: string;
+  text: string;
+}
+
 interface SchemaDoc {
   /** Prose for the schema itself (`schema-description`). */
   description?: string;
+  /**
+   * The one exception to "fill-in only": prose that replaces the library's own
+   * description of the schema. Only for a library text written for the
+   * library's callers - one that names its internal functions and adapters
+   * (`StorageAdapter.getRoomSkill`, `toChatError`) - which a caller of this API
+   * can neither see nor use. See `Replacement` for how a library change is
+   * caught.
+   */
+  replaceDescription?: Replacement;
   /** Prose per property name (`schema-property-description`). */
   properties?: Readonly<Record<string, string>>;
+  /** `replaceDescription` for a property's library description. */
+  replaceProperties?: Readonly<Record<string, Replacement>>;
   /**
    * One realistic value per property name, emitted as the property's
    * `examples`. The library declares none, and a generated SDK's own docs plus
@@ -79,6 +105,20 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Request-side types: what a caller has to construct --------------- */
 
   AiProfile: {
+    replaceProperties: {
+      providerType: {
+        replacing: "Provider type for this profile.",
+        text: "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
+      },
+      reasoningSupport: {
+        replacing: "Extended-thinking capabilities of the selected model",
+        text: "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID.",
+      },
+      useProxy: {
+        replacing: "Route every provider request through the host's `fetchProxy`",
+        text: "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
+      },
+    },
     examples: {
       id: EXAMPLE_IDS.profile,
       name: "OpenAI GPT-4o",
@@ -99,6 +139,24 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiCreateProfileInput: {
+    replaceDescription: {
+      replacing: "Input for creating a new profile",
+      text: "Input for creating a new profile: the shape of a profile without the fields the service fills in (`id`, `createdAt`).",
+    },
+    replaceProperties: {
+      providerType: {
+        replacing: "Provider type for this profile.",
+        text: "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
+      },
+      reasoningSupport: {
+        replacing: "Extended-thinking capabilities of the selected model",
+        text: "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID.",
+      },
+      useProxy: {
+        replacing: "Route every provider request through the host's `fetchProxy`",
+        text: "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
+      },
+    },
     examples: {
       name: "OpenAI GPT-4o",
       providerType: "openai",
@@ -139,6 +197,8 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiActionArgs: {
+    description:
+      "Per-request options of an AI round: extra tools, the depth of reasoning, a system prompt override and the rooms and folder connected as context.",
     examples: {
       tools: [],
       isReasoning: false,
@@ -179,6 +239,20 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiMCPItem: {
+    replaceProperties: {
+      serverType: {
+        replacing: "Server type (MCP server name / host tool group id)",
+        text: "The server or tool group the tool belongs to (an MCP server name or a host tool group ID): the key a disabled tool is stored under, so a tool sent in `actionArgs.tools` is still matched to its group.",
+      },
+      requireApproval: {
+        replacing: "Whether the consumer must show an approval dialog",
+        text: "Whether the tool asks for approval before it runs, under the `auto` tool permission mode: `false` runs it without asking; `true` or absent leaves it to the always-allow list and the tool's MCP annotations (see `annotations`). Under `ask` every call asks and under `allow` none does, whatever this says. Host tools default to `false`; MCP and custom-server tools leave it unset.",
+      },
+      annotations: {
+        replacing: "The MCP tool annotations as the server declared them",
+        text: "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool that cannot destroy anything runs without approval - one annotated `readOnlyHint: true`, or one with an explicit `destructiveHint: false`; a destructive tool, and one with no annotations (the protocol's default is destructive), keeps asking.",
+      },
+    },
     examples: {
       name: "docspace_get_folder",
       description: "Read the contents of a DocSpace folder.",
@@ -193,6 +267,100 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
     },
   },
 
+  AiContextRoomRef: {
+    replaceDescription: {
+      replacing: "One room a round runs with as context",
+      text: "One Instructions room a round runs with as context: the account and room ID from `GET api/2.0/ai/context/get-context-folders`, plus the skills of the room the round may use.",
+    },
+    properties: {
+      cloud: "The account the room belongs to; `docspace` for a room of this portal.",
+      id: "The room ID.",
+      skills:
+        "The skills of the room the round may use, as `GET api/2.0/ai/context/get-room-skills` lists them.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room, skills: [] },
+  },
+
+  AiKnowledgeRoomRef: {
+    replaceDescription: {
+      replacing: "One knowledge base a round searches",
+      text: "One Knowledge room a round searches: the account and room ID from `GET api/2.0/ai/context/get-knowledge-folders`.",
+    },
+    properties: {
+      cloud: "The account the room belongs to; `docspace` for a room of this portal.",
+      id: "The room ID; anything that is not a positive integer is ignored.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room },
+  },
+
+  AiFolderContextRef: {
+    replaceDescription: {
+      replacing: "A folder connected as the round's context",
+      text: "A folder connected as the round's context - any folder of the portal, not only a room - named by its account and ID.",
+    },
+    properties: {
+      cloud: "The account the folder belongs to; `docspace` for a folder of this portal.",
+      id: "The folder ID.",
+    },
+    examples: { cloud: "docspace", id: EXAMPLE_IDS.room },
+  },
+
+  AiRoomSkill: {
+    replaceDescription: {
+      replacing: "A skill configured inside a room",
+      text: "A skill of an Instructions room: the frontmatter of one Markdown skill file. `name` and `description` are what the model is shown; the body is read through `GET api/2.0/ai/context/get-room-skill`.",
+    },
+    properties: {
+      id: "The skill's ID, as `GET api/2.0/ai/context/get-room-skill` takes it.",
+      name: "The skill's name, from its frontmatter.",
+      description: "What the skill is for, from its frontmatter; empty when it declares none.",
+    },
+    examples: {
+      id: "5678",
+      name: "contract-review",
+      description: "How to review a supply contract.",
+    },
+  },
+
+  AiContextFolder: {
+    replaceDescription: {
+      replacing: "One cloud account's rooms",
+      text: "The rooms of one account the caller can connect as context, grouped under the account.",
+    },
+    properties: {
+      cloud: "The account the rooms belong to; `docspace` for this portal.",
+      rooms: "The rooms of that account the caller can connect.",
+    },
+    examples: { cloud: "docspace", rooms: [] },
+  },
+
+  AiContextRoom: {
+    replaceDescription: {
+      replacing: "A room the user can pull into the conversation",
+      text: "A room the caller can connect to a chat as context.",
+    },
+    properties: {
+      id: "The room ID.",
+      name: "The room title.",
+    },
+    examples: { id: EXAMPLE_IDS.room, name: "Contract templates" },
+  },
+
+  AiSuggestedQuestion: {
+    examples: {
+      question: "Which region had the most responses?",
+      prompt: "Group the submissions by region and show the count for each.",
+    },
+  },
+
+  AiChatErrorPayload: {
+    replaceDescription: {
+      replacing: "Serializable error payload",
+      text: "Why a round failed or stopped early, as the message status and the stream report it: a stable `code`, a message safe to show the user, and the cause when there is one.",
+    },
+    examples: { code: "rate_limit", message: "The provider is rate limiting requests." },
+  },
+
   AiWebSearchConfig: {
     examples: {
       provider: "exa",
@@ -200,6 +368,27 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
       baseUrl: "https://api.exa.ai",
       isCloudProvider: true,
       headers: {},
+    },
+  },
+
+  AiOpenAIFinishReason: {
+    replaceDescription: {
+      replacing: "OpenAI Chat Completions streaming shapes.",
+      text: "Why a choice of an OpenAI-compatible streamed completion ended, as the OpenAI Chat Completions format spells it; null while the choice is still streaming.",
+    },
+  },
+
+  AiImportMode: {
+    replaceDescription: {
+      replacing: "Mode passed to `PromptsEngine.importBundle`",
+      text: "How an imported prompt bundle meets the library: `merge` adds to it, `replace` replaces it.",
+    },
+  },
+
+  AiBuiltinProviderType: {
+    replaceDescription: {
+      replacing: "Union of all 17 built-in AI provider type identifiers.",
+      text: "The built-in AI provider types. `external` has no transport of its own: the requests go through a transport the embedding application supplies and are parsed with the provider named in `basedOn`.",
     },
   },
 
@@ -218,6 +407,12 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiModel: {
+    replaceProperties: {
+      reasoningSupport: {
+        replacing: "What the model can do with extended thinking",
+        text: "What the model can do with extended thinking, when the provider's catalogue reports it (OpenRouter and the ONLYOFFICE route do). Copied onto the profile when it is saved; when absent, the abilities are taken from the model ID.",
+      },
+    },
     examples: {
       id: "gpt-4o",
       name: "GPT-4o",
@@ -247,6 +442,16 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   // rest without one rather than filling the gap. `AiChatEvent` below is the
   // other such type here.
   AiAttachment: {
+    replaceProperties: {
+      source: {
+        replacing: "Origin of the attachment.",
+        text: "Where the attachment came from: `user` - attached by the user (also when unset); `tool` - produced by a tool call (for example `generate_image`).",
+      },
+      entityId: {
+        replacing: 'Opaque scope token (entity / "room")',
+        text: "The room or folder the attachment was created in, as an opaque token; once the attachment is bound to a message it repeats the thread's own scope.",
+      },
+    },
     examples: {
       id: EXAMPLE_IDS.attachment,
       kind: "file",
@@ -326,6 +531,20 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Chat stream ------------------------------------------------------ */
 
   AiChatEvent: {
+    replaceDescription: {
+      replacing: "Discriminated event emitted by the streaming methods",
+      text: "One event of a chat stream, told apart by `type`: `message-start`, `message-delta` and `message-end` frame the assistant reply, `message-incomplete` reports a provider error or an unfinished answer, `thread-title` carries a generated title, and `tool-call-pending` pauses the round until the call is approved (`POST api/2.0/ai/ai/approve-tool-call`) or denied (`POST api/2.0/ai/ai/deny-tool-call`).",
+    },
+    replaceProperties: {
+      autoAllow: {
+        replacing: "The consumer should execute the tool without prompting the user.",
+        text: "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never - the always-allow list, `requireApproval` and the annotations are all ignored; under `auto` a tool on the always-allow list, one with `requireApproval: false`, or one annotated `readOnlyHint: true` or `destructiveHint: false`; under `allow` every tool.",
+      },
+      serverExecuted: {
+        replacing: "Set when the tool is served by a server-side system source",
+        text: "The tool is run by the service itself: the client must not run it, only ask for approval (unless `autoAllow`) and approve or deny the call - an approval needs no `result`.",
+      },
+    },
     // A union over seven `type` values, and most fields belong to one variant
     // only: `idx`, `autoAllow` and `serverExecuted` to `tool-call-pending`,
     // `title` and `profileId` to `thread-title`. Only the fields every event
@@ -377,6 +596,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiAssignmentMutationResult: {
+    replaceDescription: {
+      replacing: "Outcome of `AssignmentsEngine.assign`",
+      text: "The outcome of an assign or unassign: a success, or an error naming the field that was refused.",
+    },
     examples: { success: true },
     properties: {
       success: "True when the assignment was persisted.",
@@ -393,6 +616,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiWebSearchMutationResult: {
+    replaceDescription: {
+      replacing: "Outcome of `WebSearchEngine.configure`",
+      text: "The outcome of storing a web-search configuration: the stored configuration, or an error naming the field that was refused.",
+    },
     examples: { success: true },
     properties: {
       success: "True when the configuration was persisted.",
@@ -404,6 +631,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Bulk outcomes: on failure nothing at all was persisted ------------ */
 
   AiBulkAssignmentResult: {
+    replaceDescription: {
+      replacing: "Outcome of `AssignmentsEngine.bulkAssign`",
+      text: "The outcome of a bulk assign: either every entry was stored, or none was and the errors are reported per action. Every entry is validated before anything is written, so one bad entry never leaves the assignments half-written.",
+    },
     examples: { success: true, errors: [] },
     properties: {
       success: "True when every entry was persisted.",
@@ -413,6 +644,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsBulkResult: {
+    replaceDescription: {
+      replacing: "Outcome of `ToolsEngine.replaceAllCustomServers`",
+      text: "The outcome of replacing the custom MCP servers: either every entry was stored, or none was and the errors are reported per server.",
+    },
     examples: { success: true, errors: [] },
     properties: {
       success: "True when every custom MCP server was persisted.",
@@ -422,6 +657,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportResult: {
+    replaceDescription: {
+      replacing: "Outcome of `PromptsEngine.importBundle`",
+      text: "The outcome of a prompt bundle import: either every entry was stored, with counts, or none was and the errors are reported per entry.",
+    },
     examples: { success: true, imported: { folders: 2, prompts: 12 }, errors: [] },
     properties: {
       success: "True when the whole bundle was imported.",
@@ -431,6 +670,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportError: {
+    replaceDescription: {
+      replacing: "Per-entry error reported by `PromptsEngine.importBundle`",
+      text: "One refused entry of a prompt bundle import.",
+    },
     examples: {
       kind: "prompt",
       ref: EXAMPLE_IDS.prompt,
@@ -445,6 +688,10 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Prompts and threads ---------------------------------------------- */
 
   AiCreatePromptInput: {
+    replaceDescription: {
+      replacing: "Input for creating a prompt",
+      text: "Input for creating a prompt; the service fills in `id`, `createdAt` and `updatedAt`.",
+    },
     examples: {
       name: "Contract summary",
       text: "Summarise the key obligations and dates in the attached contract.",
@@ -468,6 +715,16 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiOpenOrCreateResult: {
+    replaceDescription: {
+      replacing: "Resolved thread state returned by `ThreadsEngine.openOrCreate`",
+      text: "The thread that was opened or created, with its stored messages.",
+    },
+    replaceProperties: {
+      title: {
+        replacing: "Empty string for existing threads",
+        text: "The title generated for a thread this call created; an empty string when it opened an existing thread.",
+      },
+    },
     properties: {
       threadId: "The thread that was opened, or the one just created.",
       priorMessages:
@@ -531,7 +788,31 @@ export interface UnusedSchemaDoc {
   schema: string;
   /** The property the entry described, or `undefined` for a type-level entry. */
   property?: string;
-  reason: "no such schema" | "no such property" | "already described";
+  reason:
+    | "no such schema"
+    | "no such property"
+    | "already described"
+    | "nothing to replace"
+    | "library text changed";
+}
+
+/**
+ * Applies one pinned replacement to a schema node; the reason it was not
+ * applied, or `undefined` when it was.
+ */
+function replace(
+  node: Record<string, unknown>,
+  replacement: Replacement,
+): UnusedSchemaDoc["reason"] | undefined {
+  const current = node["description"];
+  if (typeof current !== "string") {
+    return "nothing to replace";
+  }
+  if (!current.startsWith(replacement.replacing)) {
+    return "library text changed";
+  }
+  node["description"] = replacement.text;
+  return undefined;
 }
 
 /**
@@ -559,6 +840,26 @@ export function applySchemaDocs(components: Record<string, unknown>): {
         schema["description"] = doc.description;
       } else {
         unused.push({ schema: name, reason: "already described" });
+      }
+    }
+
+    if (doc.replaceDescription !== undefined) {
+      const reason = replace(schema, doc.replaceDescription);
+      if (reason) {
+        unused.push({ schema: name, reason });
+      }
+    }
+
+    for (const [property, replacement] of Object.entries(doc.replaceProperties ?? {})) {
+      const props = schema["properties"];
+      const target = isObject(props) ? props[property] : undefined;
+      if (!isObject(target)) {
+        unused.push({ schema: name, property, reason: "no such property" });
+        continue;
+      }
+      const reason = replace(target, replacement);
+      if (reason) {
+        unused.push({ schema: name, property, reason });
       }
     }
 
@@ -593,7 +894,34 @@ export function applySchemaDocs(components: Record<string, unknown>): {
   return { components: out, unused };
 }
 
-/** Unwrap TSDoc markup in the inlined per-operation schemas. */
+/**
+ * Unwrap TSDoc markup in the inlined per-operation schemas, and give them the
+ * same pinned replacements as the components: a library type inlined into an
+ * operation (`Omit<Profile, "key">`) carries the same library text, matched by
+ * the start it is pinned to.
+ */
 export function cleanOperationDescriptions<T>(operations: T): T {
-  return cleanDescriptions(operations) as T;
+  const replacements = Object.values(SCHEMA_DOCS).flatMap((doc) => [
+    ...(doc.replaceDescription ? [doc.replaceDescription] : []),
+    ...Object.values(doc.replaceProperties ?? {}),
+  ]);
+  return replaceInlinedLibraryTexts(cleanDescriptions(operations), replacements) as T;
+}
+
+function replaceInlinedLibraryTexts(node: unknown, replacements: readonly Replacement[]): unknown {
+  if (Array.isArray(node)) {
+    return node.map((item) => replaceInlinedLibraryTexts(item, replacements));
+  }
+  if (!isObject(node)) {
+    return node;
+  }
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node)) {
+    const replacement =
+      key === "description" && typeof value === "string"
+        ? replacements.find((candidate) => value.startsWith(candidate.replacing))
+        : undefined;
+    out[key] = replacement ? replacement.text : replaceInlinedLibraryTexts(value, replacements);
+  }
+  return out;
 }

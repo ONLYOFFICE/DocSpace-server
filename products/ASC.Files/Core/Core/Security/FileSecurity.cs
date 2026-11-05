@@ -1300,8 +1300,11 @@ public class FileSecurity(
             }
         }
 
+        // The room owner holds no share record of their own on the room, so the one found here can be a link's or a
+        // group's - it must not hide the form from the owner.
         if (room is { FolderType: FolderType.FillingFormsRoom } && file is { IsPdf: true } &&
-            !parentFolders.Exists(f => DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)))
+            !parentFolders.Exists(f => DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)) &&
+            !await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
         {
             var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
             if (shareRecord is { Share: FileShare.FillForms })
@@ -1700,6 +1703,21 @@ public class FileSecurity(
             return false;
         }
 
+        var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
+
+        // The content of an end-to-end encrypted room never leaves it as a copy, whether the room is
+        // active or archived, and the server has no clear text to build an index or a vector from.
+        if (inPrivateRoom && action is
+                FilesSecurityActions.Copy or
+                FilesSecurityActions.Duplicate or
+                FilesSecurityActions.IndexExport or
+                FilesSecurityActions.UseChat or
+                FilesSecurityActions.Vectorization or
+                FilesSecurityActions.StartFilling)
+        {
+            return false;
+        }
+
         switch (e.RootFolderType)
         {
             case FolderType.DEFAULT:
@@ -1767,8 +1785,6 @@ public class FileSecurity(
                 // cannot read anything in one and must not be handed access to it by role alone. This
                 // skips the bypass rather than denying outright: an administrator who *was* invited
                 // falls through to the ordinary share-based checks and keeps their access.
-                var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
-
                 if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
@@ -2066,7 +2082,9 @@ public class FileSecurity(
                     return false;
                 }
 
-                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
+                // Archiving does not lift what protects an end-to-end encrypted room while it is active:
+                // only membership gives access to it, so the administrator bypass is skipped here too.
+                if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {

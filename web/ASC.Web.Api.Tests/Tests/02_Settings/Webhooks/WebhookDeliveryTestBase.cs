@@ -43,7 +43,7 @@ public abstract class WebhookDeliveryTestBase(
 {
     private readonly AspireAppFixture _fixture = fixture;
 
-    // the receiver takes the deliveries, Web.Studio sends them, and Files publishes the file events
+    // Web.Studio sends the deliveries, and Files publishes the file events
     protected override bool NeedsLazyResources => true;
 
     /// <summary>
@@ -80,9 +80,9 @@ public abstract class WebhookDeliveryTestBase(
     /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/> and
     /// <paramref name="body"/> (<c>ok</c> by default).
     /// </summary>
-    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0, string? body = null)
+    protected static WebhookReceiver CreateReceiver(int status = 200, int delayMilliseconds = 0, string? body = null)
     {
-        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds, body);
+        return WebhookReceiver.Create(status, delayMilliseconds, body);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public abstract class WebhookDeliveryTestBase(
     /// </summary>
     protected async Task<int> CreateSubscriptionAsync()
     {
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
 
         return (await CreateSubscriptionAsync(receiver)).Id;
     }
@@ -231,29 +231,10 @@ public abstract class WebhookDeliveryTestBase(
     /// <paramref name="match"/>, and returns that payload, or null when none did by the deadline. The record
     /// holds the body as published until it is sent and as sent afterwards; the payload is the same in both.
     /// </summary>
-    protected async Task<JsonElement?> WaitForPayloadAsync(int configId, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    protected Task<DeliveredPayload<T>?> WaitForPayloadAsync<T>(int configId, Func<T, bool> match, int timeoutSeconds = 30)
+        where T : class
     {
-        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
-
-        while (true)
-        {
-            var payloads = (await GetLogAsync(configId)).Select(r => PayloadOf(r.RequestPayload));
-
-            foreach (var payload in payloads)
-            {
-                if (match(payload))
-                {
-                    return payload;
-                }
-            }
-
-            if (DateTime.UtcNow >= deadline)
-            {
-                return null;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        return WaitForDeliveredPayloadAsync(configId, null, match, timeoutSeconds);
     }
 
     /// <summary>
@@ -262,7 +243,14 @@ public abstract class WebhookDeliveryTestBase(
     /// payload, or null when none did by the deadline. Matching the name rather than the subscription's trigger
     /// bits lets a catch-all subscription stand in for the triggers the pinned SDK enum does not list yet (agent.*).
     /// </summary>
-    protected async Task<JsonElement?> WaitForEventPayloadAsync(int configId, string trigger, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    protected Task<DeliveredPayload<T>?> WaitForEventPayloadAsync<T>(int configId, string trigger, Func<T, bool> match, int timeoutSeconds = 30)
+        where T : class
+    {
+        return WaitForDeliveredPayloadAsync(configId, trigger, match, timeoutSeconds);
+    }
+
+    private async Task<DeliveredPayload<T>?> WaitForDeliveredPayloadAsync<T>(int configId, string? trigger, Func<T, bool> match, int timeoutSeconds)
+        where T : class
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
@@ -270,14 +258,11 @@ public abstract class WebhookDeliveryTestBase(
         {
             foreach (var record in await GetLogAsync(configId))
             {
-                using var document = JsonDocument.Parse(record.RequestPayload);
-                var root = document.RootElement;
+                var webhook = WebhookParser.Parse(record.RequestPayload);
 
-                if (root.GetProperty("event").GetProperty("trigger").GetString() == trigger
-                    && root.GetProperty("payload") is var payload
-                    && match(payload))
+                if ((trigger is null || webhook.Trigger == trigger) && webhook.PayloadAs<T>() is { } payload && match(payload))
                 {
-                    return payload.Clone();
+                    return new DeliveredPayload<T>(payload, PayloadOf(record.RequestPayload));
                 }
             }
 
@@ -310,8 +295,17 @@ public abstract class WebhookDeliveryTestBase(
         return list.Response.SingleOrDefault(w => w.Configs.Id == configId)?.Configs;
     }
 
-    /// <summary>The <c>payload</c> of a delivery body: the user, group or entry the event is about.</summary>
-    protected static JsonElement PayloadOf(string body)
+    /// <summary>
+    /// The number of the attempt a delivery body belongs to, from 0: <c>webhook.retryCount</c>, which is left out of
+    /// the first attempt.
+    /// </summary>
+    protected static int RetryCountOf(string body)
+    {
+        return WebhookParser.Parse(body).Webhook!.RetryCount ?? 0;
+    }
+
+    /// <summary>The <c>payload</c> of a delivery body as it went out.</summary>
+    private static JsonElement PayloadOf(string body)
     {
         using var document = JsonDocument.Parse(body);
 
@@ -514,11 +508,13 @@ public abstract class WebhookDeliveryTestBase(
         return firstName;
     }
 
-    /// <summary>The HMAC-SHA256 the portal signs a body with, as the hex string of the signature header.</summary>
-    protected static string Sign(string secretKey, string body)
-    {
-        return Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secretKey), Encoding.UTF8.GetBytes(body)));
-    }
 }
 
 public sealed record WebhookSubscription(int Id, string Name, string Uri, string SecretKey);
+
+/// <summary>
+/// A payload read from a delivery record through the webhook SDK. <paramref name="Json"/> is the same payload as it
+/// went out, for what a model cannot say: that a field no model declares is not there, and how a value looks on the
+/// wire.
+/// </summary>
+public sealed record DeliveredPayload<T>(T Model, JsonElement Json);

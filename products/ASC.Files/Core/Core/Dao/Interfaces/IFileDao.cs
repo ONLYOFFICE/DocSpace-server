@@ -527,6 +527,9 @@ public interface IFileDao<T>
     Task SetFileKey(T fileId, IEnumerable<FileKeyData> keys);
     Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);
 
+    /// <summary>The ones of <paramref name="fileIds"/> that hold a key for <paramref name="userId"/>.</summary>
+    IAsyncEnumerable<T> GetFileIdsWithKeyAsync(IEnumerable<T> fileIds, Guid userId);
+
     #endregion
 }
 public interface ICacheFileDao<T> : IFileDao<T>;

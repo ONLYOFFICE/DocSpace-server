@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Pakalpojumu sniedzēja izmaksas</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook ir atspējots. Iespējojiet to, pirms atkārtojat tā piegādes</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Notikums šobrīd tiek sūtīts. Mēģiniet vēlreiz pēc mēģinājuma pabeigšanas</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Piegāde tika reģistrēta agrākā webhook formātā, un to nevar nosūtīt vēlreiz</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook mērķis nav esošs lietotājs vai grupa</value>
+  </data>
 </root>

@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>Το μοντέλο AI του έργου ΤΝ {0} άλλαξε σε {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Η παράδοση του webhook επαναλήφθηκε: {0}</value>
+  </data>
 </root>

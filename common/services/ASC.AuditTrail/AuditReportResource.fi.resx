@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>Tekoälyprojektin {0} AI-malli vaihdettu: {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-toimitusta yritettiin uudelleen: {0}</value>
+  </data>
 </root>

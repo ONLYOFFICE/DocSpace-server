@@ -103,6 +103,14 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        // Somebody who enters through a link holds no key, so a link cannot give access to end-to-end
+        // encrypted content. Revoking a link that already exists stays possible.
+        if (aceWrappers.Exists(r => r.IsLink && r.Access != FileShare.None) &&
+            (room is { SettingsPrivate: true } || (room == null && await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, cachedFolderDao))))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
 
 
@@ -436,7 +444,7 @@ public class FileSharingAceHelper(
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
                     w.Email,
-                    entry.Title,
+                    entry is Folder<T> { SettingsPrivate: true } ? null : entry.Title,
                     shortenLink,
                     entry is IFolder { FolderType: FolderType.AiRoom },
                     culture,
@@ -448,7 +456,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.SettingsPrivate ? null : room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
@@ -536,6 +544,10 @@ public class FileSharingAceHelper(
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
+        }
 
         if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
         {
@@ -607,6 +619,10 @@ public class FileSharingAceHelper(
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
+        }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);

@@ -35,23 +35,22 @@ namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
-public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class McpServerUpdateTests(AspireAppFixture fixture) : PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task Update_Existing_PersistsNewConfig()
     {
-        await CreateMcpServerAsync("server-1", BuildMcpConfig("https://example.com/old"));
-        var newConfig = BuildMcpConfig("https://example.com/new");
+        await AddCustomServerAsync("server-1", "https://example.com/old");
 
-        using var response = await _ai.PutAsync(
-            $"{McpServersPath}/server-1",
-            new { config = newConfig },
+        var result = await _aiTools.AiToolsUpdateCustomServerAsync(
+            new AiToolsUpdateCustomServerRequest(name: "server-1", config: McpConfig("https://example.com/new")),
             TestContext.Current.CancellationToken);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
-        JsonEquals((await ReadMcpServerAsync("server-1")).Config, newConfig).Should().BeTrue();
+        result.Success.Should().BeTrue();
+        ConfigEquals(await GetCustomServerAsync("server-1"), "https://example.com/new").Should().BeTrue();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Update_WithEntityId_UpdatesOnlyScoped()
     {
@@ -60,8 +59,8 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var initialScoped = BuildMcpConfig("https://example.com/scoped-old");
         var newScoped = BuildMcpConfig("https://example.com/scoped-new");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
-        await CreateMcpServerAsync("server-1", initialScoped, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", initialScoped, roomId.ToString());
 
         using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
@@ -70,26 +69,31 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         response.IsSuccessStatusCode.Should().BeTrue();
 
-        JsonEquals((await ReadMcpServerAsync("server-1")).Config, globalConfig).Should().BeTrue();
-        JsonEquals((await ReadMcpServerAsync("server-1", roomId.ToString())).Config, newScoped).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1")).Config, globalConfig).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1", roomId.ToString())).Config, newScoped).Should().BeTrue();
     }
 
+    // An unregistered name is a soft failure: status 200 with success=false and the name field named, nothing created.
     [Fact]
-    public async Task Update_NonExistingName_Returns404()
+    public async Task Update_NonExistingName_ReturnsNameError()
     {
-        using var response = await _ai.PutAsync(
-            $"{McpServersPath}/missing",
-            new { config = BuildMcpConfig() },
+        var result = await _aiTools.AiToolsUpdateCustomServerAsync(
+            new AiToolsUpdateCustomServerRequest(name: "missing", config: McpConfig()),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.Success.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Field.Should().Be(AiErrorData.FieldEnum.Name);
+
+        (await GetCustomServerAsync("missing")).Should().BeNull();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Update_GlobalExists_ButScopedRequest_Returns404()
     {
         var roomId = await CreateRoomAsync();
-        await CreateMcpServerAsync("server-1");
+        await CreateMcpServerInternalAsync("server-1");
 
         using var response = await _ai.PutAsync(
             $"{McpServersPath}/server-1",
@@ -102,13 +106,15 @@ public class McpServerUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Update_NonExistentEntityId_Returns404()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1", "https://example.com/old");
 
-        using var response = await _ai.PutAsync(
-            $"{McpServersPath}/server-1",
-            new { config = BuildMcpConfig(), entityId = "999999999" },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsUpdateCustomServerAsync(
+                new AiToolsUpdateCustomServerRequest(name: "server-1", config: McpConfig("https://example.com/new"), entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+
+        ConfigEquals(await GetCustomServerAsync("server-1"), "https://example.com/old").Should().BeTrue();
     }
 }

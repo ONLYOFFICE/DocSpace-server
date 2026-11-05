@@ -37,6 +37,7 @@
 // Handled differences:
 //   • `#/definitions/X`      → `#/components/schemas/X`
 //   • strips `$schema` / `$id` / `$comment`
+//   • an integer numeric `const` → `type: integer` pinned by `minimum`/`maximum`
 // Everything else (properties, `$ref`, `enum`, `additionalProperties`,
 // `oneOf`/`anyOf`/`allOf`, `items`, `required`, `description`) passes through
 // unchanged.
@@ -55,12 +56,7 @@ function isObject(node: Json): node is JsonObject {
 // names, not schema keywords). Their child keys must be preserved verbatim
 // and only the values recursed — otherwise a property literally named `type`
 // / `const` / `$ref` would be misread as a schema keyword.
-const SCHEMA_MAP_KEYS = new Set([
-  "properties",
-  "patternProperties",
-  "definitions",
-  "$defs",
-]);
+const SCHEMA_MAP_KEYS = new Set(["properties", "patternProperties", "definitions", "$defs"]);
 
 function convertSchemaMap(node: Json): Json {
   if (!isObject(node)) {
@@ -143,9 +139,7 @@ function widen(a: Json, b: Json): Json {
         seen.add(v);
         return true;
       });
-      const merged: JsonObject = values.length === 1
-        ? { const: values[0] }
-        : { enum: values };
+      const merged: JsonObject = values.length === 1 ? { const: values[0] } : { enum: values };
       if (a["type"] === b["type"] && a["type"] !== undefined) {
         merged["type"] = a["type"];
       }
@@ -195,16 +189,15 @@ function flattenObjectUnion(node: JsonObject): JsonObject {
     for (const member of members as JsonObject[]) {
       const memberProps = member["properties"] as JsonObject;
       for (const [name, schema] of Object.entries(memberProps)) {
-        properties[name] = name in properties
-          ? widen(properties[name]!, schema)
-          : schema;
+        properties[name] = name in properties ? widen(properties[name]!, schema) : schema;
       }
       const memberRequired = Array.isArray(member["required"])
         ? (member["required"] as string[])
         : [];
-      required = required === undefined
-        ? memberRequired
-        : required.filter((r) => memberRequired.includes(r));
+      required =
+        required === undefined
+          ? memberRequired
+          : required.filter((r) => memberRequired.includes(r));
     }
 
     const out: JsonObject = { ...node, type: "object", properties };
@@ -240,9 +233,8 @@ function convertNode(node: Json): Json {
         // draft-only metadata with no OpenAPI equivalent.
         break;
       case "$ref":
-        out["$ref"] = typeof value === "string"
-          ? value.replace(DEFINITIONS_REF, COMPONENTS_REF)
-          : value;
+        out["$ref"] =
+          typeof value === "string" ? value.replace(DEFINITIONS_REF, COMPONENTS_REF) : value;
         break;
       case "type":
         // A type array, "null" included, is how openapi 3.1 spells nullability.
@@ -261,22 +253,56 @@ function convertNode(node: Json): Json {
   // field shows as a plain open object. A TYPED map (`{ type: "string" }`,
   // e.g. `headers`) or `additionalProperties: false` is meaningful and kept.
   if (
-    isObject(out["additionalProperties"])
-    && Object.keys(out["additionalProperties"] as JsonObject).length === 0
+    isObject(out["additionalProperties"]) &&
+    Object.keys(out["additionalProperties"] as JsonObject).length === 0
   ) {
     delete out["additionalProperties"];
   }
 
-  return flattenObjectUnion(normalizeNullableUnion(out));
+  return flattenObjectUnion(normalizeNullableUnion(integerConst(out)));
+}
+
+// A numeric literal type (`version: 1`) arrives as `{ type: "number", const: 1 }`.
+// The C# generator has no numeric constant: it turns the `const` into a string
+// enum and serializes `"1"`, which the service then rejects. An integer pinned
+// by `minimum`/`maximum` says the same thing in a form every generator maps to
+// an int. A union of integer literals (`version: 1 | 2`) arrives as
+// `{ type: "number", enum: [1, 2] }` and goes the same string way unless it is
+// typed `integer`, which every generator maps to an int enum. The nullable
+// form of either (`1 | 2 | null`) arrives as `type: ["number", "null"]` with
+// `null` among the enum values, and is retyped the same way.
+function integerConst(node: JsonObject): JsonObject {
+  const type = node["type"];
+  const nullable =
+    Array.isArray(type) && type.length === 2 && type.includes("number") && type.includes("null");
+  if (type !== "number" && !nullable) {
+    return node;
+  }
+  const values = node["enum"];
+  const numbers = Array.isArray(values) ? values.filter((value) => value !== null) : [];
+  if (
+    numbers.length > 0 &&
+    numbers.every((value) => typeof value === "number" && Number.isInteger(value))
+  ) {
+    return { ...node, type: nullable ? ["integer", "null"] : "integer" };
+  }
+  if (nullable) {
+    return node;
+  }
+  const value = node["const"];
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    return node;
+  }
+  const out: JsonObject = { ...node, type: "integer", minimum: value, maximum: value };
+  delete out["const"];
+  return out;
 }
 
 /**
  * Convert a `{ name: draft07Schema }` definitions map into an OpenAPI 3.0
  * `components.schemas` map.
  */
-export function toOpenApiSchemas(
-  definitions: Record<string, Json>,
-): Record<string, Json> {
+export function toOpenApiSchemas(definitions: Record<string, Json>): Record<string, Json> {
   const schemas: Record<string, Json> = {};
   for (const [name, schema] of Object.entries(definitions)) {
     schemas[name] = convertNode(schema);

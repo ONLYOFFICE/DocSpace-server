@@ -44,6 +44,7 @@ public class UploadToMyTests(
     : UploadTestBase(fixture)
 {
     [Fact]
+    [Trait("Bug", "81538")]
     public async Task UploadToMy_Owner_ReturnsUploadedFile()
     {
         var uploaded = await UploadToMyAsync("Autotest file content"u8.ToArray(), "autotest-my-upload.txt", "text/plain");

@@ -50,18 +50,18 @@ public class WebhookFileOperationPayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileDeleted);
 
         // Act
         await _filesClient.Authenticate(Owner);
         await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.deleted", p => IdIs(p, file.Id));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.deleted", p => IdIs(p, file.Id));
 
         payload.Should().NotBeNull("an immediate delete publishes file.deleted once it has been committed");
-        payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
-        payload.Value.GetProperty("parentId").GetInt32().Should().Be(roomId, "the payload is the file as it was before the delete");
+        payload!.Model.Title.Should().Be(file.Title);
+        payload.Model.ParentId.GetInt().Should().Be(roomId, "the payload is the file as it was before the delete");
     }
 
     [Fact]
@@ -70,16 +70,16 @@ public class WebhookFileOperationPayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileTrashed);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed);
 
         // Act
         await TrashAsync(file.Id);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.trashed", p => IdIs(p, file.Id));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.trashed", p => IdIs(p, file.Id));
 
         payload.Should().NotBeNull("a delete that is not immediate moves the file to the trash");
-        payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
+        payload!.Model.Title.Should().Be(file.Title);
     }
 
     [Fact]
@@ -89,17 +89,17 @@ public class WebhookFileOperationPayloadTests(
         var sourceRoomId = await CreateRoomAsync();
         var targetRoomId = await CreateRoomAsync();
         var file = await CreateFileAsync(sourceRoomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCopied);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCopied);
 
         // Act
         await RunBatchAsync(copy: true, file.Id, targetRoomId);
 
         // Assert: the payload is the new file, in the target room
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.copied", p => ParentIs(p, targetRoomId));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.copied", p => ParentIs(p, targetRoomId));
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
-        payload.Value.GetProperty("id").GetInt32().Should().NotBe(file.Id, "a copy is a file of its own");
+        payload!.Model.Title.Should().Be(file.Title);
+        payload.Model.Id.GetInt().Should().NotBe(file.Id, "a copy is a file of its own");
     }
 
     [Fact]
@@ -109,16 +109,16 @@ public class WebhookFileOperationPayloadTests(
         var sourceRoomId = await CreateRoomAsync();
         var targetRoomId = await CreateRoomAsync();
         var file = await CreateFileAsync(sourceRoomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileMoved);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileMoved);
 
         // Act
         await RunBatchAsync(copy: false, file.Id, targetRoomId);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.moved", p => ParentIs(p, targetRoomId));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.moved", p => ParentIs(p, targetRoomId));
 
         payload.Should().NotBeNull();
-        payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
+        payload!.Model.Title.Should().Be(file.Title);
     }
 
     [Fact]
@@ -127,18 +127,18 @@ public class WebhookFileOperationPayloadTests(
         // Arrange: a file in the trash. A catch-all subscription gets both events, told apart by event.trigger
         var roomId = await CreateRoomAsync();
         var file = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync());
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
         await TrashAsync(file.Id);
-        (await WaitForEventPayloadAsync(subscription.Id, "file.trashed", p => IdIs(p, file.Id))).Should().NotBeNull();
+        (await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.trashed", p => IdIs(p, file.Id))).Should().NotBeNull();
 
         // Act
         await RunBatchAsync(copy: false, file.Id, roomId);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.restored", p => ParentIs(p, roomId));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.restored", p => ParentIs(p, roomId));
 
         payload.Should().NotBeNull("moving a file out of the trash publishes file.restored, not file.moved");
-        payload!.Value.GetProperty("title").GetString().Should().Be(file.Title);
+        payload!.Model.Title.Should().Be(file.Title);
     }
 
     private async Task TrashAsync(int fileId)
@@ -170,13 +170,13 @@ public class WebhookFileOperationPayloadTests(
         }
     }
 
-    private static bool IdIs(JsonElement payload, int id)
+    private static bool IdIs(FilePayload payload, int id)
     {
-        return payload.TryGetProperty("id", out var value) && value.ValueKind == JsonValueKind.Number && value.GetInt32() == id;
+        return payload.Id?.ActualInstance is int value && value == id;
     }
 
-    private static bool ParentIs(JsonElement payload, int parentId)
+    private static bool ParentIs(FilePayload payload, int parentId)
     {
-        return payload.TryGetProperty("parentId", out var value) && value.ValueKind == JsonValueKind.Number && value.GetInt32() == parentId;
+        return payload.ParentId?.ActualInstance is int value && value == parentId;
     }
 }

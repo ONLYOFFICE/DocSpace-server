@@ -559,6 +559,11 @@ internal class SharePointFileDao(
     {
         return Task.FromResult<List<FileKeys>>([]);
     }
+
+    public IAsyncEnumerable<string> GetFileIdsWithKeyAsync(IEnumerable<string> fileIds, Guid userId)
+    {
+        return AsyncEnumerable.Empty<string>();
+    }
     
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {

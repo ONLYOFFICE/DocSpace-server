@@ -9,9 +9,16 @@
 - `aiAssignmentsGetAllAssignments` takes `expand`: `profile` answers the assigned profiles themselves instead of their IDs
 - Added `hasMetadataFields` to `EntryMetadataDto`
 - Added enum values: `RoomType.InstructionsRoom`, `KnowledgeRoom` and `AiProjectRoom`; `FolderType.InstructionsRoom`, `KnowledgeRoom`, `AiProjectRoom` and `AiHub`; `FilterType.InstructionsRooms`, `KnowledgeRooms` and `AiProjectRooms`; `SearchArea.AiHub`; `SubjectType.AiProject`; `MessageAction.RoomsLinkedToAiProject`, `RoomsUnlinkedFromAiProject` and `AiProjectProfileAssigned`
+- The chat-service answers that were declared as a bare `{ success }` are typed: `attachments/suggested-questions` returns `AiSuggestedQuestionsResult` (`status` and `questions` of `AiSuggestedQuestion`), `context/get-context-folders` and `context/get-knowledge-folders` a list of `AiContextFolder`, `context/get-room-skills` a list of `AiRoomSkill`, `context/get-room-skill` the skill text, and `config/tool-mode` (read and write) `AiToolPermissionModeWrapper`
+- Request fields the chat service already read: `AiActionArgs` gains `contextRooms` (`AiContextRoomRef`), `knowledgeRooms` (`AiKnowledgeRoomRef`), `folderContext` (`AiFolderContextRef`), `toolInstructions` and `entityId` (`knowledgeRoom` is deprecated); `contextEntityId` is added to `AiSendRequest`, `AiSendStreamBody`, `AiRegenerateStreamRequest` and `AiToolCallData`, `profileId` to `AiSendCustomRequest`, `messageId`, `keepCount` and `expectedLength` to `AiRegenerateStreamRequest`, and `format` (`Docx`, `Pdf` or `Md`) to `AiExportTextToDocxRequest`
+- `AiThreadMessageLike` describes what is stored: `status` carries `reason` and `error` (`AiChatErrorPayload`), and the content parts carry the tool-call fields (`toolName`, `toolCallId`, `args`, `result`) and the file fields (`mimeType`, `data`, `image`, `name`, `filename`)
 
 ### Changed
 
+- **Breaking:** `threads/append-user-message` answers `messageId` as the stored message (`AiThreadMessageLike`, its ID in `messageId.id`) - the service always sent it so, the SDK declared a string
+- **Breaking:** `assignments/get-all-assignments` answers one of two shapes: the map of action to profile ID, or with `expand=profile` `AiAssignmentsExpanded` (`assignments`, `profilesTotal`, `chatProfilesTotal`)
+- **Breaking:** `attachments/suggested-questions` takes the attachment ID itself as the body (a string) instead of an object
+- `AiPromptBundle.version` is an integer, so `prompts/import-bundle` accepts a bundle exported through the SDK (the version used to be sent as the string "1" and the import refused it)
 - The inline models of `FileEntryDto` lost their `Ai` prefix: `AiFileEntryDtoAllOfAvailableShareRights`, `AiFileEntryDtoAllOfSecurity` and `AiFileEntryDtoAllOfShareSettings` are now `FileEntryDtoAllOfAvailableShareRights`, `FileEntryDtoAllOfSecurity` and `FileEntryDtoAllOfShareSettings`
 - The API version is 4.1.0
 

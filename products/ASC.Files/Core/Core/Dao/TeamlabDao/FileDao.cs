@@ -2533,6 +2533,17 @@ internal class FileDao(
             .ToListAsync();
     }
 
+    public async IAsyncEnumerable<int> GetFileIdsWithKeyAsync(IEnumerable<int> fileIds, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in filesDbContext.FileIdsWithKeyAsync(tenantId, fileIds, userId))
+        {
+            yield return fileId;
+        }
+    }
+
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);

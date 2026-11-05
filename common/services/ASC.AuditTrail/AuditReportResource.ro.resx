@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>Modelul AI al proiectului AI {0} a fost schimbat în {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Livrarea webhook-ului a fost reîncercată: {0}</value>
+  </data>
 </root>

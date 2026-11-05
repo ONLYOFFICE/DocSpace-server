@@ -42,16 +42,13 @@ public class RemoveWebhookTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // every subscription it creates is probed at the webhook receiver
-    protected override bool NeedsLazyResources => true;
-
     [Fact]
     public async Task RemoveWebhook_Owner_RemovesItFromTheList()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
         var created = await _webhooksApi.CreateWebhookAsync(
-            await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient), TestContext.Current.CancellationToken);
+            WebhooksTestData.CreateAcceptedWebhookDto(), TestContext.Current.CancellationToken);
 
         // Act
         var removed = await _webhooksApi.RemoveWebhookAsync(created.Response.Id, TestContext.Current.CancellationToken);
@@ -73,7 +70,7 @@ public class RemoveWebhookTests(
 
         await _webApiClient.Authenticate(userB);
         var created = await _webhooksApi.CreateWebhookAsync(
-            await WebhooksTestData.CreateWebhookDtoAsync(_webhookReceiverClient), TestContext.Current.CancellationToken);
+            WebhooksTestData.CreateAcceptedWebhookDto(), TestContext.Current.CancellationToken);
 
         await _webApiClient.Authenticate(userA);
 

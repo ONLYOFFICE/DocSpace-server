@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Cena poskytovatele</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook je zakázán. Před opakováním jeho doručení jej povolte</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Událost se právě odesílá. Zkuste to znovu po dokončení pokusu</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Doručení bylo zaznamenáno ve starším formátu webhooku a nelze jej odeslat znovu</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cíl webhooku není existující uživatel ani skupina</value>
+  </data>
 </root>

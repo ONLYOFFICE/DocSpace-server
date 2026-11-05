@@ -306,6 +306,9 @@
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Customer wallet top up settings updated</value>
   </data>
+  <data name="FileKeysSet" xml:space="preserve">
+    <value>File keys issued for "{0}" to: {1}</value>
+  </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>
   </data>

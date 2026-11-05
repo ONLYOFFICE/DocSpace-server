@@ -35,201 +35,187 @@ namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/ToolPreferences")]
-public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : McpServerStorageTests.PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task UpsertAllowAlways_Global_McpServer_PersistsValue()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/allow-always",
-            new
-            {
-                allowAlways = new Dictionary<string, HashSet<string>>
-                {
-                    ["server-1"] = ["tool-a"]
-                }
-            },
+        var result = await _aiTools.AiToolsSetAllowAlwaysAsync(
+            new AiToolsSetAllowAlwaysRequest(serverType: "server-1", toolName: "tool-a", value: true),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().ContainKey("server-1");
-        stored["server-1"].AllowAlways.Should().BeEquivalentTo(["tool-a"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token("server-1", "tool-a")]);
+        (await _aiTools.AiToolsIsAllowAlwaysAsync("server-1", "tool-a", cancellationToken: TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
     public async Task UpsertAllowAlways_Global_SystemTools_PersistsValue()
     {
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/allow-always",
-            new
-            {
-                allowAlways = new Dictionary<string, HashSet<string>>
-                {
-                    [SystemToolsServerType] = ["preview"]
-                }
-            },
+        var result = await _aiTools.AiToolsSetAllowAlwaysAsync(
+            new AiToolsSetAllowAlwaysRequest(serverType: WebSearchServerType, toolName: "preview", value: true),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        var stored = await ReadToolPrefsAsync();
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token(WebSearchServerType, "preview")]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertAllowAlways_WithEntityId_McpServer_PersistsValue()
     {
         var roomId = await CreateRoomAsync();
-        await CreateMcpServerAsync("server-1", entityId: roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", entityId: roomId.ToString());
 
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 ["server-1"] = ["tool-a"]
             },
             roomId.ToString());
 
-        var stored = await ReadToolPrefsAsync(roomId.ToString());
+        var stored = await ReadToolPrefsInternalAsync(roomId.ToString());
         stored["server-1"].AllowAlways.Should().BeEquivalentTo(["tool-a"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertAllowAlways_WithEntityId_SystemTools_PersistsValue()
     {
         var roomId = await CreateRoomAsync();
 
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["preview", "download"]
             },
             roomId.ToString());
 
-        var stored = await ReadToolPrefsAsync(roomId.ToString());
+        var stored = await ReadToolPrefsInternalAsync(roomId.ToString());
         stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview", "download"]);
     }
 
+    // The public write toggles one tool per call; revoking one and granting others leaves exactly the new set.
     [Fact]
     public async Task UpsertAllowAlways_Twice_UpdatesValue()
     {
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["preview"]
-        });
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["download", "upload"]
-        });
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview");
 
-        var stored = await ReadToolPrefsAsync();
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["download", "upload"]);
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview", false);
+        await SetAllowAlwaysAsync(WebSearchServerType, "download");
+        await SetAllowAlwaysAsync(WebSearchServerType, "upload");
+
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token(WebSearchServerType, "download"), Token(WebSearchServerType, "upload")]);
+        (await _aiTools.AiToolsIsAllowAlwaysAsync(WebSearchServerType, "preview", cancellationToken: TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]
     public async Task UpsertAllowAlways_DoesNotOverwriteDisabled()
     {
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["search"]
-        });
+        await SetDisabledAsync(WebSearchServerType, "search");
 
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["preview"]
-        });
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview");
 
-        var stored = await ReadToolPrefsAsync();
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+        (await GetDisabledAsync()).Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["search"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token(WebSearchServerType, "preview")]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertAllowAlways_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["scoped-tool"]
             },
             roomId.ToString());
 
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertAllowAlwaysToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["global-tool"]
         });
 
-        var scoped = await ReadToolPrefsAsync(roomId.ToString());
+        var scoped = await ReadToolPrefsInternalAsync(roomId.ToString());
         scoped[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["scoped-tool"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertAllowAlways_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertAllowAlwaysToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["global-tool"]
         });
 
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["scoped-tool"]
             },
             roomId.ToString());
 
-        var global = await ReadToolPrefsAsync();
+        var global = await ReadToolPrefsInternalAsync();
         global[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["global-tool"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertAllowAlways_TwoDifferentEntities_AreIsolated()
     {
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
 
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["tool-a"]
             },
             firstRoomId.ToString());
-        await UpsertAllowAlwaysToolPrefsAsync(
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["tool-b"]
             },
             secondRoomId.ToString());
 
-        var first = await ReadToolPrefsAsync(firstRoomId.ToString());
-        var second = await ReadToolPrefsAsync(secondRoomId.ToString());
+        var first = await ReadToolPrefsInternalAsync(firstRoomId.ToString());
+        var second = await ReadToolPrefsInternalAsync(secondRoomId.ToString());
 
         first[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["tool-a"]);
         second[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["tool-b"]);
     }
 
+    // The public write takes one server type per call; granting under a second one must keep the first.
     [Fact]
-    public async Task UpsertAllowAlways_MultipleServerTypesInOneCall_AllPersisted()
+    public async Task UpsertAllowAlways_MultipleServerTypes_AllPersisted()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            ["server-1"] = ["mcp-tool"],
-            [SystemToolsServerType] = ["preview"]
-        });
+        await SetAllowAlwaysAsync("server-1", "mcp-tool");
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview");
 
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().HaveCount(2);
-        stored["server-1"].AllowAlways.Should().BeEquivalentTo(["mcp-tool"]);
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token("server-1", "mcp-tool"), Token(WebSearchServerType, "preview")]);
     }
 
+    // Revoking a tool that was never granted changes nothing.
+    [Fact]
+    public async Task UpsertAllowAlways_RevokeNotGranted_NoOp()
+    {
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview", false);
+
+        (await GetAllowAlwaysAsync()).Should().BeEmpty();
+    }
+
+    // Internal contract: an empty allow-always map has no public route (set-allow-always toggles one tool, and a
+    // revoke of an ungranted tool writes nothing).
     [Fact]
     public async Task UpsertAllowAlways_EmptyDictionary_Returns204_NoOp()
     {
@@ -240,19 +226,21 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var stored = await ReadToolPrefsAsync();
+        var stored = await ReadToolPrefsInternalAsync();
         stored.Should().BeEmpty();
     }
 
+    // Internal contract: an empty stored set per server type has no public route (set-allow-always toggles one tool);
+    // the chat service relies on this to clear a server type it drops from the map.
     [Fact]
     public async Task UpsertAllowAlways_EmptyToolSetForServerType_IsPersisted()
     {
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertAllowAlwaysToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = []
         });
 
-        var stored = await ReadToolPrefsAsync();
+        var stored = await ReadToolPrefsInternalAsync();
         stored.Should().ContainKey(SystemToolsServerType);
         stored[SystemToolsServerType].AllowAlways.Should().BeEmpty();
     }
@@ -260,18 +248,13 @@ public class ToolPreferenceUpsertAllowAlwaysTests(AspireAppFixture fixture) : Ba
     [Fact]
     public async Task UpsertAllowAlways_NonExistentEntityId_Returns404()
     {
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/allow-always",
-            new
-            {
-                allowAlways = new Dictionary<string, HashSet<string>>
-                {
-                    [SystemToolsServerType] = ["preview"]
-                },
-                entityId = "999999999"
-            },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsSetAllowAlwaysAsync(
+                new AiToolsSetAllowAlwaysRequest(serverType: WebSearchServerType, toolName: "preview", value: true, entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+
+        (await GetAllowAlwaysAsync()).Should().BeEmpty();
     }
 }

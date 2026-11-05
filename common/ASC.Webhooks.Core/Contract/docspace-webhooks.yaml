@@ -2704,7 +2704,8 @@ components:
             15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup,
             22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone,
             28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32
-            = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+            = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai,
+            38 = InstructionsRoom, 39 = KnowledgeRoom, 40 = AiProjectRoom, 41 = AiHub.
           example: 14
         parentRoomType:
           type: integer
@@ -2715,7 +2716,8 @@ components:
             15 = FillingFormsRoom, 16 = EditingRoom, 19 = CustomRoom, 20 = Archive, 21 = ThirdpartyBackup,
             22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone,
             28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom, 32
-            = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai.
+            = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37 = Ai,
+            38 = InstructionsRoom, 39 = KnowledgeRoom, 40 = AiProjectRoom, 41 = AiHub.
           example: 19
         originId:
           $ref: '#/components/schemas/EntryId'
@@ -2782,7 +2784,8 @@ components:
                 21 = ThirdpartyBackup, 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder,
                 27 = FormFillingFolderDone, 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30
                 = RoomTemplates, 31 = AiRoom, 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates,
-                36 = Forms, 37 = Ai.
+                36 = Forms, 37 = Ai, 38 = InstructionsRoom, 39 = KnowledgeRoom, 40 = AiProjectRoom, 41
+                = AiHub.
               example: 0
     RoomPayload:
       description: |-
@@ -2798,7 +2801,7 @@ components:
               description: >-
                 The kind of room, which decides what the room is for and which roles it offers. Values
                 of `RoomType`: 1 = FillingFormsRoom, 2 = EditingRoom, 5 = CustomRoom, 6 = PublicRoom,
-                8 = VirtualDataRoom, 9 = AiRoom.
+                8 = VirtualDataRoom, 9 = AiRoom, 10 = InstructionsRoom, 11 = KnowledgeRoom, 12 = AiProjectRoom.
               example: 2
             type:
               type: integer
@@ -2810,7 +2813,7 @@ components:
                 22 = PublicRoom, 25 = ReadyFormFolder, 26 = InProcessFormFolder, 27 = FormFillingFolderDone,
                 28 = FormFillingFolderInProgress, 29 = VirtualDataRoom, 30 = RoomTemplates, 31 = AiRoom,
                 32 = Knowledge, 33 = ChatOutputs, 34 = AiAgents, 35 = DefaultTemplates, 36 = Forms, 37
-                = Ai.
+                = Ai, 38 = InstructionsRoom, 39 = KnowledgeRoom, 40 = AiProjectRoom, 41 = AiHub.
               example: 16
             filesCount:
               type: integer

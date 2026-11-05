@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Цена на доставчика</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Уеб куката е деактивирана. Активирайте я, преди да повторите доставките ѝ</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Събитието се изпраща в момента. Опитайте отново, след като опитът приключи</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Доставката е записана в по-ранен формат на уеб кука и не може да бъде изпратена отново</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Целта на уеб куката не е съществуващ потребител или група</value>
+  </data>
 </root>

@@ -1338,4 +1338,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>AI моделът на ИИ проект {0} е променен на {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Доставката на уеб куката е повторена: {0}</value>
+  </data>
 </root>

@@ -88,7 +88,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_TwoRecordsOfTheSameEvent_QueuesOneRetry()
     {
         // Arrange: an event's first record and a manual retry of it, attempted, so nothing of the event is in flight
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -126,7 +126,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_DeliveryBeingSent_IsSkippedInSilence()
     {
         // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -145,7 +145,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_DisabledSubscription_IsSkippedInSilence()
     {
         // Arrange: a delivered event, then the subscription is switched off
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);

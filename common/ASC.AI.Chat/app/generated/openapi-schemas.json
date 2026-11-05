@@ -112,9 +112,44 @@
               "text": "Answer in British English."
             }
           ]
+        },
+        "toolInstructions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Usage notes of the MCP servers the caller holds the connection to, keyed by server type; folded into the system prompt as advisory text."
+        },
+        "contextRooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiContextRoomRef"
+          },
+          "description": "Instructions rooms connected to the chat as context, each with the skills the round may use."
+        },
+        "knowledgeRooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiKnowledgeRoomRef"
+          },
+          "description": "Knowledge rooms connected to the chat; the knowledge search tool of the round is limited to them. Each `id` has to be a DocSpace room id."
+        },
+        "knowledgeRoom": {
+          "$ref": "#/components/schemas/AiKnowledgeRoomRef",
+          "description": "A single knowledge room, as an older client sends it. Read only when `knowledgeRooms` is absent; send `knowledgeRooms` instead.",
+          "deprecated": true
+        },
+        "folderContext": {
+          "$ref": "#/components/schemas/AiFolderContextRef",
+          "description": "The folder connected to the chat as the round's context. It becomes the location the model is told the user works in, and the entry the round is attributed to."
+        },
+        "entityId": {
+          "type": "string",
+          "description": "The entry the round is attributed to. A hint, resolved against the caller's own access."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Per-request options of an AI round: extra tools, the depth of reasoning, a system prompt override and the rooms and folder connected as context."
     },
     "AiMCPItem": {
       "type": "object",
@@ -159,21 +194,21 @@
         },
         "serverType": {
           "type": "string",
-          "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine.",
+          "description": "The server or tool group the tool belongs to (an MCP server name or a host tool group ID): the key a disabled tool is stored under, so a tool sent in `actionArgs.tools` is still matched to its group.",
           "examples": [
             "docspace"
           ]
         },
         "requireApproval": {
           "type": "boolean",
-          "description": "Whether the consumer must show an approval dialog before this tool runs. Feeds the `autoAllow` flag on a `tool-call-pending` event together with the user's tool permission mode: `false` skips the dialog under the \"auto\" mode, the default (under \"ask\" only the persisted \"always-allow\" list does), `true` and `undefined` defer to that list; \"allow\" skips it for every tool. Host tools set it and default to `false`; MCP / custom-server tools leave it unset. Wire-serializable, so it survives a remote (server-side) engine.",
+          "description": "Whether the tool asks for approval before it runs, under the `auto` tool permission mode: `false` runs it without asking; `true` or absent leaves it to the always-allow list and the tool's MCP annotations (see `annotations`). Under `ask` every call asks and under `allow` none does, whatever this says. Host tools default to `false`; MCP and custom-server tools leave it unset.",
           "examples": [
             false
           ]
         },
         "annotations": {
           "$ref": "#/components/schemas/AiToolAnnotations",
-          "description": "The MCP tool annotations as the server declared them in `tools/list` (kept verbatim on the descriptor; never sent to the model). The approval flow reads two of them under the \"auto\" permission mode: `readOnlyHint: true` and `destructiveHint: false` run without the dialog, a destructive or unannotated tool keeps asking — see `resolveAutoAllow`. Wire-serializable."
+          "description": "The MCP tool annotations as the server declared them in `tools/list`; never sent to the model. Under the `auto` tool permission mode a tool that cannot destroy anything runs without approval - one annotated `readOnlyHint: true`, or one with an explicit `destructiveHint: false`; a destructive tool, and one with no annotations (the protocol's default is destructive), keeps asking."
         }
       },
       "required": [
@@ -205,6 +240,124 @@
       },
       "additionalProperties": false,
       "description": "MCP tool annotations (`Tool.annotations` in the protocol). All hints are advisory and optional; the protocol's defaults are `readOnlyHint: false` and `destructiveHint: true`, which is why an unannotated tool is treated as one that may destroy state."
+    },
+    "AiContextRoomRef": {
+      "type": "object",
+      "properties": {
+        "cloud": {
+          "type": "string",
+          "description": "The account the room belongs to; `docspace` for a room of this portal.",
+          "examples": [
+            "docspace"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "The room ID.",
+          "examples": [
+            "1234"
+          ]
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiRoomSkill"
+          },
+          "description": "The skills of the room the round may use, as `GET api/2.0/ai/context/get-room-skills` lists them.",
+          "examples": [
+            []
+          ]
+        }
+      },
+      "required": [
+        "cloud",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One Instructions room a round runs with as context: the account and room ID from `GET api/2.0/ai/context/get-context-folders`, plus the skills of the room the round may use."
+    },
+    "AiRoomSkill": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The skill's ID, as `GET api/2.0/ai/context/get-room-skill` takes it.",
+          "examples": [
+            "5678"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "The skill's name, from its frontmatter.",
+          "examples": [
+            "contract-review"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "What the skill is for, from its frontmatter; empty when it declares none.",
+          "examples": [
+            "How to review a supply contract."
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "additionalProperties": false,
+      "description": "A skill of an Instructions room: the frontmatter of one Markdown skill file. `name` and `description` are what the model is shown; the body is read through `GET api/2.0/ai/context/get-room-skill`."
+    },
+    "AiKnowledgeRoomRef": {
+      "type": "object",
+      "properties": {
+        "cloud": {
+          "type": "string",
+          "description": "The account the room belongs to; `docspace` for a room of this portal.",
+          "examples": [
+            "docspace"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "The room ID; anything that is not a positive integer is ignored.",
+          "examples": [
+            "1234"
+          ]
+        }
+      },
+      "required": [
+        "cloud",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One Knowledge room a round searches: the account and room ID from `GET api/2.0/ai/context/get-knowledge-folders`."
+    },
+    "AiFolderContextRef": {
+      "type": "object",
+      "properties": {
+        "cloud": {
+          "type": "string",
+          "description": "The account the folder belongs to; `docspace` for a folder of this portal.",
+          "examples": [
+            "docspace"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "The folder ID.",
+          "examples": [
+            "1234"
+          ]
+        }
+      },
+      "required": [
+        "cloud",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A folder connected as the round's context - any folder of the portal, not only a room - named by its account and ID."
     },
     "AiActionType": {
       "type": "string",
@@ -256,10 +409,129 @@
                 "type": "object",
                 "properties": {
                   "type": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Part kind: `text`, `reasoning`, `source`, `image`, `file`, `audio`, `data` or `tool-call`."
                   },
                   "text": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The text of a `text` or `reasoning` part."
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "Id of the part this one belongs to, on `text`, `reasoning`, `source` and `tool-call` parts. On a `reasoning` part the chat library keeps the provider's thinking signature here."
+                  },
+                  "sourceType": {
+                    "type": "string",
+                    "description": "A `source` part's source kind; always `url`."
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "A `source` part's id."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "A `source` part's URL."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "A `source` part's title."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "An `image` part's picture, as a URL (usually a `data:` URL). For an image the user attached, a JSON string `{ ref, title, kind: \"image\" }` naming the stored attachment instead."
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "description": "A `file` part's media type. For a file the user attached, a JSON string `{ ref, title, kind: \"file\", path, type }` naming the stored attachment instead - the chat library carries the reference here."
+                  },
+                  "data": {
+                    "type": "string",
+                    "description": "A `file` part's content; empty when the part references an attachment. (A `data` part would carry its payload here too, as any JSON value; neither the chat library nor this service writes one.)"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "description": "The file name of a `file` or `image` part."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "An `image` part's display name, or a `data` part's name."
+                  },
+                  "audio": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "string",
+                        "description": "The audio data, base64."
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "mp3",
+                          "wav"
+                        ],
+                        "description": "Audio format: `mp3` or `wav`."
+                      }
+                    },
+                    "required": [
+                      "data",
+                      "format"
+                    ],
+                    "additionalProperties": false,
+                    "description": "An `audio` part's sound."
+                  },
+                  "toolCallId": {
+                    "type": "string",
+                    "description": "A `tool-call` part's call id."
+                  },
+                  "toolName": {
+                    "type": "string",
+                    "description": "A `tool-call` part's tool name."
+                  },
+                  "args": {
+                    "type": "object",
+                    "description": "A `tool-call` part's arguments."
+                  },
+                  "argsText": {
+                    "type": "string",
+                    "description": "A `tool-call` part's arguments as the model streamed them, JSON text."
+                  },
+                  "result": {
+                    "description": "A `tool-call` part's result, once the tool has run."
+                  },
+                  "isError": {
+                    "type": "boolean",
+                    "description": "Whether a `tool-call` part's result is an error."
+                  },
+                  "artifact": {
+                    "description": "Extra data of a `tool-call` part. While the tool runs, the chat library keeps its progress here as `{ progress: [{ progress, total?, message? }] }`."
+                  },
+                  "interrupt": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "Interrupt kind; always `human`."
+                      },
+                      "payload": {
+                        "description": "What the tool asks the human for."
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "description": "A `tool-call` part's pending request for human input."
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Messages of a sub-agent run inside a `tool-call` part."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Provider-specific data of a `tool-call` part - for a Gemini call, `{ thoughtSignature }`, which has to be sent back with the call."
                   }
                 },
                 "required": [
@@ -268,7 +540,7 @@
               }
             }
           ],
-          "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type.",
+          "description": "Message content: either plain text or a list of typed content parts. One part schema lists every field of every part kind of the `@assistant-ui/react` 0.11 `ThreadMessageLike` union (text, reasoning, source, image, file, audio, data, tool-call) plus what the chat library adds itself (`name` on an image part, `metadata` on a tool-call part), so a strict client can read any stored part; each field says which kinds carry it.",
           "examples": [
             "Summarise the attached contract."
           ]
@@ -284,7 +556,16 @@
           "type": "object",
           "properties": {
             "type": {
-              "type": "string"
+              "type": "string",
+              "description": "`running`, `requires-action`, `complete` or `incomplete`."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why the message is in that state: `tool-calls` or `interrupt` for `requires-action`; `stop` or `unknown` for `complete`; `cancelled`, `tool-calls`, `length`, `content-filter`, `other` or `error` for `incomplete`. An `incomplete` message the chat stored carries `cancelled` (the round was stopped) or `error`."
+            },
+            "error": {
+              "$ref": "#/components/schemas/AiChatErrorPayload",
+              "description": "What failed, on an `incomplete` message whose `reason` is `error`."
             }
           },
           "required": [
@@ -299,7 +580,7 @@
         },
         "metadata": {
           "type": "object",
-          "description": "Arbitrary per-message metadata.",
+          "description": "Per-message metadata. The chat library writes `custom` (with the round's `contextEntityId`) and `steps` (token usage per provider request); `unstable_state`, `unstable_annotations`, `unstable_data` and `submittedFeedback` may appear as well. Read it as an open map.",
           "examples": [
             {}
           ]
@@ -309,7 +590,7 @@
           "items": {
             "type": "object"
           },
-          "description": "Attachments linked to the message.",
+          "description": "Attachments linked to the message (`id`, `type`, `name`, `contentType`, `status`, `content`). Read them as open objects.",
           "examples": [
             [
               "55555555-5555-5555-5555-555555555555"
@@ -323,6 +604,34 @@
       ],
       "additionalProperties": false,
       "description": "A single chat message as it travels on the wire."
+    },
+    "AiChatErrorPayload": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Stable machine-readable code. One of a canonical set — `\"auth\"`, `\"model_not_found\"`, `\"rate_limit\"`, `\"timeout\"`, `\"network\"`, `\"bad_request\"`, `\"server\"`, `\"not_found\"`, `\"insufficient_funds\"`, `\"aborted\"`, `\"unknown\"` — or a provider-specific string when the SDK supplies one verbatim.",
+          "examples": [
+            "rate_limit"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable, end-user-safe message.",
+          "examples": [
+            "The provider is rate limiting requests."
+          ]
+        },
+        "cause": {
+          "$ref": "#/components/schemas/AiChatErrorPayload",
+          "description": "Optional nested cause, normalized through the same helper."
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "description": "Why a round failed or stopped early, as the message status and the stream report it: a stable `code`, a message safe to show the user, and the cause when there is one."
     },
     "AiSendStreamBody": {
       "type": "object",
@@ -346,7 +655,7 @@
         },
         "actionArgs": {
           "$ref": "#/components/schemas/AiActionArgs",
-          "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+          "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context.",
           "examples": [
             {
               "isReasoning": false
@@ -359,6 +668,10 @@
           "examples": [
             "1234"
           ]
+        },
+        "contextEntityId": {
+          "type": "string",
+          "description": "The folder or room the user is in. Tools run against it and the model is told it is the user's location; falls back to `entityId` when omitted."
         },
         "profileId": {
           "type": "string",
@@ -375,7 +688,7 @@
       "description": "Shared body of the two streaming send endpoints (`sendWithStream` and its OpenAI-framed twin) — the `Chat` action is implied, so there is no `actionType`."
     },
     "AiChatEvent": {
-      "description": "Discriminated event emitted by the streaming methods of `AIEngine`. The engine never invokes user-supplied middleware or callbacks directly — every observable side-effect is encoded as a `ChatEvent` so the same stream can be replayed over SSE, WebSocket, or in-process.\n\nPause point: `tool-call-pending` is the only stop. The UI must execute the tool itself (consulting `autoAllow` to decide between the silent path and the approve dialog) and resume via `AIEngine.approveToolCall` or `AIEngine.denyToolCall`.\n\nOther variants are pure data:\n\n- `message-start` / `message-delta` / `message-end` — assistant reply lifecycle.\n- `message-incomplete` — the provider returned an error or incomplete status.\n- `thread-title` — auto-generated title ready for a new thread.",
+      "description": "One event of a chat stream, told apart by `type`: `message-start`, `message-delta` and `message-end` frame the assistant reply, `message-incomplete` reports a provider error or an unfinished answer, `thread-title` carries a generated title, and `tool-call-pending` pauses the round until the call is approved (`POST api/2.0/ai/ai/approve-tool-call`) or denied (`POST api/2.0/ai/ai/deny-tool-call`).",
       "type": "object",
       "properties": {
         "type": {
@@ -418,11 +731,11 @@
         },
         "autoAllow": {
           "type": "boolean",
-          "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" never; under \"auto\" a tool in the persisted \"always-allow\" list or one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+          "description": "The tool runs without asking the user, as the user's tool permission mode decides: under `ask` never - the always-allow list, `requireApproval` and the annotations are all ignored; under `auto` a tool on the always-allow list, one with `requireApproval: false`, or one annotated `readOnlyHint: true` or `destructiveHint: false`; under `allow` every tool."
         },
         "serverExecuted": {
           "type": "boolean",
-          "description": "Set when the tool is served by a server-side system source: the consumer must NOT execute it locally — only show the approval UI (unless `autoAllow`) and resume via `approveToolCall` (no `result` needed) / `denyToolCall`. The engine runs it in-engine."
+          "description": "The tool is run by the service itself: the client must not run it, only ask for approval (unless `autoAllow`) and approve or deny the call - an approval needs no `result`."
         },
         "title": {
           "type": "string",
@@ -584,7 +897,7 @@
         "content_filter",
         null
       ],
-      "description": "OpenAI Chat Completions streaming shapes.\n\n `toOpenAIChatCompletionStream` maps the engine's transport-agnostic `ChatEvent` stream onto these chunks so a host can expose an OpenAI-compatible `POST /v1/chat/completions` (`stream: true`) endpoint backed by the same chat pipeline as the in-app widget. Only the subset of fields the engine can populate is emitted; everything else an OpenAI client tolerates as absent."
+      "description": "Why a choice of an OpenAI-compatible streamed completion ended, as the OpenAI Chat Completions format spells it; null while the choice is still streaming."
     },
     "AiOpenAIStreamError": {
       "type": "object",
@@ -653,7 +966,7 @@
         },
         "message": {
           "$ref": "#/components/schemas/AiThreadMessageLike",
-          "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608).",
+          "description": "A copy of the assistant message as it was when the tool call surfaced. Optional and ignored: the round resumes from the stored message. Leave it out - a long conversation's copy can push the body past the size limit.",
           "examples": [
             {
               "role": "assistant",
@@ -663,7 +976,7 @@
         },
         "actionArgs": {
           "$ref": "#/components/schemas/AiActionArgs",
-          "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+          "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context.",
           "examples": [
             {
               "isReasoning": false
@@ -676,6 +989,10 @@
           "examples": [
             "1234"
           ]
+        },
+        "contextEntityId": {
+          "type": "string",
+          "description": "The folder or room the user is in. Tools run against it and the model is told it is the user's location; falls back to `entityId` when omitted."
         },
         "profileId": {
           "type": "string",
@@ -731,7 +1048,7 @@
         },
         "providerType": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+          "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
           "examples": [
             "openai"
           ]
@@ -785,7 +1102,7 @@
         },
         "reasoningSupport": {
           "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+          "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
         },
         "capabilities": {
           "type": "number",
@@ -817,7 +1134,7 @@
         },
         "useProxy": {
           "type": "boolean",
-          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+          "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
           "examples": [
             false
           ]
@@ -872,7 +1189,7 @@
         "onlyoffice",
         "external"
       ],
-      "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
+      "description": "The built-in AI provider types. `external` has no transport of its own: the requests go through a transport the embedding application supplies and are parsed with the provider named in `basedOn`."
     },
     "AiReasoningSupport": {
       "type": "object",
@@ -916,7 +1233,7 @@
       "description": "A `ReasoningLevel` above off — a depth the model can think at."
     },
     "AiAssignmentMutationResult": {
-      "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
+      "description": "The outcome of an assign or unassign: a success, or an error naming the field that was refused.",
       "type": "object",
       "properties": {
         "success": {
@@ -975,7 +1292,7 @@
       "description": "Why a field-scoped operation was refused, independent of the wording of `message`, so a host can pick an HTTP status without parsing text:\n\n- `\"required\"` — the field is empty.\n- `\"conflict\"` — the value collides with an existing entry.\n- `\"not_found\"` — the referenced entry does not exist.\n- `\"invalid\"` — the value has the wrong shape or an unsupported value."
     },
     "AiBulkAssignmentResult": {
-      "description": "Outcome of `AssignmentsEngine.bulkAssign`. Either every entry persisted, or no entries persisted and a per-key error report. The engine validates first and writes second so a single bad entry never leaves the assignment table in a half-written state.",
+      "description": "The outcome of a bulk assign: either every entry was stored, or none was and the errors are reported per action. Every entry is validated before anything is written, so one bad entry never leaves the assignments half-written.",
       "type": "object",
       "properties": {
         "success": {
@@ -1013,6 +1330,40 @@
         "success"
       ]
     },
+    "AiAssignmentsMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Every action-to-profile binding of the scope: the action type is the key, the bound profile's id the value. An action with no binding is absent."
+    },
+    "AiAssignmentsExpanded": {
+      "type": "object",
+      "properties": {
+        "assignments": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/components/schemas/AiProfile"
+          },
+          "description": "The bound profiles keyed by action type, as `GET api/2.0/ai/profiles/list` describes them. A binding whose profile no longer exists is left out."
+        },
+        "profilesTotal": {
+          "type": "integer",
+          "description": "How many profiles the portal has."
+        },
+        "chatProfilesTotal": {
+          "type": "integer",
+          "description": "How many of those profiles can chat; a profile without declared capabilities counts as one that can."
+        }
+      },
+      "required": [
+        "assignments",
+        "profilesTotal",
+        "chatProfilesTotal"
+      ],
+      "additionalProperties": false,
+      "description": "The bindings with `expand=profile`: the bound profiles themselves, plus how many profiles the portal has, so a chat can start on this one read."
+    },
     "AiAttachment": {
       "type": "object",
       "properties": {
@@ -1040,7 +1391,7 @@
             "user",
             "tool"
           ],
-          "description": "Origin of the attachment. `\"user\"` — uploaded by the user in the composer (the default when unset, for backward compatibility). `\"tool\"` — produced by a tool call (e.g. `generate_image`). Lets the integrator's adapter route or apply policies (separate bucket, quotas, TTL, CDN) per source.",
+          "description": "Where the attachment came from: `user` - attached by the user (also when unset); `tool` - produced by a tool call (for example `generate_image`).",
           "examples": [
             "user"
           ]
@@ -1093,7 +1444,7 @@
         },
         "entityId": {
           "type": "string",
-          "description": "Opaque scope token (entity / \"room\") the attachment was created in. Drafts carry it so an entity switch keeps in-flight composer state isolated; once linked to a message the field is redundant with the thread's own entity binding.",
+          "description": "The room or folder the attachment was created in, as an opaque token; once the attachment is bound to a message it repeats the thread's own scope.",
           "examples": [
             "1234"
           ]
@@ -1145,6 +1496,111 @@
       "additionalProperties": false,
       "description": "Persistent record for a single attachment (file or image) referenced from a user message. Files carry extracted text in `content`; images carry base64 data in `base64`. Metadata (`title`, `path`, `type`) is always present for display purposes regardless of whether the heavy payload is loaded."
     },
+    "AiSuggestedQuestion": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question as it is shown to the user.",
+          "examples": [
+            "Which region had the most responses?"
+          ]
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The prompt sent to the chat when the user picks the question.",
+          "examples": [
+            "Group the submissions by region and show the count for each."
+          ]
+        }
+      },
+      "required": [
+        "question",
+        "prompt"
+      ],
+      "additionalProperties": false,
+      "description": "A starter question proposed for an attached form."
+    },
+    "AiSuggestedQuestionsResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "pending",
+            "unavailable"
+          ],
+          "description": "`ready` - the questions are there; `pending` - they are being generated and arrive over the socket, ask again later; `unavailable` - the attachment is not a form that can have any."
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiSuggestedQuestion"
+          },
+          "description": "The questions; empty unless `status` is `ready`."
+        }
+      },
+      "required": [
+        "status",
+        "questions"
+      ],
+      "additionalProperties": false,
+      "description": "The starter questions of an attached form, and whether they are ready."
+    },
+    "AiContextFolder": {
+      "type": "object",
+      "properties": {
+        "cloud": {
+          "type": "string",
+          "description": "The account the rooms belong to; `docspace` for this portal.",
+          "examples": [
+            "docspace"
+          ]
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiContextRoom"
+          },
+          "description": "The rooms of that account the caller can connect.",
+          "examples": [
+            []
+          ]
+        }
+      },
+      "required": [
+        "cloud",
+        "rooms"
+      ],
+      "additionalProperties": false,
+      "description": "The rooms of one account the caller can connect as context, grouped under the account."
+    },
+    "AiContextRoom": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The room ID.",
+          "examples": [
+            "1234"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "The room title.",
+          "examples": [
+            "Contract templates"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "A room the caller can connect to a chat as context."
+    },
     "AiCreateProfileInput": {
       "type": "object",
       "properties": {
@@ -1157,7 +1613,7 @@
         },
         "providerType": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+          "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`.",
           "examples": [
             "openai"
           ]
@@ -1211,7 +1667,7 @@
         },
         "reasoningSupport": {
           "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+          "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
         },
         "capabilities": {
           "type": "number",
@@ -1243,7 +1699,7 @@
         },
         "useProxy": {
           "type": "boolean",
-          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+          "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured.",
           "examples": [
             false
           ]
@@ -1256,7 +1712,7 @@
         "modelId"
       ],
       "additionalProperties": false,
-      "description": "Input for creating a new profile — the same shape as `Profile` without the engine-generated fields (`id`, `createdAt`)."
+      "description": "Input for creating a new profile: the shape of a profile without the fields the service fills in (`id`, `createdAt`)."
     },
     "AiProfileMutationResult": {
       "description": "Outcome of `create` / `update` — either a success carrying the persisted profile, or a failure with a field-level error description from the name check or the provider credential check.",
@@ -1315,7 +1771,7 @@
         },
         "reasoningSupport": {
           "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "What the model can do with extended thinking, when the provider's catalogue says so (OpenRouter and the ONLYOFFICE route report a per-model `reasoning` object). Copied onto the profile at save time; absent, the widget falls back to the provider's id-based table."
+          "description": "What the model can do with extended thinking, when the provider's catalogue reports it (OpenRouter and the ONLYOFFICE route do). Copied onto the profile when it is saved; when absent, the abilities are taken from the model ID."
         },
         "capabilities": {
           "type": "number",
@@ -1454,7 +1910,7 @@
         "text"
       ],
       "additionalProperties": false,
-      "description": "Input for creating a prompt — the engine generates `id`/`createdAt`/`updatedAt`."
+      "description": "Input for creating a prompt; the service fills in `id`, `createdAt` and `updatedAt`."
     },
     "AiPromptMutationResult": {
       "description": "Outcome of `create` / `update` / `move` on a prompt — either the persisted prompt or a field-scoped error.",
@@ -1605,8 +2061,9 @@
       "type": "object",
       "properties": {
         "version": {
-          "type": "number",
-          "const": 1,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1,
           "description": "The bundle format version, so an import can migrate an older export.",
           "examples": [
             1
@@ -1647,10 +2104,10 @@
         "replace",
         "merge"
       ],
-      "description": "Mode passed to `PromptsEngine.importBundle`."
+      "description": "How an imported prompt bundle meets the library: `merge` adds to it, `replace` replaces it."
     },
     "AiImportResult": {
-      "description": "Outcome of `PromptsEngine.importBundle`. Either every entry persisted with counts, or no entries persisted plus a per-entry error report.",
+      "description": "The outcome of a prompt bundle import: either every entry was stored, with counts, or none was and the errors are reported per entry.",
       "type": "object",
       "properties": {
         "success": {
@@ -1733,7 +2190,7 @@
         "error"
       ],
       "additionalProperties": false,
-      "description": "Per-entry error reported by `PromptsEngine.importBundle`."
+      "description": "One refused entry of a prompt bundle import."
     },
     "AiThread": {
       "type": "object",
@@ -1830,7 +2287,7 @@
         },
         "title": {
           "type": "string",
-          "description": "Empty string for existing threads — the engine doesn't re-fetch."
+          "description": "The title generated for a thread this call created; an empty string when it opened an existing thread."
         },
         "priorMessages": {
           "type": "array",
@@ -1846,7 +2303,7 @@
         "priorMessages"
       ],
       "additionalProperties": false,
-      "description": "Resolved thread state returned by `ThreadsEngine.openOrCreate`."
+      "description": "The thread that was opened or created, with its stored messages."
     },
     "AiMcpServerConfig": {
       "type": "object",
@@ -1873,7 +2330,7 @@
       ]
     },
     "AiToolsBulkResult": {
-      "description": "Outcome of `ToolsEngine.replaceAllCustomServers` — either every entry persisted, or no entries persisted plus a per-key error report.",
+      "description": "The outcome of replacing the custom MCP servers: either every entry was stored, or none was and the errors are reported per server.",
       "type": "object",
       "properties": {
         "success": {
@@ -1960,7 +2417,7 @@
       "description": "Web-search provider configuration. Credentials and provider selection for the built-in web-search tool group."
     },
     "AiWebSearchMutationResult": {
-      "description": "Outcome of `WebSearchEngine.configure` — either the persisted config or a field-scoped error suitable for the settings form.",
+      "description": "The outcome of storing a web-search configuration: the stored configuration, or an error naming the field that was refused.",
       "type": "object",
       "properties": {
         "success": {
@@ -2153,6 +2610,97 @@
       "additionalProperties": false,
       "description": "The project's own model; `null` when the project runs on the portal default."
     },
+    "AiToolPermissionModeWrapper": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "description": "The ToolPermissionModeDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiToolPermissionModeDto"
+        },
+        "count": {
+          "type": "integer",
+          "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+          "format": "int32"
+        },
+        "total": {
+          "type": "integer",
+          "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+          "format": "int64"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string",
+                "description": "URL of the link"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action associated with the link"
+              }
+            }
+          },
+          "description": "List of links related to the response"
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code of the response",
+          "format": "int32"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code of the response (duplicate of status)",
+          "format": "int32"
+        }
+      },
+      "description": "The successful API response containing the ToolPermissionModeDto object."
+    },
+    "AiToolPermissionModeDto": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+          "$ref": "#/components/schemas/AiToolPermissionMode"
+        }
+      },
+      "description": "The current user's tool permission mode."
+    },
+    "AiToolPermissionMode": {
+      "oneOf": [
+        {
+          "examples": [
+            "Ask"
+          ],
+          "enum": [
+            "Ask",
+            "Auto",
+            "Allow"
+          ],
+          "type": "string",
+          "description": "[Ask - Ask, Auto - Auto, Allow - Allow]"
+        },
+        {
+          "examples": [
+            0
+          ],
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "type": "integer",
+          "description": "[0 - Ask, 1 - Auto, 2 - Allow]",
+          "x-enum-varnames": [
+            "Ask",
+            "Auto",
+            "Allow"
+          ]
+        }
+      ],
+      "x-enum-type": "integer"
+    },
     "AiUserSettingsWrapper": {
       "type": "object",
       "properties": {
@@ -2216,40 +2764,6 @@
         }
       },
       "description": "The per-user AI settings."
-    },
-    "AiToolPermissionMode": {
-      "oneOf": [
-        {
-          "examples": [
-            "Ask"
-          ],
-          "enum": [
-            "Ask",
-            "Auto",
-            "Allow"
-          ],
-          "type": "string",
-          "description": "[Ask - Ask, Auto - Auto, Allow - Allow]"
-        },
-        {
-          "examples": [
-            0
-          ],
-          "enum": [
-            0,
-            1,
-            2
-          ],
-          "type": "integer",
-          "description": "[0 - Ask, 1 - Auto, 2 - Allow]",
-          "x-enum-varnames": [
-            "Ask",
-            "Auto",
-            "Allow"
-          ]
-        }
-      ],
-      "x-enum-type": "integer"
     },
     "AiVectorizationSettingsWrapper": {
       "type": "object",
@@ -2477,11 +2991,15 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",
             "description": "Optional entity (room) scope for profile resolution."
+          },
+          "contextEntityId": {
+            "type": "string",
+            "description": "The folder or room the user is in. Tools run against it and the model is told it is the user's location; falls back to `entityId` when omitted."
           }
         },
         "required": [
@@ -2511,7 +3029,11 @@
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Profile to run this call on. When omitted, or when no profile has this id, the `Default` assignment is used."
           }
         },
         "required": [
@@ -2550,13 +3072,29 @@
             "type": "string",
             "description": "Target thread (must already exist)."
           },
+          "messageId": {
+            "type": "string",
+            "description": "The user message to re-roll from: everything stored after it is deleted. When omitted, or no longer in the thread, the last user message is used."
+          },
+          "keepCount": {
+            "type": "integer",
+            "description": "How many messages from the start of the thread to keep, used when `messageId` does not resolve. The message at `keepCount - 1` has to be a user message; otherwise the value is ignored."
+          },
+          "expectedLength": {
+            "type": "integer",
+            "description": "The thread length the caller saw when it computed `keepCount`. When it differs from the stored length, `keepCount` is discarded and the last user message is used instead."
+          },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",
             "description": "Optional entity (room) scope for profile resolution."
+          },
+          "contextEntityId": {
+            "type": "string",
+            "description": "The folder or room the user is in. Tools run against it and the model is told it is the user's location; falls back to `entityId` when omitted."
           },
           "profileId": {
             "type": "string",
@@ -2598,15 +3136,19 @@
           },
           "message": {
             "$ref": "#/components/schemas/AiThreadMessageLike",
-            "description": "Snapshot of the assistant message at the time the tool call surfaced. Optional and ignored: the engine resumes from the stored message, and the copy inflated the body past the parser limit (Bug 84608)."
+            "description": "A copy of the assistant message as it was when the tool call surfaced. Optional and ignored: the round resumes from the stored message. Leave it out - a long conversation's copy can push the body past the size limit."
           },
           "actionArgs": {
             "$ref": "#/components/schemas/AiActionArgs",
-            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+            "description": "Per-request options of the round: extra tools, reasoning, a prompt override and the connected context."
           },
           "entityId": {
             "type": "string",
             "description": "Optional entity (room) scope for profile resolution."
+          },
+          "contextEntityId": {
+            "type": "string",
+            "description": "The folder or room the user is in. Tools run against it and the model is told it is the user's location; falls back to `entityId` when omitted."
           },
           "profileId": {
             "type": "string",
@@ -2698,10 +3240,14 @@
     },
     "aiAssignmentsGetAllAssignments": {
       "response": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        }
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AiAssignmentsMap"
+          },
+          {
+            "$ref": "#/components/schemas/AiAssignmentsExpanded"
+          }
+        ]
       }
     },
     "aiAssignmentsCascadeProfileDelete": {
@@ -2941,6 +3487,14 @@
         }
       }
     },
+    "aiAttachmentsGetSuggestedQuestions": {
+      "request": {
+        "type": "string"
+      },
+      "response": {
+        "$ref": "#/components/schemas/AiSuggestedQuestionsResult"
+      }
+    },
     "aiAttachmentsLinkToMessage": {
       "request": {
         "type": "object",
@@ -2967,6 +3521,36 @@
           "threadId"
         ],
         "additionalProperties": false
+      }
+    },
+    "aiContextGetContextFolders": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiContextFolder"
+        }
+      }
+    },
+    "aiContextGetKnowledgeFolders": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiContextFolder"
+        }
+      }
+    },
+    "aiContextGetRoomSkills": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiRoomSkill"
+        }
+      }
+    },
+    "aiContextGetRoomSkill": {
+      "response": {
+        "type": "string",
+        "description": "The skill's whole Markdown file."
       }
     },
     "aiPreferencesGetDeepMode": {
@@ -3144,7 +3728,7 @@
           },
           "providerType": {
             "$ref": "#/components/schemas/AiProviderType",
-            "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+            "description": "The provider type of the profile. `external` sends every request through a transport the embedding application supplies while parsing the answers with the provider named in `basedOn`."
           },
           "basedOn": {
             "$ref": "#/components/schemas/AiBuiltinProviderType",
@@ -3164,7 +3748,7 @@
           },
           "reasoningSupport": {
             "$ref": "#/components/schemas/AiReasoningSupport",
-            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+            "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
           },
           "capabilities": {
             "type": "number",
@@ -3184,7 +3768,7 @@
           },
           "useProxy": {
             "type": "boolean",
-            "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+            "description": "Whether the chat client sends this profile's provider requests through the portal's proxy instead of directly. Has no effect when no proxy is configured."
           },
           "createdAt": {
             "type": "number",
@@ -3514,7 +4098,17 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiThreadMessageLike"
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "The stored message itself - with its storage-assigned `id` and `createdAt` - despite the field name, which is kept for the clients that already read it. The message ID is `messageId.id`."
+          }
+        },
+        "required": [
+          "messageId"
+        ],
+        "additionalProperties": false
       }
     },
     "aiThreadsTouch": {
@@ -3967,6 +4561,15 @@
               "number"
             ],
             "description": "Target folder id (int or string)."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "Docx",
+              "Pdf",
+              "Md"
+            ],
+            "description": "Output format: `Docx` (the default when omitted), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it."
           }
         },
         "required": [
@@ -4356,6 +4959,16 @@
     "aiSettingsSetUser": {
       "response": {
         "$ref": "#/components/schemas/AiUserSettingsWrapper"
+      }
+    },
+    "aiSettingsGetToolMode": {
+      "response": {
+        "$ref": "#/components/schemas/AiToolPermissionModeWrapper"
+      }
+    },
+    "aiSettingsSetToolMode": {
+      "response": {
+        "$ref": "#/components/schemas/AiToolPermissionModeWrapper"
       }
     }
   }
