@@ -114,9 +114,11 @@ public static class Constants
     public const string PaymentStubAccountingPath = "/accounting/api";
     public const string PaymentStubDocsCloudPath = "/docscloud/api/";
 
-    // What the services of that profile are told about the payment services, whatever buildtools/config says. A
-    // portal's payment key is the region followed by the tenant id, which is how the stub tells the portals apart;
-    // a portal billing knows nothing about falls back to the free startup quota rather than becoming unpaid.
+    // What the services of that profile are told about the payment services in place of what buildtools/config says:
+    // the addresses, key, secret, region, default quota and the first accounting currency. A portal's payment key is
+    // the region followed by the tenant id, which is how the stub tells the portals apart; a portal billing knows
+    // nothing about falls back to the free startup quota rather than becoming unpaid. The other payment settings
+    // (core:payment:test and :delay, core:accounting:topupperiod, the limits) still come from buildtools/config.
     public const string PaymentStubRegion = "stub-";
     public const string PaymentStubKey = "stub-key";
     public const string PaymentStubSecret = "stub-secret";

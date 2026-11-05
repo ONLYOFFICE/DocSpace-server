@@ -734,6 +734,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("core:accounting:url", PaymentServicesUrl + Constants.PaymentStubAccountingPath)
                 .WithEnvironment("core:accounting:key", key)
                 .WithEnvironment("core:accounting:secret", secret)
+                // An array is overridden index by index: a buildtools/config that lists more currencies keeps the
+                // ones after the first, so a test never relies on a currency being unsupported - it sends "XXX".
                 .WithEnvironment("core:accounting:currencies:0", "USD")
                 .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
                 .WithEnvironment("core:docscloud:key", key)

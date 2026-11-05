@@ -77,10 +77,20 @@ public sealed class PaymentServiceStub : IDisposable
 
     private PaymentServiceStub()
     {
-        _server = WireMockServer.Start(new WireMockServerSettings
+        var url = $"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}";
+
+        try
         {
-            Urls = [$"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}"]
-        });
+            _server = WireMockServer.Start(new WireMockServerSettings { Urls = [url] });
+        }
+        catch (Exception exception)
+        {
+            // The port is fixed because the AppHost writes it into the services' configuration before the stack starts.
+            // WireMock's own message does not say which port it wanted or where that comes from.
+            throw new InvalidOperationException(
+                $"The payment services stub could not listen on {url} (Constants.PaymentStubPort). Another billing test " +
+                "run, or a test process still shutting down, may hold the port.", exception);
+        }
 
         _server
             .Given(Request.Create().WithPath(new WildcardMatcher("/*")).UsingAnyMethod())

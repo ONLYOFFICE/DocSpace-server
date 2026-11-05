@@ -105,6 +105,15 @@ switch (launchProfile)
         // of its own - the standalone stack gives all of them the installation's one, so the billing answers of
         // parallel tests could not be told apart. Billing, accounting and docscloud are a WireMock the suite runs in
         // the test process (Constants.PaymentStubPort), started before the stack.
+        // A test fixture passes APP_HOSTING_STANDALONE itself (AspireHostFixture.Standalone), which wins over this
+        // profile's value: a suite that forgets to ask for SaaS gets this error, not portals that share one key.
+        if (string.Equals(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "The integration-test-billing profile is a SaaS stack: start it with APP_HOSTING_STANDALONE=false " +
+                "(AspireHostFixture.Standalone => false).");
+        }
+
         connectionManager
             .AddMySql(withDataVolume: false, withTmpfs: true)
             .AddRabbitMq(withManagementPlugin: false)
@@ -245,9 +254,10 @@ if (storybook)
         .WithEnvironment("BROWSER", "none");
 }
 
-// The letter suite never goes through the proxy, and OpenResty binds fixed host ports (8092, 443)
-// and mounts the client packages — which a server-only checkout does not have.
-if (launchProfile != "notify-test")
+// The letter and billing suites never go through the proxy - their clients call the services directly - and
+// OpenResty binds fixed host ports (8092, 443) and mounts the client packages, which a server-only checkout does
+// not have.
+if (launchProfile is not ("notify-test" or "integration-test-billing"))
 {
     var isPreview = launchProfile == "preview";
     var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);

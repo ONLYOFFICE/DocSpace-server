@@ -302,6 +302,11 @@ service empty addresses for them (`ConnectionStringManager.UsePaymentServices()`
 
 Everything past that check lives in `web/ASC.Web.Api.Billing.Tests`, on the `integration-test-billing` stack:
 
+- **Only the connection is the stub's.** `UsePaymentServices(url)` overrides the addresses, key, secret, region,
+  default quota and the first accounting currency. Everything else under `core:payment` and `core:accounting`
+  (test mode, delays, the top-up period, the limits, further currencies - an array is overridden index by index)
+  still comes from the developer's `buildtools/config`, so a test must not depend on it: an unsupported currency is
+  `XXX`, never a real code some config may list.
 - **SaaS, not standalone** (`AspireHostFixture.Standalone => false`). A standalone installation gives every
   portal the same payment key, so the answers of parallel tests could not be told apart; in SaaS a portal's key
   is `Constants.PaymentStubRegion` + its tenant id. SaaS also resolves the tenant from the request host, so the
