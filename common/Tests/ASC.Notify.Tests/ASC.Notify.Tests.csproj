@@ -25,6 +25,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" />
+    <!-- PortalRetentionJobTests point the tariff service at a WireMock accounting service on loopback. -->
+    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
 
   <ItemGroup>

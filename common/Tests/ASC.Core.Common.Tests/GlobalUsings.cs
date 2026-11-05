@@ -35,6 +35,7 @@ global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Security.Cryptography;
 global using System.Text;
@@ -73,7 +74,17 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Polly;
 global using Polly.Retry;
 
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Types;
+global using WireMock.Util;
+
 global using ZiggyCreatures.Caching.Fusion;
+
+global using static ASC.Core.Common.Tests.PaymentStubs;
 
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

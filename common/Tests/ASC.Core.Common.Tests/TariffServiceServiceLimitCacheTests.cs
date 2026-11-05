@@ -47,8 +47,8 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request =>
             {
-                requests.Add(request.RequestUri!);
-                return AccountingClientTests.ParseQuery(request.RequestUri!)["offset"] == "0"
+                requests.Add(request.Uri);
+                return ParseQuery(request.Uri)["offset"] == "0"
                     ? ParticipantLimitsPage(UserA, UserB)
                     : ParticipantLimitsPage(UserC);
             });
@@ -61,16 +61,16 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         handler.CallCount.Should().Be(2);
 
         requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants"));
-        requests.Select(uri => AccountingClientTests.ParseQuery(uri)["offset"]).Should().Equal("0", "2");
-        requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["limit"].Should().Be("100"));
-        requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["includeUsage"].Should().Be("true"));
+        requests.Select(uri => ParseQuery(uri)["offset"]).Should().Equal("0", "2");
+        requests.Should().AllSatisfy(uri => ParseQuery(uri)["limit"].Should().Be("100"));
+        requests.Should().AllSatisfy(uri => ParseQuery(uri)["includeUsage"].Should().Be("true"));
     }
 
     [Fact]
     public async Task GetCachedParticipantServiceLimits_PortalNotACustomer_ReturnsEmpty()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, "Customer not found"));
+            _ => Reply(HttpStatusCode.BadRequest, "Customer not found"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
@@ -85,7 +85,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         // The user lists read these limits; an unreachable accounting service, or one without the route, must not break
         // them. Null says the list is unknown - an empty one would claim no user has a personal limit.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(status, "boom"));
+            _ => Reply(status, "boom"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
@@ -100,7 +100,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => IsGlobalRequest(request)
                 ? GlobalLimitResponse(enabled: true)
-                : AccountingClientTests.Json(HttpStatusCode.InternalServerError, "boom"));
+                : Reply(HttpStatusCode.InternalServerError, "boom"));
 
         var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
 
@@ -113,7 +113,9 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         // Every page of users and every sign-in reads these limits, so a hanging accounting service must not stall them,
         // nor make each following request wait for it once more.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new DelayedContent("""{"collection":[],"totalQuantity":0}""", TimeSpan.FromSeconds(30)) });
+            // Longer than the 3-second hard timeout of the cached read; the stub cannot see the client give up, so the
+            // answer is kept short enough not to outlive the run by much.
+            _ => Reply(HttpStatusCode.OK, """{"collection":[],"totalQuantity":0}""").After(TimeSpan.FromSeconds(10)));
 
         var started = DateTime.UtcNow;
         var first = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
@@ -145,7 +147,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
                 }
 
                 return Interlocked.Increment(ref listReads) == 1
-                    ? new HttpResponseMessage(HttpStatusCode.OK) { Content = new DelayedContent($"{{\"collection\":[{Row(42, "Custom", UserA)}],\"totalQuantity\":1}}", TimeSpan.FromSeconds(1)) }
+                    ? Reply(HttpStatusCode.OK, $"{{\"collection\":[{Row(42, "Custom", UserA)}],\"totalQuantity\":1}}").After(TimeSpan.FromSeconds(1))
                     : ParticipantRows(Row(43, "Custom", UserB));
             });
 
@@ -170,8 +172,8 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => request.Method == HttpMethod.Put
-                ? AccountingClientTests.Json(HttpStatusCode.OK, "1")
-                : AccountingClientTests.ParseQuery(request.RequestUri!)["offset"] == "0"
+                ? Reply(HttpStatusCode.OK, "1")
+                : ParseQuery(request.Uri)["offset"] == "0"
                     ? ParticipantLimitsPage(UserA, UserB)
                     : ParticipantLimitsPage(UserC));
 
@@ -293,7 +295,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => IsGlobalRequest(request)
-                ? AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""")
+                ? Reply(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""")
                 : ParticipantRows());
 
         var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserC));

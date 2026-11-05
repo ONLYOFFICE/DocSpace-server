@@ -42,7 +42,7 @@ public class BillingClientInvoiceLinkTests
     [Fact]
     public async Task GetInvoiceLink_SendsPortalAndPaymentRef_AndUnwrapsJsonString()
     {
-        var (client, handler) = BillingClientTests.CreateClient(_ => BillingClientTests.Json(HttpStatusCode.OK,
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
             "\"https://invoice.stripe.com/i/acct_1L1C3n/test_YWNj\""));
 
         var link = await client.GetInvoiceLinkAsync("portal-1", "pi_3QabcDEF");
@@ -50,7 +50,7 @@ public class BillingClientInvoiceLinkTests
         link.Should().Be("https://invoice.stripe.com/i/acct_1L1C3n/test_YWNj");
 
         handler.LastMethod.Should().Be(HttpMethod.Post);
-        handler.LastUri!.ToString().Should().Be("https://billing.example.com/billing/GetInvoiceLink");
+        handler.LastUri!.AbsolutePath.Should().Be("/billing/GetInvoiceLink");
 
         var body = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
         body.GetProperty("PortalId").EnumerateArray().Select(e => e.GetString()).Should().Equal("portal-1");
@@ -60,7 +60,7 @@ public class BillingClientInvoiceLinkTests
     [Fact]
     public async Task GetInvoiceLink_CannotFindErrorBody_ThrowsBillingNotFoundException()
     {
-        var (client, _) = BillingClientTests.CreateClient(_ => BillingClientTests.Json(HttpStatusCode.OK,
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
             """{"Message":"error: cannot find invoice"}"""));
 
         var act = async () => await client.GetInvoiceLinkAsync("portal-1", "pi_3QabcDEF");
@@ -71,7 +71,7 @@ public class BillingClientInvoiceLinkTests
     [Fact]
     public async Task GetInvoiceLink_OtherErrorBody_ThrowsBillingException()
     {
-        var (client, _) = BillingClientTests.CreateClient(_ => BillingClientTests.Json(HttpStatusCode.OK,
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
             """{"Message":"error: stripe is not available"}"""));
 
         var act = async () => await client.GetInvoiceLinkAsync("portal-1", "pi_3QabcDEF");
