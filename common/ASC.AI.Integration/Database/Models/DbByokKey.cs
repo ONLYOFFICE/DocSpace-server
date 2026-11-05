@@ -42,6 +42,8 @@ public class DbByokKey : BaseEntity
     [Required]
     public required string Provider { get; set; }
 
+    // The type of the model the key was set for, kept for a future reader
+    // (per-type billing or reporting); nothing reads it yet.
     public ByokKeyType Type { get; set; }
 
     [Required]
