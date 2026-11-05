@@ -79,6 +79,8 @@ global using ApiKeysApi = DocSpace.API.SDK.Api.ApiKeys.ApiKeysApi;
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
+// Not the whole System.Data namespace: the ONLYOFFICE backup fixture needs only these two, and the rest would crowd the SDK model names.
+global using DataTable = System.Data.DataTable;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
@@ -104,3 +106,4 @@ global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
 global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;
+global using XmlWriteMode = System.Data.XmlWriteMode;
