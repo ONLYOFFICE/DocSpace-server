@@ -282,6 +282,10 @@ public sealed record PaymentServiceAnswer(HttpStatusCode Status, string Body)
 /// </summary>
 public sealed class PortalPayments(string portalId)
 {
+    // Billing numbers its payments across all customers, and the stack stores a paid tariff under that number, so two
+    // portals given the same number would overwrite each other's tariff.
+    private static int _lastPaymentId = 1000;
+
     private readonly ConcurrentDictionary<(PaymentService, string, string), Func<PaymentServiceCall, PaymentServiceAnswer>> _answers = new();
 
     public string PortalId { get; } = portalId;
@@ -309,7 +313,7 @@ public sealed class PortalPayments(string portalId)
         {
             ["EndDate"] = endDate.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             ["PaymentEmail"] = email,
-            ["PaymentId"] = 1,
+            ["PaymentId"] = Interlocked.Increment(ref _lastPaymentId),
             ["PaymentStatus"] = 1,
             ["ProductId"] = productId,
             ["Quantity"] = quantity
