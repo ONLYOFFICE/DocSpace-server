@@ -291,6 +291,37 @@ public class NotifyDeduplicationServiceTests
     }
 
     [Fact]
+    public async Task LetterWithoutAValueForItsKeyTag_IsNeverSuppressed()
+    {
+        // A producer of the previous version during an update sends the letter without the tag: two invitations to
+        // different rooms would look alike, so neither may hold the other back.
+        var service = CreateService();
+        var action = new TestAction("user_role_changed", tags: ["AccessLevel"]);
+
+        var first = await service.IsDuplicateAsync(Request(action, RoomId));
+        var second = await service.IsDuplicateAsync(Request(action, RoomId));
+
+        first.Should().BeFalse();
+        second.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task AskingBeforehand_WithoutEveryKeyTagValue_IsNeverARepeat()
+    {
+        var service = CreateService();
+        var action = new TestAction("user_role_changed", tags: ["AccessLevel"]);
+
+        await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("AccessLevel", "Editing")]));
+        var noValues = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        var emptyValue = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, [""]);
+        var fullKey = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, ["Editing"]);
+
+        noValues.Should().BeFalse();
+        emptyValue.Should().BeFalse();
+        fullKey.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task AskingBeforehand_SeesTheMarkOfTheLetterSent()
     {
         // The sending code asks before it builds a link, with the values the letter will carry. A letter without an

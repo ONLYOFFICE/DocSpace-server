@@ -75,7 +75,13 @@ public class NotifyDeduplicationService(
             return false;
         }
 
-        var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, discriminators);
+        var values = discriminators.ToArray();
+        if (values.Length != action.DeduplicationTags.Length || !HasEveryValue(values))
+        {
+            return false;
+        }
+
+        var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, values);
 
         return (await hybridCache.TryGetAsync<bool>(key)).HasValue;
     }
@@ -93,7 +99,13 @@ public class NotifyDeduplicationService(
             return false;
         }
 
-        var key = GetCacheKey(request._tenantId, request.NotifyAction.ID, request.CurrentSender, request.Recipient.ID, request.ObjectID, GetDiscriminators(request));
+        var discriminators = GetDiscriminators(request).ToArray();
+        if (!HasEveryValue(discriminators))
+        {
+            return false;
+        }
+
+        var key = GetCacheKey(request._tenantId, request.NotifyAction.ID, request.CurrentSender, request.Recipient.ID, request.ObjectID, discriminators);
 
         if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
         {
@@ -146,6 +158,15 @@ public class NotifyDeduplicationService(
         var hash = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(identity)));
 
         return tenantId + "notifydedup" + hash;
+    }
+
+    // A letter that names a key tag but carries no value for it cannot be told apart from other letters of its kind:
+    // it comes from a producer that does not fill the tag yet - a node of the previous version during an update, a
+    // message queued before it - or from an Init that left the tag out. Such a letter goes out rather than be taken
+    // for a repeat of a different one.
+    private static bool HasEveryValue(string[] discriminators)
+    {
+        return Array.TrueForAll(discriminators, value => !string.IsNullOrEmpty(value));
     }
 
     private static string GetMarkProperty(string sender)
