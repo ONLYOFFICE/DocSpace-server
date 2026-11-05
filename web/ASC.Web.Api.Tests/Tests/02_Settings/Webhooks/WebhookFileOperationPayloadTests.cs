@@ -141,6 +141,53 @@ public class WebhookFileOperationPayloadTests(
         payload!.Model.Title.Should().Be(file.Title);
     }
 
+    /// <summary>
+    /// The origin folder is one object for all the subscribers of an event, and an access check answers with the share
+    /// it finds on it: whoever was checked after somebody with access to the folder used to get its name and ID too.
+    /// </summary>
+    [Fact]
+    public async Task FileTrashed_Origin_FollowsTheAccessOfEachSubscriber()
+    {
+        // Arrange: a file of the owner's private folder, shared on its own with one member and through the folder with the other
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var inFolder = await InviteContact(EmployeeType.User);
+        var fileOnly = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        var myDocuments = (await _foldersApi.GetMyFolderAsync(cancellationToken: cancellationToken)).Response.Current.Id;
+        var folderTitle = $"folder-{Guid.NewGuid():N}";
+        var folder = (await _foldersApi.CreateFolderAsync(myDocuments, new CreateFolderRequest(folderTitle), cancellationToken)).Response;
+        var file = await CreateFileAsync(folder.Id);
+
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, ReadShare(inFolder), cancellationToken);
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, ReadShare(fileOnly), cancellationToken);
+
+        // the member with access to the folder goes first
+        var inFolderSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed, inFolder);
+        var fileOnlySubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed, fileOnly);
+
+        // Act
+        await TrashAsync(file.Id);
+
+        // Assert
+        var inFolderPayload = await WaitForEventPayloadAsync<FilePayload>(inFolderSubscription.Id, "file.trashed", p => IdIs(p, file.Id));
+        var fileOnlyPayload = await WaitForEventPayloadAsync<FilePayload>(fileOnlySubscription.Id, "file.trashed", p => IdIs(p, file.Id));
+
+        inFolderPayload.Should().NotBeNull("the member may read the folder of the file");
+        inFolderPayload!.Model.OriginTitle.Should().Be(folderTitle);
+        fileOnlyPayload.Should().NotBeNull("the file is shared with the member");
+        fileOnlyPayload!.Model.OriginTitle.Should().BeNull("the member cannot read the folder the file was deleted from");
+    }
+
+    private static SecurityInfoSimpleRequestDto ReadShare(User user)
+    {
+        return new SecurityInfoSimpleRequestDto
+        {
+            Share = [new FileShareParams { ShareTo = user.Id, Access = DocSpace.API.SDK.Model.FileShare.Read }],
+            Notify = false
+        };
+    }
+
     private async Task TrashAsync(int fileId)
     {
         await _filesClient.Authenticate(Owner);
