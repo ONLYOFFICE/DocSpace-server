@@ -58,6 +58,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected ProfilesApi _profilesApi = null!;
 
+    /// <summary>The payment services of the whole run, for what belongs to no single portal.</summary>
+    protected PaymentServiceStub PaymentServices => fixture.Payments;
+
     /// <summary>The requests the payment services got about this test's portal, in the order they arrived.</summary>
     protected IReadOnlyList<PaymentServiceCall> PaymentCalls => fixture.Payments.CallsFor(TenantId);
 

@@ -73,6 +73,7 @@ public sealed class PaymentServiceStub : IDisposable
     private readonly WireMockServer _server;
     private readonly ConcurrentDictionary<string, PortalPayments> _portals = new();
     private readonly ConcurrentQueue<PaymentServiceCall> _calls = new();
+    private readonly ServiceLimitStore _serviceLimits = new();
 
     private PaymentServiceStub()
     {
@@ -111,6 +112,15 @@ public sealed class PaymentServiceStub : IDisposable
         return [.. _calls.Where(call => call.PortalId == portalId)];
     }
 
+    /// <summary>
+    /// Puts a spending limit on the AI services on the account <paramref name="accountNumber"/>, as if another portal
+    /// had created it; returns its id.
+    /// </summary>
+    public int AddServiceLimit(int accountNumber, string scope = "Total", decimal amountValue = 100m)
+    {
+        return _serviceLimits.Add(accountNumber, scope, amountValue);
+    }
+
     public void Dispose()
     {
         _server.Stop();
@@ -125,6 +135,8 @@ public sealed class PaymentServiceStub : IDisposable
         var answer = call.PortalId is not null && _portals.TryGetValue(call.PortalId, out var portal)
             ? portal.AnswerFor(call)
             : null;
+
+        answer ??= _serviceLimits.TryAnswer(call, portalId => _portals.GetValueOrDefault(portalId));
 
         return (answer ?? DefaultAnswer(call)).ToResponse();
     }
@@ -200,7 +212,23 @@ public sealed class PaymentServiceStub : IDisposable
                 }
             case PaymentService.Accounting:
                 var match = _portalInPath.Match(route);
-                return match.Success ? Uri.UnescapeDataString(match.Groups["portal"].Value) : null;
+                if (match.Success)
+                {
+                    return Uri.UnescapeDataString(match.Groups["portal"].Value);
+                }
+
+                // A new limit names its customer in the body: {"customerName":"stub-42", ...}.
+                if (string.IsNullOrEmpty(message.Body))
+                {
+                    return null;
+                }
+
+                using (var body = JsonDocument.Parse(message.Body))
+                {
+                    return body.RootElement.ValueKind == JsonValueKind.Object && body.RootElement.TryGetProperty("customerName", out var customer)
+                        ? customer.GetString()
+                        : null;
+                }
             case PaymentService.DocsCloud:
                 return message.Query is not null && message.Query.TryGetValue("portalId", out var values) && values.Count > 0 ? values[0] : null;
             default:
@@ -220,9 +248,10 @@ public enum PaymentService
 /// <summary>
 /// One request a service made to <see cref="PaymentServiceStub"/>. <see cref="Route"/> is the path below the
 /// service's base URL with the portal's key put back as <c>{portalId}</c>, so it reads like the client's own route:
-/// <c>/billing/GetActiveResources</c>, <c>/customer/{portalId}/balance</c>.
+/// <c>/billing/GetActiveResources</c>, <c>/customer/{portalId}/balance</c>; <see cref="Query"/> is the query string
+/// as it came, with its leading <c>?</c>.
 /// </summary>
-public sealed record PaymentServiceCall(PaymentService Service, string Method, string Route, string? PortalId, string? Body)
+public sealed record PaymentServiceCall(PaymentService Service, string Method, string Route, string? PortalId, string? Body, string Query)
 {
     internal static PaymentServiceCall From(IRequestMessage message)
     {
@@ -245,7 +274,8 @@ public sealed record PaymentServiceCall(PaymentService Service, string Method, s
             route = route.Replace("/" + Uri.EscapeDataString(portalId), "/{portalId}", StringComparison.Ordinal);
         }
 
-        return new PaymentServiceCall(service, message.Method.ToUpperInvariant(), route, portalId, string.IsNullOrEmpty(message.Body) ? null : message.Body);
+        return new PaymentServiceCall(service, message.Method.ToUpperInvariant(), route, portalId, string.IsNullOrEmpty(message.Body) ? null : message.Body,
+            new Uri(message.AbsoluteUrl).Query);
     }
 }
 
@@ -285,6 +315,40 @@ public sealed class PortalPayments(string portalId)
     // Billing numbers its payments across all customers, and the stack stores a paid tariff under that number, so two
     // portals given the same number would overwrite each other's tariff.
     private static int _lastPaymentId = 1000;
+
+    // Accounting numbers the customers' accounts the same way; the stack tells its own spending limits from those of
+    // other portals by it.
+    private static int _lastAccountNumber = 5000;
+
+    private readonly Lock _walletLock = new();
+    private (decimal Amount, string Currency)? _wallet;
+
+    /// <summary>The number of the portal's account with accounting, unique across the run.</summary>
+    public int AccountNumber { get; } = Interlocked.Increment(ref _lastAccountNumber);
+
+    /// <summary>The account number when accounting knows the portal as a customer - once it has a wallet - else null.</summary>
+    internal int? AccountNumberIfCustomer
+    {
+        get
+        {
+            lock (_walletLock)
+            {
+                return _wallet is null ? null : AccountNumber;
+            }
+        }
+    }
+
+    /// <summary>What the portal's wallet holds now, as accounting reports it; null while it has none.</summary>
+    public decimal? WalletAmount
+    {
+        get
+        {
+            lock (_walletLock)
+            {
+                return _wallet?.Amount;
+            }
+        }
+    }
 
     private readonly ConcurrentDictionary<(PaymentService, string, string), Func<PaymentServiceCall, PaymentServiceAnswer>> _answers = new();
 
@@ -340,17 +404,47 @@ public sealed class PortalPayments(string portalId)
         return On(PaymentService.Billing, "POST", "/billing/GetCustomerInfo", customer.ToJsonString());
     }
 
-    /// <summary>The portal's wallet holds <paramref name="amount"/> in <paramref name="currency"/>, as accounting reports it.</summary>
-    public PortalPayments Balance(decimal amount, string currency = "USD", int accountNumber = 1001)
+    /// <summary>
+    /// The portal has a wallet with accounting holding <paramref name="amount"/> in <paramref name="currency"/>. The wallet
+    /// keeps its state: a deposit billing accepts (<c>/billing/Deposit</c>) is credited to it, and accounting reports
+    /// the new amount from then on.
+    /// </summary>
+    public PortalPayments Balance(decimal amount, string currency = "USD")
     {
-        var balance = new JsonObject
+        lock (_walletLock)
         {
-            ["accountNumber"] = accountNumber,
-            ["accountCurrency"] = currency,
-            ["subAccounts"] = new JsonArray(new JsonObject { ["currency"] = currency, ["amount"] = amount })
-        };
+            _wallet = (amount, currency);
+        }
 
-        return On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", balance.ToJsonString());
+        On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", _ => PaymentServiceAnswer.Json(BalanceJson()));
+
+        return On(PaymentService.Billing, "POST", "/billing/Deposit", call =>
+        {
+            using var body = JsonDocument.Parse(call.Body!);
+            var deposit = decimal.Parse(body.RootElement.GetProperty("Amount")[0].GetString()!, CultureInfo.InvariantCulture);
+
+            lock (_walletLock)
+            {
+                _wallet = (_wallet!.Value.Amount + deposit, _wallet.Value.Currency);
+            }
+
+            return PaymentServiceAnswer.Json("\"ok\"");
+        });
+    }
+
+    private string BalanceJson()
+    {
+        lock (_walletLock)
+        {
+            var (amount, currency) = _wallet!.Value;
+
+            return new JsonObject
+            {
+                ["accountNumber"] = AccountNumber,
+                ["accountCurrency"] = currency,
+                ["subAccounts"] = new JsonArray(new JsonObject { ["currency"] = currency, ["amount"] = amount })
+            }.ToJsonString();
+        }
     }
 
     internal PaymentServiceAnswer? AnswerFor(PaymentServiceCall call)

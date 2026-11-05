@@ -315,5 +315,10 @@ Everything past that check lives in `web/ASC.Web.Api.Billing.Tests`, on the `int
 - Some requests name **no portal** and their answers are cached for every portal - the checkout template
   (`PortalId` is `__Tenant__`), the accounting price catalogue. The stub answers those the same way for every
   test; never script them per test.
+- Some state is kept the way the real services keep it, because the stack checks it: `Balance` is a wallet a
+  billing deposit credits (the stack polls the balance until it moves), every portal has an account number of its
+  own (`PortalPayments.AccountNumber`), payments are numbered across the run (the stack stores a paid tariff under
+  that number), and spending limits live in one store with ids across the run (`ServiceLimitStore`) - a limit on
+  another account (`PaymentServiceStub.AddServiceLimit`) is answered as missing, as in production.
 - Cached reads (tariff, customer, balance) are re-read with `refresh=true`, as the TypeScript suite's
   `setupPayment()` does after a payment.

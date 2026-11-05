@@ -734,6 +734,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("core:accounting:url", PaymentServicesUrl + Constants.PaymentStubAccountingPath)
                 .WithEnvironment("core:accounting:key", key)
                 .WithEnvironment("core:accounting:secret", secret)
+                .WithEnvironment("core:accounting:currencies:0", "USD")
                 .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
                 .WithEnvironment("core:docscloud:key", key)
                 .WithEnvironment("core:docscloud:secret", secret);
