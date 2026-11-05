@@ -545,11 +545,17 @@ public class UserController(
             }
 
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
-            var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true);
-            messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            // the same invitation already went out within the period: no new link, no record, no spent invitation
+            if (!await studioNotifyService.IsDocSpaceInviteRepeatAsync(user.Email, invite.Type))
+            {
+                var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true);
+                messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            }
+
             await socketManager.AddUserAsync(user);
 
             await webhookManager.PublishAsync(WebhookTrigger.UserInvited, user);
@@ -2008,6 +2014,8 @@ public class UserController(
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+
+            // recorded even when the letter is a repeat: the record is the only trace of the address change itself
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 

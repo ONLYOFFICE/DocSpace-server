@@ -308,8 +308,13 @@ public class NotifyDeduplicationServiceTests
     [Fact]
     public async Task AskingBeforehand_WithoutEveryKeyTagValue_IsNeverARepeat()
     {
-        var service = CreateService();
+        // Marks lie under exactly the keys a question without every value would read, so only the check of the
+        // values can keep that question from finding one.
+        var cache = new FusionCache(new FusionCacheOptions());
+        var service = CreateService(cache: cache);
         var action = new TestAction("user_role_changed", tags: ["AccessLevel"]);
+        await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, []), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
+        await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, [""]), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
 
         await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("AccessLevel", "Editing")]));
         var noValues = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
@@ -355,16 +360,17 @@ public class NotifyDeduplicationServiceTests
     [Fact]
     public async Task AskingBeforehand_AboutALetterNotOptedIn_IsNeverARepeat()
     {
+        // The mark is left while a letter of the same name still drops repeats; asked about now that it does not, the
+        // letter is no repeat.
         var service = CreateService();
-        var action = new TestAction("change_password_v115", suppressRepeats: false);
+        await service.IsDuplicateAsync(Request(new TestAction("change_password_v115"), null));
 
-        await service.IsDuplicateAsync(Request(action, null));
-        var marked = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, []);
+        var marked = await service.IsMarkedAsync(TenantId, new TestAction("change_password_v115", suppressRepeats: false), EmailSender, Recipient, null, []);
 
         marked.Should().BeFalse();
     }
 
-    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null)
+    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null, IFusionCache? cache = null)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -376,7 +382,7 @@ public class NotifyDeduplicationServiceTests
 
         return new NotifyDeduplicationService(
             configuration,
-            new FusionCache(new FusionCacheOptions()),
+            cache ?? new FusionCache(new FusionCacheOptions()),
             new InMemoryLockProvider(),
             NullLogger<NotifyDeduplicationService>.Instance);
     }

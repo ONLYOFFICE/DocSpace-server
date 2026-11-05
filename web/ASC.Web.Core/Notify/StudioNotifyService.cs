@@ -1031,7 +1031,7 @@ public class StudioNotifyService(
     // limit of a free portal: asking whether a letter is a repeat sends nothing
     private static DirectRecipient AddressRecipient(string email)
     {
-        var address = email.ToLower();
+        var address = StudioNotifyHelper.RecipientAddress(email);
 
         return new DirectRecipient(address, null, [address], false);
     }

@@ -103,6 +103,13 @@ public class StudioNotifyHelper(
         return await RecipientsProvider.GetRecipientAsync(userId.ToString());
     }
 
+    // The id a letter sent to an address carries as its recipient. The repeat check keys letters on it, so the code
+    // that asks beforehand whether a letter is a repeat has to build it the same way.
+    public static string RecipientAddress(string email)
+    {
+        return email.ToLower();
+    }
+
     public async Task<IRecipient[]> RecipientFromEmailAsync(string email, bool checkActivation)
     {
         return await RecipientFromEmailAsync([email], checkActivation);
@@ -118,7 +125,7 @@ public class StudioNotifyHelper(
         }
 
         res.AddRange(emails.
-                         Select(email => email.ToLower()).
+                         Select(RecipientAddress).
                          Select(e => new DirectRecipient(e, null, [e], checkActivation)));
 
         int.TryParse(configuration["core:notify:countspam"], out var countMailsToNotActivated);
