@@ -1642,6 +1642,7 @@ public class UserController(
     /// request and is not a delivery report.
     /// An account that already got this letter within the last ten minutes (the server default) is not mailed again,
     /// and the link in the letter it already has stays valid, so repeating the call is safe but delivers nothing new.
+    /// Repeated calls are also throttled.
     /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
@@ -1655,6 +1656,7 @@ public class UserController(
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
