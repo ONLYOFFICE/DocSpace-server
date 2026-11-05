@@ -1664,6 +1664,7 @@ public static class AccountingHttpClientExtension
             UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
             ExceptionFactory = CreateExceptionAsync,
             TransportExceptionFactory = CreateTransportException,
+            DeserializationExceptionFactory = CreateDeserializationExceptionAsync,
             UrlParameterFormatterMap = {
                 // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
                 // formatter renders them as "True"/"False". Everything else keeps the default formatting.
@@ -1733,6 +1734,14 @@ public static class AccountingHttpClientExtension
                 ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
             });
         });
+    }
+
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) would otherwise surface
+    // as Refit.ApiException and escape the AccountingException hierarchy the callers catch.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return ValueTask.FromResult<Exception>(new AccountingException(
+            $"Accounting response to {response.RequestMessage?.RequestUri} ({(int)response.StatusCode}) could not be read: {exception.Message}", exception));
     }
 
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise

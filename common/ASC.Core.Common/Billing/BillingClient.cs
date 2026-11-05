@@ -514,7 +514,8 @@ public static class BillingHttpClientExtension
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
                 ExceptionFactory = CreateExceptionAsync,
-                TransportExceptionFactory = CreateTransportException
+                TransportExceptionFactory = CreateTransportException,
+                DeserializationExceptionFactory = CreateDeserializationExceptionAsync
             })
             .ConfigureHttpClient((_, client) =>
             {
@@ -554,6 +555,14 @@ public static class BillingHttpClientExtension
                     }
                 });
             });
+    }
+
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) would otherwise surface
+    // as Refit.ApiException and escape the BillingException hierarchy the callers catch.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return ValueTask.FromResult<Exception>(new BillingException(
+            $"Billing response to {response.RequestMessage?.RequestUri} ({(int)response.StatusCode}) could not be read: {exception.Message}", exception));
     }
 
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise

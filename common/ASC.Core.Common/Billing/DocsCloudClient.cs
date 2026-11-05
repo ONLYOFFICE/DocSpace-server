@@ -670,7 +670,8 @@ public static class DocsCloudHttpClientExtension
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
                 ExceptionFactory = CreateExceptionAsync,
-                TransportExceptionFactory = CreateTransportException
+                TransportExceptionFactory = CreateTransportException,
+                DeserializationExceptionFactory = CreateDeserializationExceptionAsync
             })
             .ConfigureHttpClient((sp, client) =>
             {
@@ -709,6 +710,14 @@ public static class DocsCloudHttpClientExtension
                     }
                 });
             });
+    }
+
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) would otherwise surface
+    // as Refit.ApiException and escape the DocsCloudException hierarchy the callers catch.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return ValueTask.FromResult<Exception>(new DocsCloudException(
+            $"DocsCloud response to {response.RequestMessage?.RequestUri} ({(int)response.StatusCode}) could not be read: {exception.Message}", exception));
     }
 
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
