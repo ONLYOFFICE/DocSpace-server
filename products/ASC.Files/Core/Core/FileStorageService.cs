@@ -5850,6 +5850,9 @@ public class FileStorageService //: IFileStorageService
                         && properties.FormFilling.OriginalFormVersion != form.Version)
                     {
                         await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(formId);
+                        // New drafts copy this version, and a submission of a draft of another version is refused. A
+                        // version saved by the editor sets it on save; any other, as one uploaded as a file, only here.
+                        properties.FormFilling.OriginalFormVersion = form.Version;
                         properties.FormFilling.IsVersionChanged = true;
                     }
 

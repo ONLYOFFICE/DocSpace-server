@@ -33,12 +33,19 @@
 
 namespace ASC.AI.Tools.Core;
 
-/// <summary>Submission table of a started filling-form: name, row count, column definitions and the database holding it.</summary>
+/// <summary>
+/// Submission table of a started filling-form: name, row count, column definitions, the database holding it, the form
+/// version it is read for, the versions whose responses it holds and the earlier versions with responses apart (null
+/// when not read or unknown).
+/// </summary>
 public sealed record FormSchema(
     string TableName,
     long RowCount,
     IReadOnlyList<DbColumnDefinition> Columns,
-    ExternalDatabaseClient Client);
+    ExternalDatabaseClient Client,
+    int Version,
+    IReadOnlyList<int> VersionsInTable,
+    IReadOnlyList<int>? VersionsApart);
 
 /// <summary>
 /// Reads the submission table behind a filling-form: in the external database when the portal has one, otherwise in
@@ -57,6 +64,11 @@ public class FormSchemaProvider(
 {
     private static readonly TimeSpan _tableNameCacheDuration = TimeSpan.FromMinutes(30);
     private static readonly TimeSpan _noTableCacheDuration = TimeSpan.FromMinutes(1);
+
+    // Earlier versions take no new responses (their drafts are refused), so the answer holds; when the index cannot
+    // give it, it is asked again soon.
+    private static readonly TimeSpan _versionsApartCacheDuration = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan _versionsApartUnknownCacheDuration = TimeSpan.FromMinutes(1);
 
     /// <summary>Whether a database for form submissions is configured: the external one or the built-in one.</summary>
     public bool IsEnabled() => externalDatabaseClient.IsEnabled() || builtinFormsDatabaseClient.IsEnabled();
@@ -82,14 +94,19 @@ public class FormSchemaProvider(
     /// </summary>
     public async Task<string?> TryGetTableNameAsync(File<int> file)
     {
-        if (!externalDatabaseClient.IsEnabled())
-        {
-            return await TryGetBuiltinTableNameAsync(file);
-        }
-
         // Read first and left uncached: filling starts at any moment, and a confirmed rename moves the version to
         // another table; neither costs an external call.
-        if (await GetStartedFormFillingAsync(file) is not { } formFilling)
+        return await TryGetTableNameAsync(file, await GetStartedFormFillingAsync(file));
+    }
+
+    private async Task<string?> TryGetTableNameAsync(File<int> file, FormFillingProperties<int>? formFilling)
+    {
+        if (!externalDatabaseClient.IsEnabled())
+        {
+            return await TryGetBuiltinTableNameAsync(file, formFilling);
+        }
+
+        if (formFilling is null)
         {
             return null;
         }
@@ -116,9 +133,9 @@ public class FormSchemaProvider(
     }
 
     // Not cached: an idle built-in table may be dropped at any time, and it is restored here.
-    private async Task<string?> TryGetBuiltinTableNameAsync(File<int> file)
+    private async Task<string?> TryGetBuiltinTableNameAsync(File<int> file, FormFillingProperties<int>? formFilling)
     {
-        if (!builtinFormsDatabaseClient.IsEnabled() || await GetStartedFormFillingAsync(file) is not { ResultFormNumber: > 0 } formFilling)
+        if (!builtinFormsDatabaseClient.IsEnabled() || formFilling is not { ResultFormNumber: > 0 })
         {
             return null;
         }
@@ -138,13 +155,50 @@ public class FormSchemaProvider(
         return $"ai:form:table:{tenantId}:{tableName}";
     }
 
-    /// <summary>Full schema. Null when there is no submission table or it cannot be read.</summary>
-    public async Task<FormSchema?> TryReadAsync(File<int> file)
+    private static string GetVersionsApartCacheKey(int tenantId, int fileId, int version)
+    {
+        return $"ai:form:versionsapart:{tenantId}:{fileId}:{version}";
+    }
+
+    // The earlier versions with responses in other tables, which only the search index can tell: read once for a form
+    // version, since the tools are built for every call the model makes.
+    private async Task<IReadOnlyList<int>?> GetVersionsApartAsync(File<int> file, FormFillingProperties<int> formFilling, IReadOnlyList<int> inTable)
+    {
+        var cacheKey = GetVersionsApartCacheKey(tenantManager.GetCurrentTenantId(), file.Id, file.Version);
+
+        var cached = await fusionCache.TryGetAsync<List<int>?>(cacheKey);
+        var apart = cached.HasValue ? cached.Value : null;
+        if (!cached.HasValue)
+        {
+            apart = await formFillingReportCreator.GetVersionsWithResponsesApartAsync(file.Id, formFilling, file.Version);
+            if (apart is null)
+            {
+                logger.WarnFormVersionsApartUnknown(file.Id);
+            }
+
+            await fusionCache.SetAsync(
+                cacheKey,
+                apart,
+                opt => opt.SetDuration(apart is null ? _versionsApartUnknownCacheDuration : _versionsApartCacheDuration));
+        }
+
+        // A version moved into the table since then is no longer apart.
+        return apart?.Where(v => !inTable.Contains(v)).ToList();
+    }
+
+    /// <summary>
+    /// Full schema. Null when there is no submission table or it cannot be read. The versions with responses apart
+    /// cost the search index and are read only when asked for: the model's prompt needs them, the starter questions do
+    /// not.
+    /// </summary>
+    public async Task<FormSchema?> TryReadAsync(File<int> file, bool withVersionsApart = false)
     {
         try
         {
-            var tableName = await TryGetTableNameAsync(file);
-            if (tableName is null)
+            // One read of the properties: the table and the versions it holds come from the same state.
+            var formFilling = await GetStartedFormFillingAsync(file);
+            var tableName = await TryGetTableNameAsync(file, formFilling);
+            if (tableName is null || formFilling is null)
             {
                 return null;
             }
@@ -152,8 +206,10 @@ public class FormSchemaProvider(
             var client = externalDatabaseClient.IsEnabled() ? externalDatabaseClient : builtinFormsDatabaseClient;
             var rowCount = await client.CountAsync(tableName);
             var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
+            var inTable = FormFillingReportCreator.GetVersionsInTable(formFilling, file.Version);
+            var apart = withVersionsApart ? await GetVersionsApartAsync(file, formFilling, inTable) : null;
 
-            return new FormSchema(tableName, rowCount, columns, client);
+            return new FormSchema(tableName, rowCount, columns, client, file.Version, inTable, apart);
         }
         catch (Exception e)
         {
@@ -167,4 +223,7 @@ internal static partial class FormSchemaProviderLogger
 {
     [LoggerMessage(LogLevel.Warning, "Failed to read the form submission schema for file {FileId}")]
     public static partial void WarnFormSchemaReadFailed(this ILogger<FormSchemaProvider> logger, Exception exception, int fileId);
+
+    [LoggerMessage(LogLevel.Warning, "The search index could not tell which earlier versions of form {FileId} have responses in other tables")]
+    public static partial void WarnFormVersionsApartUnknown(this ILogger<FormSchemaProvider> logger, int fileId);
 }

@@ -647,6 +647,49 @@ public class FormFillingReportCreator(
         return formFilling?.VersionLinks?.FirstOrDefault(l => l.Version == version)?.TableVersion ?? version;
     }
 
+    /// <summary>The versions of the form whose responses are in the table the given version writes to.</summary>
+    public static List<int> GetVersionsInTable(FormFillingProperties<int> formFilling, int version)
+    {
+        return GetTableVersions(formFilling, GetTableVersion(formFilling, version)).Order().ToList();
+    }
+
+    /// <summary>
+    /// The earlier versions of the form that have responses outside the table the given version writes to. Null when the
+    /// search index cannot tell, so that nothing is said about responses it did not show.
+    /// </summary>
+    public async Task<List<int>> GetVersionsWithResponsesApartAsync(int originalFormId, FormFillingProperties<int> formFilling, int version)
+    {
+        var inTable = GetVersionsInTable(formFilling, version);
+        var roomId = formFilling.RoomId;
+
+        // Only a version with metadata can have responses; a version saved and never filled has none to count. Usually
+        // none or one version is apart, so they are counted one by one.
+        var (success, metadata) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.RoomId, roomId));
+        if (!success)
+        {
+            return null;
+        }
+
+        var apart = new List<int>();
+        foreach (var candidate in metadata.Select(m => m.OriginalFormVersion).Where(v => v < version && !inTable.Contains(v)).Distinct().Order())
+        {
+            var (counted, count) = await CountSubmissionsAsync(originalFormId, candidate, roomId);
+            if (!counted)
+            {
+                return null;
+            }
+
+            if (count > 0)
+            {
+                apart.Add(candidate);
+            }
+        }
+
+        return apart;
+    }
+
     internal static int[] GetTableVersions(FormFillingProperties<int> formFilling, int tableVersion)
     {
         return (formFilling?.VersionLinks ?? [])

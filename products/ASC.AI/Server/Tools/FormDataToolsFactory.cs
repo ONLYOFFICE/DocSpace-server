@@ -216,8 +216,8 @@ public class FormDataToolsFactory(
             return ToolBundle.Empty;
         }
 
-        var (tableName, rowCount, columns, allowedColumns, pkColumn, client) = init;
-        var schemaText = FormatSchema(tableName, rowCount, columns);
+        var (tableName, rowCount, columns, allowedColumns, pkColumn, client, coverage) = init;
+        var schemaText = FormatSchema(tableName, rowCount, columns, coverage);
 
         var prompt =
             $"""
@@ -242,7 +242,7 @@ public class FormDataToolsFactory(
 
     private async Task<InitData?> TryInitAsync(File<int> file)
     {
-        var schema = await formSchemaProvider.TryReadAsync(file);
+        var schema = await formSchemaProvider.TryReadAsync(file, withVersionsApart: true);
         if (schema is null)
         {
             return null;
@@ -255,7 +255,9 @@ public class FormDataToolsFactory(
             ?? columns.FirstOrDefault(c => c.Type == DbColumnType.Integer)
             ?? columns.FirstOrDefault();
 
-        return new InitData(schema.TableName, schema.RowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty, schema.Client);
+        var coverage = FormSchemaFormatter.FormatCoverage(schema.Version, schema.VersionsInTable, schema.VersionsApart);
+
+        return new InitData(schema.TableName, schema.RowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty, schema.Client, coverage);
     }
 
     private static AIFunction MakeAggregateFunction(
@@ -525,7 +527,7 @@ public class FormDataToolsFactory(
         return (parsed, datePart);
     }
 
-    private static string FormatSchema(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns)
+    private static string FormatSchema(string tableName, long rowCount, IEnumerable<DbColumnDefinition> columns, string coverage)
     {
         var columnLines = columns.Select(col =>
         {
@@ -537,8 +539,9 @@ public class FormDataToolsFactory(
 
         return $"""
                 <form_data_schema>
-                ## Form Submissions ({rowCount} total, stored in external database)
-                Table: {tableName}
+                ## Form Submissions ({rowCount} total)
+                {coverage}
+                Table: {tableName} (an internal name: its suffix is not a form version)
                 Schema:
                 {string.Join("\n", columnLines)}
                 </form_data_schema>
@@ -631,7 +634,8 @@ public class FormDataToolsFactory(
         IReadOnlyList<DbColumnDefinition> Columns,
         IReadOnlyCollection<string> AllowedColumns,
         string PkColumn,
-        ExternalDatabaseClient Client);
+        ExternalDatabaseClient Client,
+        string Coverage);
 
     private sealed class FlexibleStringArrayJsonConverter : JsonConverter<IEnumerable<string>>
     {

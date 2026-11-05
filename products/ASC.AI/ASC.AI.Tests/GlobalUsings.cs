@@ -59,6 +59,7 @@ global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
+global using FormSchemaFormatter = ASCAi::ASC.AI.Tools.Core.FormSchemaFormatter;
 global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;

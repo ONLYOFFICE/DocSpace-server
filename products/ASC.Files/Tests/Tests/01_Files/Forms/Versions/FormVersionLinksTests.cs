@@ -118,6 +118,18 @@ public class FormVersionLinksTests
         state.VersionLinks.Should().ContainSingle().Which.Should().BeSameAs(link);
     }
 
+    [Fact]
+    public void GetVersionsInTable_ContinuedTable_ListsEveryVersionWritingToIt()
+    {
+        var state = new FormFillingProperties { VersionLinks = [Link(2, 1), Link(4, 1), Link(5, 3)] };
+
+        FormFillingReportCreator.GetVersionsInTable(state, 4).Should().Equal(1, 2, 4);
+        FormFillingReportCreator.GetVersionsInTable(state, 2).Should().Equal(1, 2, 4);
+        FormFillingReportCreator.GetVersionsInTable(state, 5).Should().Equal(3, 5);
+        FormFillingReportCreator.GetVersionsInTable(state, 3).Should().Equal(3, 5);
+        FormFillingReportCreator.GetVersionsInTable(null, 1).Should().Equal(1);
+    }
+
     private static FormFieldRename Rename(string oldKey, string newKey) => new() { OldKey = oldKey, NewKey = newKey };
 
     private static FormVersionLink Link(int version, int tableVersion, params FormFieldRename[] renames) =>
