@@ -50,7 +50,7 @@ public class WebhookSendCheckTests(
     public async Task Send_TargetInABlacklistedNetwork_RemovesTheSubscription()
     {
         // Arrange: 10.0.0.0/8 is on the blacklist of every profile
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -69,14 +69,14 @@ public class WebhookSendCheckTests(
         // subscription (WebhookSender.DisableWebhook); the records cannot add to it, they go with their subscription
         // (ON DELETE CASCADE). What the receiver can still tell is that the requeued attempt did not go to the address
         // the subscription had before the change: a sender working from a stale copy of it would have delivered here
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the delivery made before the URL change");
+        receiver.GetDeliveries().Should().ContainSingle("only the delivery made before the URL change");
     }
 
     [Fact]
     public async Task Send_TargetNoLongerUsable_DisablesTheSubscription()
     {
         // Arrange: the subscription now demands HTTPS, which the plain-HTTP receiver cannot give
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -97,14 +97,14 @@ public class WebhookSendCheckTests(
         after.Attempts.Should().Be(0, "no request was made");
         after.ResponsePayload.Should().StartWith(ASC.Webhooks.Core.DbWorker.TargetRejectedNote, "the record says why it was not sent")
             .And.NotBe(ASC.Webhooks.Core.DbWorker.TargetRejectedNote, "the validator's reason follows the note");
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle();
+        receiver.GetDeliveries().Should().ContainSingle();
     }
 
     [Fact]
     public async Task Send_SubscriptionDisabledBeforeTheFirstAttempt_SendsNothing()
     {
         // Arrange: an event published while the subscription was enabled, not yet attempted when it is switched off
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -128,6 +128,6 @@ public class WebhookSendCheckTests(
         after.NextAttemptOn.Should().BeNull();
         after.Attempts.Should().Be(0, "a disabled subscription receives nothing, the first attempt included");
         after.ResponsePayload.Should().Be(ASC.Webhooks.Core.DbWorker.SubscriptionDisabledNote, "the record says why it was not sent");
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle("only the delivery made before the switch-off");
+        receiver.GetDeliveries().Should().ContainSingle("only the delivery made before the switch-off");
     }
 }

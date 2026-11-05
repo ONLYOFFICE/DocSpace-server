@@ -164,8 +164,8 @@ public class GetWebhooksLogsTests(
         var member = await InviteContact(employeeType);
         var roomId = await CreateRoomAsync(member);
 
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
 
         await CreateFileAsync(roomId);
 

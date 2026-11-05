@@ -64,9 +64,6 @@ public sealed class PortalClients : PortalClientsBase
     public FoldersApi FoldersApi { get; }
     public OperationsApi OperationsApi { get; }
 
-    // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
-    public HttpClient WebhookReceiverHttpClient { get; }
-
     // WebApi service
     public AuthenticationApi AuthenticationApi { get; }
     public CapabilitiesApi CapabilitiesApi { get; }
@@ -126,8 +123,6 @@ public sealed class PortalClients : PortalClientsBase
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
-
-        WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 
         IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 

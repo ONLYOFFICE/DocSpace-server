@@ -42,8 +42,8 @@ internal static class WebhooksTestData
     /// <summary>
     /// A fresh webhook configuration payload with a unique name, for a caller that sets <c>uri</c> itself. The
     /// backend probes the URL with a HEAD request and wants a success code, so the default points at a path of
-    /// the WireMock receiver that nothing is stubbed for: it answers 404 and the create fails at once, offline,
-    /// instead of reaching the internet. Use <see cref="CreateWebhookDtoAsync"/> for a body that is accepted.
+    /// the receiver that nothing is stubbed for: it answers 404 and the create fails at once, offline,
+    /// instead of reaching the internet. Use <see cref="CreateAcceptedWebhookDto"/> for a body that is accepted.
     /// <c>secretKey</c> is required by the backend on create even though the SDK marks it optional.
     /// </summary>
     public static CreateWebhooksConfigRequestDto CreateWebhookDto(
@@ -53,7 +53,7 @@ internal static class WebhooksTestData
 
         return new CreateWebhooksConfigRequestDto(
             name: $"webhook-{suffix}",
-            uri: $"http://{ASC.AppHost.Configuration.Constants.WebhookReceiverHost}:{ASC.AppHost.Configuration.Constants.WebhookReceiverPort}/hooks/unstubbed-{suffix}",
+            uri: WebhookReceiver.UnstubbedUri($"unstubbed-{suffix}"),
             secretKey: Initializer.Faker.Random.AlphaNumeric(20),
             enabled: enabled,
             ssl: ssl,
@@ -61,13 +61,13 @@ internal static class WebhooksTestData
     }
 
     /// <summary>
-    /// A fresh webhook configuration payload pointed at an endpoint of its own on the WireMock receiver, which
+    /// A fresh webhook configuration payload pointed at an endpoint of its own on the receiver, which
     /// answers the HEAD probe with 200 and every delivery with 200. The suite needs no internet for it.
     /// </summary>
-    public static async Task<CreateWebhooksConfigRequestDto> CreateWebhookDtoAsync(
-        HttpClient receiverAdmin, bool enabled = false, WebhookTrigger? triggers = null, string? targetId = null)
+    public static CreateWebhooksConfigRequestDto CreateAcceptedWebhookDto(
+        bool enabled = false, WebhookTrigger? triggers = null, string? targetId = null)
     {
-        var receiver = await WebhookReceiver.CreateAsync(receiverAdmin);
+        var receiver = WebhookReceiver.Create();
         var dto = CreateWebhookDto(enabled: enabled, triggers: triggers);
 
         dto.Uri = receiver.TargetUri;

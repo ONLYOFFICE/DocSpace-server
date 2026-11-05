@@ -35,7 +35,7 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 
 [Trait("Category", "Validation")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadTitleLengthTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadTitleLengthTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     private const int MaxTitleLength = 255;
 
@@ -44,9 +44,10 @@ public class ThreadTitleLengthTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var title = new string('a', MaxTitleLength);
 
-        var created = await CreateThreadAsync(title);
+        var created = await CreateOwnThreadAsync(title);
 
         created.Title.Should().Be(title);
+        (await GetThreadAsync(created.ThreadId)).Title.Should().Be(title);
     }
 
     [Theory]
@@ -55,27 +56,27 @@ public class ThreadTitleLengthTests(AspireAppFixture fixture) : BaseTest(fixture
     [InlineData(5000)]
     public async Task Create_TitleOverLimit_Returns400(int length)
     {
-        using var response = await _ai.PostAsync(
-            ThreadsPath,
-            new { title = new string('a', length), profileId = (Guid?)null, entityId = (string?)null },
-            TestContext.Current.CancellationToken);
+        var profile = await GetProfileAsync();
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateThreadAsync(new string('a', length), profile.Id));
+
+        exception.ErrorCode.Should().Be(400);
+        (await ListThreadsAsync()).Should().BeEmpty();
     }
 
     [Fact]
     public async Task Update_TitleAtLimit_PersistsFullTitle()
     {
-        var created = await CreateThreadAsync("original");
+        var created = await CreateOwnThreadAsync("original");
         var title = new string('a', MaxTitleLength);
 
-        using var response = await _ai.PutAsync(
-            $"{ThreadsPath}/{created.Id}",
-            new { title },
+        var result = await _aiThreads.AiThreadsRenameAsync(
+            new AiThreadsRenameRequest(created.ThreadId, title),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadThreadAsync(created.Id)).Title.Should().Be(title);
+        result.Success.Should().BeTrue();
+        (await GetThreadAsync(created.ThreadId)).Title.Should().Be(title);
     }
 
     [Theory]
@@ -84,14 +85,14 @@ public class ThreadTitleLengthTests(AspireAppFixture fixture) : BaseTest(fixture
     [InlineData(5000)]
     public async Task Update_TitleOverLimit_Returns400(int length)
     {
-        var created = await CreateThreadAsync("original");
+        var created = await CreateOwnThreadAsync("original");
 
-        using var response = await _ai.PutAsync(
-            $"{ThreadsPath}/{created.Id}",
-            new { title = new string('a', length) },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiThreads.AiThreadsRenameAsync(
+                new AiThreadsRenameRequest(created.ThreadId, new string('a', length)),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadThreadAsync(created.Id)).Title.Should().Be("original");
+        exception.ErrorCode.Should().Be(400);
+        (await GetThreadAsync(created.ThreadId)).Title.Should().Be("original");
     }
 }

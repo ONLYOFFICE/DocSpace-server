@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Մատակարարի արժեք</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook-ն անջատված է։ Ակտիվացրեք այն՝ նախքան դրա առաքումները կրկին փորձելը</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Իրադարձությունը ուղարկվում է հենց հիմա։ Կրկին փորձեք՝ երբ փորձն ավարտվի</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Առաքումը գրանցվել է ավելի վաղ Webhook-ի ձևաչափով և չի կարող կրկին ուղարկվել</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook-ի թիրախը գոյություն ունեցող օգտատեր կամ խումբ չէ</value>
+  </data>
 </root>

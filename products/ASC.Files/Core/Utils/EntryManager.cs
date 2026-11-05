@@ -1532,6 +1532,12 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
+        // Whatever comes here for end-to-end encrypted content is ciphertext; saved without the flag it would turn into an open file.
+        if (!encrypted && (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>())))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
         var currentExt = file.ConvertedExtension;
         if (string.IsNullOrEmpty(newExtension))
         {

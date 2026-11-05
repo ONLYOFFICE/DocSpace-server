@@ -34,6 +34,7 @@
 extern alias ASCPeople;
 extern alias ASCWebApi;
 
+global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
@@ -56,8 +57,18 @@ global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
+global using DocSpace.Webhooks.SDK;
+global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
+
+global using WireMock;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;
 
 global using Xunit;
 

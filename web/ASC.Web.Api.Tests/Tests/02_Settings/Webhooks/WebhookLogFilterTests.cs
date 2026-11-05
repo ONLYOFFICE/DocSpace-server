@@ -129,7 +129,7 @@ public class WebhookLogFilterTests(
     public async Task Trigger_KeepsOnlyTheRecordsOfThatEvent()
     {
         // Arrange: a catch-all subscription, so the filter and not the subscription decides
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
 
         await FireEventAsync();
@@ -150,7 +150,7 @@ public class WebhookLogFilterTests(
         // Arrange: a subscription of the owner and one of another admin, both receiving the same event
         var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
         var ownerSubscription = await CreateAnsweringSubscriptionAsync(200);
-        var adminSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserCreated, admin);
+        var adminSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserCreated, admin);
 
         await FireEventAsync();
         await WaitForAnswersAsync(ownerSubscription, adminSubscription);
@@ -209,7 +209,7 @@ public class WebhookLogFilterTests(
     /// <summary>A subscription of the owner to <c>user.created</c>, at a receiver that answers <paramref name="status"/>.</summary>
     private async Task<WebhookSubscription> CreateAnsweringSubscriptionAsync(int status)
     {
-        return await CreateSubscriptionAsync(await CreateReceiverAsync(status), WebhookTrigger.UserCreated);
+        return await CreateSubscriptionAsync(CreateReceiver(status), WebhookTrigger.UserCreated);
     }
 
     /// <summary>Waits until every subscription's record has its first answer.</summary>

@@ -195,6 +195,27 @@ public static class DocSpaceHelper
         return LocatedInPrivateRoom(room);
     }
 
+    /// <summary>
+    /// The encrypted files under <paramref name="folderId"/> that hold no key for <paramref name="userId"/>,
+    /// which that user could not open. A file stored in the clear needs no key and is not reported.
+    /// </summary>
+    public static async Task<List<T>> GetEncryptedFilesWithoutKeyAsync<T>(IFileDao<T> fileDao, T folderId, Guid userId)
+    {
+        var encrypted = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true)
+            .Where(f => f.Encrypted)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        if (encrypted.Count == 0)
+        {
+            return encrypted;
+        }
+
+        var withKey = await fileDao.GetFileIdsWithKeyAsync(encrypted, userId).ToHashSetAsync();
+
+        return encrypted.Where(id => !withKey.Contains(id)).ToList();
+    }
+
     public static bool LocatedInPrivateRoom<T>(Folder<T> room)
     {
         return room is { SettingsPrivate: true };

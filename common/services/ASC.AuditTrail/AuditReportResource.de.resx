@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>KI-Modell des KI-Projekts {0} geändert in {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-Zustellung wiederholt: {0}</value>
+  </data>
 </root>

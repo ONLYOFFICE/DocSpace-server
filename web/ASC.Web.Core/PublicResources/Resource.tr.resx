@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Sağlayıcı maliyeti</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook devre dışı. Teslimatlarını yeniden denemeden önce etkinleştirin</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Olay şu anda gönderiliyor. Deneme tamamlandıktan sonra yeniden deneyin</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Teslimat daha eski bir webhook biçiminde kaydedilmiş ve tekrar gönderilemez</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook hedefi mevcut bir kullanıcı veya grup değil</value>
+  </data>
 </root>

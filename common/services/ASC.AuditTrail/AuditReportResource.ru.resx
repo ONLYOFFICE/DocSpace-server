@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>ИИ-модель ИИ-проекта {0} изменена на {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Повторная попытка доставки вебхука: {0}</value>
+  </data>
 </root>

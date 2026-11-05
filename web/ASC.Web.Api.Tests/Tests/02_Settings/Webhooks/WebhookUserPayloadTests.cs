@@ -50,7 +50,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await CreateMemberInGroupAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -59,12 +59,11 @@ public class WebhookUserPayloadTests(
         var payload = await WaitForUserPayloadAsync(subscription.Id, subject, firstName);
 
         payload.Should().NotBeNull("the owner may see every member");
-        payload!.Value.TryGetProperty("usedSpace", out _).Should().BeTrue();
-        payload.Value.TryGetProperty("groups", out _).Should().BeTrue();
+        payload!.Model.UsedSpace.Should().NotBeNull();
+        payload.Model.Groups.Should().NotBeNull();
 
-        payload.Value.TryGetProperty("createdBy", out var createdBy).Should().BeTrue();
-        createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        createdBy.TryGetProperty("email", out _).Should().BeFalse("a summary of another user never carries their email");
+        payload.Model.CreatedBy.Id.Should().Be(Owner.Id);
+        payload.Json.GetProperty("createdBy").TryGetProperty("email", out _).Should().BeFalse("a summary of another user never carries their email");
     }
 
     [Fact]
@@ -73,7 +72,7 @@ public class WebhookUserPayloadTests(
         // Arrange
         var subject = await CreateMemberInGroupAsync();
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, roomAdmin);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, roomAdmin);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -82,11 +81,11 @@ public class WebhookUserPayloadTests(
         var payload = await WaitForUserPayloadAsync(subscription.Id, subject, firstName);
 
         payload.Should().NotBeNull("a room admin may see the members of the portal");
-        payload!.Value.TryGetProperty("usedSpace", out _).Should().BeFalse();
-        payload.Value.TryGetProperty("quotaLimit", out _).Should().BeFalse();
-        payload.Value.TryGetProperty("isCustomQuota", out _).Should().BeFalse();
-        payload.Value.TryGetProperty("createdBy", out _).Should().BeFalse();
-        payload.Value.TryGetProperty("groups", out _).Should().BeTrue("a room admin reads the groups of a member through the REST API too");
+        payload!.Model.UsedSpace.Should().BeNull();
+        payload.Model.QuotaLimit.Should().BeNull();
+        payload.Model.IsCustomQuota.Should().BeNull();
+        payload.Model.CreatedBy.Should().BeNull();
+        payload.Model.Groups.Should().NotBeNull("a room admin reads the groups of a member through the REST API too");
     }
 
     [Fact]
@@ -94,7 +93,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await CreateMemberInGroupAsync();
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, subject);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, subject);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -103,9 +102,9 @@ public class WebhookUserPayloadTests(
         var payload = await WaitForUserPayloadAsync(subscription.Id, subject, firstName);
 
         payload.Should().NotBeNull("a member gets the events about themselves");
-        payload!.Value.TryGetProperty("usedSpace", out _).Should().BeTrue();
-        payload.Value.TryGetProperty("groups", out _).Should().BeTrue();
-        payload.Value.TryGetProperty("createdBy", out _).Should().BeFalse();
+        payload!.Model.UsedSpace.Should().NotBeNull();
+        payload.Model.Groups.Should().NotBeNull();
+        payload.Model.CreatedBy.Should().BeNull();
     }
 
     [Fact]
@@ -114,8 +113,8 @@ public class WebhookUserPayloadTests(
         // Arrange
         var subject = await InviteContact(EmployeeType.User);
         var member = await InviteContact(EmployeeType.User);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -132,7 +131,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange
         var subject = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -142,13 +141,15 @@ public class WebhookUserPayloadTests(
 
         payload.Should().NotBeNull();
 
-        foreach (var field in new[] { "avatar", "avatarOriginal", "avatarMax", "avatarMedium", "avatarSmall" })
+        var p = payload!.Model;
+
+        foreach (var url in new[] { p.Avatar, p.AvatarOriginal, p.AvatarMax, p.AvatarMedium, p.AvatarSmall })
         {
-            ShouldBeAbsoluteUrl(payload!.Value.GetProperty(field).GetString(), $"{field} must be usable outside the portal");
+            ShouldBeAbsoluteUrl(url, "every avatar must be usable outside the portal");
         }
 
-        ShouldBeAbsoluteUrl(payload!.Value.GetProperty("createdBy").GetProperty("avatar").GetString(), "so must the avatar of a user summary");
-        ShouldBeAbsoluteUrl(payload.Value.GetProperty("profileUrl").GetString(), "so must the profile link the owner gets");
+        ShouldBeAbsoluteUrl(p.CreatedBy.Avatar, "so must the avatar of a user summary");
+        ShouldBeAbsoluteUrl(p.ProfileUrl, "so must the profile link the owner gets");
     }
 
     [Fact]
@@ -156,7 +157,7 @@ public class WebhookUserPayloadTests(
     {
         // Arrange: a member whose registration date is read back from the database for the update
         var subject = await InviteContact(EmployeeType.User);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserUpdated);
 
         // Act
         var firstName = await RenameAsync(subject);
@@ -166,7 +167,8 @@ public class WebhookUserPayloadTests(
 
         payload.Should().NotBeNull();
 
-        var registrationDate = payload!.Value.GetProperty("registrationDate").GetString();
+        // the format on the wire, which a parsed DateTime no longer shows
+        var registrationDate = payload!.Json.GetProperty("registrationDate").GetString();
         registrationDate.Should().MatchRegex(@"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", "every timestamp goes out in UTC, in whole seconds");
         DateTimeOffset.Parse(registrationDate!, CultureInfo.InvariantCulture).Should()
             .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromMinutes(10), "the member registered moments ago");
@@ -176,7 +178,7 @@ public class WebhookUserPayloadTests(
     public async Task UserInvited_Payload_DescribesThePendingMember()
     {
         // Arrange
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.UserInvited);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.UserInvited);
         var email = Initializer.FakerMember.Generate().Email;
 
         // Act
@@ -186,13 +188,12 @@ public class WebhookUserPayloadTests(
             TestContext.Current.CancellationToken);
 
         // Assert: the invitee exists only as a pending member with an email until they accept
-        var payload = await WaitForEventPayloadAsync(
-            subscription.Id, "user.invited", p => p.TryGetProperty("email", out var value) && value.GetString() == email);
+        var payload = await WaitForEventPayloadAsync<UserPayload>(
+            subscription.Id, "user.invited", p => p.Email == email);
 
         payload.Should().NotBeNull("an invitation by email publishes user.invited");
-        payload!.Value.GetProperty("id").GetGuid().Should().NotBeEmpty();
-        payload.Value.TryGetProperty("createdBy", out var createdBy).Should().BeTrue("the owner may see who invited them");
-        createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
+        payload!.Model.Id.Should().NotBeEmpty();
+        payload.Model.CreatedBy.Id.Should().Be(Owner.Id, "the owner may see who invited them");
     }
 
     private async Task<User> CreateMemberInGroupAsync()
@@ -206,10 +207,8 @@ public class WebhookUserPayloadTests(
         return subject;
     }
 
-    private Task<JsonElement?> WaitForUserPayloadAsync(int configId, User subject, string firstName)
+    private Task<DeliveredPayload<UserPayload>?> WaitForUserPayloadAsync(int configId, User subject, string firstName)
     {
-        return WaitForPayloadAsync(configId, p =>
-            p.TryGetProperty("id", out var id) && id.GetGuid() == subject.Id
-            && p.TryGetProperty("firstName", out var name) && name.GetString() == firstName);
+        return WaitForPayloadAsync<UserPayload>(configId, p => p.Id == subject.Id && p.FirstName == firstName);
     }
 }
