@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20261103072221_MigrationContext_Upgrade105")]
+    [Migration("20261105092408_MigrationContext_Upgrade105")]
     partial class MigrationContext_Upgrade105
     {
         /// <inheritdoc />
@@ -299,6 +299,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("provider")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");

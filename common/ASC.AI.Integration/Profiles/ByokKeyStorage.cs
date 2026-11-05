@@ -60,7 +60,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         return string.IsNullOrEmpty(key) ? null : new ByokCredentials(entry.Provider, key);
     }
 
-    public async Task SetAsync(int tenantId, Guid id, string provider, string key)
+    public async Task SetAsync(int tenantId, Guid id, ByokKeyType type, string provider, string key)
     {
         var encryptedKey = await crypto.EncryptAsync(key);
 
@@ -79,6 +79,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
                     TenantId = tenantId,
                     Id = id,
                     Provider = provider,
+                    Type = type,
                     Key = encryptedKey,
                     ModifiedOn = DateTime.UtcNow
                 });
@@ -86,6 +87,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             else
             {
                 entity.Provider = provider;
+                entity.Type = type;
                 entity.Key = encryptedKey;
                 entity.ModifiedOn = DateTime.UtcNow;
             }

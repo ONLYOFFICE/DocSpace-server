@@ -555,8 +555,7 @@ public class PaymentHelper(
             Image = icons[s.Id],
             Provider = s.Provider,
             Price = s.Price,
-            Link = s.Link,
-            Byok = byokProviders.ContainsKey(s.RevisionId)
+            Link = s.Link
         }).ToList();
 
         return new AiPricesDto

@@ -62,8 +62,6 @@ public class InternalEmbeddingGenerator(
 public class EmbeddingGeneratorFactory(
     IHttpClientFactory httpClientFactory,
     AiGateway gateway,
-    GatewayKeyResolver gatewayKeyResolver,
-    TenantManager tenantManager,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     VectorizationGlobalSettings vectorizationGlobalSettings)
@@ -78,7 +76,7 @@ public class EmbeddingGeneratorFactory(
             if (await gateway.IsAiEnabledAsync())
             {
                 providerType = EmbeddingProviderType.PortalAi;
-                key = await gatewayKeyResolver.GetKeyAsync(tenantManager.GetCurrentTenantId(), VectorizationGlobalSettings.ModelRevisionId);
+                key = await gateway.GetKeyAsync();
             }
         }
         else

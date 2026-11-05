@@ -12144,10 +12144,6 @@
             "type": "string",
             "description": "Model display name; absent when the model is no longer in the gateway catalogue."
           },
-          "type": {
-            "type": "string",
-            "description": "Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine); absent when the model is no longer in it."
-          },
           "provider": {
             "type": "string",
             "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
@@ -12195,16 +12191,11 @@
           "name": {
             "type": "string",
             "description": "Model display name."
-          },
-          "type": {
-            "type": "string",
-            "description": "Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine)."
           }
         },
         "required": [
           "id",
-          "name",
-          "type"
+          "name"
         ],
         "additionalProperties": false
       },

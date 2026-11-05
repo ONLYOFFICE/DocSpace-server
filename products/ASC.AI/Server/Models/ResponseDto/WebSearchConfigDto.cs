@@ -38,7 +38,6 @@ public class WebSearchConfigDto
     public required string Provider { get; init; }
     public string? Key { get; init; }
     public string? BaseUrl { get; init; }
-    public Guid? RevisionId { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

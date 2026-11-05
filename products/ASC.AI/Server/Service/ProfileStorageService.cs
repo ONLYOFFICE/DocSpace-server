@@ -52,8 +52,6 @@ public class ProfileStorageService(
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
-    private const string SearchType = "search";
-
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
         await AssertUserHasAccessAsync(_writeTypes);
@@ -86,9 +84,10 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var target = await FindByokTargetAsync(id) ?? throw new ItemNotFoundException();
+        var model = await FindByokModelAsync(id) ?? throw new ItemNotFoundException();
+        var type = GetByokType(model) ?? throw new ItemNotFoundException();
 
-        if (target.Providers.All(p => p.Id != provider))
+        if (model.ByokProviders?.Any(p => p.Id == provider) != true)
         {
             throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
         }
@@ -98,11 +97,11 @@ public class ProfileStorageService(
             throw new ArgumentException(ErrorMessages.InvalidKey);
         }
 
-        await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, provider, key);
+        await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, type, provider, key);
 
-        messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), target.Name);
+        messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
 
-        return new ByokKeyInfo { Id = id, Name = target.Name, Type = target.Type, Provider = provider };
+        return new ByokKeyInfo { Id = id, Name = model.Alias, Provider = provider };
     }
 
     public async Task DeleteByokKeyAsync(Guid id)
@@ -110,7 +109,7 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var name = (await FindByokTargetAsync(id))?.Name ?? id.ToString();
+        var name = (await FindByokModelAsync(id))?.Alias ?? id.ToString();
 
         if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
         {
@@ -131,9 +130,9 @@ public class ProfileStorageService(
             return [];
         }
 
-        var targets = (await GetByokTargetsAsync())
-            .DistinctBy(t => t.Id)
-            .ToDictionary(t => t.Id);
+        var names = (await _aiGateway.GetAllModelsAsync()).Data
+            .DistinctBy(m => m.RevisionId)
+            .ToDictionary(m => m.RevisionId, m => m.Alias);
 
         return
         [
@@ -141,8 +140,7 @@ public class ProfileStorageService(
                 .Select(k => new ByokKeyInfo
                 {
                     Id = k.Id,
-                    Name = targets.GetValueOrDefault(k.Id)?.Name,
-                    Type = targets.GetValueOrDefault(k.Id)?.Type,
+                    Name = names.GetValueOrDefault(k.Id),
                     Provider = k.Provider
                 })
         ];
@@ -153,20 +151,20 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var targets = await GetByokTargetsAsync();
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
         var overridden = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
 
         return
         [
-            .. targets
-                .Where(t => !overridden.Contains(t.Id))
-                .SelectMany(t => t.Providers.Select(p => (Provider: p, Target: t)))
+            .. models
+                .Where(m => GetByokType(m).HasValue && !overridden.Contains(m.RevisionId))
+                .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
                 .GroupBy(x => x.Provider.Id)
                 .Select(g => new ByokProviderInfo
                 {
                     Id = g.Key,
                     Name = g.First().Provider.Name,
-                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Target.Id, Name = x.Target.Name, Type = x.Target.Type })]
+                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.RevisionId, Name = x.Model.Alias })]
                 })
                 .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
         ];
@@ -225,6 +223,14 @@ public class ProfileStorageService(
         return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
     }
 
+    internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
+    {
+        await AssertUserHasAccessAsync(_readTypes);
+        AssertGatewayConfigured();
+
+        return await byokKeyStorage.ReadCredentialsAsync(tenantManager.GetCurrentTenantId(), id) ?? throw new ItemNotFoundException();
+    }
+
     private void AssertGatewayConfigured()
     {
         if (!_aiGateway.Configured)
@@ -233,22 +239,15 @@ public class ProfileStorageService(
         }
     }
 
-    private async Task<ByokTarget?> FindByokTargetAsync(Guid id)
+    private async Task<Model?> FindByokModelAsync(Guid id)
     {
-        return (await GetByokTargetsAsync()).FirstOrDefault(t => t.Id == id);
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+
+        return models.FirstOrDefault(m => m.RevisionId == id);
     }
 
-    private async Task<List<ByokTarget>> GetByokTargetsAsync()
+    private static ByokKeyType? GetByokType(Model model)
     {
-        var models = (await _aiGateway.GetAllModelsAsync()).Data
-            .Select(m => new ByokTarget(m.RevisionId, m.Alias, m.Type, m.ByokProviders ?? []));
-
-        var engines = (await _aiGateway.GetSearchEnginesAsync()).Engines
-            .Where(e => e.Byok)
-            .Select(e => new ByokTarget(e.RevisionId, e.Name, SearchType, [new ModelByokProvider { Id = e.Id, Name = e.Name }]));
-
-        return [.. models, .. engines];
+        return ByokKeyTypeExtensions.TryParse(model.Type, ignoreCase: true, out var type) ? type : null;
     }
-
-    private sealed record ByokTarget(Guid Id, string Name, string Type, IEnumerable<ModelByokProvider> Providers);
 }

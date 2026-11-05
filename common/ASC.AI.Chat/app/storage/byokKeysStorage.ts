@@ -49,8 +49,6 @@ export interface ByokKey {
   id: string;
   /** Model display name; absent when the model is no longer in the gateway catalogue. */
   name?: string;
-  /** Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine); absent when the model is no longer in it. */
-  type?: string;
   /** BYOK provider id the key belongs to, e.g. `anthropic`. */
   provider: string;
 }
@@ -60,8 +58,6 @@ export interface ByokModel {
   id: string;
   /** Model display name. */
   name: string;
-  /** Type from the gateway catalogue: `chat`, `image`, `embedding` or `search` (a web search engine). */
-  type: string;
 }
 
 export interface ByokProvider {
@@ -119,22 +115,13 @@ function dtoToByokKey(raw: JsonObject): ByokKey | undefined {
     return undefined;
   }
   const name = getString(raw, "name");
-  const type = getString(raw, "type");
-  return {
-    id,
-    ...(name === undefined ? {} : { name }),
-    ...(type === undefined ? {} : { type }),
-    provider,
-  };
+  return name === undefined ? { id, provider } : { id, name, provider };
 }
 
 function dtoToByokModel(raw: JsonObject): ByokModel | undefined {
   const id = getString(raw, "id");
   const name = getString(raw, "name");
-  const type = getString(raw, "type");
-  return id === undefined || name === undefined || type === undefined
-    ? undefined
-    : { id, name, type };
+  return id === undefined || name === undefined ? undefined : { id, name };
 }
 
 function dtoToByokProvider(raw: JsonObject): ByokProvider | undefined {

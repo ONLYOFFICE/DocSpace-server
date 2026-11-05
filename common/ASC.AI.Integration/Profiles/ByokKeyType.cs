@@ -33,17 +33,9 @@
 
 namespace ASC.AI.Integration.Profiles;
 
-[Scope]
-public class GatewayKeyResolver(AiGateway gateway, ByokKeyStorage byokKeyStorage)
+[EnumExtensions]
+public enum ByokKeyType
 {
-    public async Task<string> GetKeyAsync(int tenantId, Guid revisionId)
-    {
-        var credentials = await byokKeyStorage.ReadCredentialsAsync(tenantId, revisionId);
-        if (credentials is null)
-        {
-            return await gateway.GetKeyAsync();
-        }
-
-        return await gateway.GetByokKeyAsync(credentials.Provider, credentials.Key);
-    }
+    Chat = 0,
+    Image = 1
 }

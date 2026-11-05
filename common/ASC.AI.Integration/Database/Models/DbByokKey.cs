@@ -42,6 +42,8 @@ public class DbByokKey : BaseEntity
     [Required]
     public required string Provider { get; set; }
 
+    public ByokKeyType Type { get; set; }
+
     [Required]
     public required string Key { get; set; }
 
@@ -93,6 +95,10 @@ public static class DbByokKeyExtension
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
+                .HasColumnType("int");
+
             entity.Property(e => e.Key)
                 .HasColumnName("key")
                 .HasColumnType("text")
@@ -126,6 +132,10 @@ public static class DbByokKeyExtension
                 .HasColumnName("provider")
                 .HasColumnType("character varying")
                 .HasMaxLength(255);
+
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
+                .HasColumnType("integer");
 
             entity.Property(e => e.Key)
                 .HasColumnName("key")

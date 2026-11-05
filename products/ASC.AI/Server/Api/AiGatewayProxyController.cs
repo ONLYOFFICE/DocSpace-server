@@ -41,8 +41,7 @@ namespace ASC.AI.Api;
 public class AiGatewayProxyController(
     IHttpClientFactory httpClientFactory,
     AiGateway aiGateway,
-    GatewayKeyResolver gatewayKeyResolver,
-    TenantManager tenantManager,
+    ProfileStorageService profileStorageService,
     UserManager userManager,
     AuthContext authContext) : ControllerBase
 {
@@ -84,7 +83,8 @@ public class AiGatewayProxyController(
             return NotFound();
         }
 
-        var key = await IssueKeyAsync(() => gatewayKeyResolver.GetKeyAsync(tenantManager.GetCurrentTenantId(), profileId));
+        var credentials = await profileStorageService.ReadByokCredentialsAsync(profileId);
+        var key = await IssueKeyAsync(() => aiGateway.GetByokKeyAsync(credentials.Provider, credentials.Key));
 
         return await ForwardAsync(path, key);
     }

@@ -297,6 +297,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
 

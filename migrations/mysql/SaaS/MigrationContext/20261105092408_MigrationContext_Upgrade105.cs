@@ -20,6 +20,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .Annotation("MySql:CharSet", "utf8"),
                     provider = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
+                    type = table.Column<int>(type: "int", nullable: false),
                     key = table.Column<string>(type: "text", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     modified_on = table.Column<DateTime>(type: "datetime", nullable: false)

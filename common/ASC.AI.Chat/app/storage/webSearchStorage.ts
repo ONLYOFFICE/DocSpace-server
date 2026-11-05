@@ -54,33 +54,23 @@ import {
 const PATH = "/web-search";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-export type DocspaceWebSearchConfig = WebSearchConfig & {
-    /** Gateway revision of the search engine; the BYOK proxy route resolves the portal's key by it. */
-    revisionId?: string;
-};
-
-function gatewayBaseUrl(revisionId: string | undefined): string {
-    const gateway = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
-    return revisionId ? `${gateway}/byok/${encodeURIComponent(revisionId)}/` : `${gateway}/`;
-}
-
 export function withWebSearchProviderOverrides(
-    config: DocspaceWebSearchConfig | null,
+    config: WebSearchConfig | null,
 ): WebSearchConfig | null {
-    if (!config) {
-        return null;
-    }
-    const { revisionId, ...rest } = config;
-    if (rest.provider !== "onlyoffice" || !shouldForwardHeadersToProvider()) {
-        return rest;
+    if (
+        !config
+        || config.provider !== "onlyoffice"
+        || !shouldForwardHeadersToProvider()
+    ) {
+        return config;
     }
     return {
-        ...rest,
+        ...config,
         isCloudProvider: true,
-        baseUrl: gatewayBaseUrl(revisionId),
+        baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/`,
         headers: {
             ...getForwardedHeaders(),
-            ...(rest.headers ?? {}),
+            ...(config.headers ?? {}),
         },
     };
 }
@@ -99,7 +89,7 @@ function toBody(config: WebSearchConfig): Record<string, unknown> {
     return body;
 }
 
-export function parseWebSearchConfig(raw: unknown): DocspaceWebSearchConfig | null {
+export function parseWebSearchConfig(raw: unknown): WebSearchConfig | null {
     if (!isObject(raw)) {
         return null;
     }
@@ -107,7 +97,7 @@ export function parseWebSearchConfig(raw: unknown): DocspaceWebSearchConfig | nu
     if (!provider) {
         return null;
     }
-    const config: DocspaceWebSearchConfig = { provider };
+    const config: WebSearchConfig = { provider };
     const key = getString(raw, "key");
     if (key !== undefined) {
         config.key = key;
@@ -119,10 +109,6 @@ export function parseWebSearchConfig(raw: unknown): DocspaceWebSearchConfig | nu
     const isCloudProvider = getBoolean(raw, "isCloudProvider");
     if (isCloudProvider !== undefined) {
         config.isCloudProvider = isCloudProvider;
-    }
-    const revisionId = getString(raw, "revisionId");
-    if (revisionId !== undefined) {
-        config.revisionId = revisionId;
     }
     return config;
 }
