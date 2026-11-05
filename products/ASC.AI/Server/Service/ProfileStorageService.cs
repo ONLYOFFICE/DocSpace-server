@@ -79,7 +79,7 @@ public class ProfileStorageService(
         return created;
     }
 
-    public async Task<ByokKeyInfo> SetByokKeyAsync(Guid id, string provider, string key)
+    public async Task<ByokKeyDto> SetByokKeyAsync(Guid id, string provider, string key)
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
@@ -101,7 +101,7 @@ public class ProfileStorageService(
 
         messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
 
-        return new ByokKeyInfo { Id = id, Name = model.Alias, Provider = provider };
+        return new ByokKeyDto { Id = id, Name = model.Alias, Provider = provider };
     }
 
     public async Task DeleteByokKeyAsync(Guid id)
@@ -119,7 +119,7 @@ public class ProfileStorageService(
         messageService.Send(MessageAction.AiByokKeyDeleted, MessageTarget.Create(id), name);
     }
 
-    public async Task<List<ByokKeyInfo>> ReadByokKeysAsync()
+    public async Task<List<ByokKeyDto>> ReadByokKeysAsync()
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
@@ -137,7 +137,7 @@ public class ProfileStorageService(
         return
         [
             .. keys
-                .Select(k => new ByokKeyInfo
+                .Select(k => new ByokKeyDto
                 {
                     Id = k.Id,
                     Name = names.GetValueOrDefault(k.Id),
@@ -146,7 +146,7 @@ public class ProfileStorageService(
         ];
     }
 
-    public async Task<List<ByokProviderInfo>> ReadByokProvidersAsync()
+    public async Task<List<ByokProviderDto>> ReadByokProvidersAsync()
     {
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
@@ -160,11 +160,11 @@ public class ProfileStorageService(
                 .Where(m => GetByokType(m).HasValue && !overridden.Contains(m.RevisionId))
                 .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
                 .GroupBy(x => x.Provider.Id)
-                .Select(g => new ByokProviderInfo
+                .Select(g => new ByokProviderDto
                 {
                     Id = g.Key,
                     Name = g.First().Provider.Name,
-                    Models = [.. g.Select(x => new ByokModelInfo { Id = x.Model.RevisionId, Name = x.Model.Alias })]
+                    Models = [.. g.Select(x => new ByokModelDto { Id = x.Model.RevisionId, Name = x.Model.Alias })]
                 })
                 .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
         ];

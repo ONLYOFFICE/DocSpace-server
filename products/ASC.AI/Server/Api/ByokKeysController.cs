@@ -42,22 +42,19 @@ public class ByokKeysController(ProfileStorageService profileStorageService) : C
     [HttpGet("byok/providers")]
     public async Task<List<ByokProviderDto>> ReadProvidersAsync()
     {
-        var providers = await profileStorageService.ReadByokProvidersAsync();
-        return [.. providers.Select(ByokProviderMapper.MapToDto)];
+        return await profileStorageService.ReadByokProvidersAsync();
     }
 
     [HttpGet("byok")]
     public async Task<List<ByokKeyDto>> ReadKeysAsync()
     {
-        var keys = await profileStorageService.ReadByokKeysAsync();
-        return [.. keys.Select(ByokKeyDtoMapper.MapToDto)];
+        return await profileStorageService.ReadByokKeysAsync();
     }
 
     [HttpPut("byok/{id}")]
     public async Task<ByokKeyDto> SetAsync(SetByokKeyRequestDto inDto)
     {
-        var key = await profileStorageService.SetByokKeyAsync(inDto.Id, inDto.Body.Provider, inDto.Body.Key);
-        return ByokKeyDtoMapper.MapToDto(key);
+        return await profileStorageService.SetByokKeyAsync(inDto.Id, inDto.Body.Provider, inDto.Body.Key);
     }
 
     [HttpDelete("byok/{id}")]
