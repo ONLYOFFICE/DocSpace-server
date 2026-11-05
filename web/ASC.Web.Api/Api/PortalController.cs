@@ -1006,9 +1006,9 @@ public class PortalController(
     /// records the request in the audit trail; the portal itself is not changed here. The caller has to be the portal
     /// owner and hold the portal-settings right, and on a server installation the last remaining space cannot be
     /// deactivated - the call is refused when every other space has limited access. The letter always goes to the
-    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. A repeat within ten
-    /// minutes (the server default) does nothing - no new links, no second letter, no audit record - while the links
-    /// of the first letter stay valid. The call is rate-limited and answers 429 above the limit. Nothing is returned
+    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. A repeat shortly
+    /// after the letter went out does nothing - no new links, no second letter, no audit record - while the links of
+    /// the first letter stay valid. The call is rate-limited and answers 429 above the limit. Nothing is returned
     /// in the body. The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which suspends the portal,
     /// and the second one authorizes `PUT api/2.0/portal/continue`, which makes it active again. To remove the portal
     /// instead of pausing it, use `POST api/2.0/portal/delete`.
@@ -1052,8 +1052,8 @@ public class PortalController(
     /// installation the last remaining space cannot be removed - the call is refused when every other space has
     /// limited access. The letter goes to the owner's own address whoever asked for it, and it warns about the
     /// subscription that will stop renewing when the portal is on a paid plan. The operation keeps working while the
-    /// portal's payment has lapsed. A repeat within ten minutes (the server default) does nothing - no new link, no
-    /// second letter - while the link of the first letter stays valid. The call is rate-limited and answers 429 above
+    /// portal's payment has lapsed. A repeat shortly after the letter went out does nothing - no new link, no second
+    /// letter - while the link of the first letter stays valid. The call is rate-limited and answers 429 above
     /// the limit. Nothing is returned in the body. The link in the letter authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its
     /// rooms, files and accounts and cannot be undone. To pause the portal instead of deleting it, send the
     /// deactivation letter with `POST api/2.0/portal/suspend`.

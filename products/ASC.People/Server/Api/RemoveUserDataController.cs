@@ -83,7 +83,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// emailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.
     /// The answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped
     /// in bold HTML markup, so strip the markup before showing it outside a web page.
-    /// A repeat within ten minutes (the server default) sends no second letter, and the link already sent stays valid;
+    /// A repeat shortly after the letter went out sends no second letter, and the link already sent stays valid;
     /// repeated calls are also throttled.
     /// </remarks>
     /// <summary>

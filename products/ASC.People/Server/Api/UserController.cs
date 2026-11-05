@@ -1640,15 +1640,14 @@ public class UserController(
     /// Set `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and
     /// the caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are
     /// reached, and a member or a guest may then list nothing but their own ID.
-    /// Which email goes out depends on the state of each account: a pending invitation gets a fresh invitation link,
-    /// while an account that exists but has not confirmed its address gets activation instructions instead.
-    /// Accounts that are already active or that are disabled are skipped, and so are the pending accounts the caller
-    /// has no right to invite, without an error.
+    /// A pending invitation gets a fresh invitation link, while an account that has not confirmed its address gets
+    /// activation instructions instead.
+    /// Active and disabled accounts are skipped without an error, and so are the pending accounts the caller has no
+    /// right to invite.
     /// The answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the
     /// request and is not a delivery report.
-    /// An account that already got this letter within the last ten minutes (the server default) is not mailed again,
-    /// and the link in the letter it already has stays valid, so repeating the call is safe but delivers nothing new.
-    /// Repeated calls are also throttled.
+    /// An account that got this letter a short while ago is not mailed again, and the link it already has stays
+    /// valid, so repeating the call is safe but delivers nothing new; repeated calls are also throttled.
     /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
@@ -2574,19 +2573,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.
+    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route.
     /// The caller needs the permission to add and remove users of the requested type, cannot change their own type or
-    /// the type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to
-    /// `Guest` additionally requires the portal to allow inviting guests.
+    /// the type of the portal owner, and must not be a guest; changing somebody to `Guest` also needs the portal to
+    /// allow inviting guests.
     /// Every listed account has to be visible to the caller and must not be disabled.
-    /// The change is applied immediately: each converted user gets a notification email, and the accounts are
-    /// processed one by one, so a rejection in the middle leaves the users before it
-    /// already converted - re-read them before retrying.
-    /// The answer streams the converted users with their detailed information, in the order they were processed.
+    /// The change is applied immediately: each converted user gets a notification email, unless one about the same
+    /// type reached them a short while ago, and the accounts are processed one by one, so a rejection in the middle
+    /// leaves the users before it already converted - re-read them before retrying.
+    /// The answer streams the converted users in detail, in the order they were processed.
     /// Converting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the
     /// paid-user quota does not allow one more.
-    /// This operation only moves the type and leaves the rooms and the shared files of the account where they are -
-    /// to hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.
+    /// This operation only moves the type and leaves the rooms and shared files of the account in place; to hand them
+    /// over to another admin as well, use `POST api/2.0/people/type`.
     /// </remarks>
     /// <summary>
     /// Change a user type

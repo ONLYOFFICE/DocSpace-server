@@ -167,15 +167,15 @@ public abstract class SecurityController<T>(
     /// <remarks>
     /// Grants, changes or withdraws the rights of the listed accounts and groups on one file, and answers with the
     /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
-    /// and the level that denies everything takes the access away instead; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with, such as a guest who belongs to
-    /// another member, is dropped without an error, so compare the answer with what was sent. With `notify` set, each
-    /// account named is emailed about the access it received and `sharingMessage` is put into that mail with its
-    /// markup stripped, while a message longer than the field allows is rejected as an invalid request. The caller
-    /// has to be allowed to change the sharing of the file, which its creator, the manager of the room it lies in and
-    /// a portal administrator acting as room manager are; anyone else, a guest and a member with read access
-    /// included, is refused. The call is mutating and safe to repeat. For several files and folders in one request
-    /// use `PUT api/2.0/files/share`.
+    /// and the level that denies everything removes the access; an empty `share` changes nothing and is
+    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error, so
+    /// compare the answer with what was sent. With `notify` set, each account named is emailed about the access it
+    /// received and `sharingMessage` is put into that mail with its markup stripped, while a message longer than the
+    /// field allows is rejected as an invalid request; an account already mailed about the same access to this file a
+    /// short while ago is not mailed again, even with a new message. The caller has to be allowed to change the
+    /// sharing of the file, which its creator, the manager of the room it lies in and a portal administrator acting
+    /// as room manager are; anyone else is refused. The call is mutating and safe to repeat. For several files and
+    /// folders in one request use `PUT api/2.0/files/share`.
     /// </remarks>
     /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{id}/share</path>
@@ -203,13 +203,14 @@ public abstract class SecurityController<T>(
     /// Grants, changes or withdraws the rights of the listed accounts and groups on one folder, and answers with the
     /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
     /// and the level that denies everything takes the access away instead; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with, such as a guest who belongs to
-    /// another member, is dropped without an error. With `notify` set, each account named is emailed about the access
-    /// it received and `sharingMessage` is put into that mail with its markup stripped, while a message longer than
-    /// the field allows is rejected as an invalid request. The caller has to be allowed to change the sharing of the
-    /// folder, which the manager of the room it belongs to and a portal administrator acting as room manager are;
-    /// anyone else, a guest and a member with read access included, is refused. The call is mutating and safe to
-    /// repeat. For a room use `PUT api/2.0/files/rooms/{id}/share`, which invites people by email as well.
+    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error.
+    /// With `notify` set, each account named is emailed about the access it received and `sharingMessage` is put into
+    /// that mail with its markup stripped, while a message longer than the field allows is rejected as an invalid
+    /// request; an account already mailed about the same access to this folder a short while ago is not mailed again,
+    /// even with a new message. The caller has to be allowed to change the sharing of the folder, which the manager
+    /// of the room it belongs to and a portal administrator acting as room manager are; anyone else is refused. The
+    /// call is mutating and safe to repeat. For a room use `PUT api/2.0/files/rooms/{id}/share`, which invites
+    /// people by email as well.
     /// </remarks>
     /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
