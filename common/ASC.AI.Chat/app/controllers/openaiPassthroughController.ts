@@ -41,6 +41,7 @@ import { safeResolveSource } from "../storage/docspaceFilesApi.js";
 import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
 import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
 import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
+import { hasCacheBreakpoints, markCacheBreakpoints } from "./cacheBreakpoints.js";
 import { isObject } from "../narrow.js";
 
 // OpenAI-compatible passthrough for the document editor's AI plugin.
@@ -77,11 +78,9 @@ function sourceKindOf(value: string | null): SourceKind {
   return value === "file" ? "file" : "folder";
 }
 
-// The conversation-correlation header the ONLYOFFICE route reads, and the
-// Anthropic-style cache breakpoint the Claude backend behind it looks for.
-// Both mirror `OnlyOfficeProvider` in `@onlyoffice/ai-chat`.
+// The conversation-correlation header the ONLYOFFICE route reads, mirroring
+// `OnlyOfficeProvider` in `@onlyoffice/ai-chat`.
 const SESSION_HEADER = "x-session-id";
-const CACHE_CONTROL = { type: "ephemeral" } as const;
 
 // Ceiling for parsing the body. Above it the request is still forwarded and
 // still carries `metadata` (spliced without parsing), but the cache
@@ -107,63 +106,6 @@ function withSessionHeader(
     return headers;
   }
   return { ...headers, [SESSION_HEADER]: sessionId };
-}
-
-// Mark one message as a cache breakpoint, mirroring the library exactly: a
-// string content becomes a single text part carrying `cache_control`, an array
-// content gets it on its LAST text part, and a message with no text at all is
-// left alone (nothing to cache). Unlike the library — whose input is typed —
-// this runs on untrusted JSON, so non-object content parts are skipped instead
-// of dereferenced.
-function withCacheControl(message: Record<string, unknown>): Record<string, unknown> {
-  const content = message["content"];
-  if (typeof content === "string") {
-    if (!content) {
-      return message;
-    }
-    return {
-      ...message,
-      content: [{ type: "text", text: content, cache_control: CACHE_CONTROL }],
-    };
-  }
-  if (!Array.isArray(content)) {
-    return message;
-  }
-  let lastText = -1;
-  for (let i = content.length - 1; i >= 0; i--) {
-    const part = content[i];
-    if (isObject(part) && part["type"] === "text") {
-      lastText = i;
-      break;
-    }
-  }
-  if (lastText === -1) {
-    return message;
-  }
-  return {
-    ...message,
-    content: content.map((part, i) =>
-      i === lastText && isObject(part) ? { ...part, cache_control: CACHE_CONTROL } : part,
-    ),
-  };
-}
-
-// Anthropic-style prompt-caching breakpoints on the message list: the leading
-// system prompt and the last message of the history, the static prefix the
-// Claude backend behind the ONLYOFFICE route can reuse across turns. Same two
-// positions the library marks in `OnlyOfficeProvider.getStream`.
-function markCacheBreakpoints(messages: unknown[]): unknown[] {
-  if (messages.length === 0) {
-    return messages;
-  }
-  const last = messages.length - 1;
-  return messages.map((message, i) => {
-    if (!isObject(message)) {
-      return message;
-    }
-    const isLeadingSystem = i === 0 && message["role"] === "system";
-    return i === last || isLeadingSystem ? withCacheControl(message) : message;
-  });
 }
 
 // Splice a `metadata` object into a JSON request body without parsing it.
@@ -211,10 +153,12 @@ function spliceMetadata(
 // occasionally megabytes of vision data, so above `MAX_PARSE_BYTES` we fall
 // back to splicing `metadata` in and say in the log what was dropped.
 //
-// `stream: true` gates the breakpoints, matching the library: a one-shot round
-// has no follow-up turn to reuse the cache, so the write would be pure cost.
-// A body that is not a JSON object, or that fails to parse, is forwarded
-// untouched and fails at the provider, exactly as it did before.
+// `stream: true` gates the host's breakpoints: a one-shot round has no
+// follow-up turn to reuse its history, so a write of it would be pure cost.
+// (The library marks the shared system prompt of its own one-shot calls; such
+// a marker, when present, is forwarded as sent.) A body that is not a JSON
+// object, or that fails to parse, is forwarded untouched and fails at the
+// provider, exactly as it did before.
 function withOnlyofficeExtras(
   body: Buffer,
   contentType: string | undefined,
@@ -252,22 +196,6 @@ function withOnlyofficeExtras(
     next["messages"] = markCacheBreakpoints(parsed["messages"]);
   }
   return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, source);
-}
-
-// Whether the caller placed its own breakpoints. `@onlyoffice/ai-chat` marks
-// the message list itself since 1.0.2-progress.33 (on chat rounds and one-shot
-// actions alike), and a plugin built on it must keep what it sent: adding the
-// host's two markers on top would move the trailing breakpoint onto a `tool`
-// message the library deliberately skips, and push a long tool round past the
-// four breakpoints Anthropic allows. Older plugins send none, and keep getting
-// the host's.
-function hasCacheBreakpoints(messages: unknown[]): boolean {
-  return messages.some((message) => {
-    if (!isObject(message) || !Array.isArray(message["content"])) {
-      return false;
-    }
-    return message["content"].some((part) => isObject(part) && "cache_control" in part);
-  });
 }
 
 // The plugin's round-trip runs browser → CDN/reverse proxy → nginx → here, and
@@ -529,9 +457,7 @@ function imageRequestError(body: Record<string, unknown>): string | undefined {
 // own message.
 async function logUpstreamFailure(route: string, upstream: globalThis.Response): Promise<void> {
   const detail = await upstream.text().catch(() => "");
-  logger.error(
-    `${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`,
-  );
+  logger.error(`${route}: upstream answered ${upstream.status}: ${detail.slice(0, 1000)}`);
 }
 
 function passthrough(subPath: string, cacheBreakpoints = false, alwaysJson = false) {
