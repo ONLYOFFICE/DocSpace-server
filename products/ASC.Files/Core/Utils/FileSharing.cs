@@ -444,7 +444,7 @@ public class FileSharingAceHelper(
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
                     w.Email,
-                    entry.Title,
+                    entry is Folder<T> { SettingsPrivate: true } ? null : entry.Title,
                     shortenLink,
                     entry is IFolder { FolderType: FolderType.AiRoom },
                     culture,
@@ -456,7 +456,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.SettingsPrivate ? null : room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
@@ -544,6 +544,10 @@ public class FileSharingAceHelper(
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
+        }
 
         if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
         {
@@ -615,6 +619,10 @@ public class FileSharingAceHelper(
         if (entryType == FileEntryType.File)
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
+        }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
         }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);

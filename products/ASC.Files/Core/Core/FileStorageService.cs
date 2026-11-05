@@ -2291,6 +2291,12 @@ public class FileStorageService //: IFileStorageService
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        // Filling hands the form to people who hold no key, and its result would be stored in the clear.
+        if (file.Encrypted)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
         var folder = await folderDao.GetFolderAsync(file.ParentId);
 
         if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
@@ -4975,6 +4981,12 @@ public class FileStorageService //: IFileStorageService
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
+        // A reference is resolved by the document server, which sees nothing but ciphertext here.
+        if (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
         var fileStable = file;
         if (file.Forcesave != ForcesaveType.None)
         {
@@ -5390,7 +5402,12 @@ public class FileStorageService //: IFileStorageService
     }
 
 
-    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
+    /// <summary>
+    /// Stores the file keys of the recipients who can read the file. One who cannot, say because they were
+    /// removed while another device was uploading with their key, must not cost everybody else theirs, so
+    /// such a recipient is skipped and reported back.
+    /// </summary>
+    public async Task<List<Guid>> SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -5416,18 +5433,36 @@ public class FileStorageService //: IFileStorageService
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        var accepted = new List<FileKeyData>();
+        var skipped = new List<Guid>();
+
         foreach (var k in keys)
         {
-            if (!await fileSecurity.CanReadAsync(file, k.UserId))
+            // A security check keeps the share record it found on the entry and reuses it for whoever is asked about
+            // next, so each recipient gets an instance of their own or they would pass on the previous one's access.
+            if (await fileSecurity.CanReadAsync(await fileDao.GetFileAsync(fileId), k.UserId))
             {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+                accepted.Add(k);
+            }
+            else
+            {
+                skipped.Add(k.UserId);
             }
         }
 
-        await fileDao.SetFileKey(fileId, keys);
+        if (accepted.Count != 0)
+        {
+            await fileDao.SetFileKey(fileId, accepted);
+
+            await filesMessageService.SendAsync(MessageAction.FileKeysSet, file, file.Title, string.Join(", ", accepted.Select(k => k.UserId).Distinct()));
+        }
+
+        return skipped;
     }
 
-    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
+    // demandFileKeys refuses a private room whose encrypted files the new owner could not open. The call that reassigns the
+    // rooms of a user being deleted leaves it off: nobody is left there to issue the missing keys, and it must not stop the deletion.
+    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager, bool demandFileKeys = false)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
@@ -5463,6 +5498,12 @@ public class FileStorageService //: IFileStorageService
             if (isRoom && folder.SettingsPrivate)
             {
                 await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(userId);
+
+                if (demandFileKeys && folder.CreateBy != userId &&
+                    (await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(daoFactory.GetFileDao<T>(), folder.Id, userId)).Count != 0)
+                {
+                    throw new CustomHttpException(HttpStatusCode.Conflict, "The new owner holds no key for some encrypted files of the room");
+                }
             }
 
             var newFolder = folder;
@@ -5653,7 +5694,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -5688,7 +5729,7 @@ public class FileStorageService //: IFileStorageService
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 

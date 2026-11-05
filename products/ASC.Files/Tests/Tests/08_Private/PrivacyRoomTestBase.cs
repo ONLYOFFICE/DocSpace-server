@@ -86,6 +86,23 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         return last;
     }
 
+    /// <summary>Uploads a file the way a private-room client does: chunked, with the encrypted flag. The bytes do not matter here.</summary>
+    protected async Task<int> UploadEncryptedFile(int folderId, string title)
+    {
+        var content = new byte[1024];
+
+        var session = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            folderId,
+            new SessionRequest(title, content.Length, encrypted: true),
+            TestContext.Current.CancellationToken)).Response;
+
+        await _filesOperationsApi.UploadAsyncSessionAsync(folderId, session.Id, 1, new FileParameter(new MemoryStream(content)), TestContext.Current.CancellationToken);
+
+        var file = (await _filesOperationsApi.FinalizeSessionAsync(folderId, session.Id, TestContext.Current.CancellationToken)).Response;
+
+        return file.Id;
+    }
+
     /// <summary>
     /// Writes the user's <c>e2e</c> row exactly as the single-pair release did. Must run before
     /// anything reads that user's keys: the services keep linked profiles in a per-node memory cache

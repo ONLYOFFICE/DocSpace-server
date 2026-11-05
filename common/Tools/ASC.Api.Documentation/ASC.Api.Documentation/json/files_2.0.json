@@ -2669,7 +2669,7 @@
             "description": "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size"
           },
           "403": {
-            "description": "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it"
+            "description": "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room"
           },
           "404": {
             "description": "The file or the destination folder does not exist"
@@ -6480,7 +6480,7 @@
         },
         "responses": {
           "200": {
-            "description": "The file keys were stored",
+            "description": "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -6491,10 +6491,17 @@
               "X-RateLimit-Reset": {
                 "$ref": "#/components/headers/X-RateLimit-Reset"
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileKeysWrittenWrapper"
+                }
+              }
             }
           },
           "403": {
-            "description": "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it"
+            "description": "The file does not exist, the caller may not issue keys for it, or the file is not in a private room"
           },
           "404": {
             "description": "The file does not exist"
@@ -25611,6 +25618,9 @@
           "403": {
             "description": "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section"
           },
+          "409": {
+            "description": "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written"
+          },
           "500": {
             "description": "An id is a number that is not a 32-bit integer"
           },
@@ -26961,7 +26971,7 @@
             "description": "The request body cannot be read or has no `roomId`, `title` is empty or longer than 400 characters, `color` is longer than 6 or `cover` longer than 50 characters, or `logo` has no `tmpFile` or a position or size outside 0-1280"
           },
           "403": {
-            "description": "The source room is archived, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off"
+            "description": "The source room is archived or private, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off"
           },
           "404": {
             "description": "No room with `roomId` exists in the Rooms section"
@@ -27413,7 +27423,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty"
+            "description": "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty"
           },
           "402": {
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
@@ -28681,7 +28691,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected"
+            "description": "The request body cannot be read or holds a property the room update does not define, a private room is given `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected"
           },
           "402": {
             "description": "The new logo or watermark image does not fit into the portal storage quota"
@@ -29600,7 +29610,7 @@
             "description": "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected"
           },
           "403": {
-            "description": "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change"
+            "description": "The caller may not manage the links of this room, the room is private, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change"
           },
           "404": {
             "description": "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type"
@@ -35148,6 +35158,144 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The room is not a private room, or a user ID is malformed"
+          },
+          "403": {
+            "description": "The caller has no read access to the room or cannot change its access"
+          },
+          "404": {
+            "description": "The room is not found"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access/missing": {
+      "get": {
+        "tags": [
+          "Rooms / Privacy room"
+        ],
+        "summary": "Get missing file keys of a room",
+        "description": "Reports which encrypted files of a private room each user cannot open yet, across all its folders, so that a\r\nclient can write exactly the missing keys with `PUT api/2.0/files/{fileId}/access` instead of trying every file.\r\nThe caller needs the right to change the room's access, which means its owner or a room manager; other members\r\nand a DocSpace administrator who is not a member are refused, and an archived room, whose access cannot change,\r\nis refused too. Listing `userIds` checks those people, members or not, which is what a client does before\r\n`POST api/2.0/files/owner` answers 409 for a new owner; without it the members of the room are checked. The call\r\nis read-only. The answer holds one entry per user who misses something and carries identifiers only, never a\r\nkey: an empty list means nothing is missing. A file stored in the clear needs no key and is never reported, and\r\nan id that names nobody on this portal is ignored. A room that is not private, or a folder inside a room, is\r\nrejected as invalid, as is a malformed id.",
+        "operationId": "getRoomMissingFileKeys",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "The private room to check. Take it from the `id` of the room returned by `POST api/2.0/files/rooms` or listed by\r\n`GET api/2.0/files/rooms`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1234
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "description": "The people to check, repeated once per user (`userIds=...&userIds=...`). Take each from the `id` of a user\r\nreturned by `GET api/2.0/people`.",
+            "schema": {
+              "examples": [
+                [
+                  "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The users who miss a file key and the files concerned",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomMissingFileKeysArrayWrapper"
                 }
               }
             }
@@ -43359,6 +43507,78 @@
         },
         "description": "The encrypted file key issued to one user."
       },
+      "FileKeysWrittenDto": {
+        "required": [
+          "skippedUserIds"
+        ],
+        "type": "object",
+        "properties": {
+          "skippedUserIds": {
+            "examples": [
+              [
+                "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The recipients whose key was not stored, because they can no longer read the file. Empty when every key was\r\nstored."
+          }
+        },
+        "description": "The outcome of issuing file keys."
+      },
+      "FileKeysWrittenWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The FileKeysWrittenDto object returned by the operation.",
+            "$ref": "#/components/schemas/FileKeysWrittenDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the FileKeysWrittenDto object."
+      },
       "FileLinkDto": {
         "required": [
           "filetype",
@@ -44664,6 +44884,13 @@
               "type": "string"
             },
             "description": "Documents that can be edited inside a private room, where the content is encrypted on the client."
+          },
+          "docServiceEncryptionSupported": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the connected document server can edit end-to-end encrypted files. When false, an encrypted file cannot be\r\nopened in the editors, whatever `extsWebEncrypt` lists."
           },
           "extsWebReviewed": {
             "examples": [
@@ -48478,6 +48705,7 @@
               "PrivacyRoomKeyCreated",
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
+              "FileKeysSet",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -48860,6 +49088,7 @@
               5161,
               5162,
               5163,
+              5164,
               5201,
               5202,
               5203,
@@ -49237,6 +49466,7 @@
               "PrivacyRoomKeyCreated",
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
+              "FileKeysSet",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -51989,6 +52219,91 @@
           }
         },
         "description": "The link of a room to create, change or revoke."
+      },
+      "RoomMissingFileKeysArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoomMissingFileKeysDto"
+            },
+            "description": "The list of RoomMissingFileKeysDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of RoomMissingFileKeysDto objects."
+      },
+      "RoomMissingFileKeysDto": {
+        "required": [
+          "fileIds",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "examples": [
+              "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+            ],
+            "type": "string",
+            "description": "The user the keys are missing for.",
+            "format": "uuid"
+          },
+          "fileIds": {
+            "examples": [
+              [
+                1234,
+                1235
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The encrypted files that hold no key for this user, anywhere in the room. Never empty: a user who has every key\r\nis not listed at all."
+          }
+        },
+        "description": "One user who cannot open some encrypted files of a private room yet."
       },
       "RoomNewItemsDto": {
         "type": "object",

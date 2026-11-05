@@ -106,6 +106,33 @@ public class PrivateRoomSettingsTests(AspireAppFixture fixture) : PrivacyRoomTes
     }
 
     [Fact]
+    public async Task CreateFromTemplate_TemplateWithIndexing_FailsWithoutMakingARoom()
+    {
+        await _filesClient.Authenticate(Owner);
+        await EnsureEncryptionKeys();
+
+        var source = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto("Autotest Indexed Room", indexing: true, roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+        await _roomsApi.CreateRoomTemplateAsync(new RoomTemplateDto(source.Id, "Autotest Indexed Template"), TestContext.Current.CancellationToken);
+        var templateId = await WaitForRoomTemplate();
+
+        await _roomsApi.CreateRoomFromTemplateAsync(
+            new CreateRoomFromTemplateDto(templateId, "Autotest Private From Template", @private: true),
+            TestContext.Current.CancellationToken);
+
+        var status = await PollUntil(
+            async () => (await _roomsApi.GetRoomCreatingStatusAsync(TestContext.Current.CancellationToken)).Response,
+            state => state.IsCompleted,
+            TimeSpan.FromSeconds(30));
+
+        status.Error.Should().NotBeNullOrEmpty();
+
+        var rooms = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        rooms.Folders.OfType<FolderDto>().Should().NotContain(f => f.Title == "Autotest Private From Template");
+    }
+
+    [Fact]
     public async Task UpdateRoom_Rename_IsAllowed()
     {
         await _filesClient.Authenticate(Owner);

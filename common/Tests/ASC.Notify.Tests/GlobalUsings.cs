@@ -55,6 +55,8 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+global using ASC.Files.Core;
+global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Data.Backup;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;

@@ -76,6 +76,7 @@ public class BaseTest(
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
+    protected UserDataApi _userDataApi = null!;
     protected PhotosApi _photosApi = null!;
     protected ProfilesApi _profilesApi = null!;
 
@@ -137,6 +138,7 @@ public class BaseTest(
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
+        _userDataApi = _clients.UserDataApi;
         _photosApi = _clients.PhotosApi;
         _profilesApi = _clients.ProfilesApi;
 

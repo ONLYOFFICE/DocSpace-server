@@ -207,6 +207,35 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
+    /// Reports which encrypted files of a private room each user cannot open yet, across all its folders, so that a
+    /// client can write exactly the missing keys with `PUT api/2.0/files/{fileId}/access` instead of trying every file.
+    /// The caller needs the right to change the room's access, which means its owner or a room manager; other members
+    /// and a DocSpace administrator who is not a member are refused, and an archived room, whose access cannot change,
+    /// is refused too. Listing `userIds` checks those people, members or not, which is what a client does before
+    /// `POST api/2.0/files/owner` answers 409 for a new owner; without it the members of the room are checked. The call
+    /// is read-only. The answer holds one entry per user who misses something and carries identifiers only, never a
+    /// key: an empty list means nothing is missing. A file stored in the clear needs no key and is never reported, and
+    /// an id that names nobody on this portal is ignored. A room that is not private, or a folder inside a room, is
+    /// rejected as invalid, as is a malformed id.
+    /// </remarks>
+    /// <summary>
+    /// Get missing file keys of a room
+    /// </summary>
+    /// <path>api/2.0/privacyroom/{roomId}/access/missing</path>
+    /// <collection>list</collection>
+    [SwaggerResponse(200, "The users who miss a file key and the files concerned", typeof(IEnumerable<RoomMissingFileKeysDto>))]
+    [SwaggerResponse(400, "The room is not a private room, or a user ID is malformed")]
+    [SwaggerResponse(403, "The caller has no read access to the room or cannot change its access")]
+    [SwaggerResponse(404, "The room is not found")]
+    [HttpGet("{roomId:int}/access/missing")]
+    public async Task<IEnumerable<RoomMissingFileKeysDto>> GetRoomMissingFileKeys(GetRoomMissingFileKeysRequestDto inDto)
+    {
+        await Demand();
+
+        return await encryptionKeyPairHelper.GetMissingFileKeysAsync(inDto.RoomId, inDto.UserIds);
+    }
+
+    /// <remarks>
     /// Removes one encryption key pair from the calling user's own key set and answers 204 with no body. The pair is
     /// named by the `id` of an entry of `GET api/2.0/privacyroom/keys`; the caller's other pairs stay as they are.
     /// The call is destructive and cannot be repeated: the key material is gone for good, a second delete of the same

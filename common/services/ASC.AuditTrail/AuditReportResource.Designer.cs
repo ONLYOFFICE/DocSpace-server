@@ -1087,6 +1087,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File keys issued for &quot;{0}&quot; to: {1}.
+        /// </summary>
+        public static string FileKeysSet {
+            get {
+                return ResourceManager.GetString("FileKeysSet", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to File Locked: {0}.
         /// </summary>
         public static string FileLocked {

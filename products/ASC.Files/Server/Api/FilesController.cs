@@ -1287,13 +1287,13 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The file keys were stored")]
-    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it")]
+    [SwaggerResponse(200, "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`", typeof(FileKeysWrittenDto))]
+    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, or the file is not in a private room")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/access")]
-    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    public async Task<FileKeysWrittenDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
+        return new FileKeysWrittenDto { SkippedUserIds = await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project()) };
     }
 }
 

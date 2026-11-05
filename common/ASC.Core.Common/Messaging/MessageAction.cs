@@ -651,6 +651,11 @@ public enum MessageAction
     [Description("Private room encryption key deleted")]
     PrivacyRoomKeyDeleted = 5163,
 
+    /// <summary>
+    /// File keys issued
+    /// </summary>
+    FileKeysSet = 5164,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

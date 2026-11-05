@@ -734,6 +734,11 @@ internal class ProviderFileDao(
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetFileKeys(selector.ConvertId(fileId), userId);
     }
+
+    public IAsyncEnumerable<string> GetFileIdsWithKeyAsync(IEnumerable<string> fileIds, Guid userId)
+    {
+        return AsyncEnumerable.Empty<string>();
+    }
     
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {

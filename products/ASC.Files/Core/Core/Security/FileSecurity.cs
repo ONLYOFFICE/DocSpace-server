@@ -1712,7 +1712,8 @@ public class FileSecurity(
                 FilesSecurityActions.Duplicate or
                 FilesSecurityActions.IndexExport or
                 FilesSecurityActions.UseChat or
-                FilesSecurityActions.Vectorization)
+                FilesSecurityActions.Vectorization or
+                FilesSecurityActions.StartFilling)
         {
             return false;
         }
