@@ -3,11 +3,12 @@ paths:
   - "products/*/Tests/**/*.cs"
   - "common/Tests/**/*.cs"
   - "web/ASC.Web.Api.Tests/**/*.cs"
+  - "web/ASC.Web.Api.Billing.Tests/**/*.cs"
 ---
 
 # Integration Tests
 
-Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/` and `common/Tests/`. Style rules
+Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 

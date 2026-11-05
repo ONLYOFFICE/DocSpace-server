@@ -49,7 +49,7 @@ ts_areas=$(grep -oE "^\s+[a-zA-Z0-9]+: new [A-Za-z0-9]+Api\(" "$ts_root/../servi
   | sed -E 's/.*\.([a-zA-Z0-9_]+)\($/\1/' | sort -u > "$tmp/ts_ops"
 
 grep -rhoE "[A-Za-z0-9_]+Async\(" --include=*.cs --exclude-dir=bin --exclude-dir=obj \
-     products/*/Tests products/ASC.AI/ASC.AI.Tests web/ASC.Web.Api.Tests common/Tests \
+     products/*/Tests products/ASC.AI/ASC.AI.Tests web/ASC.Web.Api.Tests web/ASC.Web.Api.Billing.Tests common/Tests \
   | sed 's/Async(//' | sort -u > "$tmp/net_ops"
 
 echo "== TypeScript SDK operations with no matching *Async in the .NET suites =="
